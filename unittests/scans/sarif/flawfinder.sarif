@@ -1,0 +1,1839 @@
+{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Flawfinder",
+          "version": "2.0.19",
+          "informationUri": "https://dwheeler.com/flawfinder/",
+          "rules": [
+            {
+              "id": "FF1048",
+              "name": "random/setstate",
+              "shortDescription": {
+                "text": "This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327)."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/327.html",
+              "relationships": [
+                {
+                  "target": {
+                    "id": "CWE-327",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "FF1021",
+              "name": "buffer/sscanf",
+              "shortDescription": {
+                "text": "The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20)."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/120.html",
+              "relationships": [
+                {
+                  "target": {
+                    "id": "CWE-120",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                },
+                {
+                  "target": {
+                    "id": "CWE-20",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "FF1022",
+              "name": "buffer/strlen",
+              "shortDescription": {
+                "text": "Does not handle strings that are not \\0-terminated; if given one it may perform an over-read (it could cause a crash if unprotected) (CWE-126)."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/126.html",
+              "relationships": [
+                {
+                  "target": {
+                    "id": "CWE-126",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "FF1004",
+              "name": "buffer/memcpy",
+              "shortDescription": {
+                "text": "Does not check for buffer overflows when copying to destination (CWE-120)."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/120.html",
+              "relationships": [
+                {
+                  "target": {
+                    "id": "CWE-120",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "FF1013",
+              "name": "buffer/char",
+              "shortDescription": {
+                "text": "Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/119.html",
+              "relationships": [
+                {
+                  "target": {
+                    "id": "CWE-119",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "incomparable"
+                  ]
+                },
+                {
+                  "target": {
+                    "id": "CWE-120",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "FF1019",
+              "name": "format/snprintf",
+              "shortDescription": {
+                "text": "If format strings can be influenced by an attacker, they can be exploited, and note that sprintf variations do not always \\0-terminate (CWE-134)."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/134.html",
+              "relationships": [
+                {
+                  "target": {
+                    "id": "CWE-134",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "FF1071",
+              "name": "buffer/equal",
+              "shortDescription": {
+                "text": "Function does not check the second iterator for over-read conditions (CWE-126)."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/126.html",
+              "relationships": [
+                {
+                  "target": {
+                    "id": "CWE-126",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "FF1029",
+              "name": "buffer/read",
+              "shortDescription": {
+                "text": "Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/120.html",
+              "relationships": [
+                {
+                  "target": {
+                    "id": "CWE-120",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                },
+                {
+                  "target": {
+                    "id": "CWE-20",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "FF1047",
+              "name": "integer/atoi",
+              "shortDescription": {
+                "text": "Unless checked, the resulting number can exceed the expected range (CWE-190)."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/190.html",
+              "relationships": [
+                {
+                  "target": {
+                    "id": "CWE-190",
+                    "toolComponent": {
+                      "name": "CWE",
+                      "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+                    }
+                  },
+                  "kinds": [
+                    "relevant"
+                  ]
+                }
+              ]
+            }
+          ],
+          "supportedTaxonomies": [
+            {
+              "name": "CWE",
+              "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+            }
+          ]
+        }
+      },
+      "columnKind": "utf16CodeUnits",
+      "results": [
+        {
+          "ruleId": "FF1048",
+          "kind": "fail",
+          "message": {
+            "text": "random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/tree/param.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 29,
+                  "startColumn": 10,
+                  "endColumn": 38,
+                  "snippet": {
+                    "text": "      is.setstate(std::ios::failbit);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "e6c1ad2b1d96ffc4035ed8df070600566ad240b8ded025dac30620f3fd4aa9fd"
+          },
+          "rank": 0.6000000000000001
+        },
+        {
+          "ruleId": "FF1048",
+          "level": "warning",
+          "message": {
+            "text": "random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/tree/param.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 75,
+                  "startColumn": 10,
+                  "endColumn": 38,
+                  "snippet": {
+                    "text": "      is.setstate(std::ios::failbit);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "e6c1ad2b1d96ffc4035ed8df070600566ad240b8ded025dac30620f3fd4aa9fd"
+          },
+          "rank": 0.6000000000000001
+        },
+        {
+          "ruleId": "FF1021",
+          "level": "note",
+          "message": {
+            "text": "buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/metric/rank_metric.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 242,
+                  "startColumn": 11,
+                  "endColumn": 49,
+                  "snippet": {
+                    "text": "      if (sscanf(param, \"%u[-]?\", &topn) == 1) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "b1699f70cbe95f1be3407d87c85c98bf7097f3f33cf818154d5e61eee41843f2"
+          },
+          "rank": 0.0
+        },
+        {
+          "ruleId": "FF1022",
+          "level": "note",
+          "message": {
+            "text": "buffer/strlen:Does not handle strings that are not \\0-terminated; if given one it may perform an over-read (it could cause a crash if unprotected) (CWE-126)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/metric/rank_metric.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 249,
+                  "startColumn": 17,
+                  "endColumn": 45,
+                  "snippet": {
+                    "text": "      if (param[strlen(param) - 1] == '-') {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "c7c4126bddc0d49577ae5a4d906aab9ca66253072a724a93caa4e728a7b3da59"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/data/data.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 899,
+                  "startColumn": 10,
+                  "endColumn": 80,
+                  "snippet": {
+                    "text": "    std::memcpy(dmlc::BeginPtr(data_vec) + top, dmlc::BeginPtr(batch_data_vec),"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "51934c5f14bd500ce7e1f897ccec31ae4d11027a44960cd722263d9ad131ce9a"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/data/data.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 1051,
+                  "startColumn": 10,
+                  "endColumn": 42,
+                  "snippet": {
+                    "text": "    std::memcpy(dmlc::BeginPtr(data)+beg,"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "1146e92de0a163c7a465646a9d6d8e0556f097185c4509ea5380975effc6f246"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/data/data.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 1059,
+                  "startColumn": 10,
+                  "endColumn": 42,
+                  "snippet": {
+                    "text": "    std::memcpy(dmlc::BeginPtr(data)+beg,"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "1146e92de0a163c7a465646a9d6d8e0556f097185c4509ea5380975effc6f246"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/base64.h",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 197,
+                  "startColumn": 12,
+                  "endColumn": 29,
+                  "snippet": {
+                    "text": "  unsigned char buf_prev[2];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "33794969672c3808e1221c3ca916300a056fc8269f3c6bd2ea01b6b7e7e1f5b5"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/base64.h",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 255,
+                  "startColumn": 12,
+                  "endColumn": 24,
+                  "snippet": {
+                    "text": "  unsigned char buf[4];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "6e710741b3492f6816ae4e97fc6cb0b89b0cbd9ed187b1c24a93b16de168fe6d"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/timer.h",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 33,
+                  "startColumn": 5,
+                  "endColumn": 22,
+                  "snippet": {
+                    "text": "    char buffer[255];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "466849fbb37ae26ee192cffef5ec576006b4f0c50503c9a56b662d7543ed147f"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1019",
+          "level": "note",
+          "message": {
+            "text": "format/snprintf:If format strings can be influenced by an attacker, they can be exploited, and note that sprintf variations do not always \\0-terminate (CWE-134)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/timer.h",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 34,
+                  "startColumn": 5,
+                  "endColumn": 65,
+                  "snippet": {
+                    "text": "    snprintf(buffer, sizeof(buffer), \"%s:\\t %fs\", label.c_str(),"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "3b993b2db67bca5c6e3c5234154661582fe0149607dd198b27d3a96bccd22e6a"
+          },
+          "rank": 0.0
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/json.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 59,
+                  "startColumn": 3,
+                  "endColumn": 51,
+                  "snippet": {
+                    "text": "  char number[NumericLimits<float>::kToCharsSize];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "3db5ecd47314395f8262ab3537b395ca42e4b727b90b4af7de5a1c56f12b6717"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/json.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 64,
+                  "startColumn": 8,
+                  "endColumn": 65,
+                  "snippet": {
+                    "text": "  std::memcpy(stream_->data() + ori_size, number, end - number);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "782baf2689f30cc5471712407dc419757600a24064e4a281663917d42a9a1512"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/json.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 68,
+                  "startColumn": 3,
+                  "endColumn": 58,
+                  "snippet": {
+                    "text": "  char i2s_buffer_[NumericLimits<int64_t>::kToCharsSize];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "a072b22a5eea5360e654081d63a9c6c929cbd625c380c7d6ac45ba30976b8825"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/json.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 76,
+                  "startColumn": 8,
+                  "endColumn": 64,
+                  "snippet": {
+                    "text": "  std::memcpy(stream_->data() + ori_size, i2s_buffer_, digits);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "21a3e23750502d9511783114c2b572abbe5c3a58fbeb15d606437c59318d2c23"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/json.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 115,
+                  "startColumn": 7,
+                  "endColumn": 19,
+                  "snippet": {
+                    "text": "      char buf[8];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "794dd086f29fe8304359c335f25d99574851f607ff35b5fa940ffbc8b6b35d2c"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1019",
+          "level": "note",
+          "message": {
+            "text": "format/snprintf:If format strings can be influenced by an attacker, they can be exploited, and note that sprintf variations do not always \\0-terminate (CWE-134)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/json.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 116,
+                  "startColumn": 7,
+                  "endColumn": 48,
+                  "snippet": {
+                    "text": "      snprintf(buf, sizeof buf, \"\\\\u%04x\", ch);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "c7825bbe6afbc248295f415acbaaa498040aa7a53e6dade9f6141b0c7a83c538"
+          },
+          "rank": 0.0
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/json.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 126,
+                  "startColumn": 8,
+                  "endColumn": 66,
+                  "snippet": {
+                    "text": "  std::memcpy(stream_->data() + s, buffer.data(), buffer.size());"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "f5775d61d873e88f0de80a6393b06d88936f27960606b2d18b0c01bf4797d240"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1071",
+          "level": "note",
+          "message": {
+            "text": "buffer/equal:Function does not check the second iterator for over-read conditions (CWE-126)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/json.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 252,
+                  "startColumn": 15,
+                  "endColumn": 62,
+                  "snippet": {
+                    "text": "  return std::equal(arr.cbegin(), arr.cend(), vec_.cbegin());"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "d53c714e2a35fb03beb2e458db157bb2b4afb8375fbc55e1a628f62b6df57229"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 26,
+                  "startColumn": 10,
+                  "endColumn": 71,
+                  "snippet": {
+                    "text": "    std::memcpy(dptr, dmlc::BeginPtr(buffer_) + buffer_ptr_, nbuffer);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "4f5ebfd18b4716c728295925cc5c7187bb24d40f874238d09c9d9fd28d32aca9"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 31,
+                  "startColumn": 10,
+                  "endColumn": 68,
+                  "snippet": {
+                    "text": "    std::memcpy(dptr, dmlc::BeginPtr(buffer_) + buffer_ptr_, size);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "327fc54b75ab37bbbb31a1b71431aaefa8137ff755acc103685ad5adf88f5dda"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 45,
+                  "startColumn": 10,
+                  "endColumn": 66,
+                  "snippet": {
+                    "text": "    std::memcpy(dptr, dmlc::BeginPtr(buffer_), buffer_.length());"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "2415c4dfcc23c956815c7a20576af99bb7fa74e8b959dd2a26a5779483b88be0"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 48,
+                  "startColumn": 10,
+                  "endColumn": 68,
+                  "snippet": {
+                    "text": "    std::memcpy(dptr, dmlc::BeginPtr(buffer_) + buffer_ptr_, size);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "327fc54b75ab37bbbb31a1b71431aaefa8137ff755acc103685ad5adf88f5dda"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 60,
+                  "startColumn": 13,
+                  "endColumn": 18,
+                  "snippet": {
+                    "text": "    total = read;"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "8dcdce5b0fa24ce8e0a05a20da785c67cf4a8c7dbfcb77a5369cac80b906a86e"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 61,
+                  "startColumn": 9,
+                  "endColumn": 23,
+                  "snippet": {
+                    "text": "    if (read < size) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "7a546fcabe3a89c3fb809a0e2359edd6295112c6e7d6f8b9b75a2f67a285e995"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 71,
+                  "startColumn": 15,
+                  "endColumn": 20,
+                  "snippet": {
+                    "text": "  pointer_ += read;"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "110ed830f83f218f8637a270b04b163230e094fa9f25d3caeab98d4701bd50ee"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 72,
+                  "startColumn": 10,
+                  "endColumn": 15,
+                  "snippet": {
+                    "text": "  return read;"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "fe0938d5dd649f8904dd8fd1d308ead7aebeec466f821ef897ae01c46d1550a6"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 122,
+                  "startColumn": 9,
+                  "endColumn": 37,
+                  "snippet": {
+                    "text": "    ifs.read(&buffer[0], file_size);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "82558a2a3ce4f06113e3fd175f1a5990dee0240a67ff651d87661442c38eacfc"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 136,
+                  "startColumn": 14,
+                  "endColumn": 19,
+                  "snippet": {
+                    "text": "    total += read;"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "824618c0b006a0cd2c1127719a37dc36c39dabf46fa1e4a3fd828dae0f8d831a"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/io.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 137,
+                  "startColumn": 9,
+                  "endColumn": 23,
+                  "snippet": {
+                    "text": "    if (read < size) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "7a546fcabe3a89c3fb809a0e2359edd6295112c6e7d6f8b9b75a2f67a285e995"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/charconv.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 59,
+                  "startColumn": 18,
+                  "endColumn": 40,
+                  "snippet": {
+                    "text": "static constexpr char kItoaLut[200] = {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "2dab0388fa51233c5aaaacb076e8d1e2f4ab617d08a24f9943c5a6b3f7431053"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/charconv.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 90,
+                  "startColumn": 8,
+                  "endColumn": 38,
+                  "snippet": {
+                    "text": "  std::memcpy(&t, &from, sizeof(To));"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "1f1a1c5a0201d09e5be85906b9500fc0374054ec9f3543a45b773e28cfcdff51"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/charconv.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 603,
+                  "startColumn": 12,
+                  "endColumn": 74,
+                  "snippet": {
+                    "text": "      std::memcpy(result + index + out_length - i - 1, kItoaLut + c0, 2);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "4378536f29f4c1abc735e0258b44067a4cbe4e143b505134ef05e360a09dc065"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/charconv.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 604,
+                  "startColumn": 12,
+                  "endColumn": 74,
+                  "snippet": {
+                    "text": "      std::memcpy(result + index + out_length - i - 3, kItoaLut + c1, 2);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "f0bd1843d3b825a9d34f4340d4be6e5d3b85a8661a249bdb2a180e1697e887dd"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/charconv.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 610,
+                  "startColumn": 12,
+                  "endColumn": 73,
+                  "snippet": {
+                    "text": "      std::memcpy(result + index + out_length - i - 1, kItoaLut + c, 2);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "cf85bd9af6551b5b86487ac6c50a998bb036bd81b216a08f31470faf88e9c4d0"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/charconv.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 640,
+                  "startColumn": 12,
+                  "endColumn": 58,
+                  "snippet": {
+                    "text": "      std::memcpy(result + index, kItoaLut + 2 * exp, 2);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "b3ec2ddc947bb6d73a46fb4c0861cc37ee8c29f615e8c77964adce043ba79c96"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/charconv.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 652,
+                  "startColumn": 12,
+                  "endColumn": 39,
+                  "snippet": {
+                    "text": "      std::memcpy(result, u8\"NaN\", 3);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "0319d1523f800936f20357bc03cdf387423e9d4f751de4d9810e88262b0e5e8b"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/charconv.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 659,
+                  "startColumn": 12,
+                  "endColumn": 51,
+                  "snippet": {
+                    "text": "      std::memcpy(result + sign, u8\"Infinity\", 8);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "1c32f784bcda4f81fa2ce35da260df2431c28530ad097ccbc69bc05f201dc12b"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/charconv.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 662,
+                  "startColumn": 10,
+                  "endColumn": 44,
+                  "snippet": {
+                    "text": "    std::memcpy(result + sign, u8\"0E0\", 3);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "fd019151c106948e63717e082685514fc8a4c7c369999d236508120fb40b104b"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/version.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 43,
+                  "startColumn": 40,
+                  "endColumn": 45,
+                  "snippet": {
+                    "text": "  std::string verstr { u8\"version:\" }, read;"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "1c6d4c6b0c9c564483a1bc5a1bdea7a13294528ed500b1f9e8fe5b5010e1613a"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/version.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 44,
+                  "startColumn": 3,
+                  "endColumn": 33,
+                  "snippet": {
+                    "text": "  read.resize(verstr.size(), 0);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "75a5e0d06e487a8aeca65855ee885c8931c12ab1d6e4e935ecbf6bd97ce2efcb"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/version.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 46,
+                  "startColumn": 22,
+                  "endColumn": 69,
+                  "snippet": {
+                    "text": "  CHECK_EQ(fi->Read(&read[0], verstr.size()), verstr.size()) << msg;"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "535823cf701cadc93c70a868ace12f5f306da8f3582b69d18e70e71dad290120"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1029",
+          "level": "note",
+          "message": {
+            "text": "buffer/read:Check buffer boundaries if used in a loop including recursive loops (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/version.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 47,
+                  "startColumn": 17,
+                  "endColumn": 24,
+                  "snippet": {
+                    "text": "  if (verstr != read) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "7f0a1daa01ba92d0321de75884b318341b288f5161c7e803cde17eef898526ce"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1004",
+          "level": "note",
+          "message": {
+            "text": "buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/common/quantile.h",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 180,
+                  "startColumn": 10,
+                  "endColumn": 55,
+                  "snippet": {
+                    "text": "    std::memcpy(data, src.data, sizeof(Entry) * size);"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "e373da8e9e747f9443118b424a47913c30cfe74685ce7cb061d0066f3ad38d40"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/c_api/c_api.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 71,
+                  "startColumn": 7,
+                  "endColumn": 54,
+                  "snippet": {
+                    "text": "      char chars[NumericLimits<float>::kToCharsSize];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "76a19aadcfb91e133cc48bafcebfa58febfcb6b5dfd9699d4d61fd67a3dc6e9e"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/learner.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 105,
+                  "startColumn": 5,
+                  "endColumn": 53,
+                  "snippet": {
+                    "text": "    char floats[NumericLimits<float>::kToCharsSize];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "b1e2ee9cf54c7c728a446a3800148eb7581ef3c44e5e6b7ae9fc0a78a6578c7c"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/learner.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 111,
+                  "startColumn": 5,
+                  "endColumn": 57,
+                  "snippet": {
+                    "text": "    char integers[NumericLimits<int64_t>::kToCharsSize];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "1e35cc4018aab8a8eb0dd37eadddd9f4454f018a4b360af350d6f046460b560e"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1071",
+          "level": "note",
+          "message": {
+            "text": "buffer/equal:Function does not check the second iterator for over-read conditions (CWE-126)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/learner.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 514,
+                  "startColumn": 19,
+                  "endColumn": 73,
+                  "snippet": {
+                    "text": "             std::equal(postfix.rbegin(), postfix.rend(), key.rbegin());"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "90fdfe9e4cba38cfbb108efd323d53f922ee9a0e731aa504fa918204d25d9896"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1047",
+          "level": "note",
+          "message": {
+            "text": "integer/atoi:Unless checked, the resulting number can exceed the expected range (CWE-190)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/learner.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 622,
+                  "startColumn": 11,
+                  "endColumn": 81,
+                  "snippet": {
+                    "text": "      if (atoi(cfg_[\"num_class\"].c_str()) > 1 && cfg_.count(\"objective\") == 0) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "d34e6328b5a331d9600dff5132a85df924fab61e183c8259107ecb49bc521001"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1071",
+          "level": "note",
+          "message": {
+            "text": "buffer/equal:Function does not check the second iterator for over-read conditions (CWE-126)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/learner.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 823,
+                  "startColumn": 17,
+                  "endColumn": 83,
+                  "snippet": {
+                    "text": "      if (!std::equal(multi.cbegin(), multi.cend(), tparam_.objective.cbegin())) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "0ceea29b46b2a3d028790f13dfaf6a400686192e5a87f4ff7cdaf375023ec4c4"
+          },
+          "rank": 0.2
+        },
+        {
+          "ruleId": "FF1013",
+          "level": "note",
+          "message": {
+            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/cli_main.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 142,
+                  "startColumn": 9,
+                  "endColumn": 26,
+                  "snippet": {
+                    "text": "        char evname[256];"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "ce329a896b6141aa0320de37774a6e1696e14cc3e17cead261008ef722f135c3"
+          },
+          "rank": 0.4
+        },
+        {
+          "ruleId": "FF1021",
+          "level": "note",
+          "message": {
+            "text": "buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/cli_main.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 143,
+                  "startColumn": 18,
+                  "endColumn": 68,
+                  "snippet": {
+                    "text": "        CHECK_EQ(sscanf(kv.first.c_str(), \"eval[%[^]]\", evname), 1)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "a01d5fa16410a823f5d85f372456bf4a96436ead4a1fe25447e7499aabccff0a"
+          },
+          "rank": 0.0
+        },
+        {
+          "ruleId": "FF1013",
+          "kind": "pass",
+          "level": "note"
+        },
+        {
+          "ruleId": "FF1021",
+          "level": "error",
+          "message": {
+            "text": "buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/cli_main.cc",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "startLine": 482,
+                  "startColumn": 11,
+                  "endColumn": 57,
+                  "snippet": {
+                    "text": "      if (sscanf(argv[i], \"%[^=]=%s\", name, val) == 2) {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "contextHash/v1": "ad8408027235170e870e7662751a01386beb2d2ed8beb75dd4ba8e4a70e91d65"
+          },
+          "rank": 0.8
+        }
+      ],
+      "externalPropertyFileReferences": {
+        "taxonomies": [
+          {
+            "location": {
+              "uri": "https://raw.githubusercontent.com/sarif-standard/taxonomies/main/CWE_v4.4.sarif"
+            },
+            "guid": "FFC64C90-42B6-44CE-8BEB-F6B7DAE649E5"
+          }
+        ]
+      }
+    }
+  ]
+}

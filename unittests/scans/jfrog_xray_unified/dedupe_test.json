@@ -1,0 +1,212 @@
+{ "total_rows" : 7,
+  "rows" : [
+{
+	"cves": [
+	{
+	"cve": "CVE-2019-2988",
+	"cvss_v2_score": 4.3,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:N/I:N/A:P",
+	"cvss_v3_score": 3.7,
+	"cvss_v3_vector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L"
+	},
+	{
+	"cve": "CVE-2019-2981",
+	"cvss_v2_score": 4.3,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:N/I:N/A:P",
+	"cvss_v3_score": 3.7,
+	"cvss_v3_vector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L"
+	}
+	],
+	"cvss2_max_score": 4.3,
+	"cvss3_max_score": 3.7,
+	"summary": "RHSA-2019:3127: java-11-openjdk security update (Important)",
+	"severity": "High",
+	"vulnerable_component": "rpm://7:java-11-openjdk-headless:0:11.0.6.10-1.el7_7",
+	"impacted_artifact": "docker://test-artifact:1.0.5",
+	"path": "docker-reg/test-artifact/1.0.5/",
+	"fixed_versions": [
+	"≥ 1:11.0.5.10-0.el7_7"
+	],
+	"published": "2020-04-30T13:26:51Z",
+	"artifact_scan_time": "2020-07-30T13:46:18Z",
+	"issue_id": "XRAY-96880",
+	"package_type": "rpm",
+	"provider": "JFrog",
+	"description": "The java-11-openjdk packages provide the OpenJDK 11 Java Runtime Environment and the OpenJDK 11 Java Software Development Kit.Security Fix(es):* OpenJDK: Improper handling of Kerberos proxy credentials (Kerberos, 8220302) (CVE-2019-2949)* OpenJDK: Unexpected exception thrown during regular expression processing in Nashorn (Scripting, 8223518) (CVE-2019-2975)* OpenJDK: Out of bounds access in optimized String indexof implementation (Hotspot, 8224062) (CVE-2019-2977)* OpenJDK: Incorrect handling of nested jar: URLs in Jar URL handler (Networking, 8223892) (CVE-2019-2978)* OpenJDK: Incorrect handling of HTTP proxy responses in HttpURLConnection (Networking, 8225298) (CVE-2019-2989)* OpenJDK: Missing restrictions on use of custom SocketImpl (Networking, 8218573) (CVE-2019-2945)* OpenJDK: NULL pointer dereference in DrawGlyphList (2D, 8222690) (CVE-2019-2962)* OpenJDK: Unexpected exception thrown by Pattern processing crafted regular expression (Concurrency, 8222684) (CVE-2019-2964)* OpenJDK: Unexpected exception thrown by XPathParser processing crafted XPath expression (JAXP, 8223505) (CVE-2019-2973)* OpenJDK: Unexpected exception thrown by XPath processing crafted XPath expression (JAXP, 8224532) (CVE-2019-2981)* OpenJDK: Unexpected exception thrown during Font object deserialization (Serialization, 8224915) (CVE-2019-2983)* OpenJDK: Missing glyph bitmap image dimension check in FreetypeFontScaler (2D, 8225286) (CVE-2019-2987)* OpenJDK: Integer overflow in bounds check in SunGraphics2D (2D, 8225292) (CVE-2019-2988)* OpenJDK: Excessive memory allocation in CMap when reading TrueType font (2D, 8225597) (CVE-2019-2992)* OpenJDK: Insufficient filtering of HTML event attributes in Javadoc (Javadoc, 8226765) (CVE-2019-2999)For more details about the security issue(s), including the impact, a CVSS score, acknowledgments, and other related information, refer to the CVE page(s) listed in the References section.",
+	"references": [
+	"https://access.redhat.com/security/cve/CVE-2019-2999",
+	"https://access.redhat.com/security/cve/CVE-2019-2992",
+	"https://access.redhat.com/security/cve/CVE-2019-2989",
+	"https://access.redhat.com/security/cve/CVE-2019-2988",
+	"https://access.redhat.com/security/cve/CVE-2019-2987",
+	"https://access.redhat.com/security/cve/CVE-2019-2983",
+	"https://access.redhat.com/security/cve/CVE-2019-2981",
+	"https://access.redhat.com/security/cve/CVE-2019-2978",
+	"https://access.redhat.com/security/cve/CVE-2019-2977",
+	"https://access.redhat.com/security/cve/CVE-2019-2975",
+	"https://access.redhat.com/security/cve/CVE-2019-2973",
+	"https://access.redhat.com/security/cve/CVE-2019-2964",
+	"https://access.redhat.com/security/cve/CVE-2019-2962",
+	"https://access.redhat.com/security/cve/CVE-2019-2949",
+	"https://access.redhat.com/security/cve/CVE-2019-2945",
+	"https://access.redhat.com/errata/RHSA-2019:3127"
+	]
+	}
+,{
+	"cves": [
+	{
+	"cve": "CVE-2016-5300",
+	"cvss_v2_score": 4.3,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:N/I:N/A:P",
+	"cvss_v3_score": 7.5,
+	"cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+	}
+	],
+	"cvss2_max_score": 4.3,
+	"cvss3_max_score": 7.5,
+	"summary": "CVE-2016-5300 expat: Little entropy used for hash initialization",
+	"severity": "Medium",
+	"vulnerable_component": "rpm://7:expat:17:2.1.0-10.el7_3",
+	"impacted_artifact": "docker://test-artifact:1.0.0",
+	"path": "docker-reg/test-artifact/1.0.0/",
+	"fixed_versions": [],
+	"published": "2020-07-12T17:24:37Z",
+	"artifact_scan_time": "2020-07-30T13:46:42Z",
+	"issue_id": "XRAY-108166",
+	"package_type": "rpm",
+	"provider": "JFrog",
+	"description": "The XML parser in Expat does not use sufficient entropy for hash initialization, which allows context-dependent attackers to cause a denial of service (CPU consumption) via crafted identifiers in an XML document.  NOTE: this vulnerability exists because of an incomplete fix for CVE-2012-0876.",
+	"references": []
+	}
+,{
+	"cves": [
+	{
+	"cve": "CVE-2016-4008",
+	"cvss_v2_score": 4.3,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:N/I:N/A:P",
+	"cvss_v3_score": 5.9,
+	"cvss_v3_vector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+	}
+	],
+	"cvss2_max_score": 4.3,
+	"cvss3_max_score": 5.9,
+	"summary": "CVE-2016-4008 libtasn1: infinite loop while parsing DER certificates",
+	"severity": "Medium",
+	"vulnerable_component": "rpm://7:libtasn1:0:4.10-1.el7",
+	"impacted_artifact": "docker://test-artifact:1.0.0",
+	"path": "docker-reg/test-artifact/1.0.0/",
+	"fixed_versions": [],
+	"published": "2020-07-12T17:25:18Z",
+	"artifact_scan_time": "2020-07-30T13:46:42Z",
+	"issue_id": "XRAY-108256",
+	"package_type": "rpm",
+	"provider": "JFrog",
+	"description": "The _asn1_extract_der_octet function in lib/decoding.c in GNU Libtasn1 before 4.8, when used without the ASN1_DECODE_FLAG_STRICT_DER flag, allows remote attackers to cause a denial of service (infinite recursion) via a crafted certificate.",
+	"references": []
+	}
+,{
+	"cves": [
+	{
+	"cve": "CVE-2020-12762",
+	"cvss_v2_score": 6.8,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:P/I:P/A:P",
+	"cvss_v3_score": 7.8,
+	"cvss_v3_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+	}
+	],
+	"cvss2_max_score": 6.8,
+	"cvss3_max_score": 7.8,
+	"summary": "CVE-2020-12762 json-c: integer overflow and out-of-bounds write via a large JSON file",
+	"severity": "Medium",
+	"vulnerable_component": "rpm://7:json-c:18:0.11-4.el7_0",
+	"impacted_artifact": "docker://test-artifact:1.0.0",
+	"path": "docker-reg/test-artifact/1.0.0/",
+	"fixed_versions": [],
+	"published": "2020-07-12T17:07:18Z",
+	"artifact_scan_time": "2020-07-30T13:46:42Z",
+	"issue_id": "XRAY-105828",
+	"package_type": "rpm",
+	"provider": "JFrog",
+	"description": "json-c through 0.14 has an integer overflow and out-of-bounds write via a large JSON file, as demonstrated by printbuf_memappend.",
+	"references": []
+	}
+,{
+	"cves": [
+	{
+	"cve": "CVE-2016-5300",
+	"cvss_v2_score": 4.3,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:N/I:N/A:P",
+	"cvss_v3_score": 7.5,
+	"cvss_v3_vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+	}
+	],
+	"cvss2_max_score": 4.3,
+	"cvss3_max_score": 7.5,
+	"summary": "CVE-2016-5300 expat: Little entropy used for hash initialization",
+	"severity": "Medium",
+	"vulnerable_component": "rpm://7:expat:17:2.1.0-10.el7_3",
+	"impacted_artifact": "docker://test-artifact:1.0.0",
+	"path": "docker-reg/test-artifact/1.0.0/",
+	"fixed_versions": [],
+	"published": "2020-07-12T17:24:37Z",
+	"artifact_scan_time": "2020-07-30T13:46:42Z",
+	"issue_id": "XRAY-998166",
+	"package_type": "rpm",
+	"provider": "JFrog",
+	"description": "The XML parser in Expat does not use sufficient entropy for hash initialization, which allows context-dependent attackers to cause a denial of service (CPU consumption) via crafted identifiers in an XML document.  NOTE: this vulnerability exists because of an incomplete fix for CVE-2012-0876. DUPE TEST different issue_id, same algorithm fields (cve, filepath, component name, component version)",
+	"references": []
+	}
+,{
+	"cves": [
+	{
+	"cve": "CVE-2016-4008",
+	"cvss_v2_score": 4.3,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:N/I:N/A:P",
+	"cvss_v3_score": 5.9,
+	"cvss_v3_vector": "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+	}
+	],
+	"cvss2_max_score": 4.3,
+	"cvss3_max_score": 5.9,
+	"summary": "CVE-2016-4008 libtasn1: infinite loop while parsing DER certificates",
+	"severity": "Medium",
+	"vulnerable_component": "rpm://7:libtasn1:0:4.10-1.el7",
+	"impacted_artifact": "docker://test-artifact:1.0.0",
+	"path": "docker-reg/test-artifact/1.0.0/testtesttest/",
+	"fixed_versions": [],
+	"published": "2020-07-12T17:25:18Z",
+	"artifact_scan_time": "2020-07-30T13:46:42Z",
+	"issue_id": "XRAY-108256",
+	"package_type": "rpm",
+	"provider": "JFrog",
+	"description": "The _asn1_extract_der_octet function in lib/decoding.c in GNU Libtasn1 before 4.8, when used without the ASN1_DECODE_FLAG_STRICT_DER flag, allows remote attackers to cause a denial of service (infinite recursion) via a crafted certificate. DUPE TEST same issue_id, different algorithm fields (cve, filepath, component name, component version) - filepath changed",
+	"references": []
+	}
+,{
+	"cves": [
+	{
+	"cve": "CVE-2020-12762",
+	"cvss_v2_score": 6.8,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:M/Au:N/C:P/I:P/A:P",
+	"cvss_v3_score": 7.8,
+	"cvss_v3_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+	}
+	],
+	"cvss2_max_score": 6.8,
+	"cvss3_max_score": 7.8,
+	"summary": "CVE-2020-12762 json-c: integer overflow and out-of-bounds write via a large JSON file",
+	"severity": "Medium",
+	"vulnerable_component": "rpm://7:json-c:18:0.11-4.el7_0",
+	"impacted_artifact": "docker://test-artifact:1.0.0",
+	"path": "docker-reg/test-artifact/1.0.0/",
+	"fixed_versions": [],
+	"published": "2020-07-12T17:07:18Z",
+	"artifact_scan_time": "2020-07-30T13:46:42Z",
+	"issue_id": "XRAY-105828",
+	"package_type": "rpm",
+	"provider": "JFrog",
+	"description": "json-c through 0.14 has an integer overflow and out-of-bounds write via a large JSON file, as demonstrated by printbuf_memappend. DUPE TEST same issue_id, same algorithm fields (cve, filepath, component name, component version)",
+	"references": []
+	}
+
+]}

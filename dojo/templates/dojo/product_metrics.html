@@ -1,42 +1,44 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_styles %}
-    .graph {min-height: 158px;}
+    {{ block.super }}
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
               <h3 class="has-filters">
                   Metrics Overview
                 <div class="dropdown pull-right ">
+                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
-                        <span class="fa fa-bars"></span>
+                        <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a href="{% url 'view_product_metrics' prod.id %}?type=Finding">
-                                <i class="fa fa-file-text-o"></i> Measure Findings
+                                <i class="fa-solid fa-file-lines"></i> Measure Findings
                             </a>
                         </li>
                         <li role="presentation">
                             <a href="{% url 'view_product_metrics' prod.id %}?type=Endpoint">
-                                <i class="fa fa-file-text-o"></i> Measure Affected Endpoints
+                                <i class="fa-solid fa-file-lines"></i> Measure Affected Endpoints
                             </a>
                         </li>
                     </ul>
                 </div>
               </h3>
-                
-                
-                  
+
+
+
             </div>
         </div>
-        <div id="the-filters" class="panel-body collapse">
+        <div id="the-filters" class="is-filters panel-body collapse">
             {% include "dojo/filter_snippet.html" with form=form clear_link=reset_link %}
         </div>
         <div class="panel-body product-graphs-overview">
@@ -45,15 +47,15 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-crosshairs fa-2x"></i>
+                                <i class="fa-solid fa-crosshairs fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ verified_objs|length }}</span>
+                                    <span class=" fa-2x">{{ verified_objs }}</span>
                                     <span><a
                                             href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are open/active and verified">Verified
-                                        {{ view }}{{ verified_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                        {{ view }}{{ verified_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -64,7 +66,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Verified since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -74,14 +76,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
+                                <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ open_objs|length }}</span>
+                                    <span class=" fa-2x">{{ open_objs }}</span>
                                     <span><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                         title="Findings that are open/active, but not (yet) verified">Open
-                                        {{ view }}{{ open_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                        {{ view }}{{ open_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -92,7 +94,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Opened since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Opened since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -102,14 +104,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-check fa-2x"></i>
+                                <i class="fa-solid fa-check fa-2x"></i>
 
                                 <div class="pull-right text-right">
-                                    <span class="fa-2x">{{ accepted_objs|length }}</span>
+                                    <span class="fa-2x">{{ accepted_objs }}</span>
                                     <span><a
                                             href="{% url 'accepted_findings' %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that have been accepted in a risk acceptance.">Risk Accepted
-                                    {{ view }}s <i class="fa fa-arrow-circle-right"></i></a>
+                                    {{ view }}s <i class="fa-solid fa-circle-right"></i></a>
                                 </span>
                                 </div>
                             </div>
@@ -120,7 +122,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Accepted since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Risk Accepted since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -130,14 +132,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ closed_objs|length }}</span>
+                                    <span class="fa-2x">{{ closed_objs }}</span>
                                     <span><a href="{% url 'closed_findings' %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are closed and mitigated.">Closed
-                                        {{ view }}{{ closed_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                        {{ view }}{{ closed_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -148,7 +150,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Closed since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Closed since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -158,14 +160,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ false_positive_objs|length }}</span>
+                                    <span class="fa-2x">{{ false_positive_objs }}</span>
                                     <span><a href="{% url 'product_false_positive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are marked as false postive.">False-postive
-                                        {{ view }}{{ false_positive_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                        {{ view }}{{ false_positive_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -176,7 +178,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Flagged since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Flagged since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -186,15 +188,15 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-fire-extinguisher fa-2x"></i>
+                                <i class="fa-solid fa-fire-extinguisher fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ out_of_scope_objs|length }}</span>
+                                    <span class=" fa-2x">{{ out_of_scope_objs }}</span>
                                     <span><a
                                             href="{% url 'product_out_of_scope_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                             title="Findings that are marked as out of scope.">Out Of Scope
-                                        {{ view }}{{ out_of_scope_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                        {{ view }}{{ out_of_scope_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -205,7 +207,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Since {{ start_date|date:"D., M. d, Y" }}.</small>
                     </div>
                 </div>
@@ -215,14 +217,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bullseye fa-2x"></i>
+                                <i class="fa-solid fa-bullseye fa-2x"></i>
 
                                 <div class="text-right pull-right">
-                                    <span class="fa-2x">{{ all_objs|length }}</span>
+                                    <span class="fa-2x">{{ all_objs }}</span>
                                     <span><a href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
-                                            title="All findings.">Total 
-                                        {{ view }}{{ all_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                            title="All findings.">Total
+                                        {{ view }}{{ all_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -233,7 +235,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -243,14 +245,14 @@
                     <div class="panel-heading">
                         <div class="row">
                             <div class="col-xs-12">
-                                <i class="fa fa-bug fa-2x"></i>
+                                <i class="fa-solid fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span class=" fa-2x">{{ inactive_objs|length }}</span>
+                                    <span class=" fa-2x">{{ inactive_objs }}</span>
                                     <span><a href="{% url 'product_inactive_findings' prod.id %}?test__engagement__product={{ prod.id }}"
                                              title="Findings that are not active but not mitigated for some reason">Inactive
-                                        {{ view }}{{ inactive_objs|length|pluralize }} <i
-                                                class="fa fa-arrow-circle-right"></i></a>
+                                        {{ view }}{{ inactive_objs|pluralize }} <i
+                                                class="fa-solid fa-circle-right"></i></a>
                                     </span>
                                 </div>
                             </div>
@@ -261,7 +263,7 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Ingested since {{ start_date }}"
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Ingested since {{ start_date|date:"D., M. d, Y" }}</small>
                     </div>
                 </div>
@@ -280,27 +282,47 @@
                     <div class="btn-group">
                       <!--
                         <button class="btn btn-primary clickable panel-collapsed">
-                            <span><i class="fa fa-bar-chart"></i></span>
+                            <span><i class="fa-solid fa-chart-column"></i></span>
                         </button>
                       -->
                     </div>
                 </div>
             </div>
         </div>
-      <div class="panel-body product-graphs">
+        <div class="panel-body product-graphs">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Open Day to Day by Severity
+                        <i title="Days are only displayed if findings are available."
+                           class="text-info fa-solid fa-circle-info"></i>
+                    </div>
+                    <div class="panel-body text-center">
+                        <div id="id_open_findings_burndown_loader" class="graph-loader">
+                            <p><i class="fas fa-spinner fa-spin fa-2x"></i></p>
+                            <p>Loading Finding Burndown Metrics...</p>
+                        </div>
+                        <div id="open_findings_burndown" class="graph"></div>
+                    </div>
+                    <div class="panel-footer">
+                        <i class="text-info fa-solid fa-circle-info"></i>
+                        <small>Days are only displayed if findings are available.</small>
+                    </div>
+                </div>
+            </div>
             <div class="col-md-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        Open, Closed, and Accepted Week to Week
+                        Open, Closed, and Risk Accepted Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="open_close_weekly" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -310,14 +332,14 @@
                     <div class="panel-heading">
                         Week to Week by Severity
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_weekly" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -327,14 +349,14 @@
                     <div class="panel-heading">
                         Critical Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_critical" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -344,14 +366,14 @@
                     <div class="panel-heading">
                         High Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_high" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -361,14 +383,14 @@
                     <div class="panel-heading">
                         Medium Week to Week
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div id="severity_medium" class="graph"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -383,9 +405,9 @@
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
-                        <small>Finding age of {{ open_objs|length|apnumber }} open
-                            finding{{ open_objs|length|pluralize }}</small>
+                           class="text-info fa-solid fa-circle-info"></i>
+                        <small>Finding age of {{ open_objs|apnumber }} open
+                            finding{{ open_objs|pluralize }}</small>
                     </div>
                 </div>
             </div>
@@ -394,14 +416,14 @@
                     <div class="panel-heading">
                         Weekly activity of findings reported
                             <i title="Weeks are only displayed if findings are available."
-                            class="text-info fa fa-info-circle"></i>
+                            class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div class="graph" id="punchcard"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Weeks are only displayed if findings are available.</small>
                     </div>
                 </div>
@@ -411,14 +433,14 @@
                     <div class="panel-heading">
                         Findings by Test Type
                         <i title="Test Types shown only if available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                     </div>
                     <div class="panel-body">
                         <div class="graph" id="test_type"></div>
                     </div>
                     <div class="panel-footer">
                         <i title="Weeks are only displayed if findings are available."
-                           class="text-info fa fa-info-circle"></i>
+                           class="text-info fa-solid fa-circle-info"></i>
                         <small>Test Types shown only if available.</small>
                     </div>
                 </div>
@@ -433,9 +455,9 @@
                         <div id="open_vulnerabilities" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i class="text-info fa fa-info-circle"></i>
-                        <small>Showing {{ open_vulnerabilities|length|apnumber }}
-                            vulnerabilit{{ open_vulnerabilities|length|pluralize:"y,ies"}} from Open findings</small>
+                        <i class="text-info fa-solid fa-circle-info"></i>
+                        <small>Showing {{ open_vulnerabilities_count|apnumber }}
+                            vulnerabilit{{ open_vulnerabilities_count|pluralize:"y,ies"}} from Open findings</small>
                     </div>
                 </div>
             </div>
@@ -448,9 +470,9 @@
                         <div id="all_vulnerabilities" class="graph"></div>
                     </div>
                     <div class="panel-footer">
-                        <i class="text-info fa fa-info-circle"></i>
-                        <small>Showing {{ all_vulnerabilities|length|apnumber }}
-                            vulnerabilit{{ all_vulnerabilities|length|pluralize:"y,ies"}} from all findings</small>
+                        <i class="text-info fa-solid fa-circle-info"></i>
+                        <small>Showing {{ all_vulnerabilities_count|apnumber }}
+                            vulnerabilit{{ all_vulnerabilities_count|pluralize:"y,ies"}} from all findings</small>
                     </div>
                 </div>
             </div>
@@ -459,6 +481,7 @@
 </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <!-- Flot Charts JavaScript -->
     <script src="{% static "flot/excanvas.min.js" %}"></script>
@@ -466,7 +489,6 @@
     <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
     <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
     <script src="{% static "flot/jquery.flot.categories.js" %}"></script>
-    <script src="{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     {% include "dojo/filter_js_snippet.html" %}
     {% if punchcard %}
         <script src="{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
@@ -475,6 +497,9 @@
     {% endif %}
     <script src="{% static "flot/jquery.flot.time.js" %}"></script>
     <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script type="text/javascript">
         $(function () {
             if (document.referrer.indexOf('simple_search') > 0) {
@@ -503,1274 +528,130 @@
                 }
             });
 
-            accepted_objs();
-            verified_objs();
-            inactive_objs();
-            open_objs();
-            closed_objs();
-            false_positive_objs();
-            out_of_scope_objs();
-            all_objs();
-            new_objs();
-            open_close_weekly();
-            severity_weekly();
-            severity_counts_weekly();
-            test_type();
-            finding_age();
-            open_vulnerabilities();
-            all_vulnerabilities();
-            //$(".product-graphs").hide();
-            $("#meta_accordion").accordion();
-        });
 
-        function accepted_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
             var ticks = [
                 [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
             ];
 
-            {% for f in accepted_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
+            $(document).ready(function() {
+                fetch_burndown_metrics({{ prod.id }});
+            })
 
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
+            function fetch_burndown_metrics(pid) {
+                $.ajax({
+                    type: 'GET',
+                    url: '/product/' + pid + '/async_burndown_metrics',
+                    beforeSend: function() {
+                        $('#open_findings_burndown').hide();
+                        $('#id_open_findings_burndown_loader').show();
                     },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#accepted_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-
-        function inactive_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in inactive_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#inactive_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function open_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in open_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#open_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function false_positive_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in false_positive_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#false_positive_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function verified_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in verified_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#verified_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-            });
-        }
-        ;
-
-        function out_of_scope_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in out_of_scope_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#out_of_scope_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-            });
-        }
-        ;
-
-        function all_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in all_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#all_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function closed_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in closed_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#closed_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        function new_objs() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
-            {% for f in new_objs %}
-                {% if f.severity == 'Critical' %}
-                    critical += 1;
-                {% elif f.severity == 'High' %}
-                    high += 1;
-                {% elif f.severity == 'Medium' %}
-                    medium += 1;
-                {% elif f.severity == 'Low' %}
-                    low += 1;
-                {% elif f.severity == 'Info' %}
-                    info += 1;
-                {% endif %}
-            {% endfor %}
-
-            var d1 = [
-                [0, critical],
-            ];
-            var d2 = [
-                [1, high],
-            ];
-            var d3 = [
-                [2, medium],
-            ];
-            var d4 = [
-                [3, low],
-            ];
-            var d5 = [
-                [4, info],
-            ];
-
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#new_objs", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function open_close_weekly() {
-            var opened = []
-            var closed = []
-            var accepted = []
-            var ticks = []
-
+                    success: function(response) {
+                        $('#open_findings_burndown').show();
+                        $('#id_open_findings_burndown_loader').hide();
+                        open_findings_burndown(
+                            response.critical,
+                            response.high,
+                            response.medium,
+                            response.low,
+                            response.info,
+                            response.max,
+                            response.min,
+                        );
+                    }
+                });
+            }
+
+            accepted_objs(
+                [[0, {{ accepted_objs_by_severity.Critical }}]],
+                [[1, {{ accepted_objs_by_severity.High }}]],
+                [[2, {{ accepted_objs_by_severity.Medium }}]],
+                [[3, {{ accepted_objs_by_severity.Low }}]],
+                [[4, {{ accepted_objs_by_severity.Info }}]],
+                ticks);
+
+            inactive_objs(
+                [[0, {{ inactive_objs_by_severity.Critical }}]],
+                [[1, {{ inactive_objs_by_severity.High }}]],
+                [[2, {{ inactive_objs_by_severity.Medium }}]],
+                [[3, {{ inactive_objs_by_severity.Low }}]],
+                [[4, {{ inactive_objs_by_severity.Info }}]],
+                ticks);
+
+            open_objs(
+                [[0, {{ open_objs_by_severity.Critical }}]],
+                [[1, {{ open_objs_by_severity.High }}]],
+                [[2, {{ open_objs_by_severity.Medium }}]],
+                [[3, {{ open_objs_by_severity.Low }}]],
+                [[4, {{ open_objs_by_severity.Info }}]],
+                ticks);
+
+            false_positive_objs(
+                [[0, {{ false_positive_objs_by_severity.Critical }}]],
+                [[1, {{ false_positive_objs_by_severity.High }}]],
+                [[2, {{ false_positive_objs_by_severity.Medium }}]],
+                [[3, {{ false_positive_objs_by_severity.Low }}]],
+                [[4, {{ false_positive_objs_by_severity.Info }}]],
+                ticks);
+
+            verified_objs(
+                [[0, {{ verified_objs_by_severity.Critical }}]],
+                [[1, {{ verified_objs_by_severity.High }}]],
+                [[2, {{ verified_objs_by_severity.Medium }}]],
+                [[3, {{ verified_objs_by_severity.Low }}]],
+                [[4, {{ verified_objs_by_severity.Info }}]],
+                ticks);
+
+            out_of_scope_objs(
+                [[0, {{ out_of_scope_objs_by_severity.Critical }}]],
+                [[1, {{ out_of_scope_objs_by_severity.High }}]],
+                [[2, {{ out_of_scope_objs_by_severity.Medium }}]],
+                [[3, {{ out_of_scope_objs_by_severity.Low }}]],
+                [[4, {{ out_of_scope_objs_by_severity.Info }}]],
+                ticks);
+
+            all_objs(
+                [[0, {{ all_objs_by_severity.Critical }}]],
+                [[1, {{ all_objs_by_severity.High }}]],
+                [[2, {{ all_objs_by_severity.Medium }}]],
+                [[3, {{ all_objs_by_severity.Low }}]],
+                [[4, {{ all_objs_by_severity.Info }}]],
+                ticks);
+
+            closed_objs(
+                [[0, {{ closed_objs_by_severity.Critical }}]],
+                [[1, {{ closed_objs_by_severity.High }}]],
+                [[2, {{ closed_objs_by_severity.Medium }}]],
+                [[3, {{ closed_objs_by_severity.Low }}]],
+                [[4, {{ closed_objs_by_severity.Info }}]],
+                ticks);
+
+            new_objs(
+                [[0, {{ new_objs_by_severity.Critical }}]],
+                [[1, {{ new_objs_by_severity.High }}]],
+                [[2, {{ new_objs_by_severity.Medium }}]],
+                [[3, {{ new_objs_by_severity.Low }}]],
+                [[4, {{ new_objs_by_severity.Info }}]],
+                ticks);
+
+            
+            var opened = [];
+            var closed = [];
+            var accepted = [];
+            ticks = [];
             {% for week, values in open_close_weekly.items %}
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"])
                 opened.push([{{ forloop.counter0 }}, {{ values.open }}])
                 closed.push([{{ forloop.counter0 }}, {{ values.closed }}])
                 accepted.push([{{ forloop.counter0 }}, {{ values.accepted }}])
             {% endfor %}
-
-            var options = {
-                xaxes: [{
-                    ticks: ticks,
-                }],
-                yaxes: [{
-                    min: 0
-                }],
-                series: {
-                    lines: {
-                        show: true
-                    },
-                    points: {
-                        show: true
-                    }
-                },
-                grid: {
-                    hoverable: true,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7'
-
-                },
-                tooltip: true
-            };
-
-            var plotObj = $.plot($("#open_close_weekly"), [{
-                        data: opened,
-                        label: " Opened",
-                        color: "#d9534f"
-                    }, {
-                        data: closed,
-                        label: " Closed",
-                        color: '#f0ad4e'
-                    }, {
-                        data: accepted,
-                        label: " Accepted",
-                        color: '#80699B'
-                    }],
-                    options);
-        }
-        ;
-
-        function severity_weekly() {
-            var critical = []
-            var high = []
-            var medium = []
-            var low = []
-            var info = []
-            var ticks = []
-
+            open_close_weekly(opened, closed, accepted, ticks);
+            
+            let critical = [];
+            let high = [];
+            let medium = [];
+            let low = [];
+            let info = [];
+            ticks = [];
             {% for week, values in severity_weekly.items %}
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
                 critical.push([{{ forloop.counter0 }}, {{ values.Critical }}]);
@@ -1779,63 +660,12 @@
                 low.push([{{ forloop.counter0 }}, {{ values.Low }}]);
                 info.push([{{ forloop.counter0 }}, {{ values.Info }}]);
             {% endfor %}
-
-            var options = {
-                xaxes: [{
-                    ticks: ticks,
-                }],
-                yaxes: [{
-                    min: 0
-                }],
-                series: {
-                    lines: {
-                        show: true
-                    },
-                    points: {
-                        show: true
-                    }
-                },
-                grid: {
-                    hoverable: true,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7'
-
-                },
-                tooltip: true
-            };
-
-            var plotObj = $.plot($("#severity_weekly"), [{
-                        data: critical,
-                        label: " Critical",
-                        color: "#d9534f"
-                    }, {
-                        data: high,
-                        label: " High",
-                        color: '#f0ad4e'
-                    }, {
-                        data: medium,
-                        label: " Medium",
-                        color: '#f0de28'
-                    }, {
-                        data: low,
-                        label: " Low",
-                        color: '#337ab7'
-                    }, {
-                        data: info,
-                        label: " Info",
-                        color: '#80699B'
-                    }],
-                    options);
-
-        }
-        ;
-
-        function severity_counts_weekly() {
-            var critical = []
-            var high = []
-            var medium = []
-            var ticks = []
-
+            severity_weekly(critical, high, medium, low, info, ticks);
+            
+            critical = [];
+            high = [];
+            medium = [];
+            ticks = [];
             {% for week, values in critical_weekly.items %}
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
                 critical.push([{{ forloop.counter0 }}, {{ values.count }}]);
@@ -1848,201 +678,35 @@
                 ticks.push([{{ forloop.counter0 }}, "{{ values.week|safe }}"]);
                 medium.push([{{ forloop.counter0 }}, {{ values.count }}]);
             {% endfor %}
-
-            var options = {
-                xaxes: [{
-                    ticks: ticks,
-                }],
-                yaxes: [{
-                    min: 0
-                }],
-                series: {
-                    lines: {
-                        show: true
-                    },
-                    points: {
-                        show: true
-                    }
-                },
-                grid: {
-                    hoverable: true,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7'
-
-                },
-                tooltip: true
-            };
-
-            var plotObj = $.plot($("#severity_critical"), [{
-                        data: critical,
-                        label: " Critical",
-                        color: "#d9534f"
-                    }],
-                    options);
-            var plotObj = $.plot($("#severity_high"), [{
-                        data: high,
-                        label: " High",
-                        color: "#f0ad4e"
-                    }],
-                    options);
-            var plotObj = $.plot($("#severity_medium"), [{
-                        data: medium,
-                        label: " Medium",
-                        color: "#f0de28"
-                    }],
-                    options);
-
-        }
-        ;
-
-        function test_type() {
-
+            severity_counts_weekly(critical, high, medium, ticks);
+            
             var data = []
             {% for x, y in test_data.items %}
                 {% if y > 0 %}
                     data.push(['{{x}}', {{ y }}]);
                 {%  endif %}
             {% endfor %}
-
-            $.plot('#test_type', [data], {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .7,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    mode: "categories",
-                    tickLength: 4
-                },
-
-            });
-        }
-
-        function _draw_vulnerabilities_graph(tag, data) {
-            $.plot(tag, [data], {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .7,
-                        'align': "center"
-                    }
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7'
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    mode: "categories",
-                    tickLength: 4
-                }
-            });
-        }
-
-        function open_vulnerabilities() {
-            var data = [];
-            {% for x in open_vulnerabilities %}
-                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
-            {% endfor %}
-
-            _draw_vulnerabilities_graph("#open_vulnerabilities", data);
-        }
-
-        function all_vulnerabilities() {
-            var data = [];
-            {% for x in all_vulnerabilities %}
-                data.push(['CWE-{{x.cwe}}', {{x.count}}]);
-            {% endfor %}
-
-            _draw_vulnerabilities_graph("#all_vulnerabilities", data);
-        }
-
-        function finding_age() {
-            var data = {};
-            var data_1 = []
+            test_type(data);
+            
+            var data_2 = []
             var ticks = []
-            {% for f in open_objs %}
-                if (data[{{ f.age }}]) {
-                    data[{{ f.age }}] += 1
-                }
-                else {
-                    data[{{ f.age }}] = 1
-                }
-            {% endfor %}
+
             var i = 0;
-            $.each(data, function (index, value) {
+            $.each({{ open_objs_by_age }}, function (index, value) {
                 if (value > 0) {
-                    data_1.push([i, value]);
+                    data_2.push([i, value]);
                     ticks.push([i, index])
                 }
                 i++;
             });
+            finding_age(data_2, ticks);
+            
+            draw_vulnerabilities_graph("#open_vulnerabilities", {{ open_vulnerabilities|safe }});
+            draw_vulnerabilities_graph("#all_vulnerabilities", {{ all_vulnerabilities|safe }});
 
-
-            var dataset = [
-                {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
-            ];
-
-            var options = {
-                series: {
-                    bars: {
-                        show: true,
-                        fill: true,
-                        fillColor: "#337ab7"
-                    }
-                },
-                bars: {
-                    align: "center",
-                    barWidth: 0.5
-                },
-                xaxis: {
-                    axisLabel: "Days Open",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 10,
-                    ticks: ticks,
-                },
-                yaxis: {
-                    axisLabel: "Number of Findings",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 3,
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-                }
-            };
-
-
-            $.plot("#finding_age", dataset, options);
-        }
+            //$(".product-graphs").hide();
+            $("#meta_accordion").accordion();
+        });
 
         {%  if punchcard %}
 

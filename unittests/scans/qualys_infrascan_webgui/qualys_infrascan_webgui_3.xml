@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE SCAN SYSTEM "https://qualysapi.qg2.apps.qualys.eu/scan-1.dtd">
+<!-- Initializing Data -->
+<!-- Generating XML report -->
+<SCAN value="scan/1609253113.01100">
+
+<HEADER>
+  <KEY value="USERNAME">Username</KEY>
+  <KEY value="COMPANY"><![CDATA[Company Name]]></KEY>
+  <KEY value="DATE">2019-04-02T10:14:53Z</KEY>
+  <KEY value="TITLE"><![CDATA[Report Title]]></KEY>
+  <KEY value="TARGET"><![CDATA[10.1.10.1]]></KEY>
+  <KEY value="EXCLUDED_TARGET"><![CDATA[N/A]]></KEY>
+  <KEY value="DURATION">04:29:11</KEY>
+  <KEY value="SCAN_HOST">ScanHost</KEY>
+  <KEY value="NBHOST_ALIVE">1</KEY>
+  <KEY value="NBHOST_TOTAL">1</KEY>
+  <KEY value="REPORT_TYPE">On-demand</KEY>
+  <KEY value="OPTIONS"><![CDATA[Full TCP scan, Standard UDP port list, parallel ML scaling disabled for appliances, Load balancer detection OFF, Windows Authentication ON, Unix Authentication ON, Oracle Authentication ON, SNMP Authentication ON, Oracle Listener Authentication ON, VMware Authentication ON, DB2 Authentication ON, HTTP Authentication ON, MySQL Authentication ON, ICMP Host Discovery, Overall Performance: Custom, Hosts to Scan in Parallel - External Scanners: 5, Hosts to Scan in Parallel - Scanner Appliances: 3, Total Processes to Run in Parallel: 2, HTTP Processes to Run in Parallel: 2, Packet (Burst) Delay: Long, Intensity: Low]]></KEY>
+  <KEY value="STATUS">FINISHED</KEY>
+  <OPTION_PROFILE>
+    <OPTION_PROFILE_TITLE option_profile_default="0"><![CDATA[Option Profile]]></OPTION_PROFILE_TITLE>
+  </OPTION_PROFILE>
+</HEADER>
+
+<IP value="10.1.10.1" name="No registered hostname">
+  <OS><![CDATA[Linux 2.6]]></OS>
+  <VULNS>
+    <CAT value="TCP/IP">
+      <VULN number="82024" severity="2" cveid="CVE-2002-0510">
+        <TITLE><![CDATA[UDP Constant IP Identification Field Fingerprinting Vulnerability]]></TITLE>
+        <LAST_UPDATE><![CDATA[2008-05-07T18:23:49Z]]></LAST_UPDATE>
+        <CVSS_BASE>5</CVSS_BASE>
+        <CVSS_TEMPORAL>4.8</CVSS_TEMPORAL>
+        <CVSS3_BASE></CVSS3_BASE>
+        <CVSS3_TEMPORAL>-</CVSS3_TEMPORAL>
+        <PCI_FLAG>0</PCI_FLAG>
+        <CVE_ID_LIST>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2002-0510]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2002-0510]]></URL>
+          </CVE_ID>
+        </CVE_ID_LIST>
+        <BUGTRAQ_ID_LIST>
+          <BUGTRAQ_ID>
+            <ID><![CDATA[4314]]></ID>
+            <URL><![CDATA[http://www.securityfocus.com/bid/4314]]></URL>
+          </BUGTRAQ_ID>
+        </BUGTRAQ_ID_LIST>
+        <DIAGNOSIS><![CDATA[some diagnosis]]></DIAGNOSIS>
+        <CONSEQUENCE><![CDATA[Some impact]]></CONSEQUENCE>
+        <SOLUTION><![CDATA[some solution]]></SOLUTION>
+        <RESULT><![CDATA[some output]]></RESULT>
+      </VULN>
+    </CAT>
+  </VULNS>
+</IP>
+</SCAN>
+<!-- CONFIDENTIAL AND PROPRIETARY INFORMATION. Qualys provides the QualysGuard Service "As Is," without any warranty of any kind. Qualys makes no warranty that the information contained in this report is complete or error-free. Copyright 2020, Qualys, Inc. //--> 

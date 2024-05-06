@@ -1,0 +1,81 @@
+{
+	"items": [
+		{
+			"id":"0123456:id",
+			"createdOn":"2021-05-27T17:38:41.518+00:00",
+			"updatedOn":"2021-05-27T17:38:41.518+00:00",
+			"customerId":1234567,
+			"customerName":"customerName",
+			"severity":"HIGH",
+			"classification":"Vulnerability/Missing Patch",
+			"name":"Nginx ngx_http_range_parse Integer Overflow Vunlerability",
+			"assetId":"0123456:assetId",
+			"externalFindingId":"None",
+			"externalJobId":"None",
+			"trackingId":"None",
+			"location":{
+				"applicationCpe":"cpe:/a:nginx:nginx:1.20.0",
+				"applicationName":"nginx:nginx",
+				"applicationProtocol":"https",
+				"domain":"None",
+				"ip":"127.0.0.1",
+				"port":443,
+				"transportProtocol":"tcp",
+				"url":"https://google.com/"
+			},
+			"job":{
+				"id":"0123456",
+				"jobEndTime":"2021-05-27T17:41:14.428+00:00",
+				"jobName":"jobName",
+				"jobStartTime":"2021-05-27T16:39:23.037+00:00"
+			},
+			"kb":{
+				"cves":[
+					"CVE-2017-7529"
+				],
+				"cvssV2BaseScore":5.0,
+				"cvssV3BaseScore":7.5,
+				"id":"SLID-2018-0112"
+			}
+		},
+        {
+            "id":"0123456:id",
+            "createdOn":"2021-05-21T04:06:30.444+00:00",
+            "updatedOn":"2021-05-21T04:06:30.444+00:00",
+            "customerId":1234567,
+            "customerName":"customerName",
+            "severity":"MEDIUM",
+            "classification":"Cryptography/Weak Cryptography",
+            "name":"SSL RC4-based Ciphers Supported",
+            "assetId":"0123456:assetId",
+            "externalFindingId":"None",
+            "externalJobId":"None",
+            "trackingId":"None",
+            "location":{
+                "applicationCpe":"None",
+                "applicationName":"None",
+                "applicationProtocol":"https",
+                "domain":"google.com",
+                "ip":"127.0.0.1",
+                "port":443,
+                "transportProtocol":"tcp",
+                "url":"None"
+            },
+            "job":{
+                "id":"0123456",
+                "jobEndTime":"2021-05-21T04:06:44.851+00:00",
+                "jobName":"jobName",
+                "jobStartTime":"2021-05-21T03:00:14.344+00:00"
+            },
+            "kb":{
+                "cves":[
+                "CVE-2013-2566",
+                "CVE-2015-2808"
+                ],
+                "cvssV2BaseScore":4.3,
+                "cvssV3BaseScore":5.9,
+                "id":"SLID-2013-0623"
+            }
+        }
+	]
+}

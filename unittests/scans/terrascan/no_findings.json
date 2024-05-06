@@ -1,0 +1,28 @@
+{
+  "results": {
+    "scan_errors": [
+      {
+        "iac_type": "kustomize",
+        "directory": "terrascan-test",
+        "errMsg": "kustomization.y(a)ml file not found in the directory terrascan-test"
+      },
+      {
+        "iac_type": "helm",
+        "directory": "terrascan-test",
+        "errMsg": "no helm charts found in directory terrascan-test"
+      }
+    ],
+    "violations": null,
+    "skipped_violations": null,
+    "scan_summary": {
+      "file/folder": "terrascan-test",
+      "iac_type": "all",
+      "scanned_at": "2021-05-19 13:17:04.067888 +0000 UTC",
+      "policies_validated": 607,
+      "violated_policies": 0,
+      "low": 0,
+      "medium": 0,
+      "high": 0
+    }
+  }
+}

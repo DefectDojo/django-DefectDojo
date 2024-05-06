@@ -1,29 +1,59 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
-class TruffleHogJSONParser(object):
-    def __init__(self, filename, test):
+class TruffleHogParser:
+    def get_scan_types(self):
+        return ["Trufflehog Scan"]
 
+    def get_label_for_scan_types(self, scan_type):
+        return "Trufflehog Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JSON Output of Trufflehog. Supports version 2 and 3 of https://github.com/trufflesecurity/trufflehog"
+
+    def get_findings(self, filename, test):
         data = filename.read()
-        self.dupes = dict()
-        self.items = ()
+        dict_strs = data.splitlines()
+        if len(dict_strs) == 0:
+            return []
+        try:
+            json_data = json.loads(str(dict_strs[0], "utf-8"))
+        except Exception:
+            json_data = json.loads(dict_strs[0])
 
-        for line in data.splitlines():
-            json_data = self.parse_json(line)
-            file = json_data["path"]
+        if "SourceMetadata" in json_data:
+            return self.get_findings_v3(dict_strs, test)
+        elif "path" in json_data:
+            return self.get_findings_v2(dict_strs, test)
+        else:
+            return []
 
-            reason = json_data["reason"]
-            titleText = "Hard Coded " + reason + " in: " + file
+    def get_findings_v2(self, data, test):
+        dupes = {}
+        for line in data:
+            try:
+                json_data = json.loads(str(line, "utf-8"))
+            except Exception:
+                json_data = json.loads(line)
 
-            commit = json_data["commit"]
-            description = "**Commit:** " + commit.rstrip("\n") + "\n"
-            description += "**Commit Hash:** " + json_data["commitHash"] + "\n"
-            description += "**Commit Date:** " + json_data["date"] + "\n"
-            description += "**Branch:** " + json_data["branch"] + "\n"
-            description += "**Reason:** " + json_data["reason"] + "\n"
-            description += "**Path:** " + file + "\n"
+            file = json_data.get("path")
+            reason = json_data.get("reason")
+            titleText = f"Hard Coded {reason} in: {file}"
+            commit = json_data.get("commit")
+            description = "**Commit:** " + str(commit).split("\n")[0] + "\n"
+            description += (
+                "```\n" + str(commit).replace("```", "\\`\\`\\`") + "\n```\n"
+            )
+            description += (
+                "**Commit Hash:** " + json_data.get("commitHash") + "\n"
+            )
+            description += "**Commit Date:** " + json_data.get("date") + "\n"
+            description += "**Branch:** " + json_data.get("branch") + "\n"
+            description += "**Reason:** " + json_data.get("reason") + "\n"
+            description += f"**Path:** {file}" + "\n"
 
             severity = "High"
             if reason == "High Entropy":
@@ -33,47 +63,153 @@ class TruffleHogJSONParser(object):
             elif reason == "Generic Secret":
                 severity = "Medium"
 
-            strings_found = ""
-            for string in json_data["stringsFound"]:
-                strings_found += string + "\n"
-
+            strings_found = "".join(
+                string + "\n" for string in json_data.get("stringsFound")
+            )
             dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()
-            description += "\n**Strings Found:**\n" + strings_found + "\n"
+            description += (
+                "\n**Strings Found:**\n```" + strings_found + "```\n"
+            )
 
-            if dupe_key in self.dupes:
-                finding = self.dupes[dupe_key]
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
                 finding.description = finding.description + description
-                self.dupes[dupe_key] = finding
+                finding.nb_occurences += 1
+                dupes[dupe_key] = finding
             else:
-                self.dupes[dupe_key] = True
+                dupes[dupe_key] = True
 
-                finding = Finding(title=titleText,
-                                  test=test,
-                                  cwe=798,
-                                  active=False,
-                                  verified=False,
-                                  description=description,
-                                  severity=severity,
-                                  numerical_severity=Finding.get_numerical_severity(severity),
-                                  mitigation="Secrets and passwords should be stored in a secure vault and/or secure storage.",
-                                  impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
-                                  references="N/A",
-                                  file_path=file,
-                                  url='N/A',
-                                  dynamic_finding=False,
-                                  static_finding=True)
+                finding = Finding(
+                    title=titleText,
+                    test=test,
+                    cwe=798,
+                    description=description,
+                    severity=severity,
+                    mitigation="Secrets and passwords should be stored in a secure vault and/or secure storage.",
+                    impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
+                    references="N/A",
+                    file_path=file,
+                    line=0,  # setting it to a fake value to activate deduplication
+                    url="N/A",
+                    dynamic_finding=False,
+                    static_finding=True,
+                    nb_occurences=1,
+                )
 
-                self.dupes[dupe_key] = finding
+                dupes[dupe_key] = finding
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())
 
-    def parse_json(self, json_output):
-        try:
+    def get_findings_v3(self, data, test):
+        dupes = {}
+        for line in data:
             try:
-                json_data = json.loads(str(json_output, 'utf-8'))
-            except:
-                json_data = json.loads(json_output)
-        except ValueError:
-            raise Exception("Invalid format")
+                json_data = json.loads(str(line, "utf-8"))
+            except Exception:
+                json_data = json.loads(line)
 
-        return json_data
+            metadata = json_data.get("SourceMetadata", {}).get("Data", {})
+            # Get the source of the data
+            source = {}
+            source_data = {}
+            if metadata:
+                source = list(metadata.keys())[0]
+                source_data = metadata.get(source)
+
+            file = source_data.get("file", "")
+            email = source_data.get("email", "")
+            commit = source_data.get("commit", "")
+            detector_name = json_data.get("DetectorName", "")
+            date = source_data.get("timestamp", "")
+            line_number = source_data.get("line", 0)
+            repository = source_data.get("repository", "")
+            link = source_data.get("link", "")
+            redacted_info = json_data.get("Redacted", "")
+            structured_data = json_data.get("StructuredData", {})
+            extra_data = json_data.get("ExtraData", {})
+            verified = json_data.get("Verified", "")
+            raw = json_data.get("Raw", "")
+            rawV2 = json_data.get("RawV2", "")
+
+            titleText = f"Hard Coded {detector_name} secret in: {file}"
+
+            mitigation = "Secrets and passwords should be stored in a secure vault and/or secure storage."
+            if link:
+                mitigation = f"{mitigation}\nSee the commit here: {link}"
+
+            description = f"**Repository:** {repository}\n"
+            description += f"**Link:** {link}\n"
+            description += f"**Commit Hash:** {commit}\n"
+            description += f"**Commit Date:** {date}\n"
+            description += f"**Committer:** {email}\n"
+            description += f"**Reason:** {detector_name}\n"
+            description += f"**Path:** {file}\n"
+            description += f"**Contents:** {redacted_info}\n"
+
+            if structured_data:
+                description += f"**Structured Data:**\n{self.walk_dict(structured_data)}\n"
+
+            if extra_data:
+                description += (
+                    f"**Extra Data:**\n{self.walk_dict(extra_data)}\n"
+                )
+
+            severity = "Critical"
+            if not verified:
+                if (
+                    "Oauth" in detector_name
+                    or "AWS" in detector_name
+                    or "Heroku" in detector_name
+                ):
+                    severity = "Critical"
+                elif detector_name == "PrivateKey":
+                    severity = "High"
+                elif detector_name == "Generic Secret":
+                    severity = "Medium"
+
+            dupe_key = hashlib.md5(
+                (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8")
+            ).hexdigest()
+
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
+                finding.description = finding.description + description
+                finding.nb_occurences += 1
+                dupes[dupe_key] = finding
+            else:
+                dupes[dupe_key] = True
+
+                finding = Finding(
+                    title=titleText,
+                    test=test,
+                    cwe=798,
+                    description=description,
+                    severity=severity,
+                    mitigation=mitigation,
+                    impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
+                    references="N/A",
+                    file_path=file,
+                    line=line_number,  # setting it to a fake value to activate deduplication
+                    url="N/A",
+                    dynamic_finding=False,
+                    static_finding=True,
+                    nb_occurences=1
+                )
+                dupes[dupe_key] = finding
+
+        return list(dupes.values())
+
+    def walk_dict(self, obj, tab_count=1):
+        return_string = ""
+        if obj:
+            tab_string = tab_count * "\t"
+            if isinstance(obj, dict):
+                for key, value in obj.items():
+                    if isinstance(value, dict):
+                        return_string += self.walk_dict(
+                            value, tab_count=(tab_count + 1)
+                        )
+                        continue
+                    else:
+                        return_string += f"{tab_string}{key}: {value}\n"
+        return return_string

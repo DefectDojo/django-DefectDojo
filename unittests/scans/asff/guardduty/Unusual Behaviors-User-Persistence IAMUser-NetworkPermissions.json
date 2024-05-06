@@ -1,0 +1,107 @@
+[
+    {
+        "AwsAccountId": "123456789012",
+        "CreatedAt": "2020-11-11T11:47:26.511Z",
+        "Description": "APIs commonly used to change the network access permissions for security groups, routes and ACLs, was invoked by IAM principal GeneratedFindingUserName. Such activity is not typically seen from this principal.",
+        "FirstObservedAt": "2020-11-11T11:47:26.511Z",
+        "GeneratorId": "arn:aws:guardduty:eu-west-1:123456789012:detector/cab6a714deb3b739eaddacbdfd5ef2f2",
+        "Id": "arn:aws:guardduty:eu-west-1:123456789012:detector/cab6a714deb3b739eaddacbdfd5ef2f2/finding/d6badb90e557d4bd811488a53ca89895",
+        "LastObservedAt": "2020-11-28T23:11:30.811Z",
+        "ProductArn": "arn:aws:securityhub:eu-west-1::product/aws/guardduty",
+        "ProductFields": {
+            "aws/guardduty/service/action/actionType": "AWS_API_CALL",
+            "aws/guardduty/service/action/awsApiCallAction/affectedResources": "THIS_WAS_PREVIOUSLY_EMPTY_AND_WAS_ADDED_BY_NE",
+            "aws/guardduty/service/action/awsApiCallAction/api": "GeneratedFindingAPIName",
+            "aws/guardduty/service/action/awsApiCallAction/callerType": "Remote IP",
+            "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/city/cityName": "GeneratedFindingCityName",
+            "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/country/countryName": "GeneratedFindingCountryName",
+            "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/geoLocation/lat": "0",
+            "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/geoLocation/lon": "0",
+            "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/ipAddressV4": "198.51.100.0",
+            "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/organization/asn": "-1",
+            "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/organization/asnOrg": "GeneratedFindingASNOrg",
+            "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/organization/isp": "GeneratedFindingISP",
+            "aws/guardduty/service/action/awsApiCallAction/remoteIpDetails/organization/org": "GeneratedFindingORG",
+            "aws/guardduty/service/action/awsApiCallAction/serviceName": "GeneratedFindingAPIServiceName",
+            "aws/guardduty/service/additionalInfo/recentApiCalls.0_/api": "GeneratedFindingAPIName1",
+            "aws/guardduty/service/additionalInfo/recentApiCalls.0_/count": "2",
+            "aws/guardduty/service/additionalInfo/recentApiCalls.1_/api": "GeneratedFindingAPIName2",
+            "aws/guardduty/service/additionalInfo/recentApiCalls.1_/count": "2",
+            "aws/guardduty/service/additionalInfo/sample": "true",
+            "aws/guardduty/service/archived": "false",
+            "aws/guardduty/service/count": "2",
+            "aws/guardduty/service/detectorId": "cab6a714deb3b739eaddacbdfd5ef2f2",
+            "aws/guardduty/service/eventFirstSeen": "2020-11-11T11:47:26.511Z",
+            "aws/guardduty/service/eventLastSeen": "2020-11-28T23:11:30.811Z",
+            "aws/guardduty/service/resourceRole": "TARGET",
+            "aws/guardduty/service/serviceName": "guardduty",
+            "aws/securityhub/CompanyName": "Amazon",
+            "aws/securityhub/FindingId": "arn:aws:securityhub:eu-west-1::product/aws/guardduty/arn:aws:guardduty:eu-west-1:123456789012:detector/cab6a714deb3b739eaddacbdfd5ef2f2/finding/d6badb90e557d4bd811488a53ca89895",
+            "aws/securityhub/ProductName": "GuardDuty"
+        },
+        "RecordState": "ACTIVE",
+        "Resources": [
+            {
+                "Details": {
+                    "AwsEc2Instance": {
+                        "IamInstanceProfileArn": "arn:aws:iam::123456789012:example/instance/profile",
+                        "ImageId": "ami-99999999",
+                        "IpV4Addresses": [
+                            "10.0.0.1",
+                            "198.51.100.0"
+                        ],
+                        "LaunchedAt": "2016-08-02T02:05:06Z",
+                        "SubnetId": "GeneratedFindingSubnetId",
+                        "Type": "m3.xlarge",
+                        "VpcId": "GeneratedFindingVPCId"
+                    }
+                },
+                "Id": "arn:aws:ec2:eu-west-1:123456789012:instance/i-99999999",
+                "Partition": "aws",
+                "Region": "eu-west-1",
+                "Tags": {
+                    "GeneratedFindingInstaceTag1": "GeneratedFindingInstaceValue1",
+                    "GeneratedFindingInstaceTag2": "GeneratedFindingInstaceTagValue2",
+                    "GeneratedFindingInstaceTag3": "GeneratedFindingInstaceTagValue3",
+                    "GeneratedFindingInstaceTag4": "GeneratedFindingInstaceTagValue4",
+                    "GeneratedFindingInstaceTag5": "GeneratedFindingInstaceTagValue5",
+                    "GeneratedFindingInstaceTag6": "GeneratedFindingInstaceTagValue6",
+                    "GeneratedFindingInstaceTag7": "GeneratedFindingInstaceTagValue7",
+                    "GeneratedFindingInstaceTag8": "GeneratedFindingInstaceTagValue8",
+                    "GeneratedFindingInstaceTag9": "GeneratedFindingInstaceTagValue9"
+                },
+                "Type": "AwsEc2Instance"
+            },
+            {
+                "Details": {
+                    "AwsIamAccessKey": {
+                        "PrincipalId": "GeneratedFindingPrincipalId",
+                        "PrincipalName": "GeneratedFindingUserName",
+                        "PrincipalType": "IAMUser"
+                    }
+                },
+                "Id": "AWS::IAM::AccessKey:GeneratedFindingAccessKeyId",
+                "Partition": "aws",
+                "Region": "eu-west-1",
+                "Type": "AwsIamAccessKey"
+            }
+        ],
+        "SchemaVersion": "2018-10-08",
+        "Severity": {
+            "Label": "MEDIUM",
+            "Normalized": 50,
+            "Product": 5
+        },
+        "SourceUrl": "https://eu-west-1.console.aws.amazon.com/guardduty/home?region=eu-west-1#/findings?macros=current&fId=d6badb90e557d4bd811488a53ca89895",
+        "Title": "Unusual changes to network permissions by GeneratedFindingUserName.",
+        "Types": [
+            "TTPs/Persistence/Persistence:IAMUser-NetworkPermissions",
+            "Unusual Behaviors/User/Persistence:IAMUser-NetworkPermissions"
+        ],
+        "UpdatedAt": "2020-11-28T23:11:30.811Z",
+        "Workflow": {
+            "Status": "NEW"
+        },
+        "WorkflowState": "NEW"
+    }
+]

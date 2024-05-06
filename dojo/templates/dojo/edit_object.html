@@ -1,7 +1,8 @@
 {% extends "base.html" %}
-{% load static from staticfiles %}
+{% load static %}
 
 {% block content %}
+    {{ block.super }}
     <h3>Edit Tracked Files</h3>
     <form class="form-horizontal" enctype="multipart/form-data" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=tform %}
@@ -13,24 +14,5 @@
     </form>
 {% endblock %}
 {% block postscript %}
-    <script type="application/javascript">
-        $(function () {
-            $('#id_tags').chosen({
-                'placeholder_text_multiple': 'Select or add some tags...',
-                'no_results_text': "Tag not found, press TAB key to add.",
-            });
-
-            $(".search-field").find("input").on("keydown", function (evt) {
-                var stroke;
-                stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
-                if (stroke == 9) { // 9 = tab key
-                    var o = new Option($(this).val(), $(this).val(), true, true);
-			        $("#id_tags").append(o);
-                    $('#id_tags').trigger('chosen:updated');
-                    $('#id_tags').focus();
-                    return false;
-                }
-            });
-        });
-    </script>
+    {{ block.super }}
 {% endblock %}

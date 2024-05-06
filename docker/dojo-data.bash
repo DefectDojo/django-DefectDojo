@@ -1,7 +1,7 @@
 #!/bin/bash
 #Exports and loads sample data for dojo
 
-if [ $# > 1 ]
+if [ $# -gt 1 ]
 then
     if [[ "$1" = "load" ]]
     then

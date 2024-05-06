@@ -1,144 +1,118 @@
-from xml.dom import NamespaceErr
 import hashlib
-from urllib.parse import urlparse
 import re
-from defusedxml import ElementTree as ET
+
+import html2text
+from defusedxml.ElementTree import parse
+
 from dojo.models import Endpoint, Finding
 
-__author__ = 'dr3dd589'
 
+class MicrofocusWebinspectParser:
+    """Micro Focus Webinspect XML report parser"""
 
-class Severityfilter:
+    def get_scan_types(self):
+        return ["Microfocus Webinspect Scan"]
 
-    def __init__(self):
-        self.severity_mapping = {
-            '0': 'Info',
-            '1': 'Low',
-            '2': 'Medium',
-            '3': 'High',
-                                }
-        self.severity = None
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
 
-    def eval_column(self, column_value):
-        if column_value in self.severity_mapping.keys():
-            self.severity = self.severity_mapping[column_value]
-        else:
-            self.severity = 'Info'
+    def get_description_for_scan_types(self, scan_type):
+        return "Import XML report"
 
-
-class MicrofocusWebinspectXMLParser(object):
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
-        if file is None:
-            return
-
-        tree = ET.parse(file)
+    def get_findings(self, file, test):
+        tree = parse(file)
         # get root of tree.
         root = tree.getroot()
-        if 'Sessions' not in root.tag:
-            raise NamespaceErr("This doesn't seem to be a valid Webinspect xml file.")
+        if "Sessions" not in root.tag:
+            msg = "This doesn't seem to be a valid Webinspect xml file."
+            raise ValueError(msg)
 
+        dupes = {}
         for session in root:
-            url = session.find('URL').text
-            host = session.find('Host').text
-            port = session.find('Port').text
-            scheme = session.find('Scheme').text
-            issues = session.find('Issues')
-            for issue in issues.findall('Issue'):
-                title = issue.find('Name').text
-                num_severity = issue.find('Severity').text
-                severityfilter = Severityfilter()
-                severityfilter.eval_column(num_severity)
-                severity = severityfilter.severity
-                for content in issue.findall('ReportSection'):
-                    name = content.find('Name').text
-                    if 'Summary' in name:
-                        description = content.find('SectionText').text
-                    if 'Fix' in name:
-                        mitigation = content.find('SectionText').text
-                    if 'Reference' in name:
-                        reference = content.find('SectionText').text
-                Classifications = issue.find('Classifications')
-                for content in Classifications.findall('Classification'):
-                    cwe_content = content.text
-                    if 'CWE' in cwe_content:
-                        cwe = re.findall(r'\d+', content.attrib['identifier'])[0]
-                        description += "\n\n" + cwe_content + "\n"
+            url = session.find("URL").text
+            endpoint = Endpoint.from_uri(url)
+            issues = session.find("Issues")
+            for issue in issues.findall("Issue"):
+                mitigation = None
+                reference = None
+                severity = MicrofocusWebinspectParser.convert_severity(
+                    issue.find("Severity").text
+                )
+                for content in issue.findall("ReportSection"):
+                    name = content.find("Name").text
+                    if "Summary" in name:
+                        if content.find("SectionText").text:
+                            description = content.find("SectionText").text
+                    if "Fix" in name:
+                        if content.find("SectionText").text:
+                            mitigation = content.find("SectionText").text
+                    if "Reference" in name:
+                        if name and content.find("SectionText").text:
+                            reference = html2text.html2text(
+                                content.find("SectionText").text
+                            )
+                cwe = 0
+                description = ""
+                classifications = issue.find("Classifications")
+                if classifications is not None:
+                    for content in classifications.findall('Classification'):
+                        # detect CWE number
+                        # TODO support more than one CWE number
+                        if "kind" in content.attrib and "CWE" == content.attrib["kind"]:
+                            cwe = MicrofocusWebinspectParser.get_cwe(content.attrib['identifier'])
+                            description += "\n\n" + content.text + "\n"
+
+                finding = Finding(
+                    title=issue.findtext("Name"),
+                    test=test,
+                    cwe=cwe,
+                    description=description,
+                    mitigation=mitigation,
+                    severity=severity,
+                    references=reference,
+                    static_finding=False,
+                    dynamic_finding=True,
+                    nb_occurences=1,
+                )
+                if "id" in issue.attrib:
+                    finding.unique_id_from_tool = issue.attrib.get("id")
+                # manage endpoint
+                finding.unsaved_endpoints = [endpoint]
 
                 # make dupe hash key
-                dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
+                dupe_key = hashlib.sha256(
+                    f"{finding.description}|{finding.title}|{finding.severity}".encode()
+                ).hexdigest()
                 # check if dupes are present.
-                if dupe_key in self.dupes:
-                    finding = self.dupes[dupe_key]
-                    if finding.description:
-                        finding.description = finding.description
-                    self.process_endpoints(finding, host)
-                    self.dupes[dupe_key] = finding
+                if dupe_key in dupes:
+                    find = dupes[dupe_key]
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    find.nb_occurences += finding.nb_occurences
                 else:
-                    self.dupes[dupe_key] = True
+                    dupes[dupe_key] = finding
 
-                    finding = Finding(title=title,
-                                    test=test,
-                                    active=False,
-                                    verified=False,
-                                    cwe=cwe,
-                                    description=description,
-                                    severity=severity,
-                                    numerical_severity=Finding.get_numerical_severity(
-                                        severity),
-                                    mitigation=mitigation,
-                                    references=reference,
-                                    dynamic_finding=True)
+        return list(dupes.values())
 
-                    self.dupes[dupe_key] = finding
-                    self.process_endpoints(finding, host)
-
-            self.items = list(self.dupes.values())
-
-    def process_endpoints(self, finding, host):
-        protocol = "http"
-        query = ""
-        fragment = ""
-        path = ""
-        url = urlparse(host)
-
-        if url:
-            path = url.path
-            if path == host:
-                path = ""
-
-        rhost = re.search(
-            r"(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-            host)
-        try:
-            protocol = rhost.group(1)
-            host = rhost.group(4)
-        except:
-            pass
-        try:
-            dupe_endpoint = Endpoint.objects.get(protocol=protocol,
-                                                 host=host,
-                                                 query=query,
-                                                 fragment=fragment,
-                                                 path=path
-                                                 )
-        except Endpoint.DoesNotExist:
-            dupe_endpoint = None
-
-        if not dupe_endpoint:
-            endpoint = Endpoint(protocol=protocol,
-                                host=host,
-                                query=query,
-                                fragment=fragment,
-                                path=path
-                                )
+    @staticmethod
+    def convert_severity(val):
+        if val == "0":
+            return "Info"
+        elif val == "1":
+            return "Low"
+        elif val == "2":
+            return "Medium"
+        elif val == "3":
+            return "High"
+        elif val == "4":
+            return "Critical"
         else:
-            endpoint = dupe_endpoint
+            return "Info"
 
-        if not dupe_endpoint:
-            endpoints = [endpoint]
+    @staticmethod
+    def get_cwe(val):
+        # Match only the first CWE!
+        cweSearch = re.search("CWE-(\\d+)", val, re.IGNORECASE)
+        if cweSearch:
+            return int(cweSearch.group(1))
         else:
-            endpoints = [endpoint, dupe_endpoint]
-
-        finding.unsaved_endpoints = finding.unsaved_endpoints + endpoints
+            return 0

@@ -1,5 +1,5 @@
 {% extends "report_base.html" %}
-{% load static from staticfiles %}
+{% load static %}
 {% load display_tags %}
 {% load humanize %}
 {% load get_endpoint_status %}
@@ -7,16 +7,17 @@
 {% load get_notetype_availability %}
 {% load event_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="container">
-    {% if include_table_of_contents%}
-			<div class="row">
-				<div class="col-lg-12" id="toc">
-					<h3 id="table_of_contents">Table of Contents for {{ product.name }}</h3>
-				</div>
-			</div>
+        {% if include_table_of_contents%}
+            <div class="row">
+                <div class="col-lg-12" id="toc">
+                    <h3 id="table_of_contents">Table of Contents for {{ product.name }}</h3>
+                </div>
+            </div>
 
-			<div id="contents">
-		{% endif %}
+            <div id="contents">
+        {% endif %}
         {% if include_executive_summary %}
             <div class="row pretty-graphs">
                 <div class="col-lg-12">
@@ -50,7 +51,7 @@
                                     </p>
                                     <ul>
                                         {% for t in eng.test_set.all %}
-                                            <li>{{ t.test_type.name }}
+                                            <li>{{ t }}
                                                 ({{ t.environment.name|default:"unknown" }}): {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
                                         {% endfor %}
                                     </ul>
@@ -115,6 +116,12 @@
 
             </div>
         {% endif %}
+        {% if include_disclaimer%}
+            <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
+                <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
+                <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer }}</p>
+            </div>
+        {% endif %}
         <div class="row">
             <div class="col-lg-12">
                 {% if endpoints %}
@@ -128,7 +135,7 @@
                     <div class="panel panel-warning">
                         <div class="panel-heading">
                             <h4>
-                                Endpoint: {{ endpoint.host_no_port }}
+                                Endpoint: {{ endpoint }}
                             </h4>
                         </div>
                     </div>
@@ -141,7 +148,7 @@
                                         Finding {{ finding.id }}: {{ finding.title }}
                                         {% if finding.tags %}
                                             <sup>
-                                                {% for tag in finding.tags %}
+                                                {% for tag in finding.tags.all %}
                                                 {{ tag }}
                                                 {% endfor %}
                                             </sup>
@@ -153,6 +160,7 @@
                                 <table id="notes" class="table-striped table table-condensed table-hover centered">
                                     <tr>
                                         <th>Severity</th>
+                                        <th>EPSS Score / Percentile</th>
                                         <th>Status</th>
                                         {% if finding.risk_acceptance_set.all %}
                                             <th>Acceptance</th>
@@ -170,19 +178,27 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                    <span class="label severity severity-{{ finding.severity }}">
-                                        {% if finding.severity %}
-                                            {{ finding.severity }}
-                                        {% else %}
-                                            Unknown
-                                        {% endif %}
-                                    </span>
+                                            <span class="label severity severity-{{ finding.severity }}">
+                                                {% if finding.severity %}
+                                                    {{ finding.severity }}
+                                                {% else %}
+                                                    Unknown
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {{ finding.epss_score|format_epss }}
+                                            /
+                                            {{ finding.epss_percentile|format_epss }}
                                         </td>
                                         <td>{{ finding.status }}</td>
                                         {% if finding.risk_acceptance_set.all %}
                                             <td>
-                                                <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                                    View Risk Acceptance</a>
+                                                {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
+                                                {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                                    <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                                    class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
+                                                {% endfor %}
                                             </td>
                                         {% endif %}
                                         <td>{{ finding.date }}</td>
@@ -196,7 +212,7 @@
                                             <td>
                                                 <a target="_blank"
                                                    href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                                    <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                                 </a>
                                             </td>
                                         {% endif %}
@@ -208,39 +224,55 @@
 
                         {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
 
-                        <h6>CVSSv3</h6>
-                        <pre>{{ finding.cvssv3 }}</pre>
+                        {% if finding.cvssv3 %}
+                            <h6>CVSS v3</h6>
+                            <pre>{{ finding.cvssv3|markdown_render }}</pre>
+                        {% endif %}
 
                         <h6>Description</h6>
-                        <pre>{{ finding.description }}</pre>
+                        <pre>{{ finding.description|markdown_render }}</pre>
 
-                        <h6>Mitigation</h6>
-                        <pre>{{ finding.mitigation }}</pre>
-                 {% if finding.get_report_requests %}
-                        <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h5>
-                        {% for req in finding.get_report_requests %}
-                           <h6>Request {{forloop.counter}} </h6>
-                           <pre>{{ req.get_request }}</pre>
-                        {% if req.get_response %}
-                           <h6>Response {{forloop.counter}}</h6>
-                           <pre>{{ req.get_response|truncatechars_html:800 }}</pre>
+                        {% if finding.mitigation %}
+                            <h6>Mitigation</h6>
+                            <pre>{{ finding.mitigation|markdown_render }}</pre>
                         {% endif %}
-                        {% endfor %}
+
+                        {% if finding.get_report_requests %}
+                            <h5>Sample Request(s): Displaying {{finding.get_report_requests.count}} of {{finding.burprawrequestresponse_set.count}}</h5>
+                            {% for req in finding.get_report_requests %}
+                            <h6>Request {{forloop.counter}} </h6>
+                            <pre class="raw_request">{{ req.get_request }}</pre>
+                                {% if req.get_response != "" %}
+                                <h6>Response {{forloop.counter}}</h6>
+                                <pre class="raw_request">{{ req.get_response|truncatechars_html:800 }}</pre>
+                                {% endif %}
+                            {% endfor %}
                         {% endif %}
-                        <h6>Impact</h6>
-                        <pre>{{ finding.impact }}</pre>
-                        <h6>References</h6>
-                        <pre>{{ finding.references }}</pre>
+
+                        {% if finding.impact %}
+                            <h6>Impact</h6>
+                            <pre>{{ finding.impact|markdown_render }}</pre>
+                        {% endif %}
+                        
+                        {% if finding.steps_to_reproduce %}
+                            <h6>Steps to Reproduce</h6>
+                            <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+                        {% endif %}
+
+                        {% if finding.severity_justification %}
+                            <h6>Severity Justification</h6>
+                            <pre>{{ finding.severity_justification|markdown_render }}</pre>
+                        {% endif %}
+
+                        {% if finding.references %}
+                            <h6>References</h6>
+                            <pre>{{ finding.references|markdown_render }}</pre>
+                        {% endif %}
+                        
                         {% if include_finding_images %}
-                            <h6>Images</h6>
-                            {% if finding.images.all.count > 0 %}
-                                {% for pic in finding.images.all %}
-                                    <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%"></p>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-center">No images found.</p>
-                            {% endif %}
+                            {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
                         {% endif %}
+                        
                         {% if include_finding_notes %}
                             {% with notes=finding.notes.all|get_public_notes %}
                                 {% if notes.count > 0 %}
@@ -294,28 +326,24 @@
     </div> <!-- /container -->
 {% endblock %}
 {% block js %}
+    {{ block.super }}
     <!-- jQuery -->
     <script src="{{ host }}{% static "jquery/dist/jquery.js" %}"></script>
     <!-- Flot Charts JavaScript -->
     <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.js" %}"></script>
     <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
-    <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     {% if punchcard %}
         <script src="{{ host }}{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
         <script src="{{ host }}{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
         <script src="{{ host }}{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
         <script src="{{ host }}{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
     {% endif %}
+    {% block metrics %}
+        <script src="{% static "dojo/js/metrics.js" %}"></script>
+    {% endblock metrics %}
     <script type="text/javascript">
         $(function () {
-            accepted_findings();
-            open_findings();
-            closed_findings();
-            finding_age();
-        });
-
-        function accepted_findings() {
             var critical = 0;
             var high = 0;
             var medium = 0;
@@ -354,108 +382,13 @@
             var d5 = [
                 [4, info],
             ];
+            accepted_findings(d1, d2, d3, d4, d5, ticks);
 
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#accepted_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        function open_findings() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in open_findings %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -470,123 +403,28 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
+            open_findings(d1, d2, d3, d4, d5, ticks);
 
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#open_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-        function closed_findings() {
-            var critical = 0;
-            var high = 0;
-            var medium = 0;
-            var low = 0;
-            var info = 0;
-            var ticks = [
-                [0, "Critical"], [1, "High"], [2, "Medium"], [3, "Low"], [4, "Info"]
-            ];
-
+            critical = 0;
+            high = 0;
+            medium = 0;
+            low = 0;
+            info = 0;
             {% for f in closed_findings %}
                 {% if f.severity == 'Critical' %}
                     critical += 1;
@@ -601,118 +439,26 @@
                 {% endif %}
             {% endfor %}
 
-            var d1 = [
+            d1 = [
                 [0, critical],
             ];
-            var d2 = [
+            d2 = [
                 [1, high],
             ];
-            var d3 = [
+            d3 = [
                 [2, medium],
             ];
-            var d4 = [
+            d4 = [
                 [3, low],
             ];
-            var d5 = [
+            d5 = [
                 [4, info],
             ];
+            closed_findings(d1, d2, d3, d4, d5, ticks);
 
-            var data = [
-                {
-                    label: "Critical",
-                    data: d1,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 1,
-                        fillColor: "#d9534f"
-                    },
-                    color: "#d9534f"
-                },
-                {
-                    label: "High",
-                    data: d2,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 2,
-                        fillColor: "#f0ad4e"
-                    },
-                    color: "#f0ad4e"
-                },
-                {
-                    label: "Medium",
-                    data: d3,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 3,
-                        fillColor: "#f0de28"
-                    },
-                    color: "#f0de28"
-                },
-                {
-                    label: "Low",
-                    data: d4,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#337ab7"
-                    },
-                    color: "#337ab7"
-                },
-                {
-                    label: "info",
-                    data: d5,
-                    bars: {
-                        show: true,
-                        fill: true,
-                        lineWidth: 1,
-                        order: 4,
-                        fillColor: "#80699B"
-                    },
-                    color: "#80699B"
-                }
-            ];
-
-            $.plot("#closed_findings", data, {
-                series: {
-                    stack: true,
-                    bars: {
-                        show: true,
-                        barWidth: .9,
-                        'align': "center",
-                    },
-
-                },
-                grid: {
-                    hoverable: false,
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-
-                },
-                tooltip: false,
-                legend: {
-                    show: false,
-                    position: "ne"
-                },
-                xaxis: {
-                    ticks: ticks,
-                },
-
-            });
-        }
-        ;
-
-        function finding_age() {
             var data = {};
             var data_1 = []
-            var ticks = []
+            ticks = []
             {% for f in verified_findings %}
                 if (data[{{ f.age }}]) {
                     data[{{ f.age }}] += 1
@@ -729,51 +475,8 @@
                 }
                 i++;
             });
-
-
-            var dataset = [
-                {data: data_1, color: "#337ab7", fillColor: "#337ab7"}
-            ];
-
-            var options = {
-                series: {
-                    bars: {
-                        show: true,
-                        fill: true,
-                        fillColor: "#337ab7"
-                    }
-                },
-                bars: {
-                    align: "center",
-                    barWidth: 0.5
-                },
-                xaxis: {
-                    axisLabel: "Days Open",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 10,
-                    ticks: ticks,
-                },
-                yaxis: {
-                    axisLabel: "Number of Findings",
-                    axisLabelUseCanvas: true,
-                    axisLabelFontSizePixels: 12,
-                    axisLabelFontFamily: 'Verdana, Arial',
-                    axisLabelPadding: 3,
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    borderWidth: 1,
-                    borderColor: '#e7e7e7',
-                }
-            };
-
-
-            $.plot("#finding_age", dataset, options);
-        }
+            finding_age(data_1, ticks);
+        });
 
         window.onload = function () {
             var toc = "";
@@ -802,17 +505,17 @@
                         }
 
                         level = parseInt(openLevel);
-                        
+
                         var anchor = titleText.trim().replace(/ /g, "_");
 
                         if(tags)
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "<sup>" + tags + "</sup></a></li>";
                             }
 
@@ -822,11 +525,11 @@
                         else
                         {
                             if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<br><li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li><br>";
                             }
                             else {
-                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                 titleText + "</a></li>";
                             }
 
@@ -838,7 +541,7 @@
                             + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                     }
                 );
-                
+
             if (level) {
                 toc += (new Array(level + 1)).join("</ul>");
             }

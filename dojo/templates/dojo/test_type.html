@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -8,24 +10,25 @@
                     <h3 class="has-filters">
                         Test Type List
                         <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            {% if "dojo.add_test_type"|has_configuration_permission:request %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-wrench"></span>
+                                <span class="fa-solid fa-screwdriver-wrench"></span>
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_staff %}
                                     <li role="presentation">
                                         <a href="{%  url 'add_test_type' %}">
-                                            <i class="fa fa-plus"></i> New Test Type </a>
+                                            <i class="fa-solid fa-plus"></i> New Test Type </a>
                                     </li>
-                                {% endif %}
                             </ul>
+                            {% endif %}
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if test_types.form.has_changed %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=test_types.form %}
                 </div>
             </div>
@@ -38,13 +41,14 @@
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
+                            {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Test Type' 'name' 'asc' %}</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for tt in tts %}
                             <tr>
-                                {% if user.is_staff %}
+                                {% if "dojo.change_test_type"|has_configuration_permission:request %}
                                     <td><a href="{% url 'edit_test_type' tt.id %}"> {{ tt.name }} </a></td>
                                 {% else %}
                                     <td> {{ tt.name }} </a> </td>
@@ -64,6 +68,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         $(function () {
             var availableTags = [
@@ -78,10 +83,3 @@
     </script>
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
-
-
-
-
-
-
-

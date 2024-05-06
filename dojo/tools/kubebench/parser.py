@@ -1,31 +1,24 @@
 import json
+
 from dojo.models import Finding
 
 
-class KubeBenchParser(object):
+class KubeBenchParser:
+    def get_scan_types(self):
+        return ["kube-bench Scan"]
 
-    def __init__(self, json_output, test):
-        self.items = []
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
 
-        if json_output is None:
-            return
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON reports of Kubernetes CIS benchmark scans."
 
-        tree = self.parse_json(json_output)
-
-        if tree:
-            self.items = [data for data in self.get_chapters(tree, test)]
-
-    def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
+    def get_findings(self, json_output, test):
+        tree = json.load(json_output)
+        if "Controls" in tree:
+            return self.get_chapters(tree["Controls"], test)
+        else:
+            return self.get_chapters(tree, test)
 
     def get_chapters(self, tree, test):
         items = []
@@ -40,14 +33,14 @@ class KubeBenchParser(object):
 def get_tests(tree, test):
     items_from_tests = []
 
-    description = ''
-    if 'id' in tree:
-        description += tree['id'] + " "
-    if 'text' in tree:
-        description += tree['text']
-    description += '\n'
+    description = ""
+    if "id" in tree:
+        description += tree["id"] + " "
+    if "text" in tree:
+        description += tree["text"]
+    description += "\n"
 
-    for node in tree['tests']:
+    for node in tree["tests"]:
         items_from_results = get_results(node, test, description)
         items_from_tests += items_from_results
 
@@ -57,13 +50,13 @@ def get_tests(tree, test):
 def get_results(tree, test, description):
     items_from_results = []
 
-    if 'section' in tree:
-        description += tree['section'] + ' '
-    if 'desc' in tree:
-        description += tree['desc']
-    description += '\n'
+    if "section" in tree:
+        description += tree["section"] + " "
+    if "desc" in tree:
+        description += tree["desc"]
+    description += "\n"
 
-    for node in tree['results']:
+    for node in tree["results"]:
         item = get_item(node, test, description)
         if item:
             items_from_results.append(item)
@@ -72,48 +65,55 @@ def get_results(tree, test, description):
 
 
 def get_item(vuln, test, description):
+    status = vuln.get("status", None)
+    reason = vuln.get("reason", None)
 
-    if ('status' in vuln) and (vuln['status'].upper() != 'FAIL'):
+    if status is None:
         return None
 
-    if 'test_number' not in vuln:
-        return None
-
-    unique_id_from_tool = vuln['test_number']
-
-    title = ''
-    if 'test_desc' in vuln:
-        title = vuln['test_desc']
+    # kube-bench doesn't define severities. So we use the status to define the
+    # severity
+    if status.upper() == "FAIL":
+        severity = "Medium"
+    elif status.upper() == "WARN" and reason != "Test marked as a manual test":
+        severity = "Info"
     else:
-        title = 'test_desc not found'
+        return None
 
-    if 'test_number' in vuln:
-        description += vuln['test_number'] + ' '
-    if 'test_desc' in vuln:
-        description += vuln['test_desc']
-    description += '\n'
-    if 'audit' in vuln:
-        description += 'Audit: {}\n'.format(vuln['audit'])
+    test_number = vuln.get("test_number", "Test number not found")
+    test_description = vuln.get("test_desc", "Description not found")
 
-    # kube-bench doesn't define severities. Sine the findings are
-    # vulnerabilities, we set them to Medium
-    severity = 'Medium'
-    numerical_severity = Finding.get_numerical_severity(severity)
+    title = test_number + " - " + test_description
 
-    mitigation = ''
-    if 'remediation' in vuln:
-        mitigation = vuln['remediation']
+    if "test_number" in vuln:
+        description += vuln["test_number"] + " "
+    if "test_desc" in vuln:
+        description += vuln["test_desc"]
+    if "audit" in vuln:
+        description += "\n"
+        description += "Audit: {}\n".format(vuln["audit"])
+    if "reason" in vuln and vuln["reason"] != "":
+        description += "\n"
+        description += "Reason: {}\n".format(vuln["reason"])
+    if "expected_result" in vuln and vuln["expected_result"] != "":
+        description += "\n"
+        description += "Expected result: {}\n".format(vuln["expected_result"])
+    if "actual_value" in vuln and vuln["actual_value"] != "":
+        description += "\n"
+        description += "Actual value: {}\n".format(vuln["actual_value"])
 
-    finding = Finding(title=title,
-                      test=test,
-                      active=False,
-                      verified=False,
-                      description=description,
-                      severity=severity,
-                      numerical_severity=numerical_severity,
-                      mitigation=mitigation,
-                      unique_id_from_tool=unique_id_from_tool,
-                      static_finding=True,
-                      dynamic_finding=False)
+    mitigation = vuln.get("remediation", None)
+    vuln_id_from_tool = test_number
+
+    finding = Finding(
+        title=title,
+        test=test,
+        description=description,
+        severity=severity,
+        mitigation=mitigation,
+        vuln_id_from_tool=vuln_id_from_tool,
+        static_finding=True,
+        dynamic_finding=False,
+    )
 
     return finding

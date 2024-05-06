@@ -1,71 +1,102 @@
+import datetime
 import json
-import re
-from dojo.models import Finding
 
-__author__ = "Roy Shoemake"
-__status__ = "Development"
+import html2text
+from cvss import parser as cvss_parser
 
-
-# Function to remove HTML tags
-TAG_RE = re.compile(r'<[^>]+>')
+from dojo.models import Endpoint, Finding
 
 
-def cleantags(text=''):
-    prepared_text = text if text else ''
-    return TAG_RE.sub('', prepared_text)
+class NetsparkerParser:
+    def get_scan_types(self):
+        return ["Netsparker Scan"]
 
+    def get_label_for_scan_types(self, scan_type):
+        return "Netsparker Scan"
 
-class NetsparkerParser(object):
-    def __init__(self, filename, test):
+    def get_description_for_scan_types(self, scan_type):
+        return "Netsparker JSON format."
+
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
-            data = json.loads(str(tree, 'utf-8-sig'))
-        except:
+            data = json.loads(str(tree, "utf-8-sig"))
+        except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
+        if "UTC" in data["Generated"]:
+            scan_date = datetime.datetime.strptime(
+                data["Generated"].split(" ")[0], "%d/%m/%Y"
+            ).date()
+        else:
+            scan_date = datetime.datetime.strptime(
+                data["Generated"], "%d/%m/%Y %H:%M %p"
+            ).date()
 
         for item in data["Vulnerabilities"]:
-            categories = ''
-            language = ''
-            mitigation = ''
-            impact = ''
-            references = ''
-            findingdetail = ''
-            title = ''
-            group = ''
-            status = ''
-
             title = item["Name"]
-            findingdetail = cleantags(item["Description"])
-            cwe = item["Classification"]["Cwe"] if "Cwe" in item["Classification"] else None
+            findingdetail = html2text.html2text(item.get("Description", ""))
+            if "Cwe" in item["Classification"]:
+                try:
+                    cwe = int(item["Classification"]["Cwe"].split(",")[0])
+                except Exception:
+                    cwe = None
+            else:
+                cwe = None
             sev = item["Severity"]
-            if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
-                sev = 'Info'
-            mitigation = cleantags(item["RemedialProcedure"])
-            references = cleantags(item["RemedyReferences"])
+            if sev not in ["Info", "Low", "Medium", "High", "Critical"]:
+                sev = "Info"
+            mitigation = html2text.html2text(item.get("RemedialProcedure", ""))
+            references = html2text.html2text(item.get("RemedyReferences", ""))
             url = item["Url"]
-            impact = cleantags(item["Impact"])
-            dupe_key = title + item["Name"] + item["Url"]
+            impact = html2text.html2text(item.get("Impact", ""))
+            dupe_key = title
+            request = item["HttpRequest"]["Content"]
+            response = item["HttpResponse"]["Content"]
+
+            finding = Finding(
+                title=title,
+                test=test,
+                description=findingdetail,
+                severity=sev.title(),
+                mitigation=mitigation,
+                impact=impact,
+                date=scan_date,
+                references=references,
+                cwe=cwe,
+                static_finding=True,
+            )
+            state = item.get("State", None)
+            if state == "FalsePositive":
+                finding.active = False
+                finding.verified = False
+                finding.false_p = True
+                finding.mitigated = None
+                finding.is_mitigated = False
+            elif state == "AcceptedRisk":
+                finding.risk_accepted = True
+
+            if item["Classification"] is not None:
+                if item["Classification"].get("Cvss") is not None and item["Classification"].get("Cvss").get("Vector") is not None:
+                    cvss_objects = cvss_parser.parse_cvss_from_text(
+                        item["Classification"]["Cvss"]["Vector"]
+                    )
+                    if len(cvss_objects) > 0:
+                        finding.cvssv3 = cvss_objects[0].clean_vector()
+                elif item["Classification"].get("Cvss31") is not None and item["Classification"].get("Cvss31").get("Vector") is not None:
+                    cvss_objects = cvss_parser.parse_cvss_from_text(
+                        item["Classification"]["Cvss31"]["Vector"]
+                    )
+                    if len(cvss_objects) > 0:
+                        finding.cvssv3 = cvss_objects[0].clean_vector()
+            finding.unsaved_req_resp = [{"req": request, "resp": response}]
+            finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
+                find.unsaved_req_resp.extend(finding.unsaved_req_resp)
+                find.unsaved_endpoints.extend(finding.unsaved_endpoints)
             else:
-                dupes[dupe_key] = True
+                dupes[dupe_key] = finding
 
-                find = Finding(title=title,
-                               test=test,
-                               active=False,
-                               verified=False,
-                               description=findingdetail,
-                               severity=sev.title(),
-                               numerical_severity=Finding.get_numerical_severity(sev),
-                               mitigation=mitigation,
-                               impact=impact,
-                               references=references,
-                               url=url,
-                               cwe=cwe,
-                               static_finding=True)
-                dupes[dupe_key] = find
-                findingdetail = ''
-
-        self.items = list(dupes.values())
+        return list(dupes.values())

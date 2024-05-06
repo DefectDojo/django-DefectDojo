@@ -1,0 +1,712 @@
+{
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Python Security Analysis",
+          "rules": [
+            {
+              "id": "taint-xmli",
+              "help": {
+                "text": "The software does not properly neutralize special elements that are used in XML, allowing attackers to modify the syntax, content, or commands of the XML before it is processed by an end system.\nWithin XML, special elements could include reserved words or characters such as <, >, , and &, which could then be used to add new data or modify XML syntax.",
+                "markdown": "The software does not properly neutralize special elements that are used in XML, allowing attackers to modify the syntax, content, or commands of the XML before it is processed by an end system.\nWithin XML, special elements could include reserved words or characters such as <, >, , and &, which could then be used to add new data or modify XML syntax."
+              },
+              "name": "XML Injection",
+              "properties": {
+                "tags": [
+                  "Scan"
+                ],
+                "precision": "high"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "The software does not properly neutralize special elements that are used in XML, allowing attackers to modify the syntax, content, or commands of the XML before it is processed by an end system."
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/91.html",
+              "shortDescription": {
+                "text": "XML Injection (aka Blind XPath Injection)."
+              }
+            },
+            {
+              "id": "taint-basic-xss",
+              "help": {
+                "text": "The software receives input from an upstream component, but it does not neutralize or incorrectly neutralizes special characters such as <, >, and & that could be interpreted as web-scripting elements when they are sent to a downstream component that processes web pages.\nThis may allow such characters to be treated as control characters, which are executed client-side in the context of the user's session. Although this can be classified as an injection problem, the more pertinent issue is the improper conversion of such special characters to respective context-appropriate entities before displaying them to the user.",
+                "markdown": "The software receives input from an upstream component, but it does not neutralize or incorrectly neutralizes special characters such as <, >, and & that could be interpreted as web-scripting elements when they are sent to a downstream component that processes web pages.\nThis may allow such characters to be treated as control characters, which are executed client-side in the context of the user's session. Although this can be classified as an injection problem, the more pertinent issue is the improper conversion of such special characters to respective context-appropriate entities before displaying them to the user."
+              },
+              "name": "Potential XSS",
+              "properties": {
+                "tags": [
+                  "Scan"
+                ],
+                "precision": "high"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "fullDescription": {
+                "text": "The software receives input from an upstream component, but it does not neutralize or incorrectly neutralizes special characters such as <, >, and & that could be interpreted as web-scripting elements when they are sent to a downstream component that processes web pages."
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/80.html",
+              "shortDescription": {
+                "text": "Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)."
+              }
+            },
+            {
+              "id": "taint-idor",
+              "help": {
+                "text": "The system's authorization functionality does not prevent one user from gaining access to another user's data or record by modifying the key value identifying the data.\nRetrieval of a user record occurs in the system based on some key value that is under user control. The key would typically identify a user-related record stored in the system and would be used to lookup that record for presentation to the user. It is likely that an attacker would have to be an authenticated user in the system. However, the authorization process would not properly check the data access operation to ensure that the authenticated user performing the operation has sufficient entitlements to perform the requested data access, hence bypassing any other authorization checks present in the system. For example, attackers can look at places where user specific data is retrieved (e.g. search screens) and determine whether the key for the item being looked up is controllable externally. The key may be a hidden field in the HTML form field, might be passed as a URL parameter or as an unencrypted cookie variable, then in each of these cases it will be possible to tamper with the key value. One manifestation of this weakness is when a system uses sequential or otherwise easily-guessable session IDs that would allow one user to easily switch to another user's session and read/modify their data.",
+                "markdown": "The system's authorization functionality does not prevent one user from gaining access to another user's data or record by modifying the key value identifying the data.\nRetrieval of a user record occurs in the system based on some key value that is under user control. The key would typically identify a user-related record stored in the system and would be used to lookup that record for presentation to the user. It is likely that an attacker would have to be an authenticated user in the system. However, the authorization process would not properly check the data access operation to ensure that the authenticated user performing the operation has sufficient entitlements to perform the requested data access, hence bypassing any other authorization checks present in the system. For example, attackers can look at places where user specific data is retrieved (e.g. search screens) and determine whether the key for the item being looked up is controllable externally. The key may be a hidden field in the HTML form field, might be passed as a URL parameter or as an unencrypted cookie variable, then in each of these cases it will be possible to tamper with the key value. One manifestation of this weakness is when a system uses sequential or otherwise easily-guessable session IDs that would allow one user to easily switch to another user's session and read/modify their data."
+              },
+              "name": "Insecure Direct Object Reference",
+              "properties": {
+                "tags": [
+                  "Scan"
+                ],
+                "precision": "high"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "fullDescription": {
+                "text": "The system's authorization functionality does not prevent one user from gaining access to another user's data or record by modifying the key value identifying the data."
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/639.html",
+              "shortDescription": {
+                "text": "Authorization Bypass Through User-Controlled Key."
+              }
+            },
+            {
+              "id": "taint-file-write",
+              "help": {
+                "text": "The product specifies permissions for a security-critical resource in a way that allows that resource to be read or modified by unintended actors.\nWhen a resource is given a permissions setting that provides access to a wider range of actors than required, it could lead to the exposure of sensitive information, or the modification of that resource by unintended parties. This is especially dangerous when the resource is related to program configuration, execution or sensitive user data.",
+                "markdown": "The product specifies permissions for a security-critical resource in a way that allows that resource to be read or modified by unintended actors.\nWhen a resource is given a permissions setting that provides access to a wider range of actors than required, it could lead to the exposure of sensitive information, or the modification of that resource by unintended parties. This is especially dangerous when the resource is related to program configuration, execution or sensitive user data."
+              },
+              "name": "File Write",
+              "properties": {
+                "tags": [
+                  "Scan"
+                ],
+                "precision": "high"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "The product specifies permissions for a security-critical resource in a way that allows that resource to be read or modified by unintended actors."
+              },
+              "helpUri": "https://cwe.mitre.org/data/definitions/732.html",
+              "shortDescription": {
+                "text": "Incorrect Permission Assignment for Critical Resource."
+              }
+            }
+          ],
+          "version": "1.0.0-scan",
+          "fullName": "Python Security Analysis"
+        }
+      },
+      "conversion": {
+        "tool": {
+          "driver": {
+            "name": "@ShiftLeft/sast-scan"
+          }
+        },
+        "invocation": {
+          "arguments": [
+            "-j",
+            "-a",
+            "e",
+            "-o",
+            "/app/reports/taint-python-report.json"
+          ],
+          "executionSuccessful": true,
+          "commandLine": "-j -a e -o /app/reports/taint-python-report.json",
+          "endTimeUtc": "2021-03-08T15:46:16Z",
+          "workingDirectory": {
+            "uri": "file:///home/damien/dd"
+          }
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "endTimeUtc": "2021-03-08T15:46:16Z",
+          "workingDirectory": {
+            "uri": "file:///home/damien/dd"
+          }
+        }
+      ],
+      "properties": {
+        "metrics": {
+          "total": 11,
+          "critical": 1,
+          "high": 7,
+          "medium": 1,
+          "low": 2
+        }
+      },
+      "results": [
+        {
+          "message": {
+            "markdown": "",
+            "text": "XML injection with user data from `filename in parser.py:35` is used for parsing XML at `parser.py:38`."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    def get_findings(self, filename, test):\n"
+                  },
+                  "startLine": 35
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/tools/veracode/parser.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "\n    def get_findings(self, filename, test):\n        if filename is None:\n            return list()\n"
+                  },
+                  "endLine": 37,
+                  "startLine": 34
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "HIGH",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "filename",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "etree.parse(",
+              "sink_label": "~call_2 = ret_lxml.etree.parse(filename, ~call_3)",
+              "sink_type": "XMLParser"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "be794d27997ab3ce",
+            "scanTagsHash": "53dc119db6d3af07",
+            "scanFileHash": "933a05ac897cd017"
+          },
+          "ruleId": "taint-xmli",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "XML injection with user data from `filename in parser.py:31` is used for parsing XML at `parser.py:33`."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    def get_findings(self, filename, test):\n"
+                  },
+                  "startLine": 31
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/tools/sonarqube/parser.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "\n    def get_findings(self, filename, test):\n        parser = etree.HTMLParser()\n        tree = etree.parse(filename, parser)\n"
+                  },
+                  "endLine": 33,
+                  "startLine": 30
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "HIGH",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "filename",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "etree.parse(",
+              "sink_label": "~call_2 = ret_lxml.etree.parse(filename, parser)",
+              "sink_type": "XMLParser"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "be794d27997ab3ce",
+            "scanTagsHash": "f9d8e7dcbd9aa492",
+            "scanFileHash": "280ddbb9fd8aa6a6"
+          },
+          "ruleId": "taint-xmli",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "XML injection with user data from `qualys_xml_file in parser.py:169` is used for parsing XML at `parser.py:173`."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "def qualys_infrascan_parser(qualys_xml_file):\n"
+                  },
+                  "startLine": 169
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/tools/qualys_infrascan_webgui/parser.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "\ndef qualys_infrascan_parser(qualys_xml_file):\n    master_list = []\n    if qualys_xml_file is not None:\n"
+                  },
+                  "endLine": 171,
+                  "startLine": 168
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "HIGH",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "qualys_xml_file",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "etree.parse(",
+              "sink_label": "~call_2 = ret_lxml.etree.parse(qualys_xml_file, parser)",
+              "sink_type": "XMLParser"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "8e7b8553416ce569",
+            "scanTagsHash": "eabc8cc092e7d76c",
+            "scanFileHash": "738408a47833a698"
+          },
+          "ruleId": "taint-xmli",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "XML injection with user data from `file in parser.py:222` is used for parsing XML at `parser.py:173`."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    def get_findings(self, file, test):\n"
+                  },
+                  "startLine": 222
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/tools/qualys_infrascan_webgui/parser.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "\n    def get_findings(self, file, test):\n        return qualys_infrascan_parser(file)\n"
+                  },
+                  "endLine": 223,
+                  "startLine": 221
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "HIGH",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "file",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "etree.parse(",
+              "sink_label": "~call_3 = ret_lxml.etree.parse(qualys_xml_file, parser)",
+              "sink_type": "XMLParser"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "07e6f4030e8c34a8",
+            "scanTagsHash": "32758c235b9583cb",
+            "scanFileHash": "738408a47833a698"
+          },
+          "ruleId": "taint-xmli",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "XML injection with user data from `filename in parser_helper.py:16` is used for parsing XML at `parser_helper.py:23`."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "def get_root_node(filename):\n"
+                  },
+                  "startLine": 16
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/tools/acunetix/parser_helper.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "# @profile\ndef get_root_node(filename):\n    \"\"\"\n        This method returns root node.\n"
+                  },
+                  "endLine": 18,
+                  "startLine": 15
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "HIGH",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "filename",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "etree.parse(",
+              "sink_label": "~call_1 = ret_lxml.etree.parse(filename, ~call_2)",
+              "sink_type": "XMLParser"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "3abf3cb18c28698e",
+            "scanTagsHash": "9b42fa2c6f22c7e2",
+            "scanFileHash": "1a7d99b557851f8e"
+          },
+          "ruleId": "taint-xmli",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "XML injection with user data from `filename in parser_helper.py:141` is used for parsing XML at `parser_helper.py:23`."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "def get_acunetix_scan_report(filename):\n"
+                  },
+                  "startLine": 141
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/tools/acunetix/parser_helper.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "# @profile\ndef get_acunetix_scan_report(filename):\n    \"\"\"\n        creates accunetix scan report.\n"
+                  },
+                  "endLine": 143,
+                  "startLine": 140
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "HIGH",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "filename",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "etree.parse(",
+              "sink_label": "~call_2 = ret_lxml.etree.parse(filename, ~call_3)",
+              "sink_type": "XMLParser"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "b98d3327034e2f97",
+            "scanTagsHash": "53dc119db6d3af07",
+            "scanFileHash": "1a7d99b557851f8e"
+          },
+          "ruleId": "taint-xmli",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "XML injection with user data from `filename in parser_helper.py:167` is used for parsing XML at `parser_helper.py:23`."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "def get_defectdojo_findings(filename):\n"
+                  },
+                  "startLine": 167
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/tools/acunetix/parser_helper.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "# @profile\ndef get_defectdojo_findings(filename):\n    \"\"\"\n        Returns defect dojo findings.\n"
+                  },
+                  "endLine": 169,
+                  "startLine": 166
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "HIGH",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "filename",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "etree.parse(",
+              "sink_label": "~call_3 = ret_lxml.etree.parse(filename, ~call_4)",
+              "sink_type": "XMLParser"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "74aa20ab2a9cfc12",
+            "scanTagsHash": "e4c512dca8828832",
+            "scanFileHash": "1a7d99b557851f8e"
+          },
+          "ruleId": "taint-xmli",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "Possibility for Cross-site scripting (XSS) when the http data at `value in display_tags.py:72` is returned to the user via `display_tags.py:74` without sanitization."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "def markdown_render(value):\n"
+                  },
+                  "startLine": 72
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/templatetags/display_tags.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "@register.filter\ndef markdown_render(value):\n    if value:\n        markdown_text = markdown.markdown(value,\n"
+                  },
+                  "endLine": 74,
+                  "startLine": 71
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "MEDIUM",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "value",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "markdown(",
+              "sink_label": "~call_1 = ret_markdown.markdown(value, extensions=[markdown.extensions.nl2br, markdown.extensions.sane_lists, markdown.extensions.codehilite, markdown.extensions.fenced_code, markdown.extensions.toc, markdown.extensions.tables])",
+              "sink_type": "XSS"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "77fcfdcf3b94f961",
+            "scanTagsHash": "d136266a4585166e",
+            "scanFileHash": "52d2f226b66128b2"
+          },
+          "ruleId": "taint-basic-xss",
+          "ruleIndex": 1
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "The key `ttid in views.py:592` can be used to retrieve another user's data at `views.py:595`."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "def delete_cred_controller(request, destination_url, id, ttid):\n"
+                  },
+                  "startLine": 592
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/cred/views.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "\ndef delete_cred_controller(request, destination_url, id, ttid):\n    cred = None\n    try:\n"
+                  },
+                  "endLine": 594,
+                  "startLine": 591
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "ttid",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "objects.get(pk=",
+              "sink_label": "~call_1 = ret_dojo.models.Cred_Mapping.objects.get(pk=ttid)",
+              "sink_type": "PrivateRef"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "37e2c634d137ad45",
+            "scanTagsHash": "e3f3320ede2bce11",
+            "scanFileHash": "5ad26a14ee412028"
+          },
+          "ruleId": "taint-idor",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "The key `ttid in views.py:592` can be used to retrieve another user's data at `views.py:642`."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "def delete_cred_controller(request, destination_url, id, ttid):\n"
+                  },
+                  "startLine": 592
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/cred/views.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "\ndef delete_cred_controller(request, destination_url, id, ttid):\n    cred = None\n    try:\n"
+                  },
+                  "endLine": 594,
+                  "startLine": 591
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "LOW",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "ttid",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "objects.get(pk=",
+              "sink_label": "~call_11 = ret_dojo.models.Cred_User.objects.get(pk=ttid)",
+              "sink_type": "PrivateRef"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "37e2c634d137ad45",
+            "scanTagsHash": "9592351f906c3f06",
+            "scanFileHash": "5ad26a14ee412028"
+          },
+          "ruleId": "taint-idor",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "markdown": "",
+            "text": "User data from `value in forms.py:2577` is used in `forms.py:2579` for file operations."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "    def decompress(self, value):\n"
+                  },
+                  "startLine": 2577
+                },
+                "artifactLocation": {
+                  "uri": "file:///home/damien/dd/dojo/forms.py"
+                },
+                "contextRegion": {
+                  "snippet": {
+                    "text": "\n    def decompress(self, value):\n        if value:\n            return pickle.loads(value)\n"
+                  },
+                  "endLine": 2579,
+                  "startLine": 2576
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_confidence": "HIGH",
+            "issue_severity": "CRITICAL",
+            "issue_tags": {
+              "source_trigger_word": "Framework function URL parameter",
+              "source_label": "value",
+              "source_type": "Framework_Parameter",
+              "sink_trigger_word": "pickle.loads(",
+              "sink_label": "~call_1 = ret_pickle.loads(value)",
+              "sink_type": "FileSystem"
+            }
+          },
+          "baselineState": "new",
+          "partialFingerprints": {
+            "scanPrimaryLocationHash": "1a8bbb28fe7380df",
+            "scanTagsHash": "21de8f8d0eb8d9b2",
+            "scanFileHash": "4bc9f13947613303"
+          },
+          "ruleId": "taint-file-write",
+          "ruleIndex": 3
+        }
+      ],
+      "automationDetails": {
+        "description": {
+          "text": "Static Analysis Security Test results using @ShiftLeft/sast-scan"
+        },
+        "guid": "1b426ab1-dca8-43b5-b8bc-7919b90bfa4e"
+      },
+      "versionControlProvenance": [
+        {
+          "branch": "dev",
+          "repositoryUri": "https://github.com/damiencarol/django-DefectDojo",
+          "revisionId": "288c68d1ba1f35ebeff1d1bdb032186a23f0ea5b"
+        }
+      ]
+    }
+  ],
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "inlineExternalProperties": [
+    {
+      "guid": "1b426ab1-dca8-43b5-b8bc-7919b90bfa4e",
+      "runGuid": "8306105e-5fd7-487a-b20f-a867df2cc645"
+    }
+  ]
+}

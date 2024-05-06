@@ -1,4 +1,4 @@
-{% load static from staticfiles %}
+{% load static %}
 {% load display_tags %}
 {% load humanize %}
 {% load get_endpoint_status %}
@@ -20,7 +20,7 @@
         <div class="panel panel-warning">
             <div class="panel-heading">
                 <h4>
-                    Endpoint: {{ endpoint.host_no_port }} with {{ endpoint.active_findings|length|apnumber }}
+                    Endpoint: {{ endpoint }} with {{ endpoint.active_findings|length|apnumber }}
                     active findings
                 </h4>
             </div>
@@ -37,7 +37,7 @@
                             Finding {{ forloop.counter }}: {{ finding.title }}
                             {% if finding.tags %}
                                 <sup>
-                                    {% for tag in finding.tags %}
+                                    {% for tag in finding.tags.all %}
                                     {{ tag }}
                                     {% endfor %}
                                 </sup>
@@ -49,6 +49,7 @@
                     <table id="heading" class="table-striped table table-condensed table-hover centered">
                         <tr>
                             <th>Severity</th>
+                            <th>EPSS Score / Percentile</th>
                             <th>Status</th>
                             {% if finding.risk_acceptance_set.all %}
                                 <th>Acceptance</th>
@@ -75,11 +76,19 @@
                                 {% endif %}
                             </span>
                             </td>
+                            <td>
+                                {{ finding.epss_score|format_epss }}
+                                /
+                                {{ finding.epss_percentile|format_epss }}
+                            </td>
                             <td>{{ finding.status }}</td>
                             {% if finding.risk_acceptance_set.all %}
                                 <td>
-                                    <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                        View Risk Acceptance</a>
+                                    {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
+                                    {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                        <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                        class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
+                                    {% endfor %}
                                 </td>
                             {% endif %}
                             <td>{{ finding.date }}</td>
@@ -93,7 +102,7 @@
                                 <td>
                                     <a target="_blank"
                                         href="https://cwe.mitre.org/data/definitions/{{ finding.cwe }}.html">
-                                        <i class="fa fa-external-link"></i> {{ finding.cwe }}
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                     </a>
                                 </td>
                             {% endif %}
@@ -104,9 +113,9 @@
             </div>
 
             {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
-            
+
             {% if finding.cvssv3 %}
-                <h6>CVSSv3</h6>
+                <h6>CVSS v3</h6>
                 <pre>{{ finding.cvssv3|markdown_render }}</pre>
             {% endif %}
 
@@ -142,12 +151,7 @@
             <pre>{{ finding.references|markdown_render }}</pre>
             {% endif %}
             {% if include_finding_images %}
-                {% if finding.images.all.count > 0 %}
-                <h6>Images</h6>
-                    {% for pic in finding.images.all %}
-                        <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%" alt="Finding Image"></p>
-                    {% endfor %}
-                {% endif %}
+                {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
             {% endif %}
             {% if include_finding_notes %}
                 {% with notes=finding.notes.all|get_public_notes %}

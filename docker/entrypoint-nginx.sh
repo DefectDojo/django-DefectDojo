@@ -26,7 +26,8 @@ fi
 if [ "${METRICS_HTTP_AUTH_PASSWORD}" != "" ]; then
   sed -i "s/#auth_basic/auth_basic/g;" $NGINX_CONFIG
   rm -rf /etc/nginx/.htpasswd
-  echo -n $METRICS_HTTP_AUTH_USER:$(openssl passwd -apr1 $METRICS_HTTP_AUTH_PASSWORD) >> /etc/nginx/.htpasswd
+  openssl_passwd=$(openssl passwd -apr1 "$METRICS_HTTP_AUTH_PASSWORD")
+  echo "$METRICS_HTTP_AUTH_USER":"$openssl_passwd" >> /etc/nginx/.htpasswd
   echo "Basic auth is on for user ${HTTP_AUTH_LOGIN}..."
 else
   echo "Basic auth is off (HTTP_AUTH_PASSWORD not provided)"

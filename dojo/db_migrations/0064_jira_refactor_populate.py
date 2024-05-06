@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
         logger.info('done with data migration, now removing some fields which may take a while depending on the amount of findings')
 
     def show_info(apps, schema_editor):
-        logger.info('this migration should have run succesfully. if not, there is a Django Management command to manually run the data conversion')
+        logger.info('this migration should have run successfully. if not, there is a Django Management command to manually run the data conversion')
         logger.info('for docker-compose execute: docker-compose exec uwsgi ./manage.py jira_refactor_data_migration')
 
     operations = [

@@ -1,7 +1,10 @@
 {% load navigation_tags %}
-{% load static from staticfiles %}
-<table class="table table-striped table-hover centered no-bottom-margin">
-    <tr>
+{% load static %}
+<div class="clearfix">
+    {% include "dojo/paging_snippet.html" with page=finding_list prefix=prefix page_size=True %}
+</div>
+<table id="{{prefix}}_findings_table" class="table table-striped table-hover centered no-bottom-margin">
+    <thead>
         <th>Relationship</th>
         <th>Severity</th>
         <th>Title</th>
@@ -11,13 +14,15 @@
         <th>Engagement</th>
         <th>Product</th>
         <th>CWE</th>
-        <th>CVE</th>
+        <th>Vulnerability Id</th>
+        <th>EPSS Score</th>
+        <th>EPSS Percentile</th>
         <th>File</th>
         {% if system_settings.enable_jira %}
             <th>JIRA</th>
         {% endif %}
         <th>Action</th>
-    </tr>
+    </thead>
 
     {% if finding_first_related %}
         {% include "dojo/finding_related_row.html" with similar_finding=finding_first_related finding_context=finding %}

@@ -1,60 +1,65 @@
-from itertools import chain
-import random
-from django import template
-from django.contrib.contenttypes.models import ContentType
-from django.template.defaultfilters import stringfilter
-from django.utils.html import escape, conditional_escape
-from django.utils.safestring import mark_safe, SafeData
-from django.utils.text import normalize_newlines
-from django.urls import reverse
-from django.contrib.auth.models import User
-from dojo.utils import prepare_for_view, get_system_setting, get_full_url
-from dojo.user.helper import user_is_authorized
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, Product, Dojo_User
-import markdown
-from django.db.models import Sum, Case, When, IntegerField, Value
-from django.utils import timezone
-import dateutil.relativedelta
 import datetime
-from ast import literal_eval
-from urllib.parse import urlparse
-import bleach
-import git
-from django.conf import settings
-import dojo.jira_link.helper as jira_helper
 import logging
+from itertools import chain
+
+import bleach
+import dateutil.relativedelta
+import git
+import markdown
+from django import template
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Case, IntegerField, Sum, Value, When
+from django.template.defaultfilters import stringfilter
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.html import conditional_escape, escape
+from django.utils.safestring import SafeData, mark_safe
+from django.utils.text import normalize_newlines
+from django.utils.translation import gettext as _
+
+import dojo.jira_link.helper as jira_helper
+import dojo.utils
+from dojo.models import Benchmark_Product, Check_List, Dojo_User, FileAccessToken, Finding, Product, System_Settings
+from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
 
 logger = logging.getLogger(__name__)
 
 register = template.Library()
 
 # Tags suitable for rendering markdown
-markdown_tags = [
+markdown_tags = {
     "h1", "h2", "h3", "h4", "h5", "h6",
     "b", "i", "strong", "em", "tt",
     "table", "thead", "th", "tbody", "tr", "td",  # enables markdown.extensions.tables
     "p", "br",
     "pre", "div",  # used for code highlighting
-    "span", "div", "blockquote", "code", "hr", "pre",
+    "span", "blockquote", "code", "hr",
     "ul", "ol", "li", "dd", "dt",
     "img",
     "a",
     "sub", "sup",
-]
+    "center",
+}
 
 markdown_attrs = {
     "*": ["id"],
-    "img": ["src", "alt", "title"],
+    "img": ["src", "alt", "title", "width", "height", "style"],
     "a": ["href", "alt", "target", "title"],
     "span": ["class"],  # used for code highlighting
     "pre": ["class"],  # used for code highlighting
     "div": ["class"],  # used for code highlighting
 }
 
+markdown_styles = [
+    "background-color"
+]
+
 finding_related_action_classes_dict = {
-    'reset_finding_duplicate_status': 'fa fa-eraser',
-    'set_finding_as_original': 'fa fa-superpowers',
-    'mark_finding_duplicate': 'fa fa-copy'
+    'reset_finding_duplicate_status': 'fa-solid fa-eraser',
+    'set_finding_as_original': 'fa-brands fa-superpowers',
+    'mark_finding_duplicate': 'fa-solid fa-copy'
 }
 
 finding_related_action_title_dict = {
@@ -62,6 +67,12 @@ finding_related_action_title_dict = {
     'set_finding_as_original': 'Set as original',
     'mark_finding_duplicate': 'Mark as duplicate'
 }
+
+supported_file_formats = [
+    'apng', 'avif', 'gif', 'jpg',
+    'jpeg', 'jfif', 'pjpeg', 'pjp',
+    'png', 'svg', 'webp', 'pdf'
+]
 
 
 @register.filter
@@ -74,28 +85,24 @@ def markdown_render(value):
                                                       'markdown.extensions.fenced_code',
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
-        return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
+        return mark_safe(bleach.clean(markdown_text, tags=markdown_tags, attributes=markdown_attrs, css_sanitizer=markdown_styles))
 
 
-@register.filter(name='ports_open')
-def ports_open(value):
-    count = 0
-    for ipscan in value.ipscan_set.all():
-        count += len(literal_eval(ipscan.services))
-    return count
-
-
-@register.filter(name='url_shortner')
-def url_shortner(value):
+def text_shortener(value, length):
     return_value = str(value)
-    url = urlparse(return_value)
-
-    if url.path and len(url.path) != 1:
-        return_value = url.path
-    if len(return_value) > 50:
-        return_value = "..." + return_value[-47:]
-
+    if len(return_value) > length:
+        return_value = return_value[:length] + "..."
     return return_value
+
+
+@register.filter(name='url_shortener')
+def url_shortener(value):
+    return text_shortener(value, 80)
+
+
+@register.filter(name='breadcrumb_shortener')
+def breadcrumb_shortener(value):
+    return text_shortener(value, 15)
 
 
 @register.filter(name='get_pwd')
@@ -129,7 +136,7 @@ def dojo_version():
     version = __version__
     if settings.FOOTER_VERSION:
         version = settings.FOOTER_VERSION
-    return "v. {}".format(version)
+    return f"v. {version}"
 
 
 @register.simple_tag
@@ -144,7 +151,7 @@ def dojo_current_hash():
 
 @register.simple_tag
 def display_date():
-    return timezone.now().strftime("%b %d, %Y")
+    return timezone.localtime(timezone.now()).strftime("%b %d, %Y")
 
 
 @register.simple_tag
@@ -172,10 +179,10 @@ def remove_string(string, value):
     return string.replace(value, '')
 
 
-@register.filter(name='percentage')
+@register.filter
 def percentage(fraction, value):
     return_value = ''
-    if int(value) > 0 and int(fraction) > 0:
+    if int(value) > 0:
         try:
             return_value = "%.1f%%" % ((float(fraction) / float(value)) * 100)
         except ValueError:
@@ -183,50 +190,55 @@ def percentage(fraction, value):
     return return_value
 
 
+@register.filter
+def format_epss(value):
+    try:
+        return f'{value:.2%}'
+    except (ValueError, TypeError):
+        return 'N.A.'
+
+
 def asvs_calc_level(benchmark_score):
-    level = 0
-    total_pass = 0
     total = 0
+    total_pass = 0
+    total_fail = 0
+    total_wait = 0
+    total_viewed = 0
+
     if benchmark_score:
-        total = benchmark_score.asvs_level_1_benchmark + \
-                benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
-        total_pass = benchmark_score.asvs_level_1_score + \
-                     benchmark_score.asvs_level_2_score + benchmark_score.asvs_level_3_score
-
+        benchmarks = Benchmark_Product.objects.filter(product_id=benchmark_score.product_id, enabled=True,
+                                                      control__category__type=benchmark_score.benchmark_type)
         if benchmark_score.desired_level == "Level 1":
-            total = benchmark_score.asvs_level_1_benchmark
-            total_pass = benchmark_score.asvs_level_1_score
+            benchmarks = benchmarks.filter(control__level_1=True)
         elif benchmark_score.desired_level == "Level 2":
-            total = benchmark_score.asvs_level_1_benchmark + \
-                    benchmark_score.asvs_level_2_benchmark
-            total_pass = benchmark_score.asvs_level_1_score + \
-                         benchmark_score.asvs_level_2_score
+            benchmarks = benchmarks.filter(control__level_2=True)
         elif benchmark_score.desired_level == "Level 3":
-            total = benchmark_score.asvs_level_1_benchmark + \
-                    benchmark_score.asvs_level_2_benchmark + benchmark_score.asvs_level_3_benchmark
+            benchmarks = benchmarks.filter(control__level_3=True)
 
-        level = percentage(total_pass, total)
+        noted_benchmarks = benchmarks.filter(notes__isnull=False).order_by('id').distinct()
+        noted_benchmarks_ids = [b.id for b in noted_benchmarks]
 
-    return benchmark_score.desired_level, level, str(total_pass), str(total)
+        total = len(benchmarks)
+        total_pass = len([bench for bench in benchmarks if bench.pass_fail])
+        total_fail = len([bench for bench in benchmarks if not bench.pass_fail and bench.id in noted_benchmarks_ids])
+        total_wait = len(
+            [bench for bench in benchmarks if not bench.pass_fail and bench.id not in noted_benchmarks_ids])
+        total_viewed = total_pass + total_fail
+
+    return benchmark_score.desired_level, total, total_pass, total_wait, total_fail, total_viewed
 
 
-def get_level(benchmark_score):
-    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(benchmark_score)
-    level = percentage(total_pass, total)
-    return level
-
-
-@register.filter(name='asvs_level')
+@register.filter
 def asvs_level(benchmark_score):
-    benchmark_score.desired_level, level, total_pass, total = asvs_calc_level(
-        benchmark_score)
-    if level is None:
-        level = ""
-    else:
-        level = "(" + level + ")"
+    benchmark_score.desired_level, total, _total_pass, _total_wait, _total_fail, total_viewed = asvs_calc_level(benchmark_score)
 
-    return "ASVS " + str(benchmark_score.desired_level) + " " + level + " Pass: " + str(
-        total_pass) + " Total:  " + total
+    level = percentage(total_viewed, total)
+
+    return _("Checklist is %(level)s full (pass: %(total_viewed)s, total: %(total)s)") % {
+        'level': level,
+        'total_viewed': total_viewed,
+        'total': total
+    }
 
 
 @register.filter(name='version_num')
@@ -238,40 +250,18 @@ def version_num(value):
     return version
 
 
-@register.filter(name='count_findings_test_all')
-def count_findings_test_all(test):
-    open_findings = Finding.objects.filter(test=test).count()
-    return open_findings
+@register.filter(name='group_sla')
+def group_sla(group):
+    if not get_system_setting('enable_finding_sla'):
+        return ""
 
+    if not group.findings.all():
+        return ""
 
-@register.filter(name='count_findings_test_duplicate')
-def count_findings_test_duplicate(test):
-    duplicate_findings = Finding.objects.filter(test=test, duplicate=True).count()
-    return duplicate_findings
-
-
-@register.filter(name='paginator')
-def paginator(page):
-    page_value = paginator_value(page)
-    if page_value:
-        page_value = "&page=" + page_value
-    return page_value
-
-
-@register.filter(name='paginator_form')
-def paginator_form(page):
-    return paginator_value(page)
-
-
-def paginator_value(page):
-    page_value = ""
-    # isinstance(page, int):
-    try:
-        if int(page):
-            page_value = str(page)
-    except:
-        pass
-    return page_value
+    # if there is at least 1 finding, there will be date, severity etc to calculate sla
+    # Get the first finding with the highests severity
+    finding = group.findings.all().order_by('severity').first()
+    return finding_sla(finding)
 
 
 @register.filter(name='finding_sla')
@@ -282,26 +272,25 @@ def finding_sla(finding):
     title = ""
     severity = finding.severity
     find_sla = finding.sla_days_remaining()
-    sla_age = get_system_setting('sla_' + severity.lower())
+    sla_age = finding.get_sla_period()
     if finding.mitigated:
         status = "blue"
-        status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
+        status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
         if find_sla and find_sla < 0:
             status = "orange"
             find_sla = abs(find_sla)
-            status_text = 'Out of SLA: Remediatied ' + str(
-                find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
+            status_text = 'Out of SLA: Remediated ' + str(
+                find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
     else:
         status = "green"
-        status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less'
+        status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y")
         if find_sla and find_sla < 0:
             status = "red"
-            find_sla = abs(find_sla)
             status_text = 'Overdue: Remediation for ' + severity.lower() + ' findings in ' + str(
-                sla_age) + ' days or less'
+                sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y")
 
     if find_sla is not None:
-        title = '<a data-toggle="tooltip" data-placement="bottom" title="" href="#" data-original-title="' + status_text + '">' \
+        title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \
                                                                                                                            '<span class="label severity age-' + status + '">' + str(find_sla) + '</span></a>'
 
     return mark_safe(title)
@@ -337,21 +326,6 @@ def display_index(data, index):
     return data[index]
 
 
-@register.filter
-def finding_status(finding, duplicate):
-    findingFilter = None
-    if finding:
-        findingFilter = finding.filter(duplicate=duplicate)
-    return findingFilter
-
-
-@register.simple_tag
-def random_html():
-    def r(): return random.randint(0, 255)
-
-    return ('#%02X%02X%02X' % (r(), r(), r()))
-
-
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
 def action_log_entry(value, autoescape=None):
@@ -360,8 +334,7 @@ def action_log_entry(value, autoescape=None):
     text = ''
     for k in history.keys():
         text += k.capitalize() + ' changed from "' + \
-                history[k][0] + '" to "' + history[k][1] + '"'
-
+                history[k][0] + '" to "' + history[k][1] + '"\n'
     return text
 
 
@@ -371,21 +344,13 @@ def dojo_body_class(context):
     return request.COOKIES.get('dojo-sidebar', 'min')
 
 
-@register.simple_tag
-def random_value():
-    import string
-    import random
-    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
-
-
 @register.filter(name='datediff_time')
 def datediff_time(date1, date2):
     date_str = ""
     diff = dateutil.relativedelta.relativedelta(date2, date1)
     attrs = ['years', 'months', 'days']
-    human_readable = lambda delta: ['%d %s' % (getattr(delta, attr), getattr(delta, attr) > 1 and attr or attr[:-1])
-                                    for attr in attrs if getattr(delta, attr)]
-    human_date = human_readable(diff)
+    human_date = ['%d %s' % (getattr(diff, attr), getattr(diff, attr) > 1 and attr or attr[:-1])
+                                    for attr in attrs if getattr(diff, attr)]
     for date_part in human_date:
         date_str = date_str + date_part + " "
 
@@ -454,8 +419,8 @@ def colgroup(parser, token):
         _, iterable, _, num_cols, _, _, varname = token.split_contents()
         num_cols = int(num_cols)
     except ValueError:
-        raise template.TemplateSyntaxError(
-            "Invalid arguments passed to %r." % token.contents.split()[0])
+        msg = f"Invalid arguments passed to {token.contents.split()[0]!r}."
+        raise template.TemplateSyntaxError(msg)
     return Node(iterable, num_cols, varname)
 
 
@@ -463,20 +428,14 @@ def colgroup(parser, token):
 def pic_token(context, image, size):
     user_id = context['user_id']
     user = User.objects.get(id=user_id)
-    token = FindingImageAccessToken(user=user, image=image, size=size)
+    token = FileAccessToken(user=user, file=image, size=size)
     token.save()
     return reverse('download_finding_pic', args=[token.token])
 
 
-@register.simple_tag
-def severity_value(value):
-    try:
-        if get_system_setting('s_finding_severity_naming'):
-            value = Finding.get_numerical_severity(value)
-    except:
-        pass
-
-    return value
+@register.filter
+def file_images(obj):
+    return get_file_images(obj, return_objects=True)
 
 
 @register.simple_tag
@@ -513,20 +472,20 @@ def tracked_object_type(current_object):
 
 
 def icon(name, tooltip):
-    return '<i class="fa fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+    return '<i class="fa-solid fa-' + name + ' has-popover" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
 
 
 def not_specified_icon(tooltip):
-    return '<i class="fa fa-question fa-fw text-danger has-popover" aria-hidden="true" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
+    return '<i class="fa-solid fa-question fa-fw text-danger has-popover" aria-hidden="true" data-trigger="hover" data-placement="bottom" data-content="' + tooltip + '"></i>'
 
 
 def stars(filled, total, tooltip):
     code = '<i class="has-popover" data-placement="bottom" data-content="' + tooltip + '">'
     for i in range(0, total):
         if i < filled:
-            code += '<i class="fa fa-star has-popover" aria-hidden="true"></span>'
+            code += '<i class="fa-solid fa-star has-popover" aria-hidden="true"></span>'
         else:
-            code += '<i class="fa fa-star-o text-muted has-popover" aria-hidden="true"></span>'
+            code += '<i class="fa-regular fa-star text-muted has-popover" aria-hidden="true"></span>'
     code += '</i>'
     return code
 
@@ -758,17 +717,24 @@ def setting_enabled(name):
     return getattr(settings, name, False)
 
 
+# this filter checks value directly against of function in utils
+@register.filter
+def system_setting_enabled(name):
+    return getattr(dojo.utils, name)()
+
+
 @register.filter
 def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
-    if finding.risk_acceptance_set.all():
-        url = reverse('view_risk', args=(finding.test.engagement.id, finding.risk_acceptance_set.all()[0].id, ))
-        name = finding.risk_acceptance_set.all()[0].name
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(name) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
-        # print(link)
-        display_status = display_status.replace('Risk Accepted', link)
+    if 'Risk Accepted' in display_status:
+        ra = finding.risk_acceptance
+        if ra:
+            url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
+            info = ra.name_and_expiration_info
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
+            display_status = display_status.replace('Risk Accepted', link)
 
     if finding.under_review:
         url = reverse('defect_finding_review', args=(finding.id, ))
@@ -791,24 +757,6 @@ def finding_display_status(finding):
 
 
 @register.filter
-def is_authorized_for_change(user, obj):
-    # print('filter: is_authorized_for_change')
-    return user_is_authorized(user, 'change', obj)
-
-
-@register.filter
-def is_authorized_for_delete(user, obj):
-    # print('filter: is_authorized_for_delete')
-    return user_is_authorized(user, 'delete', obj)
-
-
-@register.filter
-def is_authorized_for_staff(user, obj):
-    # print('filter: is_authorized_for_staff')
-    return user_is_authorized(user, 'staff', obj)
-
-
-@register.filter
 def cwe_url(cwe):
     if not cwe:
         return ''
@@ -816,10 +764,46 @@ def cwe_url(cwe):
 
 
 @register.filter
-def cve_url(cve):
-    if not cve:
-        return ''
-    return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + str(cve)
+def has_vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return True
+    return False
+
+
+@register.filter
+def vulnerability_url(vulnerability_id):
+    if not vulnerability_id:
+        return False
+
+    for key in settings.VULNERABILITY_URLS:
+        if vulnerability_id.upper().startswith(key):
+            return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
+    return ''
+
+
+@register.filter
+def first_vulnerability_id(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids:
+        return vulnerability_ids[0]
+    else:
+        return None
+
+
+@register.filter
+def additional_vulnerability_ids(finding):
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids and len(vulnerability_ids) > 1:
+        references = []
+        for vulnerability_id in vulnerability_ids[1:]:
+            references.append(vulnerability_id)
+        return references
+    else:
+        return None
 
 
 @register.filter
@@ -831,13 +815,22 @@ def jiraencode(value):
 
 
 @register.filter
+def jiraencode_component(value):
+    if not value:
+        return value
+    # component names can be long and won't wrap causing everything to look messy
+    # add some spaces around semicolon
+    return value.replace("|", "").replace(":", " : ").replace("@", " @ ").replace("?", " ? ").replace("#", " # ")
+
+
+@register.filter
 def jira_project(obj, use_inheritance=True):
     return jira_helper.get_jira_project(obj, use_inheritance)
 
 
 @register.filter
 def jira_issue_url(obj):
-    return jira_helper.get_jira_issue_url(obj)
+    return jira_helper.get_jira_url(obj)
 
 
 @register.filter
@@ -861,13 +854,21 @@ def jira_change(obj):
 
 
 @register.filter
+def get_thumbnail(file):
+    from pathlib import Path
+    file_format = Path(file.file.url).suffix[1:]
+    return file_format in supported_file_formats
+
+
+@register.filter
 def finding_extended_title(finding):
     if not finding:
         return ''
     result = finding.title
 
-    if finding.cve:
-        result += ' (' + finding.cve + ')'
+    vulnerability_ids = finding.vulnerability_ids
+    if vulnerability_ids:
+        result += ' (' + vulnerability_ids[0] + ')'
 
     if finding.cwe:
         result += ' (CWE-' + str(finding.cwe) + ')'
@@ -891,8 +892,8 @@ def finding_related_action_title(related_action):
 
 
 @register.filter
-def product_findings(product):
-    return Finding.objects.filter(test__engagement__product=product)
+def product_findings(product, findings):
+    return findings.filter(test__engagement__product=product).order_by('numerical_severity')
 
 
 @register.filter
@@ -905,12 +906,12 @@ def jira_project_tag(product_or_engagement, autoescape=True):
     if autoescape:
         esc = conditional_escape
     else:
-        esc = lambda x: x
+        def esc(x):
+            return x
 
     jira_project = jira_helper.get_jira_project(product_or_engagement)
 
     if not jira_project:
-        logger.debug('no JIRA project!: %s', product_or_engagement)
         return ''
 
     html = """
@@ -953,3 +954,77 @@ def full_name(user):
     # not in all templates we have access to a Dojo_User instance, so we use a filter
     # see https://github.com/DefectDojo/django-DefectDojo/pull/3278
     return Dojo_User.generate_full_name(user)
+
+
+@register.filter(needs_autoescape=True)
+def import_settings_tag(test_import, autoescape=True):
+    if not test_import or not test_import.import_settings:
+        return ''
+
+    if autoescape:
+        esc = conditional_escape
+    else:
+        def esc(x):
+            return x
+
+    html = """
+
+    <i class="fa %s has-popover %s"
+        title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+        data-content="
+            <b>ID:</b> %s<br/>
+            <b>Active:</b> %s<br/>
+            <b>Verified:</b> %s<br/>
+            <b>Minimum Severity:</b> %s<br/>
+            <b>Close Old Findings:</b> %s<br/>
+            <b>Push to jira:</b> %s<br/>
+            <b>Tags:</b> %s<br/>
+            <b>Endpoints:</b> %s<br/>
+        "
+    </i>
+    """
+
+    icon = 'fa-info-circle'
+    color = ''
+
+    return mark_safe(html % (icon, color, icon,
+                                esc(test_import.id),
+                                esc(test_import.import_settings.get('active', None)),
+                                esc(test_import.import_settings.get('verified', None)),
+                                esc(test_import.import_settings.get('minimum_severity', None)),
+                                esc(test_import.import_settings.get('close_old_findings', None)),
+                                esc(test_import.import_settings.get('push_to_jira', None)),
+                                esc(test_import.import_settings.get('tags', None)),
+                                esc(test_import.import_settings.get('endpoints', test_import.import_settings.get('endpoint', None)))))
+
+
+@register.filter(needs_autoescape=True)
+def import_history(finding, autoescape=True):
+    if not finding or not settings.TRACK_IMPORT_HISTORY:
+        return ''
+
+    if autoescape:
+        conditional_escape
+    else:
+        lambda x: x
+
+    # prefetched, so no filtering here
+    status_changes = finding.test_import_finding_action_set.all()
+
+    if not status_changes or len(status_changes) < 2:
+        # assumption is that the first status_change is the initial import
+        return ''
+
+    html = """
+
+    <i class="fa-solid fa-clock-rotate-left has-popover"
+        title="<i class='fa-solid fa-clock-rotate-left'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
+        data-content="%s<br/>Currently only showing status changes made by import/reimport."
+    </i>
+    """
+
+    list_of_status_changes = ''
+    for status_change in status_changes:
+        list_of_status_changes += '<b>' + status_change.created.strftime('%b %d, %Y, %H:%M:%S') + '</b>: ' + status_change.get_action_display() + '<br/>'
+
+    return mark_safe(html % (list_of_status_changes))

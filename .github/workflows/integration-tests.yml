@@ -1,80 +1,94 @@
 name: Integration tests
-# pull requests: 
-#      run on pull_request_target instead of just pull_request as we need write access to update the status check
-# dev, master:
-#      run on every push, which is when something gets merged also
-on: 
-  pull_request_target:
-  push:
-    branches:
-      - master
-      - dev
-      - release/**
-      - hotfix/**
+
+on:
+  workflow_call:
 
 jobs:
   integration_tests:
+    # run tests with docker compose
+    name: User Interface Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-case: [
+          "tests/finding_test.py",
+          "tests/report_builder_test.py",
+          "tests/notes_test.py",
+          "tests/regulations_test.py",
+          "tests/product_type_test.py",
+          "tests/product_test.py",
+          "tests/endpoint_test.py",
+          "tests/engagement_test.py",
+          "tests/environment_test.py",
+          "tests/test_test.py",
+          "tests/user_test.py",
+          "tests/group_test.py",
+          "tests/product_group_test.py",
+          "tests/product_type_group_test.py",
+          "tests/product_member_test.py",
+          "tests/product_type_member_test.py",
+          "tests/ibm_appscan_test.py",
+          "tests/search_test.py",
+          "tests/file_test.py",
+          "tests/dedupe_test.py",
+          "tests/check_various_pages.py",
+          "tests/notifications_test.py",
+          "tests/tool_config.py",
+          "openapi-validatator",
+        ]
+        profile: ["mysql-rabbitmq", "postgres-redis"]
+        os: [alpine, debian]
+      fail-fast: false
+
     steps:
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Checkout
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
-        uses: actions/checkout@v2
-        # by default the pull_requst_target event checks out the base branch, i.e. dev
-        # so we need to explicitly checkout the head of the PR
-        # we use fetch-depth 0 to make sure the full history is checked out and we can compare against
-        # the base commit (branch) of the PR
-        # more info https://github.community/t/github-actions-are-severely-limited-on-prs/18179/16
-        # we checkout merge_commit here as this contains all new code from dev also. we don't need to compare against base_commit
-        with:
-          fetch-depth: 0
-          ref: refs/pull/${{ github.event.pull_request.number }}/merge
-          # repository: ${{github.event.pull_request.head.repo.full_name}}
+        uses: actions/checkout@v4
 
-      - name: Checkout
-        # for non PR runs we just checkout the default, which is a sha on a branch probably
-        if: github.event_name != 'pull_request' && github.event_name != 'pull_request_target'
-        uses: actions/checkout@v2
+      # load docker images from build jobs
+      - name: Load images from artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Load docker images
+        run: |-
+             docker load -i nginx/nginx-${{ matrix.os }}_img
+             docker load -i django/django-${{ matrix.os }}_img
+             docker load -i integration-tests/integration-tests-debian_img
+             docker images
 
       - name: Set integration-test mode
-        run: docker/setEnv.sh integration_tests
-      
-      # Pull the latest image to build, and avoid caching pull-only images.
-      # (docker pull is faster than caching in most cases.)
-      - run: docker-compose pull
-      # In this step, this action saves a list of existing images,
-      # the cache is created without them in the post run.
-      # It also restores the cache if it exists.
-      - uses: satackey/action-docker-layer-caching@master
-        # Ignore the failure of a step and avoid terminating the job.
-        continue-on-error: true
+        run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
-      - name: Build the stack
-        run: docker-compose build
+      # phased startup with MySQL and RabbitMQ so we can use the exit code from integrationtest container
+      - name: Start Dojo MySQL + RabbitMQ
+        if: matrix.profile == 'mysql-rabbitmq'
+        run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi rabbitmq
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
 
-      # phased startup so we can use the exit code from integrationtest container
-      - name: Stary MySQL
-        run: docker-compose up -d 
+      - name: Start Dojo PostgreSQL + Redis
+        if: matrix.profile == 'postgres-redis'
+        run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
 
       - name: Initialize
-        run: docker-compose up --exit-code-from initializer initializer
-
-      - name: Start Dojo
-        # implicity starts uwsgi and rabbitmq
-        run: docker-compose up -d nginx celerybeat celeryworker
+        run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from initializer initializer
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: ${{ matrix.os }}
 
       - name: Integration tests
-        run: docker-compose up --exit-code-from integrationtest integrationtest
+        run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from integration-tests integration-tests
+        env:
+          DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
+          INTEGRATION_TESTS_VERSION: debian
 
       - name: Logs
-        if: failure()
-        run: docker-compose logs --tail="2500" uwsgi
+        if: always()
+        run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env logs --tail="2500"
 
       - name: Shutdown
         if: always()
-        run: docker-compose down
+        run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env down

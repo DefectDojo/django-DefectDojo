@@ -1,15 +1,16 @@
 {% load navigation_tags %}
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load authorization_tags %}
+{% load static %}
 
-{% if user|is_authorized_for_change:finding %}
+{% if finding|has_object_permission:"Finding_Edit" %}
     {% comment %} {{ similar_finding.related_actions }} {% endcomment %}
     {% if similar_finding.related_actions.0.action == 'None'%}
         <span title="{{similar_finding.related_actions.0.reason}}">None</span>
     {% else %}
     <div class="dropdown">
         {{ intro }}
-        <a href="#" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
+        <a href="#" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
         <ul class="dropdown-menu dropdown-menu-right" role="menu" id="related_actions_{{similar_finding.id}}">
         {% for action in similar_finding.related_actions %}
             <li role="presentation">

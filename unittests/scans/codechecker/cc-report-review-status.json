@@ -1,0 +1,165 @@
+{
+    "version": 1,
+    "reports": [
+        {
+            "analyzer_result_file_path": "/opt/_ga/openvpn/.codechecker/push.c_clang-tidy_5fb42dafea6e0be180d0fe28ce1a41f4.plist",
+            "file": {
+                "id": "/opt/_ga/openvpn/src/openvpn/push.c",
+                "path": "/opt/_ga/openvpn/src/openvpn/push.c",
+                "original_path": "/opt/_ga/openvpn/src/openvpn/push.c"
+            },
+            "line": 576,
+            "column": 20,
+            "message": "comparison of integers of different signs: 'int' and 'unsigned long'",
+            "checker_name": "clang-diagnostic-sign-compare",
+            "severity": "MEDIUM",
+            "report_hash": "d5e8aec375bc1d89630e5e848b442109",
+            "analyzer_name": "clang-tidy",
+            "category": "clang",
+            "type": null,
+            "source_code_comments": [],
+            "review_status": "unreviewed",
+            "bug_path_events": [
+                {
+                    "file": {
+                        "id": "/opt/_ga/openvpn/src/openvpn/push.c",
+                        "path": "/opt/_ga/openvpn/src/openvpn/push.c",
+                        "original_path": "/opt/_ga/openvpn/src/openvpn/push.c"
+                    },
+                    "line": 576,
+                    "column": 20,
+                    "message": "comparison of integers of different signs: 'int' and 'unsigned long'",
+                    "range": {
+                        "start_line": 576,
+                        "start_col": 20,
+                        "end_line": 576,
+                        "end_col": 20
+                    }
+                }
+            ],
+            "bug_path_positions": [],
+            "notes": [],
+            "macro_expansions": []
+        },
+        {
+            "analyzer_result_file_path": "/opt/_ga/openvpn/.codechecker/push.c_clang-tidy_5fb42dafea6e0be180d0fe28ce1a41f4.plist",
+            "file": {
+                "id": "/opt/_ga/openvpn/src/openvpn/push.c",
+                "path": "/opt/_ga/openvpn/src/openvpn/push.c",
+                "original_path": "/opt/_ga/openvpn/src/openvpn/push.c"
+            },
+            "line": 679,
+            "column": 13,
+            "message": "comparison of integers of different signs: 'int' and 'unsigned long'",
+            "checker_name": "clang-diagnostic-sign-compare",
+            "severity": "MEDIUM",
+            "report_hash": "b5dd5b1079dfaefb3893465ef56d58f2",
+            "analyzer_name": "clang-tidy",
+            "category": "clang",
+            "type": null,
+            "source_code_comments": [],
+            "review_status": "confirmed",
+            "bug_path_events": [
+                {
+                    "file": {
+                        "id": "/opt/_ga/openvpn/src/openvpn/push.c",
+                        "path": "/opt/_ga/openvpn/src/openvpn/push.c",
+                        "original_path": "/opt/_ga/openvpn/src/openvpn/push.c"
+                    },
+                    "line": 679,
+                    "column": 13,
+                    "message": "comparison of integers of different signs: 'int' and 'unsigned long'",
+                    "range": {
+                        "start_line": 679,
+                        "start_col": 13,
+                        "end_line": 679,
+                        "end_col": 13
+                    }
+                }
+            ],
+            "bug_path_positions": [],
+            "notes": [],
+            "macro_expansions": []
+        },
+        {
+            "analyzer_result_file_path": "/opt/_ga/openvpn/.codechecker/vlan.c_clang-tidy_716d1455021645c9134d79fcb2b9da6f.plist",
+            "file": {
+                "id": "/opt/_ga/openvpn/src/openvpn/multi.h",
+                "path": "/opt/_ga/openvpn/src/openvpn/multi.h",
+                "original_path": "/opt/_ga/openvpn/src/openvpn/multi.h"
+            },
+            "line": 402,
+            "column": 52,
+            "message": "comparison of integers of different signs: 'unsigned int' and 'const int'",
+            "checker_name": "clang-diagnostic-sign-compare",
+            "severity": "MEDIUM",
+            "report_hash": "7d783dcf75b8fad6597fe70e3a900b9c",
+            "analyzer_name": "clang-tidy",
+            "category": "clang",
+            "type": null,
+            "source_code_comments": [],
+            "review_status": "false_positive",
+            "bug_path_events": [
+                {
+                    "file": {
+                        "id": "/opt/_ga/openvpn/src/openvpn/multi.h",
+                        "path": "/opt/_ga/openvpn/src/openvpn/multi.h",
+                        "original_path": "/opt/_ga/openvpn/src/openvpn/multi.h"
+                    },
+                    "line": 402,
+                    "column": 52,
+                    "message": "comparison of integers of different signs: 'unsigned int' and 'const int'",
+                    "range": {
+                        "start_line": 402,
+                        "start_col": 52,
+                        "end_line": 402,
+                        "end_col": 52
+                    }
+                }
+            ],
+            "bug_path_positions": [],
+            "notes": [],
+            "macro_expansions": []
+        },
+        {
+            "analyzer_result_file_path": "/opt/_ga/openvpn/.codechecker/vlan.c_clang-tidy_716d1455021645c9134d79fcb2b9da6f.plist",
+            "file": {
+                "id": "/opt/_ga/openvpn/src/openvpn/vlan.c",
+                "path": "/opt/_ga/openvpn/src/openvpn/vlan.c",
+                "original_path": "/opt/_ga/openvpn/src/openvpn/vlan.c"
+            },
+            "line": 91,
+            "column": 19,
+            "message": "comparison of integers of different signs: 'int' and 'unsigned long'",
+            "checker_name": "clang-diagnostic-sign-compare",
+            "severity": "MEDIUM",
+            "report_hash": "a368fa650a319c07bc041d0de26bb973",
+            "analyzer_name": "clang-tidy",
+            "category": "clang",
+            "type": null,
+            "source_code_comments": [],
+            "review_status": "intentional",
+            "bug_path_events": [
+                {
+                    "file": {
+                        "id": "/opt/_ga/openvpn/src/openvpn/vlan.c",
+                        "path": "/opt/_ga/openvpn/src/openvpn/vlan.c",
+                        "original_path": "/opt/_ga/openvpn/src/openvpn/vlan.c"
+                    },
+                    "line": 91,
+                    "column": 19,
+                    "message": "comparison of integers of different signs: 'int' and 'unsigned long'",
+                    "range": {
+                        "start_line": 91,
+                        "start_col": 19,
+                        "end_line": 91,
+                        "end_col": 19
+                    }
+                }
+            ],
+            "bug_path_positions": [],
+            "notes": [],
+            "macro_expansions": []
+        }
+    ]
+}

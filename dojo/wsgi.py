@@ -13,9 +13,13 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
+import logging
 import os
 import socket
-from socket import error as socket_error
+
+from django.core.wsgi import get_wsgi_application
+
+logger = logging.getLogger(__name__)
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
@@ -23,34 +27,38 @@ from socket import error as socket_error
 # os.environ["DJANGO_SETTINGS_MODULE"] = "dojo.settings"
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 
+
+# Shouldn't apply to docker-compose dev mode (1 process, 1 thread), but may be needed when enabling debugging in other contexts
+def is_debugger_listening(port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    return s.connect_ex(('127.0.0.1', port))
+
+
+debugpy_port = os.environ.get("DD_DEBUG_PORT") if os.environ.get("DD_DEBUG_PORT") else 3000
+
+# Checking for RUN_MAIN for those that want to run the app locally with the python interpreter instead of uwsgi
+if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_debugger_listening(debugpy_port) != 0:
+    logger.info(f"DD_DEBUG is set to True, setting remote debugging on port {debugpy_port}")
+    try:
+        import debugpy
+
+        # Required, otherwise debugpy will try to use the uwsgi binary as the python interpreter - https://github.com/microsoft/debugpy/issues/262
+        debugpy.configure({
+                            "python": "python",
+                            "subProcess": True
+                        })
+        debugpy.listen(("0.0.0.0", debugpy_port))
+        if os.environ.get("DD_DEBUG_WAIT_FOR_CLIENT") == "True":
+            logger.info(f"Waiting for the debugging client to connect on port {debugpy_port}")
+            debugpy.wait_for_client()
+            print("Debugging client connected, resuming execution")
+    except RuntimeError as e:
+        if str(e) != "Can't listen for client connections: [Errno 98] Address already in use":
+            logger.exception(e)
+    except Exception as e:
+        logger.exception(e)
+
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
-from django.core.wsgi import get_wsgi_application
-
 application = get_wsgi_application()
-
-# Apply WSGI middleware here.
-# from helloworld.wsgi import HelloWorldApplication
-# application = HelloWorldApplication(application)
-
-
-def _check_ptvsd_port_not_in_use(port):
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind(('127.0.0.1', port))
-    except socket_error as se:
-        return False
-
-    return True
-
-
-ptvsd_port = 3000
-if os.environ.get("DD_DEBUG") == "True" and _check_ptvsd_port_not_in_use(ptvsd_port):
-    try:
-        # enable remote debugging
-        import ptvsd
-        ptvsd.enable_attach(address=('0.0.0.0', ptvsd_port))
-        print("ptvsd listening on port " + ptvsd_port)
-    except Exception as e:
-        print("Generic exception caught with DD_DEBUG on. Passing.")

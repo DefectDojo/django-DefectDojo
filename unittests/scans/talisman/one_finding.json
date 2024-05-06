@@ -1,0 +1,28 @@
+{
+    "summary": {
+        "types": {
+            "filecontent": 0,
+            "filesize": 0,
+            "filename": 1,
+            "warnings": 0,
+            "ignores": 0
+        }
+    },
+    "results": [
+        {
+            "filename": "password.html",
+            "failure_list": [
+                {
+                    "type": "filename",
+                    "message": "The file name \"password.html\" failed checks against the pattern password",
+                    "commits": [
+                        "0ab760b933186f5490c5699fb5ec777d4b6a5bc4"
+                    ],
+                    "severity": "low"
+                }
+            ],
+            "warning_list": [],
+            "ignore_list": []
+        }
+    ]
+}

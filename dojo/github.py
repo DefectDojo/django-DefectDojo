@@ -2,12 +2,13 @@
 import logging
 import sys
 
+from django.template.loader import render_to_string
+
 # External libs
 from github import Github
 
 # Dojo related imports
-from dojo.models import Engagement, Product, GITHUB_PKey, GITHUB_Issue
-from django.template.loader import render_to_string
+from dojo.models import Engagement, GITHUB_Issue, GITHUB_PKey, Product
 
 # Create global
 logger = logging.getLogger(__name__)
@@ -145,7 +146,7 @@ def add_external_issue_github(find, prod, eng):
 
 
 def github_body(find):
-    template = 'issue-trackers/github-body.tpl'
+    template = 'issue-trackers/jira_full/jira-description.tpl'
     kwargs = {}
     kwargs['finding'] = find
     return render_to_string(template, kwargs)

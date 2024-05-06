@@ -1,15 +1,14 @@
 # #  product
 import logging
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.urls import reverse
 from django.shortcuts import render
-from dojo.models import System_Settings, enable_disable_auditlog
-from dojo.utils import (add_breadcrumb,
-                        get_celery_worker_status)
+
 from dojo.forms import SystemSettingsForm
-from django.conf import settings
-from django.http import HttpResponseRedirect
+from dojo.models import System_Settings
+from dojo.utils import add_breadcrumb, get_celery_worker_status
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +42,7 @@ def system_settings(request):
         except:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'Unable to authenticate. Please check the URL, username, and password.',
+                                 'Unable to authenticate to JIRA. Please check the URL, username, and password.',
                                  extra_tags='alert-danger')
 
     """
@@ -51,13 +50,35 @@ def system_settings(request):
     if request.method == 'POST':
         form = SystemSettingsForm(request.POST, instance=system_settings_obj)
         if form.is_valid():
-            new_settings = form.save()
-            enable_disable_auditlog(enable=new_settings.enable_auditlog)
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Settings saved.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('system_settings', ))
+            if (form.cleaned_data['default_group'] is None and form.cleaned_data['default_group_role'] is not None) or \
+               (form.cleaned_data['default_group'] is not None and form.cleaned_data['default_group_role'] is None):
+                messages.add_message(request,
+                    messages.WARNING,
+                    'Settings cannot be saved: Default group and Default group role must either both be set or both be empty.',
+                    extra_tags='alert-warning')
+            elif form.cleaned_data['minimum_password_length'] >= form.cleaned_data['maximum_password_length']:
+                messages.add_message(request,
+                    messages.WARNING,
+                    'Settings cannot be saved: Minimum required password length must be less than maximum required password length.',
+                    extra_tags='alert-warning')
+            elif form.cleaned_data['enable_deduplication'] is True and form.cleaned_data['false_positive_history'] is True:
+                messages.add_message(request,
+                    messages.WARNING,
+                    'Settings cannot be saved: Deduplicate findings and False positive history can not be set at the same time.',
+                    extra_tags='alert-warning')
+            elif form.cleaned_data['retroactive_false_positive_history'] is True and form.cleaned_data['false_positive_history'] is False:
+                messages.add_message(request,
+                    messages.WARNING,
+                    'Settings cannot be saved: Retroactive false positive history can not be set without False positive history.',
+                    extra_tags='alert-warning')
+            else:
+                form.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Settings saved.',
+                                    extra_tags='alert-success')
+        return render(request, 'dojo/system_settings.html', {'form': form})
+
     else:
         # Celery needs to be set with the setting: CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
         if hasattr(settings, 'CELERY_RESULT_BACKEND'):

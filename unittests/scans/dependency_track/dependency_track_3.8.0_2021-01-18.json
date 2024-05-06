@@ -1,0 +1,224 @@
+{
+   "meta":{
+      "application":"Dependency-Track",
+      "version":"3.8.0",
+      "timestamp":"2021-01-18T15:08:59Z"
+   },
+   "findings":[
+      {
+         "component":{
+            "name":"jquery-ui",
+            "purl":"pkg:maven/org.webjars/jquery-ui@1.11.4?type=jar",
+            "uuid":"28902b39-d4cc-4072-b752-3614cf421867",
+            "version":"1.11.4",
+            "group":"org.webjars"
+         },
+         "vulnerability":{
+            "severity":"MEDIUM",
+            "severityRank":2,
+            "cweName":"Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "vulnId":"CVE-2016-7103",
+            "cweId":79,
+            "description":"Cross-site scripting (XSS) vulnerability in jQuery UI before 1.12.0 might allow remote attackers to inject arbitrary web script or HTML via the closeText parameter of the dialog function.",
+            "source":"NVD",
+            "uuid":"9e5b0aff-f4d8-4a7a-88a8-20326d5cfbe0"
+         },
+         "analysis":{
+            "isSuppressed":false
+         },
+         "matrix":"cb028f91-4e76-417f-9659-f98bbdab46f1:28902b39-d4cc-4072-b752-3614cf421867:9e5b0aff-f4d8-4a7a-88a8-20326d5cfbe0"
+      },
+      {
+         "component":{
+            "name":"bootstrap",
+            "purl":"pkg:maven/org.webjars/bootstrap@3.3.6?type=jar",
+            "uuid":"856773f1-67e4-4e3b-b07b-c60bf8a4f364",
+            "version":"3.3.6",
+            "group":"org.webjars"
+         },
+         "vulnerability":{
+            "severity":"MEDIUM",
+            "severityRank":2,
+            "cweName":"Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "vulnId":"3e831af5-428b-4712-874f-8f6ff932e2b2",
+            "cweId":79,
+            "description":"The software does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users.",
+            "source":"OSSINDEX",
+            "title":"CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "uuid":"d16f59db-6cff-43fa-9941-72fe4e1c820d"
+         },
+         "analysis":{
+            "isSuppressed":false
+         },
+         "matrix":"cb028f91-4e76-417f-9659-f98bbdab46f1:856773f1-67e4-4e3b-b07b-c60bf8a4f364:d16f59db-6cff-43fa-9941-72fe4e1c820d"
+      },
+      {
+         "component":{
+            "name":"bootstrap",
+            "purl":"pkg:maven/org.webjars/bootstrap@3.3.6?type=jar",
+            "uuid":"856773f1-67e4-4e3b-b07b-c60bf8a4f364",
+            "version":"3.3.6",
+            "group":"org.webjars"
+         },
+         "vulnerability":{
+            "severity":"MEDIUM",
+            "severityRank":2,
+            "cweName":"Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "vulnId":"CVE-2016-10735",
+            "cweId":79,
+            "description":"In Bootstrap 3.x before 3.4.0 and 4.x-beta before 4.0.0-beta.2, XSS is possible in the data-target attribute, a different vulnerability than CVE-2018-14041.",
+            "source":"NVD",
+            "uuid":"02ac4593-9aee-407d-9e2b-81d08cdf8603"
+         },
+         "analysis":{
+            "isSuppressed":false
+         },
+         "matrix":"cb028f91-4e76-417f-9659-f98bbdab46f1:856773f1-67e4-4e3b-b07b-c60bf8a4f364:02ac4593-9aee-407d-9e2b-81d08cdf8603"
+      },
+      {
+         "component":{
+            "name":"bootstrap",
+            "purl":"pkg:maven/org.webjars/bootstrap@3.3.6?type=jar",
+            "uuid":"856773f1-67e4-4e3b-b07b-c60bf8a4f364",
+            "version":"3.3.6",
+            "group":"org.webjars"
+         },
+         "vulnerability":{
+            "severity":"MEDIUM",
+            "severityRank":2,
+            "cweName":"Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "vulnId":"CVE-2018-14040",
+            "cweId":79,
+            "description":"In Bootstrap before 4.1.2, XSS is possible in the collapse data-parent attribute.",
+            "source":"NVD",
+            "uuid":"e26f418a-3833-4ded-9e57-6eb0bf86087e"
+         },
+         "analysis":{
+            "isSuppressed":false
+         },
+         "matrix":"cb028f91-4e76-417f-9659-f98bbdab46f1:856773f1-67e4-4e3b-b07b-c60bf8a4f364:e26f418a-3833-4ded-9e57-6eb0bf86087e"
+      },
+      {
+         "component":{
+            "name":"bootstrap",
+            "purl":"pkg:maven/org.webjars/bootstrap@3.3.6?type=jar",
+            "uuid":"856773f1-67e4-4e3b-b07b-c60bf8a4f364",
+            "version":"3.3.6",
+            "group":"org.webjars"
+         },
+         "vulnerability":{
+            "severity":"MEDIUM",
+            "severityRank":2,
+            "cweName":"Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "vulnId":"6dd9e321-93cd-4d79-b33a-ff7e01b15ad9",
+            "cweId":79,
+            "description":"The software does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users.",
+            "source":"OSSINDEX",
+            "title":"CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "uuid":"e7a95d30-9e5e-49cb-b175-7da2c4a3e42a"
+         },
+         "analysis":{
+            "isSuppressed":false
+         },
+         "matrix":"cb028f91-4e76-417f-9659-f98bbdab46f1:856773f1-67e4-4e3b-b07b-c60bf8a4f364:e7a95d30-9e5e-49cb-b175-7da2c4a3e42a"
+      },
+      {
+         "component":{
+            "name":"bootstrap",
+            "purl":"pkg:maven/org.webjars/bootstrap@3.3.6?type=jar",
+            "uuid":"856773f1-67e4-4e3b-b07b-c60bf8a4f364",
+            "version":"3.3.6",
+            "group":"org.webjars"
+         },
+         "vulnerability":{
+            "severity":"MEDIUM",
+            "severityRank":2,
+            "cweName":"Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "vulnId":"CVE-2018-20676",
+            "cweId":79,
+            "description":"In Bootstrap before 3.4.0, XSS is possible in the tooltip data-viewport attribute.",
+            "source":"NVD",
+            "uuid":"eb039a1b-443c-4e6a-8385-2063d7c93c49"
+         },
+         "analysis":{
+            "isSuppressed":false
+         },
+         "matrix":"cb028f91-4e76-417f-9659-f98bbdab46f1:856773f1-67e4-4e3b-b07b-c60bf8a4f364:eb039a1b-443c-4e6a-8385-2063d7c93c49"
+      },
+      {
+         "component":{
+            "name":"bootstrap",
+            "purl":"pkg:maven/org.webjars/bootstrap@3.3.6?type=jar",
+            "uuid":"856773f1-67e4-4e3b-b07b-c60bf8a4f364",
+            "version":"3.3.6",
+            "group":"org.webjars"
+         },
+         "vulnerability":{
+            "severity":"MEDIUM",
+            "severityRank":2,
+            "cweName":"Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "vulnId":"CVE-2018-14042",
+            "cweId":79,
+            "description":"In Bootstrap before 4.1.2, XSS is possible in the data-container property of tooltip.",
+            "source":"NVD",
+            "uuid":"e11b6826-784a-430b-8aa0-3e165eaaa03e"
+         },
+         "analysis":{
+            "isSuppressed":false
+         },
+         "matrix":"cb028f91-4e76-417f-9659-f98bbdab46f1:856773f1-67e4-4e3b-b07b-c60bf8a4f364:e11b6826-784a-430b-8aa0-3e165eaaa03e"
+      },
+      {
+         "component":{
+            "name":"bootstrap",
+            "purl":"pkg:maven/org.webjars/bootstrap@3.3.6?type=jar",
+            "uuid":"856773f1-67e4-4e3b-b07b-c60bf8a4f364",
+            "version":"3.3.6",
+            "group":"org.webjars"
+         },
+         "vulnerability":{
+            "severity":"MEDIUM",
+            "severityRank":2,
+            "cweName":"Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "vulnId":"CVE-2019-8331",
+            "cweId":79,
+            "description":"In Bootstrap before 3.4.1 and 4.3.x before 4.3.1, XSS is possible in the tooltip or popover data-template attribute.",
+            "source":"NVD",
+            "uuid":"d10dbcd5-2776-46ac-b7db-e3ce25c22bd7"
+         },
+         "analysis":{
+            "isSuppressed":false
+         },
+         "matrix":"cb028f91-4e76-417f-9659-f98bbdab46f1:856773f1-67e4-4e3b-b07b-c60bf8a4f364:d10dbcd5-2776-46ac-b7db-e3ce25c22bd7"
+      },
+      {
+         "component":{
+            "name":"bootstrap",
+            "purl":"pkg:maven/org.webjars/bootstrap@3.3.6?type=jar",
+            "uuid":"856773f1-67e4-4e3b-b07b-c60bf8a4f364",
+            "version":"3.3.6",
+            "group":"org.webjars"
+         },
+         "vulnerability":{
+            "severity":"MEDIUM",
+            "severityRank":2,
+            "cweName":"Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+            "vulnId":"CVE-2018-20677",
+            "cweId":79,
+            "description":"In Bootstrap before 3.4.0, XSS is possible in the affix configuration target property.",
+            "source":"NVD",
+            "uuid":"3715d188-7fe1-49fd-99df-9f8b8204b18a"
+         },
+         "analysis":{
+            "isSuppressed":false
+         },
+         "matrix":"cb028f91-4e76-417f-9659-f98bbdab46f1:856773f1-67e4-4e3b-b07b-c60bf8a4f364:3715d188-7fe1-49fd-99df-9f8b8204b18a"
+      }
+   ],
+   "project":{
+      "name":"project",
+      "uuid":"cb028f91-4e76-417f-9659-f98bbdab46f1",
+      "version":"CI"
+   },
+   "version":"1.0"
+}

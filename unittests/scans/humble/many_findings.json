@@ -1,0 +1,54 @@
+{
+    "[0. Info]": {
+        "Date": "2023/11/13 - 09:20:17",
+        "URL": "https://asdf.asf.hs"
+    },
+    "[HTTP Response Headers]": {
+        "Cache-Control": "no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "Connection": "Keep-Alive",
+        "Content-Security-Policy": "script-src 'self';",
+        "Content-Type": "text/html; charset=utf-8",
+        "Date": "Mon, 13 Nov 2023 08:20:19 GMT",
+        "Expires": "Wed, 17 Aug 2005 00:00:00 GMT",
+        "Keep-Alive": "timeout=5, max=100",
+        "Last-Modified": "Mon, 13 Nov 2023 08:20:19 GMT",
+        "Permissions-Policy": "interest-cohort=()",
+        "Pragma": "no-cache",
+        "Referrer-Policy": "strict-origin",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomain$",
+        "Transfer-Encoding": "chunked",
+        "Vary": "Accept-Encoding",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "sameorigin",
+        "X-XSS-Protection": "1; mode=block"
+    },
+    "[1. Missing HTTP Security Headers]": [
+        "Clear-Site-Data",
+        "Cross-Origin-Embedder-Policy",
+        "Cross-Origin-Opener-Policy",
+        "Cross-Origin-Resource-Policy",
+        "NEL",
+        "X-Permitted-Cross-Domain-Policies"
+    ],
+    "[2. Fingerprint HTTP Response Headers]": [
+        "Nothing to report, all seems OK!"
+    ],
+    "[3. Deprecated HTTP Response Headers/Protocols and Insecure Values]": [
+        "Pragma (Deprecated Header)",
+        "Strict-Transport-Security (Recommended Values)",
+        "X-XSS-Protection (Unsafe Value)"
+    ],
+    "[4. Empty HTTP Response Headers Values]": [
+        "Nothing to report, all seems OK!"
+    ],
+    "[5. Browser Compatibility for Enabled HTTP Security Headers]": {
+        "Cache-Control": "https://caniuse.com/?search=Cache-Control",
+        "Content-Type": "https://caniuse.com/?search=Content-Type",
+        "Content-Security-Policy": "https://caniuse.com/?search=contentsecuritypolicy2",
+        "Permissions-Policy": "https://caniuse.com/?search=Permissions-Policy",
+        "Referrer-Policy": "https://caniuse.com/?search=Referrer-Policy",
+        "Strict-Transport-Security": "https://caniuse.com/?search=Strict-Transport-Security",
+        "X-Content-Type-Options": "https://caniuse.com/?search=X-Content-Type-Options",
+        "X-Frame-Options": "https://caniuse.com/?search=X-Frame-Options"
+    }
+}

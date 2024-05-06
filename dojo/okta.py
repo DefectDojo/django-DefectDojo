@@ -4,15 +4,15 @@ Taken from Pull Request #333 of
 python-social-auth/socail-core
 
 """
-from six.moves.urllib.parse import urljoin
 from jose import jwt
-from jose.jwt import JWTError, ExpiredSignatureError
-from social_core.utils import append_slash
+from jose.jwt import ExpiredSignatureError, JWTError
+from six.moves.urllib.parse import urljoin
 from social_core.backends.oauth import BaseOAuth2
 from social_core.backends.open_id_connect import OpenIdConnectAuth
+from social_core.utils import append_slash
 
 
-class OktaMixin(object):
+class OktaMixin:
     def api_url(self):
         return append_slash(self.setting('API_URL'))
 
@@ -57,7 +57,7 @@ class OktaOAuth2(OktaMixin, BaseOAuth2):
         return self.get_json(
             self._url('v1/userinfo'),
             headers={
-                'Authorization': 'Bearer %s' % access_token,
+                'Authorization': f'Bearer {access_token}',
             }
         )
 
@@ -73,7 +73,7 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
         """
         Validates the id_token using Okta.
         """
-        client_id, client_secret = self.get_key_and_secret()
+        client_id, _client_secret = self.get_key_and_secret()
         claims = None
         k = None
 
@@ -85,7 +85,7 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
             except ExpiredSignatureError:
                 k = key
                 break
-            except JWTError as e:
+            except JWTError:
                 if k is None and client_id == 'a-key':
                     k = self.get_jwks_keys()[0]
                 pass

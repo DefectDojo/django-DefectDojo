@@ -1,0 +1,92 @@
+[
+  {
+    "stringsFound": [
+      "password: jeans"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "password",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "Issue Description"
+  },
+  {
+    "stringsFound": [
+      "pw: freitag"
+    ],
+    "issue_id": "TEST-235",
+    "reason": "pw",
+    "url": "https://jira.com/browse/TEST-234",
+    "location": "comment by \"Erika Mustermann\" on \"2021-12-14T11:30:08.000+0100\""
+  },
+  {
+    "stringsFound": [
+      "Password: 1289sf"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "Password",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "Issue Description"
+  },
+  {
+    "stringsFound": [
+      "AKIA1234567891234567"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "Azure Access Key ID",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "Issue Description"
+  },
+  {
+    "stringsFound": [
+      "password: admin"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "password",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "comment by \"Max Mustermann\" on \"2021-12-08T10:32:09.000+0100\""
+  },
+  {
+    "stringsFound": [
+      "user: admin"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "user",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "comment by \"Erika Mustermann\" on \"2021-12-15T11:55:13.000+0100\""
+  },
+  {
+    "stringsFound": [
+      "PW: 189ygdjhi9"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "PW",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "Issue Description"
+  },
+  {
+    "stringsFound": [
+      "sk_live_12345678901234567890asdf"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "Stripe API Key",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "Issue Description"
+  },
+  {
+    "stringsFound": [
+      "User: 1298gyhoij1o23i"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "User",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "Issue Description"
+  },
+  {
+    "stringsFound": [
+      "user: admin"
+    ],
+    "issue_id": "TEST-123",
+    "reason": "user",
+    "url": "https://jira.com/browse/TEST-123",
+    "location": "comment by \"Max Mustermann\" on \"2021-12-08T10:32:09.000+0100\""
+  }
+]

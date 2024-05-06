@@ -1,0 +1,108 @@
+{
+  "service": "StackHawk",
+  "scanCompleted": {
+    "scan": {
+      "id": "e2ff5651-7eef-47e9-b743-0c2f7d861e27",
+      "hawkscanVersion": "2.1.1",
+      "env": "Development",
+      "status": "COMPLETED",
+      "application": "Secured Application",
+      "startedTimestamp": "2022-02-16T23:07:19.575Z",
+      "scanURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27"
+    },
+    "scanDuration": "21",
+    "spiderDuration": "45",
+    "completedScanStats": {
+      "urlsCount": "31",
+      "duration": "66",
+      "scanResultsStats": {
+        "totalCount": "10",
+        "lowCount": "0",
+        "mediumCount": "0",
+        "highCount": "10",
+        "lowTriagedCount": "0",
+        "mediumTriagedCount": "0",
+        "highTriagedCount": "0"
+      }
+    },
+    "findings": [
+      {
+        "pluginId": "20012",
+        "pluginName": "Anti CSRF Tokens Scanner",
+        "severity": "High",
+        "host": "https://localhost:9000",
+        "paths": [
+          {
+            "path": "/payload/3111",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107370/message/1167"
+          },
+          {
+            "path": "/payload/3103",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107366/message/1154"
+          },
+          {
+            "path": "/payload/3107",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107369/message/1156"
+          },
+          {
+            "path": "/payload/3101",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107364/message/1171"
+          },
+          {
+            "path": "/payload/3113",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107374/message/1164"
+          },
+          {
+            "path": "/payload/3105",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107368/message/1169"
+          },
+          {
+            "path": "/payload/3097",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107365/message/1166"
+          },
+          {
+            "path": "/basic-auth",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107360/message/1158"
+          },
+          {
+            "path": "/jwt-auth",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107362/message/1152"
+          },
+          {
+            "path": "/payload/3099",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012/path/107367/message/1161"
+          }
+        ],
+        "pathStats": [
+          {
+            "status": "NEW",
+            "count": 10
+          }
+        ],
+        "totalCount": "10",
+        "category": "HTTP Header Protection",
+        "findingURL": "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012"
+      }
+    ]
+  }
+}

@@ -1,0 +1,195 @@
+[{
+    "AssessmentStartTime": "2023-04-25T23:49:42.744599",
+    "FindingUniqueId": "prowler-aws-acm_certificates_expiration_check-999999999999-us-east-1-api.teste.teste.com",
+    "Provider": "aws",
+    "CheckID": "acm_certificates_expiration_check",
+    "CheckTitle": "Check if ACM Certificates are about to expire in specific days or less",
+    "CheckType": [
+        "Data Protection"
+    ],
+    "ServiceName": "acm",
+    "SubServiceName": "",
+    "Status": "FAIL",
+    "StatusExtended": "ACM Certificate for api.teste.teste.com is about to expire in 7 days.",
+    "Severity": "high",
+    "ResourceType": "AwsCertificateManagerCertificate",
+    "ResourceDetails": "",
+    "Description": "Check if ACM Certificates are about to expire in specific days or less",
+    "Risk": "Expired certificates can impact service availability.",
+    "RelatedUrl": "https://docs.aws.amazon.com/config/latest/developerguide/acm-certificate-expiration-check.html",
+    "Remediation": {
+        "Code": {
+            "NativeIaC": "",
+            "Terraform": "",
+            "CLI": "",
+            "Other": ""
+        },
+        "Recommendation": {
+            "Text": "Monitor certificate expiration and take automated action to renew; replace or remove. Having shorter TTL for any security artifact is a general recommendation; but requires additional automation in place. If not longer required delete certificate. Use AWS config using the managed rule: acm-certificate-expiration-check.",
+            "Url": "https://docs.aws.amazon.com/config/latest/developerguide/acm-certificate-expiration-check.html"
+        }
+    },
+    "Compliance": {
+        "FedRAMP-Low-Revision-4": [
+            "ac-17",
+            "sc-12"
+        ],
+        "NIST-800-53-Revision-4": [
+            "ac_4",
+            "ac_17_2",
+            "sc_12"
+        ],
+        "NIST-CSF-1.1": [
+            "ac_5",
+            "ds_2"
+        ],
+        "NIST-800-53-Revision-5": [
+            "sc_7_12",
+            "sc_7_16"
+        ],
+        "FedRamp-Moderate-Revision-4": [
+            "ac-4",
+            "ac-17-2",
+            "sc-12"
+        ],
+        "RBI-Cyber-Security-Framework": [
+            "annex_i_1_3"
+        ],
+        "SOC2": [
+            "cc_6_7"
+        ],
+        "FFIEC": [
+            "d3-pc-im-b-1"
+        ],
+        "CISA": [
+            "your-data-2"
+        ],
+        "HIPAA": [
+            "164_308_a_4_ii_a",
+            "164_312_e_1"
+        ],
+        "NIST-800-171-Revision-2": [
+            "3_13_1",
+            "3_13_2",
+            "3_13_8",
+            "3_13_11"
+        ],
+        "GDPR": [
+            "article_32"
+        ]
+    },
+    "Categories": [],
+    "DependsOn": [],
+    "RelatedTo": [],
+    "Notes": "",
+    "Profile": null,
+    "AccountId": "999999999999",
+    "OrganizationsInfo": null,
+    "Region": "us-east-1",
+    "ResourceId": "api.teste.teste.com",
+    "ResourceArn": "arn:aws:acm:us-east-1:999999999999:certificate/ffffffff-0000-0000-0000-000000000000",
+    "ResourceTags": {}
+},{
+    "AssessmentStartTime": "2023-04-25T23:49:42.744599",
+    "FindingUniqueId": "prowler-aws-accessanalyzer_enabled-999999999999-us-east-1-999999999999",
+    "Provider": "aws",
+    "CheckID": "accessanalyzer_enabled",
+    "CheckTitle": "Check if IAM Access Analyzer is enabled",
+    "CheckType": [
+        "IAM"
+    ],
+    "ServiceName": "accessanalyzer",
+    "SubServiceName": "",
+    "Status": "FAIL",
+    "StatusExtended": "IAM Access Analyzer in account 999999999999 is not enabled",
+    "Severity": "low",
+    "ResourceType": "Other",
+    "ResourceDetails": "",
+    "Description": "Check if IAM Access Analyzer is enabled",
+    "Risk": "AWS IAM Access Analyzer helps you identify the resources in your organization and accounts, such as Amazon S3 buckets or IAM roles, that are shared with an external entity. This lets you identify unintended access to your resources and data, which is a security risk. IAM Access Analyzer uses a form of mathematical analysis called automated reasoning, which applies logic and mathematical inference to determine all possible access paths allowed by a resource policy.",
+    "RelatedUrl": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html",
+    "Remediation": {
+        "Code": {
+            "NativeIaC": "",
+            "Terraform": "",
+            "CLI": "aws accessanalyzer create-analyzer --analyzer-name <NAME> --type <ACCOUNT|ORGANIZATION>",
+            "Other": ""
+        },
+        "Recommendation": {
+            "Text": "Enable IAM Access Analyzer for all accounts, create analyzer and take action over it is recommendations (IAM Access Analyzer is available at no additional cost).",
+            "Url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html"
+        }
+    },
+    "Compliance": {
+        "CIS-1.4": [
+            "1.20"
+        ],
+        "CIS-1.5": [
+            "1.20"
+        ]
+    },
+    "Categories": [],
+    "DependsOn": [],
+    "RelatedTo": [],
+    "Notes": "",
+    "Profile": null,
+    "AccountId": "999999999999",
+    "OrganizationsInfo": null,
+    "Region": "us-east-1",
+    "ResourceId": "999999999999",
+    "ResourceArn": "",
+    "ResourceTags": {}
+},{
+    "AssessmentStartTime": "2023-04-25T23:49:42.744599",
+    "FindingUniqueId": "prowler-aws-account_maintain_current_contact_details-999999999999-us-east-1-999999999999",
+    "Provider": "aws",
+    "CheckID": "account_maintain_current_contact_details",
+    "CheckTitle": "Maintain current contact details.",
+    "CheckType": [
+        "IAM"
+    ],
+    "ServiceName": "account",
+    "SubServiceName": "",
+    "Status": "FAIL",
+    "StatusExtended": "Manual check: Login to the AWS Console. Choose your account name on the top right of the window -> My Account -> Contact Information.",
+    "Severity": "medium",
+    "ResourceType": "Other",
+    "ResourceDetails": "",
+    "Description": "Maintain current contact details.",
+    "Risk": "Ensure contact email and telephone details for AWS accounts are current and map to more than one individual in your organization. An AWS account supports a number of contact details; and AWS will use these to contact the account owner if activity judged to be in breach of Acceptable Use Policy. If an AWS account is observed to be behaving in a prohibited or suspicious manner; AWS will attempt to contact the account owner by email and phone using the contact details listed. If this is unsuccessful and the account behavior needs urgent mitigation; proactive measures may be taken; including throttling of traffic between the account exhibiting suspicious behavior and the AWS API endpoints and the Internet. This will result in impaired service to and from the account in question.",
+    "RelatedUrl": "",
+    "Remediation": {
+        "Code": {
+            "NativeIaC": "",
+            "Terraform": "",
+            "CLI": "No command available.",
+            "Other": "https://docs.bridgecrew.io/docs/iam_18-maintain-contact-details#aws-console"
+        },
+        "Recommendation": {
+            "Text": "Using the Billing and Cost Management console complete contact details.",
+            "Url": "https://docs.aws.amazon.com/accounts/latest/reference/manage-acct-update-contact.html"
+        }
+    },
+    "Compliance": {
+        "CIS-1.4": [
+            "1.1"
+        ],
+        "ENS-RD2022": [
+            "op.ext.7.aws.am.1"
+        ],
+        "CIS-1.5": [
+            "1.1"
+        ]
+    },
+    "Categories": [],
+    "DependsOn": [],
+    "RelatedTo": [],
+    "Notes": "",
+    "Profile": null,
+    "AccountId": "999999999999",
+    "OrganizationsInfo": null,
+    "Region": "us-east-1",
+    "ResourceId": "999999999999",
+    "ResourceArn": "",
+    "ResourceTags": {}
+}]

@@ -1,0 +1,704 @@
+{
+    "matches": [
+     {
+      "vulnerability": {
+       "id": "CVE-1999-1338",
+       "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-1999-1338",
+       "namespace": "nvd",
+       "severity": "Medium",
+       "urls": [
+        "http://marc.info/?l=bugtraq&m=93259112204664&w=2"
+       ],
+       "description": "Delegate proxy 5.9.3 and earlier creates files and directories in the DGROOT with world-writable permissions.",
+       "cvss": [
+        {
+         "version": "2.0",
+         "vector": "AV:N/AC:L/Au:N/C:N/I:P/A:N",
+         "metrics": {
+          "baseScore": 5,
+          "exploitabilityScore": 10,
+          "impactScore": 2.9
+         },
+         "vendorMetadata": {}
+        }
+       ],
+       "fix": {
+        "versions": [],
+        "state": "unknown"
+       },
+       "advisories": []
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+       {
+        "matcher": "javascript-matcher",
+        "searchedBy": {
+         "namespace": "nvd",
+         "cpes": [
+          "cpe:2.3:a:*:delegate:3.2.0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:delegate:delegate:3.2.0:*:*:*:*:*:*:*"
+         ]
+        },
+        "found": {
+         "versionConstraint": "<= 5.9.3 (unknown)",
+         "cpes": [
+          "cpe:2.3:a:delegate:delegate:*:*:*:*:*:*:*:*"
+         ]
+        }
+       }
+      ],
+      "artifact": {
+       "name": "delegate",
+       "version": "3.2.0",
+       "type": "npm",
+       "locations": [
+        {
+         "path": "components/yarn.lock"
+        }
+       ],
+       "language": "javascript",
+       "licenses": [],
+       "cpes": [
+        "cpe:2.3:a:delegate:delegate:3.2.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:*:delegate:3.2.0:*:*:*:*:*:*:*"
+       ],
+       "purl": "pkg:npm/delegate@3.2.0",
+       "metadata": null
+      }
+     },
+     {
+      "vulnerability": {
+       "id": "CVE-2002-1647",
+       "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2002-1647",
+       "namespace": "nvd",
+       "severity": "Medium",
+       "urls": [
+        "http://www.kb.cert.org/vuls/id/603945",
+        "http://marc.info/?l=bugtraq&m=103177860017930&w=2",
+        "http://marc.info/?l=bugtraq&m=103176636403241&w=2",
+        "http://marc.info/?l=bugtraq&m=103238514720237&w=2"
+       ],
+       "description": "The quick login feature in Slash Slashcode does not redirect the user to an alternate URL when the wrong password is provided, which makes it easier for remote web sites to guess the proper passwords by reading the username and password from the Referrer URL.",
+       "cvss": [
+        {
+         "version": "2.0",
+         "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+         "metrics": {
+          "baseScore": 5,
+          "exploitabilityScore": 10,
+          "impactScore": 2.9
+         },
+         "vendorMetadata": {}
+        }
+       ],
+       "fix": {
+        "versions": [],
+        "state": "unknown"
+       },
+       "advisories": []
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+       {
+        "matcher": "javascript-matcher",
+        "searchedBy": {
+         "namespace": "nvd",
+         "cpes": [
+          "cpe:2.3:a:*:slash:4.0.0:*:*:*:*:*:*:*"
+         ]
+        },
+        "found": {
+         "versionConstraint": "none (unknown)",
+         "cpes": [
+          "cpe:2.3:a:slashcode.com:slash:*:*:*:*:*:*:*:*"
+         ]
+        }
+       }
+      ],
+      "artifact": {
+       "name": "slash",
+       "version": "4.0.0",
+       "type": "npm",
+       "locations": [
+        {
+         "path": "docs/package-lock.json"
+        }
+       ],
+       "language": "javascript",
+       "licenses": [],
+       "cpes": [
+        "cpe:2.3:a:slash:slash:4.0.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:*:slash:4.0.0:*:*:*:*:*:*:*"
+       ],
+       "purl": "pkg:npm/slash@4.0.0",
+       "metadata": null
+      }
+     },
+     {
+      "vulnerability": {
+       "id": "CVE-2005-0036",
+       "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2005-0036",
+       "namespace": "nvd",
+       "severity": "Medium",
+       "urls": [
+        "http://www.niscc.gov.uk/niscc/docs/re-20050524-00432.pdf?lang=en",
+        "http://www.niscc.gov.uk/niscc/docs/al-20050524-00433.html",
+        "http://www.securityfocus.com/bid/13729",
+        "http://www.osvdb.org/25291"
+       ],
+       "description": "The DNS implementation in DeleGate 8.10.2 and earlier allows remote attackers to cause a denial of service via a compressed DNS packet with a label length byte with an incorrect offset, which could trigger an infinite loop.",
+       "cvss": [
+        {
+         "version": "2.0",
+         "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+         "metrics": {
+          "baseScore": 5,
+          "exploitabilityScore": 10,
+          "impactScore": 2.9
+         },
+         "vendorMetadata": {}
+        }
+       ],
+       "fix": {
+        "versions": [],
+        "state": "unknown"
+       },
+       "advisories": []
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+       {
+        "matcher": "javascript-matcher",
+        "searchedBy": {
+         "namespace": "nvd",
+         "cpes": [
+          "cpe:2.3:a:*:delegate:3.2.0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:delegate:delegate:3.2.0:*:*:*:*:*:*:*"
+         ]
+        },
+        "found": {
+         "versionConstraint": "= 8.4.0 || = 8.5.0 || = 8.9 || = 8.9.1 || = 7.7.0 || = 8.10.1 || = 8.3.4 || = 8.9.2 || = 8.9.4 || = 8.9.6 || = 7.8.0 || = 7.8.1 || = 7.8.2 || = 7.9.11 || <= 8.10.2 || = 5.9.3 || = 7.7.1 || = 8.10 || = 8.3.3 || = 8.9.3 || = 8.9.5 (unknown)",
+         "cpes": [
+          "cpe:2.3:a:delegate:delegate:*:*:*:*:*:*:*:*"
+         ]
+        }
+       }
+      ],
+      "artifact": {
+       "name": "delegate",
+       "version": "3.2.0",
+       "type": "npm",
+       "locations": [
+        {
+         "path": "components/yarn.lock"
+        }
+       ],
+       "language": "javascript",
+       "licenses": [],
+       "cpes": [
+        "cpe:2.3:a:delegate:delegate:3.2.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:*:delegate:3.2.0:*:*:*:*:*:*:*"
+       ],
+       "purl": "pkg:npm/delegate@3.2.0",
+       "metadata": null
+      }
+     },
+     {
+      "vulnerability": {
+       "id": "CVE-2005-0861",
+       "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2005-0861",
+       "namespace": "nvd",
+       "severity": "High",
+       "urls": [
+        "http://www.delegate.org/mail-lists/delegate-en/2840",
+        "http://secunia.com/advisories/14649",
+        "https://exchange.xforce.ibmcloud.com/vulnerabilities/19775"
+       ],
+       "description": "Multiple buffer overflows in DeleGate before 8.11.1 may allow attackers to cause a denial of service or execute arbitrary code, possibly due to \"overflows on arrays.\"",
+       "cvss": [
+        {
+         "version": "2.0",
+         "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+         "metrics": {
+          "baseScore": 7.5,
+          "exploitabilityScore": 10,
+          "impactScore": 6.4
+         },
+         "vendorMetadata": {}
+        }
+       ],
+       "fix": {
+        "versions": [],
+        "state": "unknown"
+       },
+       "advisories": []
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+       {
+        "matcher": "javascript-matcher",
+        "searchedBy": {
+         "namespace": "nvd",
+         "cpes": [
+          "cpe:2.3:a:*:delegate:3.2.0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:delegate:delegate:3.2.0:*:*:*:*:*:*:*"
+         ]
+        },
+        "found": {
+         "versionConstraint": "<= 8.11.0 (unknown)",
+         "cpes": [
+          "cpe:2.3:a:delegate:delegate:*:*:*:*:*:*:*:*"
+         ]
+        }
+       }
+      ],
+      "artifact": {
+       "name": "delegate",
+       "version": "3.2.0",
+       "type": "npm",
+       "locations": [
+        {
+         "path": "components/yarn.lock"
+        }
+       ],
+       "language": "javascript",
+       "licenses": [],
+       "cpes": [
+        "cpe:2.3:a:delegate:delegate:3.2.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:*:delegate:3.2.0:*:*:*:*:*:*:*"
+       ],
+       "purl": "pkg:npm/delegate@3.2.0",
+       "metadata": null
+      }
+     },
+     {
+      "vulnerability": {
+       "id": "CVE-2007-2405",
+       "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2007-2405",
+       "namespace": "nvd",
+       "severity": "Medium",
+       "urls": [
+        "http://lists.apple.com/archives/security-announce//2007/Jul/msg00004.html",
+        "http://www.securityfocus.com/bid/25159",
+        "http://secunia.com/advisories/26235",
+        "http://www.vupen.com/english/advisories/2007/2732",
+        "http://docs.info.apple.com/article.html?artnum=306172",
+        "https://exchange.xforce.ibmcloud.com/vulnerabilities/35734"
+       ],
+       "description": "Integer underflow in Preview in PDFKit on Apple Mac OS X 10.4.10 allows remote attackers to execute arbitrary code via a crafted PDF file.",
+       "cvss": [
+        {
+         "version": "2.0",
+         "vector": "AV:N/AC:M/Au:N/C:P/I:P/A:P",
+         "metrics": {
+          "baseScore": 6.8,
+          "exploitabilityScore": 8.6,
+          "impactScore": 6.4
+         },
+         "vendorMetadata": {}
+        }
+       ],
+       "fix": {
+        "versions": [],
+        "state": "unknown"
+       },
+       "advisories": []
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+       {
+        "matcher": "javascript-matcher",
+        "searchedBy": {
+         "namespace": "nvd",
+         "cpes": [
+          "cpe:2.3:a:*:pdfkit:0.12.0:*:*:*:*:*:*:*"
+         ]
+        },
+        "found": {
+         "versionConstraint": "none (unknown)",
+         "cpes": [
+          "cpe:2.3:a:apple:pdfkit:*:*:*:*:*:*:*:*"
+         ]
+        }
+       }
+      ],
+      "artifact": {
+       "name": "pdfkit",
+       "version": "0.12.0",
+       "type": "npm",
+       "locations": [
+        {
+         "path": "components/yarn.lock"
+        }
+       ],
+       "language": "javascript",
+       "licenses": [],
+       "cpes": [
+        "cpe:2.3:a:pdfkit:pdfkit:0.12.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:*:pdfkit:0.12.0:*:*:*:*:*:*:*"
+       ],
+       "purl": "pkg:npm/pdfkit@0.12.0",
+       "metadata": null
+      }
+     },
+     {
+      "vulnerability": {
+       "id": "CVE-2014-5509",
+       "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2014-5509",
+       "namespace": "nvd",
+       "severity": "Medium",
+       "urls": [
+        "https://rt.cpan.org/Public/Bug/Display.html?id=98435",
+        "https://bugzilla.redhat.com/show_bug.cgi?id=1135624",
+        "http://www.securityfocus.com/bid/69473",
+        "http://www.openwall.com/lists/oss-security/2014/08/30/2"
+       ],
+       "description": "clipedit in the Clipboard module for Perl allows local users to delete arbitrary files via a symlink attack on /tmp/clipedit$$.",
+       "cvss": [
+        {
+         "version": "2.0",
+         "vector": "AV:L/AC:L/Au:N/C:N/I:P/A:P",
+         "metrics": {
+          "baseScore": 3.6,
+          "exploitabilityScore": 3.9,
+          "impactScore": 4.9
+         },
+         "vendorMetadata": {}
+        },
+        {
+         "version": "3.0",
+         "vector": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N",
+         "metrics": {
+          "baseScore": 5.5,
+          "exploitabilityScore": 1.8,
+          "impactScore": 3.6
+         },
+         "vendorMetadata": {}
+        }
+       ],
+       "fix": {
+        "versions": [],
+        "state": "unknown"
+       },
+       "advisories": []
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+       {
+        "matcher": "javascript-matcher",
+        "searchedBy": {
+         "namespace": "nvd",
+         "cpes": [
+          "cpe:2.3:a:*:clipboard:2.0.8:*:*:*:*:*:*:*"
+         ]
+        },
+        "found": {
+         "versionConstraint": "none (unknown)",
+         "cpes": [
+          "cpe:2.3:a:clipboard_project:clipboard:-:*:*:*:*:perl:*:*"
+         ]
+        }
+       }
+      ],
+      "artifact": {
+       "name": "clipboard",
+       "version": "2.0.8",
+       "type": "npm",
+       "locations": [
+        {
+         "path": "components/yarn.lock"
+        }
+       ],
+       "language": "javascript",
+       "licenses": [],
+       "cpes": [
+        "cpe:2.3:a:clipboard:clipboard:2.0.8:*:*:*:*:*:*:*",
+        "cpe:2.3:a:*:clipboard:2.0.8:*:*:*:*:*:*:*"
+       ],
+       "purl": "pkg:npm/clipboard@2.0.8",
+       "metadata": null
+      }
+     },
+     {
+      "vulnerability": {
+       "id": "CVE-2021-29940",
+       "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-29940",
+       "namespace": "nvd",
+       "severity": "Critical",
+       "urls": [
+        "https://rustsec.org/advisories/RUSTSEC-2021-0049.html"
+       ],
+       "description": "An issue was discovered in the through crate through 2021-02-18 for Rust. There is a double free (in through and through_and) upon a panic of the map function.",
+       "cvss": [
+        {
+         "version": "2.0",
+         "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+         "metrics": {
+          "baseScore": 7.5,
+          "exploitabilityScore": 10,
+          "impactScore": 6.4
+         },
+         "vendorMetadata": {}
+        },
+        {
+         "version": "3.1",
+         "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+         "metrics": {
+          "baseScore": 9.8,
+          "exploitabilityScore": 3.9,
+          "impactScore": 5.9
+         },
+         "vendorMetadata": {}
+        }
+       ],
+       "fix": {
+        "versions": [],
+        "state": "unknown"
+       },
+       "advisories": []
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+       {
+        "matcher": "javascript-matcher",
+        "searchedBy": {
+         "namespace": "nvd",
+         "cpes": [
+          "cpe:2.3:a:*:through:2.3.8:*:*:*:*:*:*:*"
+         ]
+        },
+        "found": {
+         "versionConstraint": "<= 2021-02-18 (unknown)",
+         "cpes": [
+          "cpe:2.3:a:through_project:through:*:*:*:*:*:rust:*:*"
+         ]
+        }
+       }
+      ],
+      "artifact": {
+       "name": "through",
+       "version": "2.3.8",
+       "type": "npm",
+       "locations": [
+        {
+         "path": "components/yarn.lock"
+        }
+       ],
+       "language": "javascript",
+       "licenses": [],
+       "cpes": [
+        "cpe:2.3:a:through:through:2.3.8:*:*:*:*:*:*:*",
+        "cpe:2.3:a:*:through:2.3.8:*:*:*:*:*:*:*"
+       ],
+       "purl": "pkg:npm/through@2.3.8",
+       "metadata": null
+      }
+     },
+     {
+      "vulnerability": {
+       "id": "CVE-2021-32626",
+       "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-32626",
+       "namespace": "nvd",
+       "severity": "High",
+       "urls": [
+        "https://github.com/redis/redis/commit/666ed7facf4524bf6d19b11b20faa2cf93fdf591",
+        "https://github.com/redis/redis/security/advisories/GHSA-p486-xggp-782c",
+        "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/VL5KXFN3ATM7IIM7Q4O4PWTSRGZ5744Z/",
+        "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HTYQ5ZF37HNGTZWVNJD3VXP7I6MEEF42/",
+        "https://lists.apache.org/thread.html/r75490c61c2cb7b6ae2c81238fd52ae13636c60435abcd732d41531a0@%3Ccommits.druid.apache.org%3E"
+       ],
+       "description": "Redis is an open source, in-memory database that persists on disk. In affected versions specially crafted Lua scripts executing in Redis can cause the heap-based Lua stack to be overflowed, due to incomplete checks for this condition. This can result with heap corruption and potentially remote code execution. This problem exists in all versions of Redis with Lua scripting support, starting from 2.6. The problem is fixed in versions 6.2.6, 6.0.16 and 5.0.14. For users unable to update an additional workaround to mitigate the problem without patching the redis-server executable is to prevent users from executing Lua scripts. This can be done using ACL to restrict EVAL and EVALSHA commands.",
+       "cvss": [
+        {
+         "version": "2.0",
+         "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+         "metrics": {
+          "baseScore": 6.5,
+          "exploitabilityScore": 8,
+          "impactScore": 6.4
+         },
+         "vendorMetadata": {}
+        },
+        {
+         "version": "3.1",
+         "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+         "metrics": {
+          "baseScore": 8.8,
+          "exploitabilityScore": 2.8,
+          "impactScore": 5.9
+         },
+         "vendorMetadata": {}
+        }
+       ],
+       "fix": {
+        "versions": [],
+        "state": "unknown"
+       },
+       "advisories": []
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+       {
+        "matcher": "python-matcher",
+        "searchedBy": {
+         "namespace": "nvd",
+         "cpes": [
+          "cpe:2.3:a:redis:redis:3.5.3:*:*:*:*:*:*:*"
+         ]
+        },
+        "found": {
+         "versionConstraint": ">= 2.6, < 5.0.14 || >= 6.0.0, < 6.0.16 || >= 6.2.0, < 6.2.6 (unknown)",
+         "cpes": [
+          "cpe:2.3:a:redis:redis:*:*:*:*:*:*:*:*"
+         ]
+        }
+       }
+      ],
+      "artifact": {
+       "name": "redis",
+       "version": "3.5.3",
+       "type": "python",
+       "locations": [
+        {
+         "path": "requirements.txt"
+        }
+       ],
+       "language": "python",
+       "licenses": [],
+       "cpes": [
+        "cpe:2.3:a:python-redis:python-redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:python-redis:python_redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:python_redis:python-redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:python_redis:python_redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:python:python-redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:python:python_redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:python-redis:redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:python_redis:redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:redis:python-redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:redis:python_redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:python:redis:3.5.3:*:*:*:*:*:*:*",
+        "cpe:2.3:a:redis:redis:3.5.3:*:*:*:*:*:*:*"
+       ],
+       "purl": "pkg:pypi/redis@3.5.3",
+       "metadata": null
+      }
+     },
+     {
+      "vulnerability": {
+       "id": "GHSA-8v27-2fg9-7h62",
+       "dataSource": "https://github.com/advisories/GHSA-8v27-2fg9-7h62",
+       "namespace": "github:npm",
+       "severity": "Critical",
+       "urls": [
+        "https://github.com/advisories/GHSA-8v27-2fg9-7h62"
+       ],
+       "description": "Withdrawn: Arbitrary Code Execution in static-eval",
+       "cvss": [],
+       "fix": {
+        "versions": [],
+        "state": "not-fixed"
+       },
+       "advisories": []
+      },
+      "relatedVulnerabilities": [
+       {
+        "id": "CVE-2021-23334",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-23334",
+        "namespace": "nvd",
+        "severity": "Unknown",
+        "urls": [],
+        "description": "** REJECT ** DO NOT USE THIS CANDIDATE NUMBER. ConsultIDs: none. Reason: This candidate was withdrawn by its CNA. Further investigation showed that it was not a security issue. Notes: none.",
+        "cvss": []
+       }
+      ],
+      "matchDetails": [
+       {
+        "matcher": "javascript-matcher",
+        "searchedBy": {
+         "language": "javascript",
+         "namespace": "github:npm"
+        },
+        "found": {
+         "versionConstraint": "<=2.1.0 (unknown)"
+        }
+       }
+      ],
+      "artifact": {
+       "name": "static-eval",
+       "version": "2.1.0",
+       "type": "npm",
+       "locations": [
+        {
+         "path": "components/yarn.lock"
+        }
+       ],
+       "language": "javascript",
+       "licenses": [],
+       "cpes": [
+        "cpe:2.3:a:static-eval:static-eval:2.1.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:static-eval:static_eval:2.1.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:static_eval:static-eval:2.1.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:static_eval:static_eval:2.1.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:static:static-eval:2.1.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:static:static_eval:2.1.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:*:static-eval:2.1.0:*:*:*:*:*:*:*",
+        "cpe:2.3:a:*:static_eval:2.1.0:*:*:*:*:*:*:*"
+       ],
+       "purl": "pkg:npm/static-eval@2.1.0",
+       "metadata": null
+      }
+     }
+    ],
+    "source": {
+     "type": "directory",
+     "target": "\".\""
+    },
+    "distro": {
+     "name": "",
+     "version": "",
+     "idLike": ""
+    },
+    "descriptor": {
+     "name": "grype",
+     "version": "0.24.0",
+     "configuration": {
+      "configPath": "",
+      "output": "json",
+      "file": "",
+      "output-template-file": "",
+      "quiet": false,
+      "check-for-app-update": true,
+      "only-fixed": false,
+      "scope": "Squashed",
+      "log": {
+       "structured": false,
+       "level": "",
+       "file": ""
+      },
+      "db": {
+       "cache-dir": "/home/grant/.cache/grype/db",
+       "update-url": "https://toolbox-data.anchore.io/grype/databases/listing.json",
+       "auto-update": true,
+       "validate-by-hash-on-start": false
+      },
+      "dev": {
+       "profile-cpu": false,
+       "profile-mem": false
+      },
+      "fail-on-severity": "",
+      "registry": {
+       "insecure-skip-tls-verify": false,
+       "insecure-use-http": false,
+       "auth": []
+      },
+      "ignore": null
+     },
+     "db": {
+      "built": "2021-10-27T08:14:21Z",
+      "schemaVersion": 3,
+      "location": "/home/grant/.cache/grype/db/3",
+      "checksum": "sha256:ea339fccf02630a85f4c78bc92de322ce6bb0647a30f3a9a26cd329f8b567da5",
+      "error": null
+     }
+    }
+   }

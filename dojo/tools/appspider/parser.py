@@ -1,68 +1,56 @@
-
-
-from datetime import datetime
-from xml.dom import NamespaceErr
-
+import html2text
 from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
-import html2text
-import urllib.parse
-
-__author__ = "Jay Paz"
 
 
-class AppSpiderXMLParser(object):
-    def __init__(self, filename, test):
+class AppSpiderParser:
+    """Parser for Rapid7 AppSpider reports"""
 
-        if "VulnerabilitiesSummary.xml" not in str(filename):
-            raise NamespaceErr('Please ensure that you are uploading AppSpider\'s VulnerabilitiesSummary.xml file.'
-                               'At this time it is the only file that is consumable by DefectDojo.')
+    def get_scan_types(self):
+        return ["AppSpider Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "AppSpider Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "AppSpider (Rapid7) - Use the VulnerabilitiesSummary.xml file found in the zipped report download."
+
+    def get_findings(self, filename, test):
+        if filename is None:
+            return
 
         vscan = ElementTree.parse(filename)
         root = vscan.getroot()
 
         if "VulnSummary" not in str(root.tag):
-            raise NamespaceErr('Please ensure that you are uploading AppSpider\'s VulnerabilitiesSummary.xml file.'
-                               'At this time it is the only file that is consumable by DefectDojo.')
+            msg = (
+                "Please ensure that you are uploading AppSpider's VulnerabilitiesSummary.xml file."
+                "At this time it is the only file that is consumable by DefectDojo."
+            )
+            raise ValueError(msg)
 
-        dupes = dict()
+        dupes = {}
 
-        for finding in root.iter('Vuln'):
-
-            severity = finding.find("AttackScore").text
-            if severity == "0-Safe":
-                severity = "Info"
-            elif severity == "1-Informational":
-                severity = "Low"
-            elif severity == "2-Low":
-                severity = "Medium"
-            elif severity == "3-Medium":
-                severity = "High"
-            elif severity == "4-High":
-                severity = "Critical"
-            else:
-                severity = "Info"
-
+        for finding in root.iter("Vuln"):
+            severity = self.convert_severity(finding.find("AttackScore").text)
             title = finding.find("VulnType").text
             description = finding.find("Description").text
             mitigation = finding.find("Recommendation").text
             vuln_url = finding.find("VulnUrl").text
 
-            parts = urllib.parse.urlparse(vuln_url)
-
             cwe = int(finding.find("CweId").text)
 
             dupe_key = severity + title
-            unsaved_endpoints = list()
-            unsaved_req_resp = list()
+            unsaved_endpoints = []
+            unsaved_req_resp = []
 
             if title is None:
-                title = ''
+                title = ""
             if description is None:
-                description = ''
+                description = ""
             if mitigation is None:
-                mitigation = ''
+                mitigation = ""
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -71,17 +59,16 @@ class AppSpiderXMLParser(object):
                 unsaved_req_resp.append(find.unsaved_req_resp)
 
             else:
-                find = Finding(title=title,
-                               test=test,
-                               active=False,
-                               verified=False,
-                               description=html2text.html2text(description),
-                               severity=severity,
-                               numerical_severity=Finding.get_numerical_severity(severity),
-                               mitigation=html2text.html2text(mitigation),
-                               impact="N/A",
-                               references=None,
-                               cwe=cwe)
+                find = Finding(
+                    title=title,
+                    test=test,
+                    description=html2text.html2text(description),
+                    severity=severity,
+                    mitigation=html2text.html2text(mitigation),
+                    impact="N/A",
+                    references=None,
+                    cwe=cwe,
+                )
                 find.unsaved_endpoints = unsaved_endpoints
                 find.unsaved_req_resp = unsaved_req_resp
                 dupes[dupe_key] = find
@@ -92,11 +79,22 @@ class AppSpiderXMLParser(object):
 
                     find.unsaved_req_resp.append({"req": req, "resp": resp})
 
-                find.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
-                                                       host=parts.netloc,
-                                                       path=parts.path,
-                                                       query=parts.query,
-                                                       fragment=parts.fragment,
-                                                       product=test.engagement.product))
+                endpoint = Endpoint.from_uri(vuln_url)
+                find.unsaved_endpoints.append(endpoint)
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
+
+    @staticmethod
+    def convert_severity(val):
+        severity = "Info"
+        if val == "0-Safe":
+            severity = "Info"
+        elif val == "1-Informational":
+            severity = "Low"
+        elif val == "2-Low":
+            severity = "Medium"
+        elif val == "3-Medium":
+            severity = "High"
+        elif val == "4-High":
+            severity = "Critical"
+        return severity

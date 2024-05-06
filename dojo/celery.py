@@ -1,7 +1,11 @@
+import logging
 import os
+
 from celery import Celery
 from celery.signals import setup_logging
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dojo.settings.settings')
@@ -17,10 +21,22 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 @app.task(bind=True)
 def debug_task(self):
-    print(('Request: {0!r}'.format(self.request)))
+    print(f'Request: {self.request!r}')
 
 
 @setup_logging.connect
 def config_loggers(*args, **kwags):
     from logging.config import dictConfig
     dictConfig(settings.LOGGING)
+
+
+# from celery import current_app
+
+# _ = current_app.loader.import_default_modules()
+
+# tasks = list(sorted(name for name in current_app.tasks
+#                             if not name.startswith('celery.')))
+
+# logger.debug('registered celery tasks:')
+# for task in tasks:
+#     logger.debug(task)

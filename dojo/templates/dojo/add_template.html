@@ -1,10 +1,13 @@
 {% extends "base.html" %}
-{% load static from staticfiles %}
+{% load static %}
+{% load authorization_tags %}
 {% block add_css %}
+    {{ block.super }}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -13,6 +16,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> {{ name }} {{ template }}</h3>
 
     <form id="add_template" class="form-horizontal" method="post">{% csrf_token %}
@@ -29,19 +33,22 @@
         </div>
     </form>
     {% if template %}
-        <form method="post" action="{% url 'delete_template' template.id %}"
-              style="display: inline" class="form-horizontal">
-            {% csrf_token %}
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <input type="hidden" name="id" value="{{ template.id }}"/>
-                    <button type="submit" class="btn btn-danger template-delete">Delete Template</button>
+        {% if "Finding_Delete"|has_global_permission %}
+            <form method="post" action="{% url 'delete_template' template.id %}"
+                style="display: inline" class="form-horizontal">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input type="hidden" name="id" value="{{ template.id }}"/>
+                        <button type="submit" class="btn btn-danger template-delete">Delete Template</button>
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        {% endif %}
     {% endif %}
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
@@ -61,44 +68,29 @@
         });
 
         $(function () {
-            $('#id_tags').chosen({
-                'placeholder_text_multiple': 'Select or add some tags...',
-                'no_results_text': "Tag not found, press TAB key to add.",
-            });
-
-            $(".search-field").find("input").on("keydown", function (evt) {
-                var stroke;
-                stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
-                if (stroke == 9) { // 9 = tab key
-                    var o = new Option($(this).val(), $(this).val(), true, true);
-                    $("#id_tags").append(o);
-                    $('#id_tags').trigger('chosen:updated');
-                    $('#id_tags').focus();
-                    return false;
-                }
-            });
-
             $("textarea").each(function (index, elem) {
-
                 if (elem.hasAttribute("required")) {
                     elem.removeAttribute("required");
                     elem.id = "req"
                 }
 
-                var mde = new EasyMDE({
-                    spellChecker: false,
-                    element: elem,
-                    autofocus: false,
-                    forceSync: true,
-                    toolbar: ["bold", "italic", "heading", "|",
-                        "quote", "unordered-list", "ordered-list", "|",
-                        "link", "image", "|",
-                        "table", "horizontal-rule", "code", "|",
-                        "guide"
-                    ]
-                });
-                mde.render();
+                if (elem.name != 'vulnerability_ids' && !$(elem).hasClass('select2-search__field')) {
+                    var mde = new EasyMDE({
+                        spellChecker: false,
+                        element: elem,
+                        autofocus: false,
+                        forceSync: true,
+                        toolbar: ["bold", "italic", "heading", "|",
+                            "quote", "unordered-list", "ordered-list", "|",
+                            "link", "image", "|",
+                            "table", "horizontal-rule", "code", "|",
+                            "guide"
+                        ]
+                    });
+                    mde.render();
+                }
             });
+
             // add req id to input field which enables input length check
             $("input").each(function (index, elem) {
 

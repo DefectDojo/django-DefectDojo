@@ -1,86 +1,67 @@
-from dojo.models import Finding
-from datetime import datetime
 import json
 
+from dojo.tools.awssecurityhub.compliance import Compliance
+from dojo.tools.awssecurityhub.guardduty import GuardDuty
+from dojo.tools.awssecurityhub.inspector import Inspector
+from dojo.tools.parser_test import ParserTest
 
-class AwsSecurityFindingFormatParser:
-    def __init__(self, filehandle, test):
-        tree = self.parse_json(filehandle)
 
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+class AwsSecurityHubParser:
+    ID = "AWS Security Hub"
 
-    def parse_json(self, filehandle):
-        try:
-            data = filehandle.read()
-        except:
-            return None
+    def get_scan_types(self):
+        return ["AWS Security Hub Scan"]
 
-        try:
-            tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
+    def get_label_for_scan_types(self, scan_type):
+        return "AWS Security Hub Scan"
 
-        return tree
+    def get_description_for_scan_types(self, scan_type):
+        return "AWS Security Hub exports in JSON format."
 
-    def get_items(self, tree, test):
+    def get_tests(self, scan_type, scan):
+        data = json.load(scan)
+        findings = data.get("Findings", data.get("findings", None))
+        if not isinstance(findings, list):
+            msg = "Incorrect Security Hub report format"
+            raise TypeError(msg)
+        prod = []
+        aws_acc = []
+        for finding in findings:
+            prod.append(finding.get("ProductName", "AWS Security Hub Ruleset"))
+            aws_acc.append(finding.get("AwsAccountId"))
+        report_date = data.get("createdAt")
+        test = ParserTest(
+            name=self.ID, type=self.ID, version=""
+        )
+        test.description = "**AWS Accounts:** " + ', '.join(set(aws_acc)) + "\n"
+        test.description += "**Finding Origins:** " + ', '.join(set(prod)) + "\n"
+        test.findings = self.get_items(data, report_date)
+        return [test]
+
+    def get_findings(self, filehandle, test):
+        tree = json.load(filehandle)
+        if not isinstance(tree, dict):
+            msg = "Incorrect Security Hub report format"
+            raise TypeError(msg)
+        return self.get_items(tree, test)
+
+    def get_items(self, tree: dict, test):
         items = {}
-        # DefectDojo/django-DefectDojo/issues/2780
-        findings = tree.get('Findings', tree.get('findings', None))
-
-        if not findings:
-            return list()
-
+        findings = tree.get("Findings", tree.get("findings", None))
+        if not isinstance(findings, list):
+            msg = "Incorrect Security Hub report format"
+            raise TypeError(msg)
         for node in findings:
-            item = get_item(node, test)
-            key = node['Id']
+            aws_scanner_type = node.get("ProductFields", {}).get("aws/securityhub/ProductName", "")
+            if aws_scanner_type == "Inspector":
+                item = Inspector().get_item(node, test)
+            elif aws_scanner_type == "GuardDuty":
+                item = GuardDuty().get_item(node, test)
+            else:
+                item = Compliance().get_item(node, test)
+            key = node["Id"]
+            if not isinstance(key, str):
+                msg = "Incorrect Security Hub report format"
+                raise TypeError(msg)
             items[key] = item
-
         return list(items.values())
-
-
-def get_item(finding, test):
-    title = finding.get('Title', "")
-    severity = finding.get('Severity', {}).get('Label', 'INFORMATIONAL').title()
-    description = finding.get('Description', "")
-    mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
-    references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
-    cve = None
-    cwe = None
-    active = True
-    verified = False
-    false_p = False
-    duplicate = False
-    out_of_scope = False
-    impact = None
-
-    if finding.get('Compliance', {}).get('Status', "PASSED"):
-        if finding.get('LastObservedAt', None):
-            try:
-                mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
-            except:
-                mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
-        else:
-            mitigated = datetime.utcnow()
-    else:
-        mitigated = None
-
-    finding = Finding(title=title,
-                      test=test,
-                      severity=severity,
-                      description=description,
-                      mitigation=mitigation,
-                      references=references,
-                      cve=cve,
-                      cwe=cwe,
-                      active=active,
-                      verified=verified,
-                      false_p=false_p,
-                      duplicate=duplicate,
-                      out_of_scope=out_of_scope,
-                      mitigated=mitigated,
-                      impact="No impact provided")
-
-    return finding

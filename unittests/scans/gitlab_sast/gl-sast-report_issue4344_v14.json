@@ -1,0 +1,44 @@
+{
+  "version": "14.0.0",
+  "vulnerabilities": [
+    {
+      "id": "38646099571534a07b62ae42b37fb3640d620c48d561456fb3ecdf929b9e5933",
+      "category": "sast",
+      "name": "Potential XSS vulnerability",
+      "message": "Potential XSS vulnerability",
+      "cve": "XXXX.aspx.cs:98:SCS0029",
+      "scanner": {
+        "id": "security_code_scan",
+        "name": "Security Code Scan"
+      },
+      "location": {
+        "file": "XXXXX.aspx.cs",
+        "start_line": 98
+      },
+      "identifiers": [
+        {
+          "type": "security_code_scan_rule_id",
+          "name": "SCS0029",
+          "value": "SCS0029",
+          "url": "https://security-code-scan.github.io/#SCS0029"
+        }
+      ]
+    }
+  ],
+  "remediations": [],
+  "scan": {
+    "scanner": {
+      "id": "security_code_scan",
+      "name": "Security Code Scan",
+      "url": "https://security-code-scan.github.io",
+      "vendor": {
+        "name": "GitLab"
+      },
+      "version": "3.5.3"
+    },
+    "type": "sast",
+    "start_time": "2021-04-22T09:32:27",
+    "end_time": "2021-04-22T09:33:29",
+    "status": "success"
+  }
+}

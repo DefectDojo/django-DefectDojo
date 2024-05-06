@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% load static from staticfiles %}
+{% load static %}
 {% load event_tags %}
 {% load display_tags %}
 {% load humanize %}
 
 {% block content %}
+    {{ block.super }}
     <button onclick="asciidocDownload()" class="btn btn-primary" type="button">
         Download Report
     </button>

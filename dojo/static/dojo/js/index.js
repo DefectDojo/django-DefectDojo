@@ -1,5 +1,5 @@
 $(function () {
-    $('body').append('<a id="toTop" title="Back to Top" class="btn btn-primary btn-circle"><i class="fa fa-fw fa-arrow-up"></i></a>');
+    $('body').append('<a id="toTop" title="Back to Top" class="btn btn-primary btn-circle"><i class="fa-solid fa-arrow-up fa-fw"></i></a>');
     $(window).scroll(function () {
         if ($(this).scrollTop() > 300) {
             $('#toTop').fadeIn();
@@ -25,7 +25,7 @@ $(function () {
     })
 
     setTimeout(function () {
-        $('.alert-dismissible').slideUp('slow')
+        $('.alert-dismissible').not('.announcement-banner').slideUp('slow')
     }, 20000);
 
     $('#side-menu').metisMenu();
@@ -62,7 +62,6 @@ $.fn.serializeObject = function()
     return o;
 };
 
-
 function sidebar() {  // minimize side nav bar
     var action = 'min';
     var remove = 'max';
@@ -87,6 +86,20 @@ function sidebar() {  // minimize side nav bar
     $('body').switchClass(remove, action);
 
     return false;
+}
+
+//methods removed in django 3.1. we copy them here to keep this popup thing working
+// but this definately needs a rework, but with UI v2 in the works this is acceptable
+function id_to_windowname(text) {
+    text = text.replace(/\./g, '__dot__');
+    text = text.replace(/\-/g, '__dash__');
+    return text;
+}
+
+function windowname_to_id(text) {
+    text = text.replace(/__dot__/g, '.');
+    text = text.replace(/__dash__/g, '-');
+    return text;
 }
 
 function emptyEndpoints(win) {
@@ -229,31 +242,31 @@ function punchcard(element, data, ticks) {
 function togglePassVisibility() {
     var passwdInput = document.getElementById("id_password");
     var toggleBox = document.getElementById("toggleBox");
-    
+
     // swap password
     if (passwdInput.type === "password") {
         passwdInput.type = "text";
-        toggleBox.innerHTML = "<i class='fa fa-eye-slash'></i>\
+        toggleBox.innerHTML = "<i class='fa-solid fa-eye-slash'></i>\
         <span><b>Hide Password</b></span>";
     } else {
         passwdInput.type = "password";
-        toggleBox.innerHTML = "<i class='fa fa-eye'></i>\
+        toggleBox.innerHTML = "<i class='fa-solid fa-eye'></i>\
         <span><b>Show Password</b></span>";
     }
-} 
+}
 
 function asciidocDownload() {
     var content = document.getElementById('base-content')
     var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + 
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' +
         encodeURIComponent(content.innerText.slice(16)));
     element.setAttribute('download', 'asciidoc-report.txt');
-  
+
     element.style.display = 'none';
     document.body.appendChild(element);
-  
+
     element.click();
-  
+
     document.body.removeChild(element);
   }
 
@@ -295,7 +308,7 @@ function getDojoExportValueFromTag(htmlString, tag, htmlTagAttribValue){
     return exportValue.toString().replace(/<\/?[^>]+(>|$)/g, " ");
 }
 
-generateGUID = (typeof(window.crypto) != 'undefined' && 
+generateGUID = (typeof(window.crypto) != 'undefined' &&
                 typeof(window.crypto.getRandomValues) != 'undefined') ?
     function() {
         // If we have a cryptographically secure PRNG, use that
@@ -327,4 +340,25 @@ generateGUID = (typeof(window.crypto) != 'undefined' &&
         var link = document.createElement("a");
         link.href = href;
         return link.href;
-    }    
+    }
+
+function clear_form(form){
+    $(form).find(':input').each(function() {
+        console.log(this.type)
+        switch(this.type) {
+            case 'number':
+            case 'password':
+            case 'select-one':
+            case 'text':
+            case 'textarea':
+                $(this).val('');
+                break;
+            case 'checkbox':
+            case 'radio':
+                this.checked = false;
+                break;
+            case 'select-multiple':
+                $(this).val(null).trigger('change');
+        }
+    });
+}

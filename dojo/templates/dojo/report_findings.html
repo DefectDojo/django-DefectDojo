@@ -1,9 +1,10 @@
+{% load display_tags %}
 {% load navigation_tags %}
 <div data-multiple='true' class="panel panel-available-widget">
     <div class="panel-heading tight" title="Click and drag to move" data-toggle="tooltip">
         <div class="clearfix">
             <h5 class="pull-left">Findings</h5>
-            <span class="fa fa-arrows pull-right icon"></span>
+            <span class="fa-solid fa-arrows-up-down-left-right pull-right icon"></span>
         </div>
     </div>
     <div class="panel-body">
@@ -30,28 +31,30 @@
                        class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                     <thead>
                     <tr>
+                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Name' 'title' %}</th>
+                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Date' 'date' %}</th>
+                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Severity' 'numerical_severity' 'asc' %}</th>
+                        <th class="nowrap">{% dojo_sort request 'EPSS Score' 'epss_score' %}</th>
+                        <th class="nowrap">{% dojo_sort request 'EPSS Percentile' 'epss_percentile' %}</th>
                         <th class="nowrap">Status</th>
+                        {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                         <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name' %}</th>
                     </tr>
                     </thead>
                     <tbody>
                     {% for finding in findings %}
                         <tr>
-                            <td><a title="{{ finding.title }}"
-                                   href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
-                                    {% if finding.tags %}
-                                    <sup>
-                                        {% for tag in finding.tags %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
-                                        {% endfor %}
-                                    </sup>
-                                    {% endif %}
+                            <td>
+                                <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                             </td>
                             <td class="nowrap">{{ finding.date }}</td>
                             <td>{{ finding.severity }}</td>
+                            <td>{{ finding.epss_score|format_epss }}</td>
+                            <td>{{ finding.epss_percentile|format_epss }}</td>
                             <td>{{ finding.status }}</td>
                             <td>{{ finding.test.engagement.product }}</td>
                         </tr>
