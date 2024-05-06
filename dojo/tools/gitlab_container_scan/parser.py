@@ -2,10 +2,11 @@ import json
 import textwrap
 
 from dateutil.parser import parse
+
 from dojo.models import Finding
 
 
-class GitlabContainerScanParser(object):
+class GitlabContainerScanParser:
     """
     GitLab's container scanning report
     See more: https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/blob/master/dist/container-scanning-report-format.json

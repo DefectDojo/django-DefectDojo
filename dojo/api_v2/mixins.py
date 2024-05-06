@@ -1,12 +1,14 @@
-from django.db import DEFAULT_DB_ALIAS
+import itertools
+
 from django.contrib.admin.utils import NestedObjects
+from django.db import DEFAULT_DB_ALIAS
 from drf_spectacular.utils import extend_schema
-from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.decorators import action
+
 from dojo.api_v2 import serializers
-from dojo.models import Question, Answer
-import itertools
+from dojo.models import Answer, Question
 
 
 class DeletePreviewModelMixin:
@@ -47,11 +49,11 @@ class DeletePreviewModelMixin:
         return self.get_paginated_response(serializer.data)
 
 
-class QuestionSubClassFieldsMixin(object):
+class QuestionSubClassFieldsMixin:
     def get_queryset(self):
         return Question.objects.select_subclasses()
 
 
-class AnswerSubClassFieldsMixin(object):
+class AnswerSubClassFieldsMixin:
     def get_queryset(self):
         return Answer.objects.select_subclasses()

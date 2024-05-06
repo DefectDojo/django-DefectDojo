@@ -1,10 +1,10 @@
-import json
 import hashlib
+import json
 
 from dojo.models import Finding
 
 
-class PWNSASTParser(object):
+class PWNSASTParser:
     """
     A class that can be used to parse pwn_sast source code scanning results in JSON format.  See https://github.com/0dayinc/pwn for additional details.
     """

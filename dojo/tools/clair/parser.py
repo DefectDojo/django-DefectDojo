@@ -1,9 +1,10 @@
 import json
+
 from dojo.tools.clair.clair_parser import ClairScan
 from dojo.tools.clair.clairklar_parser import ClairKlarScan
 
 
-class ClairParser(object):
+class ClairParser:
     def get_scan_types(self):
         return ["Clair Scan"]
 
@@ -21,7 +22,7 @@ class ClairParser(object):
             elif self.scanner == "clairklar":
                 return ClairKlarScan().get_items_klar(tree, test)
         else:
-            return list()
+            return []
 
     def parse_json(self, json_output):
         try:
@@ -37,5 +38,6 @@ class ClairParser(object):
                 self.scanner = "clairklar"
                 subtree = tree.get("Vulnerabilities")
         except BaseException:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
         return subtree

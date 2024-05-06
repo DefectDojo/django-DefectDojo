@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Finding
 
 
-class Crunch42Parser(object):
+class Crunch42Parser:
 
     def get_scan_types(self):
         return ["Crunch42 Scan"]
@@ -21,7 +22,8 @@ class Crunch42Parser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 

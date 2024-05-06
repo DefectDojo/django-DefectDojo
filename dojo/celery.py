@@ -1,8 +1,9 @@
+import logging
 import os
+
 from celery import Celery
 from celery.signals import setup_logging
 from django.conf import settings
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 @app.task(bind=True)
 def debug_task(self):
-    print(('Request: {0!r}'.format(self.request)))
+    print(f'Request: {self.request!r}')
 
 
 @setup_logging.connect

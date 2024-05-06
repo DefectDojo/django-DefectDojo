@@ -27,7 +27,7 @@ class AnchoreCTLPoliciesParser:
             data = json.loads(content)
 
         find_date = datetime.now()
-        items = list()
+        items = []
         try:
             for image in data:
                 if image['detail'] is not None:
@@ -54,9 +54,7 @@ class AnchoreCTLPoliciesParser:
                                 test=test,
                                 description=description,
                                 severity=severity,
-                                references="Policy ID: {}\nTrigger ID: {}".format(
-                                    policy_id, trigger_id
-                                ),
+                                references=f"Policy ID: {policy_id}\nTrigger ID: {trigger_id}",
                                 file_path=search_filepath(description),
                                 component_name=repo,
                                 component_version=tag,
@@ -68,9 +66,8 @@ class AnchoreCTLPoliciesParser:
                                 find.unsaved_vulnerability_ids = [vulnerability_id]
                             items.append(find)
                         except (KeyError, IndexError) as err:
-                            raise ValueError(
-                                "Invalid format: {} key not found".format(err)
-                            )
+                            msg = f"Invalid format: {err} key not found"
+                            raise ValueError(msg)
         except AttributeError as err:
             # import empty policies without error (e.g. policies or images
             # objects are not a dictionary)

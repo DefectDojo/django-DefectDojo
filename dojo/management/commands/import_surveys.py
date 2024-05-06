@@ -1,10 +1,11 @@
-from django.core.management.base import BaseCommand
-from pytz import timezone
-from django.db import connection
 import os
 
-from dojo.utils import get_system_setting
+from django.core.management.base import BaseCommand
+from django.db import connection
+from pytz import timezone
+
 from dojo.models import TextQuestion
+from dojo.utils import get_system_setting
 
 locale = timezone(get_system_setting('time_zone'))
 
@@ -28,7 +29,7 @@ class Command(BaseCommand):
         # Find the current id in the surveys file
         path = os.path.dirname(os.path.abspath(__file__))
         path = path[:-19] + 'fixtures/initial_surveys.json'
-        contents = open(path, "rt").readlines()
+        contents = open(path).readlines()
         for line in contents:
             if '"polymorphic_ctype": ' in line:
                 matchedLine = line
@@ -37,7 +38,7 @@ class Command(BaseCommand):
         old_id = ''.join(c for c in matchedLine if c.isdigit())
         new_line = matchedLine.replace(old_id, str(ctype_id))
         # Replace the all lines in the file
-        with open(path, "wt") as fout:
+        with open(path, "w") as fout:
             for line in contents:
                 fout.write(line.replace(matchedLine, new_line))
         # Delete the temp question

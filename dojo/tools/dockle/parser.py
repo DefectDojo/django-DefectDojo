@@ -1,9 +1,10 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
-class DockleParser(object):
+class DockleParser:
     """
     A class that can be used to parse the Dockle JSON report files
     """

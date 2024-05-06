@@ -1,9 +1,10 @@
 import hashlib
 import json
+
 from dojo.models import Finding
 
 
-class KubeHunterParser(object):
+class KubeHunterParser:
     """
     kube-hunter hunts for security weaknesses in Kubernetes clusters. The tool was developed to increase awareness and visibility for security issues in Kubernetes environments.
     """
@@ -20,7 +21,7 @@ class KubeHunterParser(object):
     def get_findings(self, file, test):
         data = json.load(file)
 
-        dupes = dict()
+        dupes = {}
 
         # Find any missing attribute
         vulnerabilities = data['vulnerabilities']

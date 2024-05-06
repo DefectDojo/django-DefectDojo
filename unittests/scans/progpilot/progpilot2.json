@@ -1,0 +1,88 @@
+[
+    {
+        "source_name": [
+            "$json_encode_return"
+        ],
+        "source_line": [
+            61
+        ],
+        "source_column": [
+            1590
+        ],
+        "source_file": [
+            "\/home\/User\/Modules\/progpilot\/ajax.php"
+        ],
+        "tainted_flow": [
+            [
+                {
+                    "flow_name": "$json_encode_param0_line61_column1590_progpilot",
+                    "flow_line": 61,
+                    "flow_column": 1590,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                },
+                {
+                    "flow_name": "$response",
+                    "flow_line": 59,
+                    "flow_column": 1561,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                },
+                {
+                    "flow_name": "$resp",
+                    "flow_line": 26,
+                    "flow_column": 765,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                },
+                {
+                    "flow_name": "$validateAmount_return",
+                    "flow_line": 26,
+                    "flow_column": 773,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                },
+                {
+                    "flow_name": "$validateAmount_param0_line26_column773_progpilot",
+                    "flow_line": 26,
+                    "flow_column": 773,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                },
+                {
+                    "flow_name": "$vals",
+                    "flow_line": 8,
+                    "flow_column": 281,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                },
+                {
+                    "flow_name": "$json_decode_return",
+                    "flow_line": 8,
+                    "flow_column": 289,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                },
+                {
+                    "flow_name": "$json_decode_param0_line8_column289_progpilot",
+                    "flow_line": 8,
+                    "flow_column": 289,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                },
+                {
+                    "flow_name": "$frontRequest",
+                    "flow_line": 7,
+                    "flow_column": 231,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                },
+                {
+                    "flow_name": "$file_get_contents_return",
+                    "flow_line": 7,
+                    "flow_column": 247,
+                    "flow_file": "\/home\/User\/Modules\/progpilot\/ajax.php"
+                }
+            ]
+        ],
+        "sink_name": "echo",
+        "sink_line": 61,
+        "sink_column": 1590,
+        "sink_file": "\/home\/kali\/Modules\/progpilot\/ajax.php",
+        "vuln_name": "xss",
+        "vuln_cwe": "CWE_79",
+        "vuln_id": "4c1c5e204a59146a9a046a6a49042ce9a26a7cfd952955ec8614a22b093e451d",
+        "vuln_type": "taint-style"
+    }
+]

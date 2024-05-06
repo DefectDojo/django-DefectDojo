@@ -1,27 +1,28 @@
+import datetime
+import logging
 from itertools import chain
+
+import bleach
+import dateutil.relativedelta
+import git
+import markdown
 from django import template
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Case, IntegerField, Sum, Value, When
 from django.template.defaultfilters import stringfilter
+from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import escape, conditional_escape
-from django.utils.safestring import mark_safe, SafeData
+from django.utils.html import conditional_escape, escape
+from django.utils.safestring import SafeData, mark_safe
 from django.utils.text import normalize_newlines
 from django.utils.translation import gettext as _
-from django.urls import reverse
-from django.contrib.auth.models import User
 
-from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
-import dojo.utils
-from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User, Benchmark_Product
-import markdown
-from django.db.models import Sum, Case, When, IntegerField, Value
-import dateutil.relativedelta
-import datetime
-import bleach
-import git
-from django.conf import settings
 import dojo.jira_link.helper as jira_helper
-import logging
+import dojo.utils
+from dojo.models import Benchmark_Product, Check_List, Dojo_User, FileAccessToken, Finding, Product, System_Settings
+from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +136,7 @@ def dojo_version():
     version = __version__
     if settings.FOOTER_VERSION:
         version = settings.FOOTER_VERSION
-    return "v. {}".format(version)
+    return f"v. {version}"
 
 
 @register.simple_tag
@@ -418,8 +419,8 @@ def colgroup(parser, token):
         _, iterable, _, num_cols, _, _, varname = token.split_contents()
         num_cols = int(num_cols)
     except ValueError:
-        raise template.TemplateSyntaxError(
-            "Invalid arguments passed to %r." % token.contents.split()[0])
+        msg = f"Invalid arguments passed to {token.contents.split()[0]!r}."
+        raise template.TemplateSyntaxError(msg)
     return Node(iterable, num_cols, varname)
 
 
@@ -797,7 +798,7 @@ def first_vulnerability_id(finding):
 def additional_vulnerability_ids(finding):
     vulnerability_ids = finding.vulnerability_ids
     if vulnerability_ids and len(vulnerability_ids) > 1:
-        references = list()
+        references = []
         for vulnerability_id in vulnerability_ids[1:]:
             references.append(vulnerability_id)
         return references

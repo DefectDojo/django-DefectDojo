@@ -1,8 +1,9 @@
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
-class Inspector(object):
+class Inspector:
     def get_item(self, finding: dict, test):
         finding_id = finding.get("Id", "")
         title = finding.get("Title", "")

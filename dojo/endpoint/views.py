@@ -1,30 +1,38 @@
 import logging
 from datetime import datetime
+
 from dateutil.relativedelta import relativedelta
-from django.contrib import messages
+from django.apps import apps
 from django.conf import settings
-from django.urls import reverse
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
+from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import Q, QuerySet, Count
+from django.db.models import Count, Q, QuerySet
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils import timezone
 
-from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
-from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
-from dojo.forms import EditEndpointForm, \
-    DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm, ImportEndpointMetaForm
-from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, Product_Tab, calculate_grade, redirect, \
-    add_error_message_to_response, is_scan_file_too_large, get_system_setting
-from dojo.notifications.helper import create_notification
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.endpoint.queries import get_authorized_endpoints
-from django.apps import apps
-
+from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
+from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
+from dojo.forms import AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm, EditEndpointForm, ImportEndpointMetaForm
+from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
+from dojo.notifications.helper import create_notification
+from dojo.utils import (
+    Product_Tab,
+    add_breadcrumb,
+    add_error_message_to_response,
+    calculate_grade,
+    get_page_items,
+    get_period_counts,
+    get_system_setting,
+    is_scan_file_too_large,
+    redirect,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -215,9 +223,9 @@ def delete_endpoint(request, eid):
                                      'Endpoint and relationships removed.',
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='Deletion of %s' % endpoint,
+                                    title=f'Deletion of {endpoint}',
                                     product=product,
-                                    description='The endpoint "%s" was deleted by %s' % (endpoint, request.user),
+                                    description=f'The endpoint "{endpoint}" was deleted by {request.user}',
                                     url=reverse('endpoint'),
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
@@ -279,7 +287,7 @@ def add_product_endpoint(request):
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('endpoint') + "?product=%s" % form.product.id)
+            return HttpResponseRedirect(reverse('endpoint') + f"?product={form.product.id}")
     add_breadcrumb(title="Add Endpoint", top_level=False, request=request)
     return render(request,
                   'dojo/add_endpoint.html',
@@ -373,12 +381,12 @@ def endpoint_bulk_update_all(request, pid=None):
                 calculate_grade(prod)
 
             if skipped_endpoint_count > 0:
-                add_error_message_to_response('Skipped deletion of {} endpoints because you are not authorized.'.format(skipped_endpoint_count))
+                add_error_message_to_response(f'Skipped deletion of {skipped_endpoint_count} endpoints because you are not authorized.')
 
             if deleted_endpoint_count > 0:
                 messages.add_message(request,
                     messages.SUCCESS,
-                    'Bulk delete of {} endpoints was successful.'.format(deleted_endpoint_count),
+                    f'Bulk delete of {deleted_endpoint_count} endpoints was successful.',
                     extra_tags='alert-success')
         else:
             if endpoints_to_update:
@@ -393,7 +401,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 updated_endpoint_count = endpoints.count()
 
                 if skipped_endpoint_count > 0:
-                    add_error_message_to_response('Skipped mitigation of {} endpoints because you are not authorized.'.format(skipped_endpoint_count))
+                    add_error_message_to_response(f'Skipped mitigation of {skipped_endpoint_count} endpoints because you are not authorized.')
 
                 eps_count = Endpoint_Status.objects.filter(endpoint__in=endpoints).update(
                     mitigated=True,
@@ -405,8 +413,7 @@ def endpoint_bulk_update_all(request, pid=None):
                 if updated_endpoint_count > 0:
                     messages.add_message(request,
                                         messages.SUCCESS,
-                                        'Bulk mitigation of {} endpoints ({} endpoint statuses) was successful.'.format(
-                                            updated_endpoint_count, eps_count),
+                                        f'Bulk mitigation of {updated_endpoint_count} endpoints ({eps_count} endpoint statuses) was successful.',
                                         extra_tags='alert-success')
             else:
                 messages.add_message(request,
@@ -489,7 +496,7 @@ def import_endpoint_meta(request, pid):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                    f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB",
                     extra_tags='alert-danger')
 
             create_endpoints = form.cleaned_data['create_endpoints']
@@ -500,7 +507,7 @@ def import_endpoint_meta(request, pid):
                 endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin='UI', request=request)
             except Exception as e:
                 logger.exception(e)
-                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+                add_error_message_to_response(f'An exception error occurred during the report import:{str(e)}')
             return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
 
     add_breadcrumb(title="Endpoint Meta Importer", top_level=False, request=request)

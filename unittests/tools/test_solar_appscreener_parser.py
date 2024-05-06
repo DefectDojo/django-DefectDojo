@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.solar_appscreener.parser import SolarAppscreenerParser
 from dojo.models import Test
+from dojo.tools.solar_appscreener.parser import SolarAppscreenerParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestSolarAppscreenerParser(DojoTestCase):

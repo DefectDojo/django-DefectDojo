@@ -2,12 +2,13 @@ import hashlib
 import json
 import logging
 import re
-from typing import Union, List
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+from typing import List, Union
+
+from dojo.models import Endpoint, Finding
 
 
-class WhiteHatSentinelParser(object):
+class WhiteHatSentinelParser:
     """
     A class to parse WhiteHat Sentinel vulns from the WhiteHat Sentinel API vuln?query_site=[
     SITE_ID]&format=json&display_attack_vectors=all&display_custom_risk=1&display_risk=1&display_description=custom
@@ -28,7 +29,7 @@ class WhiteHatSentinelParser(object):
         findings_collection = json.load(file)
 
         if not findings_collection.keys():
-            return list()
+            return []
 
         # Make sure the findings key exists in the dictionary and that it is
         # not null or an empty list
@@ -36,9 +37,8 @@ class WhiteHatSentinelParser(object):
             "collection" not in findings_collection.keys()
             or not findings_collection["collection"]
         ):
-            raise ValueError(
-                "collection key not present or there were not findings present."
-            )
+            msg = "collection key not present or there were not findings present."
+            raise ValueError(msg)
 
         # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo
         # findings
@@ -198,7 +198,7 @@ class WhiteHatSentinelParser(object):
             test: The test ID that the DefectDojo finding should be associated with
         Returns: A DefectDojo Finding object
         """
-        dupes = dict()
+        dupes = {}
 
         for whitehat_vuln in whitehat_sentinel_vulns:
             date_created = whitehat_vuln["found"].split("T")[0]

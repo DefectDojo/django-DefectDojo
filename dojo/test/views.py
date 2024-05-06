@@ -1,49 +1,83 @@
 # #  tests
-from django.db.models.query import Prefetch
-from dojo.engagement.queries import get_authorized_engagements
-from dojo.importers.utils import construct_imported_message
+import base64
 import logging
 import operator
-import base64
 from datetime import datetime
-from django.conf import settings
+from functools import reduce
+from typing import Tuple
+
 from django.contrib import messages
+from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
-from django.urls import reverse, Resolver404
-from django.db.models import Q, QuerySet, Count
-from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.cache import cache_page
+from django.db import DEFAULT_DB_ALIAS
+from django.db.models import Count, Q, QuerySet
+from django.db.models.query import Prefetch
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import Resolver404, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.contrib.admin.utils import NestedObjects
-from django.db import DEFAULT_DB_ALIAS
-
-from dojo.filters import TemplateFindingFilter, FindingFilter, TestImportFilter, FindingFilterWithoutObjectLookups
-from dojo.forms import NoteForm, TestForm, \
-    DeleteTestForm, AddFindingForm, TypedNoteForm, \
-    ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
-    FindingBulkUpdateForm, CopyTestForm
-from dojo.models import IMPORT_UNTOUCHED_FINDING, Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Test_Import, Product_API_Scan_Configuration, Test_Import_Finding_Action
-
-from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
-from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
-    Product_Tab, is_scan_file_too_large, get_words_for_field, get_setting, async_delete, redirect_to_return_url_or_else, calculate_grade
-from dojo.notifications.helper import create_notification
-from dojo.finding.views import find_available_notetypes
-from functools import reduce
-import dojo.jira_link.helper as jira_helper
-import dojo.finding.helper as finding_helper
-from django.views.decorators.vary import vary_on_cookie
 from django.views import View
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
-from dojo.test.queries import get_authorized_tests
-from dojo.user.queries import get_authorized_users
-from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 
+import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
+from dojo.finding.views import find_available_notetypes
+from dojo.forms import (
+    AddFindingForm,
+    CopyTestForm,
+    DeleteTestForm,
+    FindingBulkUpdateForm,
+    JIRAFindingForm,
+    JIRAImportScanForm,
+    NoteForm,
+    ReImportScanForm,
+    TestForm,
+    TypedNoteForm,
+)
+from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.models import (
+    IMPORT_UNTOUCHED_FINDING,
+    BurpRawRequestResponse,
+    Cred_Mapping,
+    Endpoint,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    Note_Type,
+    Product_API_Scan_Configuration,
+    Stub_Finding,
+    Test,
+    Test_Import,
+    Test_Import_Finding_Action,
+)
+from dojo.notifications.helper import create_notification
+from dojo.test.queries import get_authorized_tests
+from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
+from dojo.user.queries import get_authorized_users
+from dojo.utils import (
+    Product_Tab,
+    add_breadcrumb,
+    add_error_message_to_response,
+    add_field_errors_to_response,
+    add_success_message_to_response,
+    async_delete,
+    calculate_grade,
+    get_cal_event,
+    get_page_items,
+    get_page_items_and_count,
+    get_setting,
+    get_system_setting,
+    get_words_for_field,
+    process_notifications,
+    redirect_to_return_url_or_else,
+)
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -301,9 +335,9 @@ def delete_test(request, tid):
                                      message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                    title=_('Deletion of %(title)s') % {"title": test.title},
+                                    title=_(f"Deletion of {test.title}"),
                                     product=product,
-                                    description=_('The test "%(title)s" was deleted by %(user)s') % {"title": test.title, "user": request.user},
+                                    description=_(f'The test "{test.title}" was deleted by {request.user}'),
                                     url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
                                     recipients=[test.engagement.lead],
                                     icon="exclamation-triangle")
@@ -347,8 +381,8 @@ def copy_test(request, tid):
                 'Test Copied successfully.',
                 extra_tags='alert-success')
             create_notification(event='other',
-                                title='Copying of %s' % test.title,
-                                description='The test "%s" was copied by %s to %s' % (test.title, request.user, engagement.name),
+                                title=f'Copying of {test.title}',
+                                description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_test', args=(test_copy.id,))),
                                 recipients=[test.engagement.lead],
@@ -404,23 +438,21 @@ def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
     end_date = datetime.combine(test.target_end, datetime.max.time())
-    uid = "dojo_test_%d_%d_%d" % (test.id, test.engagement.id, test.engagement.product.id)
-    cal = get_cal_event(start_date,
-                        end_date,
-                        _("Test: %(test_type_name)s (%(product_name)s)") % {
-                            'test_type_name': test.test_type.name,
-                            'product_name': test.engagement.product.name
-                        },
-                        _("Set aside for test %(test_type_name)s, on product %(product_name)s. Additional detail can be found at %(detail_url)s") % {
-                            'test_type_name': test.test_type.name,
-                            'product_name': test.engagement.product.name,
-                            'detail_url': request.build_absolute_uri((reverse("view_test", args=(test.id,))))
-                        },
-                        uid)
+    uid = f"dojo_test_{test.id}_{test.engagement.id}_{test.engagement.product.id}"
+    cal = get_cal_event(
+        start_date,
+        end_date,
+        _(f"Test: {test.test_type.name} ({test.engagement.product.name}"),
+        _(
+            f"Set aside for test {test.test_type.name}, on product {test.engagement.product.name}. "
+            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_test', args=(test.id,)))}"
+        ),
+        uid
+    )
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'
-    response['Content-Disposition'] = 'attachment; filename=%s.ics' % test.test_type.name
+    response['Content-Disposition'] = f'attachment; filename={test.test_type.name}.ics'
     return response
 
 
@@ -595,11 +627,9 @@ class AddFindingView(View):
             # Create a notification
             create_notification(
                 event='other',
-                title=_('Addition of %(title)s') % {'title': finding.title},
+                title=_(f'Addition of {finding.title}'),
                 finding=finding,
-                description=_('Finding "%(title)s" was added by %(user)s') % {
-                    'title': finding.title, 'user': request.user
-                },
+                description=_(f'Finding "{finding.title}" was added by {request.user}'),
                 url=reverse("view_finding", args=(finding.id,)),
                 icon="exclamation-triangle")
             # Add a success message
@@ -658,7 +688,7 @@ def add_temp_finding(request, tid, fid):
         form = AddFindingForm(request.POST, req_resp=None, product=test.engagement.product)
         if jira_helper.get_jira_project(test):
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
-            logger.debug('jform valid: %s', jform.is_valid())
+            logger.debug(f'jform valid: {jform.is_valid()}')
 
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
@@ -703,7 +733,7 @@ def add_temp_finding(request, tid, fid):
                     if jform.cleaned_data.get('push_to_jira'):
                         jira_helper.push_to_jira(new_finding)
                 else:
-                    add_error_message_to_response('jira form validation failed: %s' % jform.errors)
+                    add_error_message_to_response(f'jira form validation failed: {jform.errors}')
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse(
                     finding=new_finding,
@@ -743,12 +773,6 @@ def add_temp_finding(request, tid, fid):
         if jira_helper.get_jira_project(test):
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
-    # logger.debug('form valid: %s', form.is_valid())
-    # logger.debug('jform valid: %s', jform.is_valid())
-    # logger.debug('form errors: %s', form.errors)
-    # logger.debug('jform errors: %s', jform.errors)
-    # logger.debug('jform errors: %s', vars(jform))
-
     product_tab = Product_Tab(test.engagement.product, title=_("Add Finding"), tab="engagements")
     product_tab.setEngagement(test.engagement)
     return render(request, 'dojo/add_findings.html',
@@ -782,121 +806,281 @@ def search(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid')
-def re_import_scan_results(request, tid):
-    additional_message = _("When re-uploading a scan, any findings not found in original scan will be updated as "
-                           "mitigated.  The process attempts to identify the differences, however manual verification "
-                           "is highly recommended.")
-    test = get_object_or_404(Test, id=tid)
-    # by default we keep a trace of the scan_type used to create the test
-    # if it's not here, we use the "name" of the test type
-    # this feature exists to provide custom label for tests for some parsers
-    if test.scan_type:
-        scan_type = test.scan_type
-    else:
-        scan_type = test.test_type.name
-    engagement = test.engagement
-    form = ReImportScanForm(test=test)
-    jform = None
-    jira_project = jira_helper.get_jira_project(test)
-    push_all_jira_issues = jira_helper.is_push_all_issues(test)
+class ReImportScanResultsView(View):
+    def get_template(self) -> str:
+        """
+        Returns the template that will be presented to the user
+        """
+        return "dojo/import_scan_results.html"
 
-    # Decide if we need to present the Push to JIRA form
-    if get_system_setting('enable_jira') and jira_project:
-        jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
+    def get_form(
+        self,
+        request: HttpRequest,
+        test: Test,
+        **kwargs: dict,
+    ) -> ReImportScanForm:
+        """
+        Returns the default import form for importing findings
+        """
+        if request.method == "POST":
+            return ReImportScanForm(request.POST, request.FILES, test=test, **kwargs)
+        else:
+            return ReImportScanForm(test=test, **kwargs)
 
-    if request.method == "POST":
-        form = ReImportScanForm(request.POST, request.FILES, test=test)
-        if jira_project:
-            jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
-        if form.is_valid() and (jform is None or jform.is_valid()):
-            scan_date = form.cleaned_data['scan_date']
+    def get_jira_form(
+        self,
+        request: HttpRequest,
+        test: Test,
+    ) -> Tuple[JIRAImportScanForm | None, bool]:
+        """
+        Returns a JiraImportScanForm if jira is enabled
+        """
+        jira_form = None
+        push_all_jira_issues = False
+        # Decide if we need to present the Push to JIRA form
+        if get_system_setting('enable_jira'):
+            # Determine if jira issues should be pushed automatically
+            push_all_jira_issues = jira_helper.is_push_all_issues(test)
+            # Only return the form if the jira is enabled on this engagement or product
+            if jira_helper.get_jira_project(test):
+                if request.method == "POST":
+                    jira_form = JIRAImportScanForm(
+                        request.POST,
+                        push_all=push_all_jira_issues,
+                        prefix='jiraform'
+                    )
+                else:
+                    jira_form = JIRAImportScanForm(
+                        push_all=push_all_jira_issues,
+                        prefix='jiraform'
+                    )
+        return jira_form, push_all_jira_issues
 
-            minimum_severity = form.cleaned_data['minimum_severity']
-            scan = request.FILES.get('file', None)
-            activeChoice = form.cleaned_data.get('active', None)
-            verifiedChoice = form.cleaned_data.get('verified', None)
-            do_not_reactivate = form.cleaned_data['do_not_reactivate']
-            tags = form.cleaned_data['tags']
-            version = form.cleaned_data.get('version', None)
-            branch_tag = form.cleaned_data.get('branch_tag', None)
-            build_id = form.cleaned_data.get('build_id', None)
-            commit_hash = form.cleaned_data.get('commit_hash', None)
-            api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
-            service = form.cleaned_data.get('service', None)
+    def handle_request(
+        self,
+        request: HttpRequest,
+        test_id: int,
+    ) -> Tuple[HttpRequest, dict]:
+        """
+        Process the common behaviors between request types, and then return
+        the request and context dict back to be rendered
+        """
+        # Get the test object
+        test = get_object_or_404(Test, id=test_id)
+        # Ensure the supplied user has access to import to the engagement or product
+        user_has_permission_or_403(request.user, test, Permissions.Import_Scan_Result)
+        # by default we keep a trace of the scan_type used to create the test
+        # if it's not here, we use the "name" of the test type
+        # this feature exists to provide custom label for tests for some parsers
+        if test.scan_type:
+            scan_type = test.scan_type
+        else:
+            scan_type = test.test_type.name
+        # Set the product tab
+        product_tab = Product_Tab(test.engagement.product, title=_(f"Re-upload a {scan_type}"), tab="engagements")
+        product_tab.setEngagement(test.engagement)
+        # Get the import form with some initial data in place
+        form = self.get_form(
+            request,
+            test,
+            endpoints=Endpoint.objects.filter(product__id=product_tab.product.id),
+            api_scan_configuration=test.api_scan_configuration,
+            api_scan_configuration_queryset=Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id),
+        )
+        # Get the jira form
+        jira_form, push_all_jira_issues = self.get_jira_form(request, test)
+        # Return the request and the context
+        return request, {
+            "test": test,
+            "form": form,
+            "product_tab": product_tab,
+            "eid": test.engagement.id,
+            "jform": jira_form,
+            "scan_type": scan_type,
+            "scan_types": get_scan_types_sorted(),
+            "push_all_jira_issues": push_all_jira_issues,
+            "additional_message": (
+                "When re-uploading a scan, any findings not found in original scan will be updated as "
+                "mitigated.  The process attempts to identify the differences, however manual verification "
+                "is highly recommended."
+            ),
+        }
 
-            endpoints_to_add = None  # not available on reimport UI
+    def validate_forms(
+        self,
+        context: dict,
+    ) -> bool:
+        """
+        Validates each of the forms to ensure all errors from the form
+        level are bubbled up to the user first before we process too much
+        """
+        form_validation_list = []
+        if context.get("form") is not None:
+            form_validation_list.append(context.get("form").is_valid())
+        if context.get("jform") is not None:
+            form_validation_list.append(context.get("jform").is_valid())
+        return all(form_validation_list)
 
-            close_old_findings = form.cleaned_data.get('close_old_findings', True)
+    def process_form(
+        self,
+        request: HttpRequest,
+        form: ReImportScanForm,
+        context: dict,
+    ) -> str | None:
+        """
+        Process the form and manipulate the input in any way that is appropriate
+        """
+        # Update the running context dict with cleaned form input
+        context.update({
+            "scan": request.FILES.get("file", None),
+            "scan_date": form.cleaned_data.get("scan_date"),
+            "minimum_severity": form.cleaned_data.get("minimum_severity"),
+            "do_not_reactivate": form.cleaned_data.get("do_not_reactivate"),
+            "tags": form.cleaned_data.get("tags"),
+            "version": form.cleaned_data.get("version"),
+            "branch_tag": form.cleaned_data.get("branch_tag", None),
+            "build_id": form.cleaned_data.get("build_id", None),
+            "commit_hash": form.cleaned_data.get("commit_hash", None),
+            "api_scan_configuration": form.cleaned_data.get("api_scan_configuration", None),
+            "service": form.cleaned_data.get("service", None),
+            "apply_tags_to_findings": form.cleaned_data.get("apply_tags_to_findings", False),
+            "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
+            "group_by": form.cleaned_data.get("group_by", None),
+            "close_old_findings": form.cleaned_data.get("close_old_findings", None),
+            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
+        })
+        # Override the form values of active and verified
+        if activeChoice := form.cleaned_data.get('active', None):
+            if activeChoice == 'force_to_true':
+                context["active"] = True
+            elif activeChoice == 'force_to_false':
+                context["active"] = False
+        if verifiedChoice := form.cleaned_data.get('verified', None):
+            if verifiedChoice == 'force_to_true':
+                context["verified"] = True
+            elif verifiedChoice == 'force_to_false':
+                context["verified"] = False
+        # Override the tags and version
+        context.get("test").tags = context.get("tags")
+        context.get("test").version = context.get("version")
+        return None
 
-            group_by = form.cleaned_data.get('group_by', None)
-            create_finding_groups_for_all_findings = form.cleaned_data.get('create_finding_groups_for_all_findings')
-            apply_tags_to_findings = form.cleaned_data.get('apply_tags_to_findings', False)
-            apply_tags_to_endpoints = form.cleaned_data.get('apply_tags_to_endpoints', False)
+    def process_jira_form(
+        self,
+        request: HttpRequest,
+        form: JIRAImportScanForm,
+        context: dict,
+    ) -> str | None:
+        """
+        Process the jira form by first making sure one was supplied
+        and then setting any values supplied by the user. An error
+        may be returned and will be bubbled up in the form of a message
+        """
+        # Determine if push all issues is enabled
+        push_all_jira_issues = context.get("push_all_jira_issues", False)
+        context["push_to_jira"] = push_all_jira_issues or (form and form.cleaned_data.get("push_to_jira"))
+        return None
 
-            active = None
-            if activeChoice:
-                if activeChoice == 'force_to_true':
-                    active = True
-                elif activeChoice == 'force_to_false':
-                    active = False
-            verified = None
-            if verifiedChoice:
-                if verifiedChoice == 'force_to_true':
-                    verified = True
-                elif verifiedChoice == 'force_to_false':
-                    verified = False
+    def reimport_findings(
+        self,
+        context: dict,
+    ) -> str | None:
+        """
+        Attempt to import with all the supplied information
+        """
+        try:
+            importer_client = DefaultReImporter()
+            (
+                context["test"],
+                finding_count,
+                new_finding_count,
+                closed_finding_count,
+                reactivated_finding_count,
+                untouched_finding_count,
+                _,
+            ) = importer_client.process_scan(
+                **context,
+            )
+            # Add a message to the view for the user to see the results
+            add_success_message_to_response(importer_client.construct_imported_message(
+                context.get("scan_type"),
+                Test_Import.REIMPORT_TYPE,
+                finding_count=finding_count,
+                new_finding_count=new_finding_count,
+                closed_finding_count=closed_finding_count,
+                reactivated_finding_count=reactivated_finding_count,
+                untouched_finding_count=untouched_finding_count,
+                close_old_findings=context.get("close_old_findings"),
+            ))
+        except Exception as e:
+            logger.exception(e)
+            return f"An exception error occurred during the report import: {e}"
+        return None
 
-            # Tags are replaced, same behaviour as with django-tagging
-            test.tags = tags
-            test.version = version
-            if scan and is_scan_file_too_large(scan):
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     _("Report file is too large. Maximum supported size is %(size)d MB") % {'size': settings.SCAN_FILE_MAX_SIZE},
-                                     extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
+    def success_redirect(
+        self,
+        context: dict,
+    ) -> HttpResponseRedirect:
+        """
+        Redirect the user to a place that indicates a successful import
+        """
+        return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
 
-            push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
-            error = False
-            finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0
-            reimporter = ReImporter()
-            try:
-                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count, _test_import = \
-                    reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
-                                                tags=tags, minimum_severity=minimum_severity,
-                                                endpoints_to_add=endpoints_to_add, scan_date=scan_date,
-                                                version=version, branch_tag=branch_tag, build_id=build_id,
-                                                commit_hash=commit_hash, push_to_jira=push_to_jira,
-                                                close_old_findings=close_old_findings, group_by=group_by,
-                                                api_scan_configuration=api_scan_configuration, service=service, do_not_reactivate=do_not_reactivate,
-                                                create_finding_groups_for_all_findings=create_finding_groups_for_all_findings,
-                                                apply_tags_to_findings=apply_tags_to_findings, apply_tags_to_endpoints=apply_tags_to_endpoints)
-            except Exception as e:
-                logger.exception(e)
-                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
-                error = True
+    def failure_redirect(
+        self,
+        context: dict,
+    ) -> HttpResponseRedirect:
+        """
+        Redirect the user to a place that indicates a failed import
+        """
+        return HttpResponseRedirect(reverse(
+            "re_import_scan_results",
+            args=(context.get("test").id, ),
+        ))
 
-            if not error:
-                message = construct_imported_message(scan_type, finding_count, new_finding_count=new_finding_count,
-                                                        closed_finding_count=closed_finding_count,
-                                                        reactivated_finding_count=reactivated_finding_count,
-                                                        untouched_finding_count=untouched_finding_count)
-                add_success_message_to_response(message)
+    def get(
+        self,
+        request: HttpRequest,
+        test_id: int,
+    ) -> HttpResponse:
+        """
+        Process GET requests for the ReImport View
+        """
+        # process the request and path parameters
+        request, context = self.handle_request(
+            request,
+            test_id=test_id,
+        )
+        # Render the form
+        return render(request, self.get_template(), context)
 
-            return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
-
-    product_tab = Product_Tab(engagement.product, title=_("Re-upload a %(scan_type)s") % {"scan_type": scan_type}, tab="engagements")
-    product_tab.setEngagement(engagement)
-    form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    form.initial['api_scan_configuration'] = test.api_scan_configuration
-    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
-    return render(request,
-                  'dojo/import_scan_results.html',
-                  {'form': form,
-                   'product_tab': product_tab,
-                   'eid': engagement.id,
-                   'additional_message': additional_message,
-                   'jform': jform,
-                   'scan_types': get_scan_types_sorted(),
-                   })
+    def post(
+        self,
+        request: HttpRequest,
+        test_id: int,
+    ) -> HttpResponse:
+        """
+        Process POST requests for the ReImport View
+        """
+        # process the request and path parameters
+        request, context = self.handle_request(
+            request,
+            test_id=test_id,
+        )
+        # ensure all three forms are valid first before moving forward
+        if not self.validate_forms(context):
+            return self.failure_redirect(context)
+        # Process the jira form if it is present
+        if form_error := self.process_jira_form(request, context.get("jform"), context):
+            add_error_message_to_response(form_error)
+            return self.failure_redirect(context)
+        # Process the import form
+        if form_error := self.process_form(request, context.get("form"), context):
+            add_error_message_to_response(form_error)
+            return self.failure_redirect(context)
+        # Kick off the import process
+        if import_error := self.reimport_findings(context):
+            add_error_message_to_response(import_error)
+            return self.failure_redirect(context)
+        # Otherwise return the user back to the engagement (if present) or the product
+        return self.success_redirect(context)

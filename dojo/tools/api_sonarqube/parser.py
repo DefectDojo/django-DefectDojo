@@ -1,10 +1,9 @@
 from .importer import SonarQubeApiImporter
 
-
 SCAN_SONARQUBE_API = "SonarQube API Import"
 
 
-class ApiSonarQubeParser(object):
+class ApiSonarQubeParser:
     def get_scan_types(self):
         return [SCAN_SONARQUBE_API]
 

@@ -1,11 +1,13 @@
-import json
 import hashlib
+import json
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+
 from cpe import CPE
 
+from dojo.models import Endpoint, Finding
 
-class TrustwaveFusionAPIParser(object):
+
+class TrustwaveFusionAPIParser:
     """
     Import Trustwave Fusion Report from its API in JSON format
     """

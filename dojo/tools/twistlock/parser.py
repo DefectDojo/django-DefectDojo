@@ -10,7 +10,7 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class TwistlockCSVParser(object):
+class TwistlockCSVParser:
     def parse_issue(self, row, test):
         if not row:
             return None
@@ -56,9 +56,7 @@ class TwistlockCSVParser(object):
             duplicate=False,
             out_of_scope=False,
             mitigated=None,
-            severity_justification="(CVSS v3 base score: {})".format(
-                data_cvss
-            ),
+            severity_justification=f"(CVSS v3 base score: {data_cvss})",
             impact=data_severity,
         )
         finding.description = finding.description.strip()
@@ -71,7 +69,7 @@ class TwistlockCSVParser(object):
         if filename is None:
             return
         content = filename.read()
-        dupes = dict()
+        dupes = {}
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
@@ -94,12 +92,12 @@ class TwistlockCSVParser(object):
         return list(dupes.values())
 
 
-class TwistlockJsonParser(object):
+class TwistlockJsonParser:
     def parse(self, json_output, test):
         tree = self.parse_json(json_output)
         items = []
         if tree:
-            items = [data for data in self.get_items(tree, test)]
+            items = list(self.get_items(tree, test))
         return items
 
     def parse_json(self, json_output):
@@ -110,7 +108,8 @@ class TwistlockJsonParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -179,9 +178,7 @@ def get_item(vulnerability, test):
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
-        severity_justification="{} (CVSS v3 base score: {})\n\n{}".format(
-            vector, cvss, riskFactors
-        ),
+        severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
         impact=severity,
     )
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
@@ -205,7 +202,7 @@ def convert_severity(severity):
         return severity.title()
 
 
-class TwistlockParser(object):
+class TwistlockParser:
     def get_scan_types(self):
         return ["Twistlock Image Scan"]
 
@@ -217,11 +214,12 @@ class TwistlockParser(object):
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".json"):
             return TwistlockJsonParser().parse(filename, test)
         elif filename.name.lower().endswith(".csv"):
             return TwistlockCSVParser().parse(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

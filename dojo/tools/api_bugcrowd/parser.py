@@ -1,13 +1,15 @@
 import json
+import logging
+import re
 import textwrap
 from datetime import datetime
-from dojo.models import Endpoint, Finding
-from .importer import BugcrowdApiImporter
-import re
+
 import dateutil.parser
-import logging
 from django.core.exceptions import ValidationError
 
+from dojo.models import Endpoint, Finding
+
+from .importer import BugcrowdApiImporter
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
 
@@ -16,7 +18,7 @@ pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 logger = logging.getLogger(__name__)
 
 
-class ApiBugcrowdParser(object):
+class ApiBugcrowdParser:
     """
     Import from Bugcrowd API /submissions
     """
@@ -158,15 +160,11 @@ class ApiBugcrowdParser(object):
                         finding.unsaved_endpoints = [bug_endpoint]
                     except Exception as e:
                         logger.error(
-                            "{} bug url from bugcrowd failed to parse to endpoint, error= {}".format(
-                                str(bug_endpoint), e
-                            )
+                            f"{str(bug_endpoint)} bug url from bugcrowd failed to parse to endpoint, error= {e}"
                         )
                 except ValidationError:
                     logger.error(
-                        "Broken Bugcrowd endpoint {} was skipped.".format(
-                            bug_endpoint.host
-                        )
+                        f"Broken Bugcrowd endpoint {bug_endpoint.host} was skipped."
                     )
 
             findings.append(finding)
@@ -202,11 +200,12 @@ class ApiBugcrowdParser(object):
         if entry["attributes"]["state"] in allowed_states:
             return True
         else:
-            raise ValueError(
+            msg = (
                 "{} not in allowed bugcrowd submission states".format(
                     entry["attributes"]["state"]
                 )
             )
+            raise ValueError(msg)
 
     def convert_log_timestamp(self, timestamp):
         """Convert a log entry's timestamp to a DefectDojo date"""

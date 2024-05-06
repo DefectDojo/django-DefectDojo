@@ -2,10 +2,11 @@ import datetime
 
 from cpe import CPE
 from defusedxml.ElementTree import parse
+
 from dojo.models import Endpoint, Finding
 
 
-class NmapParser(object):
+class NmapParser:
     def get_scan_types(self):
         return ["Nmap Scan"]
 
@@ -18,9 +19,10 @@ class NmapParser(object):
     def get_findings(self, file, test):
         tree = parse(file)
         root = tree.getroot()
-        dupes = dict()
+        dupes = {}
         if "nmaprun" not in root.tag:
-            raise ValueError("This doesn't seem to be a valid Nmap xml file.")
+            msg = "This doesn't seem to be a valid Nmap xml file."
+            raise ValueError(msg)
 
         report_date = None
         try:
@@ -35,7 +37,7 @@ class NmapParser(object):
 
             ip = host.find("address[@addrtype='ipv4']").attrib["addr"]
             if ip is not None:
-                host_info += "**IP Address:** %s\n" % ip
+                host_info += f"**IP Address:** {ip}\n"
 
             fqdn = (
                 host.find("hostnames/hostname[@type='PTR']").attrib["name"]
@@ -43,7 +45,7 @@ class NmapParser(object):
                 else None
             )
             if fqdn is not None:
-                host_info += "**FQDN:** %s\n" % fqdn
+                host_info += f"**FQDN:** {fqdn}\n"
 
             host_info += "\n\n"
 
@@ -51,10 +53,10 @@ class NmapParser(object):
                 for os_match in os.iter("osmatch"):
                     if "name" in os_match.attrib:
                         host_info += (
-                            "**Host OS:** %s\n" % os_match.attrib["name"]
+                            "**Host OS:** {}\n".format(os_match.attrib["name"])
                         )
                     if "accuracy" in os_match.attrib:
-                        host_info += "**Accuracy:** {0}%\n".format(
+                        host_info += "**Accuracy:** {}%\n".format(
                             os_match.attrib["accuracy"]
                         )
 
@@ -74,31 +76,25 @@ class NmapParser(object):
                 # filter on open ports
                 if "open" != port_element.find("state").attrib.get("state"):
                     continue
-                title = "Open port: %s/%s" % (endpoint.port, endpoint.protocol)
+                title = f"Open port: {endpoint.port}/{endpoint.protocol}"
                 description = host_info
-                description += "**Port/Protocol:** %s/%s\n" % (
-                    endpoint.port,
-                    endpoint.protocol,
-                )
+                description += f"**Port/Protocol:** {endpoint.port}/{endpoint.protocol}\n"
 
                 service_info = "\n\n"
                 if port_element.find("service") is not None:
                     if "product" in port_element.find("service").attrib:
                         service_info += (
-                            "**Product:** %s\n"
-                            % port_element.find("service").attrib["product"]
+                            "**Product:** {}\n".format(port_element.find("service").attrib["product"])
                         )
 
                     if "version" in port_element.find("service").attrib:
                         service_info += (
-                            "**Version:** %s\n"
-                            % port_element.find("service").attrib["version"]
+                            "**Version:** {}\n".format(port_element.find("service").attrib["version"])
                         )
 
                     if "extrainfo" in port_element.find("service").attrib:
                         service_info += (
-                            "**Extra Info:** %s\n"
-                            % port_element.find("service").attrib["extrainfo"]
+                            "**Extra Info:** {}\n".format(port_element.find("service").attrib["extrainfo"])
                         )
 
                     description += service_info
@@ -129,7 +125,7 @@ class NmapParser(object):
                         mitigation="N/A",
                         impact="No impact provided",
                     )
-                    find.unsaved_endpoints = list()
+                    find.unsaved_endpoints = []
                     dupes[dupe_key] = find
                     if report_date:
                         find.date = report_date
@@ -163,7 +159,7 @@ class NmapParser(object):
             component_cpe = CPE(component_element.attrib["key"])
             for vuln in component_element.findall("table"):
                 # convert elements in dict
-                vuln_attributes = dict()
+                vuln_attributes = {}
                 for elem in vuln.findall("elem"):
                     vuln_attributes[elem.attrib["key"].lower()] = elem.text
 

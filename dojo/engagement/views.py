@@ -1,70 +1,110 @@
-import logging
 import csv
-import re
-from typing import List
-from django.views import View
-from openpyxl import Workbook
-from openpyxl.styles import Font
-from tempfile import NamedTemporaryFile
-
-from datetime import datetime
+import logging
 import operator
-from django.contrib.auth.models import User
+import re
+from datetime import datetime
+from functools import reduce
+from tempfile import NamedTemporaryFile
+from time import strftime
+from typing import List, Tuple
+
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.urls import reverse, Resolver404
-from django.db.models import Q, Count
-from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse, QueryDict, HttpRequest
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.cache import cache_page
-from django.utils import timezone
-from time import strftime
 from django.contrib.admin.utils import NestedObjects
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models import Count, Q
+from django.db.models.query import Prefetch, QuerySet
+from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import Resolver404, reverse
+from django.utils import timezone
+from django.views import View
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
+from openpyxl import Workbook
+from openpyxl.styles import Font
 
+import dojo.jira_link.helper as jira_helper
+import dojo.notifications.helper as notifications_helper
+import dojo.risk_acceptance.helper as ra_helper
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.utils import save_endpoints_to_add
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
-    EngagementFilter,
-    EngagementFilterWithoutObjectLookups,
     EngagementDirectFilter,
     EngagementDirectFilterWithoutObjectLookups,
+    EngagementFilter,
+    EngagementFilterWithoutObjectLookups,
     EngagementTestFilter,
-    EngagementTestFilterWithoutObjectLookups
+    EngagementTestFilterWithoutObjectLookups,
+    ProductEngagementsFilter,
+    ProductEngagementsFilterWithoutObjectLookups,
 )
-from dojo.forms import CheckForm, \
-    UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
-    EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
-    CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
-    EditRiskAcceptanceForm
-
-from dojo.models import Finding, Product, Engagement, Test, \
-    Check_List, Test_Import, Notes, \
-    Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, System_Settings, Note_Type, Product_API_Scan_Configuration
-from dojo.tools.factory import get_scan_types_sorted
-from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, async_delete, \
-    get_system_setting, get_setting, redirect_to_return_url_or_else, get_return_url, calculate_grade
-from dojo.notifications.helper import create_notification
-from dojo.finding.views import find_available_notetypes
-from functools import reduce
-from django.db.models.query import Prefetch, QuerySet
-import dojo.jira_link.helper as jira_helper
-import dojo.risk_acceptance.helper as ra_helper
-from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
-from django.views.decorators.vary import vary_on_cookie
-from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.views import find_available_notetypes
+from dojo.forms import (
+    AddFindingsRiskAcceptanceForm,
+    CheckForm,
+    CredMappingForm,
+    DeleteEngagementForm,
+    DoneForm,
+    EditRiskAcceptanceForm,
+    EngForm,
+    ImportScanForm,
+    JIRAEngagementForm,
+    JIRAImportScanForm,
+    JIRAProjectForm,
+    NoteForm,
+    ReplaceRiskAcceptanceProofForm,
+    RiskAcceptanceForm,
+    TestForm,
+    TypedNoteForm,
+    UploadThreatForm,
+)
+from dojo.importers.default_importer import DefaultImporter
+from dojo.models import (
+    Check_List,
+    Cred_Mapping,
+    Development_Environment,
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    Finding,
+    Note_Type,
+    Notes,
+    Product,
+    Product_API_Scan_Configuration,
+    Risk_Acceptance,
+    System_Settings,
+    Test,
+    Test_Import,
+)
+from dojo.notifications.helper import create_notification
 from dojo.product.queries import get_authorized_products
-from dojo.engagement.queries import get_authorized_engagements
+from dojo.risk_acceptance.helper import prefetch_for_expiration
+from dojo.tools.factory import get_scan_types_sorted
 from dojo.user.queries import get_authorized_users
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.importers.importer.importer import DojoDefaultImporter as Importer
-import dojo.notifications.helper as notifications_helper
-from dojo.endpoint.utils import save_endpoints_to_add
-
+from dojo.utils import (
+    FileIterWrapper,
+    Product_Tab,
+    add_breadcrumb,
+    add_error_message_to_response,
+    add_success_message_to_response,
+    async_delete,
+    calculate_grade,
+    get_cal_event,
+    get_page_items,
+    get_return_url,
+    get_setting,
+    get_system_setting,
+    handle_uploaded_threat,
+    redirect_to_return_url_or_else,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +144,8 @@ def engagement_calendar(request):
 def get_filtered_engagements(request, view):
 
     if view not in ['all', 'active']:
-        raise ValidationError(f'View {view} is not allowed')
+        msg = f'View {view} is not allowed'
+        raise ValidationError(msg)
 
     engagements = get_authorized_engagements(Permissions.Engagement_View).order_by('-target_start')
 
@@ -176,8 +217,11 @@ def engagements_all(request):
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
     # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
+    filter_string_matching = get_system_setting('filter_string_matching', False)
+    products_filter_class = ProductEngagementsFilterWithoutObjectLookups if filter_string_matching else ProductEngagementsFilter
+    engagement_query = Engagement.objects.annotate(test_count=Count('test__id'))
     filter_qs = products_with_engagements.prefetch_related(
-        Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(test_count=Count('test__id')))
+        Prefetch('engagement_set', queryset=products_filter_class(request.GET, engagement_query).qs)
     )
 
     filter_qs = filter_qs.prefetch_related(
@@ -191,7 +235,6 @@ def engagements_all(request):
             'engagement_set__jira_project__jira_instance',
             'jira_project_set__jira_instance'
         )
-    filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EngagementFilterWithoutObjectLookups if filter_string_matching else EngagementFilter
     filtered = filter_class(
         request.GET,
@@ -199,7 +242,7 @@ def engagements_all(request):
     )
 
     prods = get_page_items(request, filtered.qs, 25)
-
+    prods.paginator.count = sum(len(prod.engagement_set.all()) for prod in prods)
     name_words = products_with_engagements.values_list('name', flat=True)
     eng_words = get_authorized_engagements(Permissions.Engagement_View).values_list('name', flat=True).distinct()
 
@@ -237,8 +280,8 @@ def edit_engagement(request, eid):
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
                 create_notification(event='close_engagement',
-                        title='Closure of %s' % engagement.name,
-                        description='The engagement "%s" was closed' % (engagement.name),
+                        title=f'Closure of {engagement.name}',
+                        description=f'The engagement "{engagement.name}" was closed',
                         engagement=engagement, url=reverse('engagement_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
@@ -319,9 +362,9 @@ def delete_engagement(request, eid):
                     message,
                     extra_tags='alert-success')
                 create_notification(event='other',
-                                    title='Deletion of %s' % engagement.name,
+                                    title=f'Deletion of {engagement.name}',
                                     product=product,
-                                    description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
+                                    description=f'The engagement "{engagement.name}" was deleted by {request.user}',
                                     url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
                                     recipients=[engagement.lead],
                                     icon="exclamation-triangle")
@@ -362,8 +405,8 @@ def copy_engagement(request, eid):
                 'Engagement Copied successfully.',
                 extra_tags='alert-success')
             create_notification(event='other',
-                                title='Copying of %s' % engagement.name,
-                                description='The engagement "%s" was copied by %s' % (engagement.name, request.user),
+                                title=f'Copying of {engagement.name}',
+                                description=f'The engagement "{engagement.name}" was copied by {request.user}',
                                 product=product,
                                 url=request.build_absolute_uri(reverse('view_engagement', args=(engagement_copy.id, ))),
                                 recipients=[engagement.lead],
@@ -525,7 +568,7 @@ class ViewEngagement(View):
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
                 form = NoteForm()
-            title = "Engagement: %s on %s" % (eng.name, eng.product.name)
+            title = f"Engagement: {eng.name} on {eng.product.name}"
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Note added successfully.',
@@ -663,203 +706,427 @@ def add_tests(request, eid):
 
 
 class ImportScanResultsView(View):
-    def get(self, request, eid=None, pid=None):
-        environment = Development_Environment.objects.filter(name='Development').first()
-        engagement = None
-        form = ImportScanForm(initial={'environment': environment})
-        cred_form = CredMappingForm()
-        jform = None
-        user = request.user
+    def get_template(self) -> str:
+        """
+        Returns the template that will be presented to the user
+        """
+        return "dojo/import_scan_results.html"
 
-        if eid:
-            engagement = get_object_or_404(Engagement, id=eid)
+    def get_development_environment(
+        self,
+        environment_name: str = "Development",
+    ) -> Development_Environment | None:
+        """
+        Get the development environment in two cases:
+        - GET: Environment "Development" by default
+        - POST: The label supplied by the user, with Development as a backup
+        """
+        return Development_Environment.objects.filter(name=environment_name).first()
+
+    def get_engagement_or_product(
+        self,
+        user: Dojo_User,
+        engagement_id: int = None,
+        product_id: int = None,
+    ) -> Tuple[Engagement, Product, Product | Engagement]:
+        """
+        Using the path parameters, either fetch the product or engagement
+        """
+        engagement = product = engagement_or_product = None
+        # Get the product if supplied
+        # Get the engagement if supplied
+        if engagement_id is not None:
+            engagement = get_object_or_404(Engagement, id=engagement_id)
             engagement_or_product = engagement
-            cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
-        elif pid:
-            product = get_object_or_404(Product, id=pid)
+        elif product_id is not None:
+            product = get_object_or_404(Product, id=product_id)
             engagement_or_product = product
         else:
-            raise Exception('Either Engagement or Product has to be provided')
-
+            msg = 'Either Engagement or Product has to be provided'
+            raise Exception(msg)
+        # Ensure the supplied user has access to import to the engagement or product
         user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
 
+        return engagement, product, engagement_or_product
+
+    def get_form(
+        self,
+        request: HttpRequest,
+        **kwargs: dict,
+    ) -> ImportScanForm:
+        """
+        Returns the default import form for importing findings
+        """
+        if request.method == "POST":
+            return ImportScanForm(request.POST, request.FILES, **kwargs)
+        else:
+            return ImportScanForm(**kwargs)
+
+    def get_credential_form(
+        self,
+        request: HttpRequest,
+        engagement: Engagement,
+    ) -> CredMappingForm:
+        """
+        Return a new instance of a form managing credentials. If an engagement
+        it present at this time any existing credential objects will be attempted
+        to be fetched to populate the form
+        """
+        if request.method == "POST":
+            return CredMappingForm(request.POST)
+        else:
+            # If the engagement is not present, return an empty form
+            if engagement is None:
+                return CredMappingForm()
+            # Otherwise get all creds in the associated engagement
+            return CredMappingForm(
+                initial={
+                    "cred_user_queryset": Cred_Mapping.objects.filter(
+                        engagement=engagement
+                    ).order_by('cred_id'),
+                }
+            )
+
+    def get_jira_form(
+        self,
+        request: HttpRequest,
+        engagement_or_product: Engagement | Product,
+    ) -> Tuple[JIRAImportScanForm | None, bool]:
+        """
+        Returns a JiraImportScanForm if jira is enabled
+        """
+        jira_form = None
+        push_all_jira_issues = False
+        # Determine if jira issues should be pushed automatically
         push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
+        # Only return the form if the jira is enabled on this engagement or product
+        if jira_helper.get_jira_project(engagement_or_product):
+            if request.method == "POST":
+                jira_form = JIRAImportScanForm(
+                    request.POST,
+                    push_all=push_all_jira_issues,
+                    prefix='jiraform'
+                )
+            else:
+                jira_form = JIRAImportScanForm(
+                    push_all=push_all_jira_issues,
+                    prefix='jiraform'
+                )
+        return jira_form, push_all_jira_issues
+
+    def get_product_tab(
+        self,
+        product: Product,
+        engagement: Engagement,
+    ) -> Tuple[Product_Tab, dict]:
+        """
+        Determine how the product tab will be rendered, and what tab will be selected
+        as currently active
+        """
         custom_breadcrumb = None
-        title = "Import Scan Results"
         if engagement:
-            product_tab = Product_Tab(engagement.product, title=title, tab="engagements")
+            product_tab = Product_Tab(engagement.product, title="Import Scan Results", tab="engagements")
             product_tab.setEngagement(engagement)
         else:
             custom_breadcrumb = {"", ""}
-            product_tab = Product_Tab(product, title=title, tab="findings")
+            product_tab = Product_Tab(product, title="Import Scan Results", tab="findings")
+        return product_tab, custom_breadcrumb
 
-        if jira_helper.get_jira_project(engagement_or_product):
-            jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
-
-        form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-        form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
-
-        return render(request,
-        'dojo/import_scan_results.html',
-        {'form': form,
-         'product_tab': product_tab,
-         'engagement_or_product': engagement_or_product,
-         'custom_breadcrumb': custom_breadcrumb,
-         'title': title,
-         'cred_form': cred_form,
-         'jform': jform,
-         'scan_types': get_scan_types_sorted(),
-         })
-
-    def post(self, request, eid=None, pid=None):
-        environment = Development_Environment.objects.filter(name='Development').first()  # If 'Development' was removed, None is used
-        engagement = None
-        form = ImportScanForm(initial={'environment': environment})
-        cred_form = CredMappingForm()
-        finding_count = 0
-        jform = None
+    def handle_request(
+        self,
+        request: HttpRequest,
+        engagement_id: int = None,
+        product_id: int = None,
+    ) -> Tuple[HttpRequest, dict]:
+        """
+        Process the common behaviors between request types, and then return
+        the request and context dict back to be rendered
+        """
         user = request.user
+        # Get the development environment
+        environment = self.get_development_environment()
+        # Get the product or engagement from the path parameters
+        engagement, product, engagement_or_product = self.get_engagement_or_product(
+            user,
+            engagement_id=engagement_id,
+            product_id=product_id,
+        )
+        # Get the product tab and any additional custom breadcrumbs
+        product_tab, custom_breadcrumb = self.get_product_tab(product, engagement)
+        # Get the import form with some initial data in place
+        form = self.get_form(
+            request,
+            environment=environment,
+            endpoints=Endpoint.objects.filter(product__id=product_tab.product.id),
+            api_scan_configuration=Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id),
+        )
+        # Get the credential mapping form
+        cred_form = self.get_credential_form(request, engagement)
+        # Get the jira form
+        jira_form, push_all_jira_issues = self.get_jira_form(request, engagement_or_product)
+        # Return the request and the context
+        return request, {
+            "user": user,
+            "lead": user,
+            "form": form,
+            "environment": environment,
+            "product_tab": product_tab,
+            "product": product,
+            "engagement": engagement,
+            "engagement_or_product": engagement_or_product,
+            "custom_breadcrumb": custom_breadcrumb,
+            "title": "Import Scan Results",
+            "cred_form": cred_form,
+            "jform": jira_form,
+            "scan_types": get_scan_types_sorted(),
+            "push_all_jira_issues": push_all_jira_issues,
+        }
 
-        if eid:
-            engagement = get_object_or_404(Engagement, id=eid)
-            engagement_or_product = engagement
-            cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
-        elif pid:
-            product = get_object_or_404(Product, id=pid)
-            engagement_or_product = product
-        else:
-            raise Exception('Either Engagement or Product has to be provided')
+    def validate_forms(
+        self,
+        context: dict,
+    ) -> bool:
+        """
+        Validates each of the forms to ensure all errors from the form
+        level are bubbled up to the user first before we process too much
+        """
+        form_validation_list = []
+        if context.get("form") is not None:
+            form_validation_list.append(context.get("form").is_valid())
+        if context.get("jform") is not None:
+            form_validation_list.append(context.get("jform").is_valid())
+        if context.get("cred_form") is not None:
+            form_validation_list.append(context.get("cred_form").is_valid())
+        return all(form_validation_list)
 
-        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+    def create_engagement(
+        self,
+        context: dict,
+    ) -> Engagement:
+        """
+        Create an engagement if the import was triggered from the product level,
+        otherwise, return the existing engagement instead
+        """
+        # Make sure an engagement does not exist already
+        engagement = context.get("engagement")
+        if engagement is None:
+            engagement = Engagement.objects.create(
+                name="AdHoc Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple()),
+                threat_model=False,
+                api_test=False,
+                pen_test=False,
+                check_list=False,
+                active=True,
+                target_start=timezone.now().date(),
+                target_end=timezone.now().date(),
+                product=context.get("product"),
+                status='In Progress',
+                version=context.get("version"),
+                branch_tag=context.get("branch_tag"),
+                build_id=context.get("build_id"),
+                commit_hash=context.get("commit_hash"),
+            )
+            # Update the engagement in the context
+            context["engagement"] = engagement
+        # Return the engagement
+        return engagement
 
-        push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
-        form = ImportScanForm(request.POST, request.FILES)
-        cred_form = CredMappingForm(request.POST)
-        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-            engagement=engagement).order_by('cred_id')
+    def import_findings(
+        self,
+        context: dict,
+    ) -> str | None:
+        """
+        Attempt to import with all the supplied information
+        """
+        try:
+            importer_client = DefaultImporter()
+            context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
+                **context,
+            )
+            # Add a message to the view for the user to see the results
+            add_success_message_to_response(importer_client.construct_imported_message(
+                context.get("scan_type"),
+                Test_Import.IMPORT_TYPE,
+                finding_count=finding_count,
+                closed_finding_count=closed_finding_count,
+                close_old_findings=context.get("close_old_findings"),
+            ))
+        except Exception as e:
+            logger.exception(e)
+            return f"An exception error occurred during the report import: {e}"
+        return None
 
-        if jira_helper.get_jira_project(engagement_or_product):
-            jform = JIRAImportScanForm(request.POST, push_all=push_all_jira_issues, prefix='jiraform')
-            logger.debug('jform valid: %s', jform.is_valid())
-            logger.debug('jform errors: %s', jform.errors)
+    def process_form(
+        self,
+        request: HttpRequest,
+        form: ImportScanForm,
+        context: dict,
+    ) -> str | None:
+        """
+        Process the form and manipulate the input in any way that is appropriate
+        """
+        # Update the running context dict with cleaned form input
+        context.update({
+            "scan": request.FILES.get("file", None),
+            "scan_date": form.cleaned_data.get("scan_date"),
+            "minimum_severity": form.cleaned_data.get("minimum_severity"),
+            "active": None,
+            "verified": None,
+            "scan_type": request.POST.get("scan_type"),
+            "tags": form.cleaned_data.get("tags"),
+            "version": form.cleaned_data.get("version"),
+            "branch_tag": form.cleaned_data.get("branch_tag", None),
+            "build_id": form.cleaned_data.get("build_id", None),
+            "commit_hash": form.cleaned_data.get("commit_hash", None),
+            "api_scan_configuration": form.cleaned_data.get("api_scan_configuration", None),
+            "service": form.cleaned_data.get("service", None),
+            "close_old_findings": form.cleaned_data.get("close_old_findings", None),
+            "apply_tags_to_findings": form.cleaned_data.get("apply_tags_to_findings", False),
+            "apply_tags_to_endpoints": form.cleaned_data.get("apply_tags_to_endpoints", False),
+            "close_old_findings_product_scope": form.cleaned_data.get("close_old_findings_product_scope", None),
+            "group_by": form.cleaned_data.get("group_by", None),
+            "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings"),
+            "environment": self.get_development_environment(environment_name=form.cleaned_data.get("environment")),
+        })
+        # Create the engagement if necessary
+        self.create_engagement(context)
+        # close_old_findings_product_scope is a modifier of close_old_findings.
+        # If it is selected, close_old_findings should also be selected.
+        if close_old_findings_product_scope := form.cleaned_data.get('close_old_findings_product_scope', None):
+            context["close_old_findings_product_scope"] = close_old_findings_product_scope
+            context["close_old_findings"] = True
+        # Save newly added endpoints
+        added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, context.get("engagement").product)
+        endpoints_from_form = list(form.cleaned_data['endpoints'])
+        context["endpoints_to_add"] = endpoints_from_form + added_endpoints
+        # Override the form values of active and verified
+        if activeChoice := form.cleaned_data.get('active', None):
+            if activeChoice == 'force_to_true':
+                context["active"] = True
+            elif activeChoice == 'force_to_false':
+                context["active"] = False
+        if verifiedChoice := form.cleaned_data.get('verified', None):
+            if verifiedChoice == 'force_to_true':
+                context["verified"] = True
+            elif verifiedChoice == 'force_to_false':
+                context["verified"] = False
+        return None
 
-        if form.is_valid() and (jform is None or jform.is_valid()):
-            scan = request.FILES.get('file', None)
-            scan_date = form.cleaned_data['scan_date']
-            minimum_severity = form.cleaned_data['minimum_severity']
-            activeChoice = form.cleaned_data.get('active', None)
-            verifiedChoice = form.cleaned_data.get('verified', None)
-            scan_type = request.POST['scan_type']
-            tags = form.cleaned_data['tags']
-            version = form.cleaned_data['version']
-            branch_tag = form.cleaned_data.get('branch_tag', None)
-            build_id = form.cleaned_data.get('build_id', None)
-            commit_hash = form.cleaned_data.get('commit_hash', None)
-            api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
-            service = form.cleaned_data.get('service', None)
-            close_old_findings = form.cleaned_data.get('close_old_findings', None)
-            apply_tags_to_findings = form.cleaned_data.get('apply_tags_to_findings', False)
-            apply_tags_to_endpoints = form.cleaned_data.get('apply_tags_to_endpoints', False)
-            # close_old_findings_prodct_scope is a modifier of close_old_findings.
-            # If it is selected, close_old_findings should also be selected.
-            close_old_findings_product_scope = form.cleaned_data.get('close_old_findings_product_scope', None)
-            if close_old_findings_product_scope:
-                close_old_findings = True
-            # Will save in the provided environment or in the `Development` one if absent
-            environment_id = request.POST.get('environment', 'Development')
-            environment = Development_Environment.objects.get(id=environment_id)
+    def process_jira_form(
+        self,
+        request: HttpRequest,
+        form: JIRAImportScanForm,
+        context: dict,
+    ) -> str | None:
+        """
+        Process the jira form by first making sure one was supplied
+        and then setting any values supplied by the user. An error
+        may be returned and will be bubbled up in the form of a message
+        """
+        # Determine if push all issues is enabled
+        push_all_jira_issues = context.get("push_all_jira_issues", False)
+        context["push_to_jira"] = push_all_jira_issues or (form and form.cleaned_data.get("push_to_jira"))
+        return None
 
-            group_by = form.cleaned_data.get('group_by', None)
-            create_finding_groups_for_all_findings = form.cleaned_data['create_finding_groups_for_all_findings']
+    def process_credentials_form(
+        self,
+        request: HttpRequest,
+        form: CredMappingForm,
+        context: dict,
+    ) -> str | None:
+        """
+        Process the credentials form by creating
+        """
+        if cred_user := form.cleaned_data['cred_user']:
+            # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
+            cred_user = Cred_Mapping.objects.filter(
+                pk=cred_user.id,
+                engagement=context.get("engagement")
+            ).first()
+            # Create the new credential mapping object
+            new_cred_mapping = form.save(commit=False)
+            new_cred_mapping.test = context.get("test")
+            new_cred_mapping.cred_id = cred_user.cred_id
+            new_cred_mapping.save()
+            # update the context
+            context["cred_user"] = cred_user
+        return None
 
-            # TODO move to form validation?
-            if scan and is_scan_file_too_large(scan):
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
-                                     extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
+    def success_redirect(
+        self,
+        context: dict,
+    ) -> HttpResponseRedirect:
+        """
+        Redirect the user to a place that indicates a successful import
+        """
+        return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
 
-            # Allows for a test to be imported with an engagement created on the fly
-            if engagement is None:
-                engagement = Engagement()
-                engagement.name = "AdHoc Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
-                engagement.threat_model = False
-                engagement.api_test = False
-                engagement.pen_test = False
-                engagement.check_list = False
-                engagement.target_start = timezone.now().date()
-                engagement.target_end = timezone.now().date()
-                engagement.product = product
-                engagement.active = True
-                engagement.status = 'In Progress'
-                engagement.version = version
-                engagement.branch_tag = branch_tag
-                engagement.build_id = build_id
-                engagement.commit_hash = commit_hash
-                engagement.save()
+    def failure_redirect(
+        self,
+        context: dict,
+    ) -> HttpResponseRedirect:
+        """
+        Redirect the user to a place that indicates a failed import
+        """
+        return HttpResponseRedirect(reverse(
+            "import_scan_results",
+            args=(context.get("engagement", context.get("product")).id, ),
+        ))
 
-            # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
-            # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
-            push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
-            error = False
+    def get(
+        self,
+        request: HttpRequest,
+        engagement_id: int = None,
+        product_id: int = None,
+    ) -> HttpResponse:
+        """
+        Process GET requests for the Import View
+        """
+        # process the request and path parameters
+        request, context = self.handle_request(
+            request,
+            engagement_id=engagement_id,
+            product_id=product_id,
+        )
+        # Render the form
+        return render(request, self.get_template(), context)
 
-            # Save newly added endpoints
-            added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, engagement.product)
-
-            active = None
-            if activeChoice:
-                if activeChoice == 'force_to_true':
-                    active = True
-                elif activeChoice == 'force_to_false':
-                    active = False
-            verified = None
-            if verifiedChoice:
-                if verifiedChoice == 'force_to_true':
-                    verified = True
-                elif verifiedChoice == 'force_to_false':
-                    verified = False
-
-            try:
-                importer = Importer()
-                test, finding_count, closed_finding_count, _ = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
-                            minimum_severity=minimum_severity, endpoints_to_add=list(form.cleaned_data['endpoints']) + added_endpoints, scan_date=scan_date,
-                            version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings, close_old_findings_product_scope=close_old_findings_product_scope, group_by=group_by, api_scan_configuration=api_scan_configuration, service=service,
-                            create_finding_groups_for_all_findings=create_finding_groups_for_all_findings, apply_tags_to_findings=apply_tags_to_findings, apply_tags_to_endpoints=apply_tags_to_endpoints)
-
-                message = f'{scan_type} processed a total of {finding_count} findings'
-
-                if close_old_findings:
-                    message = message + ' and closed %d findings' % (closed_finding_count)
-
-                message = message + "."
-
-                add_success_message_to_response(message)
-
-            except Exception as e:
-                logger.exception(e)
-                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
-                error = True
-
-            # Save the credential to the test
-            if cred_form.is_valid():
-                if cred_form.cleaned_data['cred_user']:
-                    # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
-                    cred_user = Cred_Mapping.objects.filter(
-                        pk=cred_form.cleaned_data['cred_user'].id,
-                        engagement=eid).first()
-
-                    new_f = cred_form.save(commit=False)
-                    new_f.test = test
-                    new_f.cred_id = cred_user.cred_id
-                    new_f.save()
-
-            if not error:
-                return HttpResponseRedirect(
-                    reverse('view_test', args=(test.id, )))
-
-        return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id, )))
+    def post(
+        self,
+        request: HttpRequest,
+        engagement_id: int = None,
+        product_id: int = None,
+    ) -> HttpResponse:
+        """
+        Process POST requests for the Import View
+        """
+        # process the request and path parameters
+        request, context = self.handle_request(
+            request,
+            engagement_id=engagement_id,
+            product_id=product_id,
+        )
+        # ensure all three forms are valid first before moving forward
+        if not self.validate_forms(context):
+            return self.failure_redirect(context)
+        # Process the jira form if it is present
+        if form_error := self.process_jira_form(request, context.get("jform"), context):
+            add_error_message_to_response(form_error)
+            return self.failure_redirect(context)
+        # Process the import form
+        if form_error := self.process_form(request, context.get("form"), context):
+            add_error_message_to_response(form_error)
+            return self.failure_redirect(context)
+        # Kick off the import process
+        if import_error := self.import_findings(context):
+            add_error_message_to_response(import_error)
+            return self.failure_redirect(context)
+        # Process the credential form
+        if form_error := self.process_credentials_form(request, context.get("cred_form"), context):
+            add_error_message_to_response(form_error)
+            return self.failure_redirect(context)
+        # Otherwise return the user back to the engagement (if present) or the product
+        return self.success_redirect(context)
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
@@ -872,8 +1139,8 @@ def close_eng(request, eid):
         'Engagement closed successfully.',
         extra_tags='alert-success')
     create_notification(event='close_engagement',
-                        title='Closure of %s' % eng.name,
-                        description='The engagement "%s" was closed' % (eng.name),
+                        title=f'Closure of {eng.name}',
+                        description=f'The engagement "{eng.name}" was closed',
                         engagement=eng, url=reverse('engagement_all_findings', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
@@ -888,9 +1155,9 @@ def reopen_eng(request, eid):
         'Engagement reopened successfully.',
         extra_tags='alert-success')
     create_notification(event='other',
-                        title='Reopening of %s' % eng.name,
+                        title=f'Reopening of {eng.name}',
                         engagement=eng,
-                        description='The engagement "%s" was reopened' % (eng.name),
+                        description=f'The engagement "{eng.name}" was reopened',
                         url=reverse('view_engagement', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
@@ -1006,7 +1273,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
     else:
-        risk_acceptance_title_suggestion = 'Accept: %s' % finding
+        risk_acceptance_title_suggestion = f'Accept: {finding}'
         form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
@@ -1056,7 +1323,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             risk_acceptance_form = EditRiskAcceptanceForm(request.POST, request.FILES, instance=risk_acceptance)
             errors = errors or not risk_acceptance_form.is_valid()
             if not errors:
-                logger.debug('path: %s', risk_acceptance_form.cleaned_data['path'])
+                logger.debug(f"path: {risk_acceptance_form.cleaned_data['path']}")
 
                 risk_acceptance_form.save()
 
@@ -1142,8 +1409,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Finding%s added successfully.' % ('s' if len(findings) > 1
-                                                       else ''),
+                    f"Finding{'s' if len(findings) > 1 else ''} added successfully.",
                     extra_tags='alert-success')
         if not errors:
             logger.debug('redirecting to return_url')
@@ -1246,8 +1512,7 @@ def download_risk_acceptance(request, eid, raid):
     response = StreamingHttpResponse(
         FileIterWrapper(
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))
-    response['Content-Disposition'] = 'attachment; filename="%s"' \
-                                      % risk_acceptance.filename()
+    response['Content-Disposition'] = f'attachment; filename="{risk_acceptance.filename()}"'
     mimetype, _encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response['Content-Type'] = mimetype
     return response
@@ -1306,18 +1571,21 @@ def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())
     end_date = datetime.combine(eng.target_end, datetime.max.time())
-    uid = "dojo_eng_%d_%d" % (eng.id, eng.product.id)
+    uid = f"dojo_eng_{eng.id}_{eng.product.id}"
     cal = get_cal_event(
-        start_date, end_date,
-        "Engagement: %s (%s)" % (eng.name, eng.product.name),
-        "Set aside for engagement %s, on product %s.  Additional detail can be found at %s"
-        % (eng.name, eng.product.name,
-           request.build_absolute_uri(
-               (reverse("view_engagement", args=(eng.id, ))))), uid)
+        start_date,
+        end_date,
+        f"Engagement: {eng.name} ({eng.product.name})",
+        (
+            f"Set aside for engagement {eng.name}, on product {eng.product.name}. "
+            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_engagement', args=(eng.id, )))}"
+        ),
+        uid
+    )
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'
-    response['Content-Disposition'] = 'attachment; filename=%s.ics' % eng.name
+    response['Content-Disposition'] = f'attachment; filename={eng.name}.ics'
     return response
 
 
@@ -1332,7 +1600,8 @@ def get_list_index(list, index):
 def get_engagements(request):
     url = request.META.get('QUERY_STRING')
     if not url:
-        raise ValidationError('Please use the export button when exporting engagements')
+        msg = 'Please use the export button when exporting engagements'
+        raise ValidationError(msg)
     else:
         if url.startswith('url='):
             url = url[4:]
@@ -1340,7 +1609,8 @@ def get_engagements(request):
     path_items = list(filter(None, re.split(r'/|\?', url)))
 
     if not path_items or path_items[0] != 'engagement':
-        raise ValidationError('URL is not an engagement view')
+        msg = 'URL is not an engagement view'
+        raise ValidationError(msg)
 
     view = query = None
     if get_list_index(path_items, 1) in ['active', 'all']:

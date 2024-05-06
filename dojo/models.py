@@ -1,47 +1,46 @@
 import base64
+import copy
 import hashlib
 import logging
 import os
 import re
-import copy
 import warnings
-from typing import Dict, Set, Optional
+from datetime import datetime
+from typing import Dict, Optional, Set
 from uuid import uuid4
-from django.conf import settings
+
+import hyperlink
+import tagulous.admin
 from auditlog.registry import auditlog
+from cvss import CVSS3
+from dateutil.relativedelta import relativedelta
+from django import forms
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.db.models.expressions import Case, When
-from django.urls import reverse
-from django.core.validators import RegexValidator, validate_ipv46_address, MinValueValidator, MaxValueValidator
-from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError
-from django.db import models, connection
-from django.db.models import Q, Count
+from django.core.files.base import ContentFile
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
+from django.db import connection, models
+from django.db.models import Count, JSONField, Q
+from django.db.models.expressions import Case, When
 from django.db.models.functions import Lower
-from django_extensions.db.models import TimeStampedModel
-from django.utils.deconstruct import deconstructible
-from django.utils.timezone import now
-from django.utils.functional import cached_property
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
+from django.utils.functional import cached_property
 from django.utils.html import escape
-from pytz import all_timezones
-from polymorphic.models import PolymorphicModel
-from polymorphic.managers import PolymorphicManager
-from polymorphic.base import ManagerInheritanceWarning
-from multiselectfield import MultiSelectField
-from django import forms
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
-from dateutil.relativedelta import relativedelta
-from datetime import datetime
+from django_extensions.db.models import TimeStampedModel
+from multiselectfield import MultiSelectField
+from polymorphic.base import ManagerInheritanceWarning
+from polymorphic.managers import PolymorphicManager
+from polymorphic.models import PolymorphicModel
+from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
-import tagulous.admin
-from django.db.models import JSONField
-import hyperlink
-from cvss import CVSS3
-
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -142,7 +141,7 @@ class UniqueUploadNameProvider:
 
     def __call__(self, model_instance, filename):
         base, ext = os.path.splitext(filename)
-        filename = "%s_%s" % (base, uuid4()) if self.keep_basename else str(uuid4())
+        filename = f"{base}_{uuid4()}" if self.keep_basename else str(uuid4())
         if self.keep_ext:
             filename += ext
         if self.directory is None:
@@ -219,9 +218,7 @@ class Dojo_User(User):
         """
         Returns the first_name plus the last_name, with a space in between.
         """
-        full_name = '%s %s (%s)' % (user.first_name,
-                                    user.last_name,
-                                    user.username)
+        full_name = f'{user.first_name} {user.last_name} ({user.username})'
         return full_name.strip()
 
 
@@ -268,11 +265,11 @@ class Role(models.Model):
     name = models.CharField(max_length=255, unique=True)
     is_owner = models.BooleanField(default=False)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ('name',)
+
+    def __str__(self):
+        return self.name
 
 
 class System_Settings(models.Model):
@@ -704,12 +701,12 @@ class FileUpload(models.Model):
         copy.pk = None
         copy.id = None
         # Add unique modifier to file name
-        copy.title = '{} - clone-{}'.format(self.title, str(uuid4())[:8])
+        copy.title = f'{self.title} - clone-{str(uuid4())[:8]}'
         # Create new unique file name
         current_url = self.file.url
         _, current_full_filename = current_url.rsplit('/', 1)
         _, extension = current_full_filename.split('.', 1)
-        new_file = ContentFile(self.file.read(), name='{}.{}'.format(uuid4(), extension))
+        new_file = ContentFile(self.file.read(), name=f'{uuid4()}.{extension}')
         copy.file = new_file
         copy.save()
 
@@ -723,11 +720,7 @@ class FileUpload(models.Model):
         elif isinstance(obj, Finding):
             obj_type = 'Finding'
 
-        return 'access_file/{file_id}/{obj_id}/{obj_type}'.format(
-            file_id=self.id,
-            obj_id=obj_id,
-            obj_type=obj_type
-        )
+        return f'access_file/{self.id}/{obj_id}/{obj_type}'
 
 
 class Product_Type(models.Model):
@@ -747,6 +740,21 @@ class Product_Type(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
     members = models.ManyToManyField(Dojo_User, through='Product_Type_Member', related_name='prod_type_members', blank=True)
     authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Type_Group', related_name='product_type_groups', blank=True)
+
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('product_type', args=[str(self.id)])
+
+    def get_breadcrumbs(self):
+        bc = [{'title': str(self),
+               'url': reverse('edit_product_type', args=(self.id,))}]
+        return bc
 
     @cached_property
     def critical_present(self):
@@ -786,21 +794,6 @@ class Product_Type(models.Model):
     def unaccepted_open_findings(self):
         return Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement__product__prod_type=self)
 
-    class Meta:
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
-
-    def get_breadcrumbs(self):
-        bc = [{'title': str(self),
-               'url': reverse('edit_product_type', args=(self.id,))}]
-        return bc
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('product_type', args=[str(self.id)])
-
 
 class Product_Line(models.Model):
     name = models.CharField(max_length=300)
@@ -820,11 +813,11 @@ class Test_Type(models.Model):
     dynamic_tool = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ('name',)
+
+    def __str__(self):
+        return self.name
 
     def get_breadcrumbs(self):
         bc = [{'title': str(self),
@@ -851,6 +844,14 @@ class DojoMeta(models.Model):
                                  editable=False,
                                  related_name='finding_meta')
 
+    class Meta:
+        unique_together = (('product', 'name'),
+                           ('endpoint', 'name'),
+                           ('finding', 'name'))
+
+    def __str__(self):
+        return f"{self.name}: {self.value}"
+
     """
     Verify that this metadata entry belongs only to one object.
     """
@@ -866,17 +867,11 @@ class DojoMeta(models.Model):
                 ids_count += 1
 
         if ids_count == 0:
-            raise ValidationError('Metadata entries need either a product, an endpoint or a finding')
+            msg = 'Metadata entries need either a product, an endpoint or a finding'
+            raise ValidationError(msg)
         if ids_count > 1:
-            raise ValidationError('Metadata entries may not have more than one relation, either a product, an endpoint either or a finding')
-
-    def __str__(self):
-        return "%s: %s" % (self.name, self.value)
-
-    class Meta:
-        unique_together = (('product', 'name'),
-                           ('endpoint', 'name'),
-                           ('finding', 'name'))
+            msg = 'Metadata entries may not have more than one relation, either a product, an endpoint either or a finding'
+            raise ValidationError(msg)
 
 
 class SLA_Configuration(models.Model):
@@ -894,12 +889,11 @@ class SLA_Configuration(models.Model):
     async_updating = models.BooleanField(default=False,
                                             help_text=_('Findings under this SLA configuration are asynchronously being updated'))
 
-    def clean(self):
-        sla_days = [self.critical, self.high, self.medium, self.low]
+    class Meta:
+        ordering = ['name']
 
-        for sla_day in sla_days:
-            if sla_day < 1:
-                raise ValidationError('SLA Days must be at least 1')
+    def __str__(self):
+        return self.name
 
     def save(self, *args, **kwargs):
         # get the initial sla config before saving (if this is an existing sla config)
@@ -913,7 +907,7 @@ class SLA_Configuration(models.Model):
                 self.medium = initial_sla_config.medium
                 self.low = initial_sla_config.low
 
-        super(SLA_Configuration, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
         # if the initial sla config exists and async finding update is not running
         if initial_sla_config is not None and not self.async_updating:
@@ -931,7 +925,7 @@ class SLA_Configuration(models.Model):
             if len(severities):
                 # set the async updating flag to true for this sla config
                 self.async_updating = True
-                super(SLA_Configuration, self).save(*args, **kwargs)
+                super().save(*args, **kwargs)
                 # set the async updating flag to true for all products using this sla config
                 products = Product.objects.filter(sla_configuration=self)
                 for product in products:
@@ -941,11 +935,13 @@ class SLA_Configuration(models.Model):
                 from dojo.sla_config.helpers import update_sla_expiration_dates_sla_config_async
                 update_sla_expiration_dates_sla_config_async(self, tuple(severities), products)
 
-    def __str__(self):
-        return self.name
+    def clean(self):
+        sla_days = [self.critical, self.high, self.medium, self.low]
 
-    class Meta:
-        ordering = ['name']
+        for sla_day in sla_days:
+            if sla_day < 1:
+                msg = 'SLA Days must be at least 1'
+                raise ValidationError(msg)
 
     def delete(self, *args, **kwargs):
         logger.debug('%d sla configuration delete', self.id)
@@ -953,7 +949,8 @@ class SLA_Configuration(models.Model):
         if self.id != 1:
             super().delete(*args, **kwargs)
         else:
-            raise ValidationError("Unable to delete default SLA Configuration")
+            msg = "Unable to delete default SLA Configuration"
+            raise ValidationError(msg)
 
     def get_summary(self):
         return f'{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}'
@@ -1065,6 +1062,12 @@ class Product(models.Model):
     async_updating = models.BooleanField(default=False,
                                             help_text=_('Findings under this Product or SLA configuration are asynchronously being updated'))
 
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
     def save(self, *args, **kwargs):
         # get the product's sla config before saving (if this is an existing product)
         initial_sla_config = None
@@ -1074,7 +1077,7 @@ class Product(models.Model):
             if initial_sla_config and self.async_updating:
                 self.sla_configuration = initial_sla_config
 
-        super(Product, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
         # if the initial sla config exists and async finding update is not running
         if initial_sla_config is not None and not self.async_updating:
@@ -1084,7 +1087,7 @@ class Product(models.Model):
             if new_sla_config and (initial_sla_config != new_sla_config):
                 # set the async updating flag to true for this product
                 self.async_updating = True
-                super(Product, self).save(*args, **kwargs)
+                super().save(*args, **kwargs)
                 # set the async updating flag to true for the sla config assigned to this product
                 sla_config = getattr(self, 'sla_configuration', None)
                 if sla_config:
@@ -1094,11 +1097,9 @@ class Product(models.Model):
                 from dojo.product.helpers import update_sla_expiration_dates_product_async
                 update_sla_expiration_dates_product_async(self, sla_config)
 
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ('name',)
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_product', args=[str(self.id)])
 
     @cached_property
     def findings_count(self):
@@ -1214,10 +1215,6 @@ class Product(models.Model):
     def has_jira_configured(self):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_configured(self)
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_product', args=[str(self.id)])
 
     def violates_sla(self):
         findings = Finding.objects.filter(test__engagement__product=self,
@@ -1441,23 +1438,14 @@ class Engagement(models.Model):
             models.Index(fields=['product', 'active']),
         ]
 
-    def is_overdue(self):
-        if self.engagement_type == 'CI/CD':
-            overdue_grace_days = 10
-        else:
-            overdue_grace_days = 0
-
-        max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
-
-        if self.target_end < max_end_date.date():
-            return True
-
-        return False
-
     def __str__(self):
         return "Engagement %i: %s (%s)" % (self.id if id else 0, self.name if self.name else '',
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_engagement', args=[str(self.id)])
 
     def copy(self):
         copy = self
@@ -1489,6 +1477,19 @@ class Engagement(models.Model):
 
         return copy
 
+    def is_overdue(self):
+        if self.engagement_type == 'CI/CD':
+            overdue_grace_days = 10
+        else:
+            overdue_grace_days = 0
+
+        max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
+
+        if self.target_end < max_end_date.date():
+            return True
+
+        return False
+
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
         bc += [{'title': str(self),
@@ -1507,10 +1508,6 @@ class Engagement(models.Model):
     def has_jira_issue(self):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_issue(self)
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_engagement', args=[str(self.id)])
 
     @property
     def is_ci_cd(self):
@@ -1555,18 +1552,17 @@ class Endpoint_Status(models.Model):
     endpoint = models.ForeignKey('Endpoint', null=False, blank=False, on_delete=models.CASCADE, related_name='status_endpoint')
     finding = models.ForeignKey('Finding', null=False, blank=False, on_delete=models.CASCADE, related_name='status_finding')
 
-    @property
-    def age(self):
-
-        if self.mitigated:
-            diff = self.mitigated_time.date() - self.date
-        else:
-            diff = get_current_date() - self.date
-        days = diff.days
-        return days if days > 0 else 0
+    class Meta:
+        indexes = [
+            models.Index(fields=['finding', 'mitigated']),
+            models.Index(fields=['endpoint', 'mitigated']),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['finding', 'endpoint'], name='endpoint-finding relation')
+        ]
 
     def __str__(self):
-        return "'{}' on '{}'".format(str(self.finding), str(self.endpoint))
+        return f"'{str(self.finding)}' on '{str(self.endpoint)}'"
 
     def copy(self, finding=None):
         copy = self
@@ -1580,14 +1576,15 @@ class Endpoint_Status(models.Model):
 
         return copy
 
-    class Meta:
-        indexes = [
-            models.Index(fields=['finding', 'mitigated']),
-            models.Index(fields=['endpoint', 'mitigated']),
-        ]
-        constraints = [
-            models.UniqueConstraint(fields=['finding', 'endpoint'], name='endpoint-finding relation')
-        ]
+    @property
+    def age(self):
+
+        if self.mitigated:
+            diff = self.mitigated_time.date() - self.date
+        else:
+            diff = get_current_date() - self.date
+        days = diff.days
+        return days if days > 0 else 0
 
 
 class Endpoint(models.Model):
@@ -1625,82 +1622,6 @@ class Endpoint(models.Model):
             models.Index(fields=['product']),
         ]
 
-    def clean(self):
-        errors = []
-        null_char_list = ["0x00", "\x00"]
-        db_type = connection.vendor
-        if self.protocol or self.protocol == '':
-            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
-                errors.append(ValidationError('Protocol "{}" has invalid format'.format(self.protocol)))
-            if self.protocol == '':
-                self.protocol = None
-
-        if self.userinfo or self.userinfo == '':
-            if not re.match(r'^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$', self.userinfo):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
-                errors.append(ValidationError('Userinfo "{}" has invalid format'.format(self.userinfo)))
-            if self.userinfo == '':
-                self.userinfo = None
-
-        if self.host:
-            if not re.match(r'^[A-Za-z0-9_\-\+][A-Za-z0-9_\.\-\+]+$', self.host):
-                try:
-                    validate_ipv46_address(self.host)
-                except ValidationError:
-                    errors.append(ValidationError('Host "{}" has invalid format'.format(self.host)))
-        else:
-            errors.append(ValidationError('Host must not be empty'))
-
-        if self.port or self.port == 0:
-            try:
-                int_port = int(self.port)
-                if not (0 <= int_port < 65536):
-                    errors.append(ValidationError('Port "{}" has invalid format - out of range'.format(self.port)))
-                self.port = int_port
-            except ValueError:
-                errors.append(ValidationError('Port "{}" has invalid format - it is not a number'.format(self.port)))
-
-        if self.path or self.path == '':
-            while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
-                self.path = self.path[1:]
-            if any([null_char in self.path for null_char in null_char_list]):
-                old_value = self.path
-                if 'postgres' in db_type:
-                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
-                    for remove_str in null_char_list:
-                        self.path = self.path.replace(remove_str, '%00')
-                    errors.append(ValidationError('Path "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
-            if self.path == '':
-                self.path = None
-
-        if self.query or self.query == '':
-            if len(self.query) > 0 and self.query[0] == "?":
-                self.query = self.query[1:]
-            if any([null_char in self.query for null_char in null_char_list]):
-                old_value = self.query
-                if 'postgres' in db_type:
-                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
-                    for remove_str in null_char_list:
-                        self.query = self.query.replace(remove_str, '%00')
-                    errors.append(ValidationError('Query "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
-            if self.query == '':
-                self.query = None
-
-        if self.fragment or self.fragment == '':
-            if len(self.fragment) > 0 and self.fragment[0] == "#":
-                self.fragment = self.fragment[1:]
-            if any([null_char in self.fragment for null_char in null_char_list]):
-                old_value = self.fragment
-                if 'postgres' in db_type:
-                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
-                    for remove_str in null_char_list:
-                        self.fragment = self.fragment.replace(remove_str, '%00')
-                    errors.append(ValidationError('Fragment "{}" has invalid format - It contains the NULL character. The following action was taken: {}'.format(old_value, action_string)))
-            if self.fragment == '':
-                self.fragment = None
-
-        if errors:
-            raise ValidationError(errors)
-
     def __str__(self):
         try:
             if self.host:
@@ -1713,11 +1634,11 @@ class Endpoint(models.Model):
                     path=tuple(self.path.split('/')) if self.path else (),
                     query=tuple(
                         (
-                            qe.split(u"=", 1)
-                            if u"=" in qe
+                            qe.split("=", 1)
+                            if "=" in qe
                             else (qe, None)
                         )
-                        for qe in self.query.split(u"&")
+                        for qe in self.query.split("&")
                     ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
                     fragment=self.fragment or ''
                 )
@@ -1729,27 +1650,109 @@ class Endpoint(models.Model):
                     if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
                         clean_url = clean_url[len(dummy_scheme) + 3:]
                     else:
-                        raise ValueError('hyperlink lib did not create URL as was expected')
+                        msg = 'hyperlink lib did not create URL as was expected'
+                        raise ValueError(msg)
                 return clean_url
             else:
-                raise ValueError('Missing host')
+                msg = 'Missing host'
+                raise ValueError(msg)
         except:
             url = ''
             if self.protocol:
-                url += '{}://'.format(self.protocol)
+                url += f'{self.protocol}://'
             if self.userinfo:
-                url += '{}@'.format(self.userinfo)
+                url += f'{self.userinfo}@'
             if self.host:
                 url += self.host
             if self.port:
-                url += ':{}'.format(self.port)
+                url += f':{self.port}'
             if self.path:
                 url += '{}{}'.format('/' if self.path[0] != '/' else '', self.path)
             if self.query:
-                url += '?{}'.format(self.query)
+                url += f'?{self.query}'
             if self.fragment:
-                url += '#{}'.format(self.fragment)
+                url += f'#{self.fragment}'
             return url
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_endpoint', args=[str(self.id)])
+
+    def clean(self):
+        errors = []
+        null_char_list = ["0x00", "\x00"]
+        db_type = connection.vendor
+        if self.protocol or self.protocol == '':
+            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
+                errors.append(ValidationError(f'Protocol "{self.protocol}" has invalid format'))
+            if self.protocol == '':
+                self.protocol = None
+
+        if self.userinfo or self.userinfo == '':
+            if not re.match(r'^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$', self.userinfo):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
+                errors.append(ValidationError(f'Userinfo "{self.userinfo}" has invalid format'))
+            if self.userinfo == '':
+                self.userinfo = None
+
+        if self.host:
+            if not re.match(r'^[A-Za-z0-9_\-\+][A-Za-z0-9_\.\-\+]+$', self.host):
+                try:
+                    validate_ipv46_address(self.host)
+                except ValidationError:
+                    errors.append(ValidationError(f'Host "{self.host}" has invalid format'))
+        else:
+            errors.append(ValidationError('Host must not be empty'))
+
+        if self.port or self.port == 0:
+            try:
+                int_port = int(self.port)
+                if not (0 <= int_port < 65536):
+                    errors.append(ValidationError(f'Port "{self.port}" has invalid format - out of range'))
+                self.port = int_port
+            except ValueError:
+                errors.append(ValidationError(f'Port "{self.port}" has invalid format - it is not a number'))
+
+        if self.path or self.path == '':
+            while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
+                self.path = self.path[1:]
+            if any(null_char in self.path for null_char in null_char_list):
+                old_value = self.path
+                if 'postgres' in db_type:
+                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
+                    for remove_str in null_char_list:
+                        self.path = self.path.replace(remove_str, '%00')
+                    logging.error(f'Path "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+            if self.path == '':
+                self.path = None
+
+        if self.query or self.query == '':
+            if len(self.query) > 0 and self.query[0] == "?":
+                self.query = self.query[1:]
+            if any(null_char in self.query for null_char in null_char_list):
+                old_value = self.query
+                if 'postgres' in db_type:
+                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
+                    for remove_str in null_char_list:
+                        self.query = self.query.replace(remove_str, '%00')
+                    logging.error(f'Query "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+            if self.query == '':
+                self.query = None
+
+        if self.fragment or self.fragment == '':
+            if len(self.fragment) > 0 and self.fragment[0] == "#":
+                self.fragment = self.fragment[1:]
+            if any(null_char in self.fragment for null_char in null_char_list):
+                old_value = self.fragment
+                if 'postgres' in db_type:
+                    action_string = 'Postgres does not accept NULL character. Attempting to replace with %00...'
+                    for remove_str in null_char_list:
+                        self.fragment = self.fragment.replace(remove_str, '%00')
+                    logging.error(f'Fragment "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+            if self.fragment == '':
+                self.fragment = None
+
+        if errors:
+            raise ValidationError(errors)
 
     def __hash__(self):
         return self.__str__().__hash__()
@@ -1919,7 +1922,8 @@ class Endpoint(models.Model):
             from urllib.parse import urlparse
             url = hyperlink.parse(url="//" + urlparse(uri).netloc)
         except hyperlink.URLParseError as e:
-            raise ValidationError('Invalid URL format: {}'.format(e))
+            msg = f'Invalid URL format: {e}'
+            raise ValidationError(msg)
 
         query_parts = []  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1768
         for k, v in url.query:
@@ -1927,7 +1931,7 @@ class Endpoint(models.Model):
                 query_parts.append(k)
             else:
                 query_parts.append(f"{k}={v}")
-        query_string = u"&".join(query_parts)
+        query_string = "&".join(query_parts)
 
         protocol = url.scheme if url.scheme != '' else None
         userinfo = ':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None
@@ -1946,10 +1950,6 @@ class Endpoint(models.Model):
             query=query,
             fragment=fragment,
         )
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_endpoint', args=[str(self.id)])
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -2028,13 +2028,17 @@ class Test(models.Model):
             models.Index(fields=['engagement', 'test_type']),
         ]
 
-    def test_type_name(self) -> str:
-        return self.test_type.name
-
     def __str__(self):
         if self.title:
-            return "%s (%s)" % (self.title, self.test_type)
+            return f"{self.title} ({self.test_type})"
         return str(self.test_type)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_test', args=[str(self.id)])
+
+    def test_type_name(self) -> str:
+        return self.test_type.name
 
     def get_breadcrumbs(self):
         bc = self.engagement.get_breadcrumbs()
@@ -2128,10 +2132,6 @@ class Test(models.Model):
 
         deduplicationLogger.debug(f'HASHCODE_ALLOWS_NULL_CWE is: {hashCodeAllowsNullCwe}')
         return hashCodeAllowsNullCwe
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_test', args=[str(self.id)])
 
     def delete(self, *args, **kwargs):
         logger.debug('%d test delete', self.id)
@@ -2574,8 +2574,89 @@ class Finding(models.Model):
             models.Index(fields=['duplicate_finding', 'id']),
         ]
 
+    def __str__(self):
+        return self.title
+
+    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
+
+        from dojo.finding import helper as finding_helper
+
+        if not user:
+            from dojo.utils import get_current_user
+            user = get_current_user()
+        # Title Casing
+        from titlecase import titlecase
+        self.title = titlecase(self.title[:511])
+        # Set the date of the finding if nothing is supplied
+        if self.date is None:
+            self.date = timezone.now()
+        # Assign the numerical severity for correct sorting order
+        self.numerical_severity = Finding.get_numerical_severity(self.severity)
+
+        # Synchronize cvssv3 score using cvssv3 vector
+        if self.cvssv3:
+            try:
+                cvss_object = CVSS3(self.cvssv3)
+                # use the environmental score, which is the most refined score
+                self.cvssv3_score = cvss_object.scores()[2]
+            except Exception as ex:
+                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
+
+        # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
+        # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
+        if dedupe_option:
+            if (self.hash_code is not None):
+                deduplicationLogger.debug("Hash_code already computed for finding")
+            else:
+                self.hash_code = self.compute_hash_code()
+                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
+
+        if self.pk is None:
+            # We enter here during the first call from serializers.py
+            from dojo.utils import apply_cwe_to_template
+            self = apply_cwe_to_template(self)
+
+            if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
+                self.static_finding = True
+                self.dynamic_finding = False
+            elif (self.file_path is not None):
+                self.static_finding = True
+
+            # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
+            # so we call it manually
+            finding_helper.update_finding_status(self, user, changed_fields={'id': (None, None)})
+
+        else:
+            # logger.debug('setting static / dynamic in save')
+            # need to have an id/pk before we can access endpoints
+            if (self.file_path is not None) and (self.endpoints.count() == 0):
+                self.static_finding = True
+                self.dynamic_finding = False
+            elif (self.file_path is not None):
+                self.static_finding = True
+
+        # update the SLA expiration date last, after all other finding fields have been updated
+        self.set_sla_expiration_date()
+
+        logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
+        super().save(*args, **kwargs)
+
+        self.found_by.add(self.test.test_type)
+
+        # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
+        if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
+            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
+                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
+        else:
+            logger.debug('no options selected that require finding post processing')
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_finding', args=[str(self.id)])
+
     def __init__(self, *args, **kwargs):
-        super(Finding, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.unsaved_endpoints = []
         self.unsaved_request = None
@@ -2617,10 +2698,6 @@ class Finding(models.Model):
         copy.tags.set(old_tags)
 
         return copy
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('view_finding', args=[str(self.id)])
 
     def delete(self, *args, **kwargs):
         logger.debug('%d finding delete', self.id)
@@ -2704,24 +2781,16 @@ class Finding(models.Model):
             if self.unsaved_vulnerability_ids:
                 deduplicationLogger.debug("get_vulnerability_ids before the finding was saved")
                 # convert list of unsaved vulnerability_ids to the list of their canonical representation
-                vulnerability_id_str_list = list(
-                    map(
-                        lambda vulnerability_id: str(vulnerability_id),
-                        self.unsaved_vulnerability_ids
-                    ))
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in self.unsaved_vulnerability_ids]
                 # deduplicate (usually done upon saving finding) and sort endpoints
-                vulnerability_id_str = ''.join(sorted(list(dict.fromkeys(vulnerability_id_str_list))))
+                vulnerability_id_str = ''.join(sorted(dict.fromkeys(vulnerability_id_str_list)))
             else:
                 deduplicationLogger.debug("finding has no unsaved vulnerability references")
         else:
             vulnerability_ids = Vulnerability_Id.objects.filter(finding=self)
             deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
             # convert list of vulnerability_ids to the list of their canonical representation
-            vulnerability_id_str_list = list(
-                map(
-                    lambda vulnerability_id: str(vulnerability_id),
-                    vulnerability_ids.all()
-                ))
+            vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
             # sort vulnerability_ids strings
             vulnerability_id_str = ''.join(sorted(vulnerability_id_str_list))
         return vulnerability_id_str
@@ -2734,17 +2803,11 @@ class Finding(models.Model):
             if len(self.unsaved_endpoints) > 0:
                 deduplicationLogger.debug("get_endpoints before the finding was saved")
                 # convert list of unsaved endpoints to the list of their canonical representation
-                endpoint_str_list = list(
-                    map(
-                        lambda endpoint: str(endpoint),
-                        self.unsaved_endpoints
-                    ))
+                endpoint_str_list = [str(endpoint) for endpoint in self.unsaved_endpoints]
                 # deduplicate (usually done upon saving finding) and sort endpoints
                 endpoint_str = ''.join(
                     sorted(
-                        list(
-                            dict.fromkeys(endpoint_str_list)
-                        )))
+                        dict.fromkeys(endpoint_str_list)))
             else:
                 # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
                 # In this case, before saving the finding, both static_finding and dynamic_finding are True
@@ -2753,11 +2816,7 @@ class Finding(models.Model):
         else:
             deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
             # convert list of endpoints to the list of their canonical representation
-            endpoint_str_list = list(
-                map(
-                    lambda endpoint: str(endpoint),
-                    self.endpoints.all()
-                ))
+            endpoint_str_list = [str(endpoint) for endpoint in self.endpoints.all()]
             # sort endpoints strings
             endpoint_str = ''.join(
                 sorted(
@@ -2834,9 +2893,6 @@ class Finding(models.Model):
             return severities[num_severity]
 
         return None
-
-    def __str__(self):
-        return self.title
 
     def status(self):
         status = []
@@ -3005,79 +3061,6 @@ class Finding(models.Model):
         return self.save(dedupe_option=False, rules_option=False, product_grading_option=False,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
 
-    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
-
-        from dojo.finding import helper as finding_helper
-
-        if not user:
-            from dojo.utils import get_current_user
-            user = get_current_user()
-
-        # Title Casing
-        from titlecase import titlecase
-        self.title = titlecase(self.title[:511])
-
-        # Assign the numerical severity for correct sorting order
-        self.numerical_severity = Finding.get_numerical_severity(self.severity)
-
-        # Synchronize cvssv3 score using cvssv3 vector
-        if self.cvssv3:
-            try:
-                cvss_object = CVSS3(self.cvssv3)
-                # use the environmental score, which is the most refined score
-                self.cvssv3_score = cvss_object.scores()[2]
-            except Exception as ex:
-                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
-
-        # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
-        # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
-        if dedupe_option:
-            if (self.hash_code is not None):
-                deduplicationLogger.debug("Hash_code already computed for finding")
-            else:
-                self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
-
-        if self.pk is None:
-            # We enter here during the first call from serializers.py
-            from dojo.utils import apply_cwe_to_template
-            self = apply_cwe_to_template(self)
-
-            if (self.file_path is not None) and (len(self.unsaved_endpoints) == 0):
-                self.static_finding = True
-                self.dynamic_finding = False
-            elif (self.file_path is not None):
-                self.static_finding = True
-
-            # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
-            # so we call it manually
-            finding_helper.update_finding_status(self, user, changed_fields={'id': (None, None)})
-
-        else:
-            # logger.debug('setting static / dynamic in save')
-            # need to have an id/pk before we can access endpoints
-            if (self.file_path is not None) and (self.endpoints.count() == 0):
-                self.static_finding = True
-                self.dynamic_finding = False
-            elif (self.file_path is not None):
-                self.static_finding = True
-
-        # update the SLA expiration date last, after all other finding fields have been updated
-        self.set_sla_expiration_date()
-
-        logger.debug("Saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        super(Finding, self).save(*args, **kwargs)
-
-        self.found_by.add(self.test.test_type)
-
-        # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
-        if dedupe_option or issue_updater_option or product_grading_option or push_to_jira:
-            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, rules_option=rules_option, product_grading_option=product_grading_option,
-                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
-        else:
-            logger.debug('no options selected that require finding post processing')
-
     # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
         no_check = ["test", "reporter"]
@@ -3089,7 +3072,7 @@ class Finding(models.Model):
                 if not val and field == "title":
                     setattr(self, field, "No title given")
                 if not val and field in bigfields:
-                    setattr(self, field, "No %s given" % field)
+                    setattr(self, field, f"No {field} given")
 
     def severity_display(self):
         return self.severity
@@ -3101,7 +3084,7 @@ class Finding(models.Model):
         return bc
 
     def get_valid_request_response_pairs(self):
-        empty_value = base64.b64encode("".encode())
+        empty_value = base64.b64encode(b"")
         # Get a list of all req/resp pairs
         all_req_resps = self.burprawrequestresponse_set.all()
         # Filter away those that do not have any contents
@@ -3176,33 +3159,34 @@ class Finding(models.Model):
                 st = dojo_meta.value.strip()
                 if st:
                     return st.lower()
-        return 'github'
+        return ''
 
-    def bitbucket_public_prepare_scm_base_link(self, uri):
-        # bitbucket public (https://bitbucket.org) url template for browse is:
-        # https://bitbucket.org/<username>/<repository-slug>
+    def scm_public_prepare_base_link(self, uri):
+        # scm public (https://scm-domain.org) url template for browse is:
+        # https://scm-domain.org/<username>/<repository-slug>
         # but when you get repo url for git, its template is:
-        # https://bitbucket.org/<username>/<repository-slug>.git
+        # https://scm-domain.org/<username>/<repository-slug>.git
         # so to create browser url - git url should be recomposed like below:
 
         parts_uri = uri.split('.git')
         return parts_uri[0]
 
-    def bitbucket_public_prepare_scm_link(self, uri):
+    def git_public_prepare_scm_link(self, uri, scm_type):
         # if commit hash or branch/tag is set for engagement/test -
         # hash or branch/tag should be appended to base browser link
+        intermediate_path = '/blob/' if scm_type in ['github', 'gitlab'] else '/src/'
 
-        link = self.bitbucket_public_prepare_scm_base_link(uri)
+        link = self.scm_public_prepare_base_link(uri)
         if self.test.commit_hash:
-            link += '/src/' + self.test.commit_hash + '/' + self.file_path
+            link += intermediate_path + self.test.commit_hash + '/' + self.file_path
         elif self.test.engagement.commit_hash:
-            link += '/src/' + self.test.engagement.commit_hash + '/' + self.file_path
+            link += intermediate_path + self.test.engagement.commit_hash + '/' + self.file_path
         elif self.test.branch_tag:
-            link += '/src/' + self.test.branch_tag + '/' + self.file_path
+            link += intermediate_path + self.test.branch_tag + '/' + self.file_path
         elif self.test.engagement.branch_tag:
-            link += '/src/' + self.test.engagement.branch_tag + '/' + self.file_path
+            link += intermediate_path + self.test.engagement.branch_tag + '/' + self.file_path
         else:
-            link += '/src/master/' + self.file_path
+            link += intermediate_path + 'master/' + self.file_path
 
         return link
 
@@ -3244,22 +3228,6 @@ class Finding(models.Model):
 
         return link
 
-    def github_prepare_scm_link(self, uri):
-        link = uri
-
-        if self.test.commit_hash:
-            link += '/blob/' + self.test.commit_hash + '/' + self.file_path
-        elif self.test.engagement.commit_hash:
-            link += '/blob/' + self.test.engagement.commit_hash + '/' + self.file_path
-        elif self.test.branch_tag:
-            link += '/blob/' + self.test.branch_tag + '/' + self.file_path
-        elif self.test.engagement.branch_tag:
-            link += '/blob/' + self.test.engagement.branch_tag + '/' + self.file_path
-        else:
-            link += '/' + self.file_path
-
-        return link
-
     def get_file_path_with_raw_link(self):
         if self.file_path is None:
             return None
@@ -3267,12 +3235,12 @@ class Finding(models.Model):
         link = self.test.engagement.source_code_management_uri
         scm_type = self.get_scm_type()
         if (self.test.engagement.source_code_management_uri is not None):
-            if scm_type == 'github' or ("https://github.com/" in self.test.engagement.source_code_management_uri):
-                link = self.github_prepare_scm_link(link)
-            elif scm_type == 'bitbucket-standalone':
+            if scm_type == 'bitbucket-standalone':
                 link = self.bitbucket_standalone_prepare_scm_link(link)
-            elif scm_type == 'bitbucket':
-                link = self.bitbucket_public_prepare_scm_link(link)
+            elif scm_type in ['github', 'gitlab', 'gitea', 'codeberg', 'bitbucket']:
+                link = self.git_public_prepare_scm_link(link, scm_type)
+            elif 'https://github.com/' in self.test.engagement.source_code_management_uri:
+                link = self.git_public_prepare_scm_link(link, 'github')
             else:
                 link += '/' + self.file_path
         else:
@@ -3280,7 +3248,7 @@ class Finding(models.Model):
 
         # than - add line part to browser url
         if self.line:
-            if scm_type == 'github' or scm_type == 'gitlab':
+            if scm_type in ['github', 'gitlab', 'gitea', 'codeberg'] or 'https://github.com/' in self.test.engagement.source_code_management_uri:
                 link = link + '#L' + str(self.line)
             elif scm_type == 'bitbucket-standalone':
                 link = link + '#' + str(self.line)
@@ -3290,6 +3258,7 @@ class Finding(models.Model):
 
     def get_references_with_links(self):
         import re
+
         from dojo.utils import create_bleached_link
         if self.references is None:
             return None
@@ -3309,7 +3278,7 @@ class Finding(models.Model):
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_set.all()
-        vulnerability_ids = list()
+        vulnerability_ids = []
         for vulnerability_id in vulnerability_ids_model:
             vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
@@ -3403,7 +3372,7 @@ class Finding_Group(TimeStampedModel):
     def severity(self):
         if not self.findings.all():
             return None
-        max_number_severity = max([Finding.get_number_severity(find.severity) for find in self.findings.all()])
+        max_number_severity = max(Finding.get_number_severity(find.severity) for find in self.findings.all())
         return Finding.get_severity(max_number_severity)
 
     @cached_property
@@ -3419,7 +3388,7 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        return max([find.age for find in self.findings.all()])
+        return max(find.age for find in self.findings.all())
 
     @cached_property
     def sla_days_remaining_internal(self):
@@ -3441,20 +3410,20 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        if any([find.active for find in self.findings.all()]):
+        if any(find.active for find in self.findings.all()):
             return 'Active'
 
-        if all([find.is_mitigated for find in self.findings.all()]):
+        if all(find.is_mitigated for find in self.findings.all()):
             return 'Mitigated'
 
         return 'Inactive'
 
     @cached_property
     def mitigated(self):
-        return all([find.mitigated is not None for find in self.findings.all()])
+        return all(find.mitigated is not None for find in self.findings.all())
 
     def get_sla_start_date(self):
-        return min([find.get_sla_start_date() for find in self.findings.all()])
+        return min(find.get_sla_start_date() for find in self.findings.all())
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -3495,20 +3464,20 @@ class Finding_Template(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('edit_template', args=[str(self.id)])
+
     def get_breadcrumbs(self):
         bc = [{'title': str(self),
                'url': reverse('view_template', args=(self.id,))}]
         return bc
 
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('edit_template', args=[str(self.id)])
-
     @cached_property
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_template_set.all()
-        vulnerability_ids = list()
+        vulnerability_ids = []
         for vulnerability_id in vulnerability_ids_model:
             vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
@@ -3725,7 +3694,7 @@ class FileAccessToken(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = uuid4()
-        return super(FileAccessToken, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
 
 ANNOUNCEMENT_STYLE_CHOICES = (
@@ -3840,6 +3809,9 @@ class JIRA_Instance(models.Model):
     global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
     finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
 
+    def __str__(self):
+        return self.configuration_name + " | " + self.url + " | " + self.username
+
     @property
     def accepted_resolutions(self):
         return [m.strip() for m in (self.accepted_mapping_resolution or '').split(',')]
@@ -3847,9 +3819,6 @@ class JIRA_Instance(models.Model):
     @property
     def false_positive_resolutions(self):
         return [m.strip() for m in (self.false_positive_mapping_resolution or '').split(',')]
-
-    def __str__(self):
-        return self.configuration_name + " | " + self.url + " | " + self.username
 
     def get_priority(self, status):
         if status == 'Info':
@@ -3921,12 +3890,13 @@ class JIRA_Project(models.Model):
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
 
-    def clean(self):
-        if not self.jira_instance:
-            raise ValidationError('Cannot save JIRA Project Configuration without JIRA Instance')
-
     def __str__(self):
         return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
+
+    def clean(self):
+        if not self.jira_instance:
+            msg = 'Cannot save JIRA Project Configuration without JIRA Instance'
+            raise ValidationError(msg)
 
 
 # declare form here as we can't import forms.py due to circular imports not even locally
@@ -3972,6 +3942,14 @@ class JIRA_Issue(models.Model):
                                        verbose_name=_('Jira last update'),
                                        help_text=_("The date the linked Jira issue was last modified."))
 
+    def __str__(self):
+        text = ""
+        if self.finding:
+            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
+        elif self.engagement:
+            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
+        return text + " | Jira Key: " + str(self.jira_key)
+
     def set_obj(self, obj):
         if isinstance(obj, Finding):
             self.finding = obj
@@ -3980,15 +3958,8 @@ class JIRA_Issue(models.Model):
         elif isinstance(obj, Engagement):
             self.engagement = obj
         else:
-            raise TypeError('unknown object type while creating JIRA_Issue: %s' % to_str_typed(obj))
-
-    def __str__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
+            msg = f'unknown object type while creating JIRA_Issue: {to_str_typed(obj)}'
+            raise TypeError(msg)
 
 
 NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
@@ -4044,6 +4015,9 @@ class Notifications(models.Model):
             models.Index(fields=['user', 'product']),
         ]
 
+    def __str__(self):
+        return f"Notifications about {self.product or 'all projects'} for {self.user or 'system notifications'}"
+
     @classmethod
     def merge_notifications_list(cls, notifications_list):
         if not notifications_list:
@@ -4074,9 +4048,6 @@ class Notifications(models.Model):
                 result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
                 result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
         return result
-
-    def __str__(self):
-        return f"Notifications about {self.product or 'all projects'} for {self.user or 'system notifications'}"
 
 
 class NotificationsAdmin(admin.ModelAdmin):
@@ -4190,11 +4161,11 @@ class Languages(models.Model):
     code = models.IntegerField(blank=True, null=True, verbose_name=_('Number of code lines'))
     created = models.DateTimeField(auto_now_add=True, null=False)
 
-    def __str__(self):
-        return self.language.language
-
     class Meta:
         unique_together = [('language', 'product')]
+
+    def __str__(self):
+        return self.language.language
 
 
 class App_Analysis(models.Model):
@@ -4337,11 +4308,11 @@ class Benchmark_Product(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=False)
     updated = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
-
     class Meta:
         unique_together = [('product', 'control')]
+
+    def __str__(self):
+        return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
 
 
 class Benchmark_Product_Summary(models.Model):
@@ -4366,11 +4337,11 @@ class Benchmark_Product_Summary(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=False)
     updated = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.product.name + ': ' + self.benchmark_type.name
-
     class Meta:
         unique_together = [('product', 'benchmark_type')]
+
+    def __str__(self):
+        return self.product.name + ': ' + self.benchmark_type.name
 
 
 # ==========================
