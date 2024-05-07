@@ -16,7 +16,7 @@ class GuardDuty:
         mitigations = finding.get("FindingProviderFields", {}).get("Types")
         for mitigate in mitigations:
             mitigation += mitigate + "\n"
-        mitigation += "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html"
+        mitigation += "[https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html)"
         active = True
         if finding.get("RecordState") == "ACTIVE":
             is_Mitigated = False
@@ -30,10 +30,14 @@ class GuardDuty:
                     mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
             else:
                 mitigated = datetime.utcnow()
-        description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}"
-        description += f"SourceURL: {finding.get('SourceUrl', '')}\n"
-        description += f"AwsAccountId: {finding.get('AwsAccountId', '')}\n"
-        description += f"Region: {finding.get('Region', '')}\n"
+        description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}" + "\n"
+        description += f"**AWS Finding ARN:** {finding_id}\n"
+        if finding.get('SourceUrl'):
+            sourceurl = "[" + finding.get('SourceUrl') + "](" + finding.get('SourceUrl') + ")"
+            description += f"**SourceURL:** {sourceurl}\n"
+        description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
+        description += f"**Region:** {finding.get('Region', '')}\n"
+        description += f"**Generator ID:** {finding.get('GeneratorId', '')}\n"
         title_suffix = ""
         hosts = []
         for resource in finding.get("Resources", []):

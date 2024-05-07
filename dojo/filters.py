@@ -2882,6 +2882,7 @@ class ReportFindingFilter(FindingTagFilter):
         queryset=Product_Type.objects.none(),
         label="Product Type")
     test__engagement__product__lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, label="Product Lifecycle")
+    test__engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
@@ -2902,8 +2903,8 @@ class ReportFindingFilter(FindingTagFilter):
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'references', 'test', 'sonarqube_issue',
-                   'thread_id', 'notes', 'endpoints',
+                   'references', 'sonarqube_issue',
+                   'thread_id', 'notes',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
@@ -2953,6 +2954,8 @@ class ReportFindingFilter(FindingTagFilter):
         if 'test__engagement__product' in self.form.fields:
             self.form.fields[
                 'test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
+        if 'test__engagement' in self.form.fields:
+            self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
     @property
     def qs(self):
