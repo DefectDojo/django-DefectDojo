@@ -5,6 +5,7 @@ import logging
 
 from cvss import parser as cvss_parser
 from dateutil.parser import parse
+
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
