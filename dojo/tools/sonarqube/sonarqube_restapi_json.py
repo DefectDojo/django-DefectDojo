@@ -208,10 +208,10 @@ class SonarQubeRESTAPIJSON:
                 description += "**line:** " + line + "\n"
                 description += "**message:** " + message + "\n"
                 if textRange != {}:
-                        res = []
-                        for item in textRange:
-                            res.append(item + ": " + str(textRange[item]))
-                        description += "**textRange:** " + ", ".join(res) + "\n"
+                    res = []
+                    for item in textRange:
+                        res.append(item + ": " + str(textRange[item]))
+                    description += "**textRange:** " + ", ".join(res) + "\n"
                 if flows != []:
                     description += "**flows:** " + ", ".join(flows) + "\n"
                 description += "**ruleKey:** " + ruleKey + "\n"
