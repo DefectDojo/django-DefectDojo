@@ -2144,6 +2144,11 @@ class ImportScanSerializer(serializers.Serializer):
             context["endpoints_to_add"] = [endpoints_to_add]
         else:
             context["endpoint_to_add"] = None
+        # Set custom field mapping
+        if "custom_fields_mapping" in self.initial_data:
+            context["custom_fields_mapping"] = data.get("custom_fields_mapping")
+        else:
+            context["custom_fields_mapping"] = None
         # Convert the tags to a list if needed. At this point, the
         # TaggitListSerializer has already removed commas supplied
         # by the user, so this operation will consistently return

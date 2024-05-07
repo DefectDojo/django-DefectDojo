@@ -1,3 +1,3 @@
 Title,Description,Severity,Date,Url,CustomColumnA,CustomColumnB
-Title1,,,28/02/2021,www.example.com,CustomValueA,CustomValueB
-Title2,,,28/02/2021,localhost,CustomValueC,CustomValueD
+Title1,,Low,28/02/2021,www.example.com,CustomValueA,CustomValueB
+Title2,,Low,28/02/2021,localhost,CustomValueC,CustomValueD

@@ -796,7 +796,6 @@ class ImportScanResultsView(View):
         Returns a JiraImportScanForm if jira is enabled
         """
         jira_form = None
-        push_all_jira_issues = False
         # Determine if jira issues should be pushed automatically
         push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
         # Only return the form if the jira is enabled on this engagement or product
@@ -1026,6 +1025,10 @@ class ImportScanResultsView(View):
         # Determine if push all issues is enabled
         push_all_jira_issues = context.get("push_all_jira_issues", False)
         context["push_to_jira"] = push_all_jira_issues or (form and form.cleaned_data.get("push_to_jira"))
+
+        # Put custom fields mapping into the context
+        custom_fields_mapping = context.get("custom_fields_mapping", None)
+        context["custom_fields_mapping"] = custom_fields_mapping or (form and form.cleaned_data.get("custom_fields_mapping"))
         return None
 
     def process_credentials_form(

@@ -4,14 +4,16 @@ import io
 
 from cvss import parser as cvss_parser
 from dateutil.parser import parse
-
+import logging
 from dojo.models import Endpoint, Finding
+
+logger = logging.getLogger(__name__)
 
 
 class GenericCSVParser:
     ID = "Generic Findings Import"
 
-    def _get_findings_csv(self, filename):
+    def _get_findings_csv(self, filename, **kwargs):
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8")
@@ -78,6 +80,24 @@ class GenericCSVParser:
                     if "://" in row["Url"]
                     else Endpoint.from_uri("//" + row["Url"])
                 ]
+
+            # custom report field mapping
+            custom_fields_mapping = kwargs.get('custom_fields_mapping', None)
+            if custom_fields_mapping and isinstance(custom_fields_mapping, dict):
+                extracted_custom_fields = dict()
+                for custom_field, report_column in custom_fields_mapping.items():
+                    if not custom_field or not report_column:
+                        logger.warning(
+                            f"custom_fields_mapping contains empty key or value: {custom_fields_mapping}"
+                        )
+                        continue
+
+                    if report_column in row:
+                        extracted_custom_fields[custom_field] = row[report_column]
+
+                # write extracted custom fields dict into finding
+                if len(extracted_custom_fields) > 0:
+                    finding.custom_fields = extracted_custom_fields
 
             # manage internal de-duplication
             key = hashlib.sha256(

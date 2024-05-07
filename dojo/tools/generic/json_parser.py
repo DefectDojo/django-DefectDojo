@@ -1,11 +1,14 @@
 from dojo.models import Endpoint, Finding
 from dojo.tools.parser_test import ParserTest
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class GenericJSONParser:
     ID = "Generic Findings Import"
 
-    def _get_test_json(self, data):
+    def _get_test_json(self, data, **kwargs):
         test_internal = ParserTest(
             name=data.get("name", self.ID),
             type=data.get("type", self.ID),
@@ -81,6 +84,29 @@ class GenericJSONParser:
                 "effort_for_fixing",
                 "tags",
             }.union(required)
+
+            # verify that custom field mapping is of type dict
+            custom_fields_mapping = kwargs.get("custom_fields_mapping", None)
+            if custom_fields_mapping and isinstance(custom_fields_mapping, dict):
+                extracted_custom_fields = dict()
+                for custom_field, report_column in custom_fields_mapping.items():
+                    if not custom_field or not report_column:
+                        logger.warning(
+                            f"custom_fields_mapping contains empty key or value: {custom_fields_mapping}"
+                        )
+                        continue
+
+                    if report_column in item:
+                        extracted_custom_fields[custom_field] = item[report_column]
+
+                        # remove custom report column from item as finding model most likely will not know this field
+                        del item[report_column]
+
+                # write extracted custom fields into finding as json string
+                if len(extracted_custom_fields) > 0:
+                    item['custom_fields'] = extracted_custom_fields
+                    allowed.add("custom_fields")
+
             not_allowed = sorted(set(item).difference(allowed))
             if not_allowed:
                 msg = f"Not allowed fields are present: {not_allowed}"
