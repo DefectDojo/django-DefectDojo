@@ -1,9 +1,9 @@
 import json
+import logging
 
 from dojo.tools.generic.csv_parser import GenericCSVParser
 from dojo.tools.generic.json_parser import GenericJSONParser
 from dojo.tools.parser_test import ParserTest
-import logging
 
 logger = logging.getLogger(__name__)
 

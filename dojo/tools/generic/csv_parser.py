@@ -1,10 +1,10 @@
 import csv
 import hashlib
 import io
+import logging
 
 from cvss import parser as cvss_parser
 from dateutil.parser import parse
-import logging
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
@@ -84,7 +84,7 @@ class GenericCSVParser:
             # custom report field mapping
             custom_fields_mapping = kwargs.get('custom_fields_mapping', None)
             if custom_fields_mapping and isinstance(custom_fields_mapping, dict):
-                extracted_custom_fields = dict()
+                extracted_custom_fields = {}
                 for custom_field, report_column in custom_fields_mapping.items():
                     if not custom_field or not report_column:
                         logger.warning(

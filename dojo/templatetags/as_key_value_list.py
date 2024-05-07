@@ -18,4 +18,3 @@ def as_key_value_list(value: dict):
             result.append(f"**{key}**: {value}\n")
 
     return ''.join(result)
-

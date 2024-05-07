@@ -366,7 +366,8 @@ def has_jira_configured(obj):
 def connect_to_jira(jira_server, jira_username, jira_password):
     return JIRA(
         server=jira_server,
-        basic_auth=(jira_username, jira_password),
+        #basic_auth=(jira_username, jira_password),
+        token_auth=jira_password,
         max_retries=0,
         options={
             "verify": settings.JIRA_SSL_VERIFY,
@@ -777,9 +778,9 @@ def add_jira_issue(obj, *args, **kwargs):
         duedate = obj.sla_deadline()
 
     # merge custom fields from project / engagement and finding
-    issue_custom_fields = jira_project.custom_fields if isinstance(jira_project.custom_fields, dict) else dict()
+    issue_custom_fields = jira_project.custom_fields if isinstance(jira_project.custom_fields, dict) else {}
     if isinstance(obj, Finding) and isinstance(issue_custom_fields, dict):
-        finding_custom_fields = obj.custom_fields if isinstance(obj.custom_fields, dict) else dict()
+        finding_custom_fields = obj.custom_fields if isinstance(obj.custom_fields, dict) else {}
         issue_custom_fields |= finding_custom_fields
         logger.debug('updated finding with merged custom fields: %s', issue_custom_fields)
 
