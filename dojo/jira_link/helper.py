@@ -366,7 +366,6 @@ def has_jira_configured(obj):
 def connect_to_jira(jira_server, jira_username, jira_password):
     return JIRA(
         server=jira_server,
-        #basic_auth=(jira_username, jira_password),
         token_auth=jira_password,
         max_retries=0,
         options={
