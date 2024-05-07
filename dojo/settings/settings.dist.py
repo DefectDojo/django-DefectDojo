@@ -1503,8 +1503,7 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ('Epic', 'Epic'),
     ('Spike', 'Spike'),
     ('Bug', 'Bug'),
-    ('Security', 'Security'),
-    ('Vulnerability', 'Vulnerability'),
+    ('Security', 'Security')
 )
 
 if env('DD_JIRA_EXTRA_ISSUE_TYPES') != '':
