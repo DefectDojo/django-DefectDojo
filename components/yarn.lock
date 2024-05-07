@@ -362,20 +362,6 @@ dfa@^1.2.0:
   resolved "https://registry.yarnpkg.com/dfa/-/dfa-1.2.0.tgz#96ac3204e2d29c49ea5b57af8d92c2ae12790657"
   integrity sha512-ED3jP8saaweFTjeGX8HQPjeC1YYyZs98jGNZx6IiBvxW7JG5v492kamAQB3m2wop07CvU/RQmzcKr6bgcC5D/Q==
 
-drmonty-datatables-plugins@^1.0.0:
-  version "1.10.12"
-  resolved "https://registry.yarnpkg.com/drmonty-datatables-plugins/-/drmonty-datatables-plugins-1.10.12.tgz#32fd57f562c938c2da4445cea9675330dd968eb1"
-  integrity sha512-IhyTEXzyHlIFTT9SOOgLidebGuuikPtm3O7sX6D5CL2K6JAURnOp8ZKRuhZG7p3oTjYUnzr7i77l/YhQ9DnEjQ==
-  dependencies:
-    jquery ">=1.7"
-
-drmonty-datatables-responsive@^1.0.0:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/drmonty-datatables-responsive/-/drmonty-datatables-responsive-1.0.6.tgz#1c5c1de5ece54eefacf39f95daf75c43b7fffefd"
-  integrity sha512-2boqoLJ6FxXgtZ6KVtguX5wN5YTTi72TgLekjvziNXmy8a6LZ+5XhwtgcZxHcFeOU0gWIPqFCHi2Pvp+OKidiA==
-  dependencies:
-    jquery ">=1.7.0"
-
 duplexer2@~0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/duplexer2/-/duplexer2-0.1.4.tgz#8b12dab878c0d69e3e7891051662a32fc6bddcc1"
@@ -699,7 +685,7 @@ jquery.hotkeys@jeresig/jquery.hotkeys#master:
   version "0.2.0"
   resolved "https://codeload.github.com/jeresig/jquery.hotkeys/tar.gz/f24f1da275aab7881ab501055c256add6f690de4"
 
-"jquery@>= 1.0.0", jquery@>=1.7, jquery@>=1.7.0, "jquery@>=1.8.0 <4.0.0", jquery@^3.7.1:
+"jquery@>= 1.0.0", jquery@>=1.7, "jquery@>=1.8.0 <4.0.0", jquery@^3.7.1:
   version "3.7.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.7.1.tgz#083ef98927c9a6a74d05a6af02806566d16274de"
   integrity sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==
