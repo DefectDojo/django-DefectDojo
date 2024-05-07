@@ -61,8 +61,10 @@ class RedHatSatelliteParser:
             description += "**hosts_available_count:** " + str(hosts_available_count) + "\n"
             description += "**hosts_applicable_count:** " + str(hosts_applicable_count) + "\n"
             description += "**installable:** " + str(installable) + "\n"
-            description += "**bugs:** " + str(bugs) + "\n"
-            description += "**module_streams:** " + str(module_streams) + "\n"
+            if bugs != []:
+                description += "**bugs:** " + str(bugs) + "\n"
+            if module_streams != []:
+                description += "**module_streams:** " + ', '.join(module_streams) + "\n"
             description += "**packages:** " + ', '.join(packages)
             find = Finding(
                 title=title,
