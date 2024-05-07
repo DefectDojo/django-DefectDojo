@@ -1,4 +1,5 @@
 import logging
+
 from dojo.models import Endpoint, Finding
 from dojo.tools.parser_test import ParserTest
 
