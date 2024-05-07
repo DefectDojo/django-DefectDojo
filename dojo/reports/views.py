@@ -147,7 +147,7 @@ class CustomReport(View):
         if self.report_format == 'AsciiDoc':
             return 'dojo/custom_asciidoc_report.html',
         elif self.report_format == 'HTML':
-            return 'dojo/custom_html_report'
+            return 'dojo/custom_html_report.html'
         else:
             raise PermissionDenied()
 
