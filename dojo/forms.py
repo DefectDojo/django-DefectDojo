@@ -1088,7 +1088,7 @@ class RiskPendingForm(forms.ModelForm):
     accepted_by = forms.ModelMultipleChoiceField(
         queryset=Dojo_User.objects.none(),
         required=True,
-        widget=forms.widgets.SelectMultiple(attrs={"size": 10}),
+        widget=forms.widgets.MultipleHiddenInput(),
         help_text=("select acceptors depending on the severity of the risk"),
     )
     path = forms.FileField(
