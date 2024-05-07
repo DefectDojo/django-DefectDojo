@@ -9,7 +9,7 @@ __author__ = "dr3dd589"
 logger = logging.getLogger(__name__)
 
 
-class MendParser(object):
+class MendParser:
     def get_scan_types(self):
         return ["Mend Scan"]
 
@@ -21,7 +21,7 @@ class MendParser(object):
 
     def get_findings(self, file, test):
         if file is None:
-            return list()
+            return []
 
         data = file.read()
         try:
@@ -155,7 +155,7 @@ class MendParser(object):
                 + f.title.encode("utf-8")
             ).hexdigest()
 
-        dupes = dict()
+        dupes = {}
         for finding in findings:
             dupe_key = create_finding_key(finding)
             if dupe_key not in dupes:

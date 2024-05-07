@@ -1,27 +1,38 @@
 import logging
 
+from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.contrib import messages
-from django.urls import reverse
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.utils.translation import gettext as _
-from dojo.filters import ProductTypeFilter
-from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
-    Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm, Add_Product_Type_GroupForm, \
-    Edit_Product_Type_Group_Form, Delete_Product_Type_GroupForm
-from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group
-from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs, get_setting, async_delete
-from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils.translation import gettext as _
+
 from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_has_global_permission, user_is_authorized
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type, \
-    get_authorized_groups_for_product_type
+from dojo.authorization.roles_permissions import Permissions
+from dojo.filters import ProductTypeFilter
+from dojo.forms import (
+    Add_Product_Type_GroupForm,
+    Add_Product_Type_MemberForm,
+    Delete_Product_Type_GroupForm,
+    Delete_Product_Type_MemberForm,
+    Delete_Product_TypeForm,
+    Edit_Product_Type_Group_Form,
+    Edit_Product_Type_MemberForm,
+    Product_TypeForm,
+)
+from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role
+from dojo.notifications.helper import create_notification
 from dojo.product.queries import get_authorized_products
+from dojo.product_type.queries import (
+    get_authorized_groups_for_product_type,
+    get_authorized_members_for_product_type,
+    get_authorized_product_types,
+)
+from dojo.utils import add_breadcrumb, async_delete, get_page_items, get_setting, is_title_in_breadcrumbs
 
 logger = logging.getLogger(__name__)
 
@@ -137,9 +148,9 @@ def delete_product_type(request, ptid):
                                      message,
                                      extra_tags='alert-success')
                 create_notification(event='other',
-                                title='Deletion of %s' % product_type.name,
+                                title=f'Deletion of {product_type.name}',
                                 no_users=True,
-                                description='The product type "%s" was deleted by %s' % (product_type.name, request.user),
+                                description=f'The product type "{product_type.name}" was deleted by {request.user}',
                                 url=request.build_absolute_uri(reverse('product_type')),
                                 icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product_type'))

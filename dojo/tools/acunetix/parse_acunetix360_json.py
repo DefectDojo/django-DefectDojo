@@ -1,16 +1,18 @@
 import json
-from dateutil import parser
+
 import html2text
 from cvss import parser as cvss_parser
+from dateutil import parser
+
 from dojo.models import Endpoint, Finding
 
 
-class AcunetixJSONParser(object):
+class AcunetixJSONParser:
     """This parser is written for Acunetix JSON Findings."""
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
         data = json.load(filename)
-        dupes = dict()
+        dupes = {}
         scan_date = parser.parse(data["Generated"])
         text_maker = html2text.HTML2Text()
         text_maker.body_width = 0

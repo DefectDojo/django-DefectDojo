@@ -1,30 +1,46 @@
 import logging
-from django.views import View
-from django.db.models.query import QuerySet
+
 from django.contrib import messages
+from django.contrib.admin.utils import NestedObjects
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group
-from django.db.models.deletion import RestrictedError
-from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpRequest
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render, get_object_or_404
-from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
+from django.db.models.deletion import RestrictedError
+from django.db.models.query import QuerySet
+from django.http import HttpRequest, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.views import View
+
+from dojo.authorization.authorization import (
+    user_has_configuration_permission,
+    user_has_permission,
+    user_has_permission_or_403,
+)
+from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.filters import GroupFilter
-from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, \
-    Add_Product_Type_Group_GroupForm, Add_Group_MemberForm, Edit_Group_MemberForm, \
-    Delete_Group_MemberForm, GlobalRoleForm, ConfigurationPermissionsForm
-from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Global_Role
-from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs, redirect_to_return_url_or_else
-from dojo.group.queries import get_authorized_groups, get_product_groups_for_group, \
-    get_product_type_groups_for_group, get_group_members_for_group
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
-from dojo.authorization.authorization import user_has_configuration_permission, user_has_permission_or_403
+from dojo.forms import (
+    Add_Group_MemberForm,
+    Add_Product_Group_GroupForm,
+    Add_Product_Type_Group_GroupForm,
+    ConfigurationPermissionsForm,
+    Delete_Group_MemberForm,
+    DeleteGroupForm,
+    DojoGroupForm,
+    Edit_Group_MemberForm,
+    GlobalRoleForm,
+)
+from dojo.group.queries import (
+    get_authorized_groups,
+    get_group_members_for_group,
+    get_product_groups_for_group,
+    get_product_type_groups_for_group,
+)
 from dojo.group.utils import get_auth_group_name
+from dojo.models import Dojo_Group, Dojo_Group_Member, Global_Role, Product_Group, Product_Type_Group
+from dojo.utils import add_breadcrumb, get_page_items, is_title_in_breadcrumbs, redirect_to_return_url_or_else
 
 logger = logging.getLogger(__name__)
 
@@ -419,7 +435,7 @@ def edit_group_member(request, mid):
                 if owners < 1:
                     messages.add_message(request,
                                         messages.WARNING,
-                                        'There must be at least one owner for group {}.'.format(member.group.name),
+                                        f'There must be at least one owner for group {member.group.name}.',
                                         extra_tags='alert-warning')
                     if is_title_in_breadcrumbs('View User'):
                         return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
@@ -461,7 +477,7 @@ def delete_group_member(request, mid):
             if owners <= 1:
                 messages.add_message(request,
                                     messages.WARNING,
-                                        'There must be at least one owner for group {}.'.format(member.group.name),
+                                        f'There must be at least one owner for group {member.group.name}.',
                                     extra_tags='alert-warning')
                 if is_title_in_breadcrumbs('View User'):
                     return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))

@@ -1,11 +1,12 @@
-import sys
-import io
 import csv
+import io
+import sys
 from datetime import datetime
+
 from dojo.models import Finding
 
 
-class AzureSecurityCenterRecommendationsParser(object):
+class AzureSecurityCenterRecommendationsParser:
     def get_scan_types(self):
         return ["Azure Security Center Recommendations Scan"]
 
@@ -22,7 +23,8 @@ class AzureSecurityCenterRecommendationsParser(object):
         if file.name.lower().endswith(".csv"):
             return self.process_csv(file, test)
         else:
-            raise ValueError("Unknown file format")
+            msg = "Unknown file format"
+            raise ValueError(msg)
 
     def process_csv(self, file, test):
         content = file.read()

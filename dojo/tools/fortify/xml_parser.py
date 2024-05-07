@@ -1,8 +1,9 @@
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 
 
-class FortifyXMLParser(object):
+class FortifyXMLParser:
     def parse_xml(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
@@ -120,7 +121,7 @@ class FortifyXMLParser(object):
                 )
             )
         if explanation:
-            desc += "##Explanation:\n {}".format(explanation)
+            desc += f"##Explanation:\n {explanation}"
         return desc
 
     def format_title(self, category, filename, line_no):
@@ -131,7 +132,7 @@ class FortifyXMLParser(object):
         :param line_no:  Line number of offending line
         :return: str
         """
-        return "{} - {}: {}".format(category, filename, line_no)
+        return f"{category} - {filename}: {line_no}"
 
     def format_mitigation(self, issue, meta_info) -> str:
         """
@@ -144,8 +145,8 @@ class FortifyXMLParser(object):
         mitigation = ""
         recommendation = meta_info[issue["Category"]].get("Recommendations")
         if recommendation:
-            mitigation += "###Recommendation:\n {}\n".format(recommendation)
+            mitigation += f"###Recommendation:\n {recommendation}\n"
         tips = meta_info[issue["Category"]].get("Tips")
         if tips:
-            mitigation += "###Tips:\n {}".format(tips)
+            mitigation += f"###Tips:\n {tips}"
         return mitigation

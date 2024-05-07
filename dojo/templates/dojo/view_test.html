@@ -1128,7 +1128,10 @@
                                         {% if finding.file_path %}
                                             <i class="fa-solid fa-folder has-popover dojo-sup"
                                             data-trigger="hover"
-                                            data-content="{{ finding.file_path }}"
+                                            data-html="true"
+                                            data-content="
+                                                {{ finding.file_path }}{% if finding.line %}:{{finding.line}}{% endif %}
+                                            "
                                             data-placement="right"
                                             data-container="body"
                                             data-original-title="Files"
@@ -1680,6 +1683,10 @@
                     {
                         "orderable": false,
                         "targets": [0]
+                    },
+                    {
+                        targets: [0, 1],
+                        className: 'noVis'
                     },
                     {
                         targets: 'severity-sort',

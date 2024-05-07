@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-class TruffleHog3Parser(object):
+class TruffleHog3Parser:
     def get_scan_types(self):
         return ["Trufflehog3 Scan"]
 
@@ -17,7 +17,7 @@ class TruffleHog3Parser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
 
-        dupes = dict()
+        dupes = {}
 
         for json_data in data:
             if json_data.get("reason"):
@@ -25,7 +25,8 @@ class TruffleHog3Parser(object):
             elif json_data.get("rule"):
                 self.get_finding_current(json_data, test, dupes)
             else:
-                raise ValueError("Format is not recognized for Trufflehog3")
+                msg = "Format is not recognized for Trufflehog3"
+                raise ValueError(msg)
 
         return list(dupes.values())
 

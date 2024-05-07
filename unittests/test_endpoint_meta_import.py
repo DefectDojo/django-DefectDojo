@@ -1,18 +1,20 @@
-from django.urls import reverse
-from dojo.models import User
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-from django.test.client import Client
-from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
-from .test_utils import assertImportModelsCreated
 import logging
 
+from django.test.client import Client
+from django.urls import reverse
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
+
+from dojo.models import User
+
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_path
+from .test_utils import assertImportModelsCreated
 
 logger = logging.getLogger(__name__)
 
 
 # test methods to be used both by API Test and UI Test
-class EndpointMetaImportMixin(object):
+class EndpointMetaImportMixin:
     def __init__(self, *args, **kwargs):
         self.meta_import_full = 'endpoint_meta_import/full_endpoint_meta_import.csv'
         self.meta_import_no_hostname = 'endpoint_meta_import/no_hostname_endpoint_meta_import.csv'
@@ -204,11 +206,12 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
 
     def endpoint_meta_import_scan_with_params_ui(self, filename, product=1, create_endpoints=True,
                                                  create_tags=True, create_dojo_meta=True, expected_http_status_code=201):
-        payload = {
-            "create_endpoints": create_endpoints,
-            "create_tags": create_tags,
-            "create_dojo_meta": create_dojo_meta,
-            "file": open(get_unit_tests_path() + '/' + filename),
-        }
+        with open(get_unit_tests_path() + '/' + filename) as testfile:
+            payload = {
+                "create_endpoints": create_endpoints,
+                "create_tags": create_tags,
+                "create_dojo_meta": create_dojo_meta,
+                "file": testfile,
+            }
 
-        return self.endpoint_meta_import_ui(product, payload)
+            return self.endpoint_meta_import_ui(product, payload)

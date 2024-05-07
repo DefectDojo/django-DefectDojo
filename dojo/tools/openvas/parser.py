@@ -2,7 +2,7 @@ from dojo.tools.openvas.csv_parser import OpenVASCSVParser
 from dojo.tools.openvas.xml_parser import OpenVASXMLParser
 
 
-class OpenVASParser(object):
+class OpenVASParser:
     def get_scan_types(self):
         return ["OpenVAS Parser"]
 

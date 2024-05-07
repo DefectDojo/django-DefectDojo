@@ -1,7 +1,7 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-
-from dojo.models import Test, Engagement, Product
+from dojo.models import Engagement, Product, Test
 from dojo.tools.sonarqube.parser import SonarQubeParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestSonarQubeParser(DojoTestCase):
@@ -27,6 +27,7 @@ class TestSonarQubeParser(DojoTestCase):
         parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
         self.assertEqual(0, len(findings))
+        my_file_handle.close()
 
     # SonarQube Scan detailed - no finding
     def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self):
@@ -37,6 +38,7 @@ class TestSonarQubeParser(DojoTestCase):
         parser.set_mode('detailed')
         findings = parser.get_findings(my_file_handle, test)
         self.assertEqual(0, len(findings))
+        my_file_handle.close()
 
     # SonarQube Scan - report with one vuln
     def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(
@@ -88,6 +90,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertIsNone(item.unique_id_from_tool)
         self.assertEqual(int, type(item.nb_occurences))
         self.assertEqual(1, item.nb_occurences)
+        my_file_handle.close()
 
     def test_detailed_parse_file_with_single_vulnerability_has_single_finding(self):
         my_file_handle, _product, _engagement, test = self.init(
@@ -133,6 +136,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("66", item.line)
         self.assertEqual(str, type(item.unique_id_from_tool))
         self.assertEqual("AWK40IMu-pl6AHs22MnV", item.unique_id_from_tool)
+        my_file_handle.close()
 
     def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
             self,
@@ -145,6 +149,7 @@ class TestSonarQubeParser(DojoTestCase):
         findings = parser.get_findings(my_file_handle, test)
         # common verifications
         self.assertEqual(6, len(findings))
+        my_file_handle.close()
 
     def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
             self,
@@ -158,6 +163,7 @@ class TestSonarQubeParser(DojoTestCase):
         # common verifications
         # (there is no aggregation to be done here)
         self.assertEqual(6, len(findings))
+        my_file_handle.close()
 
     def test_detailed_parse_file_with_table_in_table(self):
         """Test parsing when the vulnerability details include a table, with tr and td that should be ignored when looking for list of rules"""
@@ -237,6 +243,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(True, item.static_finding)
         self.assertEqual(bool, type(item.dynamic_finding))
         self.assertEqual(False, item.dynamic_finding)
+        my_file_handle.close()
 
     def test_detailed_parse_file_with_rule_undefined(self):
         """the vulnerability's rule is not in the list of rules"""
@@ -282,6 +289,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(True, item.static_finding)
         self.assertEqual(bool, type(item.dynamic_finding))
         self.assertEqual(False, item.dynamic_finding)
+        my_file_handle.close()
 
     # SonarQube Scan - report with aggregations to be made
     def test_file_name_aggregated_parse_file_with_vuln_on_same_filename(self):
@@ -344,6 +352,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertIsNone(aggregatedItem.line)
         self.assertIsNone(aggregatedItem.unique_id_from_tool)
         self.assertEqual(int, type(aggregatedItem.nb_occurences))
+        my_file_handle.close()
 
     # SonarQube Scan detailed - report with aggregations to be made
     def test_detailed_parse_file_with_vuln_on_same_filename(self):
@@ -355,6 +364,7 @@ class TestSonarQubeParser(DojoTestCase):
         findings = parser.get_findings(my_file_handle, test)
         # specific verifications
         self.assertEqual(4, len(findings))
+        my_file_handle.close()
 
     def test_detailed_parse_file_with_vuln_issue_3725(self):
         """SonarQube Scan detailed - report that crash
@@ -366,6 +376,7 @@ class TestSonarQubeParser(DojoTestCase):
         findings = parser.get_findings(my_file_handle, test)
         # specific verifications
         self.assertEqual(322, len(findings))
+        my_file_handle.close()
 
     def test_detailed_parse_file_table_has_whitespace(self):
         """
@@ -449,6 +460,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(True, item.static_finding)
         self.assertEqual(bool, type(item.dynamic_finding))
         self.assertEqual(False, item.dynamic_finding)
+        my_file_handle.close()
 
     def test_detailed_parse_json_file_with_no_vulnerabilities_has_no_findings(self):
         my_file_handle, _product, _engagement, test = self.init(
@@ -458,6 +470,7 @@ class TestSonarQubeParser(DojoTestCase):
         parser.set_mode('detailed')
         findings = parser.get_findings(my_file_handle, test)
         self.assertEqual(0, len(findings))
+        my_file_handle.close()
 
     def test_detailed_parse_json_file_with_single_vulnerability_has_single_finding(self):
         my_file_handle, _product, _engagement, test = self.init(
@@ -536,6 +549,7 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual(8, 8)
         self.assertEqual(str, type(item.unique_id_from_tool))
         self.assertEqual("AYvNd32RyD1npIoQXyT1", item.unique_id_from_tool)
+        my_file_handle.close()
 
     def test_detailed_parse_json_file_with_multiple_vulnerabilities_has_multiple_findings(self):
         my_file_handle, _product, _engagement, test = self.init(
@@ -547,3 +561,92 @@ class TestSonarQubeParser(DojoTestCase):
         # common verifications
         # (there is no aggregation to be done here)
         self.assertEqual(6, len(findings))
+        my_file_handle.close()
+
+    def test_parse_json_file_from_api_with_multiple_findings_json(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(5, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Medium", item.severity)
+        self.assertEqual("CVE-2024-2529", item.unsaved_vulnerability_ids[0])
+        self.assertEqual("120", item.cwe)
+        self.assertEqual("6.4", item.cvssv3_score)
+        self.assertEqual("package", item.component_name)
+        self.assertEqual("1.1.2", item.component_version)
+        item = findings[1]
+        self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
+        self.assertEqual("Low", item.severity)
+        self.assertEqual(0, item.cwe)
+        self.assertIsNone(item.cvssv3_score)
+        item = findings[2]
+        self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[3]
+        self.assertEqual("GHSA-frr2-c345-p7c2", item.unsaved_vulnerability_ids[0])
+        item = findings[4]
+        self.assertEqual("CVE-2023-52428", item.unsaved_vulnerability_ids[0])
+        self.assertEqual("nimbus-jose-jwt-9.24.4.jar", item.component_name)
+        self.assertIsNone(item.component_version)
+        my_file_handle.close()
+
+    def test_parse_json_file_from_api_with_multiple_findings_hotspots_json(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api_hotspots.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(4, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("typescript:7777_fwafewef", item.title)
+        self.assertEqual("High", item.severity)
+        item = findings[1]
+        self.assertEqual("Web:1222_cyxcvyxcvyxv", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[2]
+        self.assertEqual("Web:9876_werrwerwerwer", item.title)
+        self.assertEqual("Low", item.severity)
+        my_file_handle.close()
+
+    def test_parse_json_file_from_api_with_empty_json(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api_empty.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(0, len(findings))
+        my_file_handle.close()
+
+    def test_parse_json_file_from_api_with_emppty_zip(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/empty_zip.zip"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(0, len(findings))
+        my_file_handle.close()
+
+    def test_parse_json_file_from_api_with_multiple_findings_zip(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/findings_over_api.zip"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(6, len(findings))
+        item = findings[0]
+        self.assertEqual(str, type(item.description))
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("Medium", item.severity)
+        item = findings[3]
+        self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwo1123efijo", item.title)
+        self.assertEqual("Low", item.severity)
+        item = findings[5]
+        self.assertEqual("typescript:S112533_fjoiewfjo1235gweifjoihugu-", item.title)
+        self.assertEqual("Medium", item.severity)
+        my_file_handle.close()

@@ -1,11 +1,13 @@
 import logging
+
 from dojo.models import Finding
+
 logger = logging.getLogger(__name__)
 
 
-class ClairKlarScan(object):
+class ClairKlarScan:
     def get_items_klar(self, tree, test):
-        items = list()
+        items = []
         clair_severities = [
             "Unknown",
             "Negligible",
@@ -22,7 +24,7 @@ class ClairKlarScan(object):
         return items
 
     def set_items_for_severity(self, tree, test, severity):
-        items = list()
+        items = []
         tree_severity = tree.get(severity)
         if tree_severity:
             for data in self.get_items_clairklar(tree_severity, test):

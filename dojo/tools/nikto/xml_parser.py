@@ -1,15 +1,18 @@
-import re
 import hashlib
 import logging
-from dojo.models import Endpoint, Finding
+import re
+
 from defusedxml import ElementTree as ET
 from django.core.exceptions import ValidationError
+
+from dojo.models import Endpoint, Finding
+
 logger = logging.getLogger(__name__)
 
 
-class NiktoXMLParser(object):
+class NiktoXMLParser:
     def process_xml(self, file, test):
-        dupes = dict()
+        dupes = {}
         tree = ET.parse(file)
         root = tree.getroot()
         scan = root.find("scandetails")

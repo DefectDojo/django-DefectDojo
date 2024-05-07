@@ -1,6 +1,6 @@
+import base64
 import json
 import logging
-import base64
 
 from dojo.models import Endpoint, Finding
 
@@ -15,7 +15,7 @@ DESCRIPTION_TEMPLATE = """**{title}**
 """
 
 
-class BurpApiParser(object):
+class BurpApiParser:
     """Parser that can load data from Burp API"""
 
     def get_scan_types(self):
@@ -33,7 +33,7 @@ class BurpApiParser(object):
 
         items = []
         # for each issue found
-        for issue_event in tree.get("issue_events", list()):
+        for issue_event in tree.get("issue_events", []):
             if (
                 "issue_found" == issue_event.get("type")
                 and "issue" in issue_event
@@ -117,9 +117,8 @@ class BurpApiParser(object):
                 elif segment["type"] == "HighlightSegment":
                     output += "\n\n------------------------------------------------------------------\n\n"
                 else:
-                    raise ValueError(
-                        f"unknown segment type in Burp data {segment['type']}"
-                    )
+                    msg = f"unknown segment type in Burp data {segment['type']}"
+                    raise ValueError(msg)
         return output
 
 

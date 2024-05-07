@@ -7,7 +7,7 @@ from dateutil import parser
 from dojo.models import Finding
 
 
-class BrakemanParser(object):
+class BrakemanParser:
     def get_scan_types(self):
         return ["Brakeman Scan"]
 
@@ -26,7 +26,7 @@ class BrakemanParser(object):
             data = json.loads(str(tree, "utf-8"))
         except BaseException:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
         find_date = parser.parse(data["scan_info"]["end_time"])
 
         for item in data["warnings"]:

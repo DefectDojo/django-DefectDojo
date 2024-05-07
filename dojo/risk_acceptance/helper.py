@@ -1,14 +1,16 @@
-from django.core.exceptions import PermissionDenied
-from django.utils import timezone
-from dojo.utils import get_system_setting, get_full_url
-from dateutil.relativedelta import relativedelta
-import dojo.jira_link.helper as jira_helper
-from dojo.jira_link.helper import escape_for_jira
-from dojo.notifications.helper import create_notification
-from django.urls import reverse
-from dojo.celery import app
-from dojo.models import System_Settings, Risk_Acceptance, Finding
 import logging
+
+from dateutil.relativedelta import relativedelta
+from django.core.exceptions import PermissionDenied
+from django.urls import reverse
+from django.utils import timezone
+
+import dojo.jira_link.helper as jira_helper
+from dojo.celery import app
+from dojo.jira_link.helper import escape_for_jira
+from dojo.models import Finding, Risk_Acceptance, System_Settings
+from dojo.notifications.helper import create_notification
+from dojo.utils import get_full_url, get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -208,8 +210,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
 
 def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
-        return 'finding was unaccepted/deleted from risk acceptance [(%s)|%s]' % \
-            (escape_for_jira(risk_acceptance.name),
+        return 'finding was unaccepted/deleted from risk acceptance [({})|{}]'.format(escape_for_jira(risk_acceptance.name),
             get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))))
     else:
         return 'Finding is no longer risk accepted'

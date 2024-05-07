@@ -1,19 +1,29 @@
+import logging
+from time import strftime
+
+from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.dispatch.dispatcher import receiver
+from django.utils import timezone
+from fieldsignals import pre_save_changed
+
+import dojo.jira_link.helper as jira_helper
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-import dojo.jira_link.helper as jira_helper
-import logging
-from time import strftime
-from django.utils import timezone
-from django.conf import settings
-from fieldsignals import pre_save_changed
-from dojo.utils import get_current_user, mass_model_updater, to_str_typed
-from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test, Endpoint, Endpoint_Status, \
-    Vulnerability_Id, Vulnerability_Id_Template
 from dojo.endpoint.utils import save_endpoints_to_add
-
+from dojo.models import (
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    Finding_Group,
+    System_Settings,
+    Test,
+    Vulnerability_Id,
+    Vulnerability_Id_Template,
+)
+from dojo.utils import get_current_user, mass_model_updater, to_str_typed
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -146,7 +156,8 @@ def can_edit_mitigated_data(user):
 def create_finding_group(finds, finding_group_name):
     logger.debug('creating finding_group_create')
     if not finds or len(finds) == 0:
-        raise ValueError('cannot create empty Finding Group')
+        msg = 'cannot create empty Finding Group'
+        raise ValueError(msg)
 
     finding_group_name_dummy = 'bulk group ' + strftime("%a, %d %b  %Y %X", timezone.now().timetuple())
 
@@ -236,18 +247,19 @@ def get_group_by_group_name(finding, finding_group_by_option):
         group_name = finding.component_name
     elif finding_group_by_option == 'component_name+component_version':
         if finding.component_name or finding.component_version:
-            group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
+            group_name = '{}:{}'.format((finding.component_name if finding.component_name else 'None'),
                 (finding.component_version if finding.component_version else 'None'))
     elif finding_group_by_option == 'file_path':
         if finding.file_path:
-            group_name = 'Filepath %s' % (finding.file_path)
+            group_name = f'Filepath {finding.file_path}'
     elif finding_group_by_option == 'finding_title':
         group_name = finding.title
     else:
-        raise ValueError("Invalid group_by option %s" % finding_group_by_option)
+        msg = f"Invalid group_by option {finding_group_by_option}"
+        raise ValueError(msg)
 
     if group_name:
-        return 'Findings in: %s' % group_name
+        return f'Findings in: {group_name}'
 
     return group_name
 

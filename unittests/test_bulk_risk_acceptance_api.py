@@ -2,10 +2,21 @@ import datetime
 
 from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APIClient, APITestCase
 
-from dojo.models import Product_Type, Product, Engagement, Product_Type_Member, Test, Finding, User, Test_Type, Role, Vulnerability_Id
 from dojo.authorization.roles_permissions import Roles
+from dojo.models import (
+    Engagement,
+    Finding,
+    Product,
+    Product_Type,
+    Product_Type_Member,
+    Role,
+    Test,
+    Test_Type,
+    User,
+    Vulnerability_Id,
+)
 
 
 class TestBulkRiskAcceptanceApi(APITestCase):
@@ -39,29 +50,29 @@ class TestBulkRiskAcceptanceApi(APITestCase):
                                          target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.timezone.utc))
 
         def create_finding(test: Test, reporter: User, cve: str) -> Finding:
-            return Finding(test=test, title='Finding {}'.format(cve), cve=cve, severity='High', verified=True,
+            return Finding(test=test, title=f'Finding {cve}', cve=cve, severity='High', verified=True,
                            description='Hello world!', mitigation='Delete system32', impact='Everything',
                            reporter=reporter, numerical_severity='S1', static_finding=True, dynamic_finding=False)
 
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_a, cls.user, 'CVE-1999-{}'.format(i)), range(50, 150, 3)))
+            create_finding(cls.test_a, cls.user, f'CVE-1999-{i}') for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_a):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_b, cls.user, 'CVE-1999-{}'.format(i)), range(51, 150, 3)))
+            create_finding(cls.test_b, cls.user, f'CVE-1999-{i}') for i in range(51, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_b):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_c, cls.user, 'CVE-1999-{}'.format(i)), range(52, 150, 3)))
+            create_finding(cls.test_c, cls.user, f'CVE-1999-{i}') for i in range(52, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_c):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
 
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_d, cls.user, 'CVE-2000-{}'.format(i)), range(50, 150, 3)))
+            create_finding(cls.test_d, cls.user, f'CVE-2000-{i}') for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_d):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
         Finding.objects.bulk_create(
-            map(lambda i: create_finding(cls.test_e, cls.user, 'CVE-1999-{}'.format(i)), range(50, 150, 3)))
+            create_finding(cls.test_e, cls.user, f'CVE-1999-{i}') for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_e):
             Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
 
@@ -70,7 +81,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
     def test_test_accept_risks(self):
-        accepted_risks = [{'vulnerability_id': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
+        accepted_risks = [{'vulnerability_id': f'CVE-1999-{i}', 'justification': 'Demonstration purposes',
                            'accepted_by': 'King of the Internet'} for i in range(100, 150)]
         result = self.client.post(reverse('test-accept-risks', kwargs={'pk': self.test_a.id}), data=accepted_risks,
                                   format='json')
@@ -83,7 +94,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         self.assertEqual(self.engagement_2a.risk_acceptance.count(), 0)
 
     def test_engagement_accept_risks(self):
-        accepted_risks = [{'vulnerability_id': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
+        accepted_risks = [{'vulnerability_id': f'CVE-1999-{i}', 'justification': 'Demonstration purposes',
                            'accepted_by': 'King of the Internet'} for i in range(100, 150)]
         result = self.client.post(reverse('engagement-accept-risks', kwargs={'pk': self.engagement.id}),
                                   data=accepted_risks, format='json')
@@ -94,7 +105,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         self.assertEqual(self.engagement_2a.unaccepted_open_findings.count(), 34)
 
     def test_finding_accept_risks(self):
-        accepted_risks = [{'vulnerability_id': 'CVE-1999-{}'.format(i), 'justification': 'Demonstration purposes',
+        accepted_risks = [{'vulnerability_id': f'CVE-1999-{i}', 'justification': 'Demonstration purposes',
                            'accepted_by': 'King of the Internet'} for i in range(60, 140)]
         result = self.client.post(reverse('finding-accept-risks'), data=accepted_risks, format='json')
         self.assertEqual(len(result.json()), 106)

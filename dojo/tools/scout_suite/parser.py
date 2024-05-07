@@ -6,7 +6,7 @@ from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
 
 
-class ScoutSuiteParser(object):
+class ScoutSuiteParser:
     """"ScoutSuite Wiki: https://github.com/nccgroup/ScoutSuite/wiki"""
 
     ID = "Scout Suite"
@@ -34,31 +34,25 @@ class ScoutSuiteParser(object):
         last_run = data["last_run"]
 
         test_description = ""
-        test_description = "%s**Account:** `%s`\n" % (
-            test_description,
-            account_id,
-        )
-        test_description = "%s**Provider:** %s\n" % (
+        test_description = f"{test_description}**Account:** `{account_id}`\n"
+        test_description = "{}**Provider:** {}\n".format(
             test_description,
             data["provider_name"],
         )
-        test_description = "%s**Ruleset:** `%s`\n" % (
+        test_description = "{}**Ruleset:** `{}`\n".format(
             test_description,
             last_run["ruleset_name"],
         )
-        test_description = "%s**Ruleset Description:** %s\n" % (
+        test_description = "{}**Ruleset Description:** {}\n".format(
             test_description,
             last_run["ruleset_about"],
         )
 
         # Summary of Services
         test_description = (
-            "%s\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count"
-            % (test_description)
+            f"{test_description}\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count"
         )
-        test_description = "%s\n:---|---:|---:|---:|---:|---:" % (
-            test_description
-        )
+        test_description = f"{test_description}\n:---|---:|---:|---:|---:|---:"
         for service, items in list(last_run["summary"].items()):
             test_description += "\n"
             test_description += "|".join(
@@ -72,7 +66,7 @@ class ScoutSuiteParser(object):
                 ]
             )
 
-        tests = list()
+        tests = []
         test = ParserTest(
             name=self.ID,
             type=data["provider_name"],
@@ -177,11 +171,11 @@ class ScoutSuiteParser(object):
                 self.item_data = (
                     self.item_data
                     + self.formatview(depth)
-                    + "**%s:** %s\n\n" % (key.title(), src)
+                    + f"**{key.title()}:** {src}\n\n"
                 )
             else:
                 self.item_data = (
-                    self.item_data + self.formatview(depth) + "%s\n" % src
+                    self.item_data + self.formatview(depth) + f"{src}\n"
                 )
             self.pdepth = depth
 

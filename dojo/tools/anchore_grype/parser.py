@@ -1,11 +1,12 @@
 import json
+
 from cvss import parser as cvss_parser
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
 
 
-class AnchoreGrypeParser(object):
+class AnchoreGrypeParser:
     """Anchore Grype JSON report format generated with `-o json` option.
 
     command: `grype defectdojo/defectdojo-django:1.13.1 -o json > many_vulns.json`
@@ -25,7 +26,7 @@ class AnchoreGrypeParser(object):
 
     def get_findings(self, file, test):
         data = json.load(file)
-        dupes = dict()
+        dupes = {}
         for item in data.get("matches", []):
             vulnerability = item["vulnerability"]
             vuln_id = vulnerability["id"]
@@ -203,7 +204,7 @@ class AnchoreGrypeParser(object):
         return None
 
     def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
-        vulnerability_ids = list()
+        vulnerability_ids = []
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         if related_vulnerabilities:

@@ -1,8 +1,8 @@
-from dojo.tools.fortify.xml_parser import FortifyXMLParser
 from dojo.tools.fortify.fpr_parser import FortifyFPRParser
+from dojo.tools.fortify.xml_parser import FortifyXMLParser
 
 
-class FortifyParser(object):
+class FortifyParser:
     def get_scan_types(self):
         return ["Fortify Scan"]
 

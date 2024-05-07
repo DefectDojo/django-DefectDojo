@@ -1,12 +1,13 @@
 import json
 import logging
-from dojo.models import Finding
 from datetime import datetime
+
+from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 
-class CheckmarxOsaParser(object):
+class CheckmarxOsaParser:
     def get_scan_types(self):
         return ["Checkmarx OSA"]
 
@@ -27,7 +28,8 @@ class CheckmarxOsaParser(object):
                 "Found %i elements",
                 len(tree),
             )
-            raise ValueError("Invalid format: bad structure")
+            msg = "Invalid format: bad structure"
+            raise ValueError(msg)
         libraries_dict = self.get_libraries(tree)
         vulnerabilities = self.get_vunlerabilities(tree)
         items = []
@@ -38,20 +40,18 @@ class CheckmarxOsaParser(object):
             library = libraries_dict[item["libraryId"]]
             self.check_mandatory(library, mandatory_library_fields)
             if "name" not in item["state"]:
-                raise ValueError(
-                    "Invalid format: missing mandatory field state.name"
-                )
+                msg = "Invalid format: missing mandatory field state.name"
+                raise ValueError(msg)
             if "name" not in item["severity"]:
-                raise ValueError(
-                    "Invalid format: missing mandatory field severity.name"
-                )
+                msg = "Invalid format: missing mandatory field severity.name"
+                raise ValueError(msg)
 
             # Possible status as per checkmarx 9.2: TO_VERIFY, NOT_EXPLOITABLE,
             # CONFIRMED, URGENT, PROPOSED_NOT_EXPLOITABLE
             status = item["state"]["name"]
             vulnerability_id = item.get("cveName", "NC")
             finding_item = Finding(
-                title="{0} {1} | {2}".format(
+                title="{} {} | {}".format(
                     library["name"], library["version"], vulnerability_id
                 ),
                 severity=item["severity"]["name"],
@@ -122,6 +122,5 @@ class CheckmarxOsaParser(object):
     def check_mandatory(self, item, mandatory_vulnerability_fields):
         for field in mandatory_vulnerability_fields:
             if field not in item:
-                raise ValueError(
-                    "Invalid format: missing mandatory field %s" % field
-                )
+                msg = f"Invalid format: missing mandatory field {field}"
+                raise ValueError(msg)

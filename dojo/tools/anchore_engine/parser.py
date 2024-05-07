@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class AnchoreEngineParser(object):
+class AnchoreEngineParser:
     def get_scan_types(self):
         return ["Anchore Engine Scan"]
 
@@ -15,7 +15,7 @@ class AnchoreEngineParser(object):
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-        dupes = dict()
+        dupes = {}
         for item in data["vulnerabilities"]:
             vulnerability_id = item.get("vuln")
 

@@ -1,18 +1,14 @@
-import csv
-import hashlib
-import io
 import json
 
-from cvss import parser as cvss_parser
-from dateutil.parser import parse
-from dojo.models import Endpoint, Finding
+from dojo.tools.generic.csv_parser import GenericCSVParser
+from dojo.tools.generic.json_parser import GenericJSONParser
 from dojo.tools.parser_test import ParserTest
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class GenericParser(object):
+class GenericParser:
     ID = "Generic Findings Import"
 
     def get_scan_types(self):
@@ -26,23 +22,23 @@ class GenericParser(object):
 
     def get_findings(self, filename, test, custom_fields_mapping=None):
         if filename.name.lower().endswith(".csv"):
-            return self._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
+            return GenericCSVParser()._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
         elif filename.name.lower().endswith(".json"):
             data = json.load(filename)
-            test_internal = self._get_test_json(data, custom_fields_mapping=custom_fields_mapping)
+            test_internal = GenericJSONParser()._get_test_json(data, custom_fields_mapping=custom_fields_mapping)
             return test_internal.findings
         else:  # default to CSV like before
-            return self._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
+            return GenericCSVParser()._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
 
     def get_tests(self, scan_type, filename, custom_fields_mapping=None):
         # if the file is a CSV just use the old function
         if filename.name.lower().endswith(".csv"):
             test = ParserTest(name=self.ID, type=self.ID, version=None)
-            test.findings = self._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
+            test.findings = GenericCSVParser()._get_findings_csv(filename, custom_fields_mapping=custom_fields_mapping)
             return [test]
         # we manage it like a JSON file (default)
         data = json.load(filename)
-        return [self._get_test_json(data, custom_fields_mapping=custom_fields_mapping)]
+        return [GenericJSONParser()._get_test_json(data, custom_fields_mapping=custom_fields_mapping)]
 
     def requires_file(self, scan_type):
         return True

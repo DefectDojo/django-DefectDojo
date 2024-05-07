@@ -1,9 +1,11 @@
 from xml.dom import NamespaceErr
+
 from defusedxml import ElementTree as ET
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
-class HCLAppScanParser(object):
+class HCLAppScanParser:
     def get_scan_types(self):
         return ["HCLAppScan XML"]
 
@@ -27,9 +29,8 @@ class HCLAppScanParser(object):
         tree = ET.parse(file)
         root = tree.getroot()
         if "xml-report" not in root.tag:
-            raise NamespaceErr(
-                "This doesn't seem to be a valid HCLAppScan xml file."
-            )
+            msg = "This doesn't seem to be a valid HCLAppScan xml file."
+            raise NamespaceErr(msg)
         report = root.find("issue-group")
         if report is not None:
             for finding in report:
@@ -107,7 +108,7 @@ class HCLAppScanParser(object):
                 )
                 findings.append(finding)
                 try:
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=host, port=port)
                     finding.unsaved_endpoints.append(endpoint)
                 except UnboundLocalError:

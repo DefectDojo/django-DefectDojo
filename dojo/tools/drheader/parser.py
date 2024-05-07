@@ -3,7 +3,7 @@ import json
 from dojo.models import Endpoint, Finding
 
 
-class DrHeaderParser(object):
+class DrHeaderParser:
     def get_scan_types(self):
         return ["DrHeader JSON Importer"]
 

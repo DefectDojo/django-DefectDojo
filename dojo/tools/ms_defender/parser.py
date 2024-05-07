@@ -1,9 +1,10 @@
 import json
-from dojo.models import Finding, Endpoint
 import zipfile
 
+from dojo.models import Endpoint, Finding
 
-class MSDefenderParser(object):
+
+class MSDefenderParser:
     """
     Import from MSDefender findings
     """
@@ -34,15 +35,15 @@ class MSDefenderParser(object):
             if zipdata.get('machines/') is None or zipdata.get('vulnerabilities/') is None:
                 return []
             else:
-                vulnerabilityfiles = list()
-                machinefiles = list()
+                vulnerabilityfiles = []
+                machinefiles = []
                 for content in list(zipdata):
                     if "vulnerabilities/" in content and "vulnerabilities/" != content:
                         vulnerabilityfiles.append(content)
                     if "machines/" in content and "machines/" != content:
                         machinefiles.append(content)
-                vulnerabilities = list()
-                machines = list()
+                vulnerabilities = []
+                machines = []
                 for vulnerabilityfile in vulnerabilityfiles:
                     output = json.loads(zipdata[vulnerabilityfile].decode('ascii'))['value']
                     for data in output:
@@ -82,7 +83,7 @@ class MSDefenderParser(object):
         if vulnerability['cveId'] is not None:
             finding.cve = vulnerability['cveId']
         self.findings.append(finding)
-        finding.unsaved_endpoints = list()
+        finding.unsaved_endpoints = []
 
     def process_zip(self, vulnerability, machine):
         description = ""
@@ -132,7 +133,7 @@ class MSDefenderParser(object):
         if vulnerability['cveId'] is not None:
             finding.cve = vulnerability['cveId']
         self.findings.append(finding)
-        finding.unsaved_endpoints = list()
+        finding.unsaved_endpoints = []
         if machine['computerDnsName'] is not None:
             finding.unsaved_endpoints.append(Endpoint(host=str(machine['computerDnsName'])))
         if machine['lastIpAddress'] is not None:

@@ -1,13 +1,13 @@
 import csv
+import datetime
 import hashlib
 import io
 import sys
-import datetime
 
 from dojo.models import Endpoint, Finding
 
 
-class ContrastParser(object):
+class ContrastParser:
     """Contrast Scanner CSV Report"""
 
     def get_scan_types(self):
@@ -25,7 +25,7 @@ class ContrastParser(object):
             content = content.decode("utf-8")
         csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
         reader = csv.DictReader(io.StringIO(content))
-        dupes = dict()
+        dupes = {}
 
         for row in reader:
             # Vulnerability Name,Vulnerability ID,Category,Rule
@@ -80,7 +80,7 @@ class ContrastParser(object):
                 )
 
             dupe_key = hashlib.sha256(
-                f"{finding.vuln_id_from_tool}".encode("utf-8")
+                f"{finding.vuln_id_from_tool}".encode()
             ).digest()
 
             if dupe_key in dupes:

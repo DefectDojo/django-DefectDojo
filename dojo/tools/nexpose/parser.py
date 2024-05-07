@@ -1,14 +1,15 @@
-import html2text
 import re
-from defusedxml import ElementTree
-from hyperlink._url import SCHEME_PORT_MAP
 from datetime import datetime
+
+import html2text
+from defusedxml import ElementTree
 from django.conf import settings
+from hyperlink._url import SCHEME_PORT_MAP
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
-class NexposeParser(object):
+class NexposeParser:
     """
     The objective of this class is to parse Nexpose's XML 2.0 Report.
 
@@ -106,7 +107,7 @@ class NexposeParser(object):
 
         @return vulns A list of vulnerabilities according to vulnsDefinitions
         """
-        vulns = list()
+        vulns = []
 
         for tests in node.findall("tests"):
             for test in tests.findall("test"):
@@ -143,7 +144,7 @@ class NexposeParser(object):
         """
         @returns vulns A dict of Vulnerability Definitions
         """
-        vulns = dict()
+        vulns = {}
         url_index = 0
         for vulnsDef in tree.findall("VulnerabilityDefinitions"):
             for vulnDef in vulnsDef.findall("vulnerability"):
@@ -163,10 +164,10 @@ class NexposeParser(object):
                     "desc": "",
                     "name": vulnDef.get("title"),
                     "vector": vulnDef.get("cvssVector"),  # this is CVSS v2
-                    "refs": dict(),
+                    "refs": {},
                     "resolution": "",
                     "severity": sev,
-                    "tags": list(),
+                    "tags": [],
                 }
                 for item in list(vulnDef):
                     if item.tag == "description":
@@ -208,14 +209,14 @@ class NexposeParser(object):
         return vulns
 
     def get_items(self, tree, vulns, test):
-        hosts = list()
+        hosts = []
         for nodes in tree.findall("nodes"):
             for node in nodes.findall("node"):
-                host = dict()
+                host = {}
                 host["name"] = node.get("address")
                 host["hostnames"] = set()
                 host["os"] = ""
-                host["services"] = list()
+                host["services"] = []
                 host["vulns"] = self.parse_tests_type(node, vulns)
 
                 host["vulns"].append(
@@ -365,6 +366,6 @@ class NexposeParser(object):
             # update CVE
             if "CVE" in vuln.get("refs", {}):
                 find.unsaved_vulnerability_ids = [vuln["refs"]["CVE"]]
-            find.unsaved_endpoints = list()
+            find.unsaved_endpoints = []
             dupes[dupe_key] = find
         return find
