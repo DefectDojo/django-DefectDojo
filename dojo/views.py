@@ -27,11 +27,11 @@ logger = logging.getLogger(__name__)
 
 
 def custom_error_view(request, exception=None):
-    return render(request, "500.html", {})
+    return render(request, "500.html", {}, status=500)
 
 
 def custom_bad_request_view(request, exception=None):
-    return render(request, "400.html", {})
+    return render(request, "400.html", {}, status=400)
 
 
 def action_history(request, cid, oid):
