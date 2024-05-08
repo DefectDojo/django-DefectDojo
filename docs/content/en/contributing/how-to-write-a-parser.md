@@ -157,7 +157,7 @@ Good example:
 
 ```python
    if "mykey" in data:
-       finding.cve = data["mykey"]
+       finding.cwe = data["mykey"]
 ```
 
 ### Do not parse CVSS by hand (vector, score or severity)
@@ -244,7 +244,7 @@ For ex:
             self.assertEqual(True, finding.verified)
             self.assertEqual(False, finding.duplicate)
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("CVE-2020-36234", finding.cve)
+            self.assertEqual("CVE-2020-36234", finding.vulnerability_ids[0])
             self.assertEqual(261, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
             self.assertIn("security", finding.tags)
