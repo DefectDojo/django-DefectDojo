@@ -45,7 +45,7 @@ class AsffParser:
                 description += f"\nAssociated ResourceId: "item.get("Resources").get("Id")
             else:
                 description = item.get("Description")
-                
+
             finding = Finding(
                 title=item.get("Title"),
                 description=description,
