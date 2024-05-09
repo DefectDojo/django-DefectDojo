@@ -43,7 +43,7 @@ class AsffParser:
             if item.get("Resources"):
                 description = "This is a Security Hub Finding \n" + item.get("Description", "") + "\n"
                 description += "\n" + item.get("Resources", {}).get("Id", "")
-            else
+            else:
                 description = item.get("Description")
 
             finding = Finding(
