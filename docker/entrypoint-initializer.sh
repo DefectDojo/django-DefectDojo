@@ -110,7 +110,7 @@ fi
 echo "Making migrations"
 python3 manage.py makemigrations dojo
 echo "Migrating"
-python3 manage.py migrate
+python3 manage.py migrate --fake
 
 echo "Admin user: ${DD_ADMIN_USER}"
 ADMIN_EXISTS=$(echo "SELECT * from auth_user;" | python manage.py dbshell | grep "${DD_ADMIN_USER}")
