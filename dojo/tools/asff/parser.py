@@ -54,8 +54,7 @@ class AsffParser:
                 references=references,
                 severity=self.get_severity(item.get("Severity")),
                 active=active,
-                unique_id_from_tool=item.get("Resources").get("Id"),
-                vuln_id_from_tool=item.get("Id"),
+                unique_id_from_tool=item.get("Id"),
             )
 
             if "Resources" in item:
