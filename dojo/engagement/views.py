@@ -1289,13 +1289,15 @@ def add_transfer_finding(request, eid, fid=None):
         else:
             logger.error(form.errors)
     else:
-        form = TransferFindingForm(initial={"engagement_name":eng,
+        form = TransferFindingForm(initial={"engagement_name": eng,
                                             "title": f"transfer finding - {finding.title}",
                                             "findings": finding,
                                             "owner": request.user.username,
                                             "status": "Transfer Pending",
                                             "severity": finding.severity,
                                             "owner": request.user})
+
+        form.fields["findings"].queryset = form.fields["findings"].queryset.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
     return render(request, 'dojo/add_transfer_finding.html', {
                   'eng': eng,

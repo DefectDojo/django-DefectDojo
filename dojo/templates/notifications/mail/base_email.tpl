@@ -221,7 +221,11 @@
 							<div class="body-margin">
 								<h2>{% trans "Hello, " %}{{ user.first_name }}</h2>
 								{%block description %}
-								<b>{{ owner }}</b> {{ description|safe }}
+									{%if owner %}
+										<b>{{ owner }}</b> {{ description|safe }}
+									{% else %}
+										{{ description|safe }}
+									{% endif %}
 								{% endblock%}
 								<p>
 									{% block content %}
@@ -248,7 +252,7 @@
 						<td class="proton-td" colspan="10" style="">
 							<div class="proton-divider"></div>
 							<center>
-								<span style="color: #000000"> © 2024 Devsecops Engine </span>
+								<span style="color: #000000"> © 2024 DevSecOps Team</span>
 							</center>
 							<div class="proton-margin-bottom"></div>
 						</td>

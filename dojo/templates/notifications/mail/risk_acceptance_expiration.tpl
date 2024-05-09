@@ -26,8 +26,6 @@
 			{% for finding in risk_acceptance.accepted_findings.all %}
 				{% url 'view_finding' finding.id as finding_url %}
 				<a href="{{ finding_url|full_url }}">{{ finding.title }}</a> ({{ finding.severity }}) {{ finding.status }}<br/>
-			{% empty %}
-				{% trans "None" %}<br/>
 			{% endfor %}
 		{%endblock%}
 	</p>

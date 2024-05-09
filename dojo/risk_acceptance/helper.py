@@ -1,6 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from dojo.utils import get_system_setting, get_full_url, get_remote_json_config
+from dojo.risk_acceptance import risk_pending as rp_pending
 from dateutil.relativedelta import relativedelta
 import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
@@ -35,6 +36,11 @@ def expire_now(risk_acceptance):
                     finding.sla_start_date = timezone.now().date()
 
                 finding.save(dedupe_option=False)
+                # reactivate finding realted (transfer finding)
+                rp_pending.close_or_reactive_related_finding(event="reactive",
+                                                  parent_finding=finding,
+                                                  notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
+                                                  send_notification=True)
                 reactivated_findings.append(finding)
                 # findings remain in this risk acceptance for reporting / metrics purposes
             else:

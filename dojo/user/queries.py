@@ -1,3 +1,4 @@
+import logging
 from crum import get_current_user
 from django.db.models import Q
 from django.conf import settings
@@ -7,6 +8,8 @@ from dojo.authorization.authorization import get_roles_for_permission, user_has_
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.request_cache import cache_for_request
+
+logger = logging.getLogger(__name__)
 
 
 def get_authorized_users_for_product_type(users, product_type, permission):
@@ -119,3 +122,10 @@ def get_all_user_by_role(role=None, user=None):
     user_query = Dojo_User.objects.filter(id__in=list(user_ids))
 
     return user_query
+
+
+def get_user(user_name):
+    try:
+        return Dojo_User.objects.get(username=user_name)
+    except Dojo_User.DoesNotExist:
+        logger.error('User %s does not exist', user_name)

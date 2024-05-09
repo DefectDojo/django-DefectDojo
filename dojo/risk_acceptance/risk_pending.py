@@ -5,12 +5,15 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from dojo.utils import sla_expiration_risk_acceptance
 from django.urls import reverse
+from dojo.risk_acceptance import risk_pending as rp_pending
 from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
-    Product, Product_Type, TransferFindingFinding
+    Product, Product_Type, TransferFindingFinding, Dojo_User, Notes
 from dojo.risk_acceptance.helper import create_notification, expiration_message_creator, post_jira_comments
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
+from dojo.user.queries import get_user
 from dojo.authorization.roles_permissions import Permissions
+from dojo.risk_acceptance.notification import Notification
 import dojo.risk_acceptance.helper as ra_helper
 import crum
 import json
@@ -35,28 +38,9 @@ def risk_acceptance_decline(
         status = "OK"
         message = "Risk Rejected"
         title = f"Rejected request:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
-        create_notification(
-            event="risk_acceptance_request",
-            subject=f"❌Acceptance request rejected in Risk_accepted: {risk_acceptance.id}🔥",
-            title=title,
-            risk_acceptance=risk_acceptance,
-            reactivated_findings=risk_acceptance.accepted_findings,
-            engagement=risk_acceptance.engagement,
-            product=risk_acceptance.engagement.product,
-            description=f"rejected the request for acceptance of finding <b>{finding.title}</b> with id <b>{finding.id}</b>",
-            owner=crum.get_current_user(),
-            icon="times-circle",
-            color_icon="#B90C0C",
-            recipients=[risk_acceptance.owner.get_username()],
-            url=reverse(
-                "view_risk_acceptance",
-                args=(
-                    risk_acceptance.engagement.id,
-                    risk_acceptance.id,
-                ),
-            ),
-        )
+        Notification.risk_acceptance_decline(title=title, risk_acceptance=risk_acceptance, finding=finding)
     return Response(status=status, message=message)
+
 
 def update_expiration_risk_accepted(finding: Finding):
     expiration_delta_days = sla_expiration_risk_acceptance('RiskAcceptanceExpiration')
@@ -65,12 +49,14 @@ def update_expiration_risk_accepted(finding: Finding):
     created_date = timezone.now().date()
     return expiration_delta_days.get(finding.severity.lower()), expiration_date, created_date
 
+
 def risk_acceptd_findings_related(finding):
     # obtener los findings relacionados con un queryset
     transfer_findings_finding = TransferFindingFinding.objects.filter(finding_related=finding.id) 
     for transfer_finding_finding in transfer_findings_finding:
         origin_finding = transfer_finding_finding.findings 
-        
+
+
 def handle_from_provider_risk(finding, acceptance_days):
     tag = ra_helper.get_matching_value(list_a=finding.tags.tags, list_b=[settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3])
     if tag is not None:
@@ -86,9 +72,8 @@ def handle_from_provider_risk(finding, acceptance_days):
             header=settings.PROVIDER_HEADER,
             token=settings.PROVIDER_TOKEN)
 
+
 def risk_accepted_succesfully(
-    user,
-    eng: Engagement,
     finding: Finding,
     risk_acceptance: Risk_Acceptance,
     send_notification: bool = True,
@@ -104,30 +89,16 @@ def risk_accepted_succesfully(
     risk_acceptance.created = created_date
     risk_acceptance.save()
     finding.save()
-    # Send notification
+
+    close_or_reactive_related_finding(
+        event="close",
+        parent_finding=finding,
+        notes=f"temporarily accepted by the parent finding {finding.id} (policies for the transfer of findings)",
+        send_notification=True)
+
     if send_notification:
         title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
-        create_notification(
-            event="risk_acceptance_request",
-            subject=f"✅Acceptance request confirmed in Risk_Accepted: {risk_acceptance.id}👌",
-            title=title,
-            risk_acceptance=risk_acceptance,
-            reactivated_findings=risk_acceptance.accepted_findings,
-            engagement=risk_acceptance.engagement,
-            product=risk_acceptance.engagement.product,
-            description=f"accepted the request of finding <b>{finding.title}</b> with id <b>{finding.id}</b>",
-            owner=risk_acceptance.accepted_by.replace("[", "").replace("]", "").replace("'", "").replace(",", " and"),
-            icon="check-circle",
-            color_icon="#096C11",
-            recipients=[risk_acceptance.owner.get_username()],
-            url=reverse(
-                "view_risk_acceptance",
-                args=(
-                    risk_acceptance.engagement.id,
-                    risk_acceptance.id,
-                ),
-            ),
-        )
+        Notification.risk_acceptance_accept(title=title, risk_acceptance=risk_acceptance, finding=finding) 
 
 
 def get_role_members(user, product: Product, product_type: Product_Type):
@@ -140,7 +111,7 @@ def get_role_members(user, product: Product, product_type: Product_Type):
     if not user_members:
         raise ValueError("The user does not have any product_type or product associated with it")
     for user_member in user_members:
-        if hasattr(user_member,"product_type_id"):
+        if hasattr(user_member, "product_type_id"):
             if user_member.product_type_id == product_type.id:
                 return user_member.role.name
         elif hasattr(user_member, "product_id"):
@@ -180,7 +151,7 @@ def risk_acceptante_pending(
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
     ):
         finding.accepted_by = user.username
-        risk_accepted_succesfully(user, eng, finding, risk_acceptance)
+        risk_accepted_succesfully(finding, risk_acceptance)
         message = "Finding Accept successfully from risk acceptance."
         status = "OK"
 
@@ -202,7 +173,7 @@ def risk_acceptante_pending(
                 if number_of_acceptors_required == len(
                     get_confirmed_acceptors(finding)
                 ):
-                    risk_accepted_succesfully(user, eng, finding, risk_acceptance)
+                    risk_accepted_succesfully(finding, risk_acceptance)
                 message = "Finding Accept successfully from risk acceptance."
                 status = "OK"
             else:
@@ -370,6 +341,10 @@ def expire_now_risk_pending(risk_acceptance):
                     finding.sla_start_date = timezone.now().date()
 
                 finding.save(dedupe_option=False)
+                rp_pending.close_or_reactive_related_finding(event="reactive",
+                                                  parent_finding=finding,
+                                                  notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
+                                                  send_notification=True)
                 reactivated_findings.append(finding)
                 # findings remain in this risk acceptance for reporting / metrics purposes
             else:
@@ -492,3 +467,65 @@ def validate_list_findings(conf_risk, type, finding, eng):
             ),
             None,
         )
+
+
+def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes: str, send_notification: bool):
+    transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
+    system_user = get_user(settings.SYSTEM_USER)
+    for transfer_finding_finding in transfer_finding_findings:
+        if event == "close":
+            transfer_finding_finding.findings.active = False
+            transfer_finding_finding.findings.out_of_scope = True
+            note = Notes(entry=notes, author=system_user)
+            note.save()
+            logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are closed")
+            transfer_finding_finding.findings.notes.add(note)
+            transfer_finding_finding.findings.save()
+            if send_notification:
+                Notification.send_notification(
+                    event="other",
+                    subject=f"✅temporarily accepted by the parent finding {parent_finding.id} (policies for the transfer of findings)👌",
+                    description=f"temporarily accepted by the parent finding <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
+                    finding=parent_finding,
+                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
+        if event == "reactive":
+            transfer_finding_finding.findings.active = True
+            transfer_finding_finding.findings.out_of_scope = False
+            note = Notes(entry=notes, author=system_user)
+            note.save()
+            logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are reactivated")
+            transfer_finding_finding.findings.notes.add(note)
+            transfer_finding_finding.findings.save()
+            if send_notification:
+                Notification.send_notification(
+                    event="other",
+                    subject=f"✅This finding has been reactivated for the finding parent {parent_finding.id} (policies for the transfer of findings)👌",
+                    description=f"The finding has been reactivated for the finding parent <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
+                    finding=parent_finding,
+                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
+
+
+def acceptance_findings_related(parent_finding: Finding, risk_acceptance: Risk_Acceptance):
+    """Busca en todo el risk acceptance que ingresa como parametro si existe algun finding relacionado en otro risk acceptance 
+        si lo encuentra agregar el finding al risk acceptance delocontrario crear un nuevo risk_acceptance
+        finding_related = finding_parent
+    Args:
+        fid (int): risk acceptance object
+
+    Returns:
+        List[Finding]: _description_
+    """
+    # obtiene los finding hijos al finding padre o finding related
+    transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
+    for transfer_finding_finding in transfer_finding_findings:
+
+        Risk_Acceptance(name="Transfer finding - " + transfer_finding_finding.finding_related.title,
+                        accepted_findings=[transfer_finding_finding.finding_related],
+                        severity=transfer_finding_finding.severity,
+                        accepted_by=risk_acceptance.accepted_by,
+                        owner=get_user(settings.SYSTEM_USER),
+                        expiration_date=update_expiration_risk_accepted(transfer_finding_finding),
+                        reactivate_expired=True,
+                        restart_sla_expired=False,
+                        notes=Notes(entry="Finding accepted by findings transfer policy")
+                        )

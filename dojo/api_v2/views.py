@@ -141,6 +141,7 @@ from dojo.product.queries import (
 )
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
+from dojo.risk_acceptance import risk_pending as rp_pending
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import (
     get_authorized_findings,
@@ -926,6 +927,11 @@ class FindingViewSet(
                     e_status.last_modified = timezone.now()
                     e_status.save()
                 finding.save()
+                rp_pending.close_or_reactive_related_finding(
+                    event="close",
+                    parent_finding=finding,
+                    notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                    send_notification=False)
             else:
                 return Response(
                     finding_close.errors, status=status.HTTP_400_BAD_REQUEST
