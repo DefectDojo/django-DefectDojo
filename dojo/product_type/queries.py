@@ -89,6 +89,9 @@ def get_authorized_contacts_for_product_type(severity, product, product_type):
     type_contacts = rule["type_contacts"][json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type_obj.name.split(" - ")[0]]]
     contacts_list = type_contacts["users"]
 
+    if user.is_superuser:
+        contacts_result.append(user.id)
+
     if hasattr(user, "global_role"):
         if user.global_role.role:
             if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
