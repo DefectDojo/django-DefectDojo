@@ -1692,6 +1692,9 @@ VULNERABILITY_URLS = {
     'RUSTSEC': 'https://rustsec.org/advisories/',
     'VNS': 'https://vulners.com/',
     'RHSA': 'https://access.redhat.com/errata/',
+    'RHBA': 'https://access.redhat.com/errata/',
+    'RHEA': 'https://access.redhat.com/errata/',
+    'FEDORA': 'https://bodhi.fedoraproject.org/updates/',
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
