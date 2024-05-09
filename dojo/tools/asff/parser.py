@@ -40,16 +40,19 @@ class AsffParser:
                 active = True
             else:
                 active = False
+            description=f"This is an AWS Security Finding\n"item.get("Description")
+            description+=f"\nAssociated ResourceId: "item.get("Resources").get("Id")
 
             finding = Finding(
                 title=item.get("Title"),
-                description=item.get("Description"),
+                description=description,
                 date=dateutil.parser.parse(item.get("CreatedAt")),
                 mitigation=mitigation,
                 references=references,
                 severity=self.get_severity(item.get("Severity")),
                 active=active,
-                unique_id_from_tool=item.get("Id"),
+                unique_id_from_tool=item.get("Resources").get("Id"),
+                vuln_id_from_tool=item.get("Id"),
             )
 
             if "Resources" in item:
