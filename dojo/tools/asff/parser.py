@@ -40,10 +40,12 @@ class AsffParser:
                 active = True
             else:
                 active = False
+            description=f"This is an AWS Security Finding\n"item.get("Description")
+            description+=f"Associated ResourceId: "item.get("Resources").get("Id")
 
             finding = Finding(
                 title=item.get("Title"),
-                description=item.get("Description"),
+                description=description,
                 date=dateutil.parser.parse(item.get("CreatedAt")),
                 mitigation=mitigation,
                 references=references,
