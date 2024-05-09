@@ -500,6 +500,8 @@ def endpoint_querys(request, prod):
         'finding__cwe'
     ).annotate(
         count=Count('finding__cwe')
+    ).annotate(
+        cwe=F('finding__cwe')
     )
 
     filters['all_vulns'] = endpoints_qs.filter(
@@ -508,6 +510,8 @@ def endpoint_querys(request, prod):
         'finding__cwe'
     ).annotate(
         count=Count('finding__cwe')
+    ).annotate(
+        cwe=F('finding__cwe')
     )
 
     filters['start_date'] = start_date
@@ -610,7 +614,7 @@ def view_product_metrics(request, pid):
             if view == 'Finding':
                 severity = finding.get('severity')
             elif view == 'Endpoint':
-                severity = finding.finding.get('severity')
+                severity = finding.get('severity')
 
             finding_age = calculate_finding_age(finding)
             if open_objs_by_age.get(finding_age, None):
