@@ -41,8 +41,7 @@ class AsffParser:
             else:
                 active = False
             if item.get("Resources"):
-                description = f"This is an AWS Security Finding\n"item.get("Description")
-                description += f"\nAssociated ResourceId: "item.get("Resources").get("Id")
+                description = f"This is an AWS Security Finding\n"item.get("Description")"\nAssociated ResourceId: "item.get("Resources").get("Id")
             else:
                 description = item.get("Description")
 
