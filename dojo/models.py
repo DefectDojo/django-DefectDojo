@@ -2225,7 +2225,6 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return '%i: %s' % (self.finding.id, self.action)
 
 
-
 class Finding(models.Model):
 
     STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
@@ -2234,8 +2233,7 @@ class Finding(models.Model):
                       ('Risk Active', 'Risk Active'),
                       ('Transfer Pending', 'Transfer Pending'),
                       ('Transfer Rejected', 'Transfer Rejected'),
-                      ('Transfer Accepted', 'Transfer Accepted'),
-                      ('Transferred', 'Transferred'))
+                      ('Transfer Accepted', 'Transfer Accepted'))
 
     title = models.CharField(max_length=511,
                              verbose_name=_('Title'),
