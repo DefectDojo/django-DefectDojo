@@ -117,13 +117,16 @@ class MSDefenderParser:
         description += "machine Info: managedBy: " + str(machine['managedBy']) + "\n"
         description += "machine Info: ipAddresses: " + str(machine['ipAddresses']) + "\n"
         title = str(vulnerability['cveId'])
+        severity = vulnerability['severity']
+        if severity == "":
+            severity = "Informational"
         if str(machine['computerDnsName']) != "null":
             title = title + "_" + str(machine['computerDnsName'])
         if str(machine['osPlatform']) != "null":
             title = title + "_" + str(machine['osPlatform'])
         finding = Finding(
             title=title + "_" + vulnerability["machineId"],
-            severity=vulnerability['severity'],
+            severity=severity,
             description=description,
             static_finding=False,
             dynamic_finding=True,
