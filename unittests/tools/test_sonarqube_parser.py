@@ -579,11 +579,14 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("6.4", item.cvssv3_score)
         self.assertEqual("package", item.component_name)
         self.assertEqual("1.1.2", item.component_version)
+        self.assertEqual(["cve", "cwe", "cwe-937", "owasp-a9", "vulnerability"], item.tags)
         item = findings[1]
         self.assertEqual("Web:TableWithoutCaptionCheck_asdfwfewfwefewf", item.title)
         self.assertEqual("Low", item.severity)
         self.assertEqual(0, item.cwe)
         self.assertIsNone(item.cvssv3_score)
+        self.assertEqual(59, int(item.line))
+        self.assertEqual("testapplication:src/app/pages/fjiowefjewio/fjwieof/fjiwoe/details.html", item.file_path)
         item = findings[2]
         self.assertEqual("typescript:S1533_fjoiewfjoweifjoihugu-", item.title)
         self.assertEqual("Low", item.severity)

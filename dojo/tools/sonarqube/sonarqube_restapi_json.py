@@ -19,6 +19,7 @@ class SonarQubeRESTAPIJSON:
                     status = issue.get("status")
                     message = issue.get("message")
                     tags = issue.get("tags")
+                    tags.append("bug")
                     type = issue.get("type")
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
@@ -28,14 +29,11 @@ class SonarQubeRESTAPIJSON:
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
-                    description += "**line:** " + line + "\n"
                     if textRange != {}:
                         res = []
                         for item in textRange:
                             res.append(item + ": " + str(textRange[item]))
                         description += "**textRange:** " + ", ".join(res) + "\n"
-                    if flows != []:
-                        description += "**flows:** " + ", ".join(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     if tags != []:
@@ -43,6 +41,8 @@ class SonarQubeRESTAPIJSON:
                     description += "**type:** " + type + "\n"
                     description += "**scope:** " + scope + "\n"
                     description += self.returncomponent(json_content, component)
+                    if flows != []:
+                        description += "**flows:** " + ", ".join([str(i) for i in flows]) + "\n"
                     item = Finding(
                         title=rule + "_" + key,
                         description=description,
@@ -50,8 +50,12 @@ class SonarQubeRESTAPIJSON:
                         severity=self.severitytranslator(issue.get("severity")),
                         static_finding=True,
                         dynamic_finding=False,
-                        tags=["bug"],
+                        vuln_id_from_tool=rule,
+                        file_path=component,
+                        tags=tags,
                     )
+                    if line != "None":
+                        item.line=line
                 elif issue.get("type") == "VULNERABILITY":
                     key = issue.get("key")
                     rule = issue.get("rule")
@@ -60,6 +64,7 @@ class SonarQubeRESTAPIJSON:
                     flows = issue.get("flows")
                     status = issue.get("status")
                     message = issue.get("message")
+                    line = str(issue.get("line"))
                     cwe = None
                     if "Category: CWE-" in message:
                         cwe_pattern = r'Category: CWE-\d{1,5}'
@@ -88,13 +93,12 @@ class SonarQubeRESTAPIJSON:
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
                     codeVariants = issue.get("codeVariants")
                     tags = issue.get("tags")
+                    tags.append("vulnerability")
                     description = ""
                     description += "**key:** " + key + "\n"
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
-                    if flows != []:
-                        description += "**flows:** " + ", ".join(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     description += "**scope:** " + scope + "\n"
@@ -104,6 +108,8 @@ class SonarQubeRESTAPIJSON:
                     if tags != []:
                         description += "**tags:** " + ", ".join(tags) + "\n"
                     description += self.returncomponent(json_content, component)
+                    if flows != []:
+                        description += "**flows:** " + ", ".join([str(i) for i in flows]) + "\n"
                     item = Finding(
                         title=rule + "_" + key,
                         description=description,
@@ -115,8 +121,12 @@ class SonarQubeRESTAPIJSON:
                         component_version=component_version,
                         cwe=cwe,
                         cvssv3_score=cvss,
-                        tags=["vulnerability"],
+                        vuln_id_from_tool=rule,
+                        file_path=component,
+                        tags=tags,
                     )
+                    if line != "None":
+                        item.line=line
                     vulnids = []
                     if "Reference: CVE" in message:
                         cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
@@ -152,6 +162,7 @@ class SonarQubeRESTAPIJSON:
                     status = issue.get("status")
                     message = issue.get("message")
                     tags = issue.get("tags")
+                    tags.append("code_smell")
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
                     codeVariants = issue.get("codeVariants")
@@ -159,14 +170,11 @@ class SonarQubeRESTAPIJSON:
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
-                    description += "**line:** " + line + "\n"
                     if textRange != {}:
                         res = []
                         for item in textRange:
                             res.append(item + ": " + str(textRange[item]))
                         description += "**textRange:** " + ", ".join(res) + "\n"
-                    if flows != []:
-                        description += "**flows:** " + ", ".join(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     if tags != []:
@@ -176,6 +184,8 @@ class SonarQubeRESTAPIJSON:
                     if codeVariants != []:
                         description += "**codeVariants:** " + ", ".join(codeVariants) + "\n"
                     description += self.returncomponent(json_content, component)
+                    if flows != []:
+                        description += "**flows:** " + ", ".join([str(i) for i in flows]) + "\n"
                     item = Finding(
                         title=rule + "_" + key,
                         description=description,
@@ -183,8 +193,12 @@ class SonarQubeRESTAPIJSON:
                         severity=self.severitytranslator(issue.get("severity")),
                         static_finding=True,
                         dynamic_finding=False,
-                        tags=["code_smell"],
+                        vuln_id_from_tool=rule,
+                        file_path=component,
+                        tags=tags,
                     )
+                    if line != "None":
+                        item.line=line
                 items.append(item)
         if json_content.get("hotspots"):
             for hotspot in json_content.get("hotspots"):
@@ -205,19 +219,18 @@ class SonarQubeRESTAPIJSON:
                 description += "**project:** " + project + "\n"
                 description += "**securityCategory:** " + securityCategory + "\n"
                 description += "**status:** " + status + "\n"
-                description += "**line:** " + line + "\n"
                 description += "**message:** " + message + "\n"
                 if textRange != {}:
                     res = []
                     for item in textRange:
                         res.append(item + ": " + str(textRange[item]))
                     description += "**textRange:** " + ", ".join(res) + "\n"
-                if flows != []:
-                    description += "**flows:** " + ", ".join(flows) + "\n"
                 description += "**ruleKey:** " + ruleKey + "\n"
                 if messageFormattings != []:
                     description += "**messageFormattings:** " + ", ".join(messageFormattings) + "\n"
                 description += self.returncomponent(json_content, component)
+                if flows != []:
+                    description += "**flows:** " + ", ".join([str(i) for i in flows]) + "\n"
                 item = Finding(
                     title=ruleKey + "_" + key,
                     description=description,
@@ -225,8 +238,12 @@ class SonarQubeRESTAPIJSON:
                     severity=self.severitytranslator(hotspot.get("vulnerabilityProbability")),
                     static_finding=True,
                     dynamic_finding=False,
+                    vuln_id_from_tool=ruleKey,
+                    file_path=component,
                     tags=["hotspot"],
                 )
+                if line != "None":
+                    item.line=line
                 items.append(item)
         return items
 

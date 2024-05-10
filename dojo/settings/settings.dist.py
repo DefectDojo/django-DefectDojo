@@ -1186,7 +1186,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['vulnerability_ids', 'component_name'],
     'Cloudsploit Scan': ['title', 'description'],
-    'SonarQube Scan': ['cwe', 'severity', 'file_path'],
+    'SonarQube Scan': ['severity', 'file_path', 'vuln_id_from_tool'],
     'SonarQube API Import': ['title', 'file_path', 'line'],
     'Sonatype Application Scan': ['title', 'cwe', 'file_path', 'component_name', 'component_version', 'vulnerability_ids'],
     'Dependency Check Scan': ['title', 'cwe', 'file_path'],
