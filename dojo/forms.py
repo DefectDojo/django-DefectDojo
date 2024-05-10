@@ -2587,12 +2587,16 @@ class SLAConfigForm(forms.ModelForm):
             msg = 'Finding SLA expiration dates are currently being recalculated. ' + \
                   'This field cannot be changed until the calculation is complete.'
             self.fields['critical'].disabled = True
+            self.fields['enforce_critical'].disabled = True
             self.fields['critical'].widget.attrs['message'] = msg
             self.fields['high'].disabled = True
+            self.fields['enforce_high'].disabled = True
             self.fields['high'].widget.attrs['message'] = msg
             self.fields['medium'].disabled = True
+            self.fields['enforce_medium'].disabled = True
             self.fields['medium'].widget.attrs['message'] = msg
             self.fields['low'].disabled = True
+            self.fields['enforce_low'].disabled = True
             self.fields['low'].widget.attrs['message'] = msg
 
     class Meta:

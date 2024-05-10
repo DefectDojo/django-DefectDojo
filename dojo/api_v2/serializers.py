@@ -2938,7 +2938,7 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         async_updating = getattr(self.instance, 'async_updating', None)
         if async_updating:
-            for field in ['critical', 'high', 'medium', 'low']:
+            for field in ['critical', 'enforce_critical', 'high', 'enforce_high', 'medium', 'enforce_medium', 'low', 'enforce_low']:
                 old_days = getattr(self.instance, field, None)
                 new_days = data.get(field, None)
                 if old_days and new_days and (old_days != new_days):
