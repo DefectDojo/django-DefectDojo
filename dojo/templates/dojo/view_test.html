@@ -101,76 +101,76 @@
             <table class="table-striped table table-condensed table-hover centered">
                 <tr>
                     {% block test_header %}
-                        <th>{% trans "Engagement" %}</th>
-                        <th>{% trans "Environment" %}</th>
-                        <th>{% trans "Dates" %}</th>
-                        <th>{% trans "Updated" %}</th>
-                        {% if test.percent_complete > 0 %}<th>{% trans "Progress" %}</th>{% endif %}
-                        <th>{% trans "Version" %}</th>
-                        {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
-                            <th>
-                                {% trans "Reimports" %}
-                                <i class="fa-solid fa-circle-question has-popover"
-                                data-trigger="hover"
-                                data-content="Total numbers of reimports done for this test."
-                                data-placement="right"
-                                data-container="body"
-                                data-original-title=""
-                                title="">
-                                </i>
-                            </th>
-                        {% endif %}
-                        {% if test.api_scan_configuration %}<th>{% trans "API Scan Configuration" %}</th>{% endif %}
+                    <th>{% trans "Engagement" %}</th>
+                    <th>{% trans "Environment" %}</th>
+                    <th>{% trans "Dates" %}</th>
+                    <th>{% trans "Updated" %}</th>
+                    {% if test.percent_complete > 0 %}<th>{% trans "Progress" %}</th>{% endif %}
+                    <th>{% trans "Version" %}</th>
+                    {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
+                        <th>
+                            {% trans "Reimports" %}
+                            <i class="fa-solid fa-circle-question has-popover"
+                            data-trigger="hover"
+                            data-content="Total numbers of reimports done for this test."
+                            data-placement="right"
+                            data-container="body"
+                            data-original-title=""
+                            title="">
+                            </i>
+                        </th>
+                    {% endif %}
+                    {% if test.api_scan_configuration %}<th>{% trans "API Scan Configuration" %}</th>{% endif %}
                     {% endblock test_header %}
                 </tr>
                 <tr>
                     {% block test_body %}
+                    <td>
+                        <a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a>
+                    </td>
+                    <td>
+                        {% if test.environment %}
+                            {{ test.environment }}
+                        {% else %}
+                            <b><i>Unknown</i></b>
+                        {% endif %}
+                    </td>
+                    <td>{{ test.target_start|date }} - {{ test.target_end|date }}</td>
+                    <td>
+                        <a target="_blank"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        title="{{ test.updated }}">{{ test.updated|date }}</a>
+                    </td>
+                    {% if test.percent_complete > 0 %}
                         <td>
-                            <a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a>
+                            <div class="progress">
+                                <div class="progress-bar"
+                                    role="progressbar"
+                                    aria-valuenow="{{ test.percent_complete }}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                    style="width: {{ test.percent_complete }}%;">
+                                    {{ test.percent_complete }}%
+                                </div>
+                            </div>
                         </td>
+                    {% endif %}
+                    <td>{{ test.version }}</td>
+                    {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
+                        <td>{{ test.total_reimport_count }}</td>
+                    {% endif %}
+                    {% if test.api_scan_configuration %}
                         <td>
-                            {% if test.environment %}
-                                {{ test.environment }}
-                            {% else %}
-                                <b><i>Unknown</i></b>
+                            {% if prod|has_object_permission:"Product_Edit" %}
+                                <a href="{% url 'edit_api_scan_configuration' prod.id test.api_scan_configuration.id %}">
+                                {% endif %}
+                                {{ test.api_scan_configuration }}
+                                {% if prod|has_object_permission:"Product_Edit" %}
+                                </a>
                             {% endif %}
                         </td>
-                        <td>{{ test.target_start|date }} - {{ test.target_end|date }}</td>
-                        <td>
-                            <a target="_blank"
-                            data-toggle="tooltip"
-                            data-placement="bottom"
-                            title="{{ test.updated }}">{{ test.updated|date }}</a>
-                        </td>
-                        {% if test.percent_complete > 0 %}
-                            <td>
-                                <div class="progress">
-                                    <div class="progress-bar"
-                                        role="progressbar"
-                                        aria-valuenow="{{ test.percent_complete }}"
-                                        aria-valuemin="0"
-                                        aria-valuemax="100"
-                                        style="width: {{ test.percent_complete }}%;">
-                                        {{ test.percent_complete }}%
-                                    </div>
-                                </div>
-                            </td>
-                        {% endif %}
-                        <td>{{ test.version }}</td>
-                        {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
-                            <td>{{ test.total_reimport_count }}</td>
-                        {% endif %}
-                        {% if test.api_scan_configuration %}
-                            <td>
-                                {% if prod|has_object_permission:"Product_Edit" %}
-                                    <a href="{% url 'edit_api_scan_configuration' prod.id test.api_scan_configuration.id %}">
-                                    {% endif %}
-                                    {{ test.api_scan_configuration }}
-                                    {% if prod|has_object_permission:"Product_Edit" %}
-                                    </a>
-                                {% endif %}
-                            </td>
-                        {% endif %}
+                    {% endif %}
                     {% endblock test_body %}
                 </tr>
             </table>
