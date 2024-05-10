@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
 from dojo.notifications.helper import create_notification
+from dojo.risk_acceptance.notification import Notification
 from django.urls import reverse
 from dojo.celery import app
 from dojo.models import System_Settings, Risk_Acceptance, Finding
@@ -56,18 +57,7 @@ def expire_now(risk_acceptance):
     risk_acceptance.expiration_date = timezone.now()
     risk_acceptance.expiration_date_handled = timezone.now()
     risk_acceptance.save()
-
-    accepted_findings = risk_acceptance.accepted_findings.all()
-    title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings has expired for " + \
-            str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
-
-    create_notification(
-        event='risk_acceptance_expiration',
-        subject=f"⚠️Acceptance request Risk_Acceptance: {risk_acceptance.id} has expired🔔",
-        title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
-        reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
-        product=risk_acceptance.engagement.product,
-        url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+    Notification.risk_acceptance_expiration(risk_acceptance, reactivated_findings)
 
 
 def reinstate(risk_acceptance, old_expiration_date):
@@ -142,19 +132,7 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             finding.save(dedupe_option=False)
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
-    title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
-    create_notification(event='risk_acceptance_request',
-                        title=title, risk_acceptance=risk_pending,
-                        subject=f"🙋‍♂️Request of aceptance of risk {risk_pending.id}🙏",
-                        accepted_findings=risk_pending.accepted_findings.all(),
-                        reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
-                        product=risk_pending.engagement.product,
-                        description=f"requested acceptance of the risks <b>{risk_pending.name}</b> for the findings",
-                        recipients=eval(risk_pending.accepted_by),
-                        icon="bell",
-                        owner=risk_pending.owner,
-                        color_icon="#1B30DE",
-                        url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
+    Notification.risk_acceptance_request(risk_pending)
     post_jira_comments(risk_pending, findings, accepted_message_creator)
 
 
@@ -216,6 +194,7 @@ def expiration_handler(*args, **kwargs):
                 timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
                 str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
 
+            Notification.risk_acceptance_expiration(risk_acceptance, reactivated_findings)
             create_notification(event='risk_acceptance_expiration', title=notification_title, risk_acceptance=risk_acceptance,
                                 accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
                                 product=risk_acceptance.engagement.product,
