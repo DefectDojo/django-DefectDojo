@@ -390,6 +390,7 @@ def get_roles_with_permissions():
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance_Edit,
+            Permissions.Risk_Acceptance_Bullk,
             Permissions.Risk_Unaccept,
             Permissions.Test_View,
             Permissions.Test_Add,

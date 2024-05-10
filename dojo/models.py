@@ -2229,6 +2229,7 @@ class Finding(models.Model):
 
     STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
                       ('Risk Rejected', 'Risk Rejected'),
+                      ('Risk Expired', 'Risk Expired'),
                       ('Risk Accepted', 'Risk Accepted'),
                       ('Risk Active', 'Risk Active'),
                       ('Transfer Pending', 'Transfer Pending'),
@@ -2906,6 +2907,8 @@ class Finding(models.Model):
             status += ['Risk pending']
         if self.risk_status == "Risk Rejected":
             status += ['Risk Rejected']
+        if self.risk_status == "Risk Expired":
+            status += ['Risk Expired']
         elif self.risk_accepted:
             status += ['Risk Accepted']
         if not len(status):

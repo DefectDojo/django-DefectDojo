@@ -157,10 +157,9 @@
 			.proton-table a {
 				display: block;
 				max-width: 100%;
-				margin-bottom: 20px;
+				margin-bottom: 0px;
 				border: 0px;
 				border-radius: 10px;
-				overflow: hidden;
 			}
 
 			.proton-table a.proton-button {
@@ -229,6 +228,8 @@
 								{% endblock%}
 								<p>
 									{% block content %}
+										{% block risk%}
+										{% endblock%}
 									{% endblock %}
 								</p>
 							</div>

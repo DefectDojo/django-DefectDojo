@@ -1134,7 +1134,11 @@ def add_risk_acceptance_pending(request, eid, fid):
             return post_risk_acceptance_pending(request, finding, eng, eid, product, product_type)
         else:
             form = get_risk_acceptance_pending(request, finding, eng, product, product_type)
-        finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        finding_choices = Finding.objects.filter(duplicate=False,
+                                                 test__engagement=eng,
+                                                 active=True,
+                                                 risk_status__in=["Risk Active", "Risk Expired"],
+                                                 severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
         form.fields['accepted_findings'].queryset = finding_choices
         if fid:
             form.fields['accepted_findings'].initial = {fid}
@@ -1215,8 +1219,8 @@ def add_risk_acceptance(request, eid, fid=None):
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
-
     form.fields['accepted_findings'].queryset = finding_choices
+
     if fid:
         form.fields['accepted_findings'].initial = {fid}
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
@@ -1443,6 +1447,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if 'add_findings' in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
                 request.POST, request.FILES, instance=risk_acceptance)
+
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
@@ -1496,8 +1501,12 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     accepted_findings = risk_acceptance.accepted_findings.order_by('id')
     fpage = get_page_items(request, accepted_findings, 15)
     if settings.RISK_PENDING:
-        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), active=True, risk_accepted=False, severity=risk_acceptance.severity, duplicate=False) \
-            .exclude(id__in=accepted_findings).order_by("title")
+        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(),
+                                                     risk_status__in=["Risk Active", "Risk Expired"],
+                                                     active=True,
+                                                     risk_accepted=False,
+                                                     severity=risk_acceptance.severity,
+                                                     duplicate=False)
     else:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
             .exclude(id__in=accepted_findings).order_by("title")
@@ -1539,10 +1548,7 @@ def expire_risk_acceptance(request, eid, raid):
     # Validate the engagement ID exists before moving forward
     get_object_or_404(Engagement, pk=eid)
 
-    if settings.RISK_PENDING:
-        rp_helper.expire_now_risk_pending(risk_acceptance)
-    else:
-        ra_helper.expire_now(risk_acceptance)
+    ra_helper.expire_now(risk_acceptance)
 
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 

@@ -29,6 +29,10 @@ def expire_now(risk_acceptance):
                 logger.debug('%i:%s: unaccepting a.k.a reactivating finding.', finding.id, finding)
                 finding.active = True
                 finding.risk_accepted = False
+                finding.risk_status = "Risk Expired"
+                finding.acceptances_confirmed = 0
+                finding.accepted_by = ""
+                
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, False)
 
@@ -57,10 +61,13 @@ def expire_now(risk_acceptance):
     title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings has expired for " + \
             str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
 
-    create_notification(event='risk_acceptance_expiration', title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
-                         reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
-                         product=risk_acceptance.engagement.product,
-                         url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+    create_notification(
+        event='risk_acceptance_expiration',
+        subject=f"⚠️Acceptance request Risk_Acceptance: {risk_acceptance.id} has expired🔔",
+        title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
+        reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
+        product=risk_acceptance.engagement.product,
+        url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
 
 
 def reinstate(risk_acceptance, old_expiration_date):
@@ -131,6 +138,7 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
         add_severity_to_risk_acceptance(risk_pending, finding.severity)
         if not finding.duplicate:
             finding.risk_status = "Risk Pending"
+            finding.acceptend_by = ""
             finding.save(dedupe_option=False)
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()

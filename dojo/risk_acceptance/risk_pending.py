@@ -323,49 +323,6 @@ def abuse_control(user, finding: Finding, product: Product, product_type: Produc
     return result_dict
 
 
-def expire_now_risk_pending(risk_acceptance):
-    logger.info('Expiring risk acceptance %i:%s with %i findings', risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
-
-    reactivated_findings = []
-    if risk_acceptance.reactivate_expired:
-        for finding in risk_acceptance.accepted_findings.all():
-            if not finding.active:
-                logger.debug('%i:%s: unaccepting a.k.a reactivating finding.', finding.id, finding)
-                finding.active = True
-                finding.risk_accepted = False
-                finding.risk_status = "Risk_Active"
-                finding.acceptances_confirmed = 0
-                finding.accepted_by = ""
-
-                if risk_acceptance.restart_sla_expired:
-                    finding.sla_start_date = timezone.now().date()
-
-                finding.save(dedupe_option=False)
-                rp_pending.close_or_reactive_related_finding(event="reactive",
-                                                  parent_finding=finding,
-                                                  notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
-                                                  send_notification=True)
-                reactivated_findings.append(finding)
-                # findings remain in this risk acceptance for reporting / metrics purposes
-            else:
-                logger.debug('%i:%s already active, no changes made.', finding.id, finding)
-
-        # best effort JIRA integration, no status changes
-        post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
-
-    risk_acceptance.expiration_date = timezone.now()
-    risk_acceptance.expiration_date_handled = timezone.now()
-    risk_acceptance.save()
-
-    accepted_findings = risk_acceptance.accepted_findings.all()
-    title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings has expired for " + \
-            str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
-
-    create_notification(event='risk_acceptance_expiration', title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
-                         reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
-                         product=risk_acceptance.engagement.product,
-                         url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
-
 def delete(eng, risk_acceptance):
     findings = risk_acceptance.accepted_findings.all()
     for finding in findings:
