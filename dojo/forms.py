@@ -2601,7 +2601,7 @@ class SLAConfigForm(forms.ModelForm):
 
     class Meta:
         model = SLA_Configuration
-        fields = ['name', 'description', 'critical', 'enforce_critical', 'high', 'enforce_high', 'medium', 'enforce_medium', 'low', 'enforce_low'] 
+        fields = ['name', 'description', 'critical', 'enforce_critical', 'high', 'enforce_high', 'medium', 'enforce_medium', 'low', 'enforce_low']
 
 
 class DeleteSLAConfigForm(forms.ModelForm):
