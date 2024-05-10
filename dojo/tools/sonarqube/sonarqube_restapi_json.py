@@ -55,7 +55,7 @@ class SonarQubeRESTAPIJSON:
                         tags=tags,
                     )
                     if line != "None":
-                        item.line=line
+                        item.line = line
                 elif issue.get("type") == "VULNERABILITY":
                     key = issue.get("key")
                     rule = issue.get("rule")
@@ -126,7 +126,7 @@ class SonarQubeRESTAPIJSON:
                         tags=tags,
                     )
                     if line != "None":
-                        item.line=line
+                        item.line = line
                     vulnids = []
                     if "Reference: CVE" in message:
                         cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
@@ -198,7 +198,7 @@ class SonarQubeRESTAPIJSON:
                         tags=tags,
                     )
                     if line != "None":
-                        item.line=line
+                        item.line = line
                 items.append(item)
         if json_content.get("hotspots"):
             for hotspot in json_content.get("hotspots"):
@@ -243,7 +243,7 @@ class SonarQubeRESTAPIJSON:
                     tags=["hotspot"],
                 )
                 if line != "None":
-                    item.line=line
+                    item.line = line
                 items.append(item)
         return items
 
