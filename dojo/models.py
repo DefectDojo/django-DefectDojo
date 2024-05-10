@@ -941,17 +941,14 @@ class SLA_Configuration(models.Model):
         if initial_sla_config is not None and not self.async_updating:
             # check which sla days fields changed based on severity
             severities = []
-            if (initial_sla_config.critical != self.critical) or (initial_sla_config.enforce_critical != self.enforce_critical):
+            if (initial_sla_config.critical != self.critical):
                 severities.append('Critical')
-            if (initial_sla_config.high != self.high) or (initial_sla_config.enforce_high != self.enforce_high):
+            if (initial_sla_config.high != self.high):
                 severities.append('High')
-            if (initial_sla_config.medium != self.medium) or (initial_sla_config.enforce_medium != self.enforce_medium):
+            if (initial_sla_config.medium != self.medium):
                 severities.append('Medium')
-            if (initial_sla_config.low != self.low) or (initial_sla_config.enforce_low != self.enforce_low):
+            if (initial_sla_config.low != self.low):
                 severities.append('Low')
-            print('\n\n\n\n\n')
-            print(severities)
-            print('\n\n\n\n\n')
             # if severities have changed, update finding sla expiration dates with those severities
             if len(severities):
                 # set the async updating flag to true for this sla config
@@ -2994,9 +2991,7 @@ class Finding(models.Model):
 
     def get_sla_period(self):
         sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
-        sla_period = getattr(sla_configuration, self.severity.lower(), None)
-        enforce_period = getattr(sla_configuration, ('enforce_' + str(self.severity)).lower(), None)
-        return sla_period, enforce_period
+        return getattr(sla_configuration, self.severity.lower(), None)
 
     def set_sla_expiration_date(self):
         system_settings = System_Settings.objects.get()
@@ -3004,11 +2999,9 @@ class Finding(models.Model):
             return None
 
         days_remaining = None
-        enforce_period, sla_period = self.get_sla_period()
-        if sla_period and enforce_period:
+        sla_period = self.get_sla_period()
+        if sla_period:
             days_remaining = sla_period - self.sla_age
-        else:
-            self.sla_expiration_date = None
 
         if days_remaining:
             if self.mitigated:
