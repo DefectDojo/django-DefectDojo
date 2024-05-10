@@ -34,7 +34,7 @@ class CrashtestSecurityJsonParser:
         )
 
         # Iterate scanner which contain the items
-        items = list()
+        items = []
         for scanner in crashtest_scan["findings"].values():
             # Iterate all findings of the scanner
             for finding in scanner:
@@ -154,7 +154,7 @@ class CrashtestSecurityXmlParser:
         if tree:
             return self.get_items(tree, test)
         else:
-            return list()
+            return []
 
     def parse_xml(self, xml_output):
         """
@@ -174,7 +174,7 @@ class CrashtestSecurityXmlParser:
         @return items A list of Host instances
         """
 
-        items = list()
+        items = []
 
         # Get all testcases
         for node in tree.findall(".//testcase"):
@@ -240,11 +240,12 @@ class CrashtestSecurityParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".xml"):
             return CrashtestSecurityXmlParser().get_findings(filename, test)
         elif filename.name.lower().endswith(".json"):
             return CrashtestSecurityJsonParser().get_findings(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

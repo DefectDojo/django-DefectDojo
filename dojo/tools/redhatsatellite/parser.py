@@ -1,4 +1,5 @@
 import json
+
 from dojo.models import Finding
 
 
@@ -26,7 +27,7 @@ class RedHatSatelliteParser:
         return severity
 
     def get_findings(self, filename, test):
-        findings = list()
+        findings = []
         tree = filename.read()
         try:
             data = json.loads(str(tree, "utf-8"))
@@ -60,19 +61,21 @@ class RedHatSatelliteParser:
             description += "**hosts_available_count:** " + str(hosts_available_count) + "\n"
             description += "**hosts_applicable_count:** " + str(hosts_applicable_count) + "\n"
             description += "**installable:** " + str(installable) + "\n"
-            description += "**bugs:** " + str(bugs) + "\n"
-            description += "**module_streams:** " + str(module_streams) + "\n"
+            if bugs != []:
+                description += "**bugs:** " + str(bugs) + "\n"
+            if module_streams != []:
+                description += "**module_streams:** " + ', '.join(module_streams) + "\n"
+            description += "**packages:** " + ', '.join(packages)
             find = Finding(
                 title=title,
                 test=test,
                 description=description,
                 severity=self.severity_mapping(input=severity),
                 mitigation=solution,
-                component_name=packages,
                 dynamic_finding=True,
             )
             if errata_id is not None:
-                find.unsaved_vulnerability_ids = list()
+                find.unsaved_vulnerability_ids = []
                 find.unsaved_vulnerability_ids.append(errata_id)
             if cves is not None:
                 for cve in cves:

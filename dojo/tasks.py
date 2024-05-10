@@ -1,18 +1,18 @@
 import logging
-from auditlog.models import LogEntry
-from datetime import timedelta, date
-from dateutil.relativedelta import relativedelta
-from django.db.models import Count, Prefetch
-from django.conf import settings
-from django.urls import reverse
-from dojo.celery import app
-from celery.utils.log import get_task_logger
-from dojo.models import Alerts, Product, Engagement, Finding, System_Settings, User
-from django.utils import timezone
-from dojo.utils import calculate_grade
-from dojo.utils import sla_compute_and_notify
-from dojo.notifications.helper import create_notification
+from datetime import date, timedelta
 
+from auditlog.models import LogEntry
+from celery.utils.log import get_task_logger
+from dateutil.relativedelta import relativedelta
+from django.conf import settings
+from django.db.models import Count, Prefetch
+from django.urls import reverse
+from django.utils import timezone
+
+from dojo.celery import app
+from dojo.models import Alerts, Engagement, Finding, Product, System_Settings, User
+from dojo.notifications.helper import create_notification
+from dojo.utils import calculate_grade, sla_compute_and_notify
 
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -31,7 +31,7 @@ def add_alerts(self, runinterval):
     upcoming_engagements = Engagement.objects.filter(target_start__gt=now + timedelta(days=3), target_start__lt=now + timedelta(days=3) + runinterval).order_by('target_start')
     for engagement in upcoming_engagements:
         create_notification(event='upcoming_engagement',
-                            title='Upcoming engagement: %s' % engagement.name,
+                            title=f'Upcoming engagement: {engagement.name}',
                             engagement=engagement,
                             recipients=[engagement.lead],
                             url=reverse('view_engagement', args=(engagement.id,)))
@@ -42,7 +42,7 @@ def add_alerts(self, runinterval):
         status='In Progress').order_by('-target_end')
     for eng in stale_engagements:
         create_notification(event='stale_engagement',
-                            title='Stale Engagement: %s' % eng.name,
+                            title=f'Stale Engagement: {eng.name}',
                             description='The engagement "{}" is stale. Target end was {}.'.format(eng.name, eng.target_end.strftime("%b. %d, %Y")),
                             url=reverse('view_engagement', args=(eng.id,)),
                             recipients=[eng.lead])

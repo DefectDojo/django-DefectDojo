@@ -2,6 +2,7 @@ import logging
 from collections import deque
 
 from dojo.models import Sonarqube_Issue_Transition
+
 from .importer import SonarQubeApiImporter
 
 logger = logging.getLogger(__name__)

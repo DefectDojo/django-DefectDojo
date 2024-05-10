@@ -1,43 +1,65 @@
-from dojo.authorization.roles_permissions import Permissions
-from dojo.finding.queries import get_authorized_findings
-import re
 import binascii
-import os
+import calendar as tcalendar
 import hashlib
-import bleach
+import logging
 import mimetypes
-import hyperlink
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
+import os
+import re
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+
+import bleach
+import crum
+import hyperlink
 import vobject
-from dateutil.relativedelta import relativedelta, MO, SU
+from asteval import Interpreter
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from dateutil.parser import parse
+from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.core.paginator import Paginator
-from django.urls import get_resolver, reverse, get_script_prefix
-from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
+from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
+from django.db.models.query import QuerySet
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.http import HttpResponseRedirect
+from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-from django.db.models.query import QuerySet
-import calendar as tcalendar
-from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
-    Test, User, Dojo_User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
-    Language_Type, Languages, Dojo_Group_Member, NOTIFICATION_CHOICES
-from asteval import Interpreter
-from dojo.notifications.helper import create_notification
-import logging
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-import crum
+
+from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-
+from dojo.finding.queries import get_authorized_findings
+from dojo.github import (
+    add_external_issue_github,
+    close_external_issue_github,
+    reopen_external_issue_github,
+    update_external_issue_github,
+)
+from dojo.models import (
+    NOTIFICATION_CHOICES,
+    Benchmark_Type,
+    Dojo_Group_Member,
+    Dojo_User,
+    Endpoint,
+    Engagement,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    Language_Type,
+    Languages,
+    Notifications,
+    Product,
+    System_Settings,
+    Test,
+    User,
+)
+from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -135,7 +157,8 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         custom_filter = {'test': test}
 
     else:
-        raise ValueError('No product, engagement or test provided as argument.')
+        msg = 'No product, engagement or test provided as argument.'
+        raise ValueError(msg)
 
     deduplication_algorithm = finding.test.deduplication_algorithm
 
@@ -485,13 +508,17 @@ def set_duplicate(new_finding, existing_finding):
     deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
     if existing_finding.duplicate:
         deduplicationLogger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
-        raise Exception("Existing finding is a duplicate")
+        msg = "Existing finding is a duplicate"
+        raise Exception(msg)
     if existing_finding.id == new_finding.id:
-        raise Exception("Can not add duplicate to itself")
+        msg = "Can not add duplicate to itself"
+        raise Exception(msg)
     if is_duplicate_reopen(new_finding, existing_finding):
-        raise Exception("Found a regression. Ignore this so that a new duplicate chain can be made")
+        msg = "Found a regression. Ignore this so that a new duplicate chain can be made"
+        raise Exception(msg)
     if new_finding.duplicate and finding_mitigated(existing_finding):
-        raise Exception("Skip this finding as we do not want to attach a new duplicate to a mitigated finding")
+        msg = "Skip this finding as we do not want to attach a new duplicate to a mitigated finding"
+        raise Exception(msg)
 
     deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     new_finding.duplicate = True
@@ -785,8 +812,8 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
         # map from python to javascript, do not use week numbers or day numbers from database.
         day_offset = {0: 5, 1: 4, 2: 3, 3: 2, 4: 1, 5: 0, 6: 6}
 
-        punchcard = list()
-        ticks = list()
+        punchcard = []
+        ticks = []
         highest_day_count = 0
         tick = 0
         day_counts = [0, 0, 0, 0, 0, 0, 0]
@@ -869,8 +896,8 @@ def get_period_counts_legacy(findings,
                              period_interval,
                              start_date,
                              relative_delta='months'):
-    opened_in_period = list()
-    accepted_in_period = list()
+    opened_in_period = []
+    accepted_in_period = []
     opened_in_period.append(
         ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
     accepted_in_period.append(
@@ -964,9 +991,9 @@ def get_period_counts(findings,
 
     start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
 
-    opened_in_period = list()
-    active_in_period = list()
-    accepted_in_period = list()
+    opened_in_period = []
+    active_in_period = []
+    accepted_in_period = []
     opened_in_period.append(
         ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
     active_in_period.append(
@@ -1227,7 +1254,7 @@ def build_query(query_string, search_fields):
     for term in terms:
         or_query = None  # Query to search for a given term in each field
         for field_name in search_fields:
-            q = Q(**{"%s__icontains" % field_name: term})
+            q = Q(**{f"{field_name}__icontains": term})
 
             if or_query:
                 or_query = or_query | q
@@ -1357,7 +1384,7 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
 def process_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
 
-    usernames_to_check = set([un.lower() for un in regex.findall(note.entry)])
+    usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
 
     users_to_notify = [
         User.objects.filter(username=username).get()
@@ -1373,7 +1400,7 @@ def process_notifications(request, note, parent_url, parent_title):
         event='user_mentioned',
         section=parent_title,
         note=note,
-        title='%s jotted a note' % request.user,
+        title=f'{request.user} jotted a note',
         url=parent_url,
         icon='commenting',
         recipients=users_to_notify)
@@ -1751,8 +1778,7 @@ def is_safe_url(url):
         from django.utils.http import url_has_allowed_host_and_scheme
     except ImportError:
         # django < 3
-        from django.utils.http import \
-            is_safe_url as url_has_allowed_host_and_scheme
+        from django.utils.http import is_safe_url as url_has_allowed_host_and_scheme
 
     return url_has_allowed_host_and_scheme(url, allowed_hosts=None)
 
@@ -1785,7 +1811,8 @@ def redirect(request, redirect_to):
     """Only allow redirects to allowed_hosts to prevent open redirects"""
     if is_safe_url(redirect_to):
         return HttpResponseRedirect(redirect_to)
-    raise ValueError('invalid redirect, host and scheme not in allowed_hosts')
+    msg = 'invalid redirect, host and scheme not in allowed_hosts'
+    raise ValueError(msg)
 
 
 def file_size_mb(file_obj):
@@ -1851,7 +1878,7 @@ def sla_compute_and_notify(*args, **kwargs):
             combined_notifications[pt] = {p: {kind: [notification]}}
 
     def _notification_title_for_finding(finding, kind, sla_age):
-        title = "Finding %s - " % (finding.id)
+        title = f"Finding {finding.id} - "
         if kind == 'breached':
             abs_sla_age = abs(sla_age)
             period = "day"
@@ -2024,7 +2051,7 @@ def get_words_for_field(model, fieldname):
 
     if models is not None:
         words = [
-            word for field_value in models.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
+            word for field_value in models.order_by().filter(**{f'{fieldname}__isnull': False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
         ]
     else:
         words = []
@@ -2067,10 +2094,11 @@ def get_object_or_none(klass, *args, **kwargs):
 
     if not hasattr(queryset, 'get'):
         klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
-        raise ValueError(
+        msg = (
             "First argument to get_object_or_None() must be a Model, Manager, "
-            "or QuerySet, not '%s'." % klass__name
+            f"or QuerySet, not '{klass__name}'."
         )
+        raise ValueError(msg)
     try:
         return queryset.get(*args, **kwargs)
     except queryset.model.DoesNotExist:
@@ -2093,10 +2121,11 @@ def get_last_object_or_none(klass, *args, **kwargs):
 
     if not hasattr(queryset, 'get'):
         klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
-        raise ValueError(
+        msg = (
             "First argument to get_last_object_or_None() must be a Model, Manager, "
-            "or QuerySet, not '%s'." % klass__name
+            f"or QuerySet, not '{klass__name}'."
         )
+        raise ValueError(msg)
     try:
         results = queryset.filter(*args, **kwargs).order_by('id')
         logger.debug('last_object_or_none: %s', results.query)
@@ -2149,7 +2178,8 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
         # get maximum, which is the first due to descending order
         last_id = models.first().id + 1
     else:
-        raise ValueError('order must be ''asc'' or ''desc''')
+        msg = 'order must be ''asc'' or ''desc'''
+        raise ValueError(msg)
     # use filter to make count fast on mysql
     total_count = models.filter(id__gt=0).count()
     logger.debug('%s found %d models for mass update:', log_prefix, total_count)
@@ -2398,10 +2428,38 @@ def sum_by_severity_level(metrics):
     values = get_zero_severity_level()
 
     for m in metrics:
-        if values.get(m.severity) is not None:
-            values[m.severity] += 1
+        if values.get(m.get('severity')) is not None:
+            values[m.get('severity')] += 1
 
     return values
+
+
+def calculate_finding_age(f):
+    start_date = f.get('date', None)
+    if start_date and isinstance(start_date, str):
+        start_date = parse(start_date).date()
+
+    if settings.SLA_BUSINESS_DAYS:
+        if f.get('mitigated'):
+            mitigated_date = f.get('mitigated')
+            if isinstance(mitigated_date, datetime):
+                mitigated_date = f.get('mitigated').date()
+            days = get_work_days(f.get('date'), mitigated_date)
+        else:
+            days = get_work_days(f.get('date'), timezone.now().date())
+    else:
+        if isinstance(start_date, datetime):
+            start_date = start_date.date()
+
+        if f.get('mitigated'):
+            mitigated_date = f.get('mitigated')
+            if isinstance(mitigated_date, datetime):
+                mitigated_date = f.get('mitigated').date()
+            diff = mitigated_date - start_date
+        else:
+            diff = timezone.now().date() - start_date
+        days = diff.days
+    return days if days > 0 else 0
 
 
 def get_open_findings_burndown(product):

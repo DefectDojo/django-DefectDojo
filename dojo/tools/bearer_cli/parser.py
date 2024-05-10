@@ -1,4 +1,5 @@
 import json
+
 from dojo.models import Finding
 
 
@@ -19,7 +20,7 @@ class BearerParser:
     def get_findings(self, file, test):
         data = json.load(file)
 
-        items = list()
+        items = []
         dupes = set()
 
         for content in data:

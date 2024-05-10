@@ -1,5 +1,6 @@
-from dojo.models import Finding
 import re
+
+from dojo.models import Finding
 
 
 class SonarQubeRESTAPIJSON:
@@ -13,11 +14,11 @@ class SonarQubeRESTAPIJSON:
                     component = issue.get("component")
                     project = issue.get("project")
                     line = str(issue.get("line"))
-                    textRange = str(issue.get("textRange"))
-                    flows = str(issue.get("flows"))
+                    textRange = issue.get("textRange")
+                    flows = issue.get("flows")
                     status = issue.get("status")
                     message = issue.get("message")
-                    tags = str(issue.get("tags"))
+                    tags = issue.get("tags")
                     type = issue.get("type")
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
@@ -28,11 +29,17 @@ class SonarQubeRESTAPIJSON:
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
                     description += "**line:** " + line + "\n"
-                    description += "**textRange:** " + textRange + "\n"
-                    description += "**flows:** " + flows + "\n"
+                    if textRange != {}:
+                        res = []
+                        for item in textRange:
+                            res.append(item + ": " + str(textRange[item]))
+                        description += "**textRange:** " + ", ".join(res) + "\n"
+                    if flows != []:
+                        description += "**flows:** " + ", ".join(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
-                    description += "**tags:** " + tags + "\n"
+                    if tags != []:
+                        description += "**tags:** " + ", ".join(tags) + "\n"
                     description += "**type:** " + type + "\n"
                     description += "**scope:** " + scope + "\n"
                     description += self.returncomponent(json_content, component)
@@ -50,30 +57,9 @@ class SonarQubeRESTAPIJSON:
                     rule = issue.get("rule")
                     component = issue.get("component")
                     project = issue.get("project")
-                    flows = str(issue.get("flows"))
+                    flows = issue.get("flows")
                     status = issue.get("status")
                     message = issue.get("message")
-                    cve = None
-                    if "Reference: CVE" in message:
-                        cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
-                        cves = re.findall(cve_pattern, message)
-                        if cves:
-                            cve = cves[0].split("Reference: ")[1]
-                    elif "References: CVE" in message:
-                        cve_pattern = r'References: CVE-\d{4}-\d{4,7}'
-                        cves = re.findall(cve_pattern, message)
-                        if cves:
-                            cve = cves[0].split("References: ")[1]
-                    elif "Reference: GHSA" in message and cve is None:
-                        cve_pattern = r'Reference: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
-                        cves = re.findall(cve_pattern, message)
-                        if cves:
-                            cve = cves[0].split("Reference: ")[1]
-                    elif "References: GHSA" in message and cve is None:
-                        cve_pattern = r'References: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
-                        cves = re.findall(cve_pattern, message)
-                        if cves:
-                            cve = cves[0].split("References: ")[1]
                     cwe = None
                     if "Category: CWE-" in message:
                         cwe_pattern = r'Category: CWE-\d{1,5}'
@@ -100,20 +86,23 @@ class SonarQubeRESTAPIJSON:
                                 component_version = None
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
-                    codeVariants = str(issue.get("codeVariants"))
-                    tags = str(issue.get("tags"))
+                    codeVariants = issue.get("codeVariants")
+                    tags = issue.get("tags")
                     description = ""
                     description += "**key:** " + key + "\n"
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
-                    description += "**flows:** " + flows + "\n"
+                    if flows != []:
+                        description += "**flows:** " + ", ".join(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     description += "**scope:** " + scope + "\n"
                     description += "**quickFixAvailable:** " + quickFixAvailable + "\n"
-                    description += "**codeVariants:** " + codeVariants + "\n"
-                    description += "**tags:** " + tags + "\n"
+                    if codeVariants != []:
+                        description += "**codeVariants:** " + ", ".join(codeVariants) + "\n"
+                    if tags != []:
+                        description += "**tags:** " + ", ".join(tags) + "\n"
                     description += self.returncomponent(json_content, component)
                     item = Finding(
                         title=rule + "_" + key,
@@ -124,38 +113,68 @@ class SonarQubeRESTAPIJSON:
                         dynamic_finding=False,
                         component_name=component_name,
                         component_version=component_version,
-                        cve=cve,
                         cwe=cwe,
                         cvssv3_score=cvss,
                         tags=["vulnerability"],
                     )
+                    vulnids = []
+                    if "Reference: CVE" in message:
+                        cve_pattern = r'Reference: CVE-\d{4}-\d{4,7}'
+                        cves = re.findall(cve_pattern, message)
+                        for cve in cves:
+                            vulnids.append(cve.split("Reference: ")[1])
+                    if "References: CVE" in message:
+                        cve_pattern = r'References: CVE-\d{4}-\d{4,7}'
+                        cves = re.findall(cve_pattern, message)
+                        for cve in cves:
+                            vulnids.append(cve.split("References: ")[1])
+                    if "Reference: GHSA" in message:
+                        cve_pattern = r'Reference: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
+                        cves = re.findall(cve_pattern, message)
+                        for cve in cves:
+                            vulnids.append(cve.split("Reference: ")[1])
+                    if "References: GHSA" in message:
+                        cve_pattern = r'References: GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}'
+                        cves = re.findall(cve_pattern, message)
+                        for cve in cves:
+                            vulnids.append(cve.split("References: ")[1])
+                    item.unsaved_vulnerability_ids = []
+                    for vulnid in vulnids:
+                        item.unsaved_vulnerability_ids.append(vulnid)
                 elif issue.get("type") == "CODE_SMELL":
                     key = issue.get("key")
                     rule = issue.get("rule")
                     component = issue.get("component")
                     project = issue.get("project")
                     line = str(issue.get("line"))
-                    textRange = str(issue.get("textRange"))
-                    flows = str(issue.get("flows"))
+                    textRange = issue.get("textRange")
+                    flows = issue.get("flows")
                     status = issue.get("status")
                     message = issue.get("message")
-                    tags = str(issue.get("tags"))
+                    tags = issue.get("tags")
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
-                    codeVariants = str(issue.get("codeVariants"))
+                    codeVariants = issue.get("codeVariants")
                     description = ""
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
                     description += "**line:** " + line + "\n"
-                    description += "**textRange:** " + textRange + "\n"
-                    description += "**flows:** " + flows + "\n"
+                    if textRange != {}:
+                        res = []
+                        for item in textRange:
+                            res.append(item + ": " + str(textRange[item]))
+                        description += "**textRange:** " + ", ".join(res) + "\n"
+                    if flows != []:
+                        description += "**flows:** " + ", ".join(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
-                    description += "**tags:** " + tags + "\n"
+                    if tags != []:
+                        description += "**tags:** " + ", ".join(tags) + "\n"
                     description += "**scope:** " + scope + "\n"
                     description += "**quickFixAvailable:** " + quickFixAvailable + "\n"
-                    description += "**codeVariants:** " + codeVariants + "\n"
+                    if codeVariants != []:
+                        description += "**codeVariants:** " + ", ".join(codeVariants) + "\n"
                     description += self.returncomponent(json_content, component)
                     item = Finding(
                         title=rule + "_" + key,
@@ -176,10 +195,10 @@ class SonarQubeRESTAPIJSON:
                 status = hotspot.get("status")
                 line = str(hotspot.get("line"))
                 message = hotspot.get("message")
-                textRange = str(hotspot.get("textRange"))
-                flows = str(hotspot.get("flows"))
+                textRange = hotspot.get("textRange")
+                flows = hotspot.get("flows")
                 ruleKey = hotspot.get("ruleKey")
-                messageFormattings = str(hotspot.get("messageFormattings"))
+                messageFormattings = hotspot.get("messageFormattings")
                 description = ""
                 description += "**key:** " + key + "\n"
                 description += "**component:** " + component + "\n"
@@ -188,10 +207,16 @@ class SonarQubeRESTAPIJSON:
                 description += "**status:** " + status + "\n"
                 description += "**line:** " + line + "\n"
                 description += "**message:** " + message + "\n"
-                description += "**textRange:** " + textRange + "\n"
-                description += "**flows:** " + flows + "\n"
+                if textRange != {}:
+                    res = []
+                    for item in textRange:
+                        res.append(item + ": " + str(textRange[item]))
+                    description += "**textRange:** " + ", ".join(res) + "\n"
+                if flows != []:
+                    description += "**flows:** " + ", ".join(flows) + "\n"
                 description += "**ruleKey:** " + ruleKey + "\n"
-                description += "**messageFormattings:** " + messageFormattings + "\n"
+                if messageFormattings != []:
+                    description += "**messageFormattings:** " + ", ".join(messageFormattings) + "\n"
                 description += self.returncomponent(json_content, component)
                 item = Finding(
                     title=ruleKey + "_" + key,

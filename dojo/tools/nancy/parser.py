@@ -1,6 +1,7 @@
 import json
 
 from cvss.cvss3 import CVSS3
+
 from dojo.models import Finding
 
 
@@ -27,7 +28,8 @@ class NancyParser:
         if "vulnerable" in data:
             findings = self.get_items(data["vulnerable"], test)
         else:
-            raise ValueError("Invalid format, unable to parse json.")
+            msg = "Invalid format, unable to parse json."
+            raise ValueError(msg)
 
         return findings
 

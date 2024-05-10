@@ -1,13 +1,15 @@
 import json
+import logging
+import re
 import textwrap
 from datetime import datetime
-from dojo.models import Endpoint, Finding
-from .importer import BugcrowdApiImporter
-import re
+
 import dateutil.parser
-import logging
 from django.core.exceptions import ValidationError
 
+from dojo.models import Endpoint, Finding
+
+from .importer import BugcrowdApiImporter
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
 
@@ -198,11 +200,12 @@ class ApiBugcrowdParser:
         if entry["attributes"]["state"] in allowed_states:
             return True
         else:
-            raise ValueError(
+            msg = (
                 "{} not in allowed bugcrowd submission states".format(
                     entry["attributes"]["state"]
                 )
             )
+            raise ValueError(msg)
 
     def convert_log_timestamp(self, timestamp):
         """Convert a log entry's timestamp to a DefectDojo date"""

@@ -1,7 +1,7 @@
 import json
-from itertools import groupby
-from itertools import islice
 import logging
+from itertools import groupby, islice
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
@@ -73,7 +73,8 @@ class GovulncheckParser:
         try:
             data = json.load(scan_file)
         except Exception:
-            raise ValueError("Invalid JSON format")
+            msg = "Invalid JSON format"
+            raise ValueError(msg)
         else:
             if isinstance(data, dict):
                 if data["Vulns"]:

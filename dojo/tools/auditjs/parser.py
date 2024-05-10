@@ -1,9 +1,11 @@
 import json
-from json.decoder import JSONDecodeError
 import re
-from dojo.models import Finding
-from cvss import CVSS3, CVSS2
+from json.decoder import JSONDecodeError
+
 import cvss.parser
+from cvss import CVSS2, CVSS3
+
+from dojo.models import Finding
 
 
 class AuditJSParser:
@@ -36,10 +38,9 @@ class AuditJSParser:
         try:
             data = json.load(filename)
         except JSONDecodeError:
-            raise ValueError(
-                "Invalid JSON format. Are you sure you used --json option ?"
-            )
-        dupes = dict()
+            msg = "Invalid JSON format. Are you sure you used --json option ?"
+            raise ValueError(msg)
+        dupes = {}
 
         for dependency in data:
             # reading package name in format pkg:npm/PACKAGE_NAME@PACKAGE_VERSION
@@ -84,10 +85,11 @@ class AuditJSParser:
                         if cwe_find:
                             cwe = int(cwe_find[0][4:])
                     else:
-                        raise ValueError(
+                        msg = (
                             "Missing mandatory attributes (id, title, description). Please check your report or ask "
                             "community."
                         )
+                        raise ValueError(msg)
                     if "cvssScore" in vulnerability:
                         cvss_score = vulnerability["cvssScore"]
                     if "cvssVector" in vulnerability:

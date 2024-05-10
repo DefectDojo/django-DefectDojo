@@ -1,35 +1,48 @@
+import csv
 import logging
 import re
-import csv
-from openpyxl import Workbook
-from openpyxl.styles import Font
-from tempfile import NamedTemporaryFile
-
-
 from datetime import datetime
+from tempfile import NamedTemporaryFile
+from typing import List
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.http import Http404, HttpResponse, QueryDict
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
 from django.core.exceptions import PermissionDenied
+from django.http import Http404, HttpRequest, HttpResponse, QueryDict
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from django.views import View
+from openpyxl import Workbook
+from openpyxl.styles import Font
 
-from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
-    EndpointFilter
-from dojo.forms import ReportOptionsForm
-from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
-    Dojo_User, Endpoint, Risk_Acceptance
-from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
-    CustomReportJsonForm, ReportOptions, report_widget_factory
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
-    get_words_for_field
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups, EndpointReportFilter, ReportFindingFilter
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
+from dojo.forms import ReportOptionsForm
+from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Risk_Acceptance, Test
+from dojo.reports.widgets import (
+    CoverPage,
+    CustomReportJsonForm,
+    EndpointList,
+    FindingList,
+    PageBreak,
+    ReportOptions,
+    TableOfContents,
+    Widget,
+    WYSIWYGContent,
+    report_widget_factory,
+)
+from dojo.utils import (
+    Product_Tab,
+    add_breadcrumb,
+    get_page_items,
+    get_period_counts_legacy,
+    get_system_setting,
+    get_words_for_field,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,74 +66,98 @@ def report_url_resolver(request):
     return url_resolver + ":" + request.META['SERVER_PORT']
 
 
-def report_builder(request):
-    add_breadcrumb(title="Report Builder", top_level=True, request=request)
-    findings = get_authorized_findings(Permissions.Finding_View)
-    findings = ReportFindingFilter(request.GET, queryset=findings)
-    endpoints = Endpoint.objects.filter(finding__active=True,
-                                        finding__verified=True,
-                                        finding__false_p=False,
-                                        finding__duplicate=False,
-                                        finding__out_of_scope=False,
-                                        ).distinct()
+class ReportBuilder(View):
+    def get(self, request: HttpRequest) -> HttpResponse:
+        add_breadcrumb(title="Report Builder", top_level=True, request=request)
+        return render(request, self.get_template(), self.get_context(request))
 
-    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
+    def get_findings(self, request: HttpRequest):
+        findings = get_authorized_findings(Permissions.Finding_View)
+        return ReportFindingFilter(self.request.GET, queryset=findings)
 
-    in_use_widgets = [ReportOptions(request=request)]
-    available_widgets = [CoverPage(request=request),
-                         TableOfContents(request=request),
-                         WYSIWYGContent(request=request),
-                         FindingList(request=request, findings=findings),
-                         EndpointList(request=request, endpoints=endpoints),
-                         PageBreak()]
-    return render(request,
-                  'dojo/report_builder.html',
-                  {"available_widgets": available_widgets,
-                   "in_use_widgets": in_use_widgets})
+    def get_endpoints(self, request: HttpRequest):
+        endpoints = Endpoint.objects.filter(finding__active=True,
+                                            finding__verified=True,
+                                            finding__false_p=False,
+                                            finding__duplicate=False,
+                                            finding__out_of_scope=False,
+                                            ).distinct()
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
+        return filter_class(request.GET, queryset=endpoints, user=request.user)
+
+    def get_available_widgets(self, request: HttpRequest) -> List[Widget]:
+        return [
+            CoverPage(request=request),
+            TableOfContents(request=request),
+            WYSIWYGContent(request=request),
+            FindingList(request=request, findings=self.get_findings(request)),
+            EndpointList(request=request, endpoints=self.get_endpoints(request)),
+            PageBreak()]
+
+    def get_in_use_widgets(self, request):
+        return [ReportOptions(request=request)]
+
+    def get_template(self):
+        return 'dojo/report_builder.html'
+
+    def get_context(self, request: HttpRequest) -> dict:
+        return {
+            "available_widgets": self.get_available_widgets(request),
+            "in_use_widgets": self.get_in_use_widgets(request), }
 
 
-def custom_report(request):
-    # saving the report
-    form = CustomReportJsonForm(request.POST)
-    host = report_url_resolver(request)
-    if form.is_valid():
-        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=False, finding_images=False, host=host)
-        report_format = 'AsciiDoc'
-        finding_notes = True
-        finding_images = True
-
-        if 'report-options' in selected_widgets:
-            options = selected_widgets['report-options']
-            report_format = options.report_type
-            finding_notes = (options.include_finding_notes == '1')
-            finding_images = (options.include_finding_images == '1')
-
-        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
-                                                 finding_notes=finding_notes, finding_images=finding_images, host=host)
-
-        if report_format == 'AsciiDoc':
-            widgets = list(selected_widgets.values())
-            return render(request,
-                          'dojo/custom_asciidoc_report.html',
-                          {"widgets": widgets,
-                           "host": host,
-                           "finding_notes": finding_notes,
-                           "finding_images": finding_images,
-                           "user_id": request.user.id})
-        elif report_format == 'HTML':
-            widgets = list(selected_widgets.values())
-            return render(request,
-                          'dojo/custom_html_report.html',
-                          {"widgets": widgets,
-                           "host": "",
-                           "finding_notes": finding_notes,
-                           "finding_images": finding_images,
-                           "user_id": request.user.id})
+class CustomReport(View):
+    def post(self, request: HttpRequest) -> HttpResponse:
+        # saving the report
+        form = self.get_form(request)
+        if form.is_valid():
+            self._set_state(request)
+            return render(request, self.get_template(), self.get_context())
         else:
             raise PermissionDenied()
-    else:
-        raise PermissionDenied()
+
+    def _set_state(self, request: HttpRequest):
+        self.request = request
+        self.host = report_url_resolver(request)
+        self.selected_widgets = self.get_selected_widgets(request)
+        self.widgets = list(self.selected_widgets.values())
+
+    def get_selected_widgets(self, request):
+        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, host=self.host,
+                                                      user=self.request.user, finding_notes=False, finding_images=False)
+
+        if options := selected_widgets.get('report-options', None):
+            self.report_format = options.report_type
+            self.finding_notes = (options.include_finding_notes == '1')
+            self.finding_images = (options.include_finding_images == '1')
+        else:
+            self.report_format = 'AsciiDoc'
+            self.finding_notes = True
+            self.finding_images = True
+
+        return report_widget_factory(json_data=request.POST['json'], request=request, host=self.host,
+                              user=request.user, finding_notes=self.finding_notes,
+                              finding_images=self.finding_images)
+
+    def get_form(self, request):
+        return CustomReportJsonForm(request.POST)
+
+    def get_template(self):
+        if self.report_format == 'AsciiDoc':
+            return 'dojo/custom_asciidoc_report.html',
+        elif self.report_format == 'HTML':
+            return 'dojo/custom_html_report.html'
+        else:
+            raise PermissionDenied()
+
+    def get_context(self):
+        return {
+            "widgets": self.widgets,
+            "host": self.host,
+            "finding_notes": self.finding_notes,
+            "finding_images": self.finding_images,
+            "user_id": self.request.user.id, }
 
 
 def report_findings(request):
@@ -361,9 +398,11 @@ def generate_report(request, obj, host_view=False):
         pass
     else:
         if obj is None:
-            raise Exception('No object is given to generate report for')
+            msg = 'No object is given to generate report for'
+            raise Exception(msg)
         else:
-            raise Exception(f'Report cannot be generated for object of type {type(obj).__name__}')
+            msg = f'Report cannot be generated for object of type {type(obj).__name__}'
+            raise Exception(msg)
 
     report_format = request.GET.get('report_type', 'AsciiDoc')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
@@ -435,7 +474,7 @@ def generate_report(request, obj, host_view=False):
         report_title = "Product Report"
         findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product=product)))
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=product).distinct()
@@ -466,7 +505,7 @@ def generate_report(request, obj, host_view=False):
         template = 'dojo/engagement_pdf_report.html'
         report_title = "Engagement Report"
 
-        ids = set(finding.id for finding in findings.qs)
+        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
 
@@ -683,7 +722,8 @@ def get_list_index(list, index):
 def get_findings(request):
     url = request.META.get('QUERY_STRING')
     if not url:
-        raise Http404('Please use the report button when viewing findings')
+        msg = 'Please use the report button when viewing findings'
+        raise Http404(msg)
     else:
         if url.startswith('url='):
             url = url[4:]

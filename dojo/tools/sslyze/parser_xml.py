@@ -55,12 +55,11 @@ class SSLyzeXMLParser:
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:
-            raise NamespaceErr(
-                "This doesn't seem to be a valid sslyze xml file."
-            )
+            msg = "This doesn't seem to be a valid sslyze xml file."
+            raise NamespaceErr(msg)
 
         results = root.find("results")
-        dupes = dict()
+        dupes = {}
         for target in results:
             host = target.attrib["host"]
             port = target.attrib["port"]
@@ -153,7 +152,7 @@ class SSLyzeXMLParser:
                             severity=severity,
                             dynamic_finding=True,
                         )
-                        finding.unsaved_endpoints = list()
+                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         if host is not None:

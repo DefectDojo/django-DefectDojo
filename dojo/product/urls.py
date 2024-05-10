@@ -1,7 +1,7 @@
 from django.urls import re_path
 
-from dojo.product import views
 from dojo.engagement import views as dojo_engagement_views
+from dojo.product import views
 
 urlpatterns = [
     #  product
@@ -12,8 +12,10 @@ urlpatterns = [
         name='view_product_components'),
     re_path(r'^product/(?P<pid>\d+)/engagements$', views.view_engagements,
         name='view_engagements'),
-    re_path(r'^product/(?P<pid>\d+)/import_scan_results$',
-        dojo_engagement_views.ImportScanResultsView.as_view(), name='import_scan_results_prod'),
+    re_path(
+        r'^product/(?P<product_id>\d+)/import_scan_results$',
+        dojo_engagement_views.ImportScanResultsView.as_view(),
+        name='import_scan_results_prod'),
     re_path(r'^product/(?P<pid>\d+)/metrics$', views.view_product_metrics,
         name='view_product_metrics'),
     re_path(r'^product/(?P<pid>\d+)/async_burndown_metrics$', views.async_burndown_metrics,

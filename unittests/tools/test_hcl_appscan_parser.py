@@ -1,5 +1,6 @@
-from ..dojo_test_case import DojoTestCase
 from dojo.tools.hcl_appscan.parser import HCLAppScanParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestHCLAppScanParser(DojoTestCase):
@@ -37,3 +38,11 @@ class TestHCLAppScanParser(DojoTestCase):
         self.assertEqual(findings[5].mitigation, "Remediation: fix_61771\nAdvisory: attReferrerPolicyHeaderExist")
         self.assertEqual(findings[1].description, "Issue-Type:attHttpsToHttp\nThreat-Class: catInformationLeakage\nEntity: 7089695691196187648\nSecurity-Risks: sensitiveNotOverSSL\nCause-Id: sensitiveDataNotSSL\n")
         self.assertEqual(findings[10].cwe, 1275)
+
+    def test_issue_10074(self):
+        with open("unittests/scans/hcl_appscan/issue_10074.xml") as my_file_handle:
+            parser = HCLAppScanParser()
+            findings = parser.get_findings(my_file_handle, None)
+            my_file_handle.close()
+            self.assertEqual(4, len(findings))
+            self.assertEqual(findings[0].severity, "Info")

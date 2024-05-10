@@ -1,5 +1,6 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
@@ -32,11 +33,10 @@ class TFSecParser:
         data = json.load(filename)
         dupes = {}
         if "results" not in data:
-            raise ValueError(
-                "Incorrect TFSec scan, missing attribute 'results'"
-            )
+            msg = "Incorrect TFSec scan, missing attribute 'results'"
+            raise ValueError(msg)
         if data.get("results") is None:
-            return list()
+            return []
         for item in data.get("results"):
             if item.get("passed", None):
                 continue

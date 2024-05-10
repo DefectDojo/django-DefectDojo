@@ -73,15 +73,16 @@ class ThreagileParser:
 
     def get_items(self, tree, test):
         if not isinstance(tree, list):
-            raise TypeError("Invalid ThreAgile risks file")
+            msg = "Invalid ThreAgile risks file"
+            raise TypeError(msg)
         if not tree:
-            return list()
+            return []
         findings = []
         for item in tree:
             for field in self.REQUIRED_FIELDS:
                 if field not in item.keys():
-                    raise ValueError(
-                        f"Invalid ThreAgile risks file, missing field {field}")
+                    msg = f"Invalid ThreAgile risks file, missing field {field}"
+                    raise ValueError(msg)
             severity = item.get("severity", "info").capitalize()
             severity = severity if severity != "Elevated" else "High"
             finding = Finding(

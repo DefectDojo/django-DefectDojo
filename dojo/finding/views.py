@@ -1,129 +1,128 @@
 # #  findings
 import base64
+import contextlib
+import copy
 import json
 import logging
 import mimetypes
-import contextlib
 from collections import OrderedDict, defaultdict
-from django.db import models
-from django.db.models.functions import Length
+from itertools import chain
+
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied, ValidationError
 from django.core import serializers
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import models
+from django.db.models import Count, Q, QuerySet
+from django.db.models.functions import Length
+from django.db.models.query import Prefetch
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.template.defaultfilters import pluralize
 from django.urls import reverse
-from django.http import Http404, HttpResponse, JsonResponse, HttpRequest
-from django.http import HttpResponseRedirect
-from django.http import StreamingHttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.utils import formats
+from django.utils import formats, timezone
 from django.utils.safestring import mark_safe
-from django.utils import timezone
-from django.views.decorators.http import require_POST
 from django.views import View
-from itertools import chain
+from django.views.decorators.http import require_POST
 from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
-from dojo.utils import (
-    add_error_message_to_response,
-    add_field_errors_to_response,
-    add_success_message_to_response,
-    close_external_issue,
-    redirect,
-    reopen_external_issue,
-    do_false_positive_history,
-    match_finding_to_existing_findings,
-    get_page_items_and_count,
+
+import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
+import dojo.risk_acceptance.helper as ra_helper
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization_decorators import (
+    user_has_global_permission,
+    user_is_authorized,
 )
-import copy
+from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import (
-    TemplateFindingFilter,
-    SimilarFindingFilter,
-    FindingFilter,
     AcceptedFindingFilter,
-    TestImportFindingActionFilter,
+    AcceptedFindingFilterWithoutObjectLookups,
+    FindingFilter,
+    FindingFilterWithoutObjectLookups,
+    SimilarFindingFilter,
+    SimilarFindingFilterWithoutObjectLookups,
+    TemplateFindingFilter,
     TestImportFilter,
+    TestImportFindingActionFilter,
 )
+from dojo.finding.queries import get_authorized_findings
 from dojo.forms import (
-    EditPlannedRemediationDateFindingForm,
-    NoteForm,
-    TypedNoteForm,
-    CloseFindingForm,
-    FindingForm,
-    PromoteFindingForm,
-    FindingTemplateForm,
-    DeleteFindingTemplateForm,
-    JIRAFindingForm,
-    GITHUBFindingForm,
-    ReviewFindingForm,
-    ClearFindingReviewForm,
-    DefectFindingForm,
-    StubFindingForm,
-    DeleteFindingForm,
-    DeleteStubFindingForm,
     ApplyFindingTemplateForm,
-    FindingFormID,
-    FindingBulkUpdateForm,
-    MergeFindings,
+    ClearFindingReviewForm,
+    CloseFindingForm,
     CopyFindingForm,
+    DefectFindingForm,
+    DeleteFindingForm,
+    DeleteFindingTemplateForm,
+    DeleteStubFindingForm,
+    EditPlannedRemediationDateFindingForm,
+    FindingBulkUpdateForm,
+    FindingForm,
+    FindingFormID,
+    FindingTemplateForm,
+    GITHUBFindingForm,
+    JIRAFindingForm,
+    MergeFindings,
+    NoteForm,
+    PromoteFindingForm,
+    ReviewFindingForm,
+    StubFindingForm,
+    TypedNoteForm,
 )
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
+    BurpRawRequestResponse,
+    Cred_Mapping,
+    Dojo_User,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    FileAccessToken,
     Finding,
     Finding_Group,
-    Notes,
-    NoteHistory,
-    Note_Type,
-    BurpRawRequestResponse,
-    Stub_Finding,
-    Endpoint,
     Finding_Template,
-    Endpoint_Status,
-    FileAccessToken,
-    GITHUB_PKey,
     GITHUB_Issue,
-    Dojo_User,
-    Cred_Mapping,
-    Test,
+    GITHUB_PKey,
+    Note_Type,
+    NoteHistory,
+    Notes,
     Product,
+    Stub_Finding,
+    System_Settings,
+    Test,
     Test_Import,
     Test_Import_Finding_Action,
     User,
-    Engagement,
     Vulnerability_Id_Template,
-    System_Settings,
-)
-from dojo.utils import (
-    get_page_items,
-    add_breadcrumb,
-    FileIterWrapper,
-    process_notifications,
-    get_system_setting,
-    apply_cwe_to_template,
-    Product_Tab,
-    calculate_grade,
-    redirect_to_return_url_or_else,
-    get_return_url,
-    add_external_issue,
-    update_external_issue,
-    get_words_for_field,
 )
 from dojo.notifications.helper import create_notification
-
-from django.template.defaultfilters import pluralize
-from django.db.models import Q, QuerySet, Count
-from django.db.models.query import Prefetch
-import dojo.jira_link.helper as jira_helper
-import dojo.risk_acceptance.helper as ra_helper
-import dojo.finding.helper as finding_helper
-from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import (
-    user_is_authorized,
-    user_has_global_permission,
-)
-from dojo.authorization.roles_permissions import Permissions
-from dojo.finding.queries import get_authorized_findings
 from dojo.test.queries import get_authorized_tests
+from dojo.utils import (
+    FileIterWrapper,
+    Product_Tab,
+    add_breadcrumb,
+    add_error_message_to_response,
+    add_external_issue,
+    add_field_errors_to_response,
+    add_success_message_to_response,
+    apply_cwe_to_template,
+    calculate_grade,
+    close_external_issue,
+    do_false_positive_history,
+    get_page_items,
+    get_page_items_and_count,
+    get_return_url,
+    get_system_setting,
+    get_words_for_field,
+    match_finding_to_existing_findings,
+    process_notifications,
+    redirect,
+    redirect_to_return_url_or_else,
+    reopen_external_issue,
+    update_external_issue,
+)
 
 JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
 
@@ -345,10 +344,13 @@ class BaseListFindings:
             "pid": self.get_product_id(),
         }
 
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
+        accepted_finding_filter_class = AcceptedFindingFilterWithoutObjectLookups if filter_string_matching else AcceptedFindingFilter
         return (
-            AcceptedFindingFilter(*args, **kwargs)
+            accepted_finding_filter_class(*args, **kwargs)
             if self.get_filter_name() == "Accepted"
-            else FindingFilter(*args, **kwargs)
+            else finding_filter_class(*args, **kwargs)
         )
 
     def get_filtered_findings(self):
@@ -596,6 +598,14 @@ class ViewFinding(View):
         }
 
     def get_similar_findings(self, request: HttpRequest, finding: Finding):
+        similar_findings_enabled = get_system_setting("enable_similar_findings", True)
+        if similar_findings_enabled is False:
+            return {
+                "similar_findings_enabled": similar_findings_enabled,
+                "duplicate_cluster": duplicate_cluster(request, finding),
+                "similar_findings": None,
+                "similar_findings_filter": None,
+            }
         # add related actions for non-similar and non-duplicate cluster members
         finding.related_actions = calculate_possible_related_actions_for_similar_finding(
             request, finding, finding
@@ -606,7 +616,9 @@ class ViewFinding(View):
                     request, finding, finding.duplicate_finding
                 )
             )
-        similar_findings_filter = SimilarFindingFilter(
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        finding_filter_class = SimilarFindingFilterWithoutObjectLookups if filter_string_matching else SimilarFindingFilter
+        similar_findings_filter = finding_filter_class(
             request.GET,
             queryset=get_authorized_findings(Permissions.Finding_View),
             user=request.user,
@@ -630,6 +642,7 @@ class ViewFinding(View):
             )
 
         return {
+            "similar_findings_enabled": similar_findings_enabled,
             "duplicate_cluster": duplicate_cluster(request, finding),
             "similar_findings": similar_findings,
             "similar_findings_filter": similar_findings_filter,
@@ -1277,7 +1290,7 @@ def close_finding(request, fid):
                 )
                 create_notification(
                     event="other",
-                    title="Closing of %s" % finding.title,
+                    title=f"Closing of {finding.title}",
                     finding=finding,
                     description=f'The finding "{finding.title}" was closed by {request.user}',
                     url=reverse("view_finding", args=(finding.id,)),
@@ -1440,7 +1453,7 @@ def reopen_finding(request, fid):
     )
     create_notification(
         event="other",
-        title="Reopening of %s" % finding.title,
+        title=f"Reopening of {finding.title}",
         finding=finding,
         description=f'The finding "{finding.title}" was reopened by {request.user}',
         url=reverse("view_finding", args=(finding.id,)),
@@ -1498,7 +1511,7 @@ def copy_finding(request, fid):
             )
             create_notification(
                 event="other",
-                title="Copying of %s" % finding.title,
+                title=f"Copying of {finding.title}",
                 description=f'The finding "{finding.title}" was copied by {request.user} to {test.title}',
                 product=product,
                 url=request.build_absolute_uri(
@@ -1816,8 +1829,7 @@ def mktemplate(request, fid):
             request,
             messages.SUCCESS,
             mark_safe(
-                'Finding template added successfully. You may edit it <a href="%s">here</a>.'
-                % reverse("edit_template", args=(template.id,))
+                'Finding template added successfully. You may edit it <a href="{}">here</a>.'.format(reverse("edit_template", args=(template.id,)))
             ),
             extra_tags="alert-success",
         )
@@ -2675,7 +2687,7 @@ def finding_bulk_update_all(request, pid=None):
         finding_to_update = request.POST.getlist("finding_to_update")
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
-        prods = set([find.test.engagement.product for find in finds])
+        prods = set(find.test.engagement.product for find in finds)  # noqa: C401
         if request.POST.get("delete_bulk_findings"):
             if form.is_valid() and finding_to_update:
                 if pid is not None:
@@ -2836,7 +2848,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if added:
                         add_success_message_to_response(
-                            "Created finding group with %s findings" % added
+                            f"Created finding group with {added} findings"
                         )
                         return_url = reverse(
                             "view_finding_group", args=(finding_group.id,)
@@ -2844,8 +2856,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response(
-                            "Skipped %s findings in group creation, findings already part of another group"
-                            % skipped
+                            f"Skipped {skipped} findings in group creation, findings already part of another group"
                         )
 
                     # refresh findings from db
@@ -2899,8 +2910,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response(
-                            "Skipped %s findings when removing from any finding group, findings not part of any group"
-                            % (skipped)
+                            f"Skipped {skipped} findings when removing from any finding group, findings not part of any group"
                         )
 
                     # refresh findings from db
@@ -2979,8 +2989,8 @@ def finding_bulk_update_all(request, pid=None):
 
                 error_counts = defaultdict(lambda: 0)
                 success_count = 0
-                finding_groups = set(
-                    [find.finding_group for find in finds if find.has_finding_group]
+                finding_groups = set(  # noqa: C401
+                    find.finding_group for find in finds if find.has_finding_group
                 )
                 logger.debug("finding_groups: %s", finding_groups)
                 groups_pushed_to_jira = False

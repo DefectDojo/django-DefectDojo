@@ -1,5 +1,7 @@
 import logging
+
 from dojo.tools.sonarqube.soprasteria_helper import SonarQubeSoprasteriaHelper
+
 logger = logging.getLogger(__name__)
 
 
@@ -10,7 +12,7 @@ class SonarQubeSoprasteriaHTML:
         detailTbody = tree.xpath(
             "/html/body/div[contains(@class,'detail')]/table/tbody"
         )
-        dupes = dict()
+        dupes = {}
         if len(detailTbody) == 2:
             # First is "Detail of the Detected Vulnerabilities" (not present if no vuln)
             # Second is "Known Security Rules"
@@ -18,7 +20,7 @@ class SonarQubeSoprasteriaHTML:
             rules_table = list(detailTbody[1].xpath("tr"))
 
             # iterate over the rules once to get the information we need
-            rulesDic = dict()
+            rulesDic = {}
             for rule in rules_table:
                 rule_properties = list(rule.iter("td"))
                 rule_name = list(rule_properties[0].iter("a"))[0].text.strip()

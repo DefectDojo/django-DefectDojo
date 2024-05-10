@@ -19,13 +19,13 @@ class XanitizerParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         root = self.parse_xml(filename)
         if root is not None:
             return self.get_findings_internal(root, test)
         else:
-            return list()
+            return []
 
     def parse_xml(self, filename):
         try:
@@ -35,14 +35,13 @@ class XanitizerParser:
 
         root = tree.getroot()
         if "XanitizerFindingsList" not in root.tag:
-            raise ValueError(
-                f"'{filename}' is not a valid Xanitizer findings list report XML file."
-            )
+            msg = f"'{filename}' is not a valid Xanitizer findings list report XML file."
+            raise ValueError(msg)
 
         return root
 
     def get_findings_internal(self, root, test):
-        items = list()
+        items = []
 
         globalDate = root.get("timeStamp", default=None)
         if globalDate is not None:

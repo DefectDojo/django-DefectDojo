@@ -1,10 +1,11 @@
-from dojo.tools.sonarqube.sonarqube_restapi_json import SonarQubeRESTAPIJSON
 import json
+
+from dojo.tools.sonarqube.sonarqube_restapi_json import SonarQubeRESTAPIJSON
 
 
 class SonarQubeRESTAPIZIP:
     def get_items(self, files, test, mode):
-        total_findings_per_file = list()
+        total_findings_per_file = []
         for dictkey in files.keys():
             if dictkey.endswith(".json"):
                 json_content = json.loads(files[dictkey].decode('ascii'))

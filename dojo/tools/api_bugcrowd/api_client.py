@@ -1,5 +1,6 @@
-import requests
 from urllib.parse import urlencode
+
+import requests
 
 
 class BugcrowdAPI:
@@ -23,9 +24,8 @@ class BugcrowdAPI:
             )
             self.session.headers.update(self.default_headers)
         else:
-            raise Exception(
-                f"bugcrowd Authentication type {tool_config.authentication_type} not supported"
-            )
+            msg = f"bugcrowd Authentication type {tool_config.authentication_type} not supported"
+            raise Exception(msg)
 
     def get_findings(self, program, target):
         """
@@ -91,7 +91,7 @@ class BugcrowdAPI:
 
             progs = list(filter(lambda prog: prog["type"] == "program", data))
             program_names = ", ".join(
-                list(map(lambda p: p["attributes"]["code"], progs))
+                [p["attributes"]["code"] for p in progs]
             )
             # Request targets to validate the org token
             response_targets = self.session.get(
@@ -104,7 +104,7 @@ class BugcrowdAPI:
                     filter(lambda prog: prog["type"] == "target", data_targets)
                 )
                 target_names = ", ".join(
-                    list(map(lambda p: p["attributes"]["name"], targets))
+                    [p["attributes"]["name"] for p in targets]
                 )
                 return (
                     f'With {total_subs} submissions, you have access to the "{program_names}" '
@@ -113,15 +113,17 @@ class BugcrowdAPI:
                     f'You also have targets "{target_names}" that can be used in Service key 2'
                 )
             else:
-                raise Exception(
+                msg = (
                     "Bugcrowd API test not successful, no targets were defined in Bugcrowd which is used for "
                     f"filtering, check your configuration, HTTP response was: {response_targets.text}"
                 )
+                raise Exception(msg)
         else:
-            raise Exception(
+            msg = (
                 "Bugcrowd API test not successful, could not retrieve the programs or submissions, check your "
                 f"configuration, HTTP response for programs was: {response_programs.text}, HTTP response for submissions was: {response_subs.text}"
             )
+            raise Exception(msg)
 
     def test_product_connection(self, api_scan_configuration):
         submissions = []

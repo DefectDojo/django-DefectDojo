@@ -1,4 +1,5 @@
 import re
+
 from openpyxl import load_workbook
 
 from dojo.models import Finding
@@ -16,7 +17,7 @@ class DsopParser:
 
     def get_findings(self, file, test):
         book = load_workbook(file)
-        items = list()
+        items = []
         self.__parse_disa(test, items, book["OpenSCAP - DISA Compliance"])
         self.__parse_oval(test, items, book["OpenSCAP - OVAL Results"])
         self.__parse_twistlock(
@@ -29,7 +30,7 @@ class DsopParser:
         return items
 
     def __parse_disa(self, test, items, sheet):
-        headers = dict()
+        headers = {}
         first = True
         for row in sheet.iter_rows(min_row=1, values_only=True):
             if first:
@@ -75,7 +76,7 @@ class DsopParser:
 
     def __parse_oval(self, test, items, sheet):
         severity_pattern = re.compile(r"\((.*)\)")
-        headers = dict()
+        headers = {}
         first = True
         for row in sheet.iter_rows(min_row=1, values_only=True):
             if first:
@@ -121,7 +122,7 @@ class DsopParser:
                 items.append(finding)
 
     def __parse_twistlock(self, test, items, sheet):
-        headers = dict()
+        headers = {}
         first = True
         for row in sheet.iter_rows(min_row=1, values_only=True):
             if first:
@@ -170,7 +171,7 @@ class DsopParser:
                 items.append(finding)
 
     def __parse_anchore(self, test, items, sheet):
-        headers = dict()
+        headers = {}
         first = True
         for row in sheet.iter_rows(min_row=1, values_only=True):
             if first:
@@ -208,7 +209,7 @@ class DsopParser:
                 items.append(finding)
 
     def __parse_anchore_compliance(self, test, items, sheet):
-        headers = dict()
+        headers = {}
         first = True
         for row in sheet.iter_rows(min_row=1, values_only=True):
             if first:

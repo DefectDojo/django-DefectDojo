@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
+from dojo.models import Engagement, Product, Test
 from dojo.tools.openvas.parser import OpenVASParser
-from dojo.models import Test, Engagement, Product
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestOpenVASParser(DojoTestCase):
@@ -80,7 +81,7 @@ class TestOpenVASParser(DojoTestCase):
             finding = findings[2]
             self.assertEqual("Apache HTTP Server Detection Consolidation", finding.title)
             self.assertEqual("Info", finding.severity)
-            self.assertEqual(finding.unsaved_vulnerability_ids, list())
+            self.assertEqual(finding.unsaved_vulnerability_ids, [])
 
     def test_openvas_xml_no_vuln(self):
         with open("unittests/scans/openvas/no_vuln.xml") as f:

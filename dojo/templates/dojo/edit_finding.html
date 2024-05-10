@@ -208,7 +208,7 @@
             if ($("#id_duplicate").prop("checked")) {
                 $("#id_duplicate").parent().parent().append(original_finding)
             } else {
-                $("#id_duplicate").click(function(){ alert('findings can only be marked as duplicates from the view finding screen'); return false; });
+                $("#id_duplicate").click(function(){ alert('findings can only be marked as duplicates from the view finding screen. Similar Findings must be enabled for this operation.'); return false; });
             }
         };
 

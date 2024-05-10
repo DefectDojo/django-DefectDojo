@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from dateutil.parser import parse
+
 from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
 
@@ -62,7 +63,7 @@ class HorusecParser:
                 data["vulnerabilities"]["details"].split("\n")[-1],
                 "**Code:**",
                 f"```{data['vulnerabilities']['language']}",
-                data["vulnerabilities"]["code"].replace("```", "``````"),
+                data["vulnerabilities"]["code"].replace("```", "``````").replace("\x00", ""),
                 "```",
             ]
         )

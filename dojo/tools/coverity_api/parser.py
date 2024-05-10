@@ -20,12 +20,10 @@ class CoverityApiParser:
         tree = json.load(file)
 
         if "viewContentsV1" not in tree:
-            raise ValueError(
-                "Report file is not a well-formed Coverity REST view report",
-                file.name,
-            )
+            msg = "Report file is not a well-formed Coverity REST view report"
+            raise ValueError(msg, file.name)
 
-        items = list()
+        items = []
         for issue in tree["viewContentsV1"]["rows"]:
             # get only security findings
             if "Security" != issue.get("displayIssueKind"):
@@ -101,7 +99,8 @@ class CoverityApiParser:
             return "Medium"
         if "High" == val:
             return "High"
-        raise ValueError(f"Unknown value for Coverity displayImpact {val}")
+        msg = f"Unknown value for Coverity displayImpact {val}"
+        raise ValueError(msg)
 
     def convert_severity(self, val):
         if val is None:
@@ -118,4 +117,5 @@ class CoverityApiParser:
             return "Info"
         if "Various" == val:
             return "Info"
-        raise ValueError(f"Unknown value for Coverity severity {val}")
+        msg = f"Unknown value for Coverity severity {val}"
+        raise ValueError(msg)
