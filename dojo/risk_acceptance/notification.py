@@ -91,10 +91,10 @@ class Notification:
 
     @staticmethod
     def risk_acceptance_expiration(risk_acceptance,
-                                   reactivated_findings,
+                                   reactivated_findings=None,
                                    title=None):
         accepted_findings = risk_acceptance.accepted_findings.all()
-        if title:
+        if title is None:
             title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings has expired for " + \
                     str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
 

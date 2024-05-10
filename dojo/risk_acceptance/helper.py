@@ -5,7 +5,6 @@ from dojo.risk_acceptance import risk_pending as rp_pending
 from dateutil.relativedelta import relativedelta
 import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
-from dojo.notifications.helper import create_notification
 from dojo.risk_acceptance.notification import Notification
 from django.urls import reverse
 from dojo.celery import app
@@ -194,12 +193,7 @@ def expiration_handler(*args, **kwargs):
                 timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
                 str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
 
-            Notification.risk_acceptance_expiration(risk_acceptance, reactivated_findings)
-            create_notification(event='risk_acceptance_expiration', title=notification_title, risk_acceptance=risk_acceptance,
-                                accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
-                                product=risk_acceptance.engagement.product,
-                                url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
-
+            Notification.risk_acceptance_expiration(risk_acceptance, notification_title)
             post_jira_comments(risk_acceptance, expiration_warning_message_creator, heads_up_days)
 
             risk_acceptance.expiration_date_warned = timezone.now()
