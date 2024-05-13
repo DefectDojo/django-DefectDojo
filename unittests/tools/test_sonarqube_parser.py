@@ -650,3 +650,16 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("typescript:S112533_fjoiewfjo1235gweifjoihugu-", item.title)
         self.assertEqual("Medium", item.severity)
         my_file_handle.close()
+
+    def test_parse_json_file_issue_10150(self):
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_path() + "/scans/sonarqube/issue_10150.json"
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.assertEqual(3, len(findings))
+        item = findings[0]
+        self.assertEqual("High", item.severity)
+        item = findings[2]
+        self.assertEqual("Medium", item.severity)
+        my_file_handle.close()
