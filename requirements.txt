@@ -29,7 +29,7 @@ djangorestframework==3.14.0
 html2text==2024.2.26
 humanize==4.9.0
 jira==3.8.0
-PyGithub==1.58.2
+PyGithub==2.3.0
 lxml==5.2.2
 Markdown==3.6
 mysqlclient==2.1.1
