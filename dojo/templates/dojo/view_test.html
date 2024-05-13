@@ -1551,7 +1551,7 @@
                         <div class="col-md-2" style="text-align: center">
                             <div class="row">
                                 {% url 'access_file' fid=file.id oid=test.id obj_type='Test' as image_url %}
-                                <a href="{{ image_url }}" target="_blank">
+                                <a href="{{ image_url }}" target="_blank" download>
                                     {% if file|get_thumbnail %}
                                         <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
                                     {% else %}
