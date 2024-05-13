@@ -37,7 +37,7 @@ only one defined or the SonarQube `Tool Configuration` if there is only one.
 ## Multi Branch Scanning
 
 If using a version of SonarQube with multi branch scanning, the branch tha be scanned can
-be supplied in the `branch tag` fieild at import/re-import time. If the branch does not exist,
+be supplied in the `branch_tag` fieild at import/re-import time. If the branch does not exist,
 a notification will be generated in the alerts table indicating that branch to be imported
 does not exist. If a branch name is not supplied during import/re-import, the default branch
 of the SonarQube project will be used.
