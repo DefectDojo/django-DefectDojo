@@ -14,7 +14,7 @@
                 <br/>
                 <br/>
               {% blocktranslate trimmed with event_url=url|full_url %}
-                More information on this event can be found here: {{ event_url }}
+                More information on this event can be found here: <a href="{{ event_url }}">{{ event_url }}</a>
               {% endblocktranslate %}
             {% endif %}
             <br/>
