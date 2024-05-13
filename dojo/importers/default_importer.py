@@ -98,7 +98,7 @@ class DefaultImporter(BaseImporter):
         engagement: Engagement = None,
         test: Test = None,
         user: Dojo_User = None,
-        parsed_findings: List[Finding] = None,
+        parsed_findings: List[Finding] = [],
         **kwargs: dict,
     ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
         """
@@ -129,7 +129,8 @@ class DefaultImporter(BaseImporter):
         parser = self.get_parser(scan_type)
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
-        test, parsed_findings = self.parse_findings(parser, scan_type, scan, test=None, engagement=engagement, **kwargs)
+        if len(parsed_findings) == 0 or test is None:
+            test, parsed_findings = self.parse_findings(parser, scan_type, scan, test=test, engagement=engagement, **kwargs)
         # process the findings in the foreground or background
         new_findings = self.determine_process_method(test, parsed_findings, user, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
