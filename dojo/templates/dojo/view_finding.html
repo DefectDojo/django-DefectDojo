@@ -172,7 +172,7 @@
                                         {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                             <li role="presentation">
 
-                                                {% if finding.active == True and "Risk_Acceptance_Expire"|has_global_permission == True and finding.risk_status != "Risk Pending" or finding.risk_status == "Risk Active"%}
+                                                {% if finding.active == True and finding.risk_status != "Risk Pending"%}
                                                         <a rel="noopener noreferrer" href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                             <i class="fa-solid fa-circle-exclamation"></i> Add Risk Acceptancess...
                                                         </a>
