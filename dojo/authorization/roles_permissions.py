@@ -392,6 +392,7 @@ def get_roles_with_permissions():
             Permissions.Risk_Acceptance_Edit,
             Permissions.Risk_Acceptance_Bullk,
             Permissions.Risk_Unaccept,
+            Permissions.Risk_Acceptance_Expire,
             Permissions.Test_View,
             Permissions.Test_Add,
             Permissions.Test_Edit,
