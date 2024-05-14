@@ -4,6 +4,7 @@ import io
 import json
 import logging
 import textwrap
+from datetime import datetime
 
 from dojo.models import Finding
 from django.conf import settings
@@ -19,7 +20,7 @@ class TwistlockCSVParser(object):
         data_vulnerability_id = row.get("CVE ID", "")
         data_package_version = row.get("Package Version", "")
         data_fix_status = row.get("Fix Status", "")
-        data_package_name = row.get("Packages", "")
+        data_package_name = row.get("Source Package", "")
         row.get("Id", "")
         data_severity = row.get("Severity", "")
         data_cvss = row.get("CVSS", "")
@@ -49,6 +50,7 @@ class TwistlockCSVParser(object):
             + str(data_package_version)
             + "</p>",
             mitigation=data_fix_status,
+            references=row.get("Vulnerability Link", ""),
             component_name=textwrap.shorten(
                 data_package_name, width=200, placeholder="..."
             ),
@@ -61,8 +63,11 @@ class TwistlockCSVParser(object):
                 data_cvss
             ),
             impact=data_severity,
+            vuln_id_from_tool= data_vulnerability_id,
+            publish_date=datetime.fromisoformat(
+                        row.get('Published')).strftime("%Y-%m-%d") if row.get('Published', None) else None,
         )
-        finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
+        finding.unsaved_tags = [row.get('Custom Tag') if row.get('Custom Tag', None) else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
         finding.description = finding.description.strip()
         if data_vulnerability_id:
             finding.unsaved_vulnerability_ids = [data_vulnerability_id]
@@ -186,7 +191,8 @@ def get_item(vulnerability, test):
         ),
         impact=severity,
         vuln_id_from_tool= vulnerability['id'],
-        publish_date=vulnerability.get('publishedDate', None),
+        publish_date=datetime.fromisoformat(
+                    vulnerability.get('publishedDate')).strftime("%Y-%m-%d") if vulnerability.get('publishedDate', None) else None,
 
     )
     finding.unsaved_tags = [vulnerability['customTag'] if vulnerability.get('customTag', None) else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
