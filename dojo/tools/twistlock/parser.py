@@ -4,7 +4,7 @@ import io
 import json
 import logging
 import textwrap
-from datetime import datetime
+import dateutil
 
 from dojo.models import Finding
 from django.conf import settings
@@ -64,8 +64,7 @@ class TwistlockCSVParser(object):
             ),
             impact=data_severity,
             vuln_id_from_tool= data_vulnerability_id,
-            publish_date=datetime.fromisoformat(
-                        row.get('Published')).strftime("%Y-%m-%d") if row.get('Published', None) else None,
+            publish_date=dateutil.parser.parse(row.get('Published')) if row.get('Published', None) else None,
         )
         finding.unsaved_tags = [row.get('Custom Tag') if row.get('Custom Tag', None) else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
         finding.description = finding.description.strip()
@@ -191,8 +190,7 @@ def get_item(vulnerability, test):
         ),
         impact=severity,
         vuln_id_from_tool= vulnerability['id'],
-        publish_date=datetime.fromisoformat(
-                    vulnerability.get('publishedDate')).strftime("%Y-%m-%d") if vulnerability.get('publishedDate', None) else None,
+        publish_date=dateutil.parser.parse(vulnerability.get('publishedDate')) if vulnerability.get('publishedDate', None) else None,
 
     )
     finding.unsaved_tags = [vulnerability['customTag'] if vulnerability.get('customTag', None) else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]

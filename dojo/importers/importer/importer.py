@@ -274,7 +274,7 @@ class DojoDefaultImporter(object):
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=""))
         
         if len(test.tags.tags) > 0:
-            old_findings = old_findings.filter(tags__in=test.tags.tags)
+            old_findings = old_findings.filter(test__tags__in=test.tags.tags)
 
         for old_finding in old_findings:
             old_finding.active = False
