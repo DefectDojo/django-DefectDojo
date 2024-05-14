@@ -320,13 +320,13 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         fields used today are `version`, `branch_tag`, `build_id`, and `commit_hash`
         """
         # Add the extra fields to the test if they are specified here
-        if not (version := kwargs.get("version", "")).isspace():
+        if (version := kwargs.get("version", None)) is not None:
             test.version = version
-        if not (branch_tag := kwargs.get("branch_tag", "")).isspace():
+        if (branch_tag := kwargs.get("branch_tag", None)) is not None:
             test.branch_tag = branch_tag
-        if not (build_id := kwargs.get("build_id", "")).isspace():
+        if (build_id := kwargs.get("build_id", None)) is not None:
             test.build_id = build_id
-        if not (commit_hash := kwargs.get("commit_hash", "")).isspace():
+        if (commit_hash := kwargs.get("commit_hash", None)) is not None:
             test.commit_hash = commit_hash
 
         return test
