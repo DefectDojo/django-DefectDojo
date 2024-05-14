@@ -27,6 +27,7 @@ from django_filters import (
     NumberFilter,
     OrderingFilter,
     RangeFilter,
+    DateFromToRangeFilter,
 )
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate
@@ -1537,8 +1538,7 @@ class PercentageRangeFilter(RangeFilter):
 
 
 class FindingFilterHelper(FilterSet):
-    title = CharFilter(lookup_expr="icontains")
-    date = DateRangeFilter()
+    title = CharFilter(lookup_expr="icontains")    
     on = DateFilter(field_name="date", lookup_expr="exact", label="On")
     before = DateFilter(field_name="date", lookup_expr="lt", label="Before")
     after = DateFilter(field_name="date", lookup_expr="gt", label="After")
@@ -2875,6 +2875,7 @@ class EndpointReportFilter(DojoFilter):
 
 class ReportFindingFilter(FindingTagFilter):
     title = CharFilter(lookup_expr='icontains', label='Name')
+    date = DateFromToRangeFilter(field_name='date', label="Date Discovered")
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(), label="Product")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
@@ -2901,7 +2902,7 @@ class ReportFindingFilter(FindingTagFilter):
     class Meta:
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
-        exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
+        exclude = [ 'date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'references', 'sonarqube_issue',
                    'thread_id', 'notes',
                    'numerical_severity', 'reporter', 'last_reviewed',
