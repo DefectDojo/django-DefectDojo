@@ -258,20 +258,23 @@ class DojoDefaultImporter(object):
             old_findings = (
                 Finding.objects.exclude(test=test)
                 .exclude(hash_code__in=new_hash_codes)
-                .filter(test__engagement__product=test.engagement.product, test__test_type=test.test_type, active=True, test__tags__in=test.tags.tags)
+                .filter(test__engagement__product=test.engagement.product, test__test_type=test.test_type, active=True)
             )
         else:
             # Close old findings of the same test type in the same engagement
             old_findings = (
                 Finding.objects.exclude(test=test)
                 .exclude(hash_code__in=new_hash_codes)
-                .filter(test__engagement=test.engagement, test__test_type=test.test_type, active=True, test__tags__in=test.tags.tags)
+                .filter(test__engagement=test.engagement, test__test_type=test.test_type, active=True)
             )
 
         if service:
             old_findings = old_findings.filter(service=service)
         else:
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=""))
+        
+        if len(test.tags.tags) > 0:
+            old_findings = old_findings.filter(tags__in=test.tags.tags)
 
         for old_finding in old_findings:
             old_finding.active = False
