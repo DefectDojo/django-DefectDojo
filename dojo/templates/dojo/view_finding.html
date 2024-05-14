@@ -171,16 +171,17 @@
                                         {% endif %}
                                         {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                             <li role="presentation">
-                                                {% if finding.risk_status == "Risk Pending" or finding.active == False or "Risk_Acceptance_Expire"|has_global_permission == False%}
+
+                                                {% if finding.active == True and "Risk_Acceptance_Expire"|has_global_permission == True and finding.risk_status != "Risk Pending" or finding.risk_status == "Risk Active"%}
+                                                        <a rel="noopener noreferrer" href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                            <i class="fa-solid fa-circle-exclamation"></i> Add Risk Acceptancess...
+                                                        </a>
+                                                {% else %}
                                                         <a rel="noopener noreferrer" href ="#" disabled>
                                                             <i class="fa-solid fa-circle-exclamation" style="color: grey"></i> <span style="color: grey"></i> Add Risk Acceptance...
                                                         </a>
-                                                {% else %}
-                                                        <a rel="noopener noreferrer" href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                            <i class="fa-solid fa-circle-exclamation"></i> Add Risk Acceptance...
-                                                        </a>
                                             </li>
-                                            {% endif %}
+                                                {% endif %}
                                         {% endif %}
                                     {% endif %}
                                 {% endif %}

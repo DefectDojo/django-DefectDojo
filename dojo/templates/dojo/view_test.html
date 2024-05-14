@@ -1075,7 +1075,7 @@
                                                                     </li>
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                                    {% if finding.risk_accepted or finding.risk_status == "Risk Pending" or finding.active == False or "Risk_Acceptance_Expire"|has_global_permission == False %}
+                                                                    {% if finding.active == True and "Risk_Acceptance_Expire"|has_global_permission == True and finding.risk_status != "Risk Pending" or finding.risk_status == "Risk Active"%}
                                                                         <li role="presentation">
                                                                             <a rel="noopener noreferrer">
                                                                                 <i class="fa-solid fa-circle-exclamation"></i><span style="color: grey"> {% trans "Add Risk Acceptance..." %}<span>

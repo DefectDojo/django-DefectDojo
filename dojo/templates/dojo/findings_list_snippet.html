@@ -491,17 +491,16 @@
                                                                         </li>
                                                                     {% endif %}
                                                                     {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                                        {% if finding.risk_status == "Risk Pending" or finding.active == False or "Risk_Acceptance_Expire"|has_global_permission == False%}
-                                                                            <li role="presentation">
-                                                                                <a rel="noopener noreferrer" href="#" disabled>
-                                                                                    <i class="fa-solid fa-circle-exclamation" style="color: grey"></i> <span style="color: grey"> {% trans "Add Risk Acceptance..." %}</span>
-                                                                                </a>
-                                                                        {% else %}
-                                                                            <li role="presentation">
-                                                                                <a rel="noopener noreferrer" href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
-                                                                                    <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
-                                                                                </a>
-                                                                        {% endif %}
+                                                                        <li role="presentation">
+                                                                            {% if finding.active == True and "Risk_Acceptance_Expire"|has_global_permission == True and finding.risk_status != "Risk Pending" or finding.risk_status == "Risk Active"%}
+                                                                                    <a rel="noopener noreferrer" href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                                                        <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
+                                                                                    </a>
+                                                                            {% else %}
+                                                                                    <a rel="noopener noreferrer" href="#" disabled>
+                                                                                        <i class="fa-solid fa-circle-exclamation" style="color: grey"></i> <span style="color: grey"> {% trans "Add Risk Acceptance..." %}</span>
+                                                                                    </a>
+                                                                            {% endif %}
                                                                         </li>
                                                                     {% endif %}
                                                                 {% endif %}
