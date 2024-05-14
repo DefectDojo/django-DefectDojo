@@ -87,10 +87,10 @@ def get_severity(severity_value: int, cvss_value: float) -> str:
             elif float(cvss_value) >= 9.0:
                 sev = "Critical"
         elif severity_value is not None:
-            sev = legacy_severity_lookup.get(severity_value, "Informational")
+            sev = legacy_severity_lookup.get(int(severity_value), "Informational")
         return sev
     else:
-        return qualys_severity_lookup.get(severity_value, "Informational")
+        return qualys_severity_lookup.get(int(severity_value), "Informational")
 
 
 def htmltext(blob):
