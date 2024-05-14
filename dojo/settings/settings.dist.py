@@ -486,7 +486,7 @@ LOGIN_URL = env("DD_LOGIN_URL")
 AUTHENTICATION_BACKENDS = (
     "social_core.backends.auth0.Auth0OAuth2",
     "social_core.backends.google.GoogleOAuth2",
-    "dojo.okta.OktaOAuth2",
+    "social_core.backends.okta.OktaOAuth2",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
     "social_core.backends.gitlab.GitLabOAuth2",
     "social_core.backends.keycloak.KeycloakOAuth2",
