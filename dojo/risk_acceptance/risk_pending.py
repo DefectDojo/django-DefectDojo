@@ -409,16 +409,6 @@ def validate_list_findings(conf_risk, type, finding, eng):
 
 
 def acceptance_findings_related(parent_finding: Finding, risk_acceptance: Risk_Acceptance):
-    """Busca en todo el risk acceptance que ingresa como parametro si existe algun finding relacionado en otro risk acceptance 
-        si lo encuentra agregar el finding al risk acceptance delocontrario crear un nuevo risk_acceptance
-        finding_related = finding_parent
-    Args:
-        fid (int): risk acceptance object
-
-    Returns:
-        List[Finding]: _description_
-    """
-    # obtiene los finding hijos al finding padre o finding related
     transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
     for transfer_finding_finding in transfer_finding_findings:
 
