@@ -1,7 +1,9 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.rapplex.parser import RapplexParser
+
 from dojo.models import Test
+from dojo.tools.rapplex.parser import RapplexParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestRapplexParser(DojoTestCase):
@@ -23,7 +25,6 @@ class TestRapplexParser(DojoTestCase):
             self.assertEqual("89", finding.cwe)
             self.assertIsNotNone(finding.description)
             self.assertIsNotNone(finding.references)
-            
 
     def test_rapplex_parser_with_many_findings(self):
         with open(path.join(path.dirname(__file__), "../scans/rapplex/rapplex_many_vul.json")) as testfile:
@@ -54,4 +55,3 @@ class TestRapplexParser(DojoTestCase):
             self.assertEqual("89", finding.cwe)
             self.assertIsNotNone(finding.description)
             self.assertIsNotNone(finding.references)
-            
