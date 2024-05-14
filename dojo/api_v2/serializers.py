@@ -2957,10 +2957,10 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         async_updating = getattr(self.instance, 'async_updating', None)
         if async_updating:
-            for field in ['critical', 'high', 'medium', 'low']:
+            for field in ['critical', 'enforce_critical', 'high', 'enforce_high', 'medium', 'enforce_medium', 'low', 'enforce_low']:
                 old_days = getattr(self.instance, field, None)
                 new_days = data.get(field, None)
-                if old_days and new_days and (old_days != new_days):
+                if old_days is not None and new_days is not None and (old_days != new_days):
                     msg = 'Finding SLA expiration dates are currently being calculated. The SLA days for this SLA configuration cannot be changed until the calculation is complete.'
                     raise serializers.ValidationError(msg)
         return data
