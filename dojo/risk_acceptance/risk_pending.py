@@ -5,15 +5,15 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from dojo.utils import sla_expiration_risk_acceptance
 from django.urls import reverse
-from dojo.risk_acceptance import risk_pending as rp_pending
 from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
     Product, Product_Type, TransferFindingFinding, Dojo_User, Notes
-from dojo.risk_acceptance.helper import create_notification, expiration_message_creator, post_jira_comments
+from dojo.risk_acceptance.helper import post_jira_comments
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
 from dojo.user.queries import get_user
 from dojo.authorization.roles_permissions import Permissions
 from dojo.risk_acceptance.notification import Notification
+from dojo.transfer_findings import helper as hp_transfer_finding
 import dojo.risk_acceptance.helper as ra_helper
 import crum
 import json
@@ -55,6 +55,8 @@ def risk_acceptd_findings_related(finding):
     transfer_findings_finding = TransferFindingFinding.objects.filter(finding_related=finding.id) 
     for transfer_finding_finding in transfer_findings_finding:
         origin_finding = transfer_finding_finding.findings 
+        # TODO: complted code
+        pass
 
 
 def handle_from_provider_risk(finding, acceptance_days):
@@ -90,7 +92,7 @@ def risk_accepted_succesfully(
     risk_acceptance.save()
     finding.save()
 
-    close_or_reactive_related_finding(
+    hp_transfer_finding.close_or_reactive_related_finding(
         event="close",
         parent_finding=finding,
         notes=f"temporarily accepted by the parent finding {finding.id} (policies for the transfer of findings)",
@@ -365,19 +367,7 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             finding.save(dedupe_option=False)
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
-    title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
-    create_notification(event='risk_acceptance_request',
-                        subject=f"🙋‍♂️Request of aceptance of risk {risk_pending.id}🙏",
-                        title=title, risk_acceptance=risk_pending,
-                        accepted_findings=risk_pending.accepted_findings,
-                        reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
-                        product=risk_pending.engagement.product,
-                        recipients=eval(risk_pending.accepted_by),
-                        description=f"requested acceptance of risk for finding {finding.title} with id {finding.id}",
-                        owner=risk_pending.owner,
-                        icon="bell",
-                        color_icon="#1B30DE",
-                        url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
+    Notification.risk_acceptance_request(risk_pending)
     post_jira_comments(risk_pending, findings, ra_helper.accepted_message_creator)
 
 
@@ -399,6 +389,7 @@ def accept_risk_pending_bullk(eng, risk_acceptance, product, product_type):
     for accepted_finding in risk_acceptance.accepted_findings.all():
         logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
         risk_acceptante_pending(eng, accepted_finding, risk_acceptance, product, product_type)
+
 
 def validate_list_findings(conf_risk, type, finding, eng):
     if type == "black_list":
@@ -424,42 +415,6 @@ def validate_list_findings(conf_risk, type, finding, eng):
             ),
             None,
         )
-
-
-def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes: str, send_notification: bool):
-    transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
-    system_user = get_user(settings.SYSTEM_USER)
-    for transfer_finding_finding in transfer_finding_findings:
-        if event == "close":
-            transfer_finding_finding.findings.active = False
-            transfer_finding_finding.findings.out_of_scope = True
-            note = Notes(entry=notes, author=system_user)
-            note.save()
-            logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are closed")
-            transfer_finding_finding.findings.notes.add(note)
-            transfer_finding_finding.findings.save()
-            if send_notification:
-                Notification.send_notification(
-                    event="other",
-                    subject=f"✅temporarily accepted by the parent finding {parent_finding.id} (policies for the transfer of findings)👌",
-                    description=f"temporarily accepted by the parent finding <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
-                    finding=parent_finding,
-                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
-        if event == "reactive":
-            transfer_finding_finding.findings.active = True
-            transfer_finding_finding.findings.out_of_scope = False
-            note = Notes(entry=notes, author=system_user)
-            note.save()
-            logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are reactivated")
-            transfer_finding_finding.findings.notes.add(note)
-            transfer_finding_finding.findings.save()
-            if send_notification:
-                Notification.send_notification(
-                    event="other",
-                    subject=f"✅This finding has been reactivated for the finding parent {parent_finding.id} (policies for the transfer of findings)👌",
-                    description=f"The finding has been reactivated for the finding parent <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
-                    finding=parent_finding,
-                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
 
 
 def acceptance_findings_related(parent_finding: Finding, risk_acceptance: Risk_Acceptance):

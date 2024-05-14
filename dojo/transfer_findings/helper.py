@@ -1,8 +1,6 @@
 import logging
 from dojo.api_v2.api_error import ApiError
 from django.conf import settings
-from crum import get_current_user
-from dojo.risk_acceptance import risk_pending
 from dojo.models import (
     Test,
     Finding,
@@ -12,13 +10,12 @@ from dojo.models import (
     Test,
     System_Settings,
     Notes,
-    Dojo_User
 )
 from dojo.authorization.authorization import user_has_global_permission
 from dojo.notifications.helper import create_notification
+from dojo.risk_acceptance.notification import Notification
 from dojo.user.queries import get_user
 from django.urls import reverse
-
 logger = logging.getLogger(__name__)
 
 
@@ -171,3 +168,39 @@ def send_notification_transfer_finding(transfer_findings, status="accepted"):
         recipients=[transfer_findings.owner.get_username()],
         url=reverse("view_transfer_finding", args=(pid,)),
     )
+
+
+def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes: str, send_notification: bool):
+    transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
+    system_user = get_user(settings.SYSTEM_USER)
+    for transfer_finding_finding in transfer_finding_findings:
+        if event == "close":
+            transfer_finding_finding.findings.active = False
+            transfer_finding_finding.findings.out_of_scope = True
+            note = Notes(entry=notes, author=system_user)
+            note.save()
+            logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are closed")
+            transfer_finding_finding.findings.notes.add(note)
+            transfer_finding_finding.findings.save()
+            if send_notification:
+                Notification.send_notification(
+                    event="other",
+                    subject=f"✅temporarily accepted by the parent finding {parent_finding.id} (policies for the transfer of findings)👌",
+                    description=f"temporarily accepted by the parent finding <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
+                    finding=parent_finding,
+                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
+        if event == "reactive":
+            transfer_finding_finding.findings.active = True
+            transfer_finding_finding.findings.out_of_scope = False
+            note = Notes(entry=notes, author=system_user)
+            note.save()
+            logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are reactivated")
+            transfer_finding_finding.findings.notes.add(note)
+            transfer_finding_finding.findings.save()
+            if send_notification:
+                Notification.send_notification(
+                    event="other",
+                    subject=f"✅This finding has been reactivated for the finding parent {parent_finding.id} (policies for the transfer of findings)👌",
+                    description=f"The finding has been reactivated for the finding parent <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
+                    finding=parent_finding,
+                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])

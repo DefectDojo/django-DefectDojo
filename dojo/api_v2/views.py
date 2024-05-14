@@ -927,7 +927,7 @@ class FindingViewSet(
                     e_status.last_modified = timezone.now()
                     e_status.save()
                 finding.save()
-                rp_pending.close_or_reactive_related_finding(
+                helper_tf.close_or_reactive_related_finding(
                     event="close",
                     parent_finding=finding,
                     notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",

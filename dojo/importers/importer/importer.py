@@ -12,7 +12,7 @@ import dojo.notifications.helper as notifications_helper
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from dojo.risk_acceptance.risk_pending import close_or_reactive_related_finding
+from dojo.transfer_findings import helper as hp_transfer_finding
 from dojo.models import BurpRawRequestResponse, FileUpload, Finding, Test, Test_Import, Test_Type, System_Settings
 from dojo.tools.factory import get_parser
 import logging
@@ -482,7 +482,7 @@ class DojoDefaultImporter(object):
         system_settings = System_Settings.objects.get()
         if system_settings.enable_transfer_finding and closed_findings:
             for closed_finding in closed_findings:
-                close_or_reactive_related_finding(
+                hp_transfer_finding.close_or_reactive_related_finding(
                     event="close",
                     parent_finding=closed_finding,
                     notes=f"finding closed by the parent finding {closed_finding.id} (policies for the transfer of findings)",
