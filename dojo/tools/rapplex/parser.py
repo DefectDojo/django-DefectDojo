@@ -17,9 +17,8 @@ class RapplexParser:
     def get_description_for_scan_types(self, scan_type):
         return "Import Rapplex JSON report."
 
-    def get_findings(self, file, test):
-        raw_data = file.read()
-        data = json.loads(raw_data)
+    def get_findings(self, filename, test):
+        data = json.load(filename)
         findings = []
         severities = ["Information", "Low", "Medium", "High", "Critical"]
 
