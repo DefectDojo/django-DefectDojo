@@ -18,6 +18,7 @@ class ProgpilotParser:
         description = ""
         results = json.load(filename)
         for result in results:
+            description = ""
             source_name = result.get("source_name", None)
             source_line = result.get("source_line", None)
             source_column = result.get("source_column", None)
