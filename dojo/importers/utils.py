@@ -268,8 +268,8 @@ def decode_datetime(findings):
 
 
 def adjust_date_format(obj):
-    if "fields" in obj and "date" in obj["fields"]:
-        datetime_str = obj["fields"]["date"]
-        date_str = datetime_str[:10]  # Extract date (YYYY-MM-DD)
-        obj["fields"]["date"] = date_str
+    if "fields" in obj:
+        for field in ["date", "publish_date"]:
+            if field in obj["fields"] and obj["fields"][field] is not None:
+                obj["fields"][field] = obj["fields"][field][:10]  # Extract date (YYYY-MM-DD)
     return obj
