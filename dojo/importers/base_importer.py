@@ -880,12 +880,12 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         if finding.unsaved_vulnerability_ids:
             # Remove duplicates
             finding.unsaved_vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
-            # Add all vulnerability ids to the database
+            # Remove old vulnerability ids
+            Vulnerability_Id.objects.filter(finding=finding).delete()
+
+            # Save new vulnerability ids
             for vulnerability_id in finding.unsaved_vulnerability_ids:
-                Vulnerability_Id(
-                    vulnerability_id=vulnerability_id,
-                    finding=finding,
-                ).save()
+                Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
 
         return finding
 
