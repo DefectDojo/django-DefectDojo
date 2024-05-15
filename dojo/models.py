@@ -2225,11 +2225,11 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return '%i: %s' % (self.finding.id, self.action)
 
 
-
 class Finding(models.Model):
 
     STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
                       ('Risk Rejected', 'Risk Rejected'),
+                      ('Risk Expired', 'Risk Expired'),
                       ('Risk Accepted', 'Risk Accepted'),
                       ('Risk Active', 'Risk Active'),
                       ('Transfer Pending', 'Transfer Pending'),
@@ -2907,6 +2907,8 @@ class Finding(models.Model):
             status += ['Risk pending']
         if self.risk_status == "Risk Rejected":
             status += ['Risk Rejected']
+        if self.risk_status == "Risk Expired":
+            status += ['Risk Expired']
         elif self.risk_accepted:
             status += ['Risk Accepted']
         if not len(status):
@@ -4149,6 +4151,8 @@ NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
 NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
 NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
 NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
+NOTIFICATION_CHOICE_ALERT_MAIL = ("mail", "alert")
+NOTIFICATION_CHOICE_NONE = ("", "")
 
 NOTIFICATION_CHOICES = (
     NOTIFICATION_CHOICE_SLACK,
@@ -4161,38 +4165,38 @@ DEFAULT_NOTIFICATION = NOTIFICATION_CHOICE_ALERT
 
 
 class Notifications(models.Model):
-    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
 
-    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, help_text=_('Triggered whenever an (re-)import has been done that created/updated/closed findings.'))
+    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True, help_text=_('Triggered whenever an (re-)import has been done that created/updated/closed findings.'))
     scan_added_empty = MultiSelectField(choices=NOTIFICATION_CHOICES, default=[], blank=True, help_text=_('Triggered whenever an (re-)import has been done (even if that created/updated/closed no findings).'))
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
-    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
+    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
     user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
     template = models.BooleanField(default=False)
-    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
+    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True,
         verbose_name=_('SLA breach'),
         help_text=_('Get notified of (upcoming) SLA breaches'))
-    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
+    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_('Risk Acceptance Expiration'),
         help_text=_('Get notified of (upcoming) Risk Acceptance expiries'))
-    risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+    risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_('Risk Acceptance Request'),
         help_text=_('Send notification to the contacts of the product type'))
-    transfer_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+    transfer_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_('Transfer Finding'),
         help_text=_('Send notification to the contacts of the product'))
-    sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
+    sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
         verbose_name=_('SLA breach (combined)'),
         help_text=_('Get notified of (upcoming) SLA breaches (a message per project)'))
 

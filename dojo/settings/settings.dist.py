@@ -350,6 +350,8 @@ env = environ.FileAwareEnv(
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
+    # System user for automated resource creation
+    DD_SYSTEM_USER=(str, "admin"),
     # These variables are the params of providers name
     DD_PROVIDER1=(str, ""),
     DD_PROVIDER2=(str, ""),
@@ -2005,6 +2007,8 @@ AWS_SES_EMAIL = env('DD_AWS_SES_EMAIL')
 RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
+# System user for automated resource creation
+SYSTEM_USER = env("DD_SYSTEM_USER")
 # Engine Backend
 PROVIDER1 = env("DD_PROVIDER1")
 PROVIDER2 = env("DD_PROVIDER2")

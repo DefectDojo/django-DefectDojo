@@ -1,7 +1,6 @@
 import logging
 from dojo.api_v2.api_error import ApiError
-from crum import get_current_user
-from dojo.risk_acceptance import risk_pending
+from django.conf import settings
 from dojo.models import (
     Test,
     Finding,
@@ -9,12 +8,14 @@ from dojo.models import (
     TransferFinding,
     TransferFindingFinding,
     Test,
-    System_Settings
+    System_Settings,
+    Notes,
 )
 from dojo.authorization.authorization import user_has_global_permission
 from dojo.notifications.helper import create_notification
+from dojo.risk_acceptance.notification import Notification
+from dojo.user.queries import get_user
 from django.urls import reverse
-
 logger = logging.getLogger(__name__)
 
 
@@ -69,13 +70,19 @@ def transfer_findings(
 
 
 def created_test(origin_finding: Finding, transfer_finding: TransferFinding) -> Test:
-    test = Test.objects.create(
-        engagement=transfer_finding.destination_engagement,
-        test_type=origin_finding.test.test_type,
-        target_start=origin_finding.test.target_start,
-        target_end=origin_finding.test.target_end,
-    )
-    logger.debug(f"Created test {test}")
+    test: Test = None
+    tests = transfer_finding.destination_engagement.test_set.all().order_by('-id')
+    if tests:
+        test = tests[0]
+        logger.debug(f"Select test {test.id} for transfer finding")
+    else:
+        test = Test.objects.create(
+            engagement=transfer_finding.destination_engagement,
+            test_type=origin_finding.test.test_type,
+            target_start=origin_finding.test.target_start,
+            target_end=origin_finding.test.target_end,
+        )
+        logger.debug(f"Created new test {test.id} for transfer finding")
     return test
 
 
@@ -89,24 +96,7 @@ def transfer_finding(
     if isinstance(origin_finding, Finding) and isinstance(
         transfer_finding.destination_engagement, Engagement
     ):
-        new_finding = Finding(
-            test=test,
-            title=origin_finding.title,
-            cve=origin_finding.cve,
-            severity=origin_finding.severity,
-            verified=origin_finding.verified,
-            description=origin_finding.description,
-            mitigation=origin_finding.mitigation,
-            impact=origin_finding.impact,
-            reporter=origin_finding.reporter,
-            numerical_severity=origin_finding.numerical_severity,
-            static_finding=origin_finding.static_finding,
-            dynamic_finding=origin_finding.dynamic_finding,
-            risk_status="Risk Active",
-        )
-
-        new_finding.save()
-        add_finding_related(transferfinding_findigns, new_finding, origin_finding)
+        add_finding_related(transferfinding_findigns, origin_finding, test)
         if transfer_finding.destination_product_type.name == system_settings.orphan_findings:
             logger.debug("Removed orphan findings {origin_finding.id}")
             origin_finding.delete()
@@ -119,15 +109,42 @@ def transfer_finding(
 
 def add_finding_related(
     transfer_finding_findings: TransferFindingFinding,
-    finding: Finding,
     origin_finding: Finding,
+    test: Test
 ):
+    system_user = get_user(settings.SYSTEM_USER)
     for transferfinding_finding in transfer_finding_findings:
         if (
             transferfinding_finding.findings == origin_finding
             and transferfinding_finding.finding_related is None
         ):
-            transferfinding_finding.finding_related = finding
+            new_finding = Finding(
+                test=test,
+                title=origin_finding.title,
+                cve=origin_finding.cve,
+                severity=origin_finding.severity,
+                verified=origin_finding.verified,
+                description=origin_finding.description,
+                mitigation=origin_finding.mitigation,
+                impact=origin_finding.impact,
+                reporter=origin_finding.reporter,
+                numerical_severity=origin_finding.numerical_severity,
+                static_finding=origin_finding.static_finding,
+                dynamic_finding=origin_finding.dynamic_finding,
+                risk_status="Risk Active",
+                tags="Transferred",
+            )
+            new_finding.save()
+            if system_user:
+                note = Notes(author=system_user,
+                            entry=f"This finding has been related to the finding with ID {origin_finding.id}.")
+                note.save()
+            else:
+                logger.error("Username not found")
+            
+            new_finding.notes.add(note)
+            new_finding.save()
+            transferfinding_finding.finding_related = new_finding
             transferfinding_finding.save()
             break
         logger.debug(
@@ -151,3 +168,39 @@ def send_notification_transfer_finding(transfer_findings, status="accepted"):
         recipients=[transfer_findings.owner.get_username()],
         url=reverse("view_transfer_finding", args=(pid,)),
     )
+
+
+def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes: str, send_notification: bool):
+    transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
+    system_user = get_user(settings.SYSTEM_USER)
+    for transfer_finding_finding in transfer_finding_findings:
+        if event == "close":
+            transfer_finding_finding.findings.active = False
+            transfer_finding_finding.findings.out_of_scope = True
+            note = Notes(entry=notes, author=system_user)
+            note.save()
+            logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are closed")
+            transfer_finding_finding.findings.notes.add(note)
+            transfer_finding_finding.findings.save()
+            if send_notification:
+                Notification.send_notification(
+                    event="other",
+                    subject=f"✅temporarily accepted by the parent finding {parent_finding.id} (policies for the transfer of findings)👌",
+                    description=f"temporarily accepted by the parent finding <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
+                    finding=parent_finding,
+                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
+        if event == "reactive":
+            transfer_finding_finding.findings.active = True
+            transfer_finding_finding.findings.out_of_scope = False
+            note = Notes(entry=notes, author=system_user)
+            note.save()
+            logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are reactivated")
+            transfer_finding_finding.findings.notes.add(note)
+            transfer_finding_finding.findings.save()
+            if send_notification:
+                Notification.send_notification(
+                    event="other",
+                    subject=f"✅This finding has been reactivated for the finding parent {parent_finding.id} (policies for the transfer of findings)👌",
+                    description=f"The finding has been reactivated for the finding parent <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
+                    finding=parent_finding,
+                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])

@@ -157,10 +157,9 @@
 			.proton-table a {
 				display: block;
 				max-width: 100%;
-				margin-bottom: 20px;
+				margin-bottom: 0px;
 				border: 0px;
 				border-radius: 10px;
-				overflow: hidden;
 			}
 
 			.proton-table a.proton-button {
@@ -221,10 +220,16 @@
 							<div class="body-margin">
 								<h2>{% trans "Hello, " %}{{ user.first_name }}</h2>
 								{%block description %}
-								<b>{{ owner }}</b> {{ description|safe }}
+									{%if owner %}
+										<b>{{ owner }}</b> {{ description|safe }}
+									{% else %}
+										{{ description|safe }}
+									{% endif %}
 								{% endblock%}
 								<p>
 									{% block content %}
+										{% block risk%}
+										{% endblock%}
 									{% endblock %}
 								</p>
 							</div>
@@ -248,7 +253,7 @@
 						<td class="proton-td" colspan="10" style="">
 							<div class="proton-divider"></div>
 							<center>
-								<span style="color: #000000"> © 2024 Devsecops Engine </span>
+								<span style="color: #000000"> © 2024 DevSecOps Team</span>
 							</center>
 							<div class="proton-margin-bottom"></div>
 						</td>

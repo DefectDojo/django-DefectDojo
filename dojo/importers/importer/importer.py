@@ -1,5 +1,4 @@
 import base64
-
 from django.db.models.query_utils import Q
 from dojo.importers import utils as importer_utils
 from dojo.decorators import dojo_async_task
@@ -13,7 +12,8 @@ import dojo.notifications.helper as notifications_helper
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from dojo.models import BurpRawRequestResponse, FileUpload, Finding, Test, Test_Import, Test_Type
+from dojo.transfer_findings import helper as hp_transfer_finding
+from dojo.models import BurpRawRequestResponse, FileUpload, Finding, Test, Test_Import, Test_Type, System_Settings
 from dojo.tools.factory import get_parser
 import logging
 
@@ -478,6 +478,15 @@ class DojoDefaultImporter(object):
                 service=service,
                 close_old_findings_product_scope=close_old_findings_product_scope,
             )
+
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_transfer_finding and closed_findings:
+            for closed_finding in closed_findings:
+                hp_transfer_finding.close_or_reactive_related_finding(
+                    event="close",
+                    parent_finding=closed_finding,
+                    notes=f"finding closed by the parent finding {closed_finding.id} (policies for the transfer of findings)",
+                    send_notification=False)
 
         logger.debug("IMPORT_SCAN: Updating test/engagement timestamps")
         importer_utils.update_timestamps(test, version, branch_tag, build_id, commit_hash, now, scan_date)
