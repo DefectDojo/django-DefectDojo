@@ -179,7 +179,7 @@ class TestQualysParser(DojoTestCase):
                 finding_no_cvssv3_at_detection.cvssv3_score, 9.0
             )
 
-    def test_get_severity(self):
+    def test_get_severity_legacy(self):
         with open(get_unit_tests_path() + "/scans/qualys/Qualys_Sample_Report.xml") as testfile:
             parser = QualysParser()
             findings = parser.get_findings(testfile, Test())
@@ -190,8 +190,24 @@ class TestQualysParser(DojoTestCase):
                 "Informational": 177,
                 "Low": 65,
                 "Medium": 46,
-                "High": 5,
-                "Critical": 8,
+                "High": 6,
+                "Critical": 7,
+            }
+
+            self.assertEqual(expected_counts, counts)
+
+    @override_settings(USE_QUALYS_LEGACY_SEVERITY_PARSING=False)
+    def test_get_severity(self):
+        with open(get_unit_tests_path() + "/scans/qualys/Qualys_Sample_Report.xml") as testfile:
+            parser = QualysParser()
+            findings = parser.get_findings(testfile, Test())
+            counts = {}
+            for finding in findings:
+                counts[finding.severity] = counts.get(finding.severity, 0) + 1
+            expected_counts = {
+                "Low": 242,
+                "Medium": 46,
+                "High": 13,
             }
 
             self.assertEqual(expected_counts, counts)
