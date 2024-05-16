@@ -15,7 +15,6 @@ class ProgpilotParser:
 
     def get_findings(self, filename, test):
         findings = []
-        description = ""
         results = json.load(filename)
         for result in results:
             description = ""
