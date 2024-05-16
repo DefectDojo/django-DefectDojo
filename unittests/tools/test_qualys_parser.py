@@ -178,3 +178,20 @@ class TestQualysParser(DojoTestCase):
             self.assertEqual(
                 finding_no_cvssv3_at_detection.cvssv3_score, 9.0
             )
+
+    def test_get_severity(self):
+        with open(get_unit_tests_path() + "/scans/qualys/Qualys_Sample_Report.xml") as testfile:
+            parser = QualysParser()
+            findings = parser.get_findings(testfile, Test())
+            counts = {}
+            for finding in findings:
+                counts[finding.severity] = counts.get(finding.severity, 0) + 1
+            expected_counts = {
+                "Informational": 177,
+                "Low": 65,
+                "Medium": 46,
+                "High": 5,
+                "Critical": 8,
+            }
+
+            self.assertEqual(expected_counts, counts)
