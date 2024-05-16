@@ -927,11 +927,13 @@ class FindingViewSet(
                     e_status.last_modified = timezone.now()
                     e_status.save()
                 finding.save()
-                helper_tf.close_or_reactive_related_finding(
-                    event="close",
-                    parent_finding=finding,
-                    notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
-                    send_notification=False)
+                system_settings = System_Settings.objects.get()
+                if system_settings.enable_transfer_finding:
+                    helper_tf.close_or_reactive_related_finding(
+                        event="close",
+                        parent_finding=finding,
+                        notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                        send_notification=False)
             else:
                 return Response(
                     finding_close.errors, status=status.HTTP_400_BAD_REQUEST
