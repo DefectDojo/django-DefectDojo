@@ -195,6 +195,7 @@ class TruffleHogParser(object):
                     dynamic_finding=False,
                     static_finding=True,
                     nb_occurences=1,
+                    vuln_id_from_tool= "SECRET_SCANNING"
                 )
                 finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")]
                 dupes[dupe_key] = finding

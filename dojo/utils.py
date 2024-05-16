@@ -1875,12 +1875,12 @@ def is_scan_file_too_large(scan_file):
 def queryset_check(query):
     return query if isinstance(query, QuerySet) else query.qs
 
+
 def sla_expiration_risk_acceptance(sla_settings_name) -> dict:
     risk_acceptance_expiration = list(SLA_Configuration.objects.filter(name=sla_settings_name).values())
     if risk_acceptance_expiration:
         return risk_acceptance_expiration[0]
     raise ValueError("(RiskAcceptanceExpiration) configuration not defined in database")
-
 
 
 def sla_compute_and_notify(*args, **kwargs):

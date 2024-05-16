@@ -542,9 +542,11 @@
                                                     </li>
                                                 {% endif %}
                                                 <li>
+                                                {% if "Product_Configure_Notifications"|has_configuration_permission:request%}
                                                     <a rel="noopener noreferrer" href="{% url 'notifications' %}">
                                                         {% trans "Notifications" %}
                                                     </a>
+                                                {% endif %}
                                                 </li>
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'regulations' %}">
