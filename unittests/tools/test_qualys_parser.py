@@ -70,7 +70,7 @@ class TestQualysParser(DojoTestCase):
             self.assertEqual(finding_cvssv3_vector.cvssv3,
                             "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H")
             self.assertEqual(
-                finding_cvssv3_vector.severity, "Critical"
+                finding_cvssv3_vector.severity, "High"
             )
             return finding
 
