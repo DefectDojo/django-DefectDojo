@@ -864,29 +864,8 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
         to create `Vulnerability_Id` objects with the finding associated correctly
         """
-        # Synchronize the cve field with the unsaved_vulnerability_ids
-        # We do this to be as flexible as possible to handle the fields until
-        # the cve field is not needed anymore and can be removed.
-        if finding.unsaved_vulnerability_ids and finding.cve:
-            # Make sure the first entry of the list is the value of the cve field
-            finding.unsaved_vulnerability_ids.insert(0, finding.cve)
-        elif finding.unsaved_vulnerability_ids and not finding.cve:
-            # If the cve field is not set, use the first entry of the list to set it
-            finding.cve = finding.unsaved_vulnerability_ids[0]
-        elif not finding.unsaved_vulnerability_ids and finding.cve:
-            # If there is no list, make one with the value of the cve field
-            finding.unsaved_vulnerability_ids = [finding.cve]
-
         if finding.unsaved_vulnerability_ids:
-            # Remove duplicates
-            finding.unsaved_vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
-            # Remove old vulnerability ids
-            Vulnerability_Id.objects.filter(finding=finding).delete()
-
-            # Save new vulnerability ids
-            # for vulnerability_id in finding.unsaved_vulnerability_ids:
-            #     Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
-            Vulnerability_Id.objects. bulk_create([Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id) for vulnerability_id in finding.unsaved_vulnerability_ids])
+            finding_helper.save_vulnerability_ids(finding, finding.unsaved_vulnerability_ids)
 
         return finding
 
