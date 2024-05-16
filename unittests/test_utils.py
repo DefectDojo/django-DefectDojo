@@ -250,4 +250,4 @@ class TestSettings(DojoTestCase):
             real_hash = hashlib.sha256(file.read()).hexdigest()
         with Path('dojo/settings/.settings.dist.py.sha256sum').open('rb') as file:
             expected_hash = file.read().decode().strip()
-        self.assertEqual(expected_hash, real_hash, "File settings.dist.py was changed but checksum has not been updated. Update sha256sum value in '.settings.dist.py.sha256sum'")
+        self.assertEqual(expected_hash, real_hash, "File settings.dist.py was changed but checksum has not been updated. If this is part of a PR, update the sha256sum value in '.settings.dist.py.sha256sum'. If you are modifying this to configure your instance, revert your changes and use environment variables or 'local_settings.py'")

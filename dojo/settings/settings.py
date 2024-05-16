@@ -17,7 +17,7 @@ if not DEBUG:
     with (Path(__file__).parent / '.settings.dist.py.sha256sum').open('rb') as file:
         expected_hash = file.read().decode().strip()
     if real_hash != expected_hash:
-        msg = "Change of 'settings.dist.py' file was detected. It is not allow to edit this file. " \
+        msg = "Change of 'settings.dist.py' file was detected. It is not allowed to edit this file. " \
             "Any customization of variables need to be done via environmental variables or in 'local_settings.py'. " \
             "For more information check https://documentation.defectdojo.com/getting_started/configuration/ "
         raise ValueError(msg)
