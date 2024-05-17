@@ -240,6 +240,7 @@
             <table id="open_findings" class="table table-condensed table-striped">
                 <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Severity</th>
                     <th>EPSS Score / Percentile</th>
                     <th>Name</th>
@@ -252,6 +253,9 @@
                 <tbody>
                 {% for finding in accepted_findings %}
                     <tr>
+                        <td>
+                            {{finding.id}}
+                        </td>
                         <td>
                           <span class="label severity severity-{{ finding.severity }}">
                               {{ finding.severity_display }}

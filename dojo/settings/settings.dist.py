@@ -1102,6 +1102,7 @@ INSTALLED_APPS = (
     'tagulous',
     'fontawesomefree',
     'django_filters',
+    'django.db.migrations',
 )
 
 # ------------------------------------------------------------------------------
