@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from dojo.utils import sla_expiration_risk_acceptance
 from django.urls import reverse
 from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
-    Product, Product_Type, TransferFindingFinding, Dojo_User, Notes
+    Product, Product_Type, TransferFindingFinding, Dojo_User, Notes, TransferFinding, System_Settings
 from dojo.risk_acceptance.helper import post_jira_comments
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
@@ -83,11 +83,13 @@ def risk_accepted_succesfully(
     risk_acceptance.save()
     finding.save()
 
-    hp_transfer_finding.close_or_reactive_related_finding(
-        event="close",
-        parent_finding=finding,
-        notes=f"temporarily accepted by the parent finding {finding.id} (policies for the transfer of findings)",
-        send_notification=True)
+    system_settings = System_Settings.objects.get()
+    if system_settings.enable_transfer_finding:
+        hp_transfer_finding.close_or_reactive_related_finding(
+            event="close",
+            parent_finding=finding,
+            notes=f"temporarily accepted by the parent finding {finding.id} (policies for the transfer of findings)",
+            send_notification=True)
 
     if send_notification:
         title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"

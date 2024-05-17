@@ -41,10 +41,12 @@ def expire_now(risk_acceptance):
 
                 finding.save(dedupe_option=False)
                 # reactivate finding realted (transfer finding)
-                hp_transfer_finding.close_or_reactive_related_finding(event="reactive",
-                                                  parent_finding=finding,
-                                                  notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
-                                                  send_notification=True)
+                system_settings = System_Settings.objects.get()
+                if system_settings.enable_transfer_finding:
+                    hp_transfer_finding.close_or_reactive_related_finding(event="reactive",
+                                                    parent_finding=finding,
+                                                    notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
+                                                    send_notification=True)
                 reactivated_findings.append(finding)
                 # findings remain in this risk acceptance for reporting / metrics purposes
             else:
