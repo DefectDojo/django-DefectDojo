@@ -89,7 +89,15 @@ function innerData(data){
             <td>${findings.findings.title}</td>
             <td>${findings.findings.severity}</td>
             <td>${findings.findings.cve}</td>
-            <td><a href="http://${host}/finding/${findings.finding_related}" class="table-link" target="_blank" type="button"> ${findings.finding_related} </a></td>`
+            <td>
+            <select id="is_valid" class="form-control form-control-chosen" data-placeholder="Please select...">
+  <option></option>
+  <option>Option One</option>
+  <option>...</option>
+</select>
+          </select>
+            </div>
+            </td>`
             if(findings.findings.risk_status.includes("Transfer Accepted")){
                 cell_status.innerHTML= `<span style="color:green">Transfer Accepted</span>`
             }else if(findings.findings.risk_status.includes("Transfer Reject")){
