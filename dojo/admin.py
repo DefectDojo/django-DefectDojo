@@ -1,6 +1,7 @@
 from auditlog.models import LogEntry
 from django.contrib import admin
 from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
+from django.db.migrations.recorder import MigrationRecorder
 from dojo.models import Question, TextQuestion, ChoiceQuestion, Choice, \
     Answer, TextAnswer, ChoiceAnswer, Engagement_Survey, Answered_Survey
 
@@ -91,3 +92,4 @@ admin.site.register(ChoiceAnswer, ChoiceAnswerAdmin)
 admin.site.register(Answer, AnswerParentAdmin)
 admin.site.register(Engagement_Survey)
 admin.site.register(Answered_Survey)
+admin.site.register(MigrationRecorder.Migration)
