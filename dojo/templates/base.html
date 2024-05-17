@@ -738,12 +738,14 @@
                                                         {% trans "View Risk Accepted Findings" %}
                                                     </a>
                                                 </li>
+                                                {% if system_settings.enable_transfer_finding %}
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'view_transfer_finding' product_tab.product.id %}">
                                                         <i class="fa-solid fa-shuffle"></i>
                                                         {% trans "View Transfer Findings" %}
                                                     </a>
                                                 </li>
+                                                {%endif%}
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'product_all_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-magnifying-glass"></i>
