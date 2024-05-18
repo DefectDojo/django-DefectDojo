@@ -12,7 +12,6 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.utils import IntegrityError
-from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -78,6 +77,7 @@ from dojo.models import (
     Note_Type,
     NoteHistory,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -108,7 +108,6 @@ from dojo.models import (
     UserContactInfo,
     Vulnerability_Id,
     Vulnerability_Id_Template,
-    Notification_Webhooks,
     get_current_date,
 )
 from dojo.risk_acceptance.helper import add_findings_to_risk_acceptance, remove_finding_from_risk_acceptance

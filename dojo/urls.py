@@ -40,6 +40,7 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     NotificationsViewSet,
+    NotificationWebhooksViewset,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -70,7 +71,6 @@ from dojo.api_v2.views import (
     UserContactInfoViewSet,
     UserProfileView,
     UsersViewSet,
-    NotificationWebhooksViewset,
 )
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.banner.urls import urlpatterns as banner_urls

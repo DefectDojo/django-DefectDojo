@@ -71,6 +71,7 @@ from dojo.models import (
     JIRA_Project,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Objects_Product,
     Product,
@@ -95,7 +96,6 @@ from dojo.models import (
     Tool_Type,
     User,
     UserContactInfo,
-    Notification_Webhooks,
 )
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
@@ -2784,7 +2784,7 @@ class NotificationsWebhookForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         is_superuser = kwargs.pop('is_superuser', False)
         logger.debug(f"is_superuser: {is_superuser}")
-        super(NotificationsWebhookForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['status'].disabled = True  # TODO - same for API
         self.fields['first_error'].disabled = True
         self.fields['last_error'].disabled = True
@@ -2797,7 +2797,7 @@ class DeleteNotificationsWebhookForm(forms.ModelForm):
                             widget=forms.widgets.HiddenInput())
 
     def __init__(self, *args, **kwargs):
-        super(DeleteNotificationsWebhookForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['name'].disabled = True
         self.fields['url'].disabled = True
 

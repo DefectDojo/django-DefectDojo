@@ -111,6 +111,7 @@ from dojo.models import (
     Network_Locations,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -136,7 +137,6 @@ from dojo.models import (
     Tool_Type,
     User,
     UserContactInfo,
-    Notification_Webhooks,
 )
 from dojo.product.queries import (
     get_authorized_app_analysis,
