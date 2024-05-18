@@ -4561,6 +4561,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Endpoint)
     auditlog.register(Engagement)
     auditlog.register(Finding)
+    auditlog.register(Finding_Group)
     auditlog.register(Product_Type)
     auditlog.register(Product)
     auditlog.register(Test)
