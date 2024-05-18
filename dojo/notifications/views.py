@@ -1,25 +1,19 @@
 import logging
-import requests
 
+import requests
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.http import HttpRequest
-from django.shortcuts import render, get_object_or_404
+from django.http import Http404, HttpRequest, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views import View
 
-from dojo.forms import NotificationsForm
-
-from django.urls import reverse
-from django.http import HttpResponseRedirect, Http404
-
-from dojo.models import Notification_Webhooks
-from dojo.utils import get_system_setting
-from dojo.forms import NotificationsWebhookForm, DeleteNotificationsWebhookForm
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.forms import DeleteNotificationsWebhookForm, NotificationsForm, NotificationsWebhookForm
+from dojo.models import Notification_Webhooks, Notifications
 from dojo.notifications.helper import test_webhooks_notification
-from dojo.models import Notifications
-from dojo.utils import add_breadcrumb, get_enabled_notifications_list
+from dojo.utils import add_breadcrumb, get_enabled_notifications_list, get_system_setting
 
 logger = logging.getLogger(__name__)
 

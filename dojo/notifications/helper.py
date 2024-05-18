@@ -1,7 +1,7 @@
+import json
 import logging
 
 import requests
-import json
 import yaml
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
@@ -16,7 +16,15 @@ from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo, Notification_Webhooks, get_current_datetime
+from dojo.models import (
+    Alerts,
+    Dojo_User,
+    Notification_Webhooks,
+    Notifications,
+    System_Settings,
+    UserContactInfo,
+    get_current_datetime,
+)
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
