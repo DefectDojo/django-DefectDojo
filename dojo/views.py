@@ -16,7 +16,7 @@ from dojo.forms import ManageFileFormSet
 from dojo.utils import get_page_items, Product_Tab
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403, user_has_configuration_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
-
+from dojo.api_v2 import permissions
 
 logger = logging.getLogger(__name__)
 

@@ -1115,3 +1115,19 @@ class UserHasConfigurationPermissionSuperuser(
 
     def has_permission(self, request, view):
         return super().has_permission(request, view)
+
+
+class UserHasViewSwaggerDocumentation(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return user_has_global_permission(
+            request.user, Permissions.Swagger_Documentation
+        )
+
+
+class UserHasViewApiV2Key(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return user_has_global_permission(
+            request.user, Permissions.Api_v2_Key
+        )

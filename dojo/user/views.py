@@ -26,7 +26,7 @@ from django.utils.translation import gettext as _
 from django.utils.timezone import now
 
 from rest_framework.authtoken.models import Token
-
+from rest_framework.decorators import api_view, permission_classes
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, ChangePasswordForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
     Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm, ConfigurationPermissionsForm
@@ -36,6 +36,7 @@ from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.authorization.roles_permissions import Permissions
+from dojo.api_v2 import permissions
 from dojo.decorators import dojo_ratelimit
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 
@@ -66,7 +67,8 @@ class DojoLoginView(LoginView):
 
 
 # #  Django Rest Framework API v2
-
+@api_view(['GET'])
+@permission_classes([permissions.UserHasViewApiV2Key])
 def api_v2_key(request):
     # This check should not be necessary because url should not be in 'urlpatterns' but we never know
     if not settings.API_TOKENS_ENABLED:
