@@ -1,0 +1,16 @@
+{
+    "findings": [
+	{
+            "title": "test title",
+            "description": "Test description",
+            "active": true,
+            "verified": true,
+            "severity": "High",
+            "impact": "Some impact",
+            "date": "0001-01-01",
+            "tags": ["security", "network"],
+            "unique_id_from_tool": "0b5a8a8f-b3b0-4fe9-9b27-87d58631ac03",
+            "vuln_id_from_tool": "TEST_BAD_DATE"
+	}
+    ]
+}
