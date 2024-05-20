@@ -590,3 +590,9 @@ add_core(ptr, offset, val);
             findings = parser.get_findings(testfile, Test())
             item = findings[0]
             self.assertEqual(["Scan"], item.tags)
+
+    def test_severity_in_properties(self):
+        with open(path.join(path.dirname(__file__), "../scans/sarif/issue_10191.json")) as testfile:
+            parser = SarifParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(77, len(findings))
