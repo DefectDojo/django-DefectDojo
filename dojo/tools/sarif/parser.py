@@ -416,10 +416,16 @@ def get_item(result, rules, artifacts, run_date):
         # Some tools such as GitHub or Grype return the severity in properties
         # instead
         if "properties" in rule and "security-severity" in rule["properties"]:
-            cvss = float(rule["properties"]["security-severity"])
-            severity = cvss_to_severity(cvss)
-            finding.cvssv3_score = cvss
-            finding.severity = severity
+            try:
+                cvss = float(rule["properties"]["security-severity"])
+                severity = cvss_to_severity(cvss)
+                finding.cvssv3_score = cvss
+                finding.severity = severity
+            except ValueError:
+                if rule["properties"]["security-severity"].lower().capitalize() in ["Info", "Low", "Medium", "High", "Critical"]:
+                    finding.severity = rule["properties"]["security-severity"].lower().capitalize()
+                else:
+                    finding.severity = "Info"
 
     # manage the case that some tools produce CWE as properties of the result
     cwes_properties_extracted = get_result_cwes_properties(result)
