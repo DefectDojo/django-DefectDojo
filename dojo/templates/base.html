@@ -162,25 +162,31 @@
                                             </a>
                                         </li>
                                         {% if API_TOKENS_ENABLED %}
-                                          <li>
-                                              <a rel="noopener noreferrer" href="{% url 'api_v2_key' %}">
-                                                <i class="fa-solid fa-key fa-fw"></i>
-                                                  {% trans "API v2 Key" %}
-                                              </a>
-                                          </li>
+                                            {% if "Swagger_Documentation"|has_global_permission%}
+                                            <li>
+                                                <a rel="noopener noreferrer" href="{% url 'api_v2_key' %}">
+                                                    <i class="fa-solid fa-key fa-fw"></i>
+                                                    {% trans "API v2 Key" %}
+                                                </a>
+                                            </li>
+                                            {%endif%}
                                         {% endif %}
                                     {% endif %}
                                     <li>
-                                        <a rel="noopener noreferrer" href="{% url 'swagger-ui_oa3' %}" target="_blank">
-                                            <i class="fa-solid fa-book fa-fw" title="OpenAPI v3 Docs"></i>
-                                            {% trans "API v2 OpenAPI3 Docs" %}
-                                        </a>
+                                        {% if "Api_v2_Key"|has_global_permission%}
+                                            <a rel="noopener noreferrer" href="{% url 'swagger-ui_oa3' %}" target="_blank">
+                                                <i class="fa-solid fa-book fa-fw" title="OpenAPI v3 Docs"></i>
+                                                {% trans "API v2 OpenAPI3 Docs" %}
+                                            </a>
+                                        {%endif%}
                                     </li>
                                     <li>
-                                        <a rel="noopener noreferrer" href="{{ DOCUMENTATION_URL }}" target="_blank">
-                                            <i class="fa-solid fa-circle-question fa-fw"></i>
-                                            {% trans "Documentation" %}
-                                        </a>
+                                        {% if "Defect_Dojo_Documentation"|has_global_permission%}
+                                            <a rel="noopener noreferrer" href="{{ DOCUMENTATION_URL }}" target="_blank">
+                                                <i class="fa-solid fa-circle-question fa-fw"></i>
+                                                {% trans "Documentation" %}
+                                            </a>
+                                        {%endif%}
                                     </li>
                                 {% endblock %}
                                 {% if request.user.is_authenticated %}

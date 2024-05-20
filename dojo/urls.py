@@ -21,7 +21,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
     ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
     QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet, \
-    TransferFindingViewSet, TransferFindingFindingsViewSet, AnnouncementViewSet
+    TransferFindingViewSet, TransferFindingFindingsViewSet, AnnouncementViewSet, SchemaOa3View, SwaggerUiOa3View
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -57,8 +57,6 @@ from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.regulations.urls import urlpatterns as regulations
 from dojo.announcement.urls import urlpatterns as announcement_urls
-from drf_spectacular.views import SpectacularSwaggerView
-from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 
 import logging
 logger = logging.getLogger(__name__)
@@ -184,6 +182,8 @@ if hasattr(settings, 'API_TOKENS_ENABLED'):
 
 urlpatterns = []
 
+
+
 # sometimes urlpatterns needed be added from local_settings.py before other URLs of core dojo
 if hasattr(settings, 'PRELOAD_URL_PATTERNS'):
     urlpatterns += settings.PRELOAD_URL_PATTERNS
@@ -194,8 +194,8 @@ urlpatterns += [
     re_path(r'^%s' % get_system_setting('url_prefix'), include(ur)),
 
     # drf-spectacular = OpenAPI3
-    re_path(r'^%sapi/v2/oa3/schema/' % get_system_setting('url_prefix'), SpectacularAPIView.as_view(), name='schema_oa3'),
-    re_path(r'^%sapi/v2/oa3/swagger-ui/' % get_system_setting('url_prefix'), SpectacularSwaggerView.as_view(url=get_system_setting('url_prefix') + '/api/v2/oa3/schema/?format=json'), name='swagger-ui_oa3'),
+    re_path(r'^%sapi/v2/oa3/schema/' % get_system_setting('url_prefix'), SchemaOa3View.as_view(), name='schema_oa3'),
+    re_path(r'^%sapi/v2/oa3/swagger-ui/' % get_system_setting('url_prefix'), SwaggerUiOa3View.as_view(url=get_system_setting('url_prefix') + '/api/v2/oa3/schema/?format=json'), name='swagger-ui_oa3'),
 
     re_path(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
     re_path(r'^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.manage_files, name='manage_files'),
