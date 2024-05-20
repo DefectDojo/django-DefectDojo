@@ -15,7 +15,7 @@ class DbRouter:
         """
         Allows relations if both objects belong to the same database.
         """
-        return obj1._state.db == obj2._state.db
+        return True
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         """

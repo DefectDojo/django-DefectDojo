@@ -3,7 +3,7 @@ from django.db.models import Exists, OuterRef, Q
 from dojo.models import Finding, Product_Member, Product_Type_Member, Stub_Finding, \
     Product_Group, Product_Type_Group, Vulnerability_Id, Product_Type
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
-
+from dojo.request_cache import cache_for_request
 
 def get_authorized_groups(permission, user=None):
     roles = get_roles_for_permission(permission)
@@ -30,7 +30,7 @@ def get_authorized_groups(permission, user=None):
         authorized_product_type_groups,
         authorized_product_groups
     )
-
+@cache_for_request
 def get_authorized_findings(permission, queryset=None, user=None):
     if user is None:
         user = get_current_user()
