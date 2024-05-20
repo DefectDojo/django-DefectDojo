@@ -168,6 +168,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from drf_spectacular.views import SpectacularAPIView
+from drf_spectacular.views import SpectacularSwaggerView
 from drf_spectacular.renderers import OpenApiJsonRenderer2
 from dojo.authorization.roles_permissions import Permissions
 from dojo.user.utils import get_configuration_permissions_codenames
@@ -3414,3 +3415,11 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SchemaOa3View(SpectacularAPIView):
+    permission_classes = [permissions.UserHasViewSwaggerDocumentation]
+
+
+class SwaggerUiOa3View(SpectacularSwaggerView):
+    permission_classes = [permissions.UserHasViewApiV2Key]

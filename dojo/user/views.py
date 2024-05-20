@@ -26,18 +26,20 @@ from django.utils.translation import gettext as _
 from django.utils.timezone import now
 
 from rest_framework.authtoken.models import Token
-
+from rest_framework.decorators import api_view, permission_classes
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, ChangePasswordForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
     Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm, ConfigurationPermissionsForm
-from dojo.models import Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
+from dojo.models import Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member, Role
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.authorization.roles_permissions import Permissions
+from dojo.api_v2 import permissions
 from dojo.decorators import dojo_ratelimit
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.authorization import authorization
 
 import hyperlink
 
@@ -66,7 +68,8 @@ class DojoLoginView(LoginView):
 
 
 # #  Django Rest Framework API v2
-
+@api_view(['GET'])
+@permission_classes([permissions.UserHasViewApiV2Key])
 def api_v2_key(request):
     # This check should not be necessary because url should not be in 'urlpatterns' but we never know
     if not settings.API_TOKENS_ENABLED:
@@ -495,7 +498,7 @@ def delete_user(request, uid):
                    })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(authorization.check_permission_produc_type_member_add_owner)
 def add_product_type_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Type_Member_UserForm(initial={'user': user.id})
@@ -523,7 +526,7 @@ def add_product_type_member(request, uid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(authorization.check_permission_product_member_add_owner)
 def add_product_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Member_UserForm(initial={'user': user.id})

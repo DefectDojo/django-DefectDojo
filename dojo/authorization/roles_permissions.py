@@ -144,6 +144,10 @@ class Permissions(IntEnum):
     Transfer_Finding_Delete = 2803
     Transfer_Finding_Add = 2804
 
+    Api_v2_Key = 2901
+    Swagger_Documentation = 2902
+    Defect_Dojo_Documentation = 2903
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -378,10 +382,12 @@ def get_roles_with_permissions():
             Permissions.Product_Type_View,
             Permissions.Product_Type_Member_Delete,
             Permissions.Product_Type_Manage_Members,
+            Permissions.Product_Type_Member_Add_Owner,
             Permissions.Product_Type_Edit,
             Permissions.Product_View,
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
+            Permissions.Product_Member_Add_Owner,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Engagement_View,
@@ -450,6 +456,9 @@ def get_roles_with_permissions():
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
             Permissions.Metrics_Panel,
+            Permissions.Swagger_Documentation,
+            Permissions.Api_v2_Key,
+            Permissions.Defect_Dojo_Documentation,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
