@@ -90,12 +90,10 @@ function innerData(data){
             <td>${findings.findings.severity}</td>
             <td>${findings.findings.cve}</td>
             <td>
-            <select id="is_valid" class="form-control form-control-chosen" data-placeholder="Please select...">
-  <option></option>
-  <option>Option One</option>
-  <option>...</option>
-</select>
-          </select>
+                <select id="is_valid" class="form-control form-control-chosen" data-placeholder="Please select...">
+                  <option></option>
+                  <option>None</option>
+                </select>
             </div>
             </td>`
             if(findings.findings.risk_status.includes("Transfer Accepted")){
@@ -123,6 +121,7 @@ function innerData(data){
             </td>`; 
             
             tableBody.appendChild(row);
+            $(".form-control-chosen").chosen();
         });
     });
 }
