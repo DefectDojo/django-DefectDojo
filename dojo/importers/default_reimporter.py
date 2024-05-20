@@ -261,7 +261,7 @@ class DefaultReImporter(BaseImporter):
         # following finding in the same report
         # this means untouched can have this finding inside it,
         # while it is in fact a new finding. So we subtract new_items
-        untouched = set(unchanged_items) - set(to_mitigate) - set(new_items)
+        untouched = set(unchanged_items) - set(to_mitigate) - set(new_items) - set(reactivated_items)
         # Process groups
         self.process_groups_for_all_findings(
             group_names_to_findings_dict,
