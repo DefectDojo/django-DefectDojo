@@ -4,15 +4,15 @@ dependencies:
   version: 9.19.1
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 15.2.13
+  version: 15.2.7
 - name: postgresql-ha
   repository: https://charts.bitnami.com/bitnami
   version: 9.4.11
 - name: rabbitmq
   repository: https://charts.bitnami.com/bitnami
-  version: 14.1.5
+  version: 14.1.0
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 19.1.5
-digest: sha256:ad543edf2f36ae912453b3b075f5db27c464d90d8035d5977ac434bc3fc63b69
-generated: "2024-05-20T14:55:05.297896821Z"
+digest: sha256:489bde31da1ba28130baef3c49292e052a50bbc3726de037b3778bdb091c7cad
+generated: "2024-04-30T12:26:32.131451724Z"
