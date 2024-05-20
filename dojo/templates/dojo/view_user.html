@@ -108,7 +108,7 @@
                     &nbsp;
                     <a rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
-                    {% if request.user.is_superuser %}
+                    {% if request.user.is_superuser or "Product_Type_Member_Add_Owner"|has_global_permission%}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddProductTypeMember"
                             data-toggle="dropdown" aria-expanded="true">
@@ -181,7 +181,7 @@
                     &nbsp;
                     <a rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
-                    {% if request.user.is_superuser %}
+                    {% if request.user.is_superuser or "Product_Type_Member_Add_Owner"|has_global_permission%}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button"  id="dropdownMenuAddProductMember"
                             data-toggle="dropdown" aria-expanded="true">

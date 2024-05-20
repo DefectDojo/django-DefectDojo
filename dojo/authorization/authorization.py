@@ -1,5 +1,6 @@
 from django.core.exceptions import PermissionDenied
 from dojo.request_cache import cache_for_request
+import logging
 from dojo.authorization.roles_permissions import (
     Permissions,
     Roles,
@@ -27,7 +28,9 @@ from dojo.models import (
     Cred_Mapping,
     TransferFinding,
 )
+logger = logging.getLogger(__name__)
 
+"""  """
 
 def user_has_configuration_permission(user, permission):
     if not user:
@@ -301,6 +304,32 @@ def role_has_global_permission(role, permission):
     if permissions and permission in permissions:
         return True
     return role_has_permission(role, permission)
+
+
+def check_permission_produc_type_member_add_owner(user):
+    try:
+        if user.is_superuser:
+            return True
+        if user.global_role:
+            return role_has_global_permission(user.global_role.role.id, Permissions.Product_Type_Member_Add_Owner)
+        return False
+
+    except Exception as e:
+        logger.error(e)
+        return False
+
+
+def check_permission_product_member_add_owner(user):
+    try:
+        if user.is_superuser:
+            return True
+        if user.global_role:
+            return role_has_global_permission(user.global_role.role.id, Permissions.Product_Member_Add_Owner)
+        return False
+
+    except Exception as e:
+        logger.error(e)
+        return False
 
 
 class NoAuthorizationImplementedError(Exception):
