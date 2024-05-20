@@ -30,7 +30,6 @@ from dojo.models import (
 )
 logger = logging.getLogger(__name__)
 
-"""  """
 
 def user_has_configuration_permission(user, permission):
     if not user:

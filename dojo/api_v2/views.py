@@ -3422,4 +3422,4 @@ class SchemaOa3View(SpectacularAPIView):
 
 
 class SwaggerUiOa3View(SpectacularSwaggerView):
-    permission_classes = [permissions.UserHasViewSwaggerDocumentation]
+    permission_classes = [permissions.UserHasViewApiV2Key]
