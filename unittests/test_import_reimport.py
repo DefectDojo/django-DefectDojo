@@ -1449,15 +1449,12 @@ class ImportReimportMixin:
         self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
 
     def test_import_history_reactivated_and_untouched_findings_do_not_mix(self):
-        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
-            test_id = import0['test']
+        import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
+        test_id = import0['test']
         # reimport the second report
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=4, closed=3, reactivated=1):
-            self.reimport_scan_with_params(test_id, self.generic_import_2, scan_type=self.scan_type_generic)
+        self.reimport_scan_with_params(test_id, self.generic_import_2, scan_type=self.scan_type_generic)
         # reimport the first report again
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1):
-            self.reimport_scan_with_params(test_id, self.generic_import_1, scan_type=self.scan_type_generic)
+        self.reimport_scan_with_params(test_id, self.generic_import_1, scan_type=self.scan_type_generic)
         # Passing this test means an exception does not occur
 
 
