@@ -1,10 +1,8 @@
-from django.db import (
-    connections
-)
+from dojo.models import Product
 
 class DbRouter:
     def db_for_read(self, model, **hints):
-        if connections['default'].in_atomic_block:
+        if model is Product:
             return 'default'
         return 'replica'
 
