@@ -12,7 +12,9 @@ from rest_framework.response import Response
 from django.db import IntegrityError
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework.authtoken.models import Token
 from rest_framework.parsers import MultiPartParser
+from rest_framework.authtoken.views import ObtainAuthToken
 from django_filters.rest_framework import DjangoFilterBackend
 import base64
 import mimetypes
@@ -171,6 +173,7 @@ from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.views import SpectacularSwaggerView
 from drf_spectacular.renderers import OpenApiJsonRenderer2
 from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import role_has_global_permission
 from dojo.user.utils import get_configuration_permissions_codenames
 import dojo.transfer_findings.helper as helper_tf
 
@@ -3423,3 +3426,18 @@ class SchemaOa3View(SpectacularAPIView):
 
 class SwaggerUiOa3View(SpectacularSwaggerView):
     permission_classes = [permissions.UserHasViewApiV2Key]
+
+
+class ApiToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        user = token.user
+        if user.is_superuser:
+            return response
+
+        if user.global_role:
+            if user.global_role.role:
+                if role_has_global_permission(user.global_role.role.id, Permissions.Api_v2_Key):
+                    return response
+        return Response(status=status.HTTP_401_UNAUTHORIZED)

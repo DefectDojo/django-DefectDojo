@@ -310,7 +310,8 @@ def check_permission_produc_type_member_add_owner(user):
         if user.is_superuser:
             return True
         if user.global_role:
-            return role_has_global_permission(user.global_role.role.id, Permissions.Product_Type_Member_Add_Owner)
+            if user.global_role.role:
+                return role_has_global_permission(user.global_role.role.id, Permissions.Product_Type_Member_Add_Owner)
         return False
 
     except Exception as e:
@@ -323,7 +324,8 @@ def check_permission_product_member_add_owner(user):
         if user.is_superuser:
             return True
         if user.global_role:
-            return role_has_global_permission(user.global_role.role.id, Permissions.Product_Member_Add_Owner)
+            if user.global_role.role:
+                return role_has_global_permission(user.global_role.role.id, Permissions.Product_Member_Add_Owner)
         return False
 
     except Exception as e:
