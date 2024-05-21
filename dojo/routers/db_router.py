@@ -1,8 +1,11 @@
+from django.db import (
+    connections
+)
+
 class DbRouter:
     def db_for_read(self, model, **hints):
-        """
-        Directs all read operations to the 'replica' database.
-        """
+        if connections['default'].in_atomic_block:
+            return 'default'
         return 'replica'
 
     def db_for_write(self, model, **hints):
