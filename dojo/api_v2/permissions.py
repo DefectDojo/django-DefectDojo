@@ -31,7 +31,7 @@ from rest_framework import permissions, serializers
 from dojo.authorization.authorization import (
     user_has_global_permission,
     user_has_permission,
-    user_has_configuration_permission,
+    user_has_configuration_permission
 )
 from dojo.authorization.roles_permissions import Permissions
 

@@ -3,7 +3,6 @@ from django.urls import re_path
 from django.conf.urls import include
 from django.contrib import admin
 from rest_framework.routers import DefaultRouter
-from rest_framework.authtoken import views as tokenviews
 from django.http import HttpResponse
 from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
@@ -21,7 +20,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     ProductAPIScanConfigurationViewSet, UserProfileView, EndpointMetaImporterView, \
     ConfigurationPermissionViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
     QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet, \
-    TransferFindingViewSet, TransferFindingFindingsViewSet, AnnouncementViewSet, SchemaOa3View, SwaggerUiOa3View
+    TransferFindingViewSet, TransferFindingFindingsViewSet, AnnouncementViewSet, SchemaOa3View, SwaggerUiOa3View, ApiToken
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -175,7 +174,7 @@ if hasattr(settings, 'API_TOKENS_ENABLED'):
         api_v2_urls += [
             re_path(
                 f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
-                tokenviews.obtain_auth_token,
+                ApiToken.as_view(),
                 name='api-token-auth',
             )
         ]
