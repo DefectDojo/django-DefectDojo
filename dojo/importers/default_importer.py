@@ -48,7 +48,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         super().__init__(
             self,
             *args,
-            importer_type=Test_Import.IMPORT_TYPE,
+            import_type=Test_Import.IMPORT_TYPE,
             **kwargs,
         )
 
@@ -61,7 +61,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         new test will be attached to the supplied engagement with the
         supplied user being marked as the lead of the test
         """
-        return Test.objects.create(
+        self.test = Test.objects.create(
             title=self.test_title,
             engagement=self.engagement,
             lead=self.lead,
@@ -78,6 +78,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             api_scan_configuration=self.api_scan_configuration,
             tags=self.tags,
         )
+        return self.test
 
     def process_scan(
         self,
@@ -123,7 +124,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings=new_findings,
             closed_findings=closed_findings,
         )
-        # Send out som notifications to the user
+        # Send out some notifications to the user
         logger.debug('IMPORT_SCAN: Generating notifications')
         notifications_helper.notify_test_created(self.test)
         updated_count = len(new_findings) + len(closed_findings)
@@ -182,7 +183,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # scan_date was provided, override value from parser
             if self.scan_date_override:
                 unsaved_finding.date = self.scan_date.date()
-            if not self.service.isspace():
+            if self.service is not None:
                 unsaved_finding.service = self.service
             unsaved_finding.save(dedupe_option=False)
             finding = unsaved_finding
@@ -225,7 +226,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 else:
                     jira_helper.push_to_jira(findings[0])
 
-        sync = kwargs.get('sync', False)
+        sync = kwargs.get('sync', True)
         if not sync:
             return [serialize('json', [finding, ]) for finding in new_findings]
         return new_findings
@@ -268,17 +269,16 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             active=True
         )
         # Accommodate for product scope or engagement scope
-        if kwargs.get("close_old_findings_product_scope"):
+        if self.close_old_findings_product_scope:
             old_findings = old_findings.filter(test__engagement__product=self.test.engagement.product)
         else:
             old_findings = old_findings.filter(test__engagement=self.test.engagement)
         # Use the service to differentiate further
-        if service := kwargs.get("service"):
-            old_findings = old_findings.filter(service=service)
+        if self.service is not None:
+            old_findings = old_findings.filter(service=self.service)
         else:
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=''))
         # Determine if pushing to jira or if the finding groups are enabled
-        push_to_jira = kwargs.get("push_to_jira", False)
         finding_groups_enabled = is_finding_groups_enabled()
         # Update the status of the findings and any endpoints
         for old_finding in old_findings:
@@ -291,7 +291,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 finding_groups_enabled,
             )
         # push finding groups to jira since we only only want to push whole groups
-        if finding_groups_enabled and push_to_jira:
+        if finding_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
 

@@ -933,11 +933,8 @@ class ImportScanResultsView(View):
             )
             # Add a message to the view for the user to see the results
             add_success_message_to_response(importer_client.construct_imported_message(
-                context.get("scan_type"),
-                Test_Import.IMPORT_TYPE,
                 finding_count=finding_count,
                 closed_finding_count=closed_finding_count,
-                close_old_findings=context.get("close_old_findings"),
             ))
         except Exception as e:
             logger.exception(e)

@@ -4,6 +4,7 @@ from functools import wraps
 from pprint import pprint as pp
 from typing import Any, Callable, List
 
+from django.contrib.auth.models import User
 from django.db.models import Model
 from django.utils import timezone
 from django.utils.functional import SimpleLazyObject
@@ -123,7 +124,7 @@ class ImporterOptions:
                 if len(id_list) > 0:
                     class_name = type(id_list[0])
                 # Ensure we are not setting a class name as None
-                if class_name is type(None):
+                if isinstance(class_name, type(None)):
                     compressed_fields[field] = value
                 # Add the list to the dict
                 else:
@@ -215,7 +216,7 @@ class ImporterOptions:
             "active",
             expected_types=[bool],
             required=False,
-            default=False,
+            default=None,
             **kwargs,
         )
 
@@ -421,7 +422,7 @@ class ImporterOptions:
     ):
         return self.validate(
             "lead",
-            expected_types=[Dojo_User, SimpleLazyObject],
+            expected_types=[User, Dojo_User, SimpleLazyObject],
             required=False,
             default=None,
             **kwargs,
@@ -480,7 +481,7 @@ class ImporterOptions:
             **kwargs,
         )
         # Set an additional flag to indicate an override was made
-        self.scan_date_override = (self.now.date != value)
+        self.scan_date_override = (self.now != value)
         # Set the timezones appropriately
         if value is not None and not value.tzinfo:
             value = timezone.make_aware(value)
@@ -509,7 +510,7 @@ class ImporterOptions:
             "service",
             expected_types=[str],
             required=False,
-            default="",
+            default=None,
             **kwargs,
         )
 
@@ -548,7 +549,7 @@ class ImporterOptions:
             "test_title",
             expected_types=[str],
             required=False,
-            default="",
+            default=None,
             **kwargs,
         )
 
@@ -559,7 +560,7 @@ class ImporterOptions:
     ):
         return self.validate(
             "user",
-            expected_types=[Dojo_User, SimpleLazyObject],
+            expected_types=[User, Dojo_User, SimpleLazyObject],
             required=False,
             default=get_current_user(),
             **kwargs,

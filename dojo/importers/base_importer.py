@@ -6,13 +6,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.urls import reverse
-from django.utils import timezone
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
-from dojo.celery import app
-from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -24,18 +20,13 @@ from dojo.models import (
     # Finding Severities
     SEVERITIES,
     BurpRawRequestResponse,
-    Dojo_User,
     Endpoint,
-    Endpoint_Status,
-    # models
-    Engagement,
     FileUpload,
     Finding,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
-    Tool_Configuration,
     Vulnerability_Id,
 )
 from dojo.tools.factory import get_parser
@@ -50,7 +41,7 @@ class Parser:
     and is purely for the sake of type hinting
     """
 
-    def get_findings(scan_type: str) -> List[Finding]:
+    def get_findings(scan_type: str, test: Test) -> List[Finding]:
         """
         Stub function to make the hinting happier. The actual class
         is loosely obligated to have this function defined.

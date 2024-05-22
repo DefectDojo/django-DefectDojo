@@ -1000,14 +1000,11 @@ class ReImportScanResultsView(View):
             )
             # Add a message to the view for the user to see the results
             add_success_message_to_response(importer_client.construct_imported_message(
-                context.get("scan_type"),
-                Test_Import.REIMPORT_TYPE,
                 finding_count=finding_count,
                 new_finding_count=new_finding_count,
                 closed_finding_count=closed_finding_count,
                 reactivated_finding_count=reactivated_finding_count,
                 untouched_finding_count=untouched_finding_count,
-                close_old_findings=context.get("close_old_findings"),
             ))
         except Exception as e:
             logger.exception(e)

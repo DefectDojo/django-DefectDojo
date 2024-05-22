@@ -456,14 +456,14 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def import_scan(self, payload, expected_http_status_code):
         logger.debug('import_scan payload %s', payload)
         response = self.client.post(reverse('importscan-list'), payload)
-        print(response.content)
+        # print(response.content)
         self.assertEqual(expected_http_status_code, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
     def reimport_scan(self, payload, expected_http_status_code):
         logger.debug('reimport_scan payload %s', payload)
         response = self.client.post(reverse('reimportscan-list'), payload)
-        print(response.content)
+        # print(response.content)
         self.assertEqual(expected_http_status_code, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
