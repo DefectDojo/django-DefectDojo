@@ -549,6 +549,16 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "PORT": secret_database["port"],
         }
     }
+    if os.getenv("DD_DATABASE_USE_REPLICA") == "true":
+        DATABASES["replica"] = {
+            "ENGINE": env("DD_DATABASE_ENGINE"),
+            "NAME": secret_database["dbname"],
+            "USER": secret_database["username"],
+            "PASSWORD": secret_database["password"],
+            "HOST": secret_database["hostro"],
+            "PORT": secret_database["port"],
+        }
+        DATABASE_ROUTERS = ['dojo.routers.db_router.DbRouter']
 else:
     if os.getenv("DD_DATABASE_URL") is not None:
         DATABASES = {"default": env.db("DD_DATABASE_URL")}
@@ -2003,7 +2013,6 @@ DD_INVALID_ESCAPE_STR = env('DD_INVALID_ESCAPE_STR')
 AWS_SES_EMAIL = env('DD_AWS_SES_EMAIL')
 
 
-
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
@@ -2077,4 +2086,3 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 # - https://docs.djangoproject.com/en/4.1/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 # - https://docs.djangoproject.com/en/5.0/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
-
