@@ -4,6 +4,7 @@ from dojo.models import Finding, Product_Member, Product_Type_Member, Stub_Findi
     Product_Group, Product_Type_Group, Vulnerability_Id, Product_Type
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 
+
 def get_authorized_groups(permission, user=None):
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
