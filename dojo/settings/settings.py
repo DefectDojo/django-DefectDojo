@@ -1,4 +1,5 @@
 import hashlib
+import sys
 from pathlib import Path
 
 from split_settings.tools import include, optional
@@ -11,7 +12,7 @@ include(
     optional('local_settings.py')
 )
 
-if not DEBUG:
+if not (DEBUG or ('collectstatic' in sys.argv)):
     with (Path(__file__).parent / 'settings.dist.py').open('rb') as file:
         real_hash = hashlib.sha256(file.read()).hexdigest()
     with (Path(__file__).parent / '.settings.dist.py.sha256sum').open('rb') as file:
