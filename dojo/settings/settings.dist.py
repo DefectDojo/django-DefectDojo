@@ -1257,7 +1257,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
     'Bearer CLI': ['title', 'severity'],
     'Nancy Scan': ['title', 'vuln_id_from_tool'],
-    'Wiz Scan': ['title', 'description', 'severity']
+    'Wiz Scan': ['title', 'description', 'severity'],
+    'Rapplex Scan': ['title', 'severity', 'endpoints'],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1474,7 +1475,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Bearer CLI': DEDUPE_ALGO_HASH_CODE,
     'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
-    'Rapplex Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Rapplex Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
 
+import html2text
+
 from dojo.models import Endpoint, Finding
 
 
@@ -32,15 +34,12 @@ class RapplexParser:
                 issues = main_issue_group.get("Issues", [])
 
                 for issue in issues:
-                    scan_id = data.get("ScanId", "")
                     formatted_date = datetime.strptime(data.get("StartedDate", ""), "%d/%m/%Y %H:%M:%S").strftime("%Y-%m-%d")
                     severity_level = current_severity.get("Name", "")
                     title = issue.get("Title", "")
                     url = issue.get("Url", "")
                     req = issue.get("HttpRequest", "")
                     res = issue.get("HttpResponse", "")
-                    vIndex = issue.get("vIndex", "")
-                    vuln_id = f"{scan_id}_{vIndex}"  # scanId and vIndex combined to create unique_id_from_tool
                     issue_definition = main_issue_group.get("Definition", {})
 
                     cwe_val = None
@@ -49,33 +48,22 @@ class RapplexParser:
                             cwe_val = classification.get("Value")
                             break
 
-                    reference_texts = []
-                    for reference in issue_definition.get("References", []):
-                        ref_title = reference.get("Title", "")
-                        ref_link = reference.get("Link", "")
-                        reference_texts.append(f"{ref_title}\n{ref_link}")  # ref_title and ref_link combined to references section
-                    reference_array = "\n".join(reference_texts)
-
-                    desc_rem = issue_definition.get("Sections", {}).get("Remediation", "")
-                    desc_sum = issue_definition.get("Sections", {}).get("Summary", "")
-
-                    if (len(desc_rem) > 0):
-                        desc_text = f"\n{desc_sum}\nRemediation:\n{desc_rem}"  # summary and remediation combined to create description
-                    else:
-                        desc_text = desc_sum
+                    ref = html2text.html2text(issue_definition.get("Sections", {}).get("References", ""))
+                    rem = issue_definition.get("Sections", {}).get("Remediation", "")
+                    sum = issue_definition.get("Sections", {}).get("Summary", "")
 
                     finding = Finding(
                         title=title,
                         test=test,
                         severity=severity_level,
                         date=formatted_date,
-                        description=desc_text,
+                        description=sum,
+                        mitigation=rem,
                         cwe=cwe_val,
-                        references=reference_array,
-                        unique_id_from_tool=vuln_id,
+                        references=ref,
+                        active=True,
                     )
 
-                    finding.active = True
                     finding.unsaved_request = req
                     finding.unsaved_response = res
 
