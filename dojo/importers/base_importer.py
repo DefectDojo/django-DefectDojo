@@ -30,7 +30,7 @@ from dojo.models import (
     Vulnerability_Id,
 )
 from dojo.tools.factory import get_parser
-from dojo.utils import is_finding_groups_enabled, max_safe
+from dojo.utils import max_safe
 
 logger = logging.getLogger(__name__)
 
@@ -587,7 +587,7 @@ class BaseImporter(ImporterOptions):
         if finding groups are enabled, use the supplied grouping mechanism to
         store a reference of how the finding should be grouped
         """
-        if is_finding_groups_enabled() and self.group_by:
+        if self.findings_groups_enabled and self.group_by:
             # If finding groups are enabled, group all findings by group name
             name = finding_helper.get_group_by_group_name(finding, self.group_by)
             if name is not None:

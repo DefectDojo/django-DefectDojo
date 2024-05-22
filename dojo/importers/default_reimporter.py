@@ -17,7 +17,6 @@ from dojo.models import (
     Test,
     Test_Import,
 )
-from dojo.utils import is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -229,7 +228,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 # finding = new finding or existing finding still in the upload report
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if is_finding_groups_enabled() and self.group_by:
+                if self.findings_groups_enabled and self.group_by:
                     finding.save()
                 else:
                     finding.save(push_to_jira=self.push_to_jira)
@@ -261,7 +260,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             return []
         logger.debug("REIMPORT_SCAN: Closing findings no longer present in scan report")
         # Determine if pushing to jira or if the finding groups are enabled
-        finding_groups_enabled = is_finding_groups_enabled()
         mitigated_findings = []
         for finding in findings:
             if not finding.mitigated or not finding.is_mitigated:
@@ -269,11 +267,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 self.mitigate_finding(
                     finding,
                     f"Mitigated by {self.test.test_type} re-upload.",
-                    finding_groups_enabled,
+                    self.findings_groups_enabled,
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
-        if finding_groups_enabled and self.push_to_jira:
+        if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
 
@@ -698,7 +696,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 else:
                     jira_helper.push_to_jira(findings[0])
 
-        if is_finding_groups_enabled() and self.push_to_jira:
+        if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {
                     finding.finding_group
                     for finding in self.reactivated_items + self.unchanged_items

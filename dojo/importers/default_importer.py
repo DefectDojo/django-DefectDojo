@@ -16,7 +16,6 @@ from dojo.models import (
     Test,
     Test_Import,
 )
-from dojo.utils import is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -188,7 +187,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             unsaved_finding.save(dedupe_option=False)
             finding = unsaved_finding
             # Determine how the finding should be grouped
-            group_by = kwargs.get("group_by")
             self.process_finding_groups(
                 finding,
                 group_names_to_findings_dict,
@@ -207,7 +205,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Categorize this finding as a new one
             new_findings.append(finding)
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if is_finding_groups_enabled() and group_by:
+            if self.findings_groups_enabled and self.group_by:
                 finding.save()
             else:
                 finding.save(push_to_jira=self.push_to_jira)
@@ -278,8 +276,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             old_findings = old_findings.filter(service=self.service)
         else:
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=''))
-        # Determine if pushing to jira or if the finding groups are enabled
-        finding_groups_enabled = is_finding_groups_enabled()
         # Update the status of the findings and any endpoints
         for old_finding in old_findings:
             self.mitigate_finding(
@@ -288,10 +284,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     "This finding has been automatically closed "
                     "as it is not present anymore in recent scans."
                 ),
-                finding_groups_enabled,
+                self.findings_groups_enabled,
             )
         # push finding groups to jira since we only only want to push whole groups
-        if finding_groups_enabled and self.push_to_jira:
+        if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
 

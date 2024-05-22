@@ -19,7 +19,7 @@ from dojo.models import (
     Test_Import,
     Tool_Configuration,
 )
-from dojo.utils import get_current_user
+from dojo.utils import get_current_user, is_finding_groups_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -394,6 +394,7 @@ class ImporterOptions:
         *args: list,
         **kwargs: dict,
     ):
+        self.findings_groups_enabled: bool = is_finding_groups_enabled()
         return self.validate(
             "group_by",
             expected_types=[str],
