@@ -48,9 +48,10 @@ class RapplexParser:
                             cwe_val = classification.get("Value")
                             break
 
-                    ref = html2text.html2text(issue_definition.get("Sections", {}).get("References", ""))
-                    rem = issue_definition.get("Sections", {}).get("Remediation", "")
-                    sum = issue_definition.get("Sections", {}).get("Summary", "")
+                    issue_sections = issue_definition.get("Sections", {})
+                    ref = html2text.html2text(issue_sections.get("References", ""))
+                    rem = issue_sections.get("Remediation", "")
+                    sum = issue_sections.get("Summary", "")
 
                     finding = Finding(
                         title=title,
