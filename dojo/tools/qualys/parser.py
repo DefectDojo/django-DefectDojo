@@ -74,35 +74,20 @@ NON_LEGACY_SEVERITY_LOOKUP = {
 }
 
 
-def get_severity(severity_value_str: str | None, cvss_value_str: str | None) -> str:
+def get_severity(severity_value_str: str | None) -> str:
     severity_value: int = int(severity_value_str or -1)
-    cvss_value: float = float(cvss_value_str or -1)
 
-    sev: str | None = LEGACY_SEVERITY_LOOKUP.get(severity_value)
-
-    # Invalid severity_value, try to generate it from cvss_value
-    if sev is None:
-        if 9.0 <= cvss_value <= 10:
-            sev = "Critical"
-        elif 7.0 <= cvss_value < 9.0:
-            sev = "High"
-        elif 4.0 <= cvss_value < 7.0:
-            sev = "Medium"
-        elif 0.1 <= cvss_value < 4.0:
-            sev = "Low"
-        elif cvss_value == 0.0:
-            sev = "Informational"
+    sev: str = LEGACY_SEVERITY_LOOKUP.get(severity_value, "Unknown")
 
     # Non legacy severity is a subset of legacy severity, retrieve it from lookup
     if not settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
-        sev = NON_LEGACY_SEVERITY_LOOKUP.get(sev)
+        sev: str = NON_LEGACY_SEVERITY_LOOKUP.get(sev, "Unknown")
 
     # If we still don't have a severity, default to Informational
-    if sev is None:
+    if sev == "Unknown":
         logger.warning(
-            "Could not determine severity from severity_value: %s and cvss_value_str: %s",
+            "Could not determine severity from severity_value_str: %s",
             severity_value_str,
-            cvss_value_str,
         )
         sev = "Informational"
 
@@ -260,8 +245,8 @@ def parse_finding(host, tree):
                 _temp["cve"] = "\n".join(list(_cl.keys()))
                 _temp["links"] = "\n".join(list(_cl.values()))
 
-        # Generate severity from number in XML's 'SEVERITY' field, if not present, use cvss_value
-        sev = get_severity(vuln_item.findtext("SEVERITY"), _temp.get("CVSS_value", None))
+        # Generate severity from number in XML's 'SEVERITY' field, if not present default to 'Informational'
+        sev = get_severity(vuln_item.findtext("SEVERITY"))
         finding = None
         if _temp_cve_details:
             refs = "\n".join(list(_cl.values()))
