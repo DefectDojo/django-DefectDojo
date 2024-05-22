@@ -21,7 +21,6 @@ from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
 from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.forms import AddEndpointForm, DeleteEndpointForm, DojoMetaDataForm, EditEndpointForm, ImportEndpointMetaForm
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
-from dojo.notifications.helper import create_notification
 from dojo.utils import (
     Product_Tab,
     add_breadcrumb,
@@ -222,12 +221,6 @@ def delete_endpoint(request, eid):
                                      messages.SUCCESS,
                                      'Endpoint and relationships removed.',
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                    title=f'Deletion of {endpoint}',
-                                    product=product,
-                                    description=f'The endpoint "{endpoint}" was deleted by {request.user}',
-                                    url=reverse('endpoint'),
-                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
