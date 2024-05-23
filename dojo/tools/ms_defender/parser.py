@@ -55,7 +55,7 @@ class MSDefenderParser:
                 for vulnerability in vulnerabilities:
                     try:
                         self.process_zip(vulnerability, machines[vulnerability['machineId']])
-                    except IndexError:
+                    except (IndexError, KeyError):
                         self.process_json(vulnerability)
         else:
             return []
