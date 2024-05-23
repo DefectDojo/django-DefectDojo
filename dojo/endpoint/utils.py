@@ -6,6 +6,7 @@ import re
 from django.contrib import messages
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.core.validators import validate_ipv46_address
+from django.db import transaction
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -77,7 +78,8 @@ def endpoint_get_or_create(**kwargs):
     qs = endpoint_filter(**kwargs)
 
     if qs.count() == 0:
-        return Endpoint.objects.get_or_create(**kwargs)
+        with transaction.atomic():
+            return Endpoint.objects.select_for_update().get_or_create(**kwargs)
 
     elif qs.count() == 1:
         return qs.first(), False
