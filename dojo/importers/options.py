@@ -124,7 +124,7 @@ class ImporterOptions:
                 if len(id_list) > 0:
                     class_name = type(id_list[0])
                 # Ensure we are not setting a class name as None
-                if isinstance(class_name, type(None)):
+                if class_name is type(None):
                     compressed_fields[field] = value
                 # Add the list to the dict
                 else:
@@ -146,7 +146,10 @@ class ImporterOptions:
                 class_name, model_value = value
                 # Accommodate for model lists
                 if isinstance(model_value, list):
-                    model_list = [class_name.objects.get(id=model_id) for model_id in model_value]
+                    if class_name is type(None):
+                        model_list = model_value
+                    else:
+                        model_list = [class_name.objects.get(id=model_id) for model_id in model_value]
                     decompressed_fields[field] = model_list
                 elif isinstance(model_value, int):
                     # Check for SimpleLazyObject that will be user objects
