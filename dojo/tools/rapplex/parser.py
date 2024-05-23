@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-import html2text
+from html2text import html2text
 
 from dojo.models import Endpoint, Finding
 
@@ -49,7 +49,7 @@ class RapplexParser:
                             break
 
                     issue_sections = issue_definition.get("Sections", {})
-                    ref = html2text.html2text(issue_sections.get("References", ""))
+                    ref = html2text(issue_sections.get("References", ""))
                     rem = issue_sections.get("Remediation", "")
                     sum = issue_sections.get("Summary", "")
 
