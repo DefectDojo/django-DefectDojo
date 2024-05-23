@@ -809,7 +809,7 @@ def get_excludes():
     'test__engagement__product__authorized_group', 'test__engagement__product__member',
     'test__engagement__product__prod_type__authorized_group', 'test__engagement__product__prod_type__member',
     'unsaved_endpoints', 'unsaved_vulnerability_ids', 'unsaved_files', 'unsaved_request', 'unsaved_response',
-    'unsaved_tags', 'vulnerability_ids', 'cve']
+    'unsaved_tags', 'vulnerability_ids', 'cve', 'transferfindingfinding']
 
 
 def get_foreign_keys():
