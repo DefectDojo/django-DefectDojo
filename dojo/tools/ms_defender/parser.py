@@ -76,7 +76,6 @@ class MSDefenderParser:
             description=description,
             static_finding=False,
             dynamic_finding=True,
-            unique_id_from_tool=str(vulnerability['cveId']),
         )
         if vulnerability['fixingKbId'] is not None:
             finding.mitigation = vulnerability['fixingKbId']
@@ -127,7 +126,6 @@ class MSDefenderParser:
             description=description,
             static_finding=False,
             dynamic_finding=True,
-            unique_id_from_tool=str(vulnerability['cveId']) + str(vulnerability['machineId']),
         )
         if vulnerability['fixingKbId'] is not None:
             finding.mitigation = vulnerability['fixingKbId']
