@@ -2939,6 +2939,16 @@ class FindingCloseSerializer(serializers.ModelSerializer):
         )
 
 
+class GetEngagementByProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = (
+            "name",
+        )
+
+
+
+
 class ReportGenerateOptionSerializer(serializers.Serializer):
     include_finding_notes = serializers.BooleanField(default=False)
     include_finding_images = serializers.BooleanField(default=False)
@@ -3133,6 +3143,7 @@ class EngagementPresetsSerializer(serializers.ModelSerializer):
 class NetworkLocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Network_Locations
+
         fields = "__all__"
 
 
