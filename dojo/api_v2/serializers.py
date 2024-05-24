@@ -2047,6 +2047,30 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
+class EngagementByProductResponseSerializer(TaggitSerializer, serializers.ModelSerializer):
+    name = serializers.CharField(max_length=255)
+    findings_count = serializers.SerializerMethodField()
+    findings_list = serializers.SerializerMethodField()
+    engagements_list = serializers.SerializerMethodField()
+
+    def get_findings_count(self, obj):
+        return obj.findings_count
+
+    def get_findings_list(self, obj):
+        return obj.open_findings_list
+    
+    def get_engagements_list(self, obj):
+        return obj.engagements_list
+
+    class Meta:
+        model = Product
+        exclude = (
+            "tid",
+            "updated",
+            "async_updating"
+        )
+
+
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -2937,16 +2961,6 @@ class FindingCloseSerializer(serializers.ModelSerializer):
             "out_of_scope",
             "duplicate",
         )
-
-
-class GetEngagementByProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = (
-            "name",
-        )
-
-
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):

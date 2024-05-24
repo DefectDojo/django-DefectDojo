@@ -1695,7 +1695,6 @@ class ProductViewSet(
     # TODO: prefetch
     queryset = Product.objects.none()
     filter_backends = (DjangoFilterBackend,)
-
     filterset_class = ApiProductFilter
     permission_classes = (
         IsAuthenticated,
@@ -1715,15 +1714,14 @@ class ProductViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(
-        request=serializers.GetEngagementByProductSerializer,
-        responses={status.HTTP_200_OK: serializers.GetEngagementByProductSerializer},
+        responses={status.HTTP_200_OK: serializers.EngagementByProductResponseSerializer},
     )
     @action(
         detail=True, methods=["get"], permission_classes=[IsAuthenticated]
     )
     def engagements(self, request, pk=None):
-        queryset = self.get_queryset()
-        serializer = self.serializer_class(queryset, many=True)
+        queryset = self.get_queryset().get(pk=pk)
+        serializer = serializers.EngagementByProductResponseSerializer(queryset)
         return Response(serializer.data)
 
     @extend_schema(
