@@ -307,7 +307,7 @@ Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order t
 
 ### Syncing groups from Keycloak to Defectdojo
 It is also possible to sync groups from Keycloak into Defectdojo, for this you will first need to configure a `client scope` which enables the groups of your users to be included
-into the authentication tokens of your users. Keycloak provides a `Groups` mapper specifically for this purpose.
+into the authentication tokens of your users. Keycloak provides a `Groups` `Token mapper` specifically for this purpose.
 
 After enabling the `Groups` mapper you can configure Defectdojo to sync these groups with the following properties:
  
@@ -318,7 +318,7 @@ DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_GROUPS_FILTER: "<your regex here>"
 ```
 
 ## GitHub Enterprise
-1.  Navigate to your GitHub Enterprise Server and follow instructions to create a new OAuth App [https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app)
+1. Navigate to your GitHub Enterprise Server and follow instructions to create a new OAuth App [https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app)
 2. Choose a name for your application
 3. For the Redirect URI, enter the DefectDojo URL with the following
     format
