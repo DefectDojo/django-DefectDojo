@@ -205,9 +205,12 @@
 {% block postscript %}
     {{ block.super }}
 {% csrf_token %}
-<script src="{% static 'dojo/js/transfer_finding/index.js' %}"></script>
+<script type="module" src="{% static 'dojo/js/transfer_finding/index.js' %}">
+  import {filterForStatus} from "dojo/js/transfer_finding/index.js"
+</script>
 <script str="{% static 'dojo/js/confirmed/index.js' %}"></script>
-<script type="text/javascript">
+<script type="module">
+      import { filterForStatus } from '{% static "dojo/js/transfer_finding/index.js" %}';
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
     // cookies token
      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -255,7 +258,7 @@
     });
 
     function updateFindings(findingChangeStatus){
-      transfer_findings= {"findings" : findingChangeStatus}
+      let transfer_findings= {"findings" : findingChangeStatus}
       $.ajax({
           url: "/api/v2/transfer_finding_findings/" + transferId + "/" + "change_status" + "/",
           type: "POST",
@@ -272,7 +275,7 @@
   }
 
   function removeFindings(findingRemoved){
-    transfer_findings= {"findings" : findingRemoved}
+    let transfer_findings= {"findings" : findingRemoved}
     $.ajax({
         url: "/api/v2/transfer_finding_findings/" + transferId + "/",
         type: "DELETE",

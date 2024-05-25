@@ -1,9 +1,10 @@
+import { get_engagements } from './product.js';
 var ObjFindings= {};
 var transferId = 0;
 var productId = 0;
 var productTypeId = 0;
 var host = window.location.host;
-// Obtener el valor de la cookie 'csrftoken'
+
 $(document).on('click', '#id_transfer_finding_show_modal', function(event) {
     event.preventDefault();
     transferId = $(this).data('transfer-id');
@@ -14,6 +15,7 @@ $(document).on('click', '#id_transfer_finding_show_modal', function(event) {
 
 
 $(document).ready(function() {
+
     $('#modalTransferFinding').on('click', '.btn-success, .btn-warning, .btn-danger', function() {
         let btnClass = $(this).attr('class');
         let row = $(this).closest('tr');
@@ -30,7 +32,8 @@ $(document).ready(function() {
             let findingId = $(this).attr('data-btn-danger');
             RemoveFinding(findingId)
         }
-    });
+    }); 
+
 });
 
 
@@ -76,7 +79,8 @@ Array.prototype.remove = function(value) {
     }
 };
 
-function innerData(data){
+function innerData(data, findings_related){
+    console.log("renerelated", findings_related)
     let tableBody = document.getElementById("id_data_transfer_finding")
     tableBody.innerHTML = ""
     data.results.forEach(function(transfer_finding_item){
@@ -84,23 +88,20 @@ function innerData(data){
             let row = document.createElement("tr") 
             let cell_status = document.createElement("td")
             cell_status.className = "cls-finding-status"
+
             row.innerHTML = `
             <td><a href="http://${host}/finding/${findings.findings.id}", class="table-link" target="_blank" type="button">${findings.findings.id}</a></td>
             <td>${findings.findings.title}</td>
             <td>${findings.findings.severity}</td>
-            <td>${findings.findings.cve}</td>
-            <td>
-                <select id="is_valid" class="form-control form-control-chosen" data-placeholder="Please select...">
-                  <option></option>
-                  <option>None</option>
-                </select>
-            </div>
-            </td>`
+            <td>${findings.findings.cve}</td>`
             if(findings.findings.risk_status.includes("Transfer Accepted")){
+                row.innerHTML += `<td><a href="http://${host}/finding/${findings.finding_related}" class="table-link" target="_blank" type="button"> ${findings.finding_related} </a></td>`
                 cell_status.innerHTML= `<span style="color:green">Transfer Accepted</span>`
             }else if(findings.findings.risk_status.includes("Transfer Reject")){
+                row.innerHTML += `${findings_related}`
                 cell_status.innerHTML = `<span style="color:#e7a100">Transfer Rejected</span>`
             }else{
+                row.innerHTML += `${findings_related}`
                 cell_status.innerHTML = `${findings.findings.risk_status}`
             }
             row.appendChild(cell_status)
@@ -128,11 +129,19 @@ function innerData(data){
 
 
 function getTransferFindings(transfer_findin_id){
+    let inner_html = ""
     $.ajax({
         url: "/api/v2/transfer_finding?id=" + transfer_findin_id,
         type: "GET",
         success: function(response) {
-            innerData(response)
+            inner_html += `<td> <select class="form-control form-control-chosen" data-placeholder="Please select...">`
+            get_engagements(153).then(function(results){
+                results.findings_list.forEach(function(finding){
+                    inner_html += `<option> ${finding}</option>`
+                });
+                inner_html += `</select></td>`
+                innerData(response, inner_html)
+            });
         },
         error: function(error) {
             console.error(error);
@@ -140,8 +149,7 @@ function getTransferFindings(transfer_findin_id){
     });
 }
 
-
-function filterForStatus(status){
+export function filterForStatus(status){
     let ObjFindingsCopy = deepCopy(ObjFindings)
     for(let findingId in ObjFindingsCopy){
         if(!status.includes(ObjFindingsCopy[findingId].risk_status)){

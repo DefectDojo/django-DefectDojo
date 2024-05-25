@@ -2064,11 +2064,15 @@ class EngagementByProductResponseSerializer(TaggitSerializer, serializers.ModelS
 
     class Meta:
         model = Product
-        exclude = (
-            "tid",
-            "updated",
-            "async_updating"
-        )
+        fields = ("name",
+                  "findings_count",
+                  "findings_list",
+                  "engagements_list",
+                  "description",
+                  "product_manager",
+                  "technical_contact",
+                  "team_manager",
+                  "prod_type")
 
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
