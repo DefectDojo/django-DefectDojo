@@ -205,9 +205,6 @@
 {% block postscript %}
     {{ block.super }}
 {% csrf_token %}
-{% comment %} <script type="module" src="{% static 'dojo/js/transfer_finding/index.js' %}">
-  import {filterForStatus} from "dojo/js/transfer_finding/index.js"
-</script> {% endcomment %}
 <script str="{% static 'dojo/js/confirmed/index.js' %}"></script>
 <script type="module">
   
@@ -236,11 +233,9 @@
         let action = modal.data('tf-action')
         updateFindingsRiskStatus(action, transferFindingId)
         modal.modal('hide')
-       // form.submit();
       });
 
       $("#risk_acceptance").on('click', '.btn-success, .btn-warning, .btn-danger', function() {
-        // captura del boton
         let transferFindingId = $(this).data('tf-id')
         let transferFindingActions = ""
         if($(this).hasClass('btn-success')){ 

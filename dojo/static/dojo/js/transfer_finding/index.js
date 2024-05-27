@@ -1,4 +1,4 @@
-import { get_engagements } from './product.js';
+import { get_product_with_description_findings } from '../product/index.js';
 var ObjFindings= {};
 export var transferId = 0;
 var productId = 0;
@@ -124,25 +124,27 @@ function innerData(data, findings_related){
 }
 
 
-function getTransferFindings(transfer_findin_id){
-    let inner_html = ""
-    $.ajax({
-        url: "/api/v2/transfer_finding?id=" + transfer_findin_id,
-        type: "GET",
-        success: function(response) {
-            inner_html += `<td> <select class="form-control form-control-chosen" data-placeholder="Please select...">`
-            get_engagements(153).then(function(results){
-                results.findings_list.forEach(function(finding){
-                    inner_html += `<option> ${finding}</option>`
-                });
-                inner_html += `</select></td>`
-                innerData(response, inner_html)
+async function getTransferFindings(transfer_findin_id){
+    try{
+        let inner_html = ""
+        const finding_response = await $.ajax({
+            url: "/api/v2/transfer_finding?id=" + transfer_findin_id,
+            type: "GET",
+        });
+
+        inner_html += `<td> <select class="form-control form-control-chosen" data-placeholder="Please select...">`
+        const product = await get_product_with_description_findings(153);
+        product.findings_list.forEach(function(finding){
+                inner_html += `<option> ${finding}</option>`
             });
-        },
-        error: function(error) {
-            console.error(error);
-        }
-    });
+        inner_html += `</select></td>`
+        innerData(finding_response, inner_html)
+    }
+    catch(error){
+        console.error(error); 
+        throw error;
+    }
+    
 }
 
 export function filterForStatus(status){
