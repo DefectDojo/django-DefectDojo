@@ -205,13 +205,16 @@
 {% block postscript %}
     {{ block.super }}
 {% csrf_token %}
-<script type="module" src="{% static 'dojo/js/transfer_finding/index.js' %}">
+{% comment %} <script type="module" src="{% static 'dojo/js/transfer_finding/index.js' %}">
   import {filterForStatus} from "dojo/js/transfer_finding/index.js"
-</script>
+</script> {% endcomment %}
 <script str="{% static 'dojo/js/confirmed/index.js' %}"></script>
 <script type="module">
-      import { filterForStatus } from '{% static "dojo/js/transfer_finding/index.js" %}';
-     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+  
+    {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+    // imports 
+    import { filterForStatus, transferId, generateRequestTransferFindingUpdate } from '{% static "dojo/js/transfer_finding/index.js" %}';
+
     // cookies token
      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     // Event update
@@ -228,9 +231,9 @@
       });
 
       $("#confirmed_action_modal").on('click', function(){
-        modal = $(this).closest('.modal')
-        transferFindingId = modal.data('tf-id')
-        action = modal.data('tf-action')
+        let modal = $(this).closest('.modal')
+        let transferFindingId = modal.data('tf-id')
+        let action = modal.data('tf-action')
         updateFindingsRiskStatus(action, transferFindingId)
         modal.modal('hide')
        // form.submit();
@@ -265,11 +268,8 @@
           headers: { "X-CSRFToken": csrftoken,
           "Content-Type": "application/json"},
           data: JSON.stringify(transfer_findings),
-          success: function(response){
-              console.log("OK" +  response)
-          },
           error: function(error){
-              console.log(error)
+              console.error(error)
           }
       })
   }
@@ -282,11 +282,8 @@
         headers: { "X-CSRFToken": csrftoken,
         "Content-Type": "application/json"},
         data: JSON.stringify(transfer_findings),
-        success: function(response){
-            console.log("OK" +  response)
-        },
         error: function(error){
-            console.log(error)
+            console.error(error)
         }
     })
   }
@@ -298,11 +295,8 @@
         type: "DELETE",
         headers: { "X-CSRFToken": csrftoken,
         "Content-Type": "application/json"},
-        success: function(response){
-            console.log("OK" +  response)
-        },
         error: function(error){
-            console.log(error)
+            console.error(error)
         }
     })
   }
@@ -315,7 +309,7 @@
             updateFindings(requestFindingStatus)
         })
         .catch(function(error) {
-            console.error("Error:", error);
+            console.error(error);
         });
     }
     if (action == "Rejected"){
@@ -324,7 +318,7 @@
           updateFindings(requestFindingStatus)
       })
       .catch(function(error) {
-          console.error("Error:", error);
+          console.error(error);
       });
     }
     if (action == "Removed"){

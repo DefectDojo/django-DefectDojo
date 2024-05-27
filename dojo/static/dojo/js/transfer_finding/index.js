@@ -1,6 +1,6 @@
 import { get_engagements } from './product.js';
 var ObjFindings= {};
-var transferId = 0;
+export var transferId = 0;
 var productId = 0;
 var productTypeId = 0;
 var host = window.location.host;
@@ -10,7 +10,7 @@ $(document).on('click', '#id_transfer_finding_show_modal', function(event) {
     transferId = $(this).data('transfer-id');
     productId = $(this).data('product-id');
     productTypeId = $(this).data('product-type-id');
-    getTransferFindings(transferId, productId, productTypeId)
+    getTransferFindings(transferId)
 });
 
 
@@ -37,20 +37,17 @@ $(document).ready(function() {
 });
 
 
-function getTransferFindingsAsync(transferFindingId) {
-    return new Promise(function(resolve, reject) {
-        $.ajax({
-            url: "/api/v2/transfer_finding?id=" + transferFindingId,
-            type: "GET",
-            success: function(response) {
-                resolve(response);
-            },
-            error: function(error) {
-                console.error(error);
-                reject(error);
-            }
+export async function getTransferFindingsAsync(transferFindingId) {
+    try {
+        const response = await $.ajax({
+            url: `/api/v2/transfer_finding?id=${transferFindingId}`,
+            type: 'GET'
         });
-    });
+        return response;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
 }
 function AcceptanceFinding(findingId){
     ObjFindings[findingId] = {"risk_status": "Transfer Accepted"}
@@ -80,7 +77,6 @@ Array.prototype.remove = function(value) {
 };
 
 function innerData(data, findings_related){
-    console.log("renerelated", findings_related)
     let tableBody = document.getElementById("id_data_transfer_finding")
     tableBody.innerHTML = ""
     data.results.forEach(function(transfer_finding_item){
@@ -159,24 +155,23 @@ export function filterForStatus(status){
     return ObjFindingsCopy
 }
 
-function generateRequestTransferFindingUpdate(tranferFindingId, riskStatus){
-    return new Promise(function(resolve, reject) {
+export async function generateRequestTransferFindingUpdate(transferFindingId, riskStatus) {
+    try {
         let requestFindingStatus = {};
 
-        getTransferFindingsAsync(tranferFindingId)
-            .then(function(response){
-                response.results.forEach(function(transferFindings){
-                    transferFindings.transfer_findings.forEach(function(finding){
-                            requestFindingStatus[finding.findings.id] = {"risk_status": riskStatus};
-                    });
-                });
-                resolve(requestFindingStatus);
-            })
-            .catch(function(error){
-                console.error(error);
-                reject(error);
+        const response = await getTransferFindingsAsync(transferFindingId);
+        
+        response.results.forEach(function(transferFindings) {
+            transferFindings.transfer_findings.forEach(function(finding) {
+                requestFindingStatus[finding.findings.id] = {"risk_status": riskStatus};
             });
-    });
+        });
+
+        return requestFindingStatus;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
 }
 
 
