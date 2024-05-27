@@ -1249,6 +1249,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Threagile risks report': ['title', 'cwe', "severity"],
     'Trufflehog Scan': ['title', 'description', 'line'],
     'Humble Json Importer': ['title'],
+    'MSDefender Parser': ['title', 'description'],
     'HCLAppScan XML': ['title', 'description'],
     'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
     'MobSF Scan': ['title', 'description', 'severity'],
