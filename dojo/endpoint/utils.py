@@ -74,18 +74,14 @@ def endpoint_filter(**kwargs):
 
 
 def endpoint_get_or_create(**kwargs):
-
-    qs = endpoint_filter(**kwargs)
-
-    if qs.count() == 0:
-        with transaction.atomic():
+    with transaction.atomic():
+        try:
             return Endpoint.objects.select_for_update().get_or_create(**kwargs)
-
-    elif qs.count() == 1:
-        return qs.first(), False
-
-    else:
-        raise MultipleObjectsReturned()
+        except Endpoint.MultipleObjectsReturned:
+            # Get the oldest endpoint first, and return that instead
+            # a datetime is not captured on the endpoint model, so ID
+            # will have to work here instead
+            return Endpoint.objects.filter(**kwargs).order_by("id").first(), False
 
 
 def clean_hosts_run(apps, change):
