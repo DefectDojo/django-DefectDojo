@@ -1,6 +1,6 @@
 import json
 import logging
-
+import pprint
 import requests
 import yaml
 from django.conf import settings
@@ -366,18 +366,19 @@ def webhooks_notification_request(endpoint, event, *args, **kwargs):
         "X-DefectDojo-Event": event,
         "X-DefectDojo-Instance": settings.SITE_URL,
         "Accept": "application/json",
-        "Contenct-Type": "application/json",
     }
     if endpoint.header_name is not None:
         headers[endpoint.header_name] = endpoint.header_value
     yaml_data = create_notification_message(event, endpoint.owner, 'webhooks', *args, **kwargs)
-    json_data = json.dumps(yaml.safe_load(yaml_data))
+    data = yaml.safe_load(yaml_data)
     res = requests.request(
         method='POST',
         url=endpoint.url,
         headers=headers,
-        data=json_data,
+        json=data,
     )
+    logger.debug(f"Webhook notification response:")
+    logger.debug(pprint.pformat(res.json()))
     return res
 
 
@@ -386,7 +387,6 @@ def test_webhooks_notification(endpoint):
     res.raise_for_status()
     # in "send_webhooks_notification", we are doing deeper analysis, why it failed
     # for now, "raise_for_status" should be enough
-    logger.debug(f"res: {res.json()}")
 
 
 @dojo_async_task

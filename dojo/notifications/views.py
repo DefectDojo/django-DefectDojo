@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views import View
 
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.authorization.authorization_decorators import user_has_configuration_permission
 from dojo.forms import DeleteNotificationsWebhookForm, NotificationsForm, NotificationsWebhookForm
 from dojo.models import Notification_Webhooks, Notifications
 from dojo.notifications.helper import test_webhooks_notification
@@ -135,75 +135,162 @@ class TemplateNotificationsView(SystemNotificationsView):
         return request
 
 
-@user_is_configuration_authorized('dojo.view_notification_webhooks')
-def notification_webhooks(request):
+class NotificationWebhooksView(View):
 
-    if not get_system_setting('enable_webhooks_notifications'):
-        raise Http404()
+    def check_webhooks_enabled(self):
+        if not get_system_setting('enable_webhooks_notifications'):
+            raise Http404()
 
-    nwhs = Notification_Webhooks.objects.all().order_by('name')
-    # name_words = initial_queryset.values_list('name', flat=True)
-    # ntl = NoteTypesFilter(request.GET, queryset=initial_queryset)
-    # nwhs = get_page_items(request, initial_queryset.qs, 25)
-    # TODO finished pagination
-    # TODO restrict base on user
-    add_breadcrumb(title="Notification Webhook List", top_level=True, request=request)
-    return render(request, 'dojo/view_notification_webhooks.html', {
-                    'name': 'Notification Webhook List',
-                    'metric': False,
-                    'user': request.user,
-                    'nwhs': nwhs,
-                    # 'ntl': ntl,
-                })
+    def check_user_permissions(self, request: HttpRequest):
+        if not user_has_configuration_permission(request.user, self.permission):
+            raise PermissionDenied()
+
+    def set_breadcrumbs(self, request: HttpRequest):
+        add_breadcrumb(title=self.breadcrumb, top_level=False, request=request)
+        return request
+
+    def get_form(
+        self,
+        request: HttpRequest,
+        **kwargs: dict,
+    ) -> NotificationsWebhookForm:
+        if request.method == "POST":
+            return NotificationsWebhookForm(request.POST, **kwargs)
+        else:
+            return NotificationsWebhookForm(**kwargs)
+
+    def get(self, request: HttpRequest):
+        # Check Webhook notifications are enabled
+        self.check_webhooks_enabled()
+        # Check permissions
+        self.check_user_permissions(request)
 
 
-@user_is_configuration_authorized('dojo.add_notification_webhook')
-def add_notification_webhook(request):
+class ListNotificationWebhooksView(NotificationWebhooksView):
+    template = "dojo/view_notification_webhooks.html"
+    permission = 'dojo.view_notification_webhooks'
+    breadcrumb = "Notification Webhook List"
 
-    if not get_system_setting('enable_webhooks_notifications'):
-        raise Http404()
+    def get_initial_context(self, request: HttpRequest, nwhs: Notification_Webhooks):
+        return {
+            'name': 'Notification Webhook List',
+            'metric': False,
+            'user': request.user,
+            'nwhs': nwhs,
+            # 'ntl': ntl,
+        }
 
-    nwh_form = NotificationsWebhookForm()
-    if request.method == 'POST':
-        nwh_form = NotificationsWebhookForm(request.POST)
-        if nwh_form.is_valid():
+    def get_notification_webhooks(self, request: HttpRequest):
+        nwhs = Notification_Webhooks.objects.all().order_by('name')
+        # name_words = initial_queryset.values_list('name', flat=True)
+        # ntl = NoteTypesFilter(request.GET, queryset=initial_queryset)
+        # nwhs = get_page_items(request, initial_queryset.qs, 25)
+        # TODO finished pagination
+        # TODO restrict base on user
+        return nwhs
+
+    def get(self, request: HttpRequest):
+        # Run common checks
+        super().get(request)
+        # Get Notification Webhooks
+        nwhs = self.get_notification_webhooks(request)
+        # Set up the initial context
+        context = self.get_initial_context(request, nwhs)
+        # Add any breadcrumbs
+        request = self.set_breadcrumbs(request)
+        # Render the page
+        return render(request, self.template, context)
+
+
+class AddNotificationWebhooksView(NotificationWebhooksView):
+    template = 'dojo/add_notification_webhook.html'
+    permission = 'dojo.add_notification_webhooks'
+    breadcrumb = "Add Notification Webhook"
+
+    # TODO Disable Owner if not superadmin
+
+    def get_initial_context(self, request: HttpRequest):
+        return {
+            'name': 'Add Notification Webhook',
+            'user': request.user,
+            'form': self.get_form(request),
+        }
+
+    def process_form(self, request: HttpRequest, context: dict):
+        form = context["form"]
+        if form.is_valid():
             try:
-                test_webhooks_notification(nwh_form.instance)
+                test_webhooks_notification(form.instance)
             except requests.exceptions.RequestException as e:
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    f'Test of endpoint was not sucessful: {e}',
-                    extra_tags='alert-danger')
+                    _('Test of endpoint was not successful: %(error)s') % {'error': str(e)},
+                    extra_tags='alert-danger',
+                )
+                return request, False
             else:
-                nwh_form.instance.status = Notification_Webhooks.STATUS_ACTIVE
-                nwh_form.save()
+                # User can put here what ever he want, these are only valid defaults
+                nwh = form.save(commit=False)
+                nwh.status = Notification_Webhooks.STATUS_ACTIVE
+                nwh.first_error = None
+                nwh.last_error = None
+                nwh.save()
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Notification Webhook added successfully.',
+                    _('Notification Webhook added successfully.'),
                     extra_tags="alert-success",
                 )
-                return HttpResponseRedirect(reverse("notification_webhooks"))
+                return request, True
+        return request, False
+
+    def get(self, request: HttpRequest):
+        # Run common checks
+        super().get(request)
+        # Set up the initial context
+        context = self.get_initial_context(request)
+        # Add any breadcrumbs
+        request = self.set_breadcrumbs(request)
+        # Render the page
+        return render(request, self.template, context)
+
+    def post(self, request: HttpRequest):
+        # POST needs to pass same common checks as GET
+        super().get(request)
+        # Set up the initial context
+        context = self.get_initial_context(request)
+        # Determine the validity of the form
+        request, success = self.process_form(request, context)
+        if success:
+            return HttpResponseRedirect(reverse("notification_webhooks"))
+        # Add any breadcrumbs
+        request = self.set_breadcrumbs(request)
+        # Render the page
+        return render(request, self.template, context)
+
+
+class EditNotificationWebhooksView(NotificationWebhooksView):
+    template = 'dojo/edit_notification_webhook.html'
+    permission = 'dojo.change_notification_webhooks'
+    # TODO this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
+    breadcrumb = "Edit Notification Webhook"
+
+    def get_notification_webhook(self, nwhid: int):
+        return get_object_or_404(Notification_Webhooks, id=nwhid)
+
     # TODO Disable Owner if not superadmin
-    add_breadcrumb(title="Add Notication Webhook", top_level=False, request=request)
-    return render(request, 'dojo/add_notification_webhook.html', {
-        'name': 'Add Notification Webhook',
-        'user': request.user,
-        'form': nwh_form,
-    })
 
+    def get_initial_context(self, request: HttpRequest, nwh: Notification_Webhooks):
+        return {
+            'name': 'Edit Notification Webhook',
+            'user': request.user,
+            'form': self.get_form(request, instance=nwh),
+            'nwh': nwh
+        }
 
-@user_is_configuration_authorized('dojo.change_notification_webhook')
-# TODO this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
-def edit_notification_webhook(request, nwhid):
-
-    if not get_system_setting('enable_webhooks_notifications'):
-        raise Http404()
-
-    nwh = get_object_or_404(Notification_Webhooks, pk=nwhid)
-    nwh_form = NotificationsWebhookForm(instance=nwh, is_superuser=request.user.is_superuser)
-    if request.method == "POST":
+    def process_form(self, request: HttpRequest, nwh: Notification_Webhooks, context: dict):
+        form = context["form"]
         if 'deactivate_webhook' in request.POST:  # TODO add this to API as well
             nwh.status = Notification_Webhooks.STATUS_INACTIVE_MANUAL
             nwh.first_error = None
@@ -212,68 +299,126 @@ def edit_notification_webhook(request, nwhid):
             messages.add_message(
                                     request,
                                     messages.SUCCESS,
-                                    'Notification Webhook deactivated successfully.',
+                                    _('Notification Webhook deactivated successfully.'),
                                     extra_tags="alert-success",
                                 )
+            return request, True
+
+        if form.is_valid():
+            try:
+                test_webhooks_notification(form.instance)
+            except requests.exceptions.RequestException as e:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    _('Test of endpoint was not successful: %(error)s') % {'error': str(e)},
+                    extra_tags='alert-danger')
+                return request, False
+            else:
+                # correct definition reset defaults
+                nwh = form.save(commit=False)
+                nwh.status = Notification_Webhooks.STATUS_ACTIVE
+                nwh.first_error = None
+                nwh.last_error = None
+                nwh.save()
+                messages.add_message(
+                    request,
+                    messages.SUCCESS,
+                    _('Notification Webhook updated successfully.'),
+                    extra_tags="alert-success",
+                )
+                return request, True
+        return request, False
+
+    def get(self, request: HttpRequest, nwhid: int):
+        # Run common checks
+        super().get(request)
+        nwh = self.get_notification_webhook(nwhid)
+        # Set up the initial context
+        context = self.get_initial_context(request, nwh)
+        # Add any breadcrumbs
+        request = self.set_breadcrumbs(request)
+        # Render the page
+        return render(request, self.template, context)
+
+    def post(self, request: HttpRequest, nwhid: int):
+        # POST needs to pass same common checks as GET
+        super().get(request)
+        nwh = self.get_notification_webhook(nwhid)
+        # Set up the initial context
+        context = self.get_initial_context(request, nwh)
+        # Determine the validity of the form
+        request, success = self.process_form(request, nwh, context)
+        if success:
             return HttpResponseRedirect(reverse("notification_webhooks"))
+        # Add any breadcrumbs
+        request = self.set_breadcrumbs(request)
+        # Render the page
+        return render(request, self.template, context)
+
+
+class DeleteNotificationWebhooksView(NotificationWebhooksView):
+    template = 'dojo/delete_notification_webhook.html'
+    permission = 'dojo.delete_notification_webhooks'
+    # TODO this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
+    breadcrumb = "Edit Notification Webhook"
+
+    def get_notification_webhook(self, nwhid: int):
+        return get_object_or_404(Notification_Webhooks, id=nwhid)
+
+    # TODO Disable Owner if not superadmin
+
+    def get_form(
+        self,
+        request: HttpRequest,
+        **kwargs: dict,
+    ) -> NotificationsWebhookForm:
+        if request.method == "POST":
+            return DeleteNotificationsWebhookForm(request.POST, **kwargs)
         else:
-            nwh_form = NotificationsWebhookForm(request.POST, instance=nwh)
-            if nwh_form.is_valid():
-                try:
-                    test_webhooks_notification(nwh_form.instance)
-                except requests.exceptions.RequestException as e:
-                    messages.add_message(
-                        request,
-                        messages.ERROR,
-                        f'Test of endpoint was not sucessful: {e}',
-                        extra_tags='alert-danger')
-                else:
-                    nwh_form.instance.status = Notification_Webhooks.STATUS_ACTIVE
-                    nwh = nwh_form.save()
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        'Notification Webhook updated successfully.',
-                        extra_tags="alert-success",
-                    )
-                    return HttpResponseRedirect(reverse("notification_webhooks"))
-    add_breadcrumb(title="Edit Notication Webhook", top_level=False, request=request)
-    return render(request, 'dojo/edit_notification_webhook.html', {
-        'name': 'Edit Notication Webhook',
-        'user': request.user,
-        'form': nwh_form,
-        'nwh': nwh})
+            return DeleteNotificationsWebhookForm(**kwargs)
 
+    def get_initial_context(self, request: HttpRequest, nwh: Notification_Webhooks):
+        return {
+            'form': self.get_form(request, instance=nwh),
+            'nwh': nwh
+        }
 
-@user_is_configuration_authorized('dojo.delete_notification_webhook')
-def delete_notification_webhook(request, nwhid):
-
-    if not get_system_setting('enable_webhooks_notifications'):
-        raise Http404()
-
-    nwh = get_object_or_404(Notification_Webhooks, id=nwhid)
-    form = DeleteNotificationsWebhookForm(instance=nwh)
-
-    if request.method == 'POST':
-        form = DeleteNotificationsWebhookForm(request.POST, instance=nwh)
+    def process_form(self, request: HttpRequest, nwh: Notification_Webhooks, context: dict):
+        form = context["form"]
         if form.is_valid():
             nwh.delete()
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Notification Webhook deleted successfully.',
-                extra_tags='alert-success')
-            return HttpResponseRedirect(reverse("notification_webhooks"))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Unable to delete Notification Webhook, please try again.',
-                extra_tags='alert-danger')
+                _('Notification Webhook deleted successfully.'),
+                extra_tags="alert-success",
+            )
+            return request, True
+        return request, False
 
-    return render(request, 'dojo/delete_notification_webhook.html',
-                    {
-                        'form': form,
-                        'nwh': nwh,
-                    }
-                  )
+    def get(self, request: HttpRequest, nwhid: int):
+        # Run common checks
+        super().get(request)
+        nwh = self.get_notification_webhook(nwhid)
+        # Set up the initial context
+        context = self.get_initial_context(request, nwh)
+        # Add any breadcrumbs
+        request = self.set_breadcrumbs(request)
+        # Render the page
+        return render(request, self.template, context)
+
+    def post(self, request: HttpRequest, nwhid: int):
+        # POST needs to pass same common checks as GET
+        super().get(request)
+        nwh = self.get_notification_webhook(nwhid)
+        # Set up the initial context
+        context = self.get_initial_context(request, nwh)
+        # Determine the validity of the form
+        request, success = self.process_form(request, nwh, context)
+        if success:
+            return HttpResponseRedirect(reverse("notification_webhooks"))
+        # Add any breadcrumbs
+        request = self.set_breadcrumbs(request)
+        # Render the page
+        return render(request, self.template, context)
