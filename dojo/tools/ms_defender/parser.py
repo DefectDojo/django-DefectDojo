@@ -80,7 +80,7 @@ class MSDefenderParser:
         if vulnerability['fixingKbId'] is not None:
             finding.mitigation = vulnerability['fixingKbId']
         if vulnerability['cveId'] is not None:
-            finding.unsaved_vulnerability_ids = list()
+            finding.unsaved_vulnerability_ids = []
             finding.unsaved_vulnerability_ids.append(vulnerability['cveId'])
         self.findings.append(finding)
         finding.unsaved_endpoints = []
@@ -131,7 +131,7 @@ class MSDefenderParser:
         if vulnerability['fixingKbId'] is not None:
             finding.mitigation = vulnerability['fixingKbId']
         if vulnerability['cveId'] is not None:
-            finding.unsaved_vulnerability_ids = list()
+            finding.unsaved_vulnerability_ids = []
             finding.unsaved_vulnerability_ids.append(vulnerability['cveId'])
         self.findings.append(finding)
         finding.unsaved_endpoints = []
