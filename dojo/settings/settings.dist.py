@@ -1,3 +1,15 @@
+#########################################################################################################
+# It is not allowed to edit file 'settings.dist.py', for production deployemnts.                        #
+# Any customization of variables need to be done via environmental variables or in 'local_settings.py'. #
+# For more information check https://documentation.defectdojo.com/getting_started/configuration/        #
+#########################################################################################################
+
+#########################################################################################################
+# If as a developer of a new feature, you need to perform an update of file 'settings.dist.py',         #
+# after the change, calculate the checksum and store it related file by calling the following command:  #
+# $ sha256sum settings.dist.py | cut -d ' ' -f1 > .settings.dist.py.sha256sum                           #
+#########################################################################################################
+
 # Django settings for DefectDojo
 import json
 import logging
@@ -13,9 +25,6 @@ from netaddr import IPNetwork, IPSet
 from dojo import __version__
 
 logger = logging.getLogger(__name__)
-
-# See https://documentation.defectdojo.com/getting_started/configuration/ for options
-# how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
 
@@ -857,7 +866,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'dojo.middleware.AdditionalHeaderMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
-    'auditlog.middleware.AuditlogMiddleware',
+    'dojo.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'dojo.request_cache.middleware.RequestCacheMiddleware',
 ]

@@ -20,6 +20,7 @@ from django_filters import (
     BooleanFilter,
     CharFilter,
     DateFilter,
+    DateFromToRangeFilter,
     FilterSet,
     ModelChoiceFilter,
     ModelMultipleChoiceFilter,
@@ -1538,7 +1539,7 @@ class PercentageRangeFilter(RangeFilter):
 
 class FindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr="icontains")
-    date = DateRangeFilter()
+    date = DateFromToRangeFilter(field_name='date', label="Date Discovered")
     on = DateFilter(field_name="date", lookup_expr="exact", label="On")
     before = DateFilter(field_name="date", lookup_expr="lt", label="Before")
     after = DateFilter(field_name="date", lookup_expr="gt", label="After")
@@ -2875,6 +2876,7 @@ class EndpointReportFilter(DojoFilter):
 
 class ReportFindingFilter(FindingTagFilter):
     title = CharFilter(lookup_expr='icontains', label='Name')
+    date = DateFromToRangeFilter(field_name='date', label="Date Discovered")
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(), label="Product")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
@@ -2977,6 +2979,7 @@ class UserFilter(DojoFilter):
             ('email', 'email'),
             ('is_active', 'is_active'),
             ('is_superuser', 'is_superuser'),
+            ('date_joined', 'date_joined'),
             ('last_login', 'last_login'),
         ),
         field_labels={

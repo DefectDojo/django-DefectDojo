@@ -207,7 +207,7 @@ class SonarQubeApiImporter:
         except Exception as e:
             logger.exception(e)
             create_notification(
-                event="other",
+                event="sonarqube_failed",
                 title="SonarQube API import issue",
                 description=e,
                 icon="exclamation-triangle",
@@ -330,7 +330,7 @@ class SonarQubeApiImporter:
         except Exception as e:
             logger.exception(e)
             create_notification(
-                event="other",
+                event="sonarqube_failed",
                 title="SonarQube API import issue",
                 description=e,
                 icon="exclamation-triangle",

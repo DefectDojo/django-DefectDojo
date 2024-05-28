@@ -62,9 +62,8 @@ class NoseyParkerParser:
                                   f"Committer Name: {json_path['commit_provenance']['commit_metadata']['committer_name']}  \n" \
                                   f"Committer Email: {json_path['commit_provenance']['commit_metadata']['committer_email']} \n" \
                                   f"Commit ID: {json_path['commit_provenance']['commit_metadata']['commit_id']}  \n" \
-                                  f"Location: {filepath} line #{line_num} \n " \
-                                  f"Line #{line_num} \n " \
-                                  f"Code Snippet Containing Secret: {match['snippet']['before']}***SECRET***{match['snippet']['after']} \n"
+                                  f"Location: {filepath} line #{line_num} \n" \
+                                  f"Line #{line_num} \n"
 
                     # Internal de-duplication
                     key = hashlib.md5((filepath + "|" + secret + "|" + str(line_num)).encode("utf-8")).hexdigest()
