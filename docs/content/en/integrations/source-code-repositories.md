@@ -13,13 +13,13 @@ Findings can have a filepath and a line number as the location of the vulnerabil
 While editing the Engagement, users can set the URL of the specific SCM repo. 
 For Interactive Engagement it needs to be the URL including the branch:
 - for GitHub - like https://github.com/DefectDojo/django-DefectDojo/tree/dev
-![Edit Engagement (GitHub)](../../../static/images/source-code-repositories_1.png)
+![Edit Engagement (GitHub)](../../images/source-code-repositories_1.png)
 - for GitLab - like https://gitlab.com/gitlab-org/gitlab/-/tree/master
-![Edit Engagement (Gitlab)](../../../static/images/source-code-repositories-gitlab_1.png)
+![Edit Engagement (Gitlab)](../../images/source-code-repositories-gitlab_1.png)
 - for public BitBucket - like    (like git clone url)
-![Edit Engagement (Bitbucket public)](../../../static/images/source-code-repositories-bitbucket_1.png)
+![Edit Engagement (Bitbucket public)](../../images/source-code-repositories-bitbucket_1.png)
 - for standalone/onpremise BitBucket https://bb.example.com/scm/some-project/some-repo.git or https://bb.example.com/scm/some-user-name/some-repo.git for user public repo (like git clone url)
-![Edit Engagement (Bitbucket standalone)](../../../static/images/source-code-repositories-bitbucket-onpremise_1.png)
+![Edit Engagement (Bitbucket standalone)](../../images/source-code-repositories-bitbucket-onpremise_1.png)
 
 For CI/CD Engagement, where user could set commit hash, branch/tag and code line it should look like examples below:
 - for GitHub - like https://github.com/DefectDojo/django-DefectDojo 
@@ -33,11 +33,11 @@ SCM navigation URL is composed from Repo URL using SCM Type. Github/Gitlab SCM t
 
 Product custom fields:
 
-![Product custom fields](../../../static/images/product-custom-fields_1.png)
+![Product custom fields](../../images/product-custom-fields_1.png)
 
 Product SCM type add:
 
-![Product scm type](../../../static/images/product-scm-type_1.png)
+![Product scm type](../../images/product-scm-type_1.png)
 
 Possible SCM types could be 'github', 'gitlab', 'bitbucket', 'bitbucket-standalone', 'gitea', 'codeberg' or nothing (for default github).
 
@@ -46,8 +46,8 @@ Possible SCM types could be 'github', 'gitlab', 'bitbucket', 'bitbucket-standalo
 
 When viewing a finding, the location will be presented as a link, if the repository of the source code has been set in the Engagement:
 
-![Link to location](../../../static/images/source-code-repositories_2.png)
+![Link to location](../../images/source-code-repositories_2.png)
 
 Clicking on this link will open a new tab in the browser, with the source file of the vulnerability at the corresponding line number:
 
-![View in repository](../../../static/images/source-code-repositories_3.png)
+![View in repository](../../images/source-code-repositories_3.png)
