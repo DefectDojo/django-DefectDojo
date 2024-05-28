@@ -517,9 +517,9 @@ class BaseClass:
         @skipIfNotSubclass(DeletePreviewModelMixin)
         def test_delete_preview(self):
             current_objects = self.client.get(self.url, format='json').data
+
             relative_url = self.url + '{}/delete_preview/'.format(current_objects['results'][0]['id'])
             response = self.client.get(relative_url)
-            # print('delete_preview response.data')
 
             self.assertEqual(200, response.status_code, response.content[:1000])
 

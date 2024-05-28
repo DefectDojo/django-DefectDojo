@@ -864,6 +864,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
         Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
         to create `Vulnerability_Id` objects with the finding associated correctly
         """
+
         if finding.unsaved_vulnerability_ids:
             finding_helper.save_vulnerability_ids(finding, finding.unsaved_vulnerability_ids)
 

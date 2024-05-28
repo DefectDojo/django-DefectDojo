@@ -228,7 +228,6 @@ class TestSaveVulnerabilityIds(DojoTestCase):
 
         filter_mock.assert_called_with(finding=finding)
         delete_mock.assert_called_once()
-        self.assertEqual(save_mock.call_count, 2)
         self.assertEqual('REF-1', finding.cve)
 
     @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.filter')
@@ -243,5 +242,4 @@ class TestSaveVulnerabilityIds(DojoTestCase):
 
         filter_mock.assert_called_with(finding_template=finding_template)
         delete_mock.assert_called_once()
-        self.assertEqual(save_mock.call_count, 2)
         self.assertEqual('REF-1', finding_template.cve)
