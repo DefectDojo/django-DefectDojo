@@ -117,7 +117,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal"><i class="fa-solid fa-circle-xmark"></i> Close</button>
-          <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" id="send-message-btn" ><i class="fa-solid fa-floppy-disk"></i> Save</i> </button>
+          <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" id="save-btn" ><i class="fa-solid fa-floppy-disk"></i> Save</i> </button>
         </div>
       </div>
     </div>
@@ -216,7 +216,7 @@
      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     // Event update
     $(document).ready(function() {
-      $('#send-message-btn').on("click", function(){
+      $('#save-btn').on("click", function(){
         let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Rejected"])
         if (typeof tranferAcceptedFinding === 'object' && Object.keys(tranferAcceptedFinding).length > 0){
           updateFindings(tranferAcceptedFinding)
@@ -255,18 +255,21 @@
       });
     });
 
-    function updateFindings(findingChangeStatus){
+    async function updateFindings(findingChangeStatus){
       let transfer_findings= {"findings" : findingChangeStatus}
-      $.ajax({
-          url: "/api/v2/transfer_finding_findings/" + transferId + "/" + "change_status" + "/",
-          type: "POST",
-          headers: { "X-CSRFToken": csrftoken,
-          "Content-Type": "application/json"},
-          data: JSON.stringify(transfer_findings),
-          error: function(error){
-              console.error(error)
-          }
-      })
+      try{
+        $.ajax({
+            url: "/api/v2/transfer_finding_findings/" + transferId + "/" + "change_status" + "/",
+            type: "POST",
+            headers: { "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json"},
+            data: JSON.stringify(transfer_findings),
+        })
+      }
+      catch(error){
+        console.error(error)
+        throw error
+      }
   }
 
   function removeFindings(findingRemoved){
@@ -283,41 +286,35 @@
     })
   }
 
-  function removeTransferFinding(tranferFindingId){
-    console.debug("Delete", transferFindingId)
-    $.ajax({
-        url: "/api/v2/transfer_finding/" + tranferFindingId + "/",
-        type: "DELETE",
-        headers: { "X-CSRFToken": csrftoken,
-        "Content-Type": "application/json"},
-        error: function(error){
-            console.error(error)
-        }
-    })
+  async function removeTransferFinding(transferFindingId){
+    try
+    {
+        await $.ajax({
+          url: "/api/v2/transfer_finding/" + transferFindingId + "/",
+          type: "DELETE",
+          headers: { "X-CSRFToken": csrftoken,
+          "Content-Type": "application/json"},
+      })
+    }
+    catch(error){
+      console.error(error)
+      throw error
+
+    }
   }
 
-  function updateFindingsRiskStatus(action, transferFindingId ){
+  async function updateFindingsRiskStatus(action, transferFindingId ){
     console.debug("actions is: " + action + " and transerFinding is: " + transferFindingId)
     if (action == "Accepted"){
-        generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
-        .then(function(requestFindingStatus) {
-            updateFindings(requestFindingStatus)
-        })
-        .catch(function(error) {
-            console.error(error);
-        });
+        let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
+        await updateFindings(requestFindingStatus)
     }
     if (action == "Rejected"){
-      generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
-      .then(function(requestFindingStatus) {
-          updateFindings(requestFindingStatus)
-      })
-      .catch(function(error) {
-          console.error(error);
-      });
-    }
+      let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
+      await updateFindings(requestFindingStatus)
+      }
     if (action == "Removed"){
-      removeTransferFinding(transferFindingId)
+      await removeTransferFinding(transferFindingId)
     }
   }
 

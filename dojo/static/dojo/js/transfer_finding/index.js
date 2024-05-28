@@ -124,21 +124,30 @@ function innerData(data, findings_related){
 }
 
 
-async function getTransferFindings(transfer_findin_id){
-    try{
+async function getTransferFindings(transferFindingId){
+    try
+    {
         let inner_html = ""
-        const finding_response = await $.ajax({
-            url: "/api/v2/transfer_finding?id=" + transfer_findin_id,
+        const transferFindingResponse = await $.ajax({
+            url: "/api/v2/transfer_finding?id=" + transferFindingId,
             type: "GET",
         });
-
-        inner_html += `<td> <select class="form-control form-control-chosen" data-placeholder="Please select...">`
-        const product = await get_product_with_description_findings(153);
-        product.findings_list.forEach(function(finding){
-                inner_html += `<option> ${finding}</option>`
-            });
-        inner_html += `</select></td>`
-        innerData(finding_response, inner_html)
+        inner_html += `<td> <select class="form-control form-control-chosen" data-placeholder="Please select..."><option> None </option>`
+        if (transferFindingResponse.results.length == 1)
+            {
+                const product = await get_product_with_description_findings(transferFindingResponse.results[0].destination_product);
+                for(let engagement of product.engagements_list){
+                    for(let finding of engagement.findings){
+                        inner_html += `<option> ${finding.id} - ${finding.title}</option>`
+                    }
+                }
+                inner_html += `</select></td>`
+                innerData(transferFindingResponse, inner_html)
+            }
+            else
+            {
+                throw new Error('A single value was expected for the transferFindingResponse variable', transferFindingResponse)
+            }
     }
     catch(error){
         console.error(error); 
