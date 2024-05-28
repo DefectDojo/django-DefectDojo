@@ -16,7 +16,6 @@ from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.finding.views import prefetch_for_findings
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Product
-from dojo.notifications.helper import create_notification
 from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_system_setting, get_words_for_field
 
 logger = logging.getLogger(__name__)
@@ -115,19 +114,11 @@ def delete_finding_group(request, fgid):
         if 'id' in request.POST and str(finding_group.id) == request.POST['id']:
             form = DeleteFindingGroupForm(request.POST, instance=finding_group)
             if form.is_valid():
-                product = finding_group.test.engagement.product
                 finding_group.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Finding Group and relationships removed.',
                                      extra_tags='alert-success')
-
-                create_notification(event='other',
-                                    title=f'Deletion of {finding_group.name}',
-                                    product=product,
-                                    description=f'The finding group "{finding_group.name}" was deleted by {request.user}',
-                                    url=request.build_absolute_uri(reverse('view_test', args=(finding_group.test.id,))),
-                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_test', args=(finding_group.test.id,)))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
