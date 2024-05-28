@@ -1,8 +1,8 @@
-from dojo.models import Product
+from dojo.models import Product, Engagement, Test
 
 class DbRouter:
     def db_for_read(self, model, **hints):
-        if model is Product:
+        if isinstance(model, (Product, Engagement, Test)):
             return 'default'
         return 'replica'
 
