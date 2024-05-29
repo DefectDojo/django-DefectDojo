@@ -4,7 +4,7 @@ from dojo.tools.ms_defender.parser import MSDefenderParser
 from ..dojo_test_case import DojoTestCase
 
 
-class TestSDefenderParser(DojoTestCase):
+class TestMSDefenderParser(DojoTestCase):
 
     def test_parse_many_findings(self):
         testfile = open("unittests/scans/ms_defender/report_many_vulns.json")
@@ -25,7 +25,7 @@ class TestSDefenderParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("CVE-1234-5678_fjweoifjewiofjweoifjeowifjowei", finding.title)
-        self.assertEqual("CVE-1234-5678", finding.cve)
+        self.assertEqual("CVE-1234-5678", finding.unsaved_vulnerability_ids[0])
 
     def test_parse_no_finding(self):
         testfile = open("unittests/scans/ms_defender/report_no_vuln.json")
