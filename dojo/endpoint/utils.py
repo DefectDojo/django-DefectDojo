@@ -4,7 +4,7 @@ import logging
 import re
 
 from django.contrib import messages
-from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
 from django.db import transaction
 from django.db.models import Count, Q
