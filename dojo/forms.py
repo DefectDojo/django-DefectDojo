@@ -119,6 +119,7 @@ from dojo.user.queries import (
 from dojo.user.utils import get_configuration_permissions_fields
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 import dojo.jira_link.helper as jira_helper
+from dojo.group.queries import get_users_for_group
 
 logger = logging.getLogger(__name__)
 
@@ -1115,6 +1116,7 @@ class RiskPendingForm(forms.ModelForm):
         severity = kwargs.pop("severity", None)
         product = kwargs.pop("product_id", None)
         product_type = kwargs.pop("product_type_id", None)
+        category = kwargs.pop("category", None)
         super().__init__(*args, **kwargs)
         expiration_delta_days = sla_expiration_risk_acceptance(
             "RiskAcceptanceExpiration"
@@ -1128,6 +1130,9 @@ class RiskPendingForm(forms.ModelForm):
 
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(severity, product, product_type)
+        if category and category == "Compliance":
+            self.fields['accepted_by'].widget = forms.widgets.SelectMultiple(attrs={'size': 10})
+            self.fields['accepted_by'].queryset = get_users_for_group('Compliance')
         self.fields['owner'].queryset = get_owner_user()
 
     def clean(self):

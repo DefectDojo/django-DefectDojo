@@ -12,12 +12,21 @@ register = template.Library()
 
 
 @register.filter
+def has_risk_acceptance_pending(engagement, findings):
+    user = crum.get_current_user()
+    product = get_product(engagement)
+    product_type = product.get_product_type
+    for finding in findings:
+        if is_permissions_risk_acceptance(engagement, finding, user, product, product_type):
+            return True
+            
+        
+@register.filter
 def has_risk_acceptance_permission(engagement, finding):
     user = crum.get_current_user()
     product = get_product(engagement)
     product_type = product.get_product_type
     return is_permissions_risk_acceptance(engagement, finding, user, product, product_type)
-
 
 @register.filter
 def has_object_permission(obj, permission):
