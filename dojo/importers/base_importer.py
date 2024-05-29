@@ -878,14 +878,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             finding.unsaved_vulnerability_ids = [finding.cve]
 
         if finding.unsaved_vulnerability_ids:
-            # Remove duplicates
-            finding.unsaved_vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
-            # Add all vulnerability ids to the database
-            for vulnerability_id in finding.unsaved_vulnerability_ids:
-                Vulnerability_Id(
-                    vulnerability_id=vulnerability_id,
-                    finding=finding,
-                ).save()
+            finding_helper.save_vulnerability_ids(finding, finding.unsaved_vulnerability_ids)
 
         return finding
 
