@@ -72,7 +72,6 @@ from django.views import View
 logger = logging.getLogger(__name__)
 
 
-
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def engagement_calendar(request):
@@ -976,6 +975,18 @@ def get_risk_acceptance_pending(request,
                         'name': risk_acceptance_title_suggestion,
                         'accepted_by': [request.user],
                         "severity": finding.severity})
+        if finding.impact == "Compliance":
+            form = RiskPendingForm(
+                severity=finding.severity,
+                product_id=product.id,
+                product_type_id=product_type.id,
+                category=finding.impact,
+                initial={
+                    "owner": request.user,
+                    "name": risk_acceptance_title_suggestion,
+                    "severity": finding.severity,
+                },
+            )
         elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
             form = RiskPendingForm(severity=finding.severity,product_id=product.id, product_type_id=product_type.id,
@@ -994,6 +1005,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
     form = RiskPendingForm(request.POST,
                            request.FILES,
                            severity=finding.severity,
+                           category=finding.impact,
                            product_id=product.id,
                            product_type_id=product_type.id)
     if form.is_valid():
@@ -1114,6 +1126,9 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
         return redirect_to_return_url_or_else(request, reverse('view_risk_acceptance', args=(eid, id_risk_acceptance)))
     else:
         logger.error(form.errors)
+        messages.add_message(
+            request, messages.ERROR, str(form.errors), extra_tags="alert-danger"
+        )
     return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
 
@@ -1139,6 +1154,8 @@ def add_risk_acceptance_pending(request, eid, fid):
                                                  active=True,
                                                  risk_status__in=["Risk Active", "Risk Expired"],
                                                  severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        if finding.impact == "Compliance":
+            finding_choices = finding_choices.filter(impact="Compliance")
         form.fields['accepted_findings'].queryset = finding_choices
         if fid:
             form.fields['accepted_findings'].initial = {fid}
@@ -1507,6 +1524,8 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                                                      risk_accepted=False,
                                                      severity=risk_acceptance.severity,
                                                      duplicate=False)
+        if len(accepted_findings) > 0 and accepted_findings[0].impact == "Compliance":
+            unaccepted_findings = unaccepted_findings.filter(impact="Compliance")
     else:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
             .exclude(id__in=accepted_findings).order_by("title")

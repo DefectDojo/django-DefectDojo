@@ -107,7 +107,7 @@ def get_role_members(user, product: Product, product_type: Product_Type):
         raise ValueError("The user does not have any product_type or product associated with it")
     for user_member in user_members:
         if hasattr(user_member, "product_type_id"):
-            if user_member.product_type_id == product_type.id:
+            if user_member.product_type_id == product_type.id or len(user.groups.filter(dojo_group__name="Compliance")) > 0:
                 return user_member.role.name
         elif hasattr(user_member, "product_id"):
             if user_member.product_id == product.id:
@@ -144,6 +144,7 @@ def risk_acceptante_pending(
         or role_has_exclusive_permissions(user)
         or number_of_acceptors_required == 0
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
+        or finding.impact == "Compliance"
     ):
         finding.accepted_by = user.username
         risk_accepted_succesfully(finding, risk_acceptance)
@@ -223,7 +224,14 @@ def is_permissions_risk_acceptance(
         or role_has_exclusive_permissions(user)
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
         result = True
-        
+
+    if (
+        finding.impact == "Compliance"
+        and finding.risk_accepted is False
+        and len(user.groups.filter(dojo_group__name=finding.impact)) > 0
+    ):
+        result = True
+
     contacts = get_contacts(engagement, finding.severity, user)
     if contacts:
         contacts_ids = [contact.id for contact in contacts]
