@@ -38,7 +38,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Test_Type,
     Tool_Configuration,
-    Vulnerability_Id,
+    Vulnerability_Id, # noqa: F401
 )
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user, is_finding_groups_enabled, max_safe
