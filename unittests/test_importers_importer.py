@@ -7,7 +7,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.importers.default_importer import DefaultImporter
-from dojo.models import Development_Environment, Engagement, Finding, Product, Product_Type, Test, Test_Type, User
+from dojo.models import Development_Environment, Engagement, Finding, Product, Product_Type, Test, User
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from dojo.tools.sarif.parser import SarifParser
 from dojo.utils import get_object_or_none
