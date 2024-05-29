@@ -19,7 +19,7 @@ class SonarQubeRESTAPIJSON:
                     status = issue.get("status")
                     message = issue.get("message")
                     tags = issue.get("tags")
-                    type = issue.get("type")
+                    bugtype = issue.get("type")
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
                     codeVariants = str(issue.get("codeVariants"))
@@ -35,12 +35,12 @@ class SonarQubeRESTAPIJSON:
                             res.append(item + ": " + str(textRange[item]))
                         description += "**textRange:** " + ", ".join(res) + "\n"
                     if flows != []:
-                        description += "**flows:** " + ", ".join(flows) + "\n"
+                        description += "**flows:** " + str(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     if tags != []:
                         description += "**tags:** " + ", ".join(tags) + "\n"
-                    description += "**type:** " + type + "\n"
+                    description += "**type:** " + bugtype + "\n"
                     description += "**scope:** " + scope + "\n"
                     description += self.returncomponent(json_content, component)
                     item = Finding(
@@ -94,7 +94,7 @@ class SonarQubeRESTAPIJSON:
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
                     if flows != []:
-                        description += "**flows:** " + ", ".join(flows) + "\n"
+                        description += "**flows:** " + str(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     description += "**scope:** " + scope + "\n"
@@ -166,7 +166,7 @@ class SonarQubeRESTAPIJSON:
                             res.append(item + ": " + str(textRange[item]))
                         description += "**textRange:** " + ", ".join(res) + "\n"
                     if flows != []:
-                        description += "**flows:** " + ", ".join(flows) + "\n"
+                        description += "**flows:** " + str(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     if tags != []:
@@ -213,7 +213,7 @@ class SonarQubeRESTAPIJSON:
                         res.append(item + ": " + str(textRange[item]))
                     description += "**textRange:** " + ", ".join(res) + "\n"
                 if flows != []:
-                    description += "**flows:** " + ", ".join(flows) + "\n"
+                    description += "**flows:** " + str(flows) + "\n"
                 description += "**ruleKey:** " + ruleKey + "\n"
                 if messageFormattings != []:
                     description += "**messageFormattings:** " + ", ".join(messageFormattings) + "\n"
