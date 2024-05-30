@@ -393,11 +393,11 @@
                                                 <span class="glyphicon arrow"></span>
                                             </a>
                                             <ul class="nav nav-second-level">
-                                                <li>
+                                                <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard">
                                                         {% trans "Metrics Dashboard" %}
                                                     </a>
-                                                </li>
+                                                </li> --> 
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'critical_product_metrics' %}">
                                                         {% trans "Critical Product Metrics" %}
@@ -427,14 +427,12 @@
                                                     <a rel="noopener noreferrer" href="{% url 'engineer_metrics' %}">
                                                         {% trans "Engineer Metrics" %}
                                                     </a>
-                                                </li> -->
-                                                {% if "Metrics_Panel"|has_global_permission %}
-                                                    <li>
-                                                        <a rel="noopener noreferrer" href="{% url 'metrics_panel' %}">
-                                                            {% trans "Metrics Panel" %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}
+                                                </li> -->                            
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'metrics_panel' %}">
+                                                        {% trans "Metrics Panel" %}
+                                                    </a>
+                                                </li>                                               
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
