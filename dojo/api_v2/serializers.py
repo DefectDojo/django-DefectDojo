@@ -3385,6 +3385,7 @@ class TransferFindingFindingsSerializer(serializers.ModelSerializer):
 
 class TransferFindingFindingsDetailSerializer(serializers.Serializer):
     risk_status = serializers.CharField()
+    related_finding = serializers.IntegerField(required=False)
 
 
 class TransferFindingFindingsUpdateSerializer(serializers.Serializer):

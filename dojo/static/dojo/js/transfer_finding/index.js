@@ -7,10 +7,21 @@ var host = window.location.host;
 
 $(document).on('click', '#id_transfer_finding_show_modal', function(event) {
     event.preventDefault();
+    ObjFindings = {};
     transferId = $(this).data('transfer-id');
     productId = $(this).data('product-id');
     productTypeId = $(this).data('product-type-id');
     getTransferFindings(transferId)
+
+    $(document).on('change', '.related-finding-chosen', function() {
+        let selectedValue = $(this);
+        let row = $(this).closest('tr');
+        let finding = row.find('.btn-success');
+        row.find('.cls-finding-status').text("Transfer Pending").css("color", "#333");
+        let finding_id = finding.attr('data-btn-success');
+        delete ObjFindings[finding_id];
+        finding.attr('data-related-finding',selectedValue.val());
+    });
 });
 
 
@@ -22,7 +33,8 @@ $(document).ready(function() {
         if (btnClass.includes('btn-success')) {
             row.find('.cls-finding-status').text("Transfer Accepted").css("color", "green");
             let findingId = $(this).attr('data-btn-success');
-            AcceptanceFinding(findingId)
+            let relatedFinding = $(this).attr('data-related-finding');
+            AcceptanceFinding(findingId, relatedFinding)
         } else if (btnClass.includes('btn-warning')) {
             row.find('.cls-finding-status').text("Transfer Rejected").css("color", "#e7a100");
             let findingId = $(this).attr('data-btn-warning');
@@ -32,6 +44,7 @@ $(document).ready(function() {
             let findingId = $(this).attr('data-btn-danger');
             RemoveFinding(findingId)
         }
+        console.log(ObjFindings)
     }); 
 
 });
@@ -49,8 +62,14 @@ export async function getTransferFindingsAsync(transferFindingId) {
         throw error;
     }
 }
-function AcceptanceFinding(findingId){
-    ObjFindings[findingId] = {"risk_status": "Transfer Accepted"}
+function AcceptanceFinding(findingId, related_finding){
+    if(related_finding == ""){
+        ObjFindings[findingId] = {"risk_status": "Transfer Accepted"}
+    }
+    else{
+        ObjFindings[findingId] = {"risk_status": "Transfer Accepted", "related_finding": related_finding}
+    }
+    console.log(ObjFindings)
 }
 function RemoveFinding(findingId){
     ObjFindings[findingId] = {"risk_status": "Transfer Removed"}
@@ -86,13 +105,13 @@ function innerData(data, findings_related){
             cell_status.className = "cls-finding-status"
 
             row.innerHTML = `
-            <td><a href="http://${host}/finding/${findings.findings.id}", class="table-link" target="_blank" type="button">${findings.findings.id}</a></td>
+            <td><a href="http://${host}/finding/${findings.findings.id}", class="table-link cls-finding-id" target="_blank" type="button">${findings.findings.id}</a></td>
             <td>${findings.findings.title}</td>
             <td>${findings.findings.severity}</td>
             <td>${findings.findings.cve}</td>`
             if(findings.findings.risk_status.includes("Transfer Accepted")){
                 row.innerHTML += `<td><a href="http://${host}/finding/${findings.finding_related}" class="table-link" target="_blank" type="button"> ${findings.finding_related} </a></td>`
-                cell_status.innerHTML= `<span style="color:green">Transfer Accepted</span>`
+                cell_status.innerHTML= `<span style="color:green">${findings.findings.risk_status}</span>`
             }else if(findings.findings.risk_status.includes("Transfer Reject")){
                 row.innerHTML += `${findings_related}`
                 cell_status.innerHTML = `<span style="color:#e7a100">Transfer Rejected</span>`
@@ -103,7 +122,7 @@ function innerData(data, findings_related){
             row.appendChild(cell_status)
             row.innerHTML += `<td>
                 ${transfer_finding_item.actions.includes(2801) && transfer_finding_item.actions.includes(2802)? 
-                    `<button type="button" class="btn btn-success btn-sm" data-btn-success=${findings.findings.id}>
+                    `<button type="button" class="btn btn-success btn-sm" data-btn-success=${findings.findings.id} data-related-finding=""> 
                         <i class="fas fa-check"></i>
                      </button>
                      <button type="button" class="btn btn-warning btn-sm" data-btn-warning=${findings.findings.id}>
@@ -127,22 +146,22 @@ function innerData(data, findings_related){
 async function getTransferFindings(transferFindingId){
     try
     {
-        let inner_html = ""
+        let related_findings = ""
         const transferFindingResponse = await $.ajax({
             url: "/api/v2/transfer_finding?id=" + transferFindingId,
             type: "GET",
         });
-        inner_html += `<td> <select class="form-control form-control-chosen" data-placeholder="Please select..."><option> None </option>`
+        related_findings += `<td> <select class="form-control form-control-chosen related-finding-chosen" data-placeholder="Please select..."><option value=""> New Finding </option>`
         if (transferFindingResponse.results.length == 1)
             {
                 const product = await get_product_with_description_findings(transferFindingResponse.results[0].destination_product);
                 for(let engagement of product.engagements_list){
                     for(let finding of engagement.findings){
-                        inner_html += `<option> ${finding.id} - ${finding.title}</option>`
+                        related_findings += `<option value="${finding.id}"> ${finding.id} - ${finding.title}</option>`
                     }
                 }
-                inner_html += `</select></td>`
-                innerData(transferFindingResponse, inner_html)
+                related_findings += `</select></td>`
+                innerData(transferFindingResponse, related_findings)
             }
             else
             {

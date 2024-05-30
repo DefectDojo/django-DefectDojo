@@ -1692,7 +1692,6 @@ class ProductViewSet(
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ProductSerializer
-    # TODO: prefetch
     queryset = Product.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiProductFilter
@@ -3395,9 +3394,8 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
         serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
         if serializer.is_valid():
             transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
-            request_findings = request.data["findings"]
             if transfer_finding_findings:
-                helper_tf.transfer_findings(transfer_finding_findings, request_findings)
+                helper_tf.transfer_findings(transfer_finding_findings, serializer)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return http_response.no_content(data=serializer.data, message=f"Transfer Finding {pk} Not Found")
@@ -3413,10 +3411,12 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                 for transfer_finding_finding in obj_transfer_finding_findings:
                     if str(transfer_finding_finding.findings.id) in request_findings:
                         helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
+                        helper_tf.destroy_and_reset_finding_related(transfer_finding_finding)
                         transfer_finding_finding.delete()
 
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
             else:
+                helper_tf.destroy_and_reset_finding_related(pk)
                 super().destroy(request, pk)
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         else:

@@ -507,16 +507,16 @@
                                                             {% endif %}
                                                         {% endif %}
                                                         {% if finding|has_object_permission:"Transfer_Finding_Add" and system_settings.enable_transfer_finding%}
-                                                            {% if finding.risk_status != "Risk Active"%}
-                                                                <li role="presentation">
-                                                                    <a rel="noopener noreferrer" href="#">
-                                                                        <i class="fa-solid fa-circle-exclamation" style="color: grey"></i><span style="color: grey"> {% trans "Transfer Finding..." %} </span>
-                                                                    </a>
-                                                                    </li>
-                                                            {% else %}
+                                                            {% if finding.risk_status|enable_transfer_finding_button%}
                                                                 <li role="presentation">
                                                                     <a rel="noopener noreferrer" href="{% url 'add_transfer_finding' finding.test.engagement.id finding.id %}">
-                                                                        <i class="fa-solid fa-circle-exclamation"></i> {% trans "Transfer Finding..." %}
+                                                                        <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Transfer Finding..." %}
+                                                                    </a>
+                                                                </li>
+                                                            {% else %}
+                                                                <li role="presentation">
+                                                                    <a rel="noopener noreferrer" href="#">
+                                                                        <i class="fa-solid fa-circle-exclamation" style="color: grey"></i><span style="color: grey"> {% trans "Add Transfer Finding..." %} </span>
                                                                     </a>
                                                                 </li>
                                                             {% endif %}

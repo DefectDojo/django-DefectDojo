@@ -1223,7 +1223,7 @@ class Product(models.Model):
         engagements = Engagement.objects.filter(product=self, active=True)
         engagement_list = []
         for engagement_dict in engagements.values("id", "name", "product_id", "status", "engagement_type", "build_id"):
-            findings = Finding.objects.filter(test__engagement__id=engagement_dict["id"], active=True)
+            findings = Finding.objects.filter(test__engagement__id=engagement_dict["id"], active=True, risk_status__in=["Risk Active", "Risk Expired"])
             engagement_dict.update({"findings": list(
                 findings.values("id", "title", "cve", "severity", "description", "active",
                                 "verified", "risk_status", "risk_accepted", "accepted_by"))})
@@ -3496,7 +3496,7 @@ class TransferFinding(models.Model):
 class TransferFindingFinding(models.Model):
     findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
     transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
-    finding_related = models.OneToOneField(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
+    finding_related = models.ForeignKey(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
     engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE, null=True)
 
 

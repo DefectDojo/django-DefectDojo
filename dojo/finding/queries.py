@@ -1,5 +1,6 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef, Q
+import dojo.transfer_findings.helper as helper_tf
 from dojo.models import Finding, Product_Member, Product_Type_Member, Stub_Finding, \
     Product_Group, Product_Type_Group, Vulnerability_Id, Product_Type
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
@@ -70,8 +71,7 @@ def get_authorized_findings(permission, queryset=None, user=None):
 
 def get_authorized_findings_by_status(permission, queryset=None, user=None):
     findings = get_authorized_findings(permission, queryset, user)
-    rs = findings[0].risk_status
-    findings = findings.filter(risk_status="Risk Active")
+    findings = findings.filter(risk_status__in=helper_tf.enable_flow_transfer_finding())
     return findings
 
 
