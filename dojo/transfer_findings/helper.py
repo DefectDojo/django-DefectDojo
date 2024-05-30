@@ -42,7 +42,6 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = False
                     if not test:
-                        # se crear un unico tes por transfer-finding
                         test = created_test(
                             origin_finding=finding,
                             transfer_finding=transfer_finding_finding.transfer_findings,
@@ -237,8 +236,6 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
 def destroy_and_reset_finding_related(transfer_finding_finding):
     try:
         if transfer_finding_finding.finding_related:
-            # TODO: Buscar la forma para que no se remuevan los findins que ya exisite, se deberian 
-            # eliminar solo los findings que se crearon el el processo de transferencia
             transfer_finding_finding.finding_related.delete()
 
         if transfer_finding_finding.findings:
