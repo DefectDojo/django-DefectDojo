@@ -881,7 +881,7 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             # Remove duplicates
             vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
             # it would be more efficient and appropriate to call the already-created helpler function
-            # but this causes django warnings about unsaved models in 5.0 that 
+            # but this causes django warnings about unsaved models in 5.0 that
             # requires much more work to resolve. For now, just duplicate the finding helper code
             # finding_helper.save_vulnerability_ids(finding, finding.unsaved_vulnerability_ids)
 
