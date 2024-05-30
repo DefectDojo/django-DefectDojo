@@ -2,7 +2,7 @@ apiVersion: v2
 appVersion: "2.35.0-dev"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.6.131-dev
+version: 1.6.132-dev
 icon: https://www.defectdojo.org/img/favicon.ico
 maintainers:
   - name: madchap
@@ -14,7 +14,7 @@ dependencies:
     repository: "https://charts.bitnami.com/bitnami"
     condition: mysql.enabled
   - name: postgresql
-    version: ~15.4.0
+    version: ~15.5.0
     repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.enabled
   - name: postgresql-ha
@@ -27,6 +27,6 @@ dependencies:
     repository: "https://charts.bitnami.com/bitnami"
     condition: rabbitmq.enabled
   - name: redis
-    version: ~19.4.0
+    version: ~19.5.0
     repository: "https://charts.bitnami.com/bitnami"
     condition: redis.enabled
