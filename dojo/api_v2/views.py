@@ -3374,6 +3374,19 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                         "origin_product",
                         "origin_engagement",
                         "owner"]
+    
+    def destroy(self, request, pk=None):
+        try:
+            obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+            for transfer_finding_finding in obj_transfer_finding_findings:
+                helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
+                helper_tf.destroy_and_reset_finding_related(transfer_finding_finding)
+                transfer_finding_finding.delete()
+            super().destroy(request, pk)
+            return http_response.ok(message="TransferFinding Deleted")
+        except Exception as e:
+            logger.error(e)
+            ApiError.not_found(detail=e)
 
 
 class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,

@@ -5,6 +5,8 @@ var productId = 0;
 var productTypeId = 0;
 var host = window.location.host;
 
+
+
 $(document).on('click', '#id_transfer_finding_show_modal', function(event) {
     event.preventDefault();
     ObjFindings = {};
@@ -51,6 +53,7 @@ $(document).ready(function() {
 
 
 export async function getTransferFindingsAsync(transferFindingId) {
+    console.log("transfer-finding", transferFindingId)
     try {
         const response = await $.ajax({
             url: `/api/v2/transfer_finding?id=${transferFindingId}`,
@@ -58,7 +61,7 @@ export async function getTransferFindingsAsync(transferFindingId) {
         });
         return response;
     } catch (error) {
-        console.error(error);
+        console.log(error);
         throw error;
     }
 }

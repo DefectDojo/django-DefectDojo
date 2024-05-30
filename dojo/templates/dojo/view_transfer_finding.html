@@ -304,7 +304,6 @@
   }
 
   async function updateFindingsRiskStatus(action, transferFindingId ){
-    console.debug("actions is: " + action + " and transerFinding is: " + transferFindingId)
     if (action == "Accepted"){
         let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
         await updateFindings(requestFindingStatus)
@@ -314,7 +313,8 @@
       await updateFindings(requestFindingStatus)
       }
     if (action == "Removed"){
-      await removeTransferFinding(transferFindingId)
+       await removeTransferFinding(transferFindingId)
+       window.location.href = window.location.href;
     }
   }
 
