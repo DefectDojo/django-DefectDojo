@@ -558,11 +558,14 @@ def metrics_panel(request):
     now = timezone.now()
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
+    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    grafana_params = f"{settings.GRAFANA_PARAMS}&var-csrftoken={cookie_csrftoken}&var-sessionid={cookie_sessionid}"
     return render(request, 'dojo/metrics_panel.html', {
        'name': page_name,
        'grafana_url': settings.GRAFANA_URL,
        'grafana_path': settings.GRAFANA_PATH,
-       'grafana_params': settings.GRAFANA_PARAMS,
+       'grafana_params': grafana_params,
        'role': role,
        'user': user,
     })
