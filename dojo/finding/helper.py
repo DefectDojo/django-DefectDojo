@@ -650,8 +650,7 @@ def save_vulnerability_ids(finding, vulnerability_ids):
     Vulnerability_Id.objects.filter(finding=finding).delete()
 
     # Save new vulnerability ids
-    if finding.unsaved_vulnerability_ids:
-        Vulnerability_Id.objects.bulk_create([Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id) for vulnerability_id in finding.unsaved_vulnerability_ids])
+    Vulnerability_Id.objects.bulk_create([Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id) for vulnerability_id in vulnerability_ids])
 
     # Set CVE
     if vulnerability_ids:
