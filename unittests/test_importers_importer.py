@@ -527,7 +527,7 @@ class TestImporterUtils(DojoAPITestCase):
 
         vulnerability_ids = ['CVE', 'REF-1', 'REF-2']
 
-        self.assertEqual(6, len(mock.mock_calls))
+        self.assertEqual(8, len(mock.mock_calls))
         self.assertEqual('CVE', mock.mock_calls[0].kwargs['vulnerability_id'])
         self.assertEqual('CVE', mock.mock_calls[0].kwargs['finding'].cve)
         self.assertEqual(vulnerability_ids, mock.mock_calls[0].kwargs['finding'].unsaved_vulnerability_ids)
@@ -547,7 +547,7 @@ class TestImporterUtils(DojoAPITestCase):
 
         vulnerability_ids = ['CVE']
 
-        self.assertEqual(2, len(mock.mock_calls))
+        self.assertEqual(4, len(mock.mock_calls))
         self.assertEqual('CVE', mock.mock_calls[0].kwargs['vulnerability_id'])
         self.assertEqual('CVE', mock.mock_calls[0].kwargs['finding'].cve)
         self.assertEqual(vulnerability_ids, mock.mock_calls[0].kwargs['finding'].unsaved_vulnerability_ids)
@@ -561,7 +561,7 @@ class TestImporterUtils(DojoAPITestCase):
 
         vulnerability_ids = ['REF-1', 'REF-2']
 
-        self.assertEqual(4, len(mock.mock_calls))
+        self.assertEqual(6, len(mock.mock_calls))
         self.assertEqual('REF-1', mock.mock_calls[0].kwargs['vulnerability_id'])
         self.assertEqual('REF-1', mock.mock_calls[0].kwargs['finding'].cve)
         self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
