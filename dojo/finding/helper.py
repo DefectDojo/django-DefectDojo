@@ -650,7 +650,9 @@ def save_vulnerability_ids(finding, vulnerability_ids):
     Vulnerability_Id.objects.filter(finding=finding).delete()
 
     # Save new vulnerability ids
-    Vulnerability_Id.objects.bulk_create([Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id) for vulnerability_id in vulnerability_ids])
+    # Using bulk create throws Django 50 warnings about unsaved models...
+    for vulnerability_id in vulnerability_ids:
+        Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
 
     # Set CVE
     if vulnerability_ids:
