@@ -243,7 +243,7 @@ class BaseImporter(ImporterOptions):
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
         findings will be processed in a given worker/process/thread
         """
-        return self.process_findings(parsed_findings, sync=True, **kwargs)
+        return self.process_findings(parsed_findings, sync=False, **kwargs)
 
     def determine_process_method(
         self,
