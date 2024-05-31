@@ -2,7 +2,7 @@ from dojo.models import Product, Engagement, Test
 
 class DbRouter:
     def db_for_read(self, model, **hints):
-        if isinstance(model, (Product, Engagement, Test)):
+        if model in [Product, Engagement, Test]:
             return 'default'
         return 'replica'
 
