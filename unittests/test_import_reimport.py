@@ -1151,9 +1151,6 @@ class ImportReimportMixin:
                                                scan_type=self.scan_type_gtlab_dep_scan,
                                                minimum_severity='Info')
         test_id = import0['test']
-        print(test_id)
-        print(Finding.objects.filter(test__id=test_id, active=True))
-
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(6, active_findings_before)
 
