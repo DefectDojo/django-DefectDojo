@@ -141,7 +141,7 @@ sqlparse==0.5.0
 cffi==1.15.1
 gitdb==4.0.10
 Jinja2==3.1.4
-PyYAML==6.0
+PyYAML==6.0.1
 click-plugins==1.1.1
 ruamel.yaml.clib==0.2.7
 asgiref==3.7.2

@@ -3441,3 +3441,7 @@ class ApiToken(ObtainAuthToken):
                 if role_has_global_permission(user.global_role.role.id, Permissions.Api_v2_Key):
                     return response
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def delete(self, request, *args, **kwargs):
+        Token.objects.filter(user=request.user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

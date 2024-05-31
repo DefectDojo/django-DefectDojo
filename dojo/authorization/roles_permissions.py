@@ -334,6 +334,7 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_API_Scan_Configuration_Add,
+            Permissions.Api_v2_Key,
         },
         Roles.Writer: {
             Permissions.Product_Type_View,
