@@ -4,6 +4,7 @@ from dojo.product import views as product_views
 
 urlpatterns = [
     #  product type
+    re_path(r'^products/type/names/$', views.get_products_name, name='products'),
     re_path(r'^product/type/description/(?P<pid>\d+)$', views.get_description_product, name='get_description'),
     re_path(r'^product/type$', views.product_type, name='product_type'),
     re_path(r'^product/type/(?P<ptid>\d+)$',
