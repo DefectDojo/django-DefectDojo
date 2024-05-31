@@ -45,7 +45,7 @@ class ImporterOptions:
         **kwargs: dict,
     ):
         self.active: bool = self.validate_active(*args, **kwargs)
-        self.api_scan_configuration: Tool_Configuration = self.validate_api_scan_configuration(*args, **kwargs)
+        self.api_scan_configuration: Tool_Configuration | None = self.validate_api_scan_configuration(*args, **kwargs)
         self.apply_tags_to_endpoints: bool = self.validate_apply_tags_to_endpoints(*args, **kwargs)
         self.apply_tags_to_findings: bool = self.validate_apply_tags_to_findings(*args, **kwargs)
         self.branch_tag: str = self.validate_branch_tag(*args, **kwargs)
@@ -55,21 +55,21 @@ class ImporterOptions:
         self.do_not_reactivate: bool = self.validate_do_not_reactivate(*args, **kwargs)
         self.commit_hash: str = self.validate_commit_hash(*args, **kwargs)
         self.create_finding_groups_for_all_findings: bool = self.validate_create_finding_groups_for_all_findings(*args, **kwargs)
-        self.endpoints_to_add: List[Endpoint] = self.validate_endpoints_to_add(*args, **kwargs)
-        self.engagement: Engagement = self.validate_engagement(*args, **kwargs)
-        self.environment: Development_Environment = self.validate_environment(*args, **kwargs)
+        self.endpoints_to_add: List[Endpoint] | None = self.validate_endpoints_to_add(*args, **kwargs)
+        self.engagement: Engagement | None = self.validate_engagement(*args, **kwargs)
+        self.environment: Development_Environment | None = self.validate_environment(*args, **kwargs)
         self.group_by: str = self.validate_group_by(*args, **kwargs)
         self.import_type: str = self.validate_import_type(*args, **kwargs)
-        self.lead: Dojo_User = self.validate_lead(*args, **kwargs)
+        self.lead: Dojo_User | None = self.validate_lead(*args, **kwargs)
         self.minimum_severity: str = self.validate_minimum_severity(*args, **kwargs)
-        self.parsed_findings: List[Finding] = self.validate_parsed_findings(*args, **kwargs)
+        self.parsed_findings: List[Finding] | None = self.validate_parsed_findings(*args, **kwargs)
         self.push_to_jira: bool = self.validate_push_to_jira(*args, **kwargs)
         self.scan_date: datetime = self.validate_scan_date(*args, **kwargs)
         self.scan_type: str = self.validate_scan_type(*args, **kwargs)
         self.service: str = self.validate_service(*args, **kwargs)
         self.tags: List[str] = self.validate_tags(*args, **kwargs)
-        self.test: Test = self.validate_test(*args, **kwargs)
-        self.user: Dojo_User = self.validate_user(*args, **kwargs)
+        self.test: Test | None = self.validate_test(*args, **kwargs)
+        self.user: Dojo_User | None = self.validate_user(*args, **kwargs)
         self.test_title: str = self.validate_test_title(*args, **kwargs)
         self.verified: bool = self.validate_verified(*args, **kwargs)
         self.version: str = self.validate_version(*args, **kwargs)
@@ -214,7 +214,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> bool:
         return self.validate(
             "active",
             expected_types=[bool],
@@ -227,7 +227,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> Tool_Configuration | None:
         return self.validate(
             "api_scan_configuration",
             expected_types=[Tool_Configuration],
@@ -240,7 +240,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> bool:
         return self.validate(
             "apply_tags_to_endpoints",
             expected_types=[bool],
@@ -253,7 +253,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> bool:
         return self.validate(
             "apply_tags_to_findings",
             expected_types=[bool],
@@ -266,7 +266,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         return self.validate(
             "branch_tag",
             expected_types=[str],
@@ -279,7 +279,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         return self.validate(
             "build_id",
             expected_types=[str],
@@ -292,7 +292,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> bool:
         return self.validate(
             "close_old_findings",
             expected_types=[bool],
@@ -305,7 +305,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> bool:
         return self.validate(
             "close_old_findings_product_scope",
             expected_types=[bool],
@@ -318,7 +318,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> bool:
         return self.validate(
             "do_not_reactivate",
             expected_types=[bool],
@@ -331,7 +331,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         return self.validate(
             "commit_hash",
             expected_types=[str],
@@ -344,7 +344,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> bool:
         return self.validate(
             "create_finding_groups_for_all_findings",
             expected_types=[bool],
@@ -357,7 +357,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> list | None:
         return self.validate(
             "endpoints_to_add",
             expected_types=[list],
@@ -370,7 +370,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> Engagement | None:
         return self.validate(
             "engagement",
             expected_types=[Engagement],
@@ -383,7 +383,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> Development_Environment | None:
         return self.validate(
             "environment",
             expected_types=[Development_Environment],
@@ -396,7 +396,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         self.findings_groups_enabled: bool = is_finding_groups_enabled()
         return self.validate(
             "group_by",
@@ -410,7 +410,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         return self.validate(
             "import_type",
             expected_types=[str],
@@ -423,7 +423,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> Dojo_User | None:
         return self.validate(
             "lead",
             expected_types=[User, Dojo_User, SimpleLazyObject],
@@ -436,7 +436,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         return self.validate(
             "minimum_severity",
             expected_types=[str],
@@ -449,7 +449,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> list | None:
         return self.validate(
             "parsed_findings",
             expected_types=[list],
@@ -462,7 +462,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> bool:
         return self.validate(
             "push_to_jira",
             expected_types=[bool],
@@ -475,7 +475,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> datetime:
         self.now = timezone.now()
         value = self.validate(
             "scan_date",
@@ -496,7 +496,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         return self.validate(
             "scan_type",
             expected_types=[str],
@@ -509,7 +509,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         return self.validate(
             "service",
             expected_types=[str],
@@ -522,7 +522,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> list:
         return self.validate(
             "tags",
             expected_types=[list],
@@ -535,7 +535,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> Test | None:
         return self.validate(
             "test",
             expected_types=[Test],
@@ -548,7 +548,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         return self.validate(
             "test_title",
             expected_types=[str],
@@ -561,7 +561,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> Dojo_User | None:
         return self.validate(
             "user",
             expected_types=[User, Dojo_User, SimpleLazyObject],
@@ -574,7 +574,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> bool:
         return self.validate(
             "verified",
             expected_types=[bool],
@@ -587,7 +587,7 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ):
+    ) -> str:
         return self.validate(
             "version",
             expected_types=[str],
