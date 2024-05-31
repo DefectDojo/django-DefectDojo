@@ -157,14 +157,23 @@ async function getTransferFindings(transferFindingId){
         related_findings += `<td> <select class="form-control form-control-chosen related-finding-chosen" data-placeholder="Please select..."><option value=""> New Finding </option>`
         if (transferFindingResponse.results.length == 1)
             {
-                const product = await get_product_with_description_findings(transferFindingResponse.results[0].destination_product);
-                for(let engagement of product.engagements_list){
-                    for(let finding of engagement.findings){
-                        related_findings += `<option value="${finding.id}"> ${finding.id} - ${finding.title}</option>`
-                    }
+                const response = await get_product_with_description_findings(transferFindingResponse.results[0].destination_product);
+                if(response.code === 200)
+                {
+                    for(let engagement of response.data.engagements_list)
+                        {
+                            for(let finding of engagement.findings)
+                                {
+                                related_findings += `<option value="${finding.id}"> ${finding.id} - ${finding.title}</option>`;
+                                }
+                        }
+                    related_findings += `</select></td>`;
+                    innerData(transferFindingResponse, related_findings);
                 }
-                related_findings += `</select></td>`
-                innerData(transferFindingResponse, related_findings)
+                else
+                {
+                    innerData(transferFindingResponse, "<td>None</td>");
+                }
             }
             else
             {

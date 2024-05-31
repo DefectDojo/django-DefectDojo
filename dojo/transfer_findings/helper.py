@@ -100,7 +100,7 @@ def transfer_finding(
     if finding_related_id:
         try:
             finding_related = Finding.objects.get(id=finding_related_id)
-        except Finding.DoesNotExist as e:
+        except Exception as e:
             logger.error(e)
             raise ApiError.not_found(datail=f" {e} : finding_related: {finding_related_id}")
 

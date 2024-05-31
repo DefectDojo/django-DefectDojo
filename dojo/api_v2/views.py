@@ -1719,9 +1719,13 @@ class ProductViewSet(
         detail=True, methods=["get"], permission_classes=[IsAuthenticated]
     )
     def engagements(self, request, pk=None):
-        queryset = self.get_queryset().get(pk=pk)
+        try:
+            queryset = self.get_queryset().get(pk=pk)
+        except Product.DoesNotExist:
+            return http_response.non_authoritative_information()
+
         serializer = serializers.EngagementByProductResponseSerializer(queryset)
-        return Response(serializer.data)
+        return http_response.ok(data=serializer.data)
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -3386,7 +3390,7 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
             return http_response.ok(message="TransferFinding Deleted")
         except Exception as e:
             logger.error(e)
-            ApiError.not_found(detail=e)
+            raise ApiError.not_found(detail=e)
 
 
 class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
