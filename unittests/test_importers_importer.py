@@ -596,6 +596,7 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual(vulnerability_ids, finding.unsaved_vulnerability_ids)
         self.assertEqual('REF-2', finding.vulnerability_ids[1])
         finding.delete()
+
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
     def test_no_handle_vulnerability_ids_references_and_no_cve(self, mock):
         finding = Finding()
