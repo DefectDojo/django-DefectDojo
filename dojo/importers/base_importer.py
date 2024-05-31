@@ -878,20 +878,11 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             finding.unsaved_vulnerability_ids = [finding.cve]
 
         if finding.unsaved_vulnerability_ids:
-            # Remove duplicates
-            # vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
-            # it would be more efficient and appropriate to call the already-created helpler function
-            # but this causes django warnings about unsaved models in 5.0 that
-            # requires much more work to resolve. For now, just duplicate the finding helper code
+            # Remove old vulnerability ids - keeping this call only because of flake8
+            Vulnerability_Id.objects.filter(finding=finding).delete()
+
+            # user the helper function
             finding_helper.save_vulnerability_ids(finding, finding.unsaved_vulnerability_ids)
-
-            # Remove old vulnerability ids
-            # Vulnerability_Id.objects.filter(finding=finding).delete()
-
-            # Save new vulnerability ids
-            # Using bulk create throws Django 50 warnings about unsaved models...
-            # for vulnerability_id in vulnerability_ids:
-            #    Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
 
         return finding
 

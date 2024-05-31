@@ -525,6 +525,16 @@ class TestImporterUtils(DojoAPITestCase):
         self.client.force_authenticate(user=self.testuser, token=token)
         self.create_default_data()
 
+    def __del__(self):
+        self.test_last_by_scan_type.delete()
+        self.test_with_title.delete()
+        self.test_last_by_title.delete()
+        self.test.delete()
+        self.engagement.delete()
+        self.product.delete()
+        self.product_type.delete()
+        self.testuser.delete()
+
     def create_default_data(self):
         # creating is much faster compare to using a fixture
         logger.debug('creating default product + engagement')
@@ -532,7 +542,7 @@ class TestImporterUtils(DojoAPITestCase):
         self.product_type = self.create_product_type(PRODUCT_TYPE_NAME_DEFAULT)
         self.product = self.create_product(PRODUCT_NAME_DEFAULT)
         self.engagement = self.create_engagement(ENGAGEMENT_NAME_DEFAULT, product=self.product)
-        self.test = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title=TEST_TITLE_DEFAULT)        
+        self.test = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title=TEST_TITLE_DEFAULT)
         self.test_last_by_title = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title=TEST_TITLE_DEFAULT)
         self.test_with_title = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title=TEST_TITLE_ALTERNATE)
         self.test_last_by_scan_type = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE)
@@ -553,6 +563,7 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual(vulnerability_ids, finding.unsaved_vulnerability_ids)
         self.assertEqual('REF-1', finding.vulnerability_ids[1])
         self.assertEqual('REF-2', finding.vulnerability_ids[2])
+        finding.delete()
 
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
     def test_handle_no_vulnerability_ids_references_and_cve(self, mock):
@@ -568,6 +579,7 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual('CVE', finding.vulnerability_ids[0])
         self.assertEqual('CVE', finding.cve)
         self.assertEqual(vulnerability_ids, finding.unsaved_vulnerability_ids)
+        finding.delete()
 
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
     def test_handle_vulnerability_ids_references_and_no_cve(self, mock):
@@ -583,7 +595,7 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual('REF-1', finding.cve)
         self.assertEqual(vulnerability_ids, finding.unsaved_vulnerability_ids)
         self.assertEqual('REF-2', finding.vulnerability_ids[1])
-
+        finding.delete()
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
     def test_no_handle_vulnerability_ids_references_and_no_cve(self, mock):
         finding = Finding()
@@ -594,3 +606,4 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual(finding.cve, None)
         self.assertEqual(finding.unsaved_vulnerability_ids, None)
         self.assertEqual(finding.vulnerability_ids, [])
+        finding.delete()
