@@ -714,6 +714,7 @@ def add_temp_finding(request, tid, fid):
                 new_finding.severity)
 
             new_finding.tags = form.cleaned_data['tags']
+            new_finding.cvssv3 = finding.cvssv3
             new_finding.date = form.cleaned_data['date'] or datetime.today()
 
             finding_helper.update_finding_status(new_finding, request.user)
