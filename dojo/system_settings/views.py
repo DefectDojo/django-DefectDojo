@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 
 from django.conf import settings
 from django.contrib import messages
@@ -22,11 +23,14 @@ class SystemSettingsView(View):
         if not request.user.is_superuser:
             raise PermissionDenied
 
+    def get_settings_object(self) -> System_Settings:
+        return System_Settings.objects.get(no_cache=True)
+
     def get_context(
         self,
         request: HttpRequest,
     ) -> dict:
-        system_settings_obj = System_Settings.objects.get(no_cache=True)
+        system_settings_obj = self.get_settings_object()
         # Set the initial context
         context = {
             "system_settings_obj": system_settings_obj,
@@ -55,7 +59,7 @@ class SystemSettingsView(View):
         self,
         request: HttpRequest,
         context: dict,
-    ) -> None:
+    ) -> Tuple[HttpRequest, bool]:
         if context["form"].is_valid():
             if (context["form"].cleaned_data['default_group'] is None and context["form"].cleaned_data['default_group_role'] is not None) or \
                (context["form"].cleaned_data['default_group'] is not None and context["form"].cleaned_data['default_group_role'] is None):
@@ -89,6 +93,8 @@ class SystemSettingsView(View):
                     messages.SUCCESS,
                     'Settings saved.',
                     extra_tags='alert-success')
+            return request, True
+        return request, False
 
     def get_celery_status(
         self,
@@ -137,7 +143,7 @@ class SystemSettingsView(View):
         # Set up the initial context
         context = self.get_context(request)
         # Check the status of celery
-        self.validate_form(request, context)
+        request, _ = self.validate_form(request, context)
         # Add some breadcrumbs
         add_breadcrumb(title="Application settings", top_level=False, request=request)
         # Render the page
