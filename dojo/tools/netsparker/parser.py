@@ -51,8 +51,8 @@ class NetsparkerParser:
             url = item["Url"]
             impact = html2text.html2text(item.get("Impact", ""))
             dupe_key = title
-            request = item["HttpRequest"]["Content"]
-            response = item["HttpResponse"]["Content"]
+            request = item["HttpRequest"].get("Content", None)
+            response = item["HttpResponse"].get("Content", None)
 
             finding = Finding(
                 title=title,
