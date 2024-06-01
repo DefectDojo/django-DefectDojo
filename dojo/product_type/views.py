@@ -34,19 +34,11 @@ Status: in prod
 Product Type views
 """
 
-def get_products_name(_request):
-    """Return Product_Types name
+def get_products_name(_request, pid):
+    prod_type = Product_Type.objects.get(id=pid)
+    data = Product.objects.filter(prod_type=prod_type).values("id", "name")
+    return JsonResponse({"data": list(data)})
 
-    Args:
-        _request (_type_): Request Object
-        ptid (_type_): Product Type Id
-    """
-    data = Product_Type.objects.all().values("id", "name")
-    data = dict(data)
-    print("salio", data)
-    return JsonResponse(data)
-
-    
 
 def get_description_product(_request, pid):
     """

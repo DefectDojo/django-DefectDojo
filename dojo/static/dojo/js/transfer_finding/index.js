@@ -1,4 +1,6 @@
 import { get_product_with_description_findings } from '../product/index.js';
+import { addOption} from '../helper/helper.js';
+
 var ObjFindings= {};
 export var transferId = 0;
 var productId = 0;
@@ -26,6 +28,43 @@ $(document).on('click', '#id_transfer_finding_show_modal', function(event) {
     });
 });
 
+
+$(document).ready(function(){
+    $("#id-chosen-engagement").on("change", handleEngagementChange);
+})
+
+function handleEngagementChange(){
+    console.log("Se obtine la informacion del engagement selecionado para poder abril el modal")
+    // let idEngagement = $("#id-chosen-engagement").val();
+    // let engagementElement = document.getElementById('id-chosen-engagement');
+    // getEngagementOptions(idEngagement, engagementElement)
+    // clearLabel("id-chosen-engagement");
+    // if (idProduct!== '') {
+    //     getEngagementOptions(idProduct, engagementElement)
+    // } else {
+    //     clearSelect(engagementElement);
+    // }
+}
+
+
+function getEngagementOptions(idProduct, engagementElement){
+    console.log("entro")
+    $.ajax({
+        url: "/api/v2/engagements/?product=" + idProduct,
+        type: "GET",
+        success: function(response) {
+            clearSelect(engagementElement);
+            addOption(engagementElement, '', 'Select Engagement Name...');
+            response.results.forEach(function(engagement) {
+                addOption(engagementElement, engagement.id, engagement.name);
+            });
+            refreshSelectPicker();
+        },
+        error: function(error) {
+            console.error(error);
+        }
+    });
+}
 
 $(document).ready(function() {
 

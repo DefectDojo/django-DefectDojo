@@ -1,4 +1,6 @@
 window.onload = function(){
+    element = document.getElementById('id_destination_product_type');
+    element.selectedIndex = 0;
     element = document.getElementById('id_destination_product');
     element.selectedIndex = 0;
     element = document.getElementById('id_accepted_by');
@@ -9,39 +11,69 @@ $(document).ready(function() {
   $('#myModal').modal('show');
 });
 
-$(document).ready(function() {
+$(document).ready(function(){
     $("#id_destination_product").on("change", handleProductChange);
+})
+$(document).ready(function() {
+    $("#id_destination_product_type").on("change", handleProductTypeChange);
 });
 
+function handleProductTypeChange(){
+    let productTypeId = $("#id_destination_product_type").val()
+    let  productElement = document.getElementById('id_destination_product') 
+    console.log("productElementl",productElement)
+    clearLabel("id_destination_product")
+    clearLabel("id_accepted_by")
+    getProductOptions(productTypeId, productElement)
+    // traeer los productos relacioneado al producto type # TODO:
+}
 function handleProductChange(){
     let idProduct = $("#id_destination_product").val();
     let contactsElement = document.getElementById('id_accepted_by') 
-    let engagementElement = document.getElementById('id_destination_engagement');
-    clearLabel("id_destination_engagement");
+    // let engagementElement = document.getElementById('id_destination_engagement');
+    // clearLabel("id_destination_engagement");
     clearLabel("id_accepted_by");
     if (idProduct !== '') {
-        getProductDescription(idProduct, contactsElement, engagementElement)
+        getProductDescription(idProduct, contactsElement)
     } else {
-        clearSelect(engagementElement);
+        // clearSelect(engagementElement);
         clearSelect(contactsElement);
     }
 }
-
-function getProductDescription(idProduct, contactsElement, engagementElement){
+function get_product_types_names(){
+    $.ajax({
+        url: "/products/type/names/",
+        type: "GET",
+        success: function(response) {
+            response.results.forEach(function(product_type){
+                clearSelect(contactsElement);
+                // clearSelect(engagementElement);
+                addOption(contactsElement, '', 'Select Contact Product_Type...');
+                addOption(document.getElementById('id_destination_product_type'), product_type.id, product_type.name);
+                // addOption(engagementElement, '', 'Select Engagement...');
+            });
+            refreshSelectPicker();
+        },
+        error: function(error) {
+            console.error(error);
+        }
+    });
+}
+function getProductDescription(idProduct, contactsElement){
     $.ajax({
         url: "/product/type/description/" + idProduct,
         type: "GET",
         success: function(response) {
             clearSelect(contactsElement);
-            clearSelect(engagementElement);
+            // clearSelect(engagementElement);
             addOption(contactsElement, '', 'Select Contact Product...');
             contactsElement.innerHTML += `<option value=${response.contacts.product_manager.id}>${response.contacts.product_manager.username}</option>`;
             contactsElement.innerHTML += `<option value=${response.contacts.technical_contact.id}>${response.contacts.technical_contact.username}</option>`;
             contactsElement.innerHTML += `<option value=${response.contacts.team_manager.id}>${response.contacts.team_manager.username}</option>`;
-            addOption(engagementElement, '', 'Select Engagement...');
-            response.engagements.forEach(function(engagement){
-                engagementElement.innerHTML += `<option value=${engagement.id}>${engagement.engagement_name}</option>`;
-            });
+            // addOption(engagementElement, '', 'Select Engagement...');
+            // response.engagements.forEach(function(engagement){
+            //     engagementElement.innerHTML += `<option value=${engagement.id}>${engagement.engagement_name}</option>`;
+            // });
 
             refreshSelectPicker();
         },
@@ -56,7 +88,26 @@ function getContact(contact){
     return contactObj[0];
 }
 
+function getProductOptions(productTypeId, productElement){
+    $.ajax({
+        url: `/products/type/names/${productTypeId}`,
+        type: "GET",
+        success: function(response) {
+            addOption(productElement, '', 'Select Product Name...');
+            console.log(response)
+            response.data.forEach(function(product) {
+                addOption(productElement, product.id, product.name);
+            });
+            refreshSelectPicker();
+        },
+        error: function(error) {
+            console.error(error);
+        }
+    });
+}
+
 function getEngagementOptions(idProduct, engagementElement){
+    console.log("entro")
     $.ajax({
         url: "/api/v2/engagements/?product=" + idProduct,
         type: "GET",

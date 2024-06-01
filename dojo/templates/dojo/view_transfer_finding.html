@@ -62,7 +62,6 @@
 {% endblock %}
 {% block add_css %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
 {% endblock %}
 {% block content %}
     {{ block.super }}
@@ -154,10 +153,17 @@
                                  {{transfer_findings.title}}</a>
                             </td>
                             <td>{{transfer_findings.date}}</td>
-                            <td>{{transfer_findings.origin_product_type}}</td>
-                            <td>{{transfer_findings.destination_product_type}}</td>
-                            <td>{{transfer_findings.destination_product}}</td>
-                            <td>{{transfer_findings.destination_engagement}}</td>
+                            <td data-origin-pid="{{transfer_findings.origin_product_type.id}}">{{transfer_findings.origin_product_type}}</td>
+                            <td data-destination-ptid="{{transfer_findings.destination_product_type.id}}">{{transfer_findings.destination_product_type}}</td>
+                            <td data-destination-pid="{{transfer_findings.destination_product.id}}">{{transfer_findings.destination_product}}</td>
+                            <td>
+                              <select id="id-chosen-engagement" class="form-control" data-placeholder="Please select...">
+                                <option>Select Engagement ...</option>
+                                {% for engagement in transfer_findings.destination_product.engagement_set.all %}
+                                  <option value="{{engagement.id}}">{{engagement.name}}</option>
+                                {% endfor%}
+                              </select>
+                            </td>
                             <td>{{transfer_findings.accepted_by}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
@@ -207,7 +213,7 @@
 {% csrf_token %}
 <script str="{% static 'dojo/js/confirmed/index.js' %}"></script>
 <script type="module">
-  
+    
     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
     // imports 
     import { filterForStatus, transferId, generateRequestTransferFindingUpdate } from '{% static "dojo/js/transfer_finding/index.js" %}';
