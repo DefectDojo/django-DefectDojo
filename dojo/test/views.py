@@ -75,7 +75,7 @@ from dojo.utils import (
     get_setting,
     get_system_setting,
     get_words_for_field,
-    process_notifications,
+    process_tag_notifications,
     redirect_to_return_url_or_else,
 )
 
@@ -230,7 +230,7 @@ class ViewTest(View):
             # Make a notification for this actions
             url = request.build_absolute_uri(reverse("view_test", args=(test.id,)))
             title = f"Test: {test.test_type.name} on {test.engagement.product.name}"
-            process_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -322,7 +322,6 @@ def delete_test(request, tid):
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
-                product = test.engagement.product
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(test)
@@ -334,13 +333,6 @@ def delete_test(request, tid):
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                    title=_(f"Deletion of {test.title}"),
-                                    product=product,
-                                    description=_(f'The test "{test.title}" was deleted by {request.user}'),
-                                    url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
-                                    recipients=[test.engagement.lead],
-                                    icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_engagement', args=(eng.id,)))
 
     rels = ['Previewing the relationships has been disabled.', '']
@@ -380,7 +372,7 @@ def copy_test(request, tid):
                 messages.SUCCESS,
                 'Test Copied successfully.',
                 extra_tags='alert-success')
-            create_notification(event='other',
+            create_notification(event='test_copied',  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                                 title=f'Copying of {test.title}',
                                 description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
                                 product=product,
@@ -624,9 +616,14 @@ class AddFindingView(View):
                 )
                 burp_rr.clean()
                 burp_rr.save()
+
+            # Note: this notification has not be moved to "@receiver(post_save, sender=Finding)" method as many other notifications
+            # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+            # TODO: but same should be implemented for API endpoint
+
             # Create a notification
             create_notification(
-                event='other',
+                event='finding_added',
                 title=_(f'Addition of {finding.title}'),
                 finding=finding,
                 description=_(f'Finding "{finding.title}" was added by {request.user}'),
@@ -717,6 +714,7 @@ def add_temp_finding(request, tid, fid):
                 new_finding.severity)
 
             new_finding.tags = form.cleaned_data['tags']
+            new_finding.cvssv3 = finding.cvssv3
             new_finding.date = form.cleaned_data['date'] or datetime.today()
 
             finding_helper.update_finding_status(new_finding, request.user)
@@ -989,7 +987,7 @@ class ReImportScanResultsView(View):
         Attempt to import with all the supplied information
         """
         try:
-            importer_client = DefaultReImporter()
+            importer_client = DefaultReImporter(**context)
             (
                 context["test"],
                 finding_count,
@@ -999,18 +997,15 @@ class ReImportScanResultsView(View):
                 untouched_finding_count,
                 _,
             ) = importer_client.process_scan(
-                **context,
+                context.pop("scan", None)
             )
             # Add a message to the view for the user to see the results
             add_success_message_to_response(importer_client.construct_imported_message(
-                context.get("scan_type"),
-                Test_Import.REIMPORT_TYPE,
                 finding_count=finding_count,
                 new_finding_count=new_finding_count,
                 closed_finding_count=closed_finding_count,
                 reactivated_finding_count=reactivated_finding_count,
                 untouched_finding_count=untouched_finding_count,
-                close_old_findings=context.get("close_old_findings"),
             ))
         except Exception as e:
             logger.exception(e)

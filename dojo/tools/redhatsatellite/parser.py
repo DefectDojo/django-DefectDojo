@@ -46,11 +46,11 @@ class RedHatSatelliteParser:
             name = result.get("name", None)
             vulntype = result.get("type", None)
             cves = result.get("cves", None)
-            bugs = result.get("bugs", None)
+            bugs = result.get("bugs", [])
             hosts_available_count = result.get("hosts_available_count", None)
             hosts_applicable_count = result.get("hosts_applicable_count", None)
             packages = result.get("packages", None)
-            module_streams = result.get("module_streams", None)
+            module_streams = result.get("module_streams", [])
             installable = result.get("installable", None)
             description += "**id:** " + str(vulnid) + "\n"
             description += "**pulp_id:** " + pulp_id + "\n"
@@ -64,7 +64,7 @@ class RedHatSatelliteParser:
             if bugs != []:
                 description += "**bugs:** " + str(bugs) + "\n"
             if module_streams != []:
-                description += "**module_streams:** " + ', '.join(module_streams) + "\n"
+                description += "**module_streams:** " + str(module_streams) + "\n"
             description += "**packages:** " + ', '.join(packages)
             find = Finding(
                 title=title,

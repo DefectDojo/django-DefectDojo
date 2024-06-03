@@ -458,3 +458,36 @@ class TestFindingSLAExpiration(DojoTestCase):
         expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
         self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
         self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+    def test_sla_expiration_date_after_sla_not_enforced(self):
+        """
+            tests if the SLA expiration date is none after the after the SLA configuration on a
+            product was updated to not enforce all SLA remediation days
+        """
+        user, _ = User.objects.get_or_create(username='admin')
+        product_type = self.create_product_type('test_product_type')
+        sla_config = self.create_sla_configuration(name='test_sla_config')
+        product = self.create_product(name='test_product', prod_type=product_type)
+        product.sla_configuration = sla_config
+        product.save()
+        engagement = self.create_engagement('test_eng', product)
+        test = self.create_test(engagement=engagement, scan_type='ZAP Scan', title='test_test')
+        finding = Finding.objects.create(
+            test=test,
+            reporter=user,
+            title='test_finding',
+            severity='Critical',
+            date=datetime.now().date())
+
+        expected_sla_days = getattr(product.sla_configuration, finding.severity.lower(), None)
+        self.assertEqual(finding.sla_expiration_date, datetime.now().date() + timedelta(days=expected_sla_days))
+        self.assertEqual(finding.sla_days_remaining(), expected_sla_days)
+
+        sla_config.enforce_critical = False
+        sla_config.save()
+
+        finding.set_sla_expiration_date()
+
+        self.assertEqual(finding.sla_expiration_date, None)
+        self.assertEqual(finding.sla_days_remaining(), None)
+        self.assertEqual(finding.sla_deadline(), None)

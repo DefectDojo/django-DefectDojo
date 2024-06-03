@@ -56,41 +56,42 @@ TYPE_MAP = {
     "Vuln": "CONFIRMED",
 }
 
+# Severity mapping taken from
+# https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/severity_levels.htm
+LEGACY_SEVERITY_LOOKUP = {
+    1: "Informational",
+    2: "Low",
+    3: "Medium",
+    4: "High",
+    5: "Critical",
+}
+NON_LEGACY_SEVERITY_LOOKUP = {
+    "Informational": "Low",
+    "Low": "Low",
+    "Medium": "Medium",
+    "High": "High",
+    "Critical": "High",
+}
 
-def get_severity(severity_value: int, cvss_value: float) -> str:
-    legacy_severity_lookup = {
-        1: "Informational",
-        2: "Low",
-        3: "Medium",
-        4: "High",
-        5: "Critical",
-    }
-    # Severity mapping taken from
-    # https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/severity_levels.htm
-    qualys_severity_lookup = {
-        1: "Low",
-        2: "Low",
-        3: "Medium",
-        4: "High",
-        5: "High",
-    }
 
-    if settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
+def get_severity(severity_value_str: str | None) -> str:
+    severity_value: int = int(severity_value_str or -1)
+
+    sev: str = LEGACY_SEVERITY_LOOKUP.get(severity_value, "Unknown")
+
+    # Non legacy severity is a subset of legacy severity, retrieve it from lookup
+    if not settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
+        sev: str = NON_LEGACY_SEVERITY_LOOKUP.get(sev, "Unknown")
+
+    # If we still don't have a severity, default to Informational
+    if sev == "Unknown":
+        logger.warning(
+            "Could not determine severity from severity_value_str: %s",
+            severity_value_str,
+        )
         sev = "Informational"
-        if cvss_value is not None and cvss_value > 0:
-            if 0.1 <= float(cvss_value) <= 3.9:
-                sev = "Low"
-            elif 4.0 <= float(cvss_value) <= 6.9:
-                sev = "Medium"
-            elif 7.0 <= float(cvss_value) <= 8.9:
-                sev = "High"
-            elif float(cvss_value) >= 9.0:
-                sev = "Critical"
-        elif severity_value is not None:
-            sev = legacy_severity_lookup.get(severity_value, "Informational")
-        return sev
-    else:
-        return qualys_severity_lookup.get(severity_value, "Informational")
+
+    return sev
 
 
 def htmltext(blob):
@@ -243,10 +244,9 @@ def parse_finding(host, tree):
                 }
                 _temp["cve"] = "\n".join(list(_cl.keys()))
                 _temp["links"] = "\n".join(list(_cl.values()))
-        # The CVE in Qualys report might not have a CVSS score, so findings are informational by default
-        # unless we can find map to a Severity OR a CVSS score from the
-        # findings detail.
-        sev = get_severity(vuln_item.findtext("SEVERITY"), _temp.get("CVSS_value", None))
+
+        # Generate severity from number in XML's 'SEVERITY' field, if not present default to 'Informational'
+        sev = get_severity(vuln_item.findtext("SEVERITY"))
         finding = None
         if _temp_cve_details:
             refs = "\n".join(list(_cl.values()))

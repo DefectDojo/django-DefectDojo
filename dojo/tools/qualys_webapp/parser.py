@@ -355,7 +355,7 @@ def get_unique_items(
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[unique_id] = get_glossary_item(
-                glossary[index], finding, enable_weakness
+                glossary[index], finding, enable_weakness=enable_weakness
             )
     for unique_id, finding in get_unique_vulnerabilities(
         info_gathered, test, True, is_app_report
@@ -364,7 +364,7 @@ def get_unique_items(
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness
+                glossary[index], finding, True, enable_weakness=enable_weakness
             )
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
@@ -393,7 +393,7 @@ def get_items(
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[qid] = get_glossary_item(
-                glossary[index], finding, enable_weakness
+                glossary[index], finding, enable_weakness=enable_weakness
             )
     for qid, finding in get_vulnerabilities(
         info_gathered, test, True, is_app_report
@@ -401,7 +401,7 @@ def get_items(
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness
+                glossary[index], finding, True, enable_weakness=enable_weakness
             )
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
