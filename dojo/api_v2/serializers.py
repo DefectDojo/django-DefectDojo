@@ -2968,8 +2968,8 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.Serializer):
     user = UserSerializer(many=False)
-    user_contact_info = UserContactInfoSerializer(many=False)
-    global_role = GlobalRoleSerializer(many=False)
+    user_contact_info = UserContactInfoSerializer(many=False, required=False)
+    global_role = GlobalRoleSerializer(many=False, required=False)
     dojo_group_member = DojoGroupMemberSerializer(many=True)
     product_type_member = ProductTypeMemberSerializer(many=True)
     product_member = ProductMemberSerializer(many=True)
