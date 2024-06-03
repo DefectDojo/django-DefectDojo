@@ -927,17 +927,14 @@ class ImportScanResultsView(View):
         Attempt to import with all the supplied information
         """
         try:
-            importer_client = DefaultImporter()
+            importer_client = DefaultImporter(**context)
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
-                **context,
+                context.pop("scan", None)
             )
             # Add a message to the view for the user to see the results
             add_success_message_to_response(importer_client.construct_imported_message(
-                context.get("scan_type"),
-                Test_Import.IMPORT_TYPE,
                 finding_count=finding_count,
                 closed_finding_count=closed_finding_count,
-                close_old_findings=context.get("close_old_findings"),
             ))
         except Exception as e:
             logger.exception(e)
