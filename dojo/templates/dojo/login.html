@@ -83,7 +83,7 @@
 
                 {% if GITHUB_ENTERPRISE_ENABLED is True %}
                     <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'github-enterprise' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Github Enterprise" %}</a>
+                        <a href="{% url 'social:begin' 'github-enterprise' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with GitHub Enterprise" %}</a>
                     </div>
                 {% endif %}
 
