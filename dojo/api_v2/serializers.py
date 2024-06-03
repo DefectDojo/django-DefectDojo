@@ -108,6 +108,7 @@ from dojo.models import (
     Vulnerability_Id_Template,
     get_current_date,
 )
+from dojo.risk_acceptance.helper import add_findings_to_risk_acceptance, remove_finding_from_risk_acceptance
 from dojo.tools.factory import (
     get_choices_sorted,
     requires_file,
@@ -425,6 +426,7 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    date_joined = serializers.DateTimeField(read_only=True)
     last_login = serializers.DateTimeField(read_only=True)
     password = serializers.CharField(
         write_only=True,
@@ -450,6 +452,7 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "email",
+            "date_joined",
             "last_login",
             "is_active",
             "is_superuser",
@@ -1450,6 +1453,29 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     decision = serializers.SerializerMethodField()
     path = serializers.SerializerMethodField()
 
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        add_findings_to_risk_acceptance(instance, instance.accepted_findings.all())
+        return instance
+
+    def update(self, instance, validated_data):
+        # Determine findings to risk accept, and findings to unaccept risk
+        existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
+        new_findings_ids = [x.id for x in validated_data.get("accepted_findings", [])]
+        new_findings = Finding.objects.filter(id__in=new_findings_ids)
+        findings_to_add = set(new_findings) - set(existing_findings)
+        findings_to_remove = set(existing_findings) - set(new_findings)
+        findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
+        findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
+        # Make the update in the database
+        instance = super().update(instance, validated_data)
+        # Add the new findings
+        add_findings_to_risk_acceptance(instance, findings_to_add)
+        # Remove the ones that were not present in the payload
+        for finding in findings_to_remove:
+            remove_finding_from_risk_acceptance(instance, finding)
+        return instance
+
     @extend_schema_field(serializers.CharField())
     def get_recommendation(self, obj):
         return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.recommendation)
@@ -1483,6 +1509,12 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
+        def validate_findings_have_same_engagement(finding_objects: List[Finding]):
+            engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
+            if engagements > 1:
+                msg = "You are not permitted to add findings from multiple engagements"
+                raise PermissionDenied(msg)
+
         findings = data.get('accepted_findings', [])
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
@@ -1491,16 +1523,11 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             msg = "You are not permitted to add one or more selected findings to this risk acceptance"
             raise PermissionDenied(msg)
         if self.context["request"].method == "POST":
-            engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
-            if engagements > 1:
-                msg = "You are not permitted to add findings to a distinct engagement"
-                raise PermissionDenied(msg)
+            validate_findings_have_same_engagement(finding_objects)
         elif self.context['request'].method in ['PATCH', 'PUT']:
-            engagement = Engagement.objects.filter(risk_acceptance=self.instance.id).first()
-            findings = finding_objects.exclude(test__engagement__id=engagement.id)
-            if len(findings) > 0:
-                msg = "You are not permitted to add findings to a distinct engagement"
-                raise PermissionDenied(msg)
+            existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
+            existing_and_new_findings = existing_findings | finding_objects
+            validate_findings_have_same_engagement(existing_and_new_findings)
         return data
 
     class Meta:
@@ -2139,7 +2166,7 @@ class ImportScanSerializer(serializers.Serializer):
         """
         context = dict(data)
         # update some vars
-        context["scan"] = data.get("file", None)
+        context["scan"] = data.pop("file", None)
         context["environment"] = Development_Environment.objects.get(
             name=data.get("environment", "Development")
         )
@@ -2199,12 +2226,15 @@ class ImportScanSerializer(serializers.Serializer):
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
 
-    def get_importer(self) -> BaseImporter:
+    def get_importer(
+        self,
+        **kwargs: dict,
+    ) -> BaseImporter:
         """
         Returns a new instance of an importer that extends
         the BaseImporter class
         """
-        return DefaultImporter()
+        return DefaultImporter(**kwargs)
 
     def process_scan(
         self,
@@ -2218,8 +2248,9 @@ class ImportScanSerializer(serializers.Serializer):
         Raises exceptions in the event of an error
         """
         try:
-            context["test"], _, _, _, _, _, _ = self.get_importer().process_scan(
-                **context,
+            importer = self.get_importer(**context)
+            context["test"], _, _, _, _, _, _ = importer.process_scan(
+                context.pop("scan", None)
             )
             # Update the response body with some new data
             if test := context.get("test"):
@@ -2470,19 +2501,25 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
 
-    def get_importer(self) -> BaseImporter:
+    def get_importer(
+        self,
+        **kwargs: dict,
+    ) -> BaseImporter:
         """
         Returns a new instance of an importer that extends
         the BaseImporter class
         """
-        return DefaultImporter()
+        return DefaultImporter(**kwargs)
 
-    def get_reimporter(self) -> BaseImporter:
+    def get_reimporter(
+        self,
+        **kwargs: dict,
+    ) -> BaseImporter:
         """
         Returns a new instance of a reimporter that extends
         the BaseImporter class
         """
-        return DefaultReImporter()
+        return DefaultReImporter(**kwargs)
 
     def process_scan(
         self,
@@ -2500,14 +2537,22 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         try:
             if test := context.get("test"):
                 statistics_before = test.statistics
-                context["test"], _, _, _, _, _, test_import = self.get_reimporter().process_scan(**context)
+                context["test"], _, _, _, _, _, test_import = self.get_reimporter(
+                    **context
+                ).process_scan(
+                    context.pop("scan", None)
+                )
                 if test_import:
                     statistics_delta = test_import.statistics
             elif context.get("auto_create_context"):
                 # Attempt to create an engagement
                 logger.debug("reimport for non-existing test, using import to create new test")
                 context["engagement"] = auto_create_manager.get_or_create_engagement(**context)
-                context["test"], _, _, _, _, _, _ = self.get_importer().process_scan(**context)
+                context["test"], _, _, _, _, _, _ = self.get_importer(
+                    **context
+                ).process_scan(
+                    context.pop("scan", None)
+                )
             else:
                 msg = "A test could not be found!"
                 raise NotFound(msg)
@@ -2957,10 +3002,10 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
     def validate(self, data):
         async_updating = getattr(self.instance, 'async_updating', None)
         if async_updating:
-            for field in ['critical', 'high', 'medium', 'low']:
+            for field in ['critical', 'enforce_critical', 'high', 'enforce_high', 'medium', 'enforce_medium', 'low', 'enforce_low']:
                 old_days = getattr(self.instance, field, None)
                 new_days = data.get(field, None)
-                if old_days and new_days and (old_days != new_days):
+                if old_days is not None and new_days is not None and (old_days != new_days):
                     msg = 'Finding SLA expiration dates are currently being calculated. The SLA days for this SLA configuration cannot be changed until the calculation is complete.'
                     raise serializers.ValidationError(msg)
         return data

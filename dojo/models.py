@@ -877,17 +877,45 @@ class DojoMeta(models.Model):
 class SLA_Configuration(models.Model):
     name = models.CharField(max_length=128, unique=True, blank=False, verbose_name=_('Custom SLA Name'),
         help_text=_('A unique name for the set of SLAs.'))
-    description = models.CharField(max_length=512, null=True, blank=True)
-    critical = models.IntegerField(default=7, verbose_name=_('Critical Finding SLA Days'),
-                                          help_text=_('number of days to remediate a critical finding.'))
-    high = models.IntegerField(default=30, verbose_name=_('High Finding SLA Days'),
-                                          help_text=_('number of days to remediate a high finding.'))
-    medium = models.IntegerField(default=90, verbose_name=_('Medium Finding SLA Days'),
-                                          help_text=_('number of days to remediate a medium finding.'))
-    low = models.IntegerField(default=120, verbose_name=_('Low Finding SLA Days'),
-                                          help_text=_('number of days to remediate a low finding.'))
-    async_updating = models.BooleanField(default=False,
-                                            help_text=_('Findings under this SLA configuration are asynchronously being updated'))
+    description = models.CharField(
+        max_length=512,
+        null=True,
+        blank=True)
+    critical = models.IntegerField(
+        default=7,
+        verbose_name=_('Critical Finding SLA Days'),
+        help_text=_('The number of days to remediate a critical finding.'))
+    enforce_critical = models.BooleanField(
+        default=True,
+        verbose_name=_('Enforce Critical Finding SLA Days'),
+        help_text=_('When enabled, critical findings will be assigned an SLA expiration date based on the critical finding SLA days within this SLA configuration.'))
+    high = models.IntegerField(
+        default=30,
+        verbose_name=_('High Finding SLA Days'),
+        help_text=_('The number of days to remediate a high finding.'))
+    enforce_high = models.BooleanField(
+        default=True,
+        verbose_name=_('Enforce High Finding SLA Days'),
+        help_text=_('When enabled, high findings will be assigned an SLA expiration date based on the high finding SLA days within this SLA configuration.'))
+    medium = models.IntegerField(
+        default=90,
+        verbose_name=_('Medium Finding SLA Days'),
+        help_text=_('The number of days to remediate a medium finding.'))
+    enforce_medium = models.BooleanField(
+        default=True,
+        verbose_name=_('Enforce Medium Finding SLA Days'),
+        help_text=_('When enabled, medium findings will be assigned an SLA expiration date based on the medium finding SLA days within this SLA configuration.'))
+    low = models.IntegerField(
+        default=120,
+        verbose_name=_('Low Finding SLA Days'),
+        help_text=_('The number of days to remediate a low finding.'))
+    enforce_low = models.BooleanField(
+        default=True,
+        verbose_name=_('Enforce Low Finding SLA Days'),
+        help_text=_('When enabled, low findings will be assigned an SLA expiration date based on the low finding SLA days within this SLA configuration.'))
+    async_updating = models.BooleanField(
+        default=False,
+        help_text=_('Findings under this SLA configuration are asynchronously being updated'))
 
     class Meta:
         ordering = ['name']
@@ -903,9 +931,13 @@ class SLA_Configuration(models.Model):
             # if initial config exists and async finding update is already running, revert sla config before saving
             if initial_sla_config and self.async_updating:
                 self.critical = initial_sla_config.critical
+                self.enforce_critical = initial_sla_config.enforce_critical
                 self.high = initial_sla_config.high
+                self.enforce_high = initial_sla_config.enforce_high
                 self.medium = initial_sla_config.medium
+                self.enforce_medium = initial_sla_config.enforce_medium
                 self.low = initial_sla_config.low
+                self.enforce_low = initial_sla_config.enforce_low
 
         super().save(*args, **kwargs)
 
@@ -913,13 +945,13 @@ class SLA_Configuration(models.Model):
         if initial_sla_config is not None and not self.async_updating:
             # check which sla days fields changed based on severity
             severities = []
-            if initial_sla_config.critical != self.critical:
+            if (initial_sla_config.critical != self.critical) or (initial_sla_config.enforce_critical != self.enforce_critical):
                 severities.append('Critical')
-            if initial_sla_config.high != self.high:
+            if (initial_sla_config.high != self.high) or (initial_sla_config.enforce_high != self.enforce_high):
                 severities.append('High')
-            if initial_sla_config.medium != self.medium:
+            if (initial_sla_config.medium != self.medium) or (initial_sla_config.enforce_medium != self.enforce_medium):
                 severities.append('Medium')
-            if initial_sla_config.low != self.low:
+            if (initial_sla_config.low != self.low) or (initial_sla_config.enforce_low != self.enforce_low):
                 severities.append('Low')
             # if severities have changed, update finding sla expiration dates with those severities
             if len(severities):
@@ -2963,7 +2995,9 @@ class Finding(models.Model):
 
     def get_sla_period(self):
         sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
-        return getattr(sla_configuration, self.severity.lower(), None)
+        sla_period = getattr(sla_configuration, self.severity.lower(), None)
+        enforce_period = getattr(sla_configuration, str('enforce_' + self.severity.lower()), None)
+        return sla_period, enforce_period
 
     def set_sla_expiration_date(self):
         system_settings = System_Settings.objects.get()
@@ -2971,9 +3005,12 @@ class Finding(models.Model):
             return None
 
         days_remaining = None
-        sla_period = self.get_sla_period()
-        if sla_period:
+        sla_period, enforce_period = self.get_sla_period()
+        if sla_period is not None and enforce_period:
             days_remaining = sla_period - self.sla_age
+        else:
+            self.sla_expiration_date = Finding().sla_expiration_date
+            return None
 
         if days_remaining:
             if self.mitigated:
@@ -4524,6 +4561,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Endpoint)
     auditlog.register(Engagement)
     auditlog.register(Finding)
+    auditlog.register(Finding_Group)
     auditlog.register(Product_Type)
     auditlog.register(Product)
     auditlog.register(Test)

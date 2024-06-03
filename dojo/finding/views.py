@@ -22,6 +22,7 @@ from django.template.defaultfilters import pluralize
 from django.urls import reverse
 from django.utils import formats, timezone
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.http import require_POST
 from imagekit import ImageSpec
@@ -117,7 +118,7 @@ from dojo.utils import (
     get_system_setting,
     get_words_for_field,
     match_finding_to_existing_findings,
-    process_notifications,
+    process_tag_notifications,
     redirect,
     redirect_to_return_url_or_else,
     reopen_external_issue,
@@ -716,7 +717,7 @@ class ViewFinding(View):
                 reverse("view_finding", args=(finding.id,))
             )
             title = f"Finding: {finding.title}"
-            process_notifications(request, new_note, url, title)
+            process_tag_notifications(request, new_note, url, title)
             # Add a message to the request
             messages.add_message(
                 request, messages.SUCCESS, "Note saved.", extra_tags="alert-success"
@@ -1169,9 +1170,14 @@ class DeleteFinding(View):
                 "Finding deleted successfully.",
                 extra_tags="alert-success",
             )
+
+            # Note: this notification has not be moved to "@receiver(post_delete, sender=Finding)" method as many other notifications
+            # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+            # TODO: but same should be implemented for API endpoint
+
             # Send a notification that the finding had been deleted
             create_notification(
-                event="other",
+                event="finding_deleted",
                 title=f"Deletion of {finding.title}",
                 description=f'The finding "{finding.title}" was deleted by {request.user}',
                 product=product,
@@ -1288,9 +1294,14 @@ def close_finding(request, fid):
                     "Finding closed.",
                     extra_tags="alert-success",
                 )
+
+                # Note: this notification has not be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
+                # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+                # TODO: but same should be implemented for API endpoint
+
                 create_notification(
-                    event="other",
-                    title=f"Closing of {finding.title}",
+                    event="finding_closed",
+                    title=_("Closing of %s") % finding.title,
                     finding=finding,
                     description=f'The finding "{finding.title}" was closed by {request.user}',
                     url=reverse("view_finding", args=(finding.id,)),
@@ -1451,9 +1462,14 @@ def reopen_finding(request, fid):
     messages.add_message(
         request, messages.SUCCESS, "Finding Reopened.", extra_tags="alert-success"
     )
+
+    # Note: this notification has not be moved to "@receiver(pre_save, sender=Finding)" method as many other notifications
+    # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
+    # TODO: but same should be implemented for API endpoint
+
     create_notification(
-        event="other",
-        title=f"Reopening of {finding.title}",
+        event="finding_reopened",
+        title=_("Reopening of %s") % finding.title,
         finding=finding,
         description=f'The finding "{finding.title}" was reopened by {request.user}',
         url=reverse("view_finding", args=(finding.id,)),
@@ -1510,8 +1526,8 @@ def copy_finding(request, fid):
                 extra_tags="alert-success",
             )
             create_notification(
-                event="other",
-                title=f"Copying of {finding.title}",
+                event="finding_copied",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                title=_("Copying of %s") % finding.title,
                 description=f'The finding "{finding.title}" was copied by {request.user} to {test.title}',
                 product=product,
                 url=request.build_absolute_uri(
@@ -1686,7 +1702,7 @@ def request_finding_review(request, fid):
             logger.debug(f"Asking {reviewers_string} for review")
 
             create_notification(
-                event="review_requested",
+                event="review_requested",  # TODO - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title="Finding review requested",
                 requested_by=user,
                 note=new_note,

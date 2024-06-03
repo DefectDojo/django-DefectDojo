@@ -3,10 +3,13 @@ from re import compile
 from threading import local
 from urllib.parse import quote
 
+from auditlog.context import set_actor
+from auditlog.middleware import AuditlogMiddleware as _AuditlogMiddleware
 from django.conf import settings
 from django.db import models
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils.functional import SimpleLazyObject
 
 logger = logging.getLogger(__name__)
 
@@ -164,3 +167,17 @@ class AdditionalHeaderMiddleware:
     def __call__(self, request):
         request.META.update(settings.ADDITIONAL_HEADERS)
         return self.get_response(request)
+
+
+# This solution comes from https://github.com/jazzband/django-auditlog/issues/115#issuecomment-1539262735
+# It fix situation when TokenAuthentication is used in API. Otherwise, actor in AuditLog would be set to None
+class AuditlogMiddleware(_AuditlogMiddleware):
+    def __call__(self, request):
+        remote_addr = self._get_remote_addr(request)
+
+        user = SimpleLazyObject(lambda: getattr(request, "user", None))
+
+        context = set_actor(actor=user, remote_addr=remote_addr)
+
+        with context:
+            return self.get_response(request)

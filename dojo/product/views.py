@@ -91,7 +91,6 @@ from dojo.models import (
     Test,
     Test_Type,
 )
-from dojo.notifications.helper import create_notification
 from dojo.product.queries import (
     get_authorized_groups_for_product,
     get_authorized_members_for_product,
@@ -903,10 +902,6 @@ def new_product(request, ptid=None):
                         except:
                             logger.info('Labels cannot be created - they may already exists')
 
-            create_notification(event='product_added', title=product.name,
-                                product=product,
-                                url=reverse('view_product', args=(product.id,)))
-
             if not error:
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
             else:
@@ -1022,7 +1017,6 @@ def delete_product(request, pid):
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
-                product_type = product.prod_type
                 if get_setting("ASYNC_OBJECT_DELETE"):
                     async_del = async_delete()
                     async_del.delete(product)
@@ -1034,13 +1028,6 @@ def delete_product(request, pid):
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                    title=_('Deletion of %(name)s') % {'name': product.name},
-                                    product_type=product_type,
-                                    description=_('The product "%(name)s" was deleted by %(user)s') % {
-                                        'name': product.name, 'user': request.user},
-                                    url=reverse('product'),
-                                    icon="exclamation-triangle")
                 logger.debug('delete_product: POST RETURN')
                 return HttpResponseRedirect(reverse('product'))
             else:

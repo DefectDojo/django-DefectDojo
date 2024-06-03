@@ -94,13 +94,10 @@ class MSDefenderParser:
         description += "productVendor: " + str(vulnerability['productVendor']) + "\n"
         description += "productVersion: " + str(vulnerability['productVersion']) + "\n"
         description += "machine Info: id: " + str(machine['id']) + "\n"
-        description += "machine Info: computerDnsName: " + str(machine['computerDnsName']) + "\n"
         description += "machine Info: osPlatform: " + str(machine['osPlatform']) + "\n"
         description += "machine Info: osVersion: " + str(machine['osVersion']) + "\n"
         description += "machine Info: osProcessor: " + str(machine['osProcessor']) + "\n"
         description += "machine Info: version: " + str(machine['version']) + "\n"
-        description += "machine Info: lastIpAddress: " + str(machine['lastIpAddress']) + "\n"
-        description += "machine Info: lastExternalIpAddress: " + str(machine['lastExternalIpAddress']) + "\n"
         description += "machine Info: agentVersion: " + str(machine['agentVersion']) + "\n"
         description += "machine Info: osBuild: " + str(machine['osBuild']) + "\n"
         description += "machine Info: healthStatus: " + str(machine['healthStatus']) + "\n"
@@ -115,7 +112,6 @@ class MSDefenderParser:
         description += "machine Info: onboardingStatus: " + str(machine['onboardingStatus']) + "\n"
         description += "machine Info: osArchitecture: " + str(machine['osArchitecture']) + "\n"
         description += "machine Info: managedBy: " + str(machine['managedBy']) + "\n"
-        description += "machine Info: ipAddresses: " + str(machine['ipAddresses']) + "\n"
         title = str(vulnerability['cveId'])
         if str(machine['computerDnsName']) != "null":
             title = title + "_" + str(machine['computerDnsName'])
