@@ -38,7 +38,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Test_Type,
     Tool_Configuration,
-    Vulnerability_Id,
+    Vulnerability_Id,  # noqa: F401
 )
 from dojo.tools.factory import get_parser
 from dojo.utils import get_current_user, is_finding_groups_enabled, max_safe
@@ -878,14 +878,11 @@ class BaseImporter(ABC, DefaultReImporterEndpointManager):
             finding.unsaved_vulnerability_ids = [finding.cve]
 
         if finding.unsaved_vulnerability_ids:
-            # Remove duplicates
-            finding.unsaved_vulnerability_ids = list(dict.fromkeys(finding.unsaved_vulnerability_ids))
-            # Add all vulnerability ids to the database
-            for vulnerability_id in finding.unsaved_vulnerability_ids:
-                Vulnerability_Id(
-                    vulnerability_id=vulnerability_id,
-                    finding=finding,
-                ).save()
+            # Remove old vulnerability ids - keeping this call only because of flake8
+            Vulnerability_Id.objects.filter(finding=finding).delete()
+
+            # user the helper function
+            finding_helper.save_vulnerability_ids(finding, finding.unsaved_vulnerability_ids)
 
         return finding
 
