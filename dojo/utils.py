@@ -2502,7 +2502,10 @@ def get_open_findings_burndown(product):
                 if f.severity == 'Info':
                     info_count += 1
         elif f.risk_accepted:
-            f_risk_accepted_date = f.risk_acceptance.created.timestamp()
+            # simple risk acceptance does not have a risk acceptance object, so we fall back to creation date.
+            f_risk_accepted_date = f.created.timestamp()
+            if f.risk_acceptance:
+                f_risk_accepted_date = f.risk_acceptance.created.timestamp()
             if f_risk_accepted_date >= start_date.timestamp():
                 if f.severity == 'Critical':
                     critical_count += 1
@@ -2563,7 +2566,9 @@ def get_open_findings_burndown(product):
 
             # If a finding was risk accepted on this day we subtract it
             elif f.risk_accepted:
-                f_risk_accepted_date = f.risk_acceptance.created.timestamp()
+                f_risk_accepted_date = f.created.timestamp()
+                if f.risk_acceptance:
+                    f_risk_accepted_date = f.risk_acceptance.created.timestamp()
                 if f_risk_accepted_date >= d_start and f_risk_accepted_date < d_end:
                     if f.severity == 'Critical':
                         critical_count -= 1
