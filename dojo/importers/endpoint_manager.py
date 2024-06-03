@@ -2,12 +2,16 @@ import logging
 from typing import List
 
 from django.conf import settings
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.urls import reverse
 from django.utils import timezone
 
 from dojo.celery import app
 from dojo.decorators import dojo_async_task
+from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.models import (
     Dojo_User,
+    Endpoint,
     Endpoint_Status,
     Finding,
 )
@@ -15,7 +19,46 @@ from dojo.models import (
 logger = logging.getLogger(__name__)
 
 
-class DefaultReImporterEndpointManager:
+class EndpointManager:
+    @dojo_async_task
+    @app.task()
+    def add_endpoints_to_unsaved_finding(
+        self,
+        finding: Finding,
+        endpoints: List[Endpoint],
+        **kwargs: dict,
+    ) -> None:
+        """
+        Creates Endpoint objects for a single finding and creates the link via the endpoint status
+        """
+        logger.debug(f"IMPORT_SCAN: Adding {len(endpoints)} endpoints to finding: {finding}")
+        self.clean_unsaved_endpoints(endpoints)
+        for endpoint in endpoints:
+            ep = None
+            try:
+                ep, _ = endpoint_get_or_create(
+                    protocol=endpoint.protocol,
+                    userinfo=endpoint.userinfo,
+                    host=endpoint.host,
+                    port=endpoint.port,
+                    path=endpoint.path,
+                    query=endpoint.query,
+                    fragment=endpoint.fragment,
+                    product=finding.test.engagement.product)
+            except (MultipleObjectsReturned):
+                msg = (
+                    f"Endpoints in your database are broken. "
+                    f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them."
+                )
+                raise Exception(msg)
+
+            Endpoint_Status.objects.get_or_create(
+                finding=finding,
+                endpoint=ep,
+                defaults={'date': finding.date})
+        logger.debug(f"IMPORT_SCAN: {len(endpoints)} imported")
+        return None
+
     @dojo_async_task
     @app.task()
     def mitigate_endpoint_status(
@@ -59,6 +102,64 @@ class DefaultReImporterEndpointManager:
                 endpoint_status.save()
         return None
 
+    def chunk_endpoints(
+        self,
+        endpoint_list: List[Endpoint],
+        chunk_size: int = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE,
+    ) -> List[List[Endpoint]]:
+        """
+        Split a single large list into a list of lists of size `chunk_size`.
+        For Example
+        ```
+        >>> chunk_endpoints([A, B, C, D, E], 2)
+        >>> [[A, B], [B, C], [E]]
+        ```
+        """
+        # Break the list of parsed findings into "chunk_size" lists
+        chunk_list = [endpoint_list[i:i + chunk_size] for i in range(0, len(endpoint_list), chunk_size)]
+        logger.debug(f"Split endpoints into {len(chunk_list)} chunks of {chunk_size}")
+        return chunk_list
+
+    def chunk_endpoints_and_disperse(
+        self,
+        finding: Finding,
+        endpoints: List[Endpoint],
+        **kwargs: dict,
+    ) -> None:
+        """
+        Determines whether to asynchronously process endpoints on a finding or not. if so,
+        chunk up the findings to be dispersed into individual celery workers. Otherwise,
+        only use one worker
+        """
+        if settings.ASYNC_FINDING_IMPORT:
+            chunked_list = self.chunk_endpoints(endpoints)
+            # If there is only one chunk, then do not bother with async
+            if len(chunked_list) < 2:
+                self.add_endpoints_to_unsaved_finding(finding, endpoints, sync=True)
+                return []
+            # First kick off all the workers
+            for endpoints_list in chunked_list:
+                self.add_endpoints_to_unsaved_finding(finding, endpoints_list, sync=False)
+        else:
+            # Do not run this asynchronously or chunk the endpoints
+            self.add_endpoints_to_unsaved_finding(finding, endpoints, sync=True)
+        return None
+
+    def clean_unsaved_endpoints(
+        self,
+        endpoints: List[Endpoint]
+    ) -> None:
+        """
+        Clean endpoints that are supplied. For any endpoints that fail this validation
+        process, raise a message that broken endpoints are being stored
+        """
+        for endpoint in endpoints:
+            try:
+                endpoint.clean()
+            except ValidationError as e:
+                logger.warning(f"DefectDojo is storing broken endpoint because cleaning wasn't successful: {e}")
+        return None
+
     def chunk_endpoints_and_reactivate(
         self,
         endpoint_status_list: List[Endpoint_Status],
@@ -71,7 +172,7 @@ class DefaultReImporterEndpointManager:
         """
         # Determine if this can be run async
         if settings.ASYNC_FINDING_IMPORT:
-            chunked_list = self.chunk_objects(endpoint_status_list)
+            chunked_list = self.chunk_endpoints(endpoint_status_list)
             # If there is only one chunk, then do not bother with async
             if len(chunked_list) < 2:
                 self.reactivate_endpoint_status(endpoint_status_list, sync=True)
@@ -96,7 +197,7 @@ class DefaultReImporterEndpointManager:
         """
         # Determine if this can be run async
         if settings.ASYNC_FINDING_IMPORT:
-            chunked_list = self.chunk_objects(endpoint_status_list)
+            chunked_list = self.chunk_endpoints(endpoint_status_list)
             # If there is only one chunk, then do not bother with async
             if len(chunked_list) < 2:
                 self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
