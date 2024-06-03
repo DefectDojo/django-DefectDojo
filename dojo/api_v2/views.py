@@ -156,6 +156,7 @@ from dojo.reports.views import (
     report_url_resolver,
 )
 from dojo.risk_acceptance import api as ra_api
+from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
@@ -667,6 +668,14 @@ class RiskAcceptanceViewSet(
         IsAuthenticated,
         permissions.UserHasRiskAcceptancePermission,
     )
+
+    def destroy(self, request, pk=None):
+        instance = self.get_object()
+        # Remove any findings on the risk acceptance
+        for finding in instance.accepted_findings.all():
+            remove_finding_from_risk_acceptance(instance, finding)
+        # return the response of the object being deleted
+        return super().destroy(request, pk=pk)
 
     def get_queryset(self):
         return (
