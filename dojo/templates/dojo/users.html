@@ -67,6 +67,7 @@
                                     {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap, text-center">{% dojo_sort request superuser 'is_superuser' %}</th>
                                     <th class="nowrap">{% trans "Global Role" %}</th>
+                                    <th class="nowrap">{% trans "Date Joined" %}</th>
                                     <th class="nowrap">{% trans "Last Login" %}</th>
                                     {% block users_table_extra_header_rows %}
                                     {% endblock users_table_extra_header_rows %}
@@ -124,6 +125,7 @@
                                             <i class="text-success fa-solid fa-check"></i>{% else %}
                                             <i class="text-danger fa-solid fa-xmark"></i>{% endif %}</td>
                                         <td>{% if u.global_role.role %} {{ u.global_role.role }} {% endif %}</td>
+                                        <td>{{ u.date_joined }}</td>
                                         <td>{% if u.last_login %}{{ u.last_login }}{% else %}{% trans "Never" %}{% endif %}</td>
                                         {% block users_table_extra_data_rows %}
                                         {% endblock users_table_extra_data_rows %}

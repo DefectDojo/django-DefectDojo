@@ -25,14 +25,19 @@ from dojo.forms import (
     Product_TypeForm,
 )
 from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role
-from dojo.notifications.helper import create_notification
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
     get_authorized_groups_for_product_type,
     get_authorized_members_for_product_type,
     get_authorized_product_types,
 )
-from dojo.utils import add_breadcrumb, async_delete, get_page_items, get_setting, is_title_in_breadcrumbs
+from dojo.utils import (
+    add_breadcrumb,
+    async_delete,
+    get_page_items,
+    get_setting,
+    is_title_in_breadcrumbs,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -98,9 +103,6 @@ def add_product_type(request):
                                  messages.SUCCESS,
                                  _('Product type added successfully.'),
                                  extra_tags='alert-success')
-            create_notification(event='product_type_added', title=product_type.name,
-                                product_type=product_type,
-                                url=reverse('view_product_type', args=(product_type.id,)))
             return HttpResponseRedirect(reverse('product_type'))
     add_breadcrumb(title=page_name, top_level=False, request=request)
 
@@ -147,12 +149,6 @@ def delete_product_type(request, ptid):
                                      messages.SUCCESS,
                                      message,
                                      extra_tags='alert-success')
-                create_notification(event='other',
-                                title=f'Deletion of {product_type.name}',
-                                no_users=True,
-                                description=f'The product type "{product_type.name}" was deleted by {request.user}',
-                                url=request.build_absolute_uri(reverse('product_type')),
-                                icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('product_type'))
 
     rels = [_('Previewing the relationships has been disabled.'), '']

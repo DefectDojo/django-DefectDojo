@@ -1381,7 +1381,7 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
         reopen_external_issue_github(find, note, prod, eng)
 
 
-def process_notifications(request, note, parent_url, parent_title):
+def process_tag_notifications(request, note, parent_url, parent_title):
     regex = re.compile(r'(?:\A|\s)@(\w+)\b')
 
     usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
@@ -1761,15 +1761,6 @@ def user_post_save(sender, instance, created, **kwargs):
     if instance.is_superuser and not instance.is_staff:
         instance.is_staff = True
         instance.save()
-
-
-@receiver(post_save, sender=Engagement)
-def engagement_post_Save(sender, instance, created, **kwargs):
-    if created:
-        engagement = instance
-        title = 'Engagement created for ' + str(engagement.product) + ': ' + str(engagement.name)
-        create_notification(event='engagement_added', title=title, engagement=engagement, product=engagement.product,
-                            url=reverse('view_engagement', args=(engagement.id,)))
 
 
 def is_safe_url(url):
