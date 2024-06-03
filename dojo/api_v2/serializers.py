@@ -108,6 +108,7 @@ from dojo.models import (
     Vulnerability_Id_Template,
     get_current_date,
 )
+from dojo.risk_acceptance.helper import add_findings_to_risk_acceptance, remove_finding_from_risk_acceptance
 from dojo.tools.factory import (
     get_choices_sorted,
     requires_file,
@@ -1452,6 +1453,29 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     decision = serializers.SerializerMethodField()
     path = serializers.SerializerMethodField()
 
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        add_findings_to_risk_acceptance(instance, instance.accepted_findings.all())
+        return instance
+
+    def update(self, instance, validated_data):
+        # Determine findings to risk accept, and findings to unaccept risk
+        existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
+        new_findings_ids = [x.id for x in validated_data.get("accepted_findings", [])]
+        new_findings = Finding.objects.filter(id__in=new_findings_ids)
+        findings_to_add = set(new_findings) - set(existing_findings)
+        findings_to_remove = set(existing_findings) - set(new_findings)
+        findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
+        findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
+        # Make the update in the database
+        instance = super().update(instance, validated_data)
+        # Add the new findings
+        add_findings_to_risk_acceptance(instance, findings_to_add)
+        # Remove the ones that were not present in the payload
+        for finding in findings_to_remove:
+            remove_finding_from_risk_acceptance(instance, finding)
+        return instance
+
     @extend_schema_field(serializers.CharField())
     def get_recommendation(self, obj):
         return Risk_Acceptance.TREATMENT_TRANSLATIONS.get(obj.recommendation)
@@ -1485,6 +1509,12 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
+        def validate_findings_have_same_engagement(finding_objects: List[Finding]):
+            engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
+            if engagements > 1:
+                msg = "You are not permitted to add findings from multiple engagements"
+                raise PermissionDenied(msg)
+
         findings = data.get('accepted_findings', [])
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
@@ -1493,16 +1523,11 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             msg = "You are not permitted to add one or more selected findings to this risk acceptance"
             raise PermissionDenied(msg)
         if self.context["request"].method == "POST":
-            engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
-            if engagements > 1:
-                msg = "You are not permitted to add findings to a distinct engagement"
-                raise PermissionDenied(msg)
+            validate_findings_have_same_engagement(finding_objects)
         elif self.context['request'].method in ['PATCH', 'PUT']:
-            engagement = Engagement.objects.filter(risk_acceptance=self.instance.id).first()
-            findings = finding_objects.exclude(test__engagement__id=engagement.id)
-            if len(findings) > 0:
-                msg = "You are not permitted to add findings to a distinct engagement"
-                raise PermissionDenied(msg)
+            existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
+            existing_and_new_findings = existing_findings | finding_objects
+            validate_findings_have_same_engagement(existing_and_new_findings)
         return data
 
     class Meta:
