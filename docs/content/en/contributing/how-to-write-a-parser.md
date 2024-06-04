@@ -43,7 +43,7 @@ $ docker-compose build --build-arg uid=1000
 
 ## Factory contract
 
-Parser are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
+Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
 
 1. your parser **MUST** be in a sub-module of module `dojo.tools`
    - ex: `dojo.tools.my_tool.parser` module
@@ -157,7 +157,7 @@ Good example:
 
 ```python
    if "mykey" in data:
-       finding.cve = data["mykey"]
+       finding.cwe = data["mykey"]
 ```
 
 ### Do not parse CVSS by hand (vector, score or severity)
@@ -244,7 +244,7 @@ For ex:
             self.assertEqual(True, finding.verified)
             self.assertEqual(False, finding.duplicate)
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("CVE-2020-36234", finding.cve)
+            self.assertEqual("CVE-2020-36234", finding.vulnerability_ids[0])
             self.assertEqual(261, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
             self.assertIn("security", finding.tags)
@@ -252,6 +252,24 @@ For ex:
             self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
             self.assertEqual("TEST1", finding.vuln_id_from_tool)
 ```
+
+### Use with to open example files
+
+In order to make certain that file handles are closed properly, please use the with pattern to open files.
+Instead of:
+```python
+    testfile = open("path_to_file.json")
+    ...
+    testfile.close()
+```
+
+use:
+```python
+    with open("path_to_file.json") as testfile:
+        ...
+```
+
+This ensures the file is closed at the end of the with statement, even if an exception occurs somewhere in the block.
 
 ### Test database
 

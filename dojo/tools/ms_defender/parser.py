@@ -43,7 +43,7 @@ class MSDefenderParser:
                     if "machines/" in content and "machines/" != content:
                         machinefiles.append(content)
                 vulnerabilities = []
-                machines = []
+                machines = {}
                 for vulnerabilityfile in vulnerabilityfiles:
                     output = json.loads(zipdata[vulnerabilityfile].decode('ascii'))['value']
                     for data in output:
@@ -51,12 +51,11 @@ class MSDefenderParser:
                 for machinefile in machinefiles:
                     output = json.loads(zipdata[machinefile].decode('ascii'))['value']
                     for data in output:
-                        machines.append(data)
+                        machines[data.get('id')] = data
                 for vulnerability in vulnerabilities:
                     try:
-                        machine = list(filter(lambda m: m['id'] == vulnerability['machineId'], machines))[0]
-                        self.process_zip(vulnerability, machine)
-                    except IndexError:
+                        self.process_zip(vulnerability, machines[vulnerability['machineId']])
+                    except (IndexError, KeyError):
                         self.process_json(vulnerability)
         else:
             return []
@@ -73,7 +72,7 @@ class MSDefenderParser:
         title = str(vulnerability['cveId'])
         finding = Finding(
             title=title + "_" + vulnerability["machineId"],
-            severity=vulnerability['severity'],
+            severity=self.severity_check(vulnerability['severity']),
             description=description,
             static_finding=False,
             dynamic_finding=True,
@@ -81,7 +80,8 @@ class MSDefenderParser:
         if vulnerability['fixingKbId'] is not None:
             finding.mitigation = vulnerability['fixingKbId']
         if vulnerability['cveId'] is not None:
-            finding.cve = vulnerability['cveId']
+            finding.unsaved_vulnerability_ids = []
+            finding.unsaved_vulnerability_ids.append(vulnerability['cveId'])
         self.findings.append(finding)
         finding.unsaved_endpoints = []
 
@@ -94,13 +94,10 @@ class MSDefenderParser:
         description += "productVendor: " + str(vulnerability['productVendor']) + "\n"
         description += "productVersion: " + str(vulnerability['productVersion']) + "\n"
         description += "machine Info: id: " + str(machine['id']) + "\n"
-        description += "machine Info: computerDnsName: " + str(machine['computerDnsName']) + "\n"
         description += "machine Info: osPlatform: " + str(machine['osPlatform']) + "\n"
         description += "machine Info: osVersion: " + str(machine['osVersion']) + "\n"
         description += "machine Info: osProcessor: " + str(machine['osProcessor']) + "\n"
         description += "machine Info: version: " + str(machine['version']) + "\n"
-        description += "machine Info: lastIpAddress: " + str(machine['lastIpAddress']) + "\n"
-        description += "machine Info: lastExternalIpAddress: " + str(machine['lastExternalIpAddress']) + "\n"
         description += "machine Info: agentVersion: " + str(machine['agentVersion']) + "\n"
         description += "machine Info: osBuild: " + str(machine['osBuild']) + "\n"
         description += "machine Info: healthStatus: " + str(machine['healthStatus']) + "\n"
@@ -115,7 +112,6 @@ class MSDefenderParser:
         description += "machine Info: onboardingStatus: " + str(machine['onboardingStatus']) + "\n"
         description += "machine Info: osArchitecture: " + str(machine['osArchitecture']) + "\n"
         description += "machine Info: managedBy: " + str(machine['managedBy']) + "\n"
-        description += "machine Info: ipAddresses: " + str(machine['ipAddresses']) + "\n"
         title = str(vulnerability['cveId'])
         if str(machine['computerDnsName']) != "null":
             title = title + "_" + str(machine['computerDnsName'])
@@ -123,7 +119,7 @@ class MSDefenderParser:
             title = title + "_" + str(machine['osPlatform'])
         finding = Finding(
             title=title + "_" + vulnerability["machineId"],
-            severity=vulnerability['severity'],
+            severity=self.severity_check(vulnerability['severity']),
             description=description,
             static_finding=False,
             dynamic_finding=True,
@@ -131,7 +127,8 @@ class MSDefenderParser:
         if vulnerability['fixingKbId'] is not None:
             finding.mitigation = vulnerability['fixingKbId']
         if vulnerability['cveId'] is not None:
-            finding.cve = vulnerability['cveId']
+            finding.unsaved_vulnerability_ids = []
+            finding.unsaved_vulnerability_ids.append(vulnerability['cveId'])
         self.findings.append(finding)
         finding.unsaved_endpoints = []
         if machine['computerDnsName'] is not None:
@@ -140,3 +137,9 @@ class MSDefenderParser:
             finding.unsaved_endpoints.append(Endpoint(host=str(machine['lastIpAddress'])))
         if machine['lastExternalIpAddress'] is not None:
             finding.unsaved_endpoints.append(Endpoint(host=str(machine['lastExternalIpAddress'])))
+
+    def severity_check(self, input):
+        if input in ['Informational', 'Low', 'Medium', 'High', 'Critical']:
+            return input
+        else:
+            return "Informational"

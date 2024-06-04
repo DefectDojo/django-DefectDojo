@@ -85,7 +85,10 @@ class ImportReimportMixin:
         self.clair_empty = self.scans_path + 'clair/clair_empty.json'
         self.scan_type_clair = 'Clair Scan'
 
+        self.scan_type_generic = "Generic Findings Import"
         self.generic_filename_with_file = self.scans_path + "generic/test_with_image.json"
+        self.generic_import_1 = self.scans_path + "generic/test_import_report1.json"
+        self.generic_import_2 = self.scans_path + "generic/test_import_report2.json"
 
         self.aws_prowler_file_name = self.scans_path + 'aws_prowler/many_vuln.json'
         self.aws_prowler_file_name_plus_one = self.scans_path + 'aws_prowler/many_vuln_plus_one.json'
@@ -1147,9 +1150,7 @@ class ImportReimportMixin:
         import0 = self.import_scan_with_params(self.gitlab_dep_scan_components_filename,
                                                scan_type=self.scan_type_gtlab_dep_scan,
                                                minimum_severity='Info')
-
         test_id = import0['test']
-
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(6, active_findings_before)
 
@@ -1421,7 +1422,7 @@ class ImportReimportMixin:
         test_id = import0['test']
         test = Test.objects.get(id=test_id)
         findings = Finding.objects.filter(test=test)
-        self.assertEqual(4, len(findings))
+        self.assertEqual(5, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
@@ -1439,11 +1440,20 @@ class ImportReimportMixin:
 
         self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
         findings = Finding.objects.filter(test=reimport_test)
-        self.assertEqual(4, len(findings))
+        self.assertEqual(5, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
         self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
+
+    def test_import_history_reactivated_and_untouched_findings_do_not_mix(self):
+        import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
+        test_id = import0['test']
+        # reimport the second report
+        self.reimport_scan_with_params(test_id, self.generic_import_2, scan_type=self.scan_type_generic)
+        # reimport the first report again
+        self.reimport_scan_with_params(test_id, self.generic_import_1, scan_type=self.scan_type_generic)
+        # Passing this test means an exception does not occur
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):

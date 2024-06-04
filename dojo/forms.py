@@ -850,13 +850,22 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
             # Don't bother validating the formset unless each form is valid on its own
             return
         for form in self.forms:
-            print(dir(form))
             file = form.cleaned_data.get('file', None)
             if file:
                 ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
                 valid_extensions = settings.FILE_UPLOAD_TYPES
                 if ext.lower() not in valid_extensions:
-                    form.add_error('file', 'Unsupported file extension.')
+                    if accepted_extensions := f"{', '.join(valid_extensions)}":
+                        msg = (
+                            "Unsupported extension. Supported extensions are as "
+                            f"follows: {accepted_extensions}"
+                        )
+                    else:
+                        msg = (
+                            "File uploads are prohibited due to the list of acceptable "
+                            "file extensions being empty"
+                        )
+                    form.add_error('file', msg)
 
 
 ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=['title', 'file'], can_delete=True, formset=BaseManageFileFormSet)
@@ -2587,17 +2596,21 @@ class SLAConfigForm(forms.ModelForm):
             msg = 'Finding SLA expiration dates are currently being recalculated. ' + \
                   'This field cannot be changed until the calculation is complete.'
             self.fields['critical'].disabled = True
+            self.fields['enforce_critical'].disabled = True
             self.fields['critical'].widget.attrs['message'] = msg
             self.fields['high'].disabled = True
+            self.fields['enforce_high'].disabled = True
             self.fields['high'].widget.attrs['message'] = msg
             self.fields['medium'].disabled = True
+            self.fields['enforce_medium'].disabled = True
             self.fields['medium'].widget.attrs['message'] = msg
             self.fields['low'].disabled = True
+            self.fields['enforce_low'].disabled = True
             self.fields['low'].widget.attrs['message'] = msg
 
     class Meta:
         model = SLA_Configuration
-        fields = ['name', 'description', 'critical', 'high', 'medium', 'low']
+        fields = ['name', 'description', 'critical', 'enforce_critical', 'high', 'enforce_high', 'medium', 'enforce_medium', 'low', 'enforce_low']
 
 
 class DeleteSLAConfigForm(forms.ModelForm):
