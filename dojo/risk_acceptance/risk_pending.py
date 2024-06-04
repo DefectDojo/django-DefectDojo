@@ -144,7 +144,7 @@ def risk_acceptante_pending(
         or role_has_exclusive_permissions(user)
         or number_of_acceptors_required == 0
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
-        or finding.impact == "Compliance"
+        or finding.impact in settings.COMPLIANCE_FILTER_RISK
     ):
         finding.accepted_by = user.username
         risk_accepted_succesfully(finding, risk_acceptance)
@@ -226,7 +226,7 @@ def is_permissions_risk_acceptance(
         result = True
 
     if (
-        finding.impact == "Compliance"
+        finding.impact in settings.COMPLIANCE_FILTER_RISK
         and finding.risk_accepted is False
         and len(user.groups.filter(dojo_group__name=finding.impact)) > 0
     ):
