@@ -3,52 +3,47 @@ import { addOption} from '../helper/helper.js';
 
 var ObjFindings= {};
 export var transferId = 0;
+export var engagementId = 0;
 var productId = 0;
 var productTypeId = 0;
 var host = window.location.host;
 
 
-
-$(document).on('click', '#id_transfer_finding_show_modal', function(event) {
-    event.preventDefault();
-    ObjFindings = {};
-    transferId = $(this).data('transfer-id');
-    productId = $(this).data('product-id');
-    productTypeId = $(this).data('product-type-id');
-    getTransferFindings(transferId)
-
-    $(document).on('change', '.related-finding-chosen', function() {
-        let selectedValue = $(this);
+$(document).ready(function(){
+    $(document).on('click','.cls_transfer_finding_show_modal', function(event) {
         let row = $(this).closest('tr');
-        let finding = row.find('.btn-success');
-        row.find('.cls-finding-status').text("Transfer Pending").css("color", "#333");
-        let finding_id = finding.attr('data-btn-success');
-        delete ObjFindings[finding_id];
-        finding.attr('data-related-finding',selectedValue.val());
+        let selectEngagement = row.find('.cls-choosen-engagement')
+        let id_engagement = selectEngagement.selectpicker('val');
+        $('.alert').alert().addClass('sr-only')
+        if (id_engagement > 0){
+            $('#modalTransferFinding').modal('toggle')
+            engagementId = id_engagement
+            console.log(engagementId)
+        }
+        else{
+            $('.alert').alert().removeClass('sr-only')
+        }
+
+        ObjFindings = {};
+        transferId = $(this).data('transfer-id');
+        productId = $(this).data('product-id');
+        productTypeId = $(this).data('product-type-id');
+        getTransferFindings(transferId)
+
+        $(document).on('change', '.related-finding-chosen', function(event){
+            let selectedValue = $(this);
+            let row = $(this).closest('tr');
+            let finding = row.find('.btn-success');
+            row.find('.cls-finding-status').text("Transfer Pending").css("color", "#333");
+            let finding_id = finding.attr('data-btn-success');
+            delete ObjFindings[finding_id];
+            finding.attr('data-related-finding',selectedValue.val());
+        });
     });
 });
 
 
-$(document).ready(function(){
-    $("#id-chosen-engagement").on("change", handleEngagementChange);
-})
-
-function handleEngagementChange(){
-    console.log("Se obtine la informacion del engagement selecionado para poder abril el modal")
-    // let idEngagement = $("#id-chosen-engagement").val();
-    // let engagementElement = document.getElementById('id-chosen-engagement');
-    // getEngagementOptions(idEngagement, engagementElement)
-    // clearLabel("id-chosen-engagement");
-    // if (idProduct!== '') {
-    //     getEngagementOptions(idProduct, engagementElement)
-    // } else {
-    //     clearSelect(engagementElement);
-    // }
-}
-
-
 function getEngagementOptions(idProduct, engagementElement){
-    console.log("entro")
     $.ajax({
         url: "/api/v2/engagements/?product=" + idProduct,
         type: "GET",
@@ -105,6 +100,7 @@ export async function getTransferFindingsAsync(transferFindingId) {
     }
 }
 function AcceptanceFinding(findingId, related_finding){
+    // guarar engagement
     if(related_finding == ""){
         ObjFindings[findingId] = {"risk_status": "Transfer Accepted"}
     }
@@ -259,4 +255,3 @@ export async function generateRequestTransferFindingUpdate(transferFindingId, ri
 function deepCopy(objeto) {
     return JSON.parse(JSON.stringify(objeto));
 }
-
