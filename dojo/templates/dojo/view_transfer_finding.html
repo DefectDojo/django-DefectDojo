@@ -137,13 +137,17 @@
                             <td data-origin-pid="{{transfer_findings.origin_product_type.id}}">{{transfer_findings.origin_product_type}}</td>
                             <td data-destination-ptid="{{transfer_findings.destination_product_type.id}}">{{transfer_findings.destination_product_type}}</td>
                             <td data-destination-pid="{{transfer_findings.destination_product.id}}">{{transfer_findings.destination_product}}</td>
-                            <td>
-                              <select class="form-control cls-choosen-engagement" data-placeholder="Please select...">
-                                <option>Select Engagement ...</option>
-                                {% for engagement in transfer_findings.destination_product.engagement_set.all %}
-                                  <option value="{{engagement.id}}">{{engagement.name}}</option>
-                                {% endfor%}
-                              </select>
+                            <td class="cls-destination_engagement-field">
+                              {% if transfer_findings.destination_engagement is None%}
+                                <select class="form-control cls-choosen-engagement" data-placeholder="Please select...">
+                                  <option>Select Engagement ...</option>
+                                  {% for engagement in transfer_findings.destination_product.engagement_set.all %}
+                                    <option value="{{engagement.id}}">{{engagement.name}}</option>
+                                  {% endfor%}
+                                </select>
+                              {% else %}
+                                {{transfer_findings.destination_engagement.name}}
+                              {% endif %}
                             </td>
                             <td>{{transfer_findings.accepted_by}}</td>
                             <td>

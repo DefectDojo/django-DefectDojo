@@ -21,7 +21,6 @@ $(document).ready(function() {
 function handleProductTypeChange(){
     let productTypeId = $("#id_destination_product_type").val()
     let  productElement = document.getElementById('id_destination_product') 
-    console.log("productElementl",productElement)
     clearLabel("id_destination_product")
     clearLabel("id_accepted_by")
     getProductOptions(productTypeId, productElement)
@@ -94,7 +93,6 @@ function getProductOptions(productTypeId, productElement){
         type: "GET",
         success: function(response) {
             addOption(productElement, '', 'Select Product Name...');
-            console.log(response)
             response.data.forEach(function(product) {
                 addOption(productElement, product.id, product.name);
             });
@@ -107,7 +105,6 @@ function getProductOptions(productTypeId, productElement){
 }
 
 function getEngagementOptions(idProduct, engagementElement){
-    console.log("entro")
     $.ajax({
         url: "/api/v2/engagements/?product=" + idProduct,
         type: "GET",

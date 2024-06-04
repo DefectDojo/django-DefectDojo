@@ -12,34 +12,41 @@ var host = window.location.host;
 $(document).ready(function(){
     $(document).on('click','.cls_transfer_finding_show_modal', function(event) {
         let row = $(this).closest('tr');
-        let selectEngagement = row.find('.cls-choosen-engagement')
-        let id_engagement = selectEngagement.selectpicker('val');
-        $('.alert').alert().addClass('sr-only')
-        if (id_engagement > 0){
-            $('#modalTransferFinding').modal('toggle')
-            engagementId = id_engagement
-            console.log(engagementId)
-        }
-        else{
-            $('.alert').alert().removeClass('sr-only')
-        }
-
-        ObjFindings = {};
         transferId = $(this).data('transfer-id');
-        productId = $(this).data('product-id');
-        productTypeId = $(this).data('product-type-id');
-        getTransferFindings(transferId)
+        getTransferFindingsAsync(transferId).then(function(response) {
+            let id_engagement = response.results[0].destination_engagement;
+            $('.alert').alert().addClass('sr-only');
+            if (id_engagement > 0){
+                    $('#modalTransferFinding').modal('toggle');
+                    engagementId = id_engagement;
+            }else{
+                let selectEngagement = row.find('.cls-choosen-engagement')
+                let id_engagement = selectEngagement.selectpicker('val');
+                if(id_engagement > 0){
+                    $('#modalTransferFinding').modal('toggle');
+                    engagementId = id_engagement;
+                }
+                else{
+                    $('.alert').alert().removeClass('sr-only');
+                }
+            }
 
-        $(document).on('change', '.related-finding-chosen', function(event){
-            let selectedValue = $(this);
-            let row = $(this).closest('tr');
-            let finding = row.find('.btn-success');
-            row.find('.cls-finding-status').text("Transfer Pending").css("color", "#333");
-            let finding_id = finding.attr('data-btn-success');
-            delete ObjFindings[finding_id];
-            finding.attr('data-related-finding',selectedValue.val());
-        });
+            ObjFindings = {};
+            productId = $(this).data('product-id');
+            productTypeId = $(this).data('product-type-id');
+            getTransferFindings(transferId)
+
+            $(document).on('change', '.related-finding-chosen', function(event){
+                let selectedValue = $(this);
+                let row = $(this).closest('tr');
+                let finding = row.find('.btn-success');
+                row.find('.cls-finding-status').text("Transfer Pending").css("color", "#333");
+                let finding_id = finding.attr('data-btn-success');
+                delete ObjFindings[finding_id];
+                finding.attr('data-related-finding',selectedValue.val());
+            });
     });
+          });
 });
 
 
@@ -80,14 +87,12 @@ $(document).ready(function() {
             let findingId = $(this).attr('data-btn-danger');
             RemoveFinding(findingId)
         }
-        console.log(ObjFindings)
     }); 
 
 });
 
 
 export async function getTransferFindingsAsync(transferFindingId) {
-    console.log("transfer-finding", transferFindingId)
     try {
         const response = await $.ajax({
             url: `/api/v2/transfer_finding?id=${transferFindingId}`,
@@ -107,7 +112,6 @@ function AcceptanceFinding(findingId, related_finding){
     else{
         ObjFindings[findingId] = {"risk_status": "Transfer Accepted", "related_finding": related_finding}
     }
-    console.log(ObjFindings)
 }
 function RemoveFinding(findingId){
     ObjFindings[findingId] = {"risk_status": "Transfer Removed"}
