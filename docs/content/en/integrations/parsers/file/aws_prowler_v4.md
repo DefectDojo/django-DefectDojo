@@ -1,5 +1,5 @@
 ---
-title: "AWS Prowler V3"
+title: "AWS Prowler V4"
 toc_hide: true
 ---
 
