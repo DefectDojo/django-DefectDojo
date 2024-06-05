@@ -88,7 +88,7 @@ def get_item(vuln, test, check_type):
     
     impact= None
     if "bc_category" in vuln:
-        impact = f"{vuln['bc_category']} _ {vuln_id.split('_')[1]}"
+        impact = f"{vuln['bc_category']}_{vuln_id.split('_')[1]}"
 
     mitigation = ""
 
