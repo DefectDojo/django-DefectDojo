@@ -73,7 +73,6 @@ class AWSProwlerV4Parser:
                 "\n**Compliance:** " + str(compliance) + \
                 "\n**ASFF Compliance Type:** " + str(asff_compliance_type)
 
-
             # improving key to get duplicates
             dupe_key = hashlib.sha256(unique_id_from_tool.encode('utf-8')).hexdigest()
             if dupe_key in dupes:
