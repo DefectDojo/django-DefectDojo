@@ -15,9 +15,9 @@ from dojo.models import (
     Endpoint,
     Engagement,
     Finding,
+    Product_API_Scan_Configuration,
     Test,
     Test_Import,
-    Tool_Configuration,
 )
 from dojo.utils import get_current_user, is_finding_groups_enabled
 
@@ -45,7 +45,7 @@ class ImporterOptions:
         **kwargs: dict,
     ):
         self.active: bool = self.validate_active(*args, **kwargs)
-        self.api_scan_configuration: Tool_Configuration | None = self.validate_api_scan_configuration(*args, **kwargs)
+        self.api_scan_configuration: Product_API_Scan_Configuration | None = self.validate_api_scan_configuration(*args, **kwargs)
         self.apply_tags_to_endpoints: bool = self.validate_apply_tags_to_endpoints(*args, **kwargs)
         self.apply_tags_to_findings: bool = self.validate_apply_tags_to_findings(*args, **kwargs)
         self.branch_tag: str = self.validate_branch_tag(*args, **kwargs)
@@ -227,10 +227,10 @@ class ImporterOptions:
         self,
         *args: list,
         **kwargs: dict,
-    ) -> Tool_Configuration | None:
+    ) -> Product_API_Scan_Configuration | None:
         return self.validate(
             "api_scan_configuration",
-            expected_types=[Tool_Configuration],
+            expected_types=[Product_API_Scan_Configuration],
             required=False,
             default=None,
             **kwargs,
