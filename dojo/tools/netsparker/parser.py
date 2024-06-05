@@ -51,8 +51,8 @@ class NetsparkerParser:
             url = item["Url"]
             impact = html2text.html2text(item.get("Impact", ""))
             dupe_key = title
-            request = item["HttpRequest"]["Content"]
-            response = item["HttpResponse"]["Content"]
+            request = item["HttpRequest"].get("Content", None)
+            response = item["HttpResponse"].get("Content", None)
 
             finding = Finding(
                 title=title,
@@ -89,7 +89,7 @@ class NetsparkerParser:
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
-            finding.unsaved_req_resp = [{"req": request, "resp": response}]
+            finding.unsaved_req_resp = [{"req": str(request), "resp": str(response)}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
             if dupe_key in dupes:
