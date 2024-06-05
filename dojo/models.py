@@ -2609,16 +2609,6 @@ class Finding(models.Model):
     def __str__(self):
         return self.title
 
-    def set_hash_code(self, dedupe_option):
-        # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
-        # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
-        if dedupe_option:
-            if self.hash_code is not None:
-                deduplicationLogger.debug("Hash_code already computed for finding")
-            else:
-                self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
-
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
@@ -3345,6 +3335,16 @@ class Finding(models.Model):
     @property
     def violates_sla(self):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
+
+    def set_hash_code(self, dedupe_option):
+        # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
+        # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
+        if dedupe_option:
+            if self.hash_code is not None:
+                deduplicationLogger.debug("Hash_code already computed for finding")
+            else:
+                self.hash_code = self.compute_hash_code()
+                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
 
 
 class FindingAdmin(admin.ModelAdmin):
