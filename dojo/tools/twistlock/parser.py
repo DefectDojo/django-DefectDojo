@@ -8,6 +8,7 @@ import dateutil
 
 from dojo.models import Finding
 from django.conf import settings
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,12 @@ class TwistlockCSVParser(object):
         elif data_package_name and data_package_version:
             title = data_package_name + " - " + data_package_version
         else:
-            title = data_description
+            data_description_complete = reduce(
+                lambda str, kv: str.replace(kv[0], kv[1]),
+                settings.DD_INVALID_ESCAPE_STR.items(),
+                data_description,
+            )
+            title = data_description_complete
 
         finding = Finding(
             title=textwrap.shorten(title, width=255, placeholder="..."),

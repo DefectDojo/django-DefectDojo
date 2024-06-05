@@ -1,8 +1,8 @@
-from dojo.models import Product, Engagement, Test
+from django.conf import settings
 
 class DbRouter:
     def db_for_read(self, model, **hints):
-        if model in [Product, Engagement, Test]:
+        if model._meta.db_table in settings.REPLICA_TABLES_DEFAULT:
             return 'default'
         return 'replica'
 

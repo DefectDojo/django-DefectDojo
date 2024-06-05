@@ -975,7 +975,7 @@ def get_risk_acceptance_pending(request,
                         'name': risk_acceptance_title_suggestion,
                         'accepted_by': [request.user],
                         "severity": finding.severity})
-        if finding.impact == "Compliance":
+        if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
             form = RiskPendingForm(
                 severity=finding.severity,
                 product_id=product.id,
@@ -1154,8 +1154,8 @@ def add_risk_acceptance_pending(request, eid, fid):
                                                  active=True,
                                                  risk_status__in=["Risk Active", "Risk Expired"],
                                                  severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
-        if finding.impact == "Compliance":
-            finding_choices = finding_choices.filter(impact="Compliance")
+        if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
+            finding_choices = finding_choices.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
         form.fields['accepted_findings'].queryset = finding_choices
         if fid:
             form.fields['accepted_findings'].initial = {fid}
@@ -1524,8 +1524,8 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                                                      risk_accepted=False,
                                                      severity=risk_acceptance.severity,
                                                      duplicate=False)
-        if len(accepted_findings) > 0 and accepted_findings[0].impact == "Compliance":
-            unaccepted_findings = unaccepted_findings.filter(impact="Compliance")
+        if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
+            unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
     else:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
             .exclude(id__in=accepted_findings).order_by("title")
