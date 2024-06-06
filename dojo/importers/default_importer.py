@@ -215,7 +215,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 group_name,
                 findings,
                 self.group_by,
-                self.create_finding_groups_for_all_findings,
+                create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
                 **kwargs
             )
             if self.push_to_jira:
