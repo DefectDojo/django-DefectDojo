@@ -1673,13 +1673,13 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
         lookup_expr="icontains",
         label="Reporter Username Contains",
         help_text="Search for Reporter names that contain a given pattern")
-    reviewer = CharFilter(
-        field_name="reviewer__username",
+    reviewers = CharFilter(
+        field_name="reviewers__username",
         lookup_expr="iexact",
         label="Reviewer Username",
         help_text="Search for Reviewer names that are an exact match")
-    reviewer_contains = CharFilter(
-        field_name="reviewer__username",
+    reviewers_contains = CharFilter(
+        field_name="reviewers__username",
         lookup_expr="icontains",
         label="Reviewer Username Contains",
         help_text="Search for Reviewer usernames that contain a given pattern")
