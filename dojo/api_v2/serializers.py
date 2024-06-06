@@ -3348,7 +3348,7 @@ class TransferFindingSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['actions'] = []
+        representation['permission'] = []
         transfer_finding_obj = TransferFinding.objects.get(id=representation.get("id"))
         for permission in [Permissions.Transfer_Finding_View,
                            Permissions.Transfer_Finding_Edit,
@@ -3358,8 +3358,7 @@ class TransferFindingSerializer(serializers.ModelSerializer):
                     self.context["request"].user,
                     transfer_finding_obj,
                     permission):
-                representation['actions'].append(permission)
-
+                representation['permission'].append(permission)
         return representation
 
     class Meta:

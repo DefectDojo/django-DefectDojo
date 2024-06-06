@@ -153,7 +153,7 @@ function innerData(data, findings_related){
             }
             row.appendChild(cell_status)
             row.innerHTML += `<td>
-                ${transfer_finding_item.actions.includes(2801) && transfer_finding_item.actions.includes(2802)? 
+                ${transfer_finding_item.permission.includes(2801) && transfer_finding_item.permission.includes(2802)? 
                     `<button type="button" class="btn btn-success btn-sm" data-btn-success=${findings.findings.id} data-related-finding=""> 
                         <i class="fas fa-check"></i>
                      </button>
@@ -161,7 +161,7 @@ function innerData(data, findings_related){
                         <i class="fas fa-times"></i>
                      </button>`
                      :'--'}
-                ${transfer_finding_item.actions.includes(2803) ? 
+                ${transfer_finding_item.permission.includes(2803) ? 
                     `<button type="button" class="btn btn-danger btn-sm" data-btn-danger=${findings.findings.id}>
                         <i class="fas fa-trash-alt"></i>
                     </button>
