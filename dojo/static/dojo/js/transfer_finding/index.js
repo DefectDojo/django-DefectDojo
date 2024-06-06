@@ -13,24 +13,10 @@ $(document).ready(function(){
     $(document).on('click','.cls_transfer_finding_show_modal', function(event) {
         let row = $(this).closest('tr');
         transferId = $(this).data('transfer-id');
-        getTransferFindingsAsync(transferId).then(function(response) {
-            let id_engagement = response.results[0].destination_engagement;
-            $('.alert').alert().addClass('sr-only');
-            if (id_engagement > 0){
-                    $('#modalTransferFinding').modal('toggle');
-                    engagementId = id_engagement;
-            }else{
-                let selectEngagement = row.find('.cls-choosen-engagement')
-                let id_engagement = selectEngagement.selectpicker('val');
-                if(id_engagement > 0){
-                    $('#modalTransferFinding').modal('toggle');
-                    engagementId = id_engagement;
-                }
-                else{
-                    $('.alert').alert().removeClass('sr-only');
-                }
-            }
-
+        $('.alert').alert().addClass('sr-only');
+        let selectEngagement = row.find('.cls-choosen-engagement')
+        engagementId = selectEngagement.selectpicker('val');
+        $('#modalTransferFinding').modal('toggle');
             ObjFindings = {};
             productId = $(this).data('product-id');
             productTypeId = $(this).data('product-type-id');
@@ -45,7 +31,6 @@ $(document).ready(function(){
                 delete ObjFindings[finding_id];
                 finding.attr('data-related-finding',selectedValue.val());
             });
-    });
           });
 });
 
@@ -74,10 +59,15 @@ $(document).ready(function() {
         let btnClass = $(this).attr('class');
         let row = $(this).closest('tr');
         if (btnClass.includes('btn-success')) {
-            row.find('.cls-finding-status').text("Transfer Accepted").css("color", "green");
-            let findingId = $(this).attr('data-btn-success');
-            let relatedFinding = $(this).attr('data-related-finding');
-            AcceptanceFinding(findingId, relatedFinding)
+            $('.alert').alert().addClass('sr-only');
+            if (engagementId !== "None"){
+                row.find('.cls-finding-status').text("Transfer Accepted").css("color", "green");
+                let findingId = $(this).attr('data-btn-success');
+                let relatedFinding = $(this).attr('data-related-finding');
+                AcceptanceFinding(findingId, relatedFinding)
+            }else{
+                $('.alert').alert().removeClass('sr-only');
+            }
         } else if (btnClass.includes('btn-warning')) {
             row.find('.cls-finding-status').text("Transfer Rejected").css("color", "#e7a100");
             let findingId = $(this).attr('data-btn-warning');
@@ -92,7 +82,7 @@ $(document).ready(function() {
 });
 
 
-export async function getTransferFindingsAsync(transferFindingId) {
+async function getTransferFindingsAsync(transferFindingId) {
     try {
         const response = await $.ajax({
             url: `/api/v2/transfer_finding?id=${transferFindingId}`,

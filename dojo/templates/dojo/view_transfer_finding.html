@@ -66,10 +66,10 @@
 {% block content %}
     {{ block.super }}
     {% include 'dojo/modal/confirmed.html' %}
-    {% include 'dojo/modal/alerts.html' %}
 <div class="modal fade" id="modalTransferFinding" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
+        {% include 'dojo/modal/alerts.html' %}
         <div class="modal-header">
           <h3 class="modal-title" id="exampleModalLabel">Transfer Finding</h3>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -138,15 +138,23 @@
                             <td data-destination-ptid="{{transfer_findings.destination_product_type.id}}">{{transfer_findings.destination_product_type}}</td>
                             <td data-destination-pid="{{transfer_findings.destination_product.id}}">{{transfer_findings.destination_product}}</td>
                             <td class="cls-destination_engagement-field">
-                              {% if transfer_findings.destination_engagement is None%}
+                              {% if transfer_findings.destination_engagement is None and transfer_findings|has_object_permission:"Transfer_Finding_Edit"%}
                                 <select class="form-control cls-choosen-engagement" data-placeholder="Please select...">
-                                  <option>Select Engagement ...</option>
+                                  <option value="None">Select Engagement ...</option>
                                   {% for engagement in transfer_findings.destination_product.engagement_set.all %}
                                     <option value="{{engagement.id}}">{{engagement.name}}</option>
                                   {% endfor%}
                                 </select>
                               {% else %}
-                                {{transfer_findings.destination_engagement.name}}
+                                {% if transfer_findings.destination_engagement %}
+                                  <select class="form-control cls-choosen-engagement" disabled="True" data-placeholder="Please select...">
+                                    <option value="{{transfer_findings.destination_engagement.id}}">{{transfer_findings.destination_engagement.name}}</option>
+                                  </select>
+                                {% else %}
+                                  <select class="form-control cls-choosen-engagement" disabled="True" data-placeholder="Please select...">
+                                    <option value="None">None</option>
+                                  </select>
+                                {% endif %}
                               {% endif %}
                             </td>
                             <td>{{transfer_findings.accepted_by}}</td>
