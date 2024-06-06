@@ -1258,7 +1258,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Bearer CLI': ['title', 'severity'],
     'Nancy Scan': ['title', 'vuln_id_from_tool'],
     'Wiz Scan': ['title', 'description', 'severity'],
-    'Rapplex Scan': ['title', 'severity', 'endpoints'],
+    'Rapplex Scan': ['title', 'endpoints', 'severity'],
 }
 
 # Override the hardcoded settings here via the env var
