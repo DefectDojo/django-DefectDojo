@@ -1663,6 +1663,8 @@ class FindingFilterHelper(FilterSet):
 
 
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
+    test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
+    test__engagement__product = NumberFilter(widget=HiddenInput())
     reporter = CharFilter(
         field_name="reporter__username",
         lookup_expr="iexact",
@@ -2471,6 +2473,7 @@ class EndpointFilter(EndpointFilterHelper, DojoFilter):
 
 
 class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
+    product = NumberFilter(widget=HiddenInput())
     product__name = CharFilter(
         field_name="product__name",
         lookup_expr="iexact",
