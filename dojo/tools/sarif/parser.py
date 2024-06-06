@@ -405,6 +405,8 @@ def get_item(result, rules, artifacts, run_date):
         # for now we only support when the id of the rule is a CVE
         if cve_try(result["ruleId"]):
             finding.unsaved_vulnerability_ids = [cve_try(result["ruleId"])]
+        elif rule is not None and "name" in rule:
+            finding.unsaved_vulnerability_ids = [rule["name"]]
     # some time the rule id is here but the tool doesn't define it
     if rule is not None:
         cwes_extracted = get_rule_cwes(rule)

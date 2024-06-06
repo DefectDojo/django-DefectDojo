@@ -173,7 +173,7 @@ class TestSarifParser(DojoTestCase):
             "file:///home/damien/dd/docker/setEnv.sh",
             item.file_path,
         )
-        self.assertIsNone(item.unsaved_vulnerability_ids)
+        self.assertIsNotNone(item.unsaved_vulnerability_ids)
         self.assertEqual(datetime.datetime(2021, 3, 8, 15, 39, 40, tzinfo=datetime.timezone.utc), item.date)
         # finding 6
         with self.subTest(i=6):
@@ -183,7 +183,7 @@ class TestSarifParser(DojoTestCase):
                 finding.title,
             )
             self.assertEqual("Info", finding.severity)
-            self.assertIsNone(finding.unsaved_vulnerability_ids)
+            self.assertIsNotNone(finding.unsaved_vulnerability_ids)
             self.assertEqual(
                 "scanFileHash:5b05533780915bfc|scanPrimaryLocationHash:4d655189c485c086",
                 finding.unique_id_from_tool,
@@ -205,7 +205,7 @@ class TestSarifParser(DojoTestCase):
                 "file:///home/damien/dd/dojo/tools/veracode/parser.py",
                 item.file_path,
             )
-            self.assertIsNone(item.unsaved_vulnerability_ids)
+            self.assertIsNotNone(item.unsaved_vulnerability_ids)
             self.assertEqual(datetime.datetime(2021, 3, 8, 15, 46, 16, tzinfo=datetime.timezone.utc), item.date)
             self.assertEqual(
                 "scanFileHash:4bc9f13947613303|scanPrimaryLocationHash:1a8bbb28fe7380df|scanTagsHash:21de8f8d0eb8d9b2",
@@ -226,7 +226,7 @@ class TestSarifParser(DojoTestCase):
                 item.title,
             )
             self.assertEqual("High", item.severity)
-            self.assertIsNone(item.unsaved_vulnerability_ids)
+            self.assertIsNotNone(item.unsaved_vulnerability_ids)
             self.assertEqual(
                 "scanFileHash:4bc9f13947613303|scanPrimaryLocationHash:1a8bbb28fe7380df|scanTagsHash:21de8f8d0eb8d9b2",
                 finding.unique_id_from_tool,
@@ -244,7 +244,7 @@ class TestSarifParser(DojoTestCase):
             "file:///src/index.js",
             finding.file_path,
         )
-        self.assertIsNone(finding.unsaved_vulnerability_ids)
+        self.assertIsNotNone(finding.unsaved_vulnerability_ids)
         self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.timezone.utc), finding.date)
         self.assertEqual(327, finding.cwe)
         # finding 1
