@@ -427,7 +427,7 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.DateTimeField(read_only=True)
-    last_login = serializers.DateTimeField(read_only=True)
+    last_login = serializers.DateTimeField(read_only=True, allow_null=True)
     password = serializers.CharField(
         write_only=True,
         style={"input_type": "password"},
