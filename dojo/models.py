@@ -2617,9 +2617,13 @@ class Finding(models.Model):
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
+
+        # Trim title length of finding
+        self.title = self.title[:511]
         # Title Casing
-        from titlecase import titlecase
-        self.title = titlecase(self.title[:511])
+        if settings.FINDING_TITLECASING_ENABLED:
+            from titlecase import titlecase
+            self.title = titlecase(self.title)
         # Set the date of the finding if nothing is supplied
         if self.date is None:
             self.date = timezone.now()

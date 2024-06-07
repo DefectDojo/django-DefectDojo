@@ -91,6 +91,7 @@ env = environ.FileAwareEnv(
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
+    DD_FINDING_TITLECASING_ENABLED=(bool, True),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
     DD_DATABASE_HOST=(str, 'mysql'),
     DD_DATABASE_NAME=(str, 'defectdojo'),
@@ -732,6 +733,8 @@ FOOTER_VERSION = env('DD_FOOTER_VERSION')
 FORCE_LOWERCASE_TAGS = env('DD_FORCE_LOWERCASE_TAGS')
 MAX_TAG_LENGTH = env('DD_MAX_TAG_LENGTH')
 
+# Enable titlecasing for finding title
+FINDING_TITLECASING_ENABLED = env('DD_FINDING_TITLECASING_ENABLED')
 
 # ------------------------------------------------------------------------------
 # ADMIN
