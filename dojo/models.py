@@ -2635,7 +2635,10 @@ class Finding(models.Model):
             except Exception as ex:
                 logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
 
-        self.set_hash_code(dedupe_option)
+        if hash_method := getattr(settings, 'FINDING_HASH_METHOD', None):
+            hash_method(self, dedupe_option)
+        else:
+            self.set_hash_code(dedupe_option)
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
