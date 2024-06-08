@@ -66,10 +66,12 @@
 {% block content %}
     {{ block.super }}
     {% include 'dojo/modal/confirmed.html' %}
+    {% include 'dojo/modal/loading_transfer_finding.html' %}
+    {% include 'dojo/modal/alerts.html' with title="Select an engagement please" %}
 <div class="modal fade" id="modalTransferFinding" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        {% include 'dojo/modal/alerts.html' %}
+      {% include 'dojo/modal/alerts.html' with title="Select an engagement please" %}
         <div class="modal-header">
           <h3 class="modal-title" id="exampleModalLabel">Transfer Finding</h3>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -231,12 +233,17 @@
         }
       });
 
-      $("#confirmed_action_modal").on('click', function(){
-        console.log("entro rene")
+      $("#confirmed_action_modal").on('click', function()
+      {
         let modal = $(this).closest('.modal')
         let transferFindingId = modal.data('tf-id')
         let action = modal.data('tf-action')
-        updateFindingsRiskStatus(action, transferFindingId)
+        updateFindingsRiskStatus(action, transferFindingId).then(function(response)
+        {
+          location.reload();
+        }).catch(function(error) {
+            console.error("Error al actualizar el estado del riesgo:", error);
+        });
         modal.modal('hide')
       });
 
@@ -267,15 +274,15 @@
     });
 
     async function updateTransferFinding(data){
-      console.log("updateTransferFinding", transferId)
       try{
-        $.ajax({
+        response = await $.ajax({
             url: "/api/v2/transfer_finding/" + transferId+ "/",
             type: "PATCH",
             headers: { "X-CSRFToken": csrftoken,
             "Content-Type": "application/json"},
             data: JSON.stringify(data),
         })
+        return response
       }
       catch(error){
         console.error(error)
@@ -283,7 +290,7 @@
       }
     }
 
-    async function updateFindings(findingChangeStatus){
+  async function updateFindings(findingChangeStatus){
       let transfer_findings= {"findings" : findingChangeStatus}
       try{
         $.ajax({
@@ -295,60 +302,64 @@
         })
       }
       catch(error){
-        console.error(error)
+        console.error("updatefindings: ", error)
         throw error
       }
   }
 
-  function removeFindings(findingRemoved){
-    let transfer_findings= {"findings" : findingRemoved}
-    $.ajax({
-        url: "/api/v2/transfer_finding_findings/" + transferId + "/",
-        type: "DELETE",
-        headers: { "X-CSRFToken": csrftoken,
-        "Content-Type": "application/json"},
-        data: JSON.stringify(transfer_findings),
-        error: function(error){
-            console.error(error)
-        }
-    })
-  }
-
-  async function removeTransferFinding(transferFindingId){
-    try
-    {
-        await $.ajax({
-          url: "/api/v2/transfer_finding/" + transferFindingId + "/",
+  async function removeFindings(findingRemoved){
+      let transfer_findings= {"findings" : findingRemoved}
+      response = await $.ajax({
+          url: "/api/v2/transfer_finding_findings/" + transferId + "/",
           type: "DELETE",
           headers: { "X-CSRFToken": csrftoken,
           "Content-Type": "application/json"},
+          data: JSON.stringify(transfer_findings),
+          error: function(error){
+              console.error(error)
+          }
       })
     }
-    catch(error){
-      console.error(error)
-      throw error
 
-    }
+  async function removeTransferFinding(transferFindingId)
+  {
+      let response = "";
+      try
+      {
+          response = await $.ajax({
+              url: "/api/v2/transfer_finding/" + transferFindingId + "/",
+              type: "DELETE",
+              headers: {
+                  "X-CSRFToken": csrftoken,
+                  "Content-Type": "application/json"
+              }
+          });
+          return response;
+      }
+      catch (error)
+      {
+        console.error("RemoveTransferFinding: ", error.message);
+        throw error;
+      }
   }
 
   async function updateFindingsRiskStatus(action, transferFindingId ){
-    console.log("updateTransferfiding", engagementId)
+    let response = ""
     if (action == "Accepted"){
         if(engagementId > 0){
-          console.log("engagementid", engagementId);
           await updateTransferFinding({"destination_engagement": engagementId});
         }
         let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
-        await updateFindings(requestFindingStatus)
+       response = await updateFindings(requestFindingStatus)
     }
     if (action == "Rejected"){
       let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
-      await updateFindings(requestFindingStatus)
+      resposne = await updateFindings(requestFindingStatus)
       }
     if (action == "Removed"){
-       await removeTransferFinding(transferFindingId)
-       window.location.href = window.location.href;
+      response = await removeTransferFinding(transferFindingId)
     }
+    return response
   }
 
 </script>

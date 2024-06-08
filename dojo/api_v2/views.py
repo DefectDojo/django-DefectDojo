@@ -3384,10 +3384,9 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
             obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
             for transfer_finding_finding in obj_transfer_finding_findings:
                 helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
-                helper_tf.destroy_and_reset_finding_related(transfer_finding_finding)
-                transfer_finding_finding.delete()
+                helper_tf.reset_finding_related(transfer_finding_finding)
             super().destroy(request, pk)
-            return http_response.ok(message="TransferFinding Deleted")
+            return http_response.no_content(message="TransferFinding Deleted")
         except Exception as e:
             logger.error(e)
             raise ApiError.not_found(detail=e)
@@ -3428,12 +3427,12 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                 for transfer_finding_finding in obj_transfer_finding_findings:
                     if str(transfer_finding_finding.findings.id) in request_findings:
                         helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
-                        helper_tf.destroy_and_reset_finding_related(transfer_finding_finding)
+                        helper_tf.reset_finding_related(transfer_finding_finding)
                         transfer_finding_finding.delete()
 
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
             else:
-                helper_tf.destroy_and_reset_finding_related(pk)
+                helper_tf.reset_finding_related(pk)
                 super().destroy(request, pk)
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         else:

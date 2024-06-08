@@ -233,16 +233,16 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
                     user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
 
 
-def destroy_and_reset_finding_related(transfer_finding_finding):
+def reset_finding_related(transfer_finding_finding):
     try:
-        if transfer_finding_finding.finding_related:
-            transfer_finding_finding.finding_related.delete()
-
         if transfer_finding_finding.findings:
-            transfer_finding_finding.findings.risk_status = "Risk Active"
-            transfer_finding_finding.findings.active = True
-            transfer_finding_finding.findings.out_of_scope = False
-            transfer_finding_finding.findings.save()
+            finding_id = transfer_finding_finding.finding
+            logger.debug(f"Transfer Finding, Reset finding status {finding_id}")
+            finding = Finding.objects.get(finding_id)
+            finding.risk_status = "Risk Active"
+            finding.active = True
+            finding.out_of_scope = False
+            finding.save()
 
     except Exception as e:
         logger.error(e)

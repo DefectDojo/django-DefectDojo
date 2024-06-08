@@ -82,15 +82,16 @@ $(document).ready(function() {
 });
 
 
-async function getTransferFindingsAsync(transferFindingId) {
+export async function getTransferFindingsAsync(transferFindingId) {
+    console.log("tf: ", transferFindingId)
     try {
         const response = await $.ajax({
             url: `/api/v2/transfer_finding?id=${transferFindingId}`,
-            type: 'GET'
+            type: 'GET',
         });
         return response;
     } catch (error) {
-        console.log(error);
+        console.error(`getTransferFinding ${error.statusText}, transferFindingId=${transferFindingId}`);
         throw error;
     }
 }
@@ -179,10 +180,7 @@ async function getTransferFindings(transferFindingId){
     try
     {
         let related_findings = ""
-        const transferFindingResponse = await $.ajax({
-            url: "/api/v2/transfer_finding?id=" + transferFindingId,
-            type: "GET",
-        });
+        const transferFindingResponse = await getTransferFindingsAsync(transferFindingId);
         related_findings += `<td> <select class="form-control form-control-chosen related-finding-chosen" data-placeholder="Please select..."><option value=""> New Finding </option>`
         if (transferFindingResponse.results.length == 1)
             {
@@ -231,7 +229,6 @@ export async function generateRequestTransferFindingUpdate(transferFindingId, ri
         let requestFindingStatus = {};
 
         const response = await getTransferFindingsAsync(transferFindingId);
-        
         response.results.forEach(function(transferFindings) {
             transferFindings.transfer_findings.forEach(function(finding) {
                 requestFindingStatus[finding.findings.id] = {"risk_status": riskStatus};
