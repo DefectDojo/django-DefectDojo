@@ -36,6 +36,7 @@ jobs:
       - name: Build
         id: docker_build
         uses: docker/build-push-action@v5
+        timeout-minutes: 10
         with:
           context: .
           push: false
@@ -47,6 +48,7 @@ jobs:
   
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
+        timeout-minutes: 10
         uses:  actions/upload-artifact@v3
         with:
           name: ${{ matrix.docker-image }}
