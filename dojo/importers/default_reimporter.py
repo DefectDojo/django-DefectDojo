@@ -339,7 +339,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 serial_reactivated_findings,
                 serial_findings_to_mitigate,
                 serial_untouched_findings,
-            ) = results.get()
+            ) = results
             new_findings += [
                 next(deserialize("json", finding)).object
                 for finding in serial_new_findings

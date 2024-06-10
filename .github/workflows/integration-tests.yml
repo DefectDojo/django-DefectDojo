@@ -49,6 +49,7 @@ jobs:
         uses: actions/download-artifact@v3
 
       - name: Load docker images
+        timeout-minutes: 10
         run: |-
              docker load -i nginx/nginx-${{ matrix.os }}_img
              docker load -i django/django-${{ matrix.os }}_img
@@ -74,12 +75,14 @@ jobs:
           NGINX_VERSION: ${{ matrix.os }}
 
       - name: Initialize
+        timeout-minutes: 10
         run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from initializer initializer
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           NGINX_VERSION: ${{ matrix.os }}
 
       - name: Integration tests
+        timeout-minutes: 10
         run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}

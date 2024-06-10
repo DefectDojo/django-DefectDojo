@@ -23,6 +23,7 @@ jobs:
         uses: actions/download-artifact@v3
 
       - name: Load docker images
+        timeout-minutes: 10
         run: |-
              docker load -i nginx/nginx-${{ matrix.os }}_img
              docker load -i django/django-${{ matrix.os }}_img
@@ -38,6 +39,7 @@ jobs:
 
       # no celery or initializer needed for unit tests
       - name: Unit tests
+        timeout-minutes: 10
         run: docker compose --profile mysql-redis --env-file ./docker/environments/mysql-redis.env up --no-deps --exit-code-from uwsgi uwsgi
         env:
           DJANGO_VERSION: ${{ matrix.os }}
