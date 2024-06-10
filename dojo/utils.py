@@ -2601,7 +2601,7 @@ def get_custom_method(setting_name: str) -> Optional[Callable]:
     """
     if fq_name := getattr(settings, setting_name, None):
         try:
-            mn, _, fn = getattr(settings, fq_name).rpartition('.')
+            mn, _, fn = fq_name.rpartition('.')
             m = importlib.import_module(mn)
             return getattr(m, fn)
         except ModuleNotFoundError:
