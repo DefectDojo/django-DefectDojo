@@ -82,7 +82,7 @@ class KubescapeParser:
                             mitigation = ""
 
                     armoLink = f"https://hub.armosec.io/docs/{controlID.lower()}"
-                    description = "**Summary:** " + f"The ressource '{resourceid}' has failed the control '{control_name}.'  " + "\n"
+                    description = "**Summary:** " + f"The ressource '{resourceid}' has failed the control '{control_name}'." + "\n"
                     if controlSummary is not None and "description" in controlSummary:
                         description += "**Description:** " + controlSummary["description"] + "\n"
 
