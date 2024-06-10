@@ -3,6 +3,7 @@
 wait_for_database_to_be_reachable() {
     echo -n "Waiting for database to be reachable "
     failure_count=0
+    DD_DATABASE_READINESS_TIMEOUT=${DD_DATABASE_READINESS_TIMEOUT:-30}
     until echo "select 1;" | python3 manage.py dbshell > /dev/null
     do 
     echo -n "."
