@@ -7,7 +7,7 @@ set -e
 set -v
 
 . /secret-file-loader.sh
-source /reach_database.sh
+. /reach_database.sh
 
 cd /app
 # Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)

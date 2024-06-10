@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /reach_database.sh
+. /reach_database.sh
 
 umask 0002
 

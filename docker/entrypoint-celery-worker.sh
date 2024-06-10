@@ -4,7 +4,7 @@ umask 0002
 id
 
 . /secret-file-loader.sh
-source /reach_database.sh
+. /reach_database.sh
 
 # Allow for bind-mount multiple settings.py overrides
 FILES=$(ls /app/docker/extra_settings/* 2>/dev/null)

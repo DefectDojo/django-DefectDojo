@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . /secret-file-loader.sh
-source /reach_database.sh
+. /reach_database.sh
 
 initialize_data()
 {
