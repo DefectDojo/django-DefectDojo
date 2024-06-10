@@ -356,10 +356,10 @@ def post_process_finding_save(finding, dedupe_option=True, rules_option=True, pr
     if dedupe_option:
         if finding.hash_code is not None:
             if system_settings.enable_deduplication:
-                if dedupe_method := getattr(settings, 'FINDING_DEDUPE_METHOD', None):
+                from dojo.utils import get_custom_method, do_dedupe_finding
+                if dedupe_method := get_custom_method('FINDING_DEDUPE_METHOD'):
                     dedupe_method(finding, *args, **kwargs)
                 else:
-                    from dojo.utils import do_dedupe_finding
                     do_dedupe_finding(finding, *args, **kwargs)
             else:
                 deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")

@@ -2613,6 +2613,7 @@ class Finding(models.Model):
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
         from dojo.finding import helper as finding_helper
+        from dojo.utils import get_custom_method
 
         if not user:
             from dojo.utils import get_current_user
@@ -2635,7 +2636,7 @@ class Finding(models.Model):
             except Exception as ex:
                 logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
 
-        if hash_method := getattr(settings, 'FINDING_HASH_METHOD', None):
+        if hash_method := get_custom_method('FINDING_HASH_METHOD'):
             hash_method(self, dedupe_option)
         else:
             self.set_hash_code(dedupe_option)
