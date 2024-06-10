@@ -28,7 +28,6 @@ class AWSProwlerV3Parser:
             msg = 'Unknown file format'
             raise ValueError(msg)
 
-
     def process_ocsf_json(self, file, test):
         dupes = {}
 
