@@ -1,4 +1,7 @@
 #!/bin/bash
+
+. /reach_database.sh
+
 umask 0002
 
 id
@@ -16,12 +19,7 @@ if [ "$NUM_FILES" -gt 0 ]; then
     rm -f /app/dojo/settings/README.md
 fi
 
-echo -n "Waiting for database to be reachable "
-until echo "select 1;" | python3 manage.py dbshell > /dev/null
-do
-  echo -n "."
-  sleep 1
-done
+wait_for_database_to_be_reachable
 echo
 
 # do the check with Django stack
