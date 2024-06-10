@@ -8,6 +8,7 @@
 
 
 . /secret-file-loader.sh
+. /reach_database.sh
 
 cd /app || exit
 # Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
@@ -21,6 +22,8 @@ unset DD_CELERY_BROKER_URL
 #   echo "Creating settings.py"
 #   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 # fi
+
+wait_for_database_to_be_reachable
 
 python3 manage.py spectacular --fail-on-warn > /dev/null || {
     cat <<-EOF
