@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 wait_for_database_to_be_reachable() {
     echo -n "Waiting for database to be reachable "
