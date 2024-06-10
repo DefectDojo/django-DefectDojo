@@ -54,9 +54,6 @@ services:
       DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
-      DD_HASHCODE_FIELDS_PER_SCANNER: '{"AWS Prowler Scan": [ "cwe", "severity", "description" ], "AWS Prowler V3": [ "unique_id_from_tool" ]}'
-      DD_DEDUPLICATION_ALGORITHM_PER_PARSER: '{ "AWS Prowler V3": "unique_id_from_tool"}'
-
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -78,8 +75,6 @@ services:
       DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
-      DD_HASHCODE_FIELDS_PER_SCANNER: '{"AWS Prowler Scan": [ "cwe", "severity", "description" ], "AWS Prowler V3": [ "unique_id_from_tool" ] }'
-      DD_DEDUPLICATION_ALGORITHM_PER_PARSER: '{ "AWS Prowler V3": "unique_id_from_tool" }'
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -100,8 +95,6 @@ services:
       DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
-      DD_HASHCODE_FIELDS_PER_SCANNER: '{"AWS Prowler Scan": [ "cwe", "severity", "description" ], "AWS Prowler V3": [ "unique_id_from_tool" ] }'
-      DD_DEDUPLICATION_ALGORITHM_PER_PARSER: '{ "AWS Prowler V3": "unique_id_from_tool" }'
     volumes:
         - type: bind
           source: ./docker/extra_settings
