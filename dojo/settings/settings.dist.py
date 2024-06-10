@@ -1293,7 +1293,6 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Grype': True,
     'AWS Prowler Scan': True,
     'AWS Prowler V3': True,
-    'AWS Prowler V4': True,
     'Checkmarx Scan': False,
     'Checkmarx OSA': True,
     'Cloudsploit Scan': True,
@@ -1378,8 +1377,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Aqua Scan': DEDUPE_ALGO_HASH_CODE,
     'AuditJS Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'AWS Prowler Scan': DEDUPE_ALGO_HASH_CODE,
-    'AWS Prowler V3': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'AWS Prowler V4': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'AWS Prowler V3': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
     "AWS Security Finding Format (ASFF) Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Bandit Scan': DEDUPE_ALGO_HASH_CODE,
