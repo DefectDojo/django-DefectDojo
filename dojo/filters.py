@@ -1663,6 +1663,8 @@ class FindingFilterHelper(FilterSet):
 
 
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
+    test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
+    test__engagement__product = NumberFilter(widget=HiddenInput())
     reporter = CharFilter(
         field_name="reporter__username",
         lookup_expr="iexact",
@@ -1673,13 +1675,13 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
         lookup_expr="icontains",
         label="Reporter Username Contains",
         help_text="Search for Reporter names that contain a given pattern")
-    reviewer = CharFilter(
-        field_name="reviewer__username",
+    reviewers = CharFilter(
+        field_name="reviewers__username",
         lookup_expr="iexact",
         label="Reviewer Username",
         help_text="Search for Reviewer names that are an exact match")
-    reviewer_contains = CharFilter(
-        field_name="reviewer__username",
+    reviewers_contains = CharFilter(
+        field_name="reviewers__username",
         lookup_expr="icontains",
         label="Reviewer Username Contains",
         help_text="Search for Reviewer usernames that contain a given pattern")
@@ -2471,6 +2473,7 @@ class EndpointFilter(EndpointFilterHelper, DojoFilter):
 
 
 class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
+    product = NumberFilter(widget=HiddenInput())
     product__name = CharFilter(
         field_name="product__name",
         lookup_expr="iexact",

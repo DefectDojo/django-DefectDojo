@@ -688,6 +688,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             finding_helper.add_findings_to_auto_group(
                 group_name,
                 findings,
+                self.group_by,
+                create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
                 **kwargs
             )
             if self.push_to_jira:
