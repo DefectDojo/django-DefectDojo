@@ -81,6 +81,7 @@ COPY \
   docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
   docker/secret-file-loader.sh \
+  docker/reach_database.sh \
   docker/certs/* \
   /
 COPY wsgi.py manage.py docker/unit-tests.sh ./
