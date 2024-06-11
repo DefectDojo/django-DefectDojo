@@ -672,17 +672,17 @@ class BaseClass:
     class DeleteRequestTest(RESTEndpointTest):
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
-            if delete_id := getattr(self, "delete_id", ""):
+            if delete_id := getattr(self, "delete_id", None):
                 relative_url = f"{self.url}{delete_id}/"
             else:
                 current_objects = self.client.get(self.url, format='json').data
-                relative_url = f"{self.url}{current_objects['results'][0]['id']}/"
+                relative_url = f"{self.url}{current_objects['results'][-1]['id']}/"
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(DeletePreviewModelMixin)
         def test_delete_preview(self):
-            if delete_id := getattr(self, "delete_id", ""):
+            if delete_id := getattr(self, "delete_id", None):
                 relative_url = f"{self.url}{delete_id}/delete_preview/"
             else:
                 current_objects = self.client.get(self.url, format='json').data
@@ -743,7 +743,7 @@ class BaseClass:
 
             self.setUp_not_authorized()
 
-            if delete_id := getattr(self, "delete_id", ""):
+            if delete_id := getattr(self, "delete_id", None):
                 relative_url = self.url + f'{delete_id}/'
             else:
                 current_objects = self.endpoint_model.objects.all()
