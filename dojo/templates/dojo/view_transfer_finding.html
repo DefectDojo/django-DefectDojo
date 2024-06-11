@@ -66,7 +66,6 @@
 {% block content %}
     {{ block.super }}
     {% include 'dojo/modal/confirmed.html' %}
-    {% include 'dojo/modal/loading_transfer_finding.html' %}
     {% include 'dojo/modal/alerts.html' with title="Select an engagement please" %}
 <div class="modal fade" id="modalTransferFinding" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -240,11 +239,10 @@
         let action = modal.data('tf-action')
         updateFindingsRiskStatus(action, transferFindingId).then(function(response)
         {
-          location.reload();
+          modal.modal('hide')
         }).catch(function(error) {
             console.error("Error al actualizar el estado del riesgo:", error);
         });
-        modal.modal('hide')
       });
 
       $("#risk_acceptance").on('click', '.btn-success, .btn-warning, .btn-danger', function() {
@@ -354,7 +352,7 @@
     }
     if (action == "Rejected"){
       let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
-      resposne = await updateFindings(requestFindingStatus)
+      response = await updateFindings(requestFindingStatus)
       }
     if (action == "Removed"){
       response = await removeTransferFinding(transferFindingId)

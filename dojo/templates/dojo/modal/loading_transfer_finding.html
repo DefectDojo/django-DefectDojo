@@ -1,35 +1,34 @@
-<div class="modal fade modal fade bd-example-modal-sm" id="id_loading_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-        <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Accepted all risk</h5>
-        </div>
-        <div id="spinnerContainer">
-            <h4>Loading...</h4>
-            <div class="spinner"></div>
-        </div>
-    </div>
-    </div>
+<div id="spinnerContainer" style="display: none;">
+    <h4>Loading...</h4>
+    <div class="spinner"></div>
 </div>
 
 <script type="text/javascript">
-    {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+
+    function sleep(ms) {
+        const start = new Date().getTime();
+        while (new Date().getTime() < start + ms) {
+        }
+      }
 
    $(document).ready(function() {
        $(document).on("click", "#confirmed_action_modal", function() {
-           $('#id_loading_modal').modal('show') 
+           $('#spinnerContainer').modal('show') 
            $.ajax({
-               url: "http://localhost:8080/product/162/view_transfer_findings/all",
+               url: "/product/162/view_transfer_findings/all",
                type: "GET",
-               success: function(response) {
-                   $('#id_loading_modal').modal('hide') 
-                   location.reload()
+               success: function(response)
+               {
+                sleep(2000);
+                $('#spinnerContainer').modal('hide') 
+                location.reload();
                },
                error: function(error) {
                    console.error(error);
-                   $('#id_loading_modal').modal('hide') 
+                   $('#spinnerContainer').modal('hide') 
                }
            });
            })
    });
+   
 </script>

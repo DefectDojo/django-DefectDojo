@@ -83,7 +83,6 @@ $(document).ready(function() {
 
 
 export async function getTransferFindingsAsync(transferFindingId) {
-    console.log("tf: ", transferFindingId)
     try {
         const response = await $.ajax({
             url: `/api/v2/transfer_finding?id=${transferFindingId}`,
