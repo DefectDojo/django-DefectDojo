@@ -672,15 +672,22 @@ class BaseClass:
     class DeleteRequestTest(RESTEndpointTest):
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][-1]['id'])
+            if delete_id := getattr(self, "delete_id", ""):
+                relative_url = f"{self.url}{delete_id}/"
+            else:
+                current_objects = self.client.get(self.url, format='json').data
+                relative_url = f"{self.url}{current_objects['results'][0]['id']}/"
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(DeletePreviewModelMixin)
         def test_delete_preview(self):
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/delete_preview/'.format(current_objects['results'][0]['id'])
+            if delete_id := getattr(self, "delete_id", ""):
+                relative_url = f"{self.url}{delete_id}/delete_preview/"
+            else:
+                current_objects = self.client.get(self.url, format='json').data
+                relative_url = f"{self.url}{current_objects['results'][0]['id']}/delete_preview/"
+
             response = self.client.get(relative_url)
             # print('delete_preview response.data')
 
@@ -704,7 +711,7 @@ class BaseClass:
                     self.assertIsInstance(obj['id'], int)
                 self.assertIsInstance(obj['name'], str)
 
-            self.assertEqual(self.deleted_objects, len(response.data['results']), response.content[:1000])
+            self.assertEqual(self.deleted_objects, len(response.data['results']), response.content)
 
         @skipIfNotSubclass(DestroyModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
@@ -736,8 +743,11 @@ class BaseClass:
 
             self.setUp_not_authorized()
 
-            current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + f'{current_objects[0].id}/'
+            if delete_id := getattr(self, "delete_id", ""):
+                relative_url = self.url + f'{delete_id}/'
+            else:
+                current_objects = self.endpoint_model.objects.all()
+                relative_url = self.url + f'{current_objects[0].id}/'
             response = self.client.delete(relative_url)
             self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -1553,6 +1563,7 @@ class TestsTest(BaseClass.BaseClassTest):
         self.permission_update = Permissions.Test_Edit
         self.permission_delete = Permissions.Test_Delete
         self.deleted_objects = 5
+        self.delete_id = 55
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
