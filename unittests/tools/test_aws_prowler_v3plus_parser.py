@@ -1,12 +1,12 @@
 from dojo.models import Test
-from dojo.tools.aws_prowler_v3.parser import AWSProwlerV3Parser
+from dojo.tools.aws_prowler_v3plus.parser import AWSProwlerV3plusParser
 
 from ..dojo_test_case import DojoTestCase
 
 
-class TestAwsProwlerV3Parser(DojoTestCase):
+class TestAwsProwlerV3plusParser(DojoTestCase):
     def setup(self, testfile):
-        parser = AWSProwlerV3Parser()
+        parser = AWSProwlerV3plusParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         return findings
