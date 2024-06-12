@@ -233,16 +233,15 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
                     user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
 
 
-def reset_finding_related(transfer_finding_finding):
+def reset_finding_related(finding):
     try:
-        if transfer_finding_finding.findings:
-            finding_id = transfer_finding_finding.finding
-            logger.debug(f"Transfer Finding, Reset finding status {finding_id}")
-            finding = Finding.objects.get(finding_id)
+        if finding:
             finding.risk_status = "Risk Active"
             finding.active = True
             finding.out_of_scope = False
             finding.save()
+        else:
+            raise ApiError.not_found(f"Finding id: {finding.id} not found")
 
     except Exception as e:
         logger.error(e)

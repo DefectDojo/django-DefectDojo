@@ -3384,7 +3384,7 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
             obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
             for transfer_finding_finding in obj_transfer_finding_findings:
                 helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
-                helper_tf.reset_finding_related(transfer_finding_finding)
+                helper_tf.reset_finding_related(transfer_finding_finding.findings)
             super().destroy(request, pk)
             return http_response.no_content(message="TransferFinding Deleted")
         except Exception as e:
@@ -3427,7 +3427,7 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                 for transfer_finding_finding in obj_transfer_finding_findings:
                     if str(transfer_finding_finding.findings.id) in request_findings:
                         helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
-                        helper_tf.reset_finding_related(transfer_finding_finding)
+                        helper_tf.reset_finding_related(transfer_finding_finding.findings)
                         transfer_finding_finding.delete()
 
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
