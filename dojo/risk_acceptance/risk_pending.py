@@ -53,6 +53,7 @@ def update_expiration_risk_accepted(finding: Finding):
 def handle_from_provider_risk(finding, acceptance_days):
     tag = ra_helper.get_matching_value(list_a=finding.tags.tags, list_b=[settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3])
     if tag is not None:
+        logger.info(f"Vulnerability {finding.vuln_id_from_tool} has provider tags")
         if tag.name == settings.PROVIDER3:
             finding_id = finding.unique_id_from_tool
         else:
