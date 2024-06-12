@@ -19,9 +19,9 @@
                type: "GET",
                success: function(response)
                {
-                sleep(2000);
                 $('#spinnerContainer').modal('hide') 
-                location.reload();
+                sleep(500);
+                $('#confirmedModal').modal('hide');
                },
                error: function(error) {
                    console.error(error);

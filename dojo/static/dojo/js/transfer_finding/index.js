@@ -1,4 +1,6 @@
 import { get_product_with_description_findings } from '../product/index.js';
+import {MAX_RETRY, RETRY_INTERVAL} from '../settings.js';
+import { alertHide, alertShow } from '../alert/alert.js';
 import { addOption} from '../helper/helper.js';
 
 var ObjFindings= {};
@@ -35,10 +37,14 @@ $(document).ready(function(){
 });
 
 
+
+
 function getEngagementOptions(idProduct, engagementElement){
     $.ajax({
         url: "/api/v2/engagements/?product=" + idProduct,
         type: "GET",
+        retry: MAX_RETRY,
+        retryInterval: RETRY_INTERVAL,
         success: function(response) {
             clearSelect(engagementElement);
             addOption(engagementElement, '', 'Select Engagement Name...');
@@ -56,18 +62,21 @@ function getEngagementOptions(idProduct, engagementElement){
 $(document).ready(function() {
 
     $('#modalTransferFinding').on('click', '.btn-success, .btn-warning, .btn-danger', function() {
+        alertHide('.alert');
         let btnClass = $(this).attr('class');
         let row = $(this).closest('tr');
-        if (btnClass.includes('btn-success')) {
-            $('.alert').alert().addClass('sr-only');
-            if (engagementId !== "None"){
-                row.find('.cls-finding-status').text("Transfer Accepted").css("color", "green");
-                let findingId = $(this).attr('data-btn-success');
-                let relatedFinding = $(this).attr('data-related-finding');
-                AcceptanceFinding(findingId, relatedFinding)
-            }else{
-                $('.alert').alert().removeClass('sr-only');
-            }
+        if (btnClass.includes('btn-success'))
+            {
+                if (engagementId !== "None"){
+                    row.find('.cls-finding-status').text("Transfer Accepted").css("color", "green");
+                    let findingId = $(this).attr('data-btn-success');
+                    let relatedFinding = $(this).attr('data-related-finding');
+                    AcceptanceFinding(findingId, relatedFinding)
+                }
+                else
+                {
+                    alertShow('.alert');
+                }
         } else if (btnClass.includes('btn-warning')) {
             row.find('.cls-finding-status').text("Transfer Rejected").css("color", "#e7a100");
             let findingId = $(this).attr('data-btn-warning');
@@ -87,6 +96,8 @@ export async function getTransferFindingsAsync(transferFindingId) {
         const response = await $.ajax({
             url: `/api/v2/transfer_finding?id=${transferFindingId}`,
             type: 'GET',
+            retry: MAX_RETRY,
+            retryInterval: RETRY_INTERVAL,
         });
         return response;
     } catch (error) {
@@ -95,7 +106,6 @@ export async function getTransferFindingsAsync(transferFindingId) {
     }
 }
 function AcceptanceFinding(findingId, related_finding){
-    // guarar engagement
     if(related_finding == ""){
         ObjFindings[findingId] = {"risk_status": "Transfer Accepted"}
     }

@@ -161,17 +161,17 @@
                             <td>{{transfer_findings.accepted_by}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-success btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-success btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-check"></i>
                                     </button>
                             {% endif%}
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-warning btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-warning btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-times"></i>
                                     </button>
                             {% endif%}
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Delete" %}
-                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-danger btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-trash-alt"></i>
                                     </button></i>
                             {%endif%}
@@ -209,10 +209,11 @@
 {% csrf_token %}
 <script src="{% static 'dojo/js/modal/confirmed.js' %}"></script>
 <script type="module">
-    
     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
     // imports 
+    import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
     import { filterForStatus, transferId, engagementId, generateRequestTransferFindingUpdate } from '{% static "dojo/js/transfer_finding/index.js" %}';
+    import {alertHide, alertShow} from '{% static "dojo/js/alert/alert.js" %}';
 
     // cookies token
      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -222,9 +223,9 @@
         let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Rejected"])
         if (typeof tranferAcceptedFinding === 'object' && Object.keys(tranferAcceptedFinding).length > 0){
           if(engagementId > 0){
-            updateTransferFinding({"destination_engagement": engagementId})
+            updateTransferFinding({"destination_engagement": engagementId}, transferId);
           }
-          updateFindings(tranferAcceptedFinding)
+          updateFindings(tranferAcceptedFinding, transferId)
         }
         let removedFinding = filterForStatus(["Transfer Removed"]);
         if (typeof removedFinding === 'object' && Object.keys(removedFinding).length > 0){
@@ -245,38 +246,43 @@
         });
       });
 
-      $("#risk_acceptance").on('click', '.btn-success, .btn-warning, .btn-danger', function() {
-        let transferFindingId = $(this).data('tf-id')
-        let transferFindingActions = ""
-        if($(this).hasClass('btn-success')){ 
-          transferFindingActions = "Accepted"
+      $("#risk_acceptance").on('click', '.btn-success, .btn-warning, .btn-danger', function()
+      {
+        let row = $(this).closest('tr');
+        let selectEngagement = row.find('.cls-choosen-engagement')
+        let engagementSelected = selectEngagement.selectpicker('val');
+        if(engagementSelected === "None" && $(this).hasClass('btn-success'))
+        {
+          alertShow(".alert");
         }
-        else if($(this).hasClass('btn-warning')){
-          transferFindingActions = "Rejected"
+        else
+        {
+          alertHide(".alert");
+          let transferFindingId = $(this).data('tf-id')
+          let transferFindingActions = ""
+          if($(this).hasClass('btn-success')){ 
+            transferFindingActions = "Accepted"
+          }
+          else if($(this).hasClass('btn-warning')){
+            transferFindingActions = "Rejected"
+          }
+          else if($(this).hasClass('btn-danger')){
+            transferFindingActions = "Removed"
+          }
+          showConfirmedModal(transferFindingId, transferFindingActions);
+          $("#confirmedModal").modal('show')
         }
-        else if($(this).hasClass('btn-danger')){
-          transferFindingActions = "Removed"
-        }
-
-      $('#confirmedModal').on('show.bs.modal', function (event) {
-        $(this).data('tf-id', transferFindingId);
-        $(this).data('tf-action', transferFindingActions);
-        updateConfirmedModalByEvent(
-          $(this),
-          new MessageConfirmed("Accept Transfer Finding?", "Reject Transfer Finding?", "Delete Transfer Finding?"),
-          new MessageConfirmed("If you accept the transfer, you accept all request transfer findings",
-          "If you reject the transfer, you reject all request transfer findings", "If you delete the transfer, you delete all request transfer findings")
-        );
-        }); 
       });
     });
 
-    async function updateTransferFinding(data){
+    async function updateTransferFinding(data, transferFindingId){
       try{
         response = await $.ajax({
-            url: "/api/v2/transfer_finding/" + transferId+ "/",
+            url: "/api/v2/transfer_finding/" + transferFindingId + "/",
             type: "PATCH",
             headers: { "X-CSRFToken": csrftoken,
+            retry: MAX_RETRY,
+            retryInterval: RETRY_INTERVAL,
             "Content-Type": "application/json"},
             data: JSON.stringify(data),
         })
@@ -288,16 +294,19 @@
       }
     }
 
-  async function updateFindings(findingChangeStatus){
+  async function updateFindings(findingChangeStatus, transferFindingId){
       let transfer_findings= {"findings" : findingChangeStatus}
       try{
-        $.ajax({
-            url: "/api/v2/transfer_finding_findings/" + transferId + "/" + "change_status" + "/",
+        response = await $.ajax({
+            url: "/api/v2/transfer_finding_findings/" + transferFindingId + "/" + "change_status" + "/",
             type: "POST",
             headers: { "X-CSRFToken": csrftoken,
             "Content-Type": "application/json"},
+            retry: MAX_RETRY,
+            retryInterval: RETRY_INTERVAL,
             data: JSON.stringify(transfer_findings),
         })
+        return response
       }
       catch(error){
         console.error("updatefindings: ", error)
@@ -310,6 +319,8 @@
       response = await $.ajax({
           url: "/api/v2/transfer_finding_findings/" + transferId + "/",
           type: "DELETE",
+          retry: MAX_RETRY,
+          retryInterval: RETRY_INTERVAL,
           headers: { "X-CSRFToken": csrftoken,
           "Content-Type": "application/json"},
           data: JSON.stringify(transfer_findings),
@@ -327,6 +338,8 @@
           response = await $.ajax({
               url: "/api/v2/transfer_finding/" + transferFindingId + "/",
               type: "DELETE",
+              retry: MAX_RETRY,
+              retryInterval: RETRY_INTERVAL,
               headers: {
                   "X-CSRFToken": csrftoken,
                   "Content-Type": "application/json"
@@ -343,22 +356,36 @@
 
   async function updateFindingsRiskStatus(action, transferFindingId ){
     let response = ""
-    if (action == "Accepted"){
-        if(engagementId > 0){
-          await updateTransferFinding({"destination_engagement": engagementId});
+    if (action == "Accepted")
+    {
+        if(engagementId > 0)
+        {
+          response = await updateTransferFinding({"destination_engagement": engagementId}, transferFindingId)
         }
         let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
-       response = await updateFindings(requestFindingStatus)
+        response = await updateFindings(requestFindingStatus, transferFindingId)
     }
     if (action == "Rejected"){
       let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
-      response = await updateFindings(requestFindingStatus)
+      response = await updateFindings(requestFindingStatus, transferFindingId)
       }
     if (action == "Removed"){
-      response = await removeTransferFinding(transferFindingId)
+      response = await removeTransferFinding(transferFindingId, transferFindingId)
     }
     return response
   }
 
+  function showConfirmedModal(transferFindingId, transferFindingActions)
+  {
+    let modal = $('#confirmedModal')
+    modal.data('tf-id', transferFindingId);
+    modal.data('tf-action', transferFindingActions);
+    updateConfirmedModalByEvent(
+      modal,
+      new MessageConfirmed("Accept Transfer Finding?", "Reject Transfer Finding?", "Delete Transfer Finding?"),
+      new MessageConfirmed("If you accept the transfer, you accept all request transfer findings",
+      "If you reject the transfer, you reject all request transfer findings", "If you delete the transfer, you delete all request transfer findings")
+    );
+  }
 </script>
 {% endblock %}
