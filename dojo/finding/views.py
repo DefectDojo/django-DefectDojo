@@ -500,6 +500,54 @@ class ListClosedFindings(ListFindings):
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
+class ViewFindingRender(View):
+    
+    def get_template(self):
+        return "dojo/view_finding_render.html"
+    
+    def get_initial_context(self, request: HttpRequest, finding: Finding, user: Dojo_User):
+        notes = finding.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        available_note_types = None
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+        # Set the current context
+        context = {
+            "finding": finding,
+            "dojo_user": user,
+            "user": request.user,
+            "notes": notes,
+            "files": finding.files.all(),
+            "note_type_activation": note_type_activation,
+            "available_note_types": available_note_types,
+            "product_tab": Product_Tab(
+                finding.test.engagement.product, title="View Finding", tab="findings"
+            )
+        }
+
+        return context
+
+    def get(self, request: HttpRequest, finding_id: int):
+        # Get the initial objects
+        finding = Finding.objects.get(id=finding_id)
+        # user = self.get_dojo_user(request)
+        # Make sure the user is authorized
+        # user_has_permission_or_403(user, finding, Permissions.Finding_View)
+        # Set up the initial context
+        context = self.get_initial_context(request, finding, request.user)
+        # Add in the other extras
+        # context |= self.get_previous_and_next_findings(finding)
+        # context |= self.get_credential_objects(finding)
+        # context |= self.get_cwe_template(finding)
+        # # Add in more of the other extras
+        # context |= self.get_request_response(finding)
+        # context |= self.get_similar_findings(request, finding)
+        # context |= self.get_test_import_data(request, finding)
+        # context |= self.get_jira_data(finding)
+        # Render the form
+        return render(request, self.get_template(), context)
+
+
 class ViewFinding(View):
     def get_finding(self, finding_id: int):
         finding_qs = prefetch_for_findings(Finding.objects.all(), exclude_untouched=False)

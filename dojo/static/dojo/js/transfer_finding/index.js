@@ -6,7 +6,7 @@ import { addOption} from '../helper/helper.js';
 var ObjFindings= {};
 export var transferId = 0;
 export var engagementId = 0;
-var productId = 0;
+export var productId = 0;
 var productTypeId = 0;
 var host = window.location.host;
 
