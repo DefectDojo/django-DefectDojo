@@ -9,6 +9,7 @@ from dojo.transfer_findings import helper as hp_transfer_finding
 from django.urls import reverse
 from dojo.celery import app
 from dojo.models import System_Settings, Risk_Acceptance, Finding
+from dojo.decorators import dojo_async_task
 import logging
 import crum
 import requests
@@ -351,7 +352,8 @@ def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
         status.last_modified = timezone.now()
         status.save()
 
-
+@dojo_async_task
+@app.task(ignore_result=False)
 def risk_accept_provider(
         finding_id: str,
         provider: str,
@@ -360,6 +362,7 @@ def risk_accept_provider(
         header: str,
         token: str,
     ):
+    logger.info(f"Making risk accept for {finding_id} provider: {provider}")
     formatted_url = url + f'{provider}?vulnerabilityId={finding_id}&acceptanceDays={acceptance_days}'
     headers = {}
     headers[header] = token
