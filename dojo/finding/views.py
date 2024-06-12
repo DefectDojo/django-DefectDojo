@@ -528,23 +528,8 @@ class ViewFindingRender(View):
         return context
 
     def get(self, request: HttpRequest, finding_id: int):
-        # Get the initial objects
         finding = Finding.objects.get(id=finding_id)
-        # user = self.get_dojo_user(request)
-        # Make sure the user is authorized
-        # user_has_permission_or_403(user, finding, Permissions.Finding_View)
-        # Set up the initial context
         context = self.get_initial_context(request, finding, request.user)
-        # Add in the other extras
-        # context |= self.get_previous_and_next_findings(finding)
-        # context |= self.get_credential_objects(finding)
-        # context |= self.get_cwe_template(finding)
-        # # Add in more of the other extras
-        # context |= self.get_request_response(finding)
-        # context |= self.get_similar_findings(request, finding)
-        # context |= self.get_test_import_data(request, finding)
-        # context |= self.get_jira_data(finding)
-        # Render the form
         return render(request, self.get_template(), context)
 
 
