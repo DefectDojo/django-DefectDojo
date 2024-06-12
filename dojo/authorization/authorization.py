@@ -311,27 +311,28 @@ def custom_permissions_transfer_findings(user, obj, permission):
         ):
         return True
 
-    def rule_permissions(obj, permission):
+    def rule_permissions_transferfinding_accepted(obj, permission):
         transfer_finding_finding = obj.transfer_findings.filter(findings__risk_status="Transfer Accepted")
+        result = False
         if transfer_finding_finding:
-            if(permission == Permissions.Transfer_Finding_Delete
-               or permission == Permissions.Transfer_Finding_Edit):
-                return False
+            if permission == Permissions.Transfer_Finding_View:
+                result = True
         else:
-            return True
+            result = True
+        return result
 
     member = get_product_type_member(user, obj.destination_product_type)
     if member is not None and role_has_permission(member.role.id, permission):
-        return rule_permissions(obj, permission)
+        return rule_permissions_transferfinding_accepted(obj, permission)
     member = get_product_type_member(user, obj.origin_product_type)
-    if member is not None and role_has_permission(member.role.id, "Transfer_Finding_View"):
-        return rule_permissions(obj, permission)
+    if member is not None and role_has_permission(member.role.id, Permissions.Transfer_Finding_View):
+        return rule_permissions_transferfinding_accepted(obj, permission)
     member = get_product_member(user, obj.destination_product)
-    if member is not None and role_has_permission(member.role.id, permission):
-        return rule_permissions(obj, permission)
+    if member is not None and role_has_permission(member.role.id, Permissions.Transfer_Finding_View):
+        return rule_permissions_transferfinding_accepted(obj, permission)
     member = get_product_member(user, obj.origin_product)
     if member is not None and role_has_permission(member.role.id, "Transfer_Finding_View"):
-        return rule_permissions(obj, permission)
+        return rule_permissions_transferfinding_accepted(obj, permission)
 
 
         

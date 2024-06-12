@@ -73,6 +73,7 @@ from dojo.forms import (
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     Finding,
+    TransferFinding,
     Finding_Group,
     Notes,
     NoteHistory,
@@ -527,7 +528,9 @@ class ViewFindingRender(View):
 
         return context
 
-    def get(self, request: HttpRequest, finding_id: int):
+    def get(self, request: HttpRequest, finding_id: int, transfer_finding_id: int):
+        transfer_finding_obj = TransferFinding.objects.get(id=transfer_finding_id)
+        user_has_permission_or_403(request.user, transfer_finding_obj, Permissions.Transfer_Finding_View)
         finding = Finding.objects.get(id=finding_id)
         context = self.get_initial_context(request, finding, request.user)
         return render(request, self.get_template(), context)

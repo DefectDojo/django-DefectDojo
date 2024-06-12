@@ -10,7 +10,7 @@ urlpatterns = [
         name='view_finding'
     ),
     re_path(
-        r'^finding/render/(?P<finding_id>\d+)$',
+        r'^finding/(?P<finding_id>\d+)/transfer_finding/(?P<transfer_finding_id>\d+)$',
         views.ViewFindingRender.as_view(),
         name='view_finding_render'
     ),

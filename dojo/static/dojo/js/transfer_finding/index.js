@@ -147,7 +147,7 @@ function innerData(data, findings_related){
             cell_status.className = "cls-finding-status"
 
             row.innerHTML = `
-            <td><a href="http://${host}/finding/${findings.findings.id}", class="table-link cls-finding-id" target="_blank" type="button">${findings.findings.id}</a></td>
+            <td><a href="http://${host}/finding/${findings.findings.id}/transfer_finding/${transfer_finding_item.id}", class="table-link cls-finding-id" target="_blank" type="button">${findings.findings.id}</a></td>
             <td>${findings.findings.title}</td>
             <td>${findings.findings.severity}</td>
             <td>${findings.findings.cve}</td>`
