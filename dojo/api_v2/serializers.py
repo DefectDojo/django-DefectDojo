@@ -9,6 +9,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
 from datetime import datetime
 from dojo.endpoint.utils import endpoint_filter
+from dojo.api_v2 import api_error
 from dojo.importers.reimporter.utils import (
     get_or_create_engagement,
     get_target_engagement_if_exists,
@@ -119,7 +120,7 @@ from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.importers.reimporter.reimporter import (
     DojoDefaultReImporter as ReImporter,
 )
-from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.authorization import user_has_permission, user_has_global_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.helper import (
     save_vulnerability_ids,
@@ -3338,6 +3339,35 @@ class FindingTfSerlilizer(serializers.ModelSerializer):
 class TransferFindingFindingSerializer(serializers.ModelSerializer):
     findings = FindingTfSerlilizer(read_only=True)
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['permission'] = []
+        transfer_finding_finding_obj = TransferFindingFinding.objects.get(id=representation['id'])
+        for permission in [Permissions.Transfer_Finding_Finding_View,
+                        Permissions.Transfer_Finding_Finding_Edit,
+                        Permissions.Transfer_Finding_Finding_Delete,
+                        Permissions.Transfer_Finding_Finding_Add]:
+            user = self.context["request"].user
+
+            if user.is_superuser:
+                representation['permission'].append(permission)
+
+            elif user_has_global_permission(user, permission):
+                representation['permission'].append(permission)
+
+            elif user_has_permission(
+                    self.context["request"].user,
+                    transfer_finding_finding_obj,
+                    permission):
+                if(transfer_finding_finding_obj.findings.risk_status == "Transfer Accepted"
+                   and permission == Permissions.Transfer_Finding_Finding_View):
+                    representation['permission'].append(permission)
+                elif transfer_finding_finding_obj.findings.risk_status in ["Transfer Rejected", "Transfer Pending"]:
+                    representation['permission'].append(permission)
+
+        return representation
+            
+
     class Meta:
         model = TransferFindingFinding
         fields = '__all__'
@@ -3350,15 +3380,27 @@ class TransferFindingSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['permission'] = []
         transfer_finding_obj = TransferFinding.objects.get(id=representation.get("id"))
-        for permission in [Permissions.Transfer_Finding_View,
+        all_permissions = [Permissions.Transfer_Finding_View,
                            Permissions.Transfer_Finding_Edit,
                            Permissions.Transfer_Finding_Delete,
-                           Permissions.Transfer_Finding_Add]:
-            if user_has_permission(
-                    self.context["request"].user,
+                           Permissions.Transfer_Finding_Add]
+        user = self.context["request"].user
+        for permission in all_permissions:
+            if user.is_superuser:
+                representation['permission'].append(permission)
+
+            elif user_has_global_permission(user, permission):
+                representation['permission'].append(permission)
+
+            elif user_has_permission(
+                    user,
                     transfer_finding_obj,
                     permission):
-                representation['permission'].append(permission)
+                transfer_finding_finding = transfer_finding_obj.transfer_findings.filter(findings__risk_status="Transfer Accepted")
+                if transfer_finding_finding:
+                    if permission == Permissions.Transfer_Finding_View:
+                        representation['permission'].append(permission)
+
         return representation
 
     class Meta:

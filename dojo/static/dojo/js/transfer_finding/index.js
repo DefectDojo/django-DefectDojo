@@ -141,43 +141,42 @@ function innerData(data, findings_related){
     let tableBody = document.getElementById("id_data_transfer_finding")
     tableBody.innerHTML = ""
     data.results.forEach(function(transfer_finding_item){
-        transfer_finding_item.transfer_findings.forEach(function(findings){
+        transfer_finding_item.transfer_findings.forEach(function(transfer_findings_finding){
             let row = document.createElement("tr") 
             let cell_status = document.createElement("td")
             cell_status.className = "cls-finding-status"
 
             row.innerHTML = `
-            <td><a href="http://${host}/finding/${findings.findings.id}/transfer_finding/${transfer_finding_item.id}", class="table-link cls-finding-id" target="_blank" type="button">${findings.findings.id}</a></td>
-            <td>${findings.findings.title}</td>
-            <td>${findings.findings.severity}</td>
-            <td>${findings.findings.cve}</td>`
-            if(findings.findings.risk_status.includes("Transfer Accepted")){
-                row.innerHTML += `<td><a href="http://${host}/finding/${findings.finding_related}" class="table-link" target="_blank" type="button"> ${findings.finding_related} </a></td>`
-                cell_status.innerHTML= `<span style="color:green">${findings.findings.risk_status}</span>`
-            }else if(findings.findings.risk_status.includes("Transfer Reject")){
+            <td><a href="http://${host}/finding/${transfer_findings_finding.findings.id}/transfer_finding/${transfer_finding_item.id}", class="table-link cls-finding-id" target="_blank" type="button">${transfer_findings_finding.findings.id}</a></td>
+            <td>${transfer_findings_finding.findings.title}</td>
+            <td>${transfer_findings_finding.findings.severity}</td>
+            <td>${transfer_findings_finding.findings.cve}</td>`
+            if(transfer_findings_finding.findings.risk_status.includes("Transfer Accepted")){
+                row.innerHTML += `<td><a href="http://${host}/finding/${transfer_findings_finding.finding_related}" class="table-link" target="_blank" type="button"> ${transfer_findings_finding.finding_related} </a></td>`
+                cell_status.innerHTML= `<span style="color:green">${transfer_findings_finding.findings.risk_status}</span>`
+            }else if(transfer_findings_finding.findings.risk_status.includes("Transfer Reject")){
                 row.innerHTML += `${findings_related}`
                 cell_status.innerHTML = `<span style="color:#e7a100">Transfer Rejected</span>`
             }else{
                 row.innerHTML += `${findings_related}`
-                cell_status.innerHTML = `${findings.findings.risk_status}`
+                cell_status.innerHTML = `${transfer_findings_finding.findings.risk_status}`
             }
             row.appendChild(cell_status)
             row.innerHTML += `<td>
-                ${transfer_finding_item.permission.includes(2801) && transfer_finding_item.permission.includes(2802)? 
-                    `<button type="button" class="btn btn-success btn-sm" data-btn-success=${findings.findings.id} data-related-finding=""> 
+                ${transfer_findings_finding.permission.includes(2805) && transfer_findings_finding.permission.includes(2806)? 
+                    `<button type="button" class="btn btn-success btn-sm" data-btn-success=${transfer_findings_finding.findings.id} data-related-finding=""> 
                         <i class="fas fa-check"></i>
-                     </button>
-                     <button type="button" class="btn btn-warning btn-sm" data-btn-warning=${findings.findings.id}>
+                    </button>
+                    <button type="button" class="btn btn-warning btn-sm" data-btn-warning=${transfer_findings_finding.findings.id}>
                         <i class="fas fa-times"></i>
-                     </button>`
-                     :'--'}
-                ${transfer_finding_item.permission.includes(2803) ? 
-                    `<button type="button" class="btn btn-danger btn-sm" data-btn-danger=${findings.findings.id}>
+                    </button>`
+                    :'--'}
+                ${transfer_findings_finding.permission.includes(2807) ? 
+                    `<button type="button" class="btn btn-danger btn-sm" data-btn-danger=${transfer_findings_finding.findings.id}>
                         <i class="fas fa-trash-alt"></i>
                     </button>
-                     `: ''}
+                    `: ''}
             </td>`; 
-            
             tableBody.appendChild(row);
             $(".form-control-chosen").chosen();
         });
