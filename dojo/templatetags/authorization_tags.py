@@ -1,5 +1,6 @@
 from django import template
 import crum
+import dojo.transfer_findings.helper as helper_tf
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission, \
     user_has_configuration_permission as configuration_permission
@@ -80,3 +81,11 @@ def user_can_clear_peer_review(finding, user):
     user_requesting_review = user == finding.review_requested_by
     user_is_reviewer = user in finding.reviewers.all()
     return finding_under_review and (user_requesting_review or user_is_reviewer)
+
+
+@register.filter
+def enable_transfer_finding_button(status_finding):
+    if status_finding in helper_tf.enable_flow_transfer_finding():
+        return True
+    else:
+        return False

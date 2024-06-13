@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.contrib import messages
+from django.core.serializers import serialize
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -32,6 +33,11 @@ Jay
 Status: in prod
 Product Type views
 """
+
+def get_products_name(_request, pid):
+    prod_type = Product_Type.objects.get(id=pid)
+    data = Product.objects.filter(prod_type=prod_type).values("id", "name")
+    return JsonResponse({"data": list(data)})
 
 
 def get_description_product(_request, pid):

@@ -2047,6 +2047,34 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
+class EngagementByProductResponseSerializer(TaggitSerializer, serializers.ModelSerializer):
+    name = serializers.CharField(max_length=255)
+    findings_count = serializers.SerializerMethodField()
+    findings_list = serializers.SerializerMethodField()
+    engagements_list = serializers.SerializerMethodField()
+
+    def get_findings_count(self, obj):
+        return obj.findings_count
+
+    def get_findings_list(self, obj):
+        return obj.open_findings_list
+    
+    def get_engagements_list(self, obj):
+        return obj.engagements_list
+
+    class Meta:
+        model = Product
+        fields = ("name",
+                  "findings_count",
+                  "findings_list",
+                  "engagements_list",
+                  "description",
+                  "product_manager",
+                  "technical_contact",
+                  "team_manager",
+                  "prod_type")
+
+
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -3133,6 +3161,7 @@ class EngagementPresetsSerializer(serializers.ModelSerializer):
 class NetworkLocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Network_Locations
+
         fields = "__all__"
 
 
@@ -3319,7 +3348,7 @@ class TransferFindingSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['actions'] = []
+        representation['permission'] = []
         transfer_finding_obj = TransferFinding.objects.get(id=representation.get("id"))
         for permission in [Permissions.Transfer_Finding_View,
                            Permissions.Transfer_Finding_Edit,
@@ -3329,8 +3358,7 @@ class TransferFindingSerializer(serializers.ModelSerializer):
                     self.context["request"].user,
                     transfer_finding_obj,
                     permission):
-                representation['actions'].append(permission)
-
+                representation['permission'].append(permission)
         return representation
 
     class Meta:
@@ -3356,6 +3384,7 @@ class TransferFindingFindingsSerializer(serializers.ModelSerializer):
 
 class TransferFindingFindingsDetailSerializer(serializers.Serializer):
     risk_status = serializers.CharField()
+    related_finding = serializers.IntegerField(required=False)
 
 
 class TransferFindingFindingsUpdateSerializer(serializers.Serializer):

@@ -5,6 +5,8 @@ import os
 import re
 import copy
 import warnings
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 from typing import Dict, Set, Optional
 from uuid import uuid4
 from django.conf import settings
@@ -27,6 +29,7 @@ from django.utils.functional import cached_property
 from django.utils import timezone
 from django.utils.html import escape
 from django.db import transaction
+from django.forms.models import model_to_dict
 from pytz import all_timezones
 from polymorphic.models import PolymorphicModel
 from polymorphic.managers import PolymorphicManager
@@ -1215,6 +1218,18 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    @property
+    def engagements_list(self):
+        engagements = Engagement.objects.filter(product=self, active=True)
+        engagement_list = []
+        for engagement_dict in engagements.values("id", "name", "product_id", "status", "engagement_type", "build_id"):
+            findings = Finding.objects.filter(test__engagement__id=engagement_dict["id"], active=True, risk_status__in=["Risk Active", "Risk Expired"])
+            engagement_dict.update({"findings": list(
+                findings.values("id", "title", "cve", "severity", "description", "active",
+                                "verified", "risk_status", "risk_accepted", "accepted_by"))})
+            engagement_list.append(engagement_dict)
+        return engagement_list
+
     # only used in APIv2 serializers.py, query should be aligned with findings_count
     @cached_property
     def open_findings_list(self):
@@ -1224,6 +1239,7 @@ class Product(models.Model):
         for i in findings:
             findings_list.append(i.id)
         return findings_list
+    
 
     @property
     def has_jira_configured(self):
@@ -3480,7 +3496,7 @@ class TransferFinding(models.Model):
 class TransferFindingFinding(models.Model):
     findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
     transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
-    finding_related = models.OneToOneField(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
+    finding_related = models.ForeignKey(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
     engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE, null=True)
 
 

@@ -10,6 +10,11 @@ urlpatterns = [
         name='view_finding'
     ),
     re_path(
+        r'^finding/(?P<finding_id>\d+)/transfer_finding/(?P<transfer_finding_id>\d+)$',
+        views.ViewFindingRender.as_view(),
+        name='view_finding_render'
+    ),
+    re_path(
         r'^finding/(?P<finding_id>\d+)/edit$',
         views.EditFinding.as_view(),
         name='edit_finding'

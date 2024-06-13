@@ -1186,8 +1186,8 @@ class TransferFindingForm(forms.ModelForm):
 
     title = forms.CharField(required=True, max_length=255)
     severity = forms.CharField(widget=forms.HiddenInput(), required=True)
+    destination_product_type = forms.ModelChoiceField(queryset=Product_Type.objects.all(), required=True)
     destination_product = forms.ModelChoiceField(queryset=Product.objects.none(), required=True)
-    destination_engagement = forms.ModelChoiceField(queryset=Engagement.objects.all(), required=False)
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
@@ -1199,19 +1199,19 @@ class TransferFindingForm(forms.ModelForm):
             Permissions.Transfer_Finding_Add
         )
         self.fields["destination_product"].queryset = get_products_for_transfer_findings(Permissions.Transfer_Finding_Add)
-        self.fields["title"].initial = kwags.get("engagement_id")
         self.fields["owner"].queryset = get_owner_user()
     
     class Meta:
         model = TransferFinding
-        fields = ["findings", 
+        fields = ["findings",
                   "title",
+                  "destination_product_type",
                   "destination_product",
-                  "destination_engagement",
                   "accepted_by",
                   "path",
                   "notes",
                   "owner"]
+
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):
     def clean(self):

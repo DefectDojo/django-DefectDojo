@@ -73,6 +73,7 @@ from dojo.forms import (
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     Finding,
+    TransferFinding,
     Finding_Group,
     Notes,
     NoteHistory,
@@ -498,6 +499,41 @@ class ListClosedFindings(ListFindings):
         self.filter_name = "Closed"
         self.order_by = "-mitigated"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
+
+
+class ViewFindingRender(View):
+    
+    def get_template(self):
+        return "dojo/view_finding_render.html"
+    
+    def get_initial_context(self, request: HttpRequest, finding: Finding, user: Dojo_User):
+        notes = finding.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        available_note_types = None
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+        # Set the current context
+        context = {
+            "finding": finding,
+            "dojo_user": user,
+            "user": request.user,
+            "notes": notes,
+            "files": finding.files.all(),
+            "note_type_activation": note_type_activation,
+            "available_note_types": available_note_types,
+            "product_tab": Product_Tab(
+                finding.test.engagement.product, title="View Finding", tab="findings"
+            )
+        }
+
+        return context
+
+    def get(self, request: HttpRequest, finding_id: int, transfer_finding_id: int):
+        transfer_finding_obj = TransferFinding.objects.get(id=transfer_finding_id)
+        user_has_permission_or_403(request.user, transfer_finding_obj, Permissions.Transfer_Finding_View)
+        finding = Finding.objects.get(id=finding_id)
+        context = self.get_initial_context(request, finding, request.user)
+        return render(request, self.get_template(), context)
 
 
 class ViewFinding(View):

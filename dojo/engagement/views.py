@@ -1251,8 +1251,8 @@ def add_risk_acceptance(request, eid, fid=None):
 
 @user_is_authorized(Engagement, Permissions.Transfer_Finding_Add, 'eid')
 def add_transfer_finding(request, eid, fid=None):
-    eng = get_object_or_404(Engagement, id=eid)
-    product = eng.product
+    origin_engagement = get_object_or_404(Engagement, id=eid)
+    product = origin_engagement.product
     finding = None
     if fid:
         finding = get_object_or_404(Finding, id=fid)
@@ -1266,8 +1266,8 @@ def add_transfer_finding(request, eid, fid=None):
                 # Save
                 transfer_findings: TransferFinding = form.save()
                 # Origin
-                transfer_findings.origin_product_type = eng.product.prod_type
-                transfer_findings.origin_product = eng.product
+                transfer_findings.origin_product_type = origin_engagement.product.prod_type
+                transfer_findings.origin_product = origin_engagement.product
                 # Destination
                 id_destination_product = data.get("destination_product")
                 destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
@@ -1292,7 +1292,7 @@ def add_transfer_finding(request, eid, fid=None):
                                     icon="check-circle",
                                     color_icon="#096C11",
                                     recipients=[transfer_findings.accepted_by.get_username()],
-                                    engagement=eng, url=reverse('view_transfer_finding', args=(product.id, )))
+                                    url=reverse('view_transfer_finding', args=(product.id, )))
                 logger.debug("Transfer Finding send notification {transfer_finding.title}")
 
             except Exception as e:
@@ -1310,18 +1310,17 @@ def add_transfer_finding(request, eid, fid=None):
         else:
             logger.error(form.errors)
     else:
-        form = TransferFindingForm(initial={"engagement_name": eng,
-                                            "title": f"transfer finding - {finding.title}",
+        form = TransferFindingForm(initial={"title": f"transfer finding - {finding.title}",
                                             "findings": finding,
                                             "owner": request.user.username,
                                             "status": "Transfer Pending",
                                             "severity": finding.severity,
                                             "owner": request.user})
 
-        form.fields["findings"].queryset = form.fields["findings"].queryset.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        form.fields["findings"].queryset = form.fields["findings"].queryset.filter(duplicate=False, test__engagement=origin_engagement, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
     return render(request, 'dojo/add_transfer_finding.html', {
-                  'eng': eng,
+                  'eng': origin_engagement,
                   'product_tab': "product_tab test",
                   'form': form
                   })

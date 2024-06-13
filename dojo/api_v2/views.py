@@ -1692,10 +1692,8 @@ class ProductViewSet(
     dojo_mixins.DeletePreviewModelMixin,
 ):
     serializer_class = serializers.ProductSerializer
-    # TODO: prefetch
     queryset = Product.objects.none()
     filter_backends = (DjangoFilterBackend,)
-
     filterset_class = ApiProductFilter
     permission_classes = (
         IsAuthenticated,
@@ -1714,12 +1712,20 @@ class ProductViewSet(
             instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # def list(self, request):
-    #     print(vars(request))
-    #     # Note the use of `get_queryset()` instead of `self.queryset`
-    #     queryset = self.get_queryset()
-    #     serializer = self.serializer_class(queryset, many=True)
-    #     return Response(serializer.data)
+    @extend_schema(
+        responses={status.HTTP_200_OK: serializers.EngagementByProductResponseSerializer},
+    )
+    @action(
+        detail=True, methods=["get"], permission_classes=[IsAuthenticated]
+    )
+    def engagements(self, request, pk=None):
+        try:
+            queryset = self.get_queryset().get(pk=pk)
+        except Product.DoesNotExist:
+            return http_response.non_authoritative_information()
+
+        serializer = serializers.EngagementByProductResponseSerializer(queryset)
+        return http_response.ok(data=serializer.data)
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -3372,6 +3378,18 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                         "origin_product",
                         "origin_engagement",
                         "owner"]
+    
+    def destroy(self, request, pk=None):
+        try:
+            obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+            for transfer_finding_finding in obj_transfer_finding_findings:
+                helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
+                helper_tf.reset_finding_related(transfer_finding_finding.findings)
+            super().destroy(request, pk)
+            return http_response.no_content(message="TransferFinding Deleted")
+        except Exception as e:
+            logger.error(e)
+            raise ApiError.not_found(detail=e)
 
 
 class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
@@ -3392,9 +3410,8 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
         serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
         if serializer.is_valid():
             transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
-            request_findings = request.data["findings"]
             if transfer_finding_findings:
-                helper_tf.transfer_findings(transfer_finding_findings, request_findings)
+                helper_tf.transfer_findings(transfer_finding_findings, serializer)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return http_response.no_content(data=serializer.data, message=f"Transfer Finding {pk} Not Found")
@@ -3410,10 +3427,12 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                 for transfer_finding_finding in obj_transfer_finding_findings:
                     if str(transfer_finding_finding.findings.id) in request_findings:
                         helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
+                        helper_tf.reset_finding_related(transfer_finding_finding.findings)
                         transfer_finding_finding.delete()
 
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
             else:
+                helper_tf.reset_finding_related(pk)
                 super().destroy(request, pk)
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
         else:

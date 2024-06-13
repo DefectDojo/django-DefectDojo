@@ -106,13 +106,8 @@ def user_has_permission(user, obj, permission):
             user, obj.test.engagement.product, permission
         )
     elif (isinstance(obj, TransferFinding) and permission in Permissions.get_transfer_finding_permissions()):
-        for product_type in [obj.origin_product_type, obj.destination_product_type]:
-            member = get_product_type_member(user, product_type)
-            if member is not None and role_has_permission(
-                member.role.id, permission
-            ):
-                return True
-        return False
+        return custom_permissions_transfer_findings(user, obj, permission)
+      
     elif (
         isinstance(obj, Finding_Group)
         and permission in Permissions.get_finding_group_permissions()
@@ -304,6 +299,43 @@ def role_has_global_permission(role, permission):
         return True
     return role_has_permission(role, permission)
 
+
+def custom_permissions_transfer_findings(user, obj, permission):
+    if user.is_superuser:
+        return True
+    
+    if (
+        hasattr(user, "global_role")
+        and user.global_role.role is not None
+        and role_has_global_permission(user.global_role.role.id, permission)
+        ):
+        return True
+
+    def rule_permissions_transferfinding_accepted(obj, permission):
+        transfer_finding_finding = obj.transfer_findings.filter(findings__risk_status="Transfer Accepted")
+        result = False
+        if transfer_finding_finding:
+            if permission == Permissions.Transfer_Finding_View:
+                result = True
+        else:
+            result = True
+        return result
+
+    member = get_product_type_member(user, obj.destination_product_type)
+    if member is not None and role_has_permission(member.role.id, permission):
+        return rule_permissions_transferfinding_accepted(obj, permission)
+    member = get_product_type_member(user, obj.origin_product_type)
+    if member is not None and role_has_permission(member.role.id, Permissions.Transfer_Finding_View):
+        return rule_permissions_transferfinding_accepted(obj, permission)
+    member = get_product_member(user, obj.destination_product)
+    if member is not None and role_has_permission(member.role.id, Permissions.Transfer_Finding_View):
+        return rule_permissions_transferfinding_accepted(obj, permission)
+    member = get_product_member(user, obj.origin_product)
+    if member is not None and role_has_permission(member.role.id, "Transfer_Finding_View"):
+        return rule_permissions_transferfinding_accepted(obj, permission)
+
+
+        
 
 def check_permission_produc_type_member_add_owner(user):
     try:
