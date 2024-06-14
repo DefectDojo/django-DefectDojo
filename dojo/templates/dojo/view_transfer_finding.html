@@ -49,6 +49,17 @@
       margin: 0 auto;
 
     }
+    h3{
+      color: white;
+    }
+    .modal-header .close {
+      margin-top: -26px;
+    }
+    .modal-header{
+      padding: 8px;
+      background-color:#20a6d8bf;
+      border-button:#20a6d8bf;
+    }
     .confirmed-modal{
       max-width: 30%;
       width: 30%;
@@ -130,9 +141,9 @@
                             <td>{{transfer_findings.id}}</td>
                             <td>
                               <a href="#" class="table-link cls_transfer_finding_show_modal" id="id_transfer_finding_show_modal" type="button" 
-                              data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product}}
-                              data-product-type-id={{transfer_findings.origin_product_type}}>
-                                 {{transfer_findings.title}}</a>
+                              data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product.id}}
+                              data-product-type-id={{transfer_findings.origin_product_type.id}}>
+                                 {{transfer_findings.title}} <i class="fa-solid fa-magnifying-glass-plus"></i> </a>
                             </td>
                             <td>{{transfer_findings.date}}</td>
                             <td data-origin-pid="{{transfer_findings.origin_product_type.id}}">{{transfer_findings.origin_product_type}}</td>
@@ -210,10 +221,11 @@
 <script src="{% static 'dojo/js/modal/confirmed.js' %}"></script>
 <script type="module">
     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
-    // imports 
+    import {setSessionStorage, getSessionStorage} from '{% static "dojo/js/settings/session_storage.js" %}'
     import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
-    import { filterForStatus, transferId, engagementId, generateRequestTransferFindingUpdate } from '{% static "dojo/js/transfer_finding/index.js" %}';
+    import { filterForStatus, productId, transferId, engagementId, generateRequestTransferFindingUpdate } from '{% static "dojo/js/transfer_finding/index.js" %}';
     import {alertHide, alertShow} from '{% static "dojo/js/alert/alert.js" %}';
+    import {all} from '{% static "dojo/js/driver_adapter/transfer_finding.js" %}'
 
     // cookies token
      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -235,14 +247,21 @@
 
       $("#confirmed_action_modal").on('click', function()
       {
+        $('#spinnerContainer').modal('show') 
         let modal = $(this).closest('.modal')
         let transferFindingId = modal.data('tf-id')
         let action = modal.data('tf-action')
         updateFindingsRiskStatus(action, transferFindingId).then(function(response)
         {
           modal.modal('hide')
+          let product_id = getSessionStorage("transferFinding","productId");
+          all(product_id).then(function(response){
+            $('#spinnerContainer').modal('hide') 
+            $('#confirmedModal').modal('hide');
+            location.reload();
+          });
         }).catch(function(error) {
-            console.error("Error al actualizar el estado del riesgo:", error);
+            console.error("updateFindingsRiskStatus:", error);
         });
       });
 
@@ -250,6 +269,8 @@
       {
         let row = $(this).closest('tr');
         let selectEngagement = row.find('.cls-choosen-engagement')
+        let product_id = row.find('.cls_transfer_finding_show_modal').data('product-id')
+        setSessionStorage('transferFinding','product_id',product_id)
         let engagementSelected = selectEngagement.selectpicker('val');
         if(engagementSelected === "None" && $(this).hasClass('btn-success'))
         {
