@@ -1,7 +1,12 @@
-{% load display_tags %}
-{% include 'notifications/webhooks/other.tpl' %}
-test: {{ test }}
-url: {{ url|full_url }}    
-{% if system_settings.disclaimer and system_settings.disclaimer.strip %}
-disclaimer:  {{ system_settings.disclaimer }}
-{% endif %}
+{% include 'notifications/webhooks/subtemplates/base.tpl' %}
+{% include 'notifications/webhooks/subtemplates/test.tpl' %}
+finding_count: {{ finding_count }}
+findings:
+  new: 
+{% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_new %}
+  reactivated: 
+{% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_reactivated %}
+  mitigated: 
+{% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_mitigated %}
+  untouched: 
+{% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_untouched %}
