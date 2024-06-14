@@ -1,6 +1,6 @@
-import json
 import logging
 import pprint
+
 import requests
 import yaml
 from django.conf import settings
@@ -377,7 +377,7 @@ def webhooks_notification_request(endpoint, event, *args, **kwargs):
         headers=headers,
         json=data,
     )
-    logger.debug(f"Webhook notification response:")
+    logger.debug("Webhook notification response:")
     logger.debug(pprint.pformat(res.json()))
     return res
 
@@ -487,7 +487,6 @@ def send_alert_notification(event, user=None, *args, **kwargs):
 
 
 def get_slack_user_id(user_email):
-    import json
 
     from dojo.utils import get_system_setting
 
