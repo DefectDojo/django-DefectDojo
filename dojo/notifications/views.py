@@ -9,7 +9,6 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views import View
 
-from dojo.authorization.authorization_decorators import user_has_configuration_permission
 from dojo.forms import DeleteNotificationsWebhookForm, NotificationsForm, NotificationsWebhookForm
 from dojo.models import Notification_Webhooks, Notifications
 from dojo.notifications.helper import test_webhooks_notification
@@ -142,8 +141,11 @@ class NotificationWebhooksView(View):
             raise Http404()
 
     def check_user_permissions(self, request: HttpRequest):
-        if not user_has_configuration_permission(request.user, self.permission):
+        if not request.user.is_superuser:
             raise PermissionDenied()
+        # TODO finished access for other users
+        # if not user_has_configuration_permission(request.user, self.permission):
+        #     raise PermissionDenied()
 
     def set_breadcrumbs(self, request: HttpRequest):
         add_breadcrumb(title=self.breadcrumb, top_level=False, request=request)
@@ -186,7 +188,7 @@ class ListNotificationWebhooksView(NotificationWebhooksView):
         # ntl = NoteTypesFilter(request.GET, queryset=initial_queryset)
         # nwhs = get_page_items(request, initial_queryset.qs, 25)
         # TODO finished pagination
-        # TODO restrict base on user
+        # TODO restrict based on user
         return nwhs
 
     def get(self, request: HttpRequest):
