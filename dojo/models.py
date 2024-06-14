@@ -3510,7 +3510,7 @@ class FindingAdmin(admin.ModelAdmin):
 
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey(Finding, editable=False, on_delete=models.CASCADE)
-    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    vulnerability_id = models.TextField(max_length=100, blank=False, null=False)
 
     def __str__(self):
         return self.vulnerability_id
