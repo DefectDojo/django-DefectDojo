@@ -3045,5 +3045,19 @@
       "dismissable": true,
       "style": "danger"
     }
+  },
+  {
+    "model": "dojo.notification_webhooks",
+    "pk": 1,
+    "fields": {
+      "name": "My webhook endpoint",
+      "url": "http://webhook.endpoint:8080/post",
+      "header_name": "Auth",
+      "header_value": "Token xxx",
+      "status": "active",
+      "first_error": null,
+      "last_error": null,
+      "owner": null
+    }
   }
 ]

@@ -40,7 +40,7 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     NotificationsViewSet,
-    NotificationWebhooksViewset,
+    NotificationWebhooksViewSet,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -146,6 +146,7 @@ v2_api.register(r"network_locations", NetworkLocationsViewset, basename="network
 v2_api.register(r"notes", NotesViewSet, basename="notes")
 v2_api.register(r"note_type", NoteTypeViewSet, basename="note_type")
 v2_api.register(r"notifications", NotificationsViewSet, basename="notifications")
+v2_api.register(r'notification_webhooks', NotificationWebhooksViewSet)
 v2_api.register(r"products", ProductViewSet, basename="product")
 v2_api.register(r"product_api_scan_configurations", ProductAPIScanConfigurationViewSet, basename="product_api_scan_configuration")
 v2_api.register(r"product_groups", ProductGroupViewSet, basename="product_group")
@@ -171,7 +172,6 @@ v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="
 v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
 v2_api.register(r"users", UsersViewSet, basename="user")
 v2_api.register(r"user_contact_infos", UserContactInfoViewSet, basename="usercontactinfo")
-v2_api.register(r'notification_webhooks', NotificationWebhooksViewset)
 v2_api.register(r"questionnaire_answers", QuestionnaireAnswerViewSet, basename="answer")
 v2_api.register(r"questionnaire_answered_questionnaires", QuestionnaireAnsweredSurveyViewSet, basename="answered_survey")
 v2_api.register(r"questionnaire_engagement_questionnaires", QuestionnaireEngagementSurveyViewSet, basename="engagement_survey")

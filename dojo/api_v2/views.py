@@ -3337,7 +3337,7 @@ class AnnouncementViewSet(
         return Announcement.objects.all().order_by("id")
 
 
-class NotificationWebhooksViewset(
+class NotificationWebhooksViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
     DojoModelViewSet
