@@ -74,9 +74,6 @@ EOF
 
 python3 manage.py migrate
 
-# --parallel fails on GitHub Actions
-#python3 manage.py test unittests -v 3 --no-input --parallel
-
 echo "Unit Tests"
 echo "------------------------------------------------------------"
-python3 manage.py test unittests -v 3 --keepdb --no-input --shuffle
+python3 manage.py test unittests -v 3 --keepdb --no-input --parallel --shuffle
