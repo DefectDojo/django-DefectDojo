@@ -1747,12 +1747,3 @@ NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
 # Reference issue: https://github.com/jazzband/django-polymorphic/issues/229
 warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
-
-# This setting is here to override default renderer of forms (use div-based, instred of table-based).
-# It has effect only on templates that use "{{ form }}" in the body. Only "Delete forms" now.
-# The setting is here to avoid RemovedInDjango50Warning. It is here only for transition period.
-# TODO - Remove this setting in Django 5.0 because DjangoDivFormRenderer will become deprecated and the same class will be used by default DjangoTemplates.
-# More info:
-# - https://docs.djangoproject.com/en/4.1/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
-# - https://docs.djangoproject.com/en/5.0/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
-FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
