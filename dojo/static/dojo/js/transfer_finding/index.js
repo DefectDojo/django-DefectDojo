@@ -150,7 +150,7 @@ function innerData(data, findings_related){
 
             row.innerHTML = `
             <td><a href="http://${host}/finding/${transfer_findings_finding.findings.id}/transfer_finding/${transfer_finding_item.id}", class="table-link cls-finding-id" target="_blank" type="button">${transfer_findings_finding.findings.id} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>
-            <td>${transfer_findings_finding.findings.title}</td>
+            <td class="cls-transfer-finding-title">${transfer_findings_finding.findings.title}</td>
             <td>${transfer_findings_finding.findings.severity}</td>
             <td>${transfer_findings_finding.findings.cve}</td>`
             if(transfer_findings_finding.findings.risk_status.includes("Transfer Accepted")){
@@ -210,7 +210,7 @@ async function getTransferFindings(transferFindingId){
                         {
                             for(let finding of engagement.findings)
                                 {
-                                related_findings += `<option value="${finding.id}"> ${finding.id} - ${finding.title}</option>`;
+                                related_findings += `<option value="${finding.id}"> ${finding.id}</option>`;
                                 }
                         }
                     related_findings += `</select></td>`;
