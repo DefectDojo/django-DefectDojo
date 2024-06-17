@@ -20,7 +20,7 @@ umask 0002
 # do the check with Django stack
 python3 manage.py check
 
-DD_UWSGI_LOGFORMAT_DEFAULT='[pid: %(pid)|app: -|req: -/-] %(addr) (%(dd_user)) {%(vars) vars in %(pktsize) bytes} [%(ctime)] %(method) %(uri) => generated %(rsize) bytes in %(msecs) msecs (%(proto) %(status)) %(headers) headers in %(hsize) bytes (%(switches) switches on core %(core))'
+DD_UWSGI_LOGFORMAT_DEFAULT="'[pid: %(pid)|app: -|req: -/-] %(addr) (%(dd_user)) {%(vars) vars in %(pktsize) bytes} [%(ctime)] %(method) %(uri) => generated %(rsize) bytes in %(msecs) msecs (%(proto) %(status)) %(headers) headers in %(hsize) bytes (%(switches) switches on core %(core))'"
 
 args="--${DD_UWSGI_MODE} ${DD_UWSGI_ENDPOINT} \
 --protocol uwsgi \
@@ -32,6 +32,7 @@ args="--${DD_UWSGI_MODE} ${DD_UWSGI_ENDPOINT} \
 --http 0.0.0.0:8081 \
 --http-to ${DD_UWSGI_ENDPOINT} \
 --logformat ${DD_UWSGI_LOGFORMAT:-$DD_UWSGI_LOGFORMAT_DEFAULT}"
+# HTTP endpoint is enabled for Kubernetes liveness checks. It should not be exposed as a service.
 
 if [ -n "${DD_UWSGI_MAX_FD}" ]; then
     args="${args} --max-fd ${DD_UWSGI_MAX_FD}"
