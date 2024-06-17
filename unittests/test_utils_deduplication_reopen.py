@@ -22,13 +22,13 @@ class TestDuplicationReopen(DojoTestCase):
         self.finding_a.false_p = True
         self.finding_a.active = False
         self.finding_a.duplicate_finding = None
-        self.finding_a.save()
+        self.finding_a.save(dedupe_option=False)
         self.finding_b = Finding.objects.get(id=3)
         self.finding_b.pk = None
         self.finding_a.active = True
         self.finding_b.duplicate = False
         self.finding_b.duplicate_finding = None
-        self.finding_b.save()
+        self.finding_b.save(dedupe_option=False)
 
         self.finding_c = Finding.objects.get(id=4)
         self.finding_c.duplicate = False
@@ -37,13 +37,13 @@ class TestDuplicationReopen(DojoTestCase):
         self.finding_c.duplicate_finding = None
         self.finding_c.pk = None
         logger.debug('creating finding_c')
-        self.finding_c.save()
+        self.finding_c.save(dedupe_option=False)
         self.finding_d = Finding.objects.get(id=5)
         self.finding_d.duplicate = False
         self.finding_d.duplicate_finding = None
         self.finding_d.pk = None
         logger.debug('creating finding_d')
-        self.finding_d.save()
+        self.finding_d.save(dedupe_option=False)
 
     def tearDown(self):
         if self.finding_a.id:
