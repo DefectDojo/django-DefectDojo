@@ -51,9 +51,9 @@ jobs:
      
       - name: Update version numbers in key files
         run: |
-          sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number }}'/" dojo/__init__.py
-          sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number }}\"/" components/package.json
-          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
+          sed -ri 's/__version__ = ".*"/__version__ = "${{ github.event.inputs.release_number }}"/' dojo/__init__.py
+          sed -ri 's/"version": ".*"/"version": "${{ github.event.inputs.release_number }}"/' components/package.json
+          sed -ri 's/appVersion: ".*"/appVersion: "${{ github.event.inputs.release_number }}"/' helm/defectdojo/Chart.yaml
 
           if grep "\-dev" helm/defectdojo/Chart.yaml; then
               echo "x.y.z-dev found in Chart.yaml, probably releasing a new minor version"
