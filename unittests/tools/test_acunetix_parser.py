@@ -324,3 +324,9 @@ class TestAcunetixParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual(str(endpoint), "http://php.testsparker.com/auth/login.php")
+
+    def test_parse_file_issue_10370(self):
+        with open("unittests/scans/acunetix/issue_10370.json") as testfile:
+            parser = AcunetixParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
