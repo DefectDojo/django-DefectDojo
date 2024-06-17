@@ -1,4 +1,5 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test.testcases import SerializeMixin
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
@@ -6,7 +7,7 @@ from rest_framework.test import APIClient, APITestCase
 from dojo.models import Finding, Test, Test_Type
 
 
-class ScanImportOptionsTest(APITestCase):
+class ScanImportOptionsTest(SerializeMixin, APITestCase):
     """
     Test the options `skip_duplicates` and `close_old_findings` for the scan
     import APIv2 endpoint with ZAP
