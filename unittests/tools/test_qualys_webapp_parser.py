@@ -57,3 +57,12 @@ class TestQualysWebAppParser(DojoTestCase):
         # 21 non-info findings, 21 total
         self.assertEqual(21, len([x for x in findings if x.severity != "Info"]))
         self.assertEqual(21, len(findings))
+
+    def test_discussion_10239(self):
+        testfile = open(
+            get_unit_tests_path() + "/scans/qualys_webapp/discussion_10239.xml"
+        )
+        parser = QualysWebAppParser()
+        findings = parser.get_findings(testfile, Test(), True)
+        testfile.close()
+        self.assertEqual(1, len(findings))
