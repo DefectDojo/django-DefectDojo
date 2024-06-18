@@ -9,6 +9,7 @@ from json import dumps
 from unittest.mock import ANY, MagicMock, call, patch
 
 from django.contrib.auth.models import Permission
+from django.test.testcases import SerializeMixin
 from django.urls import reverse
 from drf_spectacular.drainage import GENERATOR_STATS
 from drf_spectacular.settings import spectacular_settings
@@ -1763,7 +1764,7 @@ class ProductPermissionTest(DojoAPITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class ImportScanTest(BaseClass.BaseClassTest):
+class ImportScanTest(SerializeMixin, BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2017,7 +2018,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
             reimporter_mock.assert_not_called()
 
 
-class ReimportScanTest(DojoAPITestCase):
+class ReimportScanTest(SerializeMixin, DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -2695,7 +2696,7 @@ class LanguageTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ImportLanguagesTest(BaseClass.BaseClassTest):
+class ImportLanguagesTest(SerializeMixin, BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
