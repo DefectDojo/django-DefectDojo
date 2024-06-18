@@ -19,7 +19,7 @@ class AcunetixJSONParser:
         for item in data["Vulnerabilities"]:
             title = item["Name"]
             findingdetail = text_maker.handle(item.get("Description", ""))
-            if "Cwe" in item["Classification"]:
+            if item["Classification"] is not None and "Cwe" in item["Classification"]:
                 try:
                     cwe = int(item["Classification"]["Cwe"].split(",")[0])
                 except BaseException:
