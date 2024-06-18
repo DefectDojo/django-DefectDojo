@@ -2896,8 +2896,8 @@ class ReportFindingFilterHelper(FilterSet):
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'references', 'sonarqube_issue',
-                   'thread_id', 'notes',
+                   'references', 'sonarqube_issue', 'duplicate_finding',
+                   'thread_id', 'notes', 'inherited_tags', 'endpoints',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
@@ -2970,11 +2970,67 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
 
 
 class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, FindingTagStringFilter):
-    test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
-    test__engagement__product = NumberFilter(widget=HiddenInput())
-    test__engagement = NumberFilter(widget=HiddenInput())
-    duplicate_finding = NumberFilter(widget=HiddenInput())
-    test__engagement__product__prod_type__name = CharFilter(
+    reporter = CharFilter(
+        field_name="reporter__username",
+        lookup_expr="iexact",
+        label="Reporter Username",
+        help_text="Search for Reporter names that are an exact match")
+    reporter_contains = CharFilter(
+        field_name="reporter__username",
+        lookup_expr="icontains",
+        label="Reporter Username Contains",
+        help_text="Search for Reporter names that contain a given pattern")
+    reviewers = CharFilter(
+        field_name="reviewers__username",
+        lookup_expr="iexact",
+        label="Reviewer Username",
+        help_text="Search for Reviewer names that are an exact match")
+    reviewers_contains = CharFilter(
+        field_name="reviewers__username",
+        lookup_expr="icontains",
+        label="Reviewer Username Contains",
+        help_text="Search for Reviewer usernames that contain a given pattern")
+    last_reviewed_by = CharFilter(
+        field_name="last_reviewed_by__username",
+        lookup_expr="iexact",
+        label="Last Reviewed By Username",
+        help_text="Search for Last Reviewed By names that are an exact match")
+    last_reviewed_by_contains = CharFilter(
+        field_name="last_reviewed_by__username",
+        lookup_expr="icontains",
+        label="Last Reviewed By Username Contains",
+        help_text="Search for Last Reviewed By usernames that contain a given pattern")
+    review_requested_by = CharFilter(
+        field_name="review_requested_by__username",
+        lookup_expr="iexact",
+        label="Review Request By Username",
+        help_text="Search for Review Request By names that are an exact match")
+    review_requested_by_contains = CharFilter(
+        field_name="review_requested_by__username",
+        lookup_expr="icontains",
+        label="Review Request By Username Contains",
+        help_text="Search for Review Request By usernames that contain a given pattern")
+    mitigated_by = CharFilter(
+        field_name="mitigated_by__username",
+        lookup_expr="iexact",
+        label="Mitigator Username",
+        help_text="Search for Mitigator names that are an exact match")
+    mitigated_by_contains = CharFilter(
+        field_name="mitigated_by__username",
+        lookup_expr="icontains",
+        label="Mitigator Username Contains",
+        help_text="Search for Mitigator usernames that contain a given pattern")
+    defect_review_requested_by = CharFilter(
+        field_name="defect_review_requested_by__username",
+        lookup_expr="iexact",
+        label="Requester of Defect Review Username",
+        help_text="Search for Requester of Defect Review names that are an exact match")
+    defect_review_requested_by_contains = CharFilter(
+        field_name="defect_review_requested_by__username",
+        lookup_expr="icontains",
+        label="Requester of Defect Review Username Contains",
+        help_text="Search for Requester of Defect Review usernames that contain a given pattern")
+    test__engagement__product__prod_type = CharFilter(
         field_name="test__engagement__product__prod_type__name",
         lookup_expr="iexact",
         label="Product Type Name",
@@ -2984,7 +3040,7 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
         lookup_expr="icontains",
         label="Product Type Name Contains",
         help_text="Search for Product Type names that contain a given pattern")
-    test__engagement__product__name = CharFilter(
+    test__engagement__product = CharFilter(
         field_name="test__engagement__product__name",
         lookup_expr="iexact",
         label="Product Name",
@@ -2994,7 +3050,7 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
         lookup_expr="icontains",
         label="Product name Contains",
         help_text="Search for Product Typ names that contain a given pattern")
-    test__engagement__name = CharFilter(
+    test__engagement = CharFilter(
         field_name="test__engagement__name",
         lookup_expr="iexact",
         label="Engagement Name",
@@ -3004,7 +3060,7 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
         lookup_expr="icontains",
         label="Engagement name Contains",
         help_text="Search for Engagement names that contain a given pattern")
-    test__name = CharFilter(
+    test = CharFilter(
         field_name="test__engagement__name",
         lookup_expr="iexact",
         label="Test Name",
