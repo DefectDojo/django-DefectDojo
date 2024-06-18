@@ -2877,30 +2877,19 @@ class EndpointReportFilter(DojoFilter):
         exclude = ['product']
 
 
-class ReportFindingFilter(FindingTagFilter):
+class ReportFindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr='icontains', label='Name')
     date = DateFromToRangeFilter(field_name='date', label="Date Discovered")
-    test__engagement__product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.none(), label="Product")
-    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.none(),
-        label="Product Type")
-    test__engagement__product__lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, label="Product Lifecycle")
-    test__engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
-    risk_acceptance = ReportRiskAcceptanceFilter(
-        label="Risk Accepted")
-    # queryset will be restricted in __init__, here we don't have access to the logged in user
+    risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
     duplicate = ReportBooleanFilter()
-    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
-
     file_path = CharFilter(lookup_expr='icontains')
 
     class Meta:
@@ -2912,7 +2901,7 @@ class ReportFindingFilter(FindingTagFilter):
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
-    def __init__(self, *args, **kwargs):
+    def manage_kwargs(self, *args, **kwargs):
         self.prod_type = None
         self.product = None
         self.engagement = None
@@ -2926,6 +2915,24 @@ class ReportFindingFilter(FindingTagFilter):
         if 'test' in kwargs:
             self.test = kwargs.pop('test')
 
+    @property
+    def qs(self):
+        parent = super().qs
+        return get_authorized_findings(Permissions.Finding_View, parent)
+
+
+class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.none(), label="Product")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.none(),
+        label="Product Type")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, label="Product Lifecycle")
+    test__engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
+    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
+
+    def __init__(self, *args, **kwargs):
+        self.manage_kwargs(*args, **kwargs)
         super().__init__(*args, **kwargs)
 
         # duplicate_finding queryset needs to restricted in line with permissions
@@ -2961,10 +2968,69 @@ class ReportFindingFilter(FindingTagFilter):
         if 'test__engagement' in self.form.fields:
             self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
-    @property
-    def qs(self):
-        parent = super().qs
-        return get_authorized_findings(Permissions.Finding_View, parent)
+
+class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, FindingTagStringFilter):
+    test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
+    test__engagement__product = NumberFilter(widget=HiddenInput())
+    test__engagement = NumberFilter(widget=HiddenInput())
+    duplicate_finding = NumberFilter(widget=HiddenInput())
+    test__engagement__product__prod_type__name = CharFilter(
+        field_name="test__engagement__product__prod_type__name",
+        lookup_expr="iexact",
+        label="Product Type Name",
+        help_text="Search for Product Type names that are an exact match")
+    test__engagement__product__prod_type__name_contains = CharFilter(
+        field_name="test__engagement__product__prod_type__name",
+        lookup_expr="icontains",
+        label="Product Type Name Contains",
+        help_text="Search for Product Type names that contain a given pattern")
+    test__engagement__product__name = CharFilter(
+        field_name="test__engagement__product__name",
+        lookup_expr="iexact",
+        label="Product Name",
+        help_text="Search for Product names that are an exact match")
+    test__engagement__product__name_contains = CharFilter(
+        field_name="test__engagement__product__name",
+        lookup_expr="icontains",
+        label="Product name Contains",
+        help_text="Search for Product Typ names that contain a given pattern")
+    test__engagement__name = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="iexact",
+        label="Engagement Name",
+        help_text="Search for Engagement names that are an exact match")
+    test__engagement__name_contains = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="icontains",
+        label="Engagement name Contains",
+        help_text="Search for Engagement names that contain a given pattern")
+    test__name = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="iexact",
+        label="Test Name",
+        help_text="Search for Test names that are an exact match")
+    test__name_contains = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="icontains",
+        label="Test name Contains",
+        help_text="Search for Test names that contain a given pattern")
+
+    def __init__(self, *args, **kwargs):
+        self.manage_kwargs(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+
+        if self.test:
+            del self.form.fields['test__tags']
+            del self.form.fields['test__engagement__tags']
+            del self.form.fields['test__engagement__product__tags']
+        if self.engagement:
+            del self.form.fields['test__engagement__tags']
+            del self.form.fields['test__engagement__product__tags']
+        elif self.product:
+            del self.form.fields['test__engagement__product']
+            del self.form.fields['test__engagement__product__tags']
+        elif self.prod_type:
+            del self.form.fields['test__engagement__product__prod_type']
 
 
 class UserFilter(DojoFilter):
