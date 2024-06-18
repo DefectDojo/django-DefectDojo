@@ -595,6 +595,10 @@ class FindingTagStringFilter(FilterSet):
         help_text="Search for tags on a Product that are an exact match, and exclude them",
         exclude=True)
 
+    def delete_tags_from_form(self, tag_list: list):
+        for tag in tag_list:
+            self.form.fields.pop(tag, None)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1716,12 +1720,12 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
         label="Engagement name Contains",
         help_text="Search for Engagement names that contain a given pattern")
     test__name = CharFilter(
-        field_name="test__engagement__name",
+        field_name="test__name",
         lookup_expr="iexact",
         label="Test Name",
         help_text="Search for Test names that are an exact match")
     test__name_contains = CharFilter(
-        field_name="test__engagement__name",
+        field_name="test__name",
         lookup_expr="icontains",
         label="Test name Contains",
         help_text="Search for Test names that contain a given pattern")
@@ -2901,7 +2905,7 @@ class ReportFindingFilterHelper(FilterSet):
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
-    def manage_kwargs(self, *args, **kwargs):
+    def manage_kwargs(self, kwargs):
         self.prod_type = None
         self.product = None
         self.engagement = None
@@ -2932,7 +2936,7 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
     duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
 
     def __init__(self, *args, **kwargs):
-        self.manage_kwargs(*args, **kwargs)
+        self.manage_kwargs(kwargs)
         super().__init__(*args, **kwargs)
 
         # duplicate_finding queryset needs to restricted in line with permissions
@@ -2970,6 +2974,11 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
 
 
 class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, FindingTagStringFilter):
+    test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
+    test__engagement__product = NumberFilter(widget=HiddenInput())
+    test__engagement = NumberFilter(widget=HiddenInput())
+    test = NumberFilter(widget=HiddenInput())
+    endpoint = NumberFilter(widget=HiddenInput())
     reporter = CharFilter(
         field_name="reporter__username",
         lookup_expr="iexact",
@@ -3030,7 +3039,7 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
         lookup_expr="icontains",
         label="Requester of Defect Review Username Contains",
         help_text="Search for Requester of Defect Review usernames that contain a given pattern")
-    test__engagement__product__prod_type = CharFilter(
+    test__engagement__product__prod_type__name = CharFilter(
         field_name="test__engagement__product__prod_type__name",
         lookup_expr="iexact",
         label="Product Type Name",
@@ -3040,7 +3049,7 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
         lookup_expr="icontains",
         label="Product Type Name Contains",
         help_text="Search for Product Type names that contain a given pattern")
-    test__engagement__product = CharFilter(
+    test__engagement__product__name = CharFilter(
         field_name="test__engagement__product__name",
         lookup_expr="iexact",
         label="Product Name",
@@ -3050,7 +3059,7 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
         lookup_expr="icontains",
         label="Product name Contains",
         help_text="Search for Product Typ names that contain a given pattern")
-    test__engagement = CharFilter(
+    test__engagement__name = CharFilter(
         field_name="test__engagement__name",
         lookup_expr="iexact",
         label="Engagement Name",
@@ -3060,33 +3069,64 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
         lookup_expr="icontains",
         label="Engagement name Contains",
         help_text="Search for Engagement names that contain a given pattern")
-    test = CharFilter(
-        field_name="test__engagement__name",
+    test__name = CharFilter(
+        field_name="test__name",
         lookup_expr="iexact",
         label="Test Name",
         help_text="Search for Test names that are an exact match")
     test__name_contains = CharFilter(
-        field_name="test__engagement__name",
+        field_name="test__name",
         lookup_expr="icontains",
         label="Test name Contains",
         help_text="Search for Test names that contain a given pattern")
 
     def __init__(self, *args, **kwargs):
-        self.manage_kwargs(*args, **kwargs)
+        self.manage_kwargs(kwargs)
         super().__init__(*args, **kwargs)
 
+        product_type_refs = [
+            "test__engagement__product__prod_type__name",
+            "test__engagement__product__prod_type__name_contains",
+        ]
+        product_refs = [
+            "test__engagement__product__name",
+            "test__engagement__product__name_contains",
+            "test__engagement__product__tags",
+            "test__engagement__product__tags_contains",
+            "not_test__engagement__product__tags",
+            "not_test__engagement__product__tags_contains",
+        ]
+        engagement_refs = [
+            "test__engagement__name",
+            "test__engagement__name_contains",
+            "test__engagement__tags",
+            "test__engagement__tags_contains",
+            "not_test__engagement__tags",
+            "not_test__engagement__tags_contains",
+        ]
+        test_refs = [
+            "test__name",
+            "test__name_contains",
+            "test__tags",
+            "test__tags_contains",
+            "not_test__tags",
+            "not_test__tags_contains",
+        ]
+
         if self.test:
-            del self.form.fields['test__tags']
-            del self.form.fields['test__engagement__tags']
-            del self.form.fields['test__engagement__product__tags']
+            self.delete_tags_from_form(product_type_refs)
+            self.delete_tags_from_form(product_refs)
+            self.delete_tags_from_form(engagement_refs)
+            self.delete_tags_from_form(test_refs)
         if self.engagement:
-            del self.form.fields['test__engagement__tags']
-            del self.form.fields['test__engagement__product__tags']
+            self.delete_tags_from_form(product_type_refs)
+            self.delete_tags_from_form(product_refs)
+            self.delete_tags_from_form(engagement_refs)
         elif self.product:
-            del self.form.fields['test__engagement__product']
-            del self.form.fields['test__engagement__product__tags']
+            self.delete_tags_from_form(product_type_refs)
+            self.delete_tags_from_form(product_refs)
         elif self.prod_type:
-            del self.form.fields['test__engagement__product__prod_type']
+            self.delete_tags_from_form(product_type_refs)
 
 
 class UserFilter(DojoFilter):
