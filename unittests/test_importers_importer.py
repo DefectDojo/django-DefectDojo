@@ -517,7 +517,11 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.assertEqual(import0, ['product_name parameter missing'])
 
 
-class TestImporterUtils(SerializeMixin, DojoAPITestCase):
+class SerializedTestImporterUtils(SerializeMixin):
+    lockfile = __file__
+
+
+class TestImporterUtils(SerializedTestImporterUtils, DojoAPITestCase):
     def setUp(self):
         self.testuser, _ = User.objects.get_or_create(username="admin", is_superuser=True)
         token, _ = Token.objects.get_or_create(user=self.testuser)
