@@ -244,7 +244,7 @@ def check_for_and_create_comment(parsed_json):
         findings = jissue.finding_group.findings.all()
         first_finding_group = findings.first()
         if first_finding_group:
-            create_notification(event='jira_comment', title=f'JIRA incoming comment - {first_finding_group}', finding=first_finding_group, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
+            create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding_group}', finding=first_finding_group, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
     elif jissue.engagement:
         return webhook_responser_handler("debug", "Comment for engagement ignored")
     else:
