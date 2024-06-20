@@ -1,3 +1,4 @@
+import contextlib
 import logging
 
 from django.contrib import messages
@@ -585,10 +586,8 @@ def new_cred_finding(request, fid):
 @user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
 def delete_cred_controller(request, destination_url, id, ttid):
     cred = None
-    try:
+    with contextlib.suppress(Exception):
         cred = Cred_Mapping.objects.get(pk=ttid)
-    except:
-        pass
     if request.method == "POST":
         tform = CredMappingForm(request.POST, instance=cred)
         message = ""

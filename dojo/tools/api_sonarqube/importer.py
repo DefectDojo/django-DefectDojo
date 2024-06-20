@@ -141,10 +141,7 @@ class SonarQubeApiImporter:
                     continue
 
                 issue_type = issue["type"]
-                if len(issue["message"]) > 511:
-                    title = issue["message"][0:507] + "..."
-                else:
-                    title = issue["message"]
+                title = issue["message"][0:507] + "..." if len(issue["message"]) > 511 else issue["message"]
                 component_key = issue["component"]
                 line = issue.get("line")
                 rule_id = issue["rule"]

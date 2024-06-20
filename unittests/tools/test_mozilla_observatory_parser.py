@@ -12,7 +12,7 @@ class TestMozillaObservatoryParser(DojoTestCase):
             # test that all findings are not active
             for finding in findings:
                 self.assertFalse(finding.active)
-                if "strict-transport-security" == finding.vuln_id_from_tool:
+                if finding.vuln_id_from_tool == "strict-transport-security":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertEqual("Preloaded via the HTTP Strict Transport Security (HSTS) preloading process", finding.title)
                         self.assertEqual("Info", finding.severity)
@@ -37,7 +37,7 @@ class TestMozillaObservatoryParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
             for finding in findings:
-                if "content-security-policy" == finding.vuln_id_from_tool:
+                if finding.vuln_id_from_tool == "content-security-policy":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("Content Security Policy (CSP) implemented unsafely. This includes 'unsafe-inline' or data: inside script-src, overly broad sources such as https: inside object-src or script-src, or not restricting the sources for object-src or script-src.", finding.title)
@@ -54,20 +54,20 @@ class TestMozillaObservatoryParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
             for finding in findings:
-                if "content-security-policy" == finding.vuln_id_from_tool:
+                if finding.vuln_id_from_tool == "content-security-policy":
                     with self.subTest(vuln_id_from_tool="content-security-policy"):
                         self.assertTrue(finding.active)
                         self.assertEqual("Content Security Policy (CSP) header not implemented", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("Content Security Policy (CSP) header not implemented", finding.description)
                         self.assertEqual("content-security-policy", finding.vuln_id_from_tool)
-                elif "cookies" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "cookies":
                     with self.subTest(vuln_id_from_tool="cookies"):
                         self.assertTrue(finding.active)
                         self.assertEqual("Cookies set without using the Secure flag or set over HTTP", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("Cookies set without using the Secure flag or set over HTTP", finding.description)
-                elif "strict-transport-security" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "strict-transport-security":
                     with self.subTest(vuln_id_from_tool="strict-transport-security"):
                         self.assertTrue(finding.active)
                         self.assertEqual("HTTP Strict Transport Security (HSTS) header not implemented", finding.title)
@@ -84,31 +84,31 @@ class TestMozillaObservatoryParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
             for finding in findings:
-                if "content-security-policy" == finding.vuln_id_from_tool:
+                if finding.vuln_id_from_tool == "content-security-policy":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("Content Security Policy (CSP) header not implemented", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("Content Security Policy (CSP) header not implemented", finding.description)
-                elif "strict-transport-security" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "strict-transport-security":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("HTTP Strict Transport Security (HSTS) header not implemented", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("HTTP Strict Transport Security (HSTS) header not implemented", finding.description)
-                elif "x-xss-protection" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "x-xss-protection":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("X-XSS-Protection header not implemented", finding.title)
                         self.assertEqual("Low", finding.severity)
                         self.assertIn("X-XSS-Protection header not implemented", finding.description)
-                elif "subresource-integrity" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "subresource-integrity":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual('Subresource Integrity (SRI) not implemented, and external scripts are loaded over HTTP or use protocol-relative URLs via src="//..."', finding.title)
                         self.assertEqual("High", finding.severity)
                         self.assertIn("Subresource Integrity (SRI) not implemented", finding.description)
-                elif "redirection" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "redirection":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("Does not redirect to an HTTPS site", finding.title)
@@ -125,49 +125,49 @@ class TestMozillaObservatoryParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
             for finding in findings:
-                if "content-security-policy" == finding.vuln_id_from_tool:
+                if finding.vuln_id_from_tool == "content-security-policy":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("Content Security Policy (CSP) header not implemented", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("Content Security Policy (CSP) header not implemented", finding.description)
-                elif "strict-transport-security" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "strict-transport-security":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("HTTP Strict Transport Security (HSTS) header cannot be set, as site contains an invalid certificate chain", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("HTTP Strict Transport Security (HSTS) header cannot be set, as site contains an invalid certificate chain", finding.description)
-                elif "x-xss-protection" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "x-xss-protection":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("X-XSS-Protection header not implemented", finding.title)
                         self.assertEqual("Low", finding.severity)
                         self.assertIn("X-XSS-Protection header not implemented", finding.description)
-                elif "x-frame-options" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "x-frame-options":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("X-Frame-Options (XFO) header not implemented", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("X-Frame-Options (XFO) header not implemented", finding.description)
-                elif "x-content-type-options" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "x-content-type-options":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("X-Content-Type-Options header not implemented", finding.title)
                         self.assertEqual("Low", finding.severity)
                         self.assertIn("X-Content-Type-Options header not implemented", finding.description)
-                elif "subresource-integrity" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "subresource-integrity":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual('Subresource Integrity (SRI) not implemented, and external scripts are loaded over HTTP or use protocol-relative URLs via src="//..."', finding.title)
                         self.assertEqual("High", finding.severity)
                         self.assertIn("Subresource Integrity (SRI) not implemented", finding.description)
-                elif "redirection" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "redirection":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("Initial redirection from HTTP to HTTPS is to a different host, preventing HSTS", finding.title)
                         self.assertEqual("Low", finding.severity)
                         self.assertIn("Initial redirection from HTTP to HTTPS is to a different host, preventing HSTS", finding.description)
-                elif "referrer-policy-private" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "referrer-policy-private":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("Referrer-Policy header not implemented", finding.title)
@@ -184,49 +184,49 @@ class TestMozillaObservatoryParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
             for finding in findings:
-                if "content-security-policy" == finding.vuln_id_from_tool:
+                if finding.vuln_id_from_tool == "content-security-policy":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("Content Security Policy (CSP) header not implemented", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("Content Security Policy (CSP) header not implemented", finding.description)
-                elif "strict-transport-security" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "strict-transport-security":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("HTTP Strict Transport Security (HSTS) header cannot be set for sites not available over HTTPS", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("HTTP Strict Transport Security (HSTS) header cannot be set for sites not available over HTTPS", finding.description)
-                elif "x-xss-protection" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "x-xss-protection":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("X-XSS-Protection header not implemented", finding.title)
                         self.assertEqual("Low", finding.severity)
                         self.assertIn("X-XSS-Protection header not implemented", finding.description)
-                elif "x-frame-options" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "x-frame-options":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("X-Frame-Options (XFO) header not implemented", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("X-Frame-Options (XFO) header not implemented", finding.description)
-                elif "x-content-type-options" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "x-content-type-options":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("X-Content-Type-Options header not implemented", finding.title)
                         self.assertEqual("Low", finding.severity)
                         self.assertIn("X-Content-Type-Options header not implemented", finding.description)
-                elif "subresource-integrity" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "subresource-integrity":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertFalse(finding.active)
                         self.assertEqual("Subresource Integrity (SRI) not implemented, but all scripts are loaded from a similar origin", finding.title)
                         self.assertEqual("Info", finding.severity)
                         self.assertIn("Subresource Integrity (SRI) not implemented", finding.description)
-                elif "redirection" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "redirection":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("Does not redirect to an HTTPS site", finding.title)
                         self.assertEqual("Medium", finding.severity)
                         self.assertIn("Does not redirect to an HTTPS site", finding.description)
-                elif "referrer-policy-private" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "referrer-policy-private":
                     with self.subTest(vuln_id_from_tool=finding.vuln_id_from_tool):
                         self.assertTrue(finding.active)
                         self.assertEqual("Referrer-Policy header not implemented", finding.title)

@@ -59,7 +59,7 @@ class TestNiktoParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(11, len(findings))
             for finding in findings:
-                if "OSVDB-3092" == finding.unique_id_from_tool:
+                if finding.unique_id_from_tool == "OSVDB-3092":
                     self.assertEqual("001811", finding.vuln_id_from_tool)
                     self.assertEqual(1, finding.nb_occurences)
                     self.assertEqual("Medium", finding.severity)
@@ -68,9 +68,9 @@ class TestNiktoParser(DojoTestCase):
                     self.assertEqual(443, endpoint.port)
                     self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                     self.assertEqual("public/", endpoint.path)
-                if ("Retrieved via header: 1.1 vegur" == finding.title and "Info" == finding.severity):
+                if (finding.title == "Retrieved via header: 1.1 vegur" and finding.severity == "Info"):
                     self.assertEqual(1, len(finding.unsaved_endpoints))
-                if ("Potentially Interesting Backup/Cert File Found. " == finding.title and "Info" == finding.severity):
+                if (finding.title == "Potentially Interesting Backup/Cert File Found. " and finding.severity == "Info"):
                     self.assertEqual(140, len(finding.unsaved_endpoints))
 
     def test_parse_file_json_with_uri_errors(self):
@@ -82,7 +82,7 @@ class TestNiktoParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(13, len(findings))
             for finding in findings:
-                if "favicon.ico file identifies this server as: Apache Tomcat" == finding.title:
+                if finding.title == "favicon.ico file identifies this server as: Apache Tomcat":
                     self.assertEqual("500008", finding.vuln_id_from_tool)
                     self.assertEqual(1, finding.nb_occurences)
                     self.assertEqual("Medium", finding.severity)
@@ -92,7 +92,7 @@ class TestNiktoParser(DojoTestCase):
                     # self.assertEqual(443, endpoint.port)
                     # self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                     # self.assertEqual("public/", endpoint.path)
-                elif "/examples/servlets/index.html: Apache Tomcat default JSP pages present." == finding.title:
+                elif finding.title == "/examples/servlets/index.html: Apache Tomcat default JSP pages present.":
                     self.assertEqual("000366", finding.vuln_id_from_tool)
                     self.assertEqual(1, finding.nb_occurences)
                     self.assertEqual("Info", finding.severity)

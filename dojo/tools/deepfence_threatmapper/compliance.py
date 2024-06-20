@@ -43,9 +43,7 @@ class DeepfenceThreatmapperCompliance:
         return finding
 
     def compliance_severity(self, input):
-        if input == "pass":
-            output = "Info"
-        elif input == "info":
+        if input == "pass" or input == "info":
             output = "Info"
         elif input == "warn":
             output = "Medium"

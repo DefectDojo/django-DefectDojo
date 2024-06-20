@@ -22,7 +22,7 @@ class GitlabContainerScanParser:
         return "GitLab Container Scan report file can be imported in JSON format (option --json)."
 
     def _get_dependency_version(self, dependency):
-        return dependency["version"] if "version" in dependency else ""
+        return dependency.get("version", "")
 
     def _get_dependency_name(self, dependency):
         if "package" in dependency and "name" in dependency["package"]:

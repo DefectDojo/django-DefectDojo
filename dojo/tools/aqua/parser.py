@@ -20,10 +20,7 @@ class AquaParser:
     def get_items(self, tree, test):
         self.items = {}
         if isinstance(tree, list):  # Aqua Scan Report coming from Azure Devops jobs.
-            if tree:
-                vulnerabilitytree = tree[0]["results"]["resources"]
-            else:
-                vulnerabilitytree = []
+            vulnerabilitytree = tree[0]["results"]["resources"] if tree else []
             self.vulnerability_tree(vulnerabilitytree, test)
         elif "resources" in tree:  # Aqua Scan Report not from Azure Devops jobs.
             vulnerabilitytree = tree["resources"]

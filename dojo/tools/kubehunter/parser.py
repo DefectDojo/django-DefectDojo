@@ -40,10 +40,7 @@ class KubeHunterParser:
             # Finding severity
             severity = item.get("severity", "info")
             allowed_severity = ["info", "low", "medium", "high", "critical"]
-            if severity.lower() in allowed_severity:
-                severity = severity.capitalize()
-            else:
-                severity = "Info"
+            severity = severity.capitalize() if severity.lower() in allowed_severity else "Info"
 
             # Finding mitigation and reference
             avd_reference = item.get("avd_reference")
