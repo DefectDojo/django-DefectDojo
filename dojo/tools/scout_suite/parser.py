@@ -111,14 +111,13 @@ class ScoutSuiteParser:
                     i = 1
                     lookup = service_item
                     while i < len(key):
-                        if key[i] in lookup:
-                            if isinstance(lookup[key[i]], dict):
-                                lookup = lookup[key[i]]
-                                if (
-                                    key[i - 1] == "security_groups"
-                                    or key[i - 1] == "PolicyDocument"
-                                ):
-                                    break
+                        if key[i] in lookup and isinstance(lookup[key[i]], dict):
+                            lookup = lookup[key[i]]
+                            if (
+                                key[i - 1] == "security_groups"
+                                or key[i - 1] == "PolicyDocument"
+                            ):
+                                break
                         i = i + 1
 
                     self.recursive_print(lookup)

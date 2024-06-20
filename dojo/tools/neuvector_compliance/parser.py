@@ -36,10 +36,7 @@ def get_items(tree, test):
     # /v1/host/{id}/compliance or similar. thus, we need to support items in a
     # bit different leafs.
     testsTree = None
-    if "report" in tree:
-        testsTree = tree.get("report").get("checks", [])
-    else:
-        testsTree = tree.get("items", [])
+    testsTree = tree.get("report").get("checks", []) if "report" in tree else tree.get("items", [])
 
     for node in testsTree:
         item = get_item(node, test)
@@ -123,11 +120,7 @@ def convert_severity(severity):
         return "Medium"
     elif severity.lower() == "info":
         return "Low"
-    elif severity.lower() == "pass":
-        return "Info"
-    elif severity.lower() == "note":
-        return "Info"
-    elif severity.lower() == "error":
+    elif severity.lower() == "pass" or severity.lower() == "note" or severity.lower() == "error":
         return "Info"
     else:
         return severity.title()

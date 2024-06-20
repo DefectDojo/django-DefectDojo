@@ -1473,9 +1473,7 @@ class FindingViewSet(
             return self._get_metadata(request, finding)
         elif request.method == "POST":
             return self._add_metadata(request, finding)
-        elif request.method == "PUT":
-            return self._edit_metadata(request, finding)
-        elif request.method == "PATCH":
+        elif request.method == "PUT" or request.method == "PATCH":
             return self._edit_metadata(request, finding)
         elif request.method == "DELETE":
             return self._remove_metadata(request, finding)
@@ -3027,24 +3025,15 @@ def report_generate(request, obj, options):
                         if eng.name:
                             engagement_name = eng.name
                         engagement_target_start = eng.target_start
-                        if eng.target_end:
-                            engagement_target_end = eng.target_end
-                        else:
-                            engagement_target_end = "ongoing"
+                        engagement_target_end = eng.target_end if eng.target_end else 'ongoing'
                         if eng.test_set.all():
                             for t in eng.test_set.all():
                                 test_type_name = t.test_type.name
                                 if t.environment:
                                     test_environment_name = t.environment.name
                                 test_target_start = t.target_start
-                                if t.target_end:
-                                    test_target_end = t.target_end
-                                else:
-                                    test_target_end = "ongoing"
-                            if eng.test_strategy:
-                                test_strategy_ref = eng.test_strategy
-                            else:
-                                test_strategy_ref = ""
+                                test_target_end = t.target_end if t.target_end else 'ongoing'
+                            test_strategy_ref = eng.test_strategy if eng.test_strategy else ''
                 total_findings = len(findings.qs.all())
 
         elif type(obj).__name__ == "Product":
@@ -3054,20 +3043,14 @@ def report_generate(request, obj, options):
                     if eng.name:
                         engagement_name = eng.name
                     engagement_target_start = eng.target_start
-                    if eng.target_end:
-                        engagement_target_end = eng.target_end
-                    else:
-                        engagement_target_end = "ongoing"
+                    engagement_target_end = eng.target_end if eng.target_end else 'ongoing'
 
                     if eng.test_set.all():
                         for t in eng.test_set.all():
                             test_type_name = t.test_type.name
                             if t.environment:
                                 test_environment_name = t.environment.name
-                    if eng.test_strategy:
-                        test_strategy_ref = eng.test_strategy
-                    else:
-                        test_strategy_ref = ""
+                    test_strategy_ref = eng.test_strategy if eng.test_strategy else ''
                 total_findings = len(findings.qs.all())
 
         elif type(obj).__name__ == "Engagement":
@@ -3075,38 +3058,26 @@ def report_generate(request, obj, options):
             if eng.name:
                 engagement_name = eng.name
             engagement_target_start = eng.target_start
-            if eng.target_end:
-                engagement_target_end = eng.target_end
-            else:
-                engagement_target_end = "ongoing"
+            engagement_target_end = eng.target_end if eng.target_end else 'ongoing'
 
             if eng.test_set.all():
                 for t in eng.test_set.all():
                     test_type_name = t.test_type.name
                     if t.environment:
                         test_environment_name = t.environment.name
-            if eng.test_strategy:
-                test_strategy_ref = eng.test_strategy
-            else:
-                test_strategy_ref = ""
+            test_strategy_ref = eng.test_strategy if eng.test_strategy else ''
             total_findings = len(findings.qs.all())
 
         elif type(obj).__name__ == "Test":
             t = obj
             test_type_name = t.test_type.name
             test_target_start = t.target_start
-            if t.target_end:
-                test_target_end = t.target_end
-            else:
-                test_target_end = "ongoing"
+            test_target_end = t.target_end if t.target_end else 'ongoing'
             total_findings = len(findings.qs.all())
             if t.engagement.name:
                 engagement_name = t.engagement.name
             engagement_target_start = t.engagement.target_start
-            if t.engagement.target_end:
-                engagement_target_end = t.engagement.target_end
-            else:
-                engagement_target_end = "ongoing"
+            engagement_target_end = t.engagement.target_end if t.engagement.target_end else 'ongoing'
         else:
             pass  # do nothing
 

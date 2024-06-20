@@ -88,9 +88,7 @@ def get_item(item_node, test):
     for npm_finding in item_node["findings"]:
         # use first version as component_version
         component_version = (
-            npm_finding["version"]
-            if not component_version
-            else component_version
+            component_version if component_version else npm_finding["version"]
         )
         paths += (
             "\n  - "

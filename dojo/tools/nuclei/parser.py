@@ -60,10 +60,7 @@ class NucleiParser:
             if item_type is None:
                 item_type = ""
             matched = item.get("matched", item.get("matched-at", ""))
-            if "://" in matched:
-                endpoint = Endpoint.from_uri(matched)
-            else:
-                endpoint = Endpoint.from_uri("//" + matched)
+            endpoint = Endpoint.from_uri(matched) if "://" in matched else Endpoint.from_uri("//" + matched)
 
             finding = Finding(
                 title=f"{name}",

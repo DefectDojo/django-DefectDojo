@@ -193,28 +193,25 @@ def get_snippet(result):
         location = result["locations"][0]
         if "physicalLocation" in location:
             if "region" in location["physicalLocation"]:
-                if "snippet" in location["physicalLocation"]["region"]:
-                    if (
-                        "text"
-                        in location["physicalLocation"]["region"]["snippet"]
-                    ):
-                        snippet = location["physicalLocation"]["region"][
-                            "snippet"
-                        ]["text"]
+                if "snippet" in location["physicalLocation"]["region"] and (
+                    "text"
+                    in location["physicalLocation"]["region"]["snippet"]
+                ):
+                    snippet = location["physicalLocation"]["region"][
+                        "snippet"
+                    ]["text"]
             if (
                 snippet is None
                 and "contextRegion" in location["physicalLocation"]
+            ) and "snippet" in location["physicalLocation"]["contextRegion"] and (
+                "text"
+                in location["physicalLocation"]["contextRegion"][
+                    "snippet"
+                ]
             ):
-                if "snippet" in location["physicalLocation"]["contextRegion"]:
-                    if (
-                        "text"
-                        in location["physicalLocation"]["contextRegion"][
-                            "snippet"
-                        ]
-                    ):
-                        snippet = location["physicalLocation"][
-                            "contextRegion"
-                        ]["snippet"]["text"]
+                snippet = location["physicalLocation"][
+                    "contextRegion"
+                ]["snippet"]["text"]
     return snippet
 
 
@@ -344,11 +341,11 @@ def get_severity(result, rule):
         if "defaultConfiguration" in rule:
             severity = rule["defaultConfiguration"].get("level")
 
-    if "note" == severity:
+    if severity == "note":
         return "Info"
-    elif "warning" == severity:
+    elif severity == "warning":
         return "Medium"
-    elif "error" == severity:
+    elif severity == "error":
         return "High"
     else:
         return "Medium"

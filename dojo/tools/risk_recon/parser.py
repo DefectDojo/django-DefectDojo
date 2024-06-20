@@ -82,7 +82,7 @@ class RiskReconParser:
             date = dateutil.parser.parse(item.get("first_seen"))
 
             sev = item.get("severity", "").capitalize()
-            sev = "Info" if not sev else sev
+            sev = sev if sev else "Info"
 
             tags = (
                 item.get("security_domain")[:20]

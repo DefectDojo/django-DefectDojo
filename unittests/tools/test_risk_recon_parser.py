@@ -8,16 +8,14 @@ from unittests.dojo_test_case import DojoTestCase
 class TestRiskReconAPIParser(DojoTestCase):
 
     def test_api_with_bad_url(self):
-        with open("unittests/scans/risk_recon/bad_url.json") as testfile:
-            with self.assertRaises(Exception):
-                parser = RiskReconParser()
-                parser.get_findings(testfile, Test())
+        with open("unittests/scans/risk_recon/bad_url.json") as testfile, self.assertRaises(Exception):
+            parser = RiskReconParser()
+            parser.get_findings(testfile, Test())
 
     def test_api_with_bad_key(self):
-        with open("unittests/scans/risk_recon/bad_key.json") as testfile:
-            with self.assertRaises(Exception):
-                parser = RiskReconParser()
-                parser.get_findings(testfile, Test())
+        with open("unittests/scans/risk_recon/bad_key.json") as testfile, self.assertRaises(Exception):
+            parser = RiskReconParser()
+            parser.get_findings(testfile, Test())
 
     def test_parser_without_api(self):
         with open("unittests/scans/risk_recon/findings.json") as testfile:

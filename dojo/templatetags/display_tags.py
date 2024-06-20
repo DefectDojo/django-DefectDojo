@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 import logging
 from itertools import chain
@@ -183,10 +184,8 @@ def remove_string(string, value):
 def percentage(fraction, value):
     return_value = ''
     if int(value) > 0:
-        try:
+        with contextlib.suppress(ValueError):
             return_value = "%.1f%%" % ((float(fraction) / float(value)) * 100)
-        except ValueError:
-            pass
     return return_value
 
 
@@ -335,7 +334,7 @@ def action_log_entry(value, autoescape=None):
     import json
     history = json.loads(value)
     text = ''
-    for k in history.keys():
+    for k in history:
         text += k.capitalize() + ' changed from "' + \
                 history[k][0] + '" to "' + history[k][1] + '"\n'
     return text
@@ -698,9 +697,7 @@ def get_severity_count(id, table):
 
     if table == "test":
         display_counts.append("Total: " + str(total) + " Findings")
-    elif table == "engagement":
-        display_counts.append("Total: " + str(total) + " Active Findings")
-    elif table == "product":
+    elif table == "engagement" or table == "product":
         display_counts.append("Total: " + str(total) + " Active Findings")
 
     display_counts = ", ".join([str(item) for item in display_counts])
@@ -771,10 +768,7 @@ def has_vulnerability_url(vulnerability_id):
     if not vulnerability_id:
         return False
 
-    for key in settings.VULNERABILITY_URLS:
-        if vulnerability_id.upper().startswith(key):
-            return True
-    return False
+    return any(vulnerability_id.upper().startswith(key) for key in settings.VULNERABILITY_URLS)
 
 
 @register.filter
@@ -929,7 +923,7 @@ def jira_project_tag(product_or_engagement, autoescape=True):
     </i>
     """
     jira_project_no_inheritance = jira_helper.get_jira_project(product_or_engagement, use_inheritance=False)
-    inherited = True if not jira_project_no_inheritance else False
+    inherited = bool(not jira_project_no_inheritance)
 
     icon = 'fa-bug'
     color = ''

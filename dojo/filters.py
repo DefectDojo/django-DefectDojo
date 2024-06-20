@@ -2071,11 +2071,10 @@ class MetricsFindingFilter(FindingFilter):
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
 
     def __init__(self, *args, **kwargs):
-        if args[0]:
-            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
-                args[0]._mutable = True
-                args[0]['date'] = 8
-                args[0]._mutable = False
+        if args[0] and (args[0].get('start_date', '') != '' or args[0].get('end_date', '') != ''):
+            args[0]._mutable = True
+            args[0]['date'] = 8
+            args[0]._mutable = False
 
         super().__init__(*args, **kwargs)
 
@@ -2101,11 +2100,10 @@ class MetricsFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
 
     def __init__(self, *args, **kwargs):
-        if args[0]:
-            if args[0].get('start_date', '') != '' or args[0].get('end_date', '') != '':
-                args[0]._mutable = True
-                args[0]['date'] = 8
-                args[0]._mutable = False
+        if args[0] and (args[0].get('start_date', '') != '' or args[0].get('end_date', '') != ''):
+            args[0]._mutable = True
+            args[0]['date'] = 8
+            args[0]._mutable = False
 
         super().__init__(*args, **kwargs)
 
@@ -2190,11 +2188,10 @@ class MetricsEndpointFilter(MetricsEndpointFilterHelper):
         queryset=Product.tags.tag_model.objects.all().order_by('name'))
 
     def __init__(self, *args, **kwargs):
-        if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
-                args[0]._mutable = True
-                args[0]["date"] = 8
-                args[0]._mutable = False
+        if args[0] and (args[0].get("start_date", "") != "" or args[0].get("end_date", "") != ""):
+            args[0]._mutable = True
+            args[0]["date"] = 8
+            args[0]._mutable = False
 
         self.pid = None
         if "pid" in kwargs:
@@ -2352,11 +2349,10 @@ class MetricsEndpointFilterWithoutObjectLookups(MetricsEndpointFilterHelper, Fin
         exclude=True)
 
     def __init__(self, *args, **kwargs):
-        if args[0]:
-            if args[0].get("start_date", "") != "" or args[0].get("end_date", "") != "":
-                args[0]._mutable = True
-                args[0]["date"] = 8
-                args[0]._mutable = False
+        if args[0] and (args[0].get("start_date", "") != "" or args[0].get("end_date", "") != ""):
+            args[0]._mutable = True
+            args[0]["date"] = 8
+            args[0]._mutable = False
         self.pid = None
         if "pid" in kwargs:
             self.pid = kwargs.pop("pid")

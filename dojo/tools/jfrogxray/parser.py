@@ -34,14 +34,13 @@ class JFrogXrayParser:
                 more_details = node.get("component_versions").get(
                     "more_details"
                 )
-                if "cves" in more_details:
-                    if "cve" in more_details.get("cves")[0]:
-                        title_cve = (
-                            node.get("component_versions")
-                            .get("more_details")
-                            .get("cves")[0]
-                            .get("cve")
-                        )
+                if "cves" in more_details and "cve" in more_details.get("cves")[0]:
+                    title_cve = (
+                        node.get("component_versions")
+                        .get("more_details")
+                        .get("cves")[0]
+                        .get("cve")
+                    )
 
                 unique_key = (
                     node.get("id")
@@ -65,10 +64,7 @@ def decode_cwe_number(value):
 def get_item(vulnerability, test):
     # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
     if "severity" in vulnerability:
-        if vulnerability["severity"] == "Unknown":
-            severity = "Info"
-        else:
-            severity = vulnerability["severity"].title()
+        severity = "Info" if vulnerability["severity"] == "Unknown" else vulnerability["severity"].title()
     # TODO: Needs UNKNOWN new status in the model.
     else:
         severity = "Info"

@@ -275,9 +275,8 @@ class TaggitSerializer(serializers.Serializer):
 
         for key in list(self.fields.keys()):
             field = self.fields[key]
-            if isinstance(field, TagListSerializerField):
-                if key in validated_data:
-                    to_be_tagged[key] = validated_data.pop(key)
+            if isinstance(field, TagListSerializerField) and key in validated_data:
+                to_be_tagged[key] = validated_data.pop(key)
 
         return (to_be_tagged, validated_data)
 
@@ -368,20 +367,16 @@ class RequestResponseSerializerField(serializers.ListSerializer):
         return data
 
     def to_representation(self, value):
-        if not isinstance(value, RequestResponseDict):
-            if not isinstance(value, list):
-                # this will trigger when a queryset is found...
-                if self.order_by:
-                    burps = value.all().order_by(*self.order_by)
-                else:
-                    burps = value.all()
-                value = [
-                    {
-                        "request": burp.get_request(),
-                        "response": burp.get_response(),
-                    }
-                    for burp in burps
-                ]
+        if not isinstance(value, RequestResponseDict) and not isinstance(value, list):
+            # this will trigger when a queryset is found...
+            burps = value.all().order_by(*self.order_by) if self.order_by else value.all()
+            value = [
+                {
+                    "request": burp.get_request(),
+                    "response": burp.get_response(),
+                }
+                for burp in burps
+            ]
 
         return value
 
@@ -508,10 +503,7 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def create(self, validated_data):
-        if "password" in validated_data:
-            password = validated_data.pop("password")
-        else:
-            password = None
+        password = validated_data.pop("password") if "password" in validated_data else None
 
         new_configuration_permissions = None
         if (
@@ -537,10 +529,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def validate(self, data):
-        if self.instance is not None:
-            instance_is_superuser = self.instance.is_superuser
-        else:
-            instance_is_superuser = False
+        instance_is_superuser = self.instance.is_superuser if self.instance is not None else False
         data_is_superuser = data.get("is_superuser", False)
         if not self.context["request"].user.is_superuser and (
             instance_is_superuser or data_is_superuser
@@ -1028,10 +1017,9 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("inherited_tags",)
 
     def validate(self, data):
-        if self.context["request"].method == "POST":
-            if data.get("target_start") > data.get("target_end"):
-                msg = "Your target start date exceeds your target end date"
-                raise serializers.ValidationError(msg)
+        if self.context["request"].method == "POST" and data.get("target_start") > data.get("target_end"):
+            msg = "Your target start date exceeds your target end date"
+            raise serializers.ValidationError(msg)
         return data
 
     def build_relational_field(self, field_name, relation_info):
@@ -1180,7 +1168,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
     def validate(self, data):
         # print('EndpointSerialize.validate')
 
-        if not self.context["request"].method == "PATCH":
+        if self.context["request"].method != "PATCH":
             if "product" not in data:
                 msg = "Product is required"
                 raise serializers.ValidationError(msg)
@@ -1757,12 +1745,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             msg = "False positive findings cannot " "be verified."
             raise serializers.ValidationError(msg)
 
-        if is_risk_accepted and not self.instance.risk_accepted:
-            if (
-                not self.instance.test.engagement.product.enable_simple_risk_acceptance
-            ):
-                msg = "Simple risk acceptance is disabled for this product, use the UI to accept this finding."
-                raise serializers.ValidationError(msg)
+        if is_risk_accepted and not self.instance.risk_accepted and (
+            not self.instance.test.engagement.product.enable_simple_risk_acceptance
+        ):
+            msg = "Simple risk acceptance is disabled for this product, use the UI to accept this finding."
+            raise serializers.ValidationError(msg)
 
         if is_active and is_risk_accepted:
             msg = "Active findings cannot be risk accepted."
@@ -2190,9 +2177,8 @@ class ImportScanSerializer(serializers.Serializer):
         # TaggitListSerializer has already removed commas supplied
         # by the user, so this operation will consistently return
         # a list to be used by the importer
-        if tags := context.get("tags"):
-            if isinstance(tags, str):
-                context["tags"] = tags.split(", ")
+        if (tags := context.get("tags")) and isinstance(tags, str):
+            context["tags"] = tags.split(", ")
         # have to make the scan_date_time timezone aware otherwise uploads via
         # the API would fail (but unit tests for api upload would pass...)
         context["scan_date"] = (
@@ -2444,7 +2430,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         """
         context = dict(data)
         # update some vars
-        context["scan"] = data.get("file", None)
+        context["scan"] = data.get("file")
         context["environment"] = Development_Environment.objects.get(
             name=data.get("environment", "Development")
         )
@@ -2466,9 +2452,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         # TaggitListSerializer has already removed commas supplied
         # by the user, so this operation will consistently return
         # a list to be used by the importer
-        if tags := context.get("tags"):
-            if isinstance(tags, str):
-                context["tags"] = tags.split(", ")
+        if (tags := context.get("tags")) and isinstance(tags, str):
+            context["tags"] = tags.split(", ")
         # have to make the scan_date_time timezone aware otherwise uploads via
         # the API would fail (but unit tests for api upload would pass...)
         context["scan_date"] = (

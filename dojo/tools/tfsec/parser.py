@@ -51,14 +51,8 @@ class TFSecParser:
             )
             impact = item.get("impact")
             resolution = item.get("resolution")
-            if item.get("links", None) is not None:
-                references = "\n".join(item.get("links"))
-            else:
-                references = item.get("link", None)
-            if item.get("severity").upper() in self.SEVERITY:
-                severity = self.SEVERITY[item.get("severity").upper()]
-            else:
-                severity = "Low"
+            references = "\n".join(item.get("links")) if item.get("links", None) is not None else item.get("link", None)
+            severity = self.SEVERITY.get(item.get("severity").upper(), "Low")
 
             dupe_key = hashlib.sha256(
                 (

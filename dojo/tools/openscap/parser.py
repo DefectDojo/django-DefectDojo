@@ -108,10 +108,7 @@ class OpenscapParser:
                         validate_ipv46_address(ip)
                         endpoint = Endpoint(host=ip)
                     except ValidationError:
-                        if "://" in ip:
-                            endpoint = Endpoint.from_uri(ip)
-                        else:
-                            endpoint = Endpoint.from_uri("//" + ip)
+                        endpoint = Endpoint.from_uri(ip) if "://" in ip else Endpoint.from_uri("//" + ip)
                     finding.unsaved_endpoints.append(endpoint)
 
                 dupe_key = hashlib.sha256(

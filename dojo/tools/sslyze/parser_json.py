@@ -492,14 +492,13 @@ def get_certificate_information(node, test, endpoint):
                     + " has problems in certificate deployments:"
                 )
                 vulnerable = False
-                if "leaf_certificate_subject_matches_hostname" in cd_node:
-                    if not cd_node[
-                        "leaf_certificate_subject_matches_hostname"
-                    ]:
-                        vulnerable = True
-                        description += (
-                            "\n - Certificate subject does not match hostname"
-                        )
+                if "leaf_certificate_subject_matches_hostname" in cd_node and not cd_node[
+                    "leaf_certificate_subject_matches_hostname"
+                ]:
+                    vulnerable = True
+                    description += (
+                        "\n - Certificate subject does not match hostname"
+                    )
                 for pvr_node in cd_node["path_validation_results"]:
                     if (
                         "openssl_error_string" in pvr_node
@@ -536,12 +535,11 @@ def get_certificate_information(node, test, endpoint):
                         + " has problems in certificate deployments:"
                     )
                     vulnerable = False
-                    if "leaf_certificate_subject_matches_hostname" in cd_node:
-                        if not cd_node[
-                            "leaf_certificate_subject_matches_hostname"
-                        ]:
-                            vulnerable = True
-                            description += "\n - Certificate subject does not match hostname"
+                    if "leaf_certificate_subject_matches_hostname" in cd_node and not cd_node[
+                        "leaf_certificate_subject_matches_hostname"
+                    ]:
+                        vulnerable = True
+                        description += "\n - Certificate subject does not match hostname"
                     for pvr_node in cd_node["path_validation_results"]:
                         if (
                             "openssl_error_string" in pvr_node

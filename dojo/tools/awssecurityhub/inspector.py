@@ -31,9 +31,8 @@ class Inspector:
                 mitigation += f"- Update {package.get('Name', '')}-{package.get('Version', '')}\n"
                 if remediation := package.get("Remediation"):
                     mitigation += f"\t- {remediation}\n"
-            if vendor := vulnerability.get("Vendor"):
-                if vendor_url := vendor.get("Url"):
-                    references.append(vendor_url)
+            if (vendor := vulnerability.get("Vendor")) and (vendor_url := vendor.get("Url")):
+                references.append(vendor_url)
             if vulnerability.get("EpssScore") is not None:
                 epss_score = vulnerability.get("EpssScore")
         if finding.get("ProductFields", {}).get("aws/inspector/FindingStatus", "ACTIVE") == "ACTIVE":
@@ -43,7 +42,7 @@ class Inspector:
         else:
             is_Mitigated = True
             active = False
-            if finding.get("LastObservedAt", None):
+            if finding.get("LastObservedAt"):
                 try:
                     mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
                 except Exception:

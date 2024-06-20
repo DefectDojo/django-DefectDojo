@@ -6,10 +6,9 @@ from unittests.dojo_test_case import DojoTestCase
 class TestMeterianParser(DojoTestCase):
 
     def test_meterianParser_invalid_security_report_raise_ValueError_exception(self):
-        with self.assertRaises(ValueError):
-            with open("unittests/scans/meterian/report_invalid.json") as testfile:
-                parser = MeterianParser()
-                parser.get_findings(testfile, Test())
+        with self.assertRaises(ValueError), open("unittests/scans/meterian/report_invalid.json") as testfile:
+            parser = MeterianParser()
+            parser.get_findings(testfile, Test())
 
     def test_meterianParser_report_has_no_finding(self):
         with open("unittests/scans/meterian/report_no_vulns.json") as testfile:

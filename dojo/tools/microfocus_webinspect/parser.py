@@ -40,17 +40,14 @@ class MicrofocusWebinspectParser:
                 )
                 for content in issue.findall("ReportSection"):
                     name = content.find("Name").text
-                    if "Summary" in name:
-                        if content.find("SectionText").text:
-                            description = content.find("SectionText").text
-                    if "Fix" in name:
-                        if content.find("SectionText").text:
-                            mitigation = content.find("SectionText").text
-                    if "Reference" in name:
-                        if name and content.find("SectionText").text:
-                            reference = html2text.html2text(
-                                content.find("SectionText").text
-                            )
+                    if "Summary" in name and content.find("SectionText").text:
+                        description = content.find("SectionText").text
+                    if "Fix" in name and content.find("SectionText").text:
+                        mitigation = content.find("SectionText").text
+                    if "Reference" in name and name and content.find("SectionText").text:
+                        reference = html2text.html2text(
+                            content.find("SectionText").text
+                        )
                 cwe = 0
                 description = ""
                 classifications = issue.find("Classifications")
@@ -58,7 +55,7 @@ class MicrofocusWebinspectParser:
                     for content in classifications.findall('Classification'):
                         # detect CWE number
                         # TODO support more than one CWE number
-                        if "kind" in content.attrib and "CWE" == content.attrib["kind"]:
+                        if "kind" in content.attrib and content.attrib["kind"] == "CWE":
                             cwe = MicrofocusWebinspectParser.get_cwe(content.attrib['identifier'])
                             description += "\n\n" + content.text + "\n"
 

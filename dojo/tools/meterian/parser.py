@@ -30,10 +30,9 @@ class MeterianParser:
         return findings
 
     def get_security_reports(self, report_json):
-        if "reports" in report_json:
-            if "security" in report_json["reports"]:
-                if "reports" in report_json["reports"]["security"]:
-                    return report_json["reports"]["security"]["reports"]
+        if "reports" in report_json and "security" in report_json["reports"]:
+            if "reports" in report_json["reports"]["security"]:
+                return report_json["reports"]["security"]["reports"]
 
         msg = "Malformed report: the security reports are missing."
         raise ValueError(msg)
@@ -72,9 +71,8 @@ class MeterianParser:
                     tags=[language],
                 )
 
-                if "cve" in advisory:
-                    if "N/A" != advisory["cve"]:
-                        finding.unsaved_vulnerability_ids = [advisory["cve"]]
+                if "cve" in advisory and advisory["cve"] != "N/A":
+                    finding.unsaved_vulnerability_ids = [advisory["cve"]]
 
                 if "cwe" in advisory:
                     finding.cwe = int(advisory["cwe"].replace("CWE-", ""))

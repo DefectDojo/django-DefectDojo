@@ -125,7 +125,7 @@ def create_notification(event=None, **kwargs):
 
 
 def create_description(event, *args, **kwargs):
-    if "description" not in kwargs.keys():
+    if "description" not in kwargs:
         if event == 'product_added':
             kwargs["description"] = _('Product %s has been created successfully.') % kwargs['title']
         elif event == 'product_type_added':
@@ -403,10 +403,7 @@ def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[
 
     title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
 
-    if updated_count == 0:
-        event = 'scan_added_empty'
-    else:
-        event = 'scan_added'
+    event = "scan_added_empty" if updated_count == 0 else "scan_added"
 
     create_notification(event=event, title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,
