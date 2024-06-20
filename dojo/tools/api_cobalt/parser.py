@@ -38,10 +38,7 @@ class ApiCobaltParser:
         )
 
     def get_findings(self, file, test):
-        if file is None:
-            data = CobaltApiImporter().get_findings(test)
-        else:
-            data = json.load(file)
+        data = CobaltApiImporter().get_findings(test) if file is None else json.load(file)
 
         findings = []
         for entry in data["data"]:
@@ -129,9 +126,7 @@ class ApiCobaltParser:
             "wont_fix",  # Risk of finding has been accepted
         ]
 
-        if resource["state"] in allowed_states:
-            return True
-        return False
+        return resource["state"] in allowed_states
 
     def convert_endpoints(self, affected_targets):
         """Convert Cobalt affected_targets into DefectDojo endpoints"""

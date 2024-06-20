@@ -15,14 +15,7 @@ class OSVScannerParser:
         return "OSV scan output can be imported in JSON format (option --format json)."
 
     def classify_severity(self, input):
-        if input != "":
-            if input == "MODERATE":
-                severity = "Medium"
-            else:
-                severity = input.lower().capitalize()
-        else:
-            severity = "Low"
-        return severity
+        return ("Medium" if input == "MODERATE" else input.lower().capitalize()) if input != "" else "Low"
 
     def get_findings(self, file, test):
         try:

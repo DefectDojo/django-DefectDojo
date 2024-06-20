@@ -63,8 +63,7 @@ def is_file(field):
 
 @register.filter
 def is_text(field):
-    return isinstance(field.field.widget, forms.TextInput) or \
-            isinstance(field.field.widget, forms.Textarea)
+    return isinstance(field.field.widget, forms.TextInput | forms.Textarea)
 
 
 @register.filter

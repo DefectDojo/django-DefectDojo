@@ -1522,17 +1522,11 @@ class Engagement(models.Model):
         return copy
 
     def is_overdue(self):
-        if self.engagement_type == "CI/CD":
-            overdue_grace_days = 10
-        else:
-            overdue_grace_days = 0
+        overdue_grace_days = 10 if self.engagement_type == "CI/CD" else 0
 
         max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
 
-        if self.target_end < max_end_date.date():
-            return True
-
-        return False
+        return self.target_end < max_end_date.date()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -1623,10 +1617,7 @@ class Endpoint_Status(models.Model):
     @property
     def age(self):
 
-        if self.mitigated:
-            diff = self.mitigated_time.date() - self.date
-        else:
-            diff = get_current_date() - self.date
+        diff = self.mitigated_time.date() - self.date if self.mitigated else get_current_date() - self.date
         days = diff.days
         return max(0, days)
 
@@ -1821,9 +1812,7 @@ class Endpoint(models.Model):
         except:
             return True
         else:
-            if self.product:
-                return False
-            return True
+            return not self.product
 
     @property
     def mitigated(self):
@@ -2911,7 +2900,7 @@ class Finding(models.Model):
     @staticmethod
     def get_severity(num_severity):
         severities = {0: "Info", 1: "Low", 2: "Medium", 3: "High", 4: "Critical"}
-        if num_severity in severities.keys():
+        if num_severity in severities:
             return severities[num_severity]
 
         return None

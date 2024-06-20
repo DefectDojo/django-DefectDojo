@@ -56,13 +56,13 @@ def get_item(vuln):
         description += "{}\n".format(vuln["message"])
 
     location = vuln["file"]
-    file_path = location["path"] if "path" in location else None
+    file_path = location.get("path", None)
 
     if file_path:
         description += f"File path: {file_path}\n"
 
-    line = vuln["line"] if "line" in vuln else None
-    column = vuln["column"] if "column" in vuln else None
+    line = vuln.get("line", None)
+    column = vuln.get("column", None)
 
     if line is not None and column is not None:
         description += f"Location in file: line {line}, column {column}\n"
