@@ -61,16 +61,10 @@ class MendParser:
                 description = node.get("description")
 
             cve = node.get("name")
-            if cve is None:
-                title = "CVE-None | " + lib_name
-            else:
-                title = cve + " | " + lib_name
+            title = "CVE-None | " + lib_name if cve is None else cve + " | " + lib_name
             # cvss2 by default in CLI, but cvss3 in UI. Adapting to have
             # homogeneous behavior.
-            if "cvss3_severity" in node:
-                cvss_sev = node.get("cvss3_severity")
-            else:
-                cvss_sev = node.get("severity")
+            cvss_sev = node.get("cvss3_severity") if "cvss3_severity" in node else node.get("severity")
             severity = cvss_sev.lower().capitalize()
 
             cvss3_score = node.get("cvss3_score", None)

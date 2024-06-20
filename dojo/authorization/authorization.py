@@ -46,7 +46,7 @@ def user_has_permission(user, obj, permission):
     if user.is_superuser:
         return True
 
-    if isinstance(obj, Product_Type) or isinstance(obj, Product):
+    if isinstance(obj, (Product_Type, Product)):
         # Global roles are only relevant for product types, products and their
         # dependent objects
         if user_has_global_permission(user, permission):
@@ -97,13 +97,9 @@ def user_has_permission(user, obj, permission):
         and permission in Permissions.get_test_permissions()
     ):
         return user_has_permission(user, obj.engagement.product, permission)
-    if (
-        isinstance(obj, Finding) or isinstance(obj, Stub_Finding)
-    ) and permission in Permissions.get_finding_permissions():
-        return user_has_permission(
-            user, obj.test.engagement.product, permission,
-        )
-    if (
+    if ((
+        isinstance(obj, (Finding, Stub_Finding))
+    ) and permission in Permissions.get_finding_permissions()) or (
         isinstance(obj, Finding_Group)
         and permission in Permissions.get_finding_group_permissions()
     ):
@@ -113,23 +109,17 @@ def user_has_permission(user, obj, permission):
     if (
         isinstance(obj, Endpoint)
         and permission in Permissions.get_endpoint_permissions()
-    ):
-        return user_has_permission(user, obj.product, permission)
-    if (
+    ) or (
         isinstance(obj, Languages)
         and permission in Permissions.get_language_permissions()
-    ):
-        return user_has_permission(user, obj.product, permission)
-    if (
+    ) or ((
         isinstance(obj, App_Analysis)
         and permission in Permissions.get_technology_permissions()
-    ):
-        return user_has_permission(user, obj.product, permission)
-    if (
+    ) or (
         isinstance(obj, Product_API_Scan_Configuration)
         and permission
         in Permissions.get_product_api_scan_configuration_permissions()
-    ):
+    )):
         return user_has_permission(user, obj.product, permission)
     if (
         isinstance(obj, Product_Type_Member)
@@ -351,10 +341,7 @@ def get_product_groups_dict(user):
         .select_related("role")
         .filter(group__users=user)
     ):
-        if pg_dict.get(product_group.product.id) is None:
-            pgu_list = []
-        else:
-            pgu_list = pg_dict[product_group.product.id]
+        pgu_list = [] if pg_dict.get(product_group.product.id) is None else pg_dict[product_group.product.id]
         pgu_list.append(product_group)
         pg_dict[product_group.product.id] = pgu_list
     return pg_dict

@@ -73,10 +73,7 @@ class H1Parser:
             references += f"[{ref_link}]({ref_link})"
 
             # Set active state of the Dojo finding
-            if content["attributes"]["state"] in ["triaged", "new"]:
-                active = True
-            else:
-                active = False
+            active = content["attributes"]["state"] in ["triaged", "new"]
 
             # Set CWE of the Dojo finding
             try:

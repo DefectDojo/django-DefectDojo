@@ -58,10 +58,7 @@ class GosecParser:
             if "-" in line:
                 # if this is a range, only point to the beginning.
                 line = line.split("-", 1)[0]
-            if line.isdigit():
-                line = int(line)
-            else:
-                line = None
+            line = int(line) if line.isdigit() else None
 
             dupe_key = title + item["file"] + str(line)
 

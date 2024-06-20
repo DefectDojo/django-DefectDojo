@@ -44,9 +44,7 @@ def get_report_findings(csv_reader) -> [dict]:
     report_findings = []
 
     for row in csv_reader:
-        if row.get("Title") and row["Title"] != "Title":
-            report_findings.append(row)
-        elif row.get("VULN TITLE"):
+        if (row.get("Title") and row["Title"] != "Title") or row.get("VULN TITLE"):
             report_findings.append(row)
     return report_findings
 

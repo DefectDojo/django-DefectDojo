@@ -15,7 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 class TenableCSVParser:
     def _validated_severity(self, severity):
-        if severity not in Finding.SEVERITIES.keys():
+        if severity not in Finding.SEVERITIES:
             severity = "Info"
         return severity
 
@@ -189,10 +189,7 @@ class TenableCSVParser:
             if isinstance(port, str) and port in ["", "0"]:
                 port = None
             # Update the endpoints
-            if "://" in host:
-                endpoint = Endpoint.from_uri(host)
-            else:
-                endpoint = Endpoint(protocol=protocol, host=host, port=port)
+            endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(protocol=protocol, host=host, port=port)
             # Add the list to be processed later
             find.unsaved_endpoints.append(endpoint)
 

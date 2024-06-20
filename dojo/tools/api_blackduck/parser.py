@@ -37,10 +37,7 @@ class ApiBlackduckParser:
         )
 
     def get_findings(self, file, test):
-        if file is None:
-            data = BlackduckApiImporter().get_findings(test)
-        else:
-            data = json.load(file)
+        data = BlackduckApiImporter().get_findings(test) if file is None else json.load(file)
         findings = []
         for entry in data:
             vulnerability_id = entry["vulnerabilityWithRemediation"][

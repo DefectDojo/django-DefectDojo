@@ -20,10 +20,7 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
     if user is None:
         return Endpoint.objects.none()
 
-    if queryset is None:
-        endpoints = Endpoint.objects.all().order_by("id")
-    else:
-        endpoints = queryset
+    endpoints = Endpoint.objects.all().order_by("id") if queryset is None else queryset
 
     if user.is_superuser:
         return endpoints
@@ -66,10 +63,7 @@ def get_authorized_endpoint_status(permission, queryset=None, user=None):
     if user is None:
         return Endpoint_Status.objects.none()
 
-    if queryset is None:
-        endpoint_status = Endpoint_Status.objects.all().order_by("id")
-    else:
-        endpoint_status = queryset
+    endpoint_status = Endpoint_Status.objects.all().order_by("id") if queryset is None else queryset
 
     if user.is_superuser:
         return endpoint_status

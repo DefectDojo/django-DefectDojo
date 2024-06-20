@@ -196,10 +196,7 @@ class TrivyParser:
                 package_version = vuln.get("InstalledVersion", "")
                 references = "\n".join(vuln.get("References", []))
                 mitigation = vuln.get("FixedVersion", "")
-                if len(vuln.get("CweIDs", [])) > 0:
-                    cwe = int(vuln["CweIDs"][0].split("-")[1])
-                else:
-                    cwe = 0
+                cwe = int(vuln["CweIDs"][0].split("-")[1]) if len(vuln.get("CweIDs", [])) > 0 else 0
                 type = target_data.get("Type", "")
                 title = f"{vuln_id} {package_name} {package_version}"
                 description = DESCRIPTION_TEMPLATE.format(

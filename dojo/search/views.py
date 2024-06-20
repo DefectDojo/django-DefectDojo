@@ -189,10 +189,10 @@ def simple_search(request):
                 # some over the top tag displaying happening...
                 findings.object_list = findings.object_list.prefetch_related("test__engagement__product__tags")
 
-            tag = operators["tag"] if "tag" in operators else keywords
-            tags = operators["tags"] if "tags" in operators else keywords
-            not_tag = operators["not-tag"] if "not-tag" in operators else keywords
-            not_tags = operators["not-tags"] if "not-tags" in operators else keywords
+            tag = operators.get("tag", keywords)
+            tags = operators.get("tags", keywords)
+            not_tag = operators.get("not-tag", keywords)
+            not_tags = operators.get("not-tags", keywords)
             if (search_tags and tag) or tags or not_tag or not_tags:
                 logger.debug("searching tags")
 
@@ -544,7 +544,7 @@ def apply_vulnerability_id_filter(qs, operators):
 def perform_keyword_search_for_operator(qs, operators, operator, keywords_query):
     watson_results = None
     operator_query = ""
-    keywords_query = "" if not keywords_query else keywords_query
+    keywords_query = keywords_query or ""
 
     if operator in operators:
         operator_query = " ".join(operators[operator])

@@ -61,10 +61,7 @@ class SonarQubeApiUpdater:
         elif finding.risk_accepted:
             target_status = "RESOLVED / WONTFIX"
         elif finding.active:
-            if finding.verified:
-                target_status = "CONFIRMED"
-            else:
-                target_status = "REOPENED"
+            target_status = "CONFIRMED" if finding.verified else "REOPENED"
         return target_status
 
     def get_sonarqube_required_transitions_for(

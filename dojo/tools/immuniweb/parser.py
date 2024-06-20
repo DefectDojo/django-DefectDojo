@@ -41,10 +41,7 @@ class ImmuniwebParser:
             cwe = "".join(
                 i for i in vulnerability.find("CWE-ID").text if i.isdigit()
             )
-            if cwe:
-                cwe = cwe
-            else:
-                cwe = None
+            cwe = cwe or None
             vulnerability_id = vulnerability.find("CVE-ID").text
             steps_to_reproduce = vulnerability.find("PoC").text
             # just to make sure severity is in the recognised sentence casing

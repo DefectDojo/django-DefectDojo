@@ -370,10 +370,7 @@ class RequestResponseSerializerField(serializers.ListSerializer):
         if not isinstance(value, RequestResponseDict):
             if not isinstance(value, list):
                 # this will trigger when a queryset is found...
-                if self.order_by:
-                    burps = value.all().order_by(*self.order_by)
-                else:
-                    burps = value.all()
+                burps = value.all().order_by(*self.order_by) if self.order_by else value.all()
                 value = [
                     {
                         "request": burp.get_request(),
@@ -507,10 +504,7 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def create(self, validated_data):
-        if "password" in validated_data:
-            password = validated_data.pop("password")
-        else:
-            password = None
+        password = validated_data.pop("password") if "password" in validated_data else None
 
         new_configuration_permissions = None
         if (
@@ -536,10 +530,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def validate(self, data):
-        if self.instance is not None:
-            instance_is_superuser = self.instance.is_superuser
-        else:
-            instance_is_superuser = False
+        instance_is_superuser = self.instance.is_superuser if self.instance is not None else False
         data_is_superuser = data.get("is_superuser", False)
         if not self.context["request"].user.is_superuser and (
             instance_is_superuser or data_is_superuser
@@ -1184,7 +1175,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def validate(self, data):
 
-        if not self.context["request"].method == "PATCH":
+        if self.context["request"].method != "PATCH":
             if "product" not in data:
                 msg = "Product is required"
                 raise serializers.ValidationError(msg)
@@ -2447,7 +2438,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         """
         context = dict(data)
         # update some vars
-        context["scan"] = data.get("file", None)
+        context["scan"] = data.get("file")
         context["environment"] = Development_Environment.objects.get(
             name=data.get("environment", "Development"),
         )

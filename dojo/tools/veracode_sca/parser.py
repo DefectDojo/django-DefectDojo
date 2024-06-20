@@ -229,7 +229,7 @@ class VeracodeScaParser:
         severity = severity.capitalize()
         if severity is None:
             severity = "Medium"
-        elif "Unknown" == severity or "None" == severity:
+        elif severity == "Unknown" or severity == "None":
             severity = "Info"
         return severity
 

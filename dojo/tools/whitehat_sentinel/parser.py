@@ -34,7 +34,7 @@ class WhiteHatSentinelParser:
         # Make sure the findings key exists in the dictionary and that it is
         # not null or an empty list
         if (
-            "collection" not in findings_collection.keys()
+            "collection" not in findings_collection
             or not findings_collection["collection"]
         ):
             msg = "collection key not present or there were not findings present."

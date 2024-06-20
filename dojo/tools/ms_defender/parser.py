@@ -37,9 +37,9 @@ class MSDefenderParser:
             vulnerabilityfiles = []
             machinefiles = []
             for content in list(zipdata):
-                if "vulnerabilities/" in content and "vulnerabilities/" != content:
+                if "vulnerabilities/" in content and content != "vulnerabilities/":
                     vulnerabilityfiles.append(content)
-                if "machines/" in content and "machines/" != content:
+                if "machines/" in content and content != "machines/":
                     machinefiles.append(content)
             vulnerabilities = []
             machines = {}

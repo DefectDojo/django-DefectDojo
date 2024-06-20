@@ -43,10 +43,7 @@ class BundlerAuditParser:
                     advisory_id = field.replace("GHSA: ", "")
                 elif field.startswith("Criticality"):
                     criticality = field.replace("Criticality: ", "")
-                    if criticality.lower() == "unknown":
-                        sev = "Medium"
-                    else:
-                        sev = criticality
+                    sev = "Medium" if criticality.lower() == "unknown" else criticality
                 elif field.startswith("URL"):
                     advisory_url = field.replace("URL: ", "")
                 elif field.startswith("Title"):

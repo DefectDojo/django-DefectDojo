@@ -42,10 +42,7 @@ class HCLAppScanParser:
                     match item.tag:
                         case "severity":
                             output = self.xmltreehelper(item)
-                            if output is None:
-                                severity = "Info"
-                            else:
-                                severity = output.strip(" ").capitalize()
+                            severity = "Info" if output is None else output.strip(" ").capitalize()
                         case "cwe":
                             cwe = int(self.xmltreehelper(item))
                         case "remediation":

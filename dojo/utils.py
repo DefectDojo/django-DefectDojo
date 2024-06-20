@@ -778,11 +778,7 @@ def is_title_in_breadcrumbs(title):
     if breadcrumbs is None:
         return False
 
-    for breadcrumb in breadcrumbs:
-        if breadcrumb.get("title") == title:
-            return True
-
-    return False
+    return any(breadcrumb.get("title") == title for breadcrumb in breadcrumbs)
 
 
 def get_punchcard_data(objs, start_date, weeks, view="Finding"):
@@ -1261,15 +1257,9 @@ def build_query(query_string, search_fields):
         for field_name in search_fields:
             q = Q(**{f"{field_name}__icontains": term})
 
-            if or_query:
-                or_query = or_query | q
-            else:
-                or_query = q
+            or_query = or_query | q if or_query else q
 
-        if query:
-            query = query & or_query
-        else:
-            query = or_query
+        query = query & or_query if query else or_query
     return query
 
 
@@ -1779,7 +1769,7 @@ def get_return_url(request):
     return_url = request.POST.get("return_url", None)
     if return_url is None or not return_url.strip():
         # for some reason using request.GET.get('return_url') never works
-        return_url = request.GET["return_url"] if "return_url" in request.GET else None
+        return_url = request.GET["return_url"] if "return_url" in request.GET else None  # noqa: SIM401
 
     return return_url or None
 
@@ -1978,7 +1968,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 if sla_age is None:
                     sla_age = 0
 
-                if (sla_age < 0) and (settings.SLA_NOTIFY_POST_BREACH < abs(sla_age)):
+                if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
                     post_breach_no_notify_count += 1
                     # Skip finding notification if breached for too long
                     logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
@@ -2229,7 +2219,7 @@ def get_product(obj):
     if not obj:
         return None
 
-    if isinstance(obj, Finding) or isinstance(obj, Finding_Group):
+    if isinstance(obj, (Finding, Finding_Group)):
         return obj.test.engagement.product
 
     if isinstance(obj, Test):

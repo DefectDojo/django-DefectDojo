@@ -58,7 +58,7 @@ class IntSightsParser:
             alert = Finding(
                 title=alert["title"],
                 test=test,
-                active=False if alert["status"] == "Closed" else True,
+                active=alert["status"] != "Closed",
                 verified=True,
                 description=self._build_finding_description(alert),
                 severity=alert["severity"],

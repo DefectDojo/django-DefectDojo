@@ -207,7 +207,7 @@ class MobSFParser:
             if isinstance(data["binary_analysis"], list):
                 for details in data["binary_analysis"]:
                     for binary_analysis_type in details:
-                        if "name" != binary_analysis_type:
+                        if binary_analysis_type != "name":
                             mobsf_item = {
                                 "category": "Binary Analysis",
                                 "title": details[binary_analysis_type]["description"].split(".")[0],
@@ -376,7 +376,7 @@ class MobSFParser:
         signature         => Info (it's positive so... Info)
         signatureOrSystem => Info (it's positive so... Info)
         """
-        if "dangerous" == status:
+        if status == "dangerous":
             return "High"
         return "Info"
 

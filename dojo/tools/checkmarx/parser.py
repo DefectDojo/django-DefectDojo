@@ -139,10 +139,7 @@ class CheckmarxParser:
             query, result,
         )
         sinkFilename = lastPathnode.find("FileName").text
-        if sinkFilename:
-            title = "{} ({})".format(titleStart, sinkFilename.split("/")[-1])
-        else:
-            title = titleStart
+        title = "{} ({})".format(titleStart, sinkFilename.split("/")[-1]) if sinkFilename else titleStart
         false_p = result.get("FalsePositive")
         sev = result.get("Severity")
         aggregateKeys = f"{cwe}{sev}{sinkFilename}"

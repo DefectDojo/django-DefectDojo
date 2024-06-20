@@ -26,16 +26,8 @@ class PipAuditParser:
     def get_findings(self, scan_file, test):
         """Return the collection of Findings ingested."""
         data = json.load(scan_file)
-        findings = None
         # this parser can handle two distinct formats see sample scan files
-        if "dependencies" in data:
-            # new format of report
-            findings = get_file_findings(data, test)
-        else:
-            # legacy format of report
-            findings = get_legacy_findings(data, test)
-
-        return findings
+        return get_file_findings(data, test) if "dependencies" in data else get_legacy_findings(data, test)
 
 
 def get_file_findings(data, test):

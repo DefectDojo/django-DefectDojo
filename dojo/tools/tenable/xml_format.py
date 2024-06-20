@@ -23,7 +23,7 @@ class TenableXMLParser:
         elif severity_id == 1:
             severity = "Low"
         # Ensure the severity is a valid choice. Fall back to info otherwise
-        if severity not in Finding.SEVERITIES.keys():
+        if severity not in Finding.SEVERITIES:
             severity = "Info"
         return severity
 

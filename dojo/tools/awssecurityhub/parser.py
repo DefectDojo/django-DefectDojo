@@ -47,7 +47,7 @@ class AwsSecurityHubParser:
 
     def get_items(self, tree: dict, test):
         items = {}
-        findings = tree.get("Findings", tree.get("findings", None))
+        findings = tree.get("Findings", tree.get("findings"))
         if not isinstance(findings, list):
             msg = "Incorrect Security Hub report format"
             raise TypeError(msg)

@@ -121,10 +121,7 @@ def get_item(item_node, tree, test):
     elif item_node["via"] and isinstance(item_node["via"][0], dict):
         title = item_node["via"][0]["title"]
         component_name = item_node["nodes"][0]
-        if len(item_node["via"][0]["cwe"]) > 0:
-            cwe = item_node["via"][0]["cwe"][0]
-        else:
-            cwe = None
+        cwe = item_node["via"][0]["cwe"][0] if len(item_node["via"][0]["cwe"]) > 0 else None
         references.append(item_node["via"][0]["url"])
         unique_id_from_tool = str(item_node["via"][0]["source"])
         cvssv3 = item_node["via"][0]["cvss"]["vectorString"]
