@@ -3336,9 +3336,7 @@ class AnnouncementViewSet(
 
 
 class NotificationWebhooksViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    DojoModelViewSet
+    PrefetchDojoModelViewSet
 ):
     serializer_class = serializers.NotificationWebhooksSerializer
     queryset = Notification_Webhooks.objects.all()

@@ -3,5 +3,6 @@
 {% else %}
 {% include 'notifications/webhooks/subtemplates/engagement.tpl' with engagement=test.engagement %}
 {% endif %}
-test: {{ test.title }}
-test_id: {{ test.pk }}
+test:
+    title: {{ test.title }}
+    id: {{ test.pk }}
