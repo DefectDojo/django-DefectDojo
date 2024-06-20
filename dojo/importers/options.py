@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from functools import wraps
-from pprint import pprint as pp
+from pprint import pformat as pp
 from typing import Any, Callable, List
 
 from django.contrib.auth.models import User

@@ -26,8 +26,6 @@ class TestSearch(DojoTestCase):
         self.assertEqual(keywords[2], "space inside")
 
         operators, keywords = parse_search_query("tag:anchore word tags:php")
-        # print(operators)
-        # print(keywords)
 
         self.assertEqual(len(operators), 2)
         self.assertEqual(len(operators["tag"]), 1)

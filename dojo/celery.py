@@ -21,7 +21,7 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 @app.task(bind=True)
 def debug_task(self):
-    print(f"Request: {self.request!r}")
+    logger.info(f"Request: {self.request!r}")
 
 
 @setup_logging.connect

@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import shutil
@@ -9,6 +10,8 @@ from base_test_class import BaseTestCase
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+
+logger = logging.getLogger(__name__)
 
 
 class ScannerTest(BaseTestCase):
@@ -42,13 +45,13 @@ class ScannerTest(BaseTestCase):
                 missing_tests += [test]
 
         if len(missing_tests) > 0:
-            print("The following scanners are missing test cases or incorrectly named")
-            print("Names must match those listed in /dojo/tools")
-            print("Test cases can be added/modified here:")
-            print("https://github.com/DefectDojo/sample-scan-files\n")
+            logger.info("The following scanners are missing test cases or incorrectly named")
+            logger.info("Names must match those listed in /dojo/tools")
+            logger.info("Test cases can be added/modified here:")
+            logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in missing_tests:
-                print(test)
-            print()
+                logger.info(test)
+            logger.info()
         assert len(missing_tests) == 0
 
     def test_check_for_doc(self):
@@ -70,13 +73,13 @@ class ScannerTest(BaseTestCase):
                     missing_docs += [tool]
 
         if len(missing_docs) > 0:
-            print("The following scanners are missing documentation")
-            print("Names must match those listed in /dojo/tools")
-            print("Documentation can be added here:")
-            print("https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs\n")
+            logger.info("The following scanners are missing documentation")
+            logger.info("Names must match those listed in /dojo/tools")
+            logger.info("Documentation can be added here:")
+            logger.info("https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs\n")
             for tool in missing_docs:
-                print(tool)
-            print()
+                logger.info(tool)
+            logger.info()
         assert len(missing_docs) == 0
 
     def test_check_for_forms(self):
@@ -108,13 +111,13 @@ class ScannerTest(BaseTestCase):
                     missing_forms += [tool]
 
         if len(missing_forms) > 0:
-            print("The following scanners are missing forms")
-            print("Names must match those listed in /dojo/tools")
-            print("forms can be added here:")
-            print("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/forms.py\n")
+            logger.info("The following scanners are missing forms")
+            logger.info("Names must match those listed in /dojo/tools")
+            logger.info("forms can be added here:")
+            logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/forms.py\n")
             for tool in missing_forms:
-                print(tool)
-            print()
+                logger.info(tool)
+            logger.info()
         assert len(missing_forms) == 0
 
     @unittest.skip("Deprecated since Dynamic Parser infrastructure")
@@ -149,13 +152,13 @@ class ScannerTest(BaseTestCase):
                     missing_templates += [tool]
 
         if len(missing_templates) > 0:
-            print("The following scanners are missing templates")
-            print("Names must match those listed in /dojo/tools")
-            print("templates can be added here:")
-            print("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/templates/dojo/import_scan_results.html\n")
+            logger.info("The following scanners are missing templates")
+            logger.info("Names must match those listed in /dojo/tools")
+            logger.info("templates can be added here:")
+            logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/templates/dojo/import_scan_results.html\n")
             for tool in missing_templates:
-                print(tool)
-            print()
+                logger.info(tool)
+            logger.info()
         assert len(missing_templates) == 0
 
     def test_engagement_import_scan_result(self):
@@ -235,13 +238,13 @@ class ScannerTest(BaseTestCase):
                     break
 
         if len(failed_tests) > 0:
-            print("The following scan imports produced errors")
-            print("Names of tests must match those listed in /dojo/tools")
-            print("Tests can be added/modified here:")
-            print("https://github.com/DefectDojo/sample-scan-files\n")
+            logger.info("The following scan imports produced errors")
+            logger.info("Names of tests must match those listed in /dojo/tools")
+            logger.info("Tests can be added/modified here:")
+            logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in failed_tests:
-                print(test)
-            print()
+                logger.info(test)
+            logger.info()
         assert len(failed_tests) == 0
 
     def tearDown(self):
