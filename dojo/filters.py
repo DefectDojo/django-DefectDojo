@@ -3118,7 +3118,7 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
             self.delete_tags_from_form(product_refs)
             self.delete_tags_from_form(engagement_refs)
             self.delete_tags_from_form(test_refs)
-        if self.engagement:
+        elif self.engagement:
             self.delete_tags_from_form(product_type_refs)
             self.delete_tags_from_form(product_refs)
             self.delete_tags_from_form(engagement_refs)
