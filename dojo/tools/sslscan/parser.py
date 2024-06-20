@@ -88,9 +88,6 @@ class SslscanParser:
                         dupes[dupe_key] = finding
 
                         if host:
-                            if "://" in host:
-                                endpoint = Endpoint.from_uri(host)
-                            else:
-                                endpoint = Endpoint(host=host, port=port)
+                            endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(host=host, port=port)
                             finding.unsaved_endpoints.append(endpoint)
         return list(dupes.values())

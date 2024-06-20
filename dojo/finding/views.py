@@ -1217,10 +1217,7 @@ def close_finding(request, fid):
     # in order to close a finding, we need to capture why it was closed
     # we can do this with a Note
     note_type_activation = Note_Type.objects.filter(is_active=True)
-    if len(note_type_activation):
-        missing_note_types = get_missing_mandatory_notetypes(finding)
-    else:
-        missing_note_types = note_type_activation
+    missing_note_types = get_missing_mandatory_notetypes(finding) if len(note_type_activation) else note_type_activation
     form = CloseFindingForm(missing_note_types=missing_note_types)
     if request.method == "POST":
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
@@ -2274,10 +2271,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                     cwe=title_template.cwe,
                     title__icontains=title_template.title,
                 ).values_list("id", flat=True)
-                if result_list is None:
-                    result_list = finding_ids
-                else:
-                    result_list = list(chain(result_list, finding_ids))
+                result_list = finding_ids if result_list is None else list(chain(result_list, finding_ids))
 
             # If result_list is None the filter exclude won't work
             if result_list:
@@ -2379,16 +2373,7 @@ def edit_template(request, tid):
             count = apply_cwe_mitigation(
                 form.cleaned_data["apply_to_findings"], template,
             )
-            if count > 0:
-                apply_message = (
-                    " and "
-                    + str(count)
-                    + " "
-                    + pluralize(count, "finding,findings")
-                    + " "
-                )
-            else:
-                apply_message = ""
+            apply_message = " and " + str(count) + " " + pluralize(count, "finding,findings") + " " if count > 0 else ""
 
             messages.add_message(
                 request,
