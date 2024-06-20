@@ -3012,8 +3012,8 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
     review_requested_by = CharFilter(
         field_name="review_requested_by__username",
         lookup_expr="iexact",
-        label="Review Request By Username",
-        help_text="Search for Review Request By names that are an exact match")
+        label="Review Requested By Username",
+        help_text="Search for Review Requested By names that are an exact match")
     review_requested_by_contains = CharFilter(
         field_name="review_requested_by__username",
         lookup_expr="icontains",
