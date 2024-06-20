@@ -1,20 +1,25 @@
+import logging
 from unittest.mock import patch
 
 from auditlog.context import set_actor
+from crum import impersonate
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
-# TODO add webHook notifications here
+import dojo.notifications.helper as notifications_helper
+from dojo import __version__ as dd_version
 from dojo.models import (
     DEFAULT_NOTIFICATION,
     Alerts,
     Dojo_User,
     Endpoint,
     Engagement,
+    Finding,
     Finding_Group,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_Type,
@@ -22,9 +27,11 @@ from dojo.models import (
     Test_Type,
     User,
 )
-from dojo.notifications.helper import create_notification, send_alert_notification
+from dojo.notifications.helper import create_notification, send_alert_notification, send_webhooks_notification
 
 from .dojo_test_case import DojoTestCase
+
+logger = logging.getLogger(__name__)
 
 
 class TestNotifications(DojoTestCase):
@@ -387,3 +394,257 @@ class TestNotificationTriggersApi(APITestCase):
         prod_type = Product_Type.objects.create(name="notif prod type API")
         self.client.delete(reverse("product_type-detail", args=(prod_type.pk,)), format="json")
         self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type API" was deleted by admin')
+
+
+class TestNotificationWebhooks(DojoTestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def run(self, result=None):
+        testuser = User.objects.get(username='admin')
+        testuser.usercontactinfo.block_execution = True
+        testuser.save()
+
+        # unit tests are running without any user, which will result in actions like dedupe happening in the celery process
+        # this doesn't work in unittests as unittests are using an in memory sqlite database and celery can't see the data
+        # so we're running the test under the admin user context and set block_execution to True
+        with impersonate(testuser):
+            super().run(result)
+
+    def setUp(self):
+        self.sys_wh = Notification_Webhooks.objects.filter(owner=None).first()
+        self.url_base = "http://webhook.endpoint:8080"
+
+    def test_missing_system_webhook(self):
+        # test data contains 2 entries but we need to test missing definition
+        Notification_Webhooks.objects.all().delete()
+        with self.assertLogs('dojo.notifications.helper', level='INFO') as cm:
+            send_webhooks_notification(event='dummy')
+        self.assertIn('URLs for Webhooks not configured: skipping system notification', cm.output[0])
+
+    def test_missing_personal_webhook(self):
+        # test data contains 2 entries but we need to test missing definition
+        Notification_Webhooks.objects.all().delete()
+        with self.assertLogs('dojo.notifications.helper', level='INFO') as cm:
+            send_webhooks_notification(event='dummy', user=Dojo_User.objects.get(username="admin"))
+        self.assertIn("URLs for Webhooks not configured for user '(admin)': skipping user notification", cm.output[0])
+
+    def test_system_webhook_inactive(self):
+        self.sys_wh.status = Notification_Webhooks.STATUS_INACTIVE_400
+        self.sys_wh.save()
+        with self.assertLogs('dojo.notifications.helper', level='INFO') as cm:
+            send_webhooks_notification(event='dummy')
+        self.assertIn("URL for Webhook 'My webhook endpoint' is not active: Inactive because of 4xx error (inactive_400)", cm.output[0])
+
+    def test_system_webhook_sucessful(self):
+        with self.assertLogs('dojo.notifications.helper', level='DEBUG') as cm:
+            send_webhooks_notification(event='dummy')
+        self.assertIn("Message sent to endpoint 'My webhook endpoint' sucessfully.", cm.output[-1])
+
+        updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE)
+        self.assertIsNone(updated_wh.first_error)
+        self.assertIsNone(updated_wh.last_error)
+
+    # def test_system_webhook_4xx(self):
+    #     self.sys_wh.url = f"{self.url_base}/status/400"
+    #     self.sys_wh.save()
+    #     with self.assertLogs('dojo.notifications.helper', level='DEBUG'):
+    #         send_webhooks_notification(event='dummy', title='Dummy event')
+
+    #     updated_wh = Notification_Webhooks.objects.all().filter(owner=None).first()
+    #     self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_400)
+    #     self.assertIsNotNone(updated_wh.first_error)
+    #     self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+
+    # def test_system_webhook_first_5xx(self):
+    #     self.sys_wh.url = f"{self.url_base}/status/500"
+    #     self.sys_wh.save()
+    #     with self.assertLogs('dojo.notifications.helper', level='DEBUG'):
+    #         send_webhooks_notification(event='dummy', title='Dummy event')
+
+    #     updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+    #     self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_500)
+    #     self.assertIsNotNone(updated_wh.first_error)
+    #     self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+
+    # def test_system_webhook_second_5xx_within_hour(self):
+    #     ten_mins_ago = get_current_datetime() - datetime.timedelta(minutes=10)
+    #     self.sys_wh.url = f"{self.url_base}/status/500"
+    #     self.sys_wh.status = Notification_Webhooks.STATUS_ACTIVE_500
+    #     self.sys_wh.first_error = ten_mins_ago
+    #     self.sys_wh.last_error = ten_mins_ago
+    #     self.sys_wh.save()
+    #     with self.assertLogs('dojo.notifications.helper', level='DEBUG') as cm:
+    #         send_webhooks_notification(event='dummy', title='Dummy event')
+
+    #     updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+    #     self.assertEquals(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_500)
+    #     self.assertIsNotNone(updated_wh.first_error)
+    #     self.assertEquals(updated_wh.first_error, updated_wh.last_error)
+
+    @patch('requests.request')
+    def test_headers(self, mock):
+        Product_Type.objects.create(name='notif prod type')
+        self.assertEqual(mock.call_args.kwargs['headers'], {
+            'User-Agent': f"DefectDojo-{dd_version}",
+            'X-DefectDojo-Event': 'product_type_added',
+            'X-DefectDojo-Instance': 'http://localhost:8080',
+            'Accept': 'application/json',
+            'Auth': 'Token xxx'
+        })
+
+    @patch('requests.request')
+    def test_events_messages(self, mock):
+        with self.subTest('product_type_added'):
+            prod_type = Product_Type.objects.create(name='notif prod type')
+            self.assertEqual(mock.call_args.kwargs['headers']['X-DefectDojo-Event'], 'product_type_added')
+            self.assertEqual(mock.call_args.kwargs['json'], {
+                'description': None,
+                'user': None,
+                'url': 'http://localhost:8080/product/type/4',
+                'product_type': {
+                    'id': 4,
+                    'name': 'notif prod type',
+                },
+            })
+
+        with self.subTest('product_added'):
+            prod = Product.objects.create(name='notif prod', prod_type=prod_type)
+            self.assertEqual(mock.call_args.kwargs['headers']['X-DefectDojo-Event'], 'product_added')
+            self.assertEqual(mock.call_args.kwargs['json'], {
+                'description': None,
+                'user': None,
+                'url': 'http://localhost:8080/product/4',
+                'product_type': {
+                    'id': 4,
+                    'name': 'notif prod type',
+                },
+                'product': {
+                    'id': 4,
+                    'name': 'notif prod',
+                },
+            })
+
+        with self.subTest('engagement_added'):
+            eng = Engagement.objects.create(name='notif eng', product=prod, target_start=timezone.now(), target_end=timezone.now())
+            self.assertEqual(mock.call_args.kwargs['headers']['X-DefectDojo-Event'], 'engagement_added')
+            self.assertEqual(mock.call_args.kwargs['json'], {
+                'description': None,
+                'user': None,
+                'url': 'http://localhost:8080/engagement/7',
+                'product_type': {
+                    'id': 4,
+                    'name': 'notif prod type',
+                },
+                'product': {
+                    'id': 4,
+                    'name': 'notif prod',
+                },
+                'engagement': {
+                    'id': 7,
+                    'name': 'notif eng',
+                },
+            })
+
+        with self.subTest('test_added'):
+            test = Test.objects.create(title='notif test', engagement=eng, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
+            notifications_helper.notify_test_created(test)
+            self.assertEqual(mock.call_args.kwargs['headers']['X-DefectDojo-Event'], 'test_added')
+            self.assertEqual(mock.call_args.kwargs['json'], {
+                'description': None,
+                'user': None,
+                'url': 'http://localhost:8080/test/90',
+                'product_type': {
+                    'id': 4,
+                    'name': 'notif prod type',
+                },
+                'product': {
+                    'id': 4,
+                    'name': 'notif prod',
+                },
+                'engagement': {
+                    'id': 7,
+                    'name': 'notif eng',
+                },
+                'test': {
+                    'id': 90,
+                    'title': 'notif test',
+                },
+            })
+
+        with self.subTest('scan_added_empty'):
+            notifications_helper.notify_scan_added(test, updated_count=0)
+            self.assertEqual(mock.call_args.kwargs['headers']['X-DefectDojo-Event'], 'scan_added_empty')
+            self.assertEqual(mock.call_args.kwargs['json'], {
+                'description': None,
+                'user': None,
+                'url': 'http://localhost:8080/test/90',
+                'product_type': {
+                    'id': 4,
+                    'name': 'notif prod type',
+                },
+                'product': {
+                    'id': 4,
+                    'name': 'notif prod',
+                },
+                'engagement': {
+                    'id': 7,
+                    'name': 'notif eng',
+                },
+                'test': {
+                    'id': 90,
+                    'title': 'notif test',
+                },
+                'finding_count': 0,
+                'findings': {
+                    'mitigated': None,
+                    'new': None,
+                    'reactivated': None,
+                    'untouched': None,
+                },
+            })
+
+        with self.subTest('scan_added'):
+            notifications_helper.notify_scan_added(test,
+                updated_count=4,
+                new_findings=[
+                    Finding.objects.create(test=test, title='New Finding', severity='Critical')
+                ],
+                findings_mitigated=[
+                    Finding.objects.create(test=test, title='Mitigated Finding', severity='Medium')
+                ],
+                findings_reactivated=[
+                    Finding.objects.create(test=test, title='Reactivated Finding', severity='Low')
+                ],
+                findings_untouched=[
+                    Finding.objects.create(test=test, title='Untouched Finding', severity='Info')
+                ],
+            )
+            self.assertEqual(mock.call_args.kwargs['headers']['X-DefectDojo-Event'], 'scan_added')
+            self.maxDiff = None
+            self.assertEqual(mock.call_args.kwargs['json']['findings'], {
+                'new': [{
+                    'id': 232,
+                    'title': 'New Finding',
+                    'severity': 'Critical',
+                    'url': 'http://localhost:8080/finding/232'
+                }],
+                'mitigated': [{
+                    'id': 233,
+                    'title': 'Mitigated Finding',
+                    'severity': 'Medium',
+                    'url': 'http://localhost:8080/finding/233'
+                }],
+                'reactivated': [{
+                    'id': 234,
+                    'title': 'Reactivated Finding',
+                    'severity': 'Low',
+                    'url': 'http://localhost:8080/finding/234'
+                }],
+                'untouched': [{
+                    'id': 235,
+                    'title': 'Untouched Finding',
+                    'severity': 'Info',
+                    'url': 'http://localhost:8080/finding/235'
+                }],
+            })

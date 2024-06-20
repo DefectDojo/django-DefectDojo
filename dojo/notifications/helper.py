@@ -1,5 +1,4 @@
 import logging
-import pprint
 
 import requests
 import yaml
@@ -376,9 +375,8 @@ def webhooks_notification_request(endpoint, event, *args, **kwargs):
         url=endpoint.url,
         headers=headers,
         json=data,
+        timeout=60,
     )
-    logger.debug("Webhook notification response:")
-    logger.debug(pprint.pformat(res.json()))
     return res
 
 
@@ -392,22 +390,26 @@ def test_webhooks_notification(endpoint):
 @dojo_async_task
 @app.task
 def send_webhooks_notification(event, user=None, *args, **kwargs):
-    # TODO check sending notifications (in general) to inactive users
-    for endpoint in Notification_Webhooks.objects.filter(owner=user):
+    endpoints = Notification_Webhooks.objects.filter(owner=user)
+
+    if not endpoints:
+        if user:
+            logger.info(f"URLs for Webhooks not configured for user '{user}': skipping user notification")
+        else:
+            logger.info("URLs for Webhooks not configured: skipping system notification")
+        return
+
+    for endpoint in endpoints:
         if not endpoint.status.startswith(Notification_Webhooks._STATUS_ACTIVE):
             logger.info(f"URL for Webhook '{endpoint.name}' is not active: {endpoint.get_status_display()} ({endpoint.status})")
             continue
 
-        if endpoint.url is None:
-            logger.info(f"URL for Webhook {endpoint.name} not configured: skipping system notification")
-            continue
-
         try:
-            logger.debug(f"Sending webhook message to endpoint {endpoint.name}")
+            logger.debug(f"Sending webhook message to endpoint '{endpoint.name}'")
             res = webhooks_notification_request(endpoint, event, *args, **kwargs)
 
             if res.status_code in [200, 201]:
-                logger.debug(f"Message sent to endpoint {endpoint.name} sucessfully.")
+                logger.debug(f"Message sent to endpoint '{endpoint.name}' sucessfully.")
                 continue
 
             now = get_current_datetime()
@@ -421,12 +423,13 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
             elif 500 <= res.status_code < 600:
                 # If there is only temporary outage (we detected 5xx first time or it was before more then one hour), we can keep endpoint active (but marked)
 
-                # First detection
+                # First detected
+                # or first detected more then one hour ago
                 if endpoint.last_error is None or (now - endpoint.last_error).minutes > 60:
                     endpoint.status = Notification_Webhooks.STATUS_ACTIVE_500
                     endpoint.first_error = now  # Yes, if last fail happen before more then hour, we are considering it as a new error
 
-                # Repleated detection
+                # Repeated detection
                 else:
                     # Error is repeating over more then hour
                     if (now - endpoint.first_error).minutes > 60:
@@ -446,19 +449,11 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
             endpoint.last_error = now
             endpoint.save()
 
-            # TODO remove this
-            logger.error("Error when sending message to Webhooks")
-            logger.error(res.status_code)
-            logger.error(res.text)
-            raise RuntimeError('Error posting message to Webhooks: ' + res.text)
+            logger.error("Error when sending message to Webhooks (status: {res.status_code}): {res.text}")
+
         except Exception as e:
             logger.exception(e)
-            log_alert(e, "Webhooks Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
-    else:
-        if user:
-            logger.info(f"URLs for Webhooks not configured for user '{user}': skipping user notification")
-        else:
-            logger.info("URLs for Webhooks not configured: skipping system notification")
+            log_alert(e, "Webhooks Notification")
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
