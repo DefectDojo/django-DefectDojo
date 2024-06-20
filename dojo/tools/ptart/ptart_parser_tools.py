@@ -25,7 +25,7 @@ def parse_ptart_fix_effort(effort):
         2: "Medium",
         3: "Low",
     }
-    return effort_mapping.get(effort, None)
+    return effort_mapping.get(effort)
 
 
 def parse_title_from_hit(hit):
@@ -72,7 +72,7 @@ def parse_retest_status(status):
         "NA": "Not Applicable",
         "NT": "Not Tested",
     }
-    return fix_status_mapping.get(status, None)
+    return fix_status_mapping.get(status)
 
 
 def parse_screenshots_from_hit(hit):

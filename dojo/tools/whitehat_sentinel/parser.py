@@ -34,7 +34,7 @@ class WhiteHatSentinelParser:
         # Make sure the findings key exists in the dictionary and that it is
         # not null or an empty list
         if (
-            "collection" not in findings_collection.keys()
+            "collection" not in findings_collection
             or not findings_collection["collection"]
         ):
             msg = "collection key not present or there were not findings present."
@@ -209,7 +209,7 @@ class WhiteHatSentinelParser:
 
         for whitehat_vuln in whitehat_sentinel_vulns:
             date_created = whitehat_vuln["found"].split("T")[0]
-            mitigated_ts = whitehat_vuln.get("closed".split("T")[0], None)
+            mitigated_ts = whitehat_vuln.get("closed", None)
             if mitigated_ts is not None:
                 mitigated_ts = datetime.strptime(mitigated_ts, "%Y-%m-%dT%H:%M:%SZ")
             cwe = self._parse_cwe_from_tags(

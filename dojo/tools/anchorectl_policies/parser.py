@@ -99,7 +99,7 @@ def get_severity(status, description):
         elif status != "go":
             severity = parsed_severity.lower().capitalize()
 
-        active = False if status == "go" else True
+        active = status != "go"
 
         return severity, active
 

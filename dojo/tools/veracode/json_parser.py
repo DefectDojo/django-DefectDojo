@@ -146,10 +146,7 @@ class VeracodeJSONParser:
         finding.dynamic_finding = False
         finding.static_finding = True
         # Get the finding category to get the high level info about the vuln
-        if category := finding_details.get("finding_category"):
-            category_title = category.get("name")
-        else:
-            category_title = None
+        category_title = category.get("name") if (category := finding_details.get("finding_category")) else None
         # Set the title of the finding to the name of the finding category.
         # If not present, fall back on CWE title. If that is not present, do nothing
         if category_title:
@@ -185,10 +182,7 @@ class VeracodeJSONParser:
         finding.dynamic_finding = True
         finding.static_finding = False
         # Get the finding category to get the high level info about the vuln
-        if category := finding_details.get("finding_category"):
-            category_title = category.get("name")
-        else:
-            category_title = None
+        category_title = category.get("name") if (category := finding_details.get("finding_category")) else None
         # Set the title of the finding to the name of the finding category.
         # If not present, fall back on CWE title. If that is not present, do nothing
         if category_title:

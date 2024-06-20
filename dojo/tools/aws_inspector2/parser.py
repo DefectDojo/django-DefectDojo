@@ -85,7 +85,7 @@ class AWSInspector2Parser:
         else:
             is_mitigated = True
             active = False
-            if (last_observed := raw_finding.get("lastObservedAt", None)) is not None:
+            if (last_observed := raw_finding.get("lastObservedAt")) is not None:
                 mitigated = date_parser(last_observed)
             else:
                 mitigated = datetime.now(UTC)
