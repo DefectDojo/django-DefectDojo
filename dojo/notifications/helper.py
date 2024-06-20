@@ -1,3 +1,4 @@
+import json
 import logging
 
 import requests
@@ -425,14 +426,14 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 
                 # First detected
                 # or first detected more then one hour ago
-                if endpoint.last_error is None or (now - endpoint.last_error).minutes > 60:
+                if endpoint.last_error is None or (now - endpoint.last_error).seconds > 60 * 60:
                     endpoint.status = Notification_Webhooks.STATUS_ACTIVE_500
                     endpoint.first_error = now  # Yes, if last fail happen before more then hour, we are considering it as a new error
 
                 # Repeated detection
                 else:
                     # Error is repeating over more then hour
-                    if (now - endpoint.first_error).minutes > 60:
+                    if (now - endpoint.first_error).seconds > 60 * 60:
                         endpoint.status = Notification_Webhooks.STATUS_INACTIVE_500
 
                     # This situation shouldn't happen - only if somebody was cleaning status and didn't clean first/last_error
@@ -449,7 +450,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
             endpoint.last_error = now
             endpoint.save()
 
-            logger.error("Error when sending message to Webhooks (status: {res.status_code}): {res.text}")
+            logger.error(f"Error when sending message to Webhooks (status: {res.status_code}): {res.text}")
 
         except Exception as e:
             logger.exception(e)
