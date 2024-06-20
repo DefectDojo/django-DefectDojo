@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from os import path
 
@@ -6,6 +7,8 @@ from dateutil.tz import tzlocal, tzoffset
 from dojo.models import Test
 from dojo.tools.dependency_check.parser import DependencyCheckParser
 from unittests.dojo_test_case import DojoTestCase
+
+logger = logging.getLogger(__name__)
 
 
 class TestFile:
@@ -279,7 +282,7 @@ class TestDependencyCheckParser(DojoTestCase):
             # test also different component_name formats
 
             with self.subTest(i=0):
-                print(items[0])
+                logger.debug(items[0])
                 # identifier -> package url java + 2 relateddependencies
                 self.assertEqual(items[0].title, "org.apache.activemq:activemq-broker:5.16.5 | CVE-2015-3208")
                 self.assertEqual(items[0].component_name, "org.apache.activemq:activemq-broker")

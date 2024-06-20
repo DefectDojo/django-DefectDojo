@@ -1,8 +1,11 @@
+import logging
 import os
-from pprint import pprint
+from pprint import pformat
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -18,4 +21,4 @@ class Command(BaseCommand):
             value = getattr(settings, attr)
             a_dict[attr] = value
 
-        pprint(a_dict)
+        logging.info(pformat(a_dict))

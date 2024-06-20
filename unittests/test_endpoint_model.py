@@ -301,19 +301,6 @@ class TestEndpointStatusModel(DojoTestCase):
         eps = Endpoint_Status.objects.get(id=1)
         self.assertEqual(str(eps), "'High Impact Test Finding' on 'ftp://localhost'")
 
-    # def test_dummy(self):
-    #     fs = Finding.objects.all()
-    #     for f in fs:
-    #         print(f.id, f.test.engagement.product.id, str(f))
-
-    #     es = Endpoint.objects.all()
-    #     for e in es:
-    #         print(e.id, e.product.id, str(e))
-
-    #     epss = Endpoint_Status.objects.all()
-    #     for eps in epss:
-    #         print(eps.id, eps.finding.id, eps.endpoint.id, str(eps))
-
     def test_status_evaluation(self):
         ep1 = Endpoint.objects.get(id=4)
         ep2 = Endpoint.objects.get(id=5)

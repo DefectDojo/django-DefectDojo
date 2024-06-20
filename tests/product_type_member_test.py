@@ -1,3 +1,4 @@
+import logging
 import sys
 import unittest
 
@@ -7,6 +8,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from user_test import UserTest
+
+logger = logging.getLogger(__name__)
 
 
 class ProductTypeMemberTest(BaseTestCase):
@@ -43,9 +46,9 @@ class ProductTypeMemberTest(BaseTestCase):
             self.assertEqual(driver.find_elements(By.NAME, "member_product_type")[0].text, "Research and Development")
             self.assertEqual(driver.find_elements(By.NAME, "member_product_type_role")[0].text, "Reader")
         else:
-            print('--------------------------------')
-            print('test_user_add_product_type_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
+            logger.info('--------------------------------')
+            logger.info('test_user_add_product_type_member: Not executed because legacy authorization is active')
+            logger.info('--------------------------------')
 
     def test_user_edit_product_type_member(self):
         # Login to the site. Password will have to be modified
@@ -70,9 +73,9 @@ class ProductTypeMemberTest(BaseTestCase):
             self.assertEqual(driver.find_elements(By.NAME, "member_product_type")[0].text, "Research and Development")
             self.assertEqual(driver.find_elements(By.NAME, "member_product_type_role")[0].text, "Owner")
         else:
-            print('--------------------------------')
-            print('test_user_edit_product_type_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
+            logger.info('--------------------------------')
+            logger.info('test_user_edit_product_type_member: Not executed because legacy authorization is active')
+            logger.info('--------------------------------')
 
     def test_user_delete_product_type_member(self):
         # Login to the site. Password will have to be modified
@@ -94,9 +97,9 @@ class ProductTypeMemberTest(BaseTestCase):
             # Query the site to determine if the member has been deleted
             self.assertFalse(driver.find_elements(By.NAME, "member_product_type"))
         else:
-            print('--------------------------------')
-            print('test_user_delete_product_type_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
+            logger.info('--------------------------------')
+            logger.info('test_user_delete_product_type_member: Not executed because legacy authorization is active')
+            logger.info('--------------------------------')
 
     def test_product_type_add_product_type_member(self):
         # Login to the site. Password will have to be modified
@@ -130,9 +133,9 @@ class ProductTypeMemberTest(BaseTestCase):
             self.assertEqual(driver.find_elements(By.NAME, "member_user")[1].text, "Proper Samuel (propersahm)")
             self.assertEqual(driver.find_elements(By.NAME, "member_role")[1].text, "Reader")
         else:
-            print('--------------------------------')
-            print('test_product_type_add_product_type_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
+            logger.info('--------------------------------')
+            logger.info('test_product_type_add_product_type_member: Not executed because legacy authorization is active')
+            logger.info('--------------------------------')
 
     def test_product_type_edit_product_type_member(self):
         # Login to the site. Password will have to be modified
@@ -159,9 +162,9 @@ class ProductTypeMemberTest(BaseTestCase):
             self.assertEqual(driver.find_elements(By.NAME, "member_user")[1].text, "Proper Samuel (propersahm)")
             self.assertEqual(driver.find_elements(By.NAME, "member_role")[1].text, "Maintainer")
         else:
-            print('--------------------------------')
-            print('test_product_type_edit_product_type_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
+            logger.info('--------------------------------')
+            logger.info('test_product_type_edit_product_type_member: Not executed because legacy authorization is active')
+            logger.info('--------------------------------')
 
     def test_product_type_delete_product_type_member(self):
         # Login to the site. Password will have to be modified
@@ -185,9 +188,9 @@ class ProductTypeMemberTest(BaseTestCase):
             # Query the site to determine if the member has been deleted
             self.assertTrue(len(driver.find_elements(By.NAME, "member_user")) == 1)
         else:
-            print('--------------------------------')
-            print('test_product_delete_product_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
+            logger.info('--------------------------------')
+            logger.info('test_product_delete_product_member: Not executed because legacy authorization is active')
+            logger.info('--------------------------------')
 
 
 def suite():

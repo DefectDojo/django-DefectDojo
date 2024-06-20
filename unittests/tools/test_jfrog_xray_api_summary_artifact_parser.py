@@ -34,7 +34,6 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         self.assertIsNone(item.mitigation)
         self.assertEqual("artifact1", item.component_name)
         self.assertIsNotNone(item.tags)
-        print(item.tags)
         self.assertEqual("1.0", item.component_version)
         self.assertEqual("artifact_path/artifact1/1.0/", item.file_path[:28])
         self.assertIsNone(item.severity_justification)
