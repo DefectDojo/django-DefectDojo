@@ -3058,7 +3058,7 @@ class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, Finding
         field_name="test__engagement__product__name",
         lookup_expr="icontains",
         label="Product name Contains",
-        help_text="Search for Product Typ names that contain a given pattern")
+        help_text="Search for Product names that contain a given pattern")
     test__engagement__name = CharFilter(
         field_name="test__engagement__name",
         lookup_expr="iexact",
