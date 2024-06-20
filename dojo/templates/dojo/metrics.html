@@ -548,13 +548,13 @@
                                                 </tr>
                                                 {% for month in opened_per_month|slice:'1:' %}
                                                     <tr>
-                                                        <td>{{ month.1|date:"m-Y" }}</td>
-                                                        <td>{{ month.2 }}</td>
-                                                        <td>{{ month.3 }}</td>
-                                                        <td>{{ month.4 }}</td>
-                                                        <td>{{ month.5 }}</td>
-                                                        <td>{{ month.6 }}</td>
-                                                        <td>{{ month.7 }}</td>
+                                                        <td>{{ month.d|date:"m-Y" }}</td>
+                                                        <td>{{ month.c }}</td>
+                                                        <td>{{ month.h }}</td>
+                                                        <td>{{ month.m }}</td>
+                                                        <td>{{ month.l }}</td>
+                                                        <td>{{ month.t }}</td>
+                                                        <td>{{ month.cl }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -596,12 +596,12 @@
                                                 </tr>
                                                 {% for month in accepted_per_month|slice:'1:' %}
                                                     <tr>
-                                                        <td>{{ month.1|date:"m-Y" }}</td>
-                                                        <td>{{ month.2 }}</td>
-                                                        <td>{{ month.3 }}</td>
-                                                        <td>{{ month.4 }}</td>
-                                                        <td>{{ month.5 }}</td>
-                                                        <td>{{ month.6 }}</td>
+                                                        <td>{{ month.d|date:"m-Y" }}</td>
+                                                        <td>{{ month.c }}</td>
+                                                        <td>{{ month.h }}</td>
+                                                        <td>{{ month.m }}</td>
+                                                        <td>{{ month.l }}</td>
+                                                        <td>{{ month.t }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -681,12 +681,13 @@
             var high = [];
             var medium = [];
             var low = [];
-            {% for month in opened_per_month|slice:'1:' %}
-                critical.push([{{ month.0 }}, {{ month.2 }}]);
-                high.push([{{ month.0 }}, {{ month.3 }}]);
-                medium.push([{{ month.0 }}, {{ month.4 }}]);
-                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% for month in opened_per_month %}
+                critical.push([{{ month.e }}, {{ month.c }}]);
+                high.push([{{ month.e }}, {{ month.h }}]);
+                medium.push([{{ month.e }}, {{ month.m }}]);
+                low.push([{{ month.e }}, {{ month.l }}]);
             {% endfor %}
+        console.log(critical)
             {% if opened_per_month %}
                 opened_per_month_2(critical, high, medium, low);
             {% endif %}
@@ -695,11 +696,11 @@
             high = [];
             medium = [];
             low = [];
-            {% for month in active_per_month|slice:'1:' %}
-                critical.push([{{ month.0 }}, {{ month.2 }}]);
-                high.push([{{ month.0 }}, {{ month.3 }}]);
-                medium.push([{{ month.0 }}, {{ month.4 }}]);
-                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% for month in active_per_month %}
+                critical.push([{{ month.e }}, {{ month.c }}]);
+                high.push([{{ month.e }}, {{ month.h }}]);
+                medium.push([{{ month.e }}, {{ month.m }}]);
+                low.push([{{ month.e }}, {{ month.l }}]);
             {% endfor %}
             {% if active_per_month %}
                 active_per_month(critical, high, medium, low);
@@ -709,11 +710,11 @@
             high = [];
             medium = [];
             low = [];
-            {% for month in accepted_per_month|slice:'1:' %}
-                critical.push([{{ month.0 }}, {{ month.2 }}]);
-                high.push([{{ month.0 }}, {{ month.3 }}]);
-                medium.push([{{ month.0 }}, {{ month.4 }}]);
-                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% for month in accepted_per_month %}
+                critical.push([{{ month.e }}, {{ month.c }}]);
+                high.push([{{ month.e }}, {{ month.h }}]);
+                medium.push([{{ month.e }}, {{ month.m }}]);
+                low.push([{{ month.e }}, {{ month.l }}]);
             {% endfor %}
             {%  if accepted_per_month %}
                 accepted_per_month_2(critical, high, medium, low);
@@ -727,17 +728,17 @@
             var high1 = [];
             var medium1 = [];
             var low1 = [];
-            {% for month in opened_per_week|slice:'1:' %}
-                critical.push([{{ month.0 }}, {{ month.2 }}]);
-                high.push([{{ month.0 }}, {{ month.3 }}]);
-                medium.push([{{ month.0 }}, {{ month.4 }}]);
-                low.push([{{ month.0 }}, {{ month.5 }}]);
+            {% for week in opened_per_week %}
+                critical.push([{{ week.e }}, {{ week.c }}]);
+                high.push([{{ week.e }}, {{ week.h }}]);
+                medium.push([{{ week.e }}, {{ week.m }}]);
+                low.push([{{ week.e }}, {{ w.l }}]);
             {% endfor %}
-            {% for month in accepted_per_week|slice:'1:' %}
-                critical1.push([{{ month.0 }}, {{ month.2 }}]);
-                high1.push([{{ month.0 }}, {{ month.3 }}]);
-                medium1.push([{{ month.0 }}, {{ month.4 }}]);
-                low1.push([{{ month.0 }}, {{ month.5 }}]);
+            {% for week in accepted_per_week %}
+                critical1.push([{{ week.e }}, {{ week.c }}]);
+                high1.push([{{ week.e }}, {{ week.h }}]);
+                medium1.push([{{ week.e }}, {{ week.m }}]);
+                low1.push([{{ week.e }}, {{ week.l }}]);
             {% endfor %}
             {% if not critical_prods %}
                 opened_per_week_2(critical, high, medium, low);
