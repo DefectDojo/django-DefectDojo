@@ -1,3 +1,4 @@
+import datetime
 import logging
 from unittest.mock import patch
 
@@ -26,6 +27,7 @@ from dojo.models import (
     Test,
     Test_Type,
     User,
+    get_current_datetime,
 )
 from dojo.notifications.helper import create_notification, send_alert_notification, send_webhooks_notification
 
@@ -445,42 +447,44 @@ class TestNotificationWebhooks(DojoTestCase):
         self.assertIsNone(updated_wh.first_error)
         self.assertIsNone(updated_wh.last_error)
 
-    # def test_system_webhook_4xx(self):
-    #     self.sys_wh.url = f"{self.url_base}/status/400"
-    #     self.sys_wh.save()
-    #     with self.assertLogs('dojo.notifications.helper', level='DEBUG'):
-    #         send_webhooks_notification(event='dummy', title='Dummy event')
+    def test_system_webhook_4xx(self):
+        self.sys_wh.url = f"{self.url_base}/status/400"
+        self.sys_wh.save()
 
-    #     updated_wh = Notification_Webhooks.objects.all().filter(owner=None).first()
-    #     self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_400)
-    #     self.assertIsNotNone(updated_wh.first_error)
-    #     self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+        with self.assertLogs('dojo.notifications.helper', level='ERROR') as cm:
+            send_webhooks_notification(event='dummy', title='Dummy event')
+        self.assertIn("Error when sending message to Webhooks (status: 400)", cm.output[-1])
 
-    # def test_system_webhook_first_5xx(self):
-    #     self.sys_wh.url = f"{self.url_base}/status/500"
-    #     self.sys_wh.save()
-    #     with self.assertLogs('dojo.notifications.helper', level='DEBUG'):
-    #         send_webhooks_notification(event='dummy', title='Dummy event')
+        updated_wh = Notification_Webhooks.objects.all().filter(owner=None).first()
+        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_400)
+        self.assertIsNotNone(updated_wh.first_error)
+        self.assertEqual(updated_wh.first_error, updated_wh.last_error)
 
-    #     updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-    #     self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_500)
-    #     self.assertIsNotNone(updated_wh.first_error)
-    #     self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+    def test_system_webhook_first_5xx(self):
+        self.sys_wh.url = f"{self.url_base}/status/500"
+        self.sys_wh.save()
 
-    # def test_system_webhook_second_5xx_within_hour(self):
-    #     ten_mins_ago = get_current_datetime() - datetime.timedelta(minutes=10)
-    #     self.sys_wh.url = f"{self.url_base}/status/500"
-    #     self.sys_wh.status = Notification_Webhooks.STATUS_ACTIVE_500
-    #     self.sys_wh.first_error = ten_mins_ago
-    #     self.sys_wh.last_error = ten_mins_ago
-    #     self.sys_wh.save()
-    #     with self.assertLogs('dojo.notifications.helper', level='DEBUG') as cm:
-    #         send_webhooks_notification(event='dummy', title='Dummy event')
+        send_webhooks_notification(event='dummy', title='Dummy event')
 
-    #     updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-    #     self.assertEquals(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_500)
-    #     self.assertIsNotNone(updated_wh.first_error)
-    #     self.assertEquals(updated_wh.first_error, updated_wh.last_error)
+        updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_500)
+        self.assertIsNotNone(updated_wh.first_error)
+        self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+
+    def test_system_webhook_second_5xx_within_hour(self):
+        ten_mins_ago = get_current_datetime() - datetime.timedelta(minutes=10)
+        self.sys_wh.url = f"{self.url_base}/status/500"
+        self.sys_wh.status = Notification_Webhooks.STATUS_ACTIVE_500
+        self.sys_wh.first_error = ten_mins_ago
+        self.sys_wh.last_error = ten_mins_ago
+        self.sys_wh.save()
+
+        send_webhooks_notification(event='dummy', title='Dummy event')
+
+        updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_500)
+        self.assertEqual(updated_wh.first_error, ten_mins_ago)
+        self.assertGreater(updated_wh.last_error, ten_mins_ago)
 
     @patch('requests.request')
     def test_headers(self, mock):
