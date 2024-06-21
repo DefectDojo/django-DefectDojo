@@ -169,7 +169,7 @@ def js_time(d):
     return int(d.timestamp()) * 1000
 
 
-def metrics_helper_2(qs, start_date, period_count, skip):
+def metrics_helper(qs, start_date, period_count, skip):
     tz = timezone.get_current_timezone()
     start_date = datetime(start_date.year, start_date.month, 1, tzinfo=tz)
     by_date = {js_time(q['d']): q for q in qs}
@@ -211,7 +211,7 @@ def period_deltas(start_date, end_date):
     # include current month
     months_between += 1
 
-    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
+    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7))) + 2
     if weeks_between <= 0:
         weeks_between += 2
     return weeks_between, months_between
@@ -277,14 +277,14 @@ def finding_querys(prod_type, request):
         'active_per_period': metrics_period_counts(findings_qs, TruncMonth, active=True, **prod_type_kwargs),
         'accepted_per_period': metrics_period_counts(findings_qs, TruncMonth, risk_accepted=True, **prod_type_kwargs),
     }
-    monthly_counts = {k: metrics_helper_2(v, start_date, months_between, 'months') for k, v in monthly_counts.items()}
+    monthly_counts = {k: metrics_helper(v, start_date, months_between, 'months') for k, v in monthly_counts.items()}
 
     weekly_counts = {
         'opened_per_period': metrics_period_counts(findings_qs, TruncWeek, **prod_type_kwargs),
         'active_per_period': metrics_period_counts(findings_qs, TruncWeek, active=True, **prod_type_kwargs),
         'accepted_per_period': metrics_period_counts(findings_qs, TruncWeek, risk_accepted=True, **prod_type_kwargs),
     }
-    weekly_counts = {k: metrics_helper_2(v, start_date, weeks_between, 'weeks') for k, v in weekly_counts.items()}
+    weekly_counts = {k: metrics_helper(v, start_date, weeks_between, 'weeks') for k, v in weekly_counts.items()}
 
     top_ten = get_authorized_products(Permissions.Product_View)
     top_ten = top_ten.filter(engagement__test__finding__verified=True,
@@ -385,14 +385,14 @@ def endpoint_querys(prod_type, request):
         'active_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncMonth, date__range=[start_date, end_date], **prod_type_kwargs),
         'accepted_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncMonth, risk_accepted=True, **prod_type_kwargs),
     }
-    monthly_counts = {k: metrics_helper_2(v, start_date, months_between, 'months') for k, v in monthly_counts.items()}
+    monthly_counts = {k: metrics_helper(v, start_date, months_between, 'months') for k, v in monthly_counts.items()}
 
     weekly_counts = {
         'opened_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncWeek, **prod_type_kwargs),
         'active_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncWeek, date__range=[start_date, end_date], **prod_type_kwargs),
         'accepted_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncWeek, risk_accepted=True, **prod_type_kwargs),
     }
-    weekly_counts = {k: metrics_helper_2(v, start_date, weeks_between, 'weeks') for k, v in weekly_counts.items()}
+    weekly_counts = {k: metrics_helper(v, start_date, weeks_between, 'weeks') for k, v in weekly_counts.items()}
 
     top_ten = get_authorized_products(Permissions.Product_View)
     top_ten = top_ten.filter(engagement__test__finding__status_finding__mitigated=False,
