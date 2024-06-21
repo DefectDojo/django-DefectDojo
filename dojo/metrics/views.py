@@ -177,7 +177,6 @@ def metrics_helper(qs, start_date, period_count, skip):
         else:
             delta = relativedelta(**{skip: x})
         cur_date = start_date + delta
-        logger.debug(cur_date)
         e = js_time(cur_date)
         if e not in by_date:
             by_date[e] = {
@@ -689,9 +688,9 @@ def metrics(request, mtype):
         filters = endpoint_querys(prod_type, request)
     p.checkpoint('finding_queryies')
 
-    in_period_counts, in_period_details, age_detail = get_in_period_details(
-        findings_queryset(view, queryset_check(filters['all']))
-    )
+    all_findings = findings_queryset(view, queryset_check(filters['all']))
+
+    in_period_counts, in_period_details, age_detail = get_in_period_details(all_findings)
     p.checkpoint('in period details')
 
     accepted_in_period_details = get_accepted_in_period_details(
@@ -708,7 +707,7 @@ def metrics(request, mtype):
     ticks = []
 
     if 'view' in request.GET and 'dashboard' == request.GET['view']:
-        punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
+        punchcard, ticks = get_punchcard_data(all_findings, filters['start_date'], filters['weeks_between'], view)
         page_name = _('%(team_name)s Metrics') % {'team_name': get_system_setting('team_name')}
         template = 'dojo/dashboard-metrics.html'
         p.checkpoint('punchcard')
@@ -719,7 +718,7 @@ def metrics(request, mtype):
         'name': page_name,
         'start_date': filters['start_date'],
         'end_date': filters['end_date'],
-        'findings': filters['all'],
+        'findings': all_findings,
         'max_findings_details': 50,
         'opened_per_month': filters['monthly_counts']['opened_per_period'],
         'active_per_month': filters['monthly_counts']['active_per_period'],

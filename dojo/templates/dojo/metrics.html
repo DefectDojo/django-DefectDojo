@@ -330,9 +330,9 @@
                                         </div>
                                     {% endif %}
                                     <div class="tab-pane table-responsive" id="tabs-2">
-                                        {% if findings.qs.count > max_findings_details %}
+                                        {% if findings.count > max_findings_details %}
                                         <div>
-                                            <em>Note:</em> {{ max_findings_details }} Findings listed of {{ findings.qs.count }} total.
+                                            <em>Note:</em> {{ max_findings_details }} Findings listed of {{ findings.count }} total.
                                         </div>
                                         {% endif %}
                                         <table class="table table-bordered table-condensed table-striped table-600">
@@ -347,7 +347,7 @@
                                                 <th class="nowrap">{% trans "Reporter" %}</th>
 
                                             </tr>
-                                            {% for finding in findings.qs|slice:max_findings_details %}
+                                            {% for finding in findings|slice:max_findings_details %}
                                                 <tr>
                                                     <td>{{ finding.test.engagement.product.prod_type.name }}</td>
                                                     <td>
