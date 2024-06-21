@@ -9,7 +9,7 @@ from functools import reduce
 from math import ceil
 from operator import itemgetter
 
-from dateutil.relativedelta import relativedelta
+from dateutil.relativedelta import MO, relativedelta
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When, F
@@ -174,7 +174,10 @@ def metrics_helper_2(qs, start_date, period_count, skip):
     start_date = datetime(start_date.year, start_date.month, 1, tzinfo=tz)
     by_date = {js_time(q['d']): q for q in qs}
     for x in range(-1, period_count + 1):
-        delta = relativedelta(**{skip: x})
+        if skip == 'weeks':
+            delta = relativedelta(weekday=MO(1), **{skip: x})
+        else:
+            delta = relativedelta(**{skip: x})
         cur_date = start_date + delta
         logger.debug(cur_date)
         e = js_time(cur_date)
@@ -185,6 +188,7 @@ def metrics_helper_2(qs, start_date, period_count, skip):
                 't': 0,
                 'c': 0,
                 'h': 0,
+                'm': 0,
                 'l': 0,
                 'i': 0,
                 'cl': 0, }

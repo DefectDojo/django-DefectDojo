@@ -539,15 +539,15 @@
                                                     <th>{% trans "Total" %}</th>
                                                     <th>{% trans "Closed*" %}</th>
                                                 </tr>
-                                                {% for week in opened_per_week|slice:'1:' %}
+                                                {% for week in opened_per_week %}
                                                     <tr>
-                                                        <td>{{ week.1|date:"m-d-Y" }}</td>
-                                                        <td>{{ week.2 }}</td>
-                                                        <td>{{ week.3 }}</td>
-                                                        <td>{{ week.4 }}</td>
-                                                        <td>{{ week.5 }}</td>
-                                                        <td>{{ week.6 }}</td>
-                                                        <td>{{ week.7 }}</td>
+                                                        <td>{{ week.d|date:"m-d-Y" }}</td>
+                                                        <td>{{ week.c }}</td>
+                                                        <td>{{ week.h }}</td>
+                                                        <td>{{ week.m }}</td>
+                                                        <td>{{ week.l }}</td>
+                                                        <td>{{ week.t }}</td>
+                                                        <td>{{ week.cl }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -563,7 +563,7 @@
                                                     <th>{% trans "Total" %}</th>
                                                     <th>{% trans "Closed*" %}</th>
                                                 </tr>
-                                                {% for month in opened_per_month|slice:'1:' %}
+                                                {% for month in opened_per_month %}
                                                     <tr>
                                                         <td>{{ month.d|date:"m-Y" }}</td>
                                                         <td>{{ month.c }}</td>
@@ -589,14 +589,14 @@
                                                     <th>{% trans "Low" %}</th>
                                                     <th>{% trans "Total" %}</th>
                                                 </tr>
-                                                {% for week in accepted_per_week|slice:'1:' %}
+                                                {% for week in accepted_per_week %}
                                                     <tr>
-                                                        <td>{{ week.1|date:"m-d-Y" }}</td>
-                                                        <td>{{ week.2 }}</td>
-                                                        <td>{{ week.3 }}</td>
-                                                        <td>{{ week.4 }}</td>
-                                                        <td>{{ week.5 }}</td>
-                                                        <td>{{ week.6 }}</td>
+                                                        <td>{{ week.d|date:"m-d-Y" }}</td>
+                                                        <td>{{ week.c }}</td>
+                                                        <td>{{ week.h }}</td>
+                                                        <td>{{ week.m }}</td>
+                                                        <td>{{ week.l }}</td>
+                                                        <td>{{ week.t }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -611,7 +611,7 @@
                                                     <th>{% trans "Low" %}</th>
                                                     <th>{% trans "Total" %}</th>
                                                 </tr>
-                                                {% for month in accepted_per_month|slice:'1:' %}
+                                                {% for month in accepted_per_month %}
                                                     <tr>
                                                         <td>{{ month.d|date:"m-Y" }}</td>
                                                         <td>{{ month.c }}</td>
