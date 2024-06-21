@@ -218,7 +218,6 @@ def period_deltas(start_date, end_date):
 
 
 def finding_querys(prod_type, request):
-    p = PTimer('finding_queries ptimer')
     # Get the initial list of findings th use is authorized to see
     findings_query = get_authorized_findings(
         Permissions.Finding_View,
@@ -234,14 +233,11 @@ def finding_querys(prod_type, request):
         'test__test_type',
     )
 
-    p.checkpoint('initial query and select related')
     filter_string_matching = get_system_setting("filter_string_matching", False)
     finding_filter_class = MetricsFindingFilterWithoutObjectLookups if filter_string_matching else MetricsFindingFilter
     findings = finding_filter_class(request.GET, queryset=findings_query)
     form = findings.form
-    p.checkpoint('filtered')
     findings_qs = queryset_check(findings)
-    p.checkpoint('qs check')
     # Quick check to determine if the filters were too tight and filtered everything away
     if not findings_qs.exists() and not findings_query.exists():
         findings = findings_query
@@ -251,47 +247,30 @@ def finding_querys(prod_type, request):
             messages.ERROR,
             _('All objects have been filtered away. Displaying all objects'),
             extra_tags='alert-danger')
-        p.checkpoint('filtering quick check')
     # Attempt to parser the date ranges
     try:
         start_date, end_date = get_date_range(findings_qs)
     except:
         start_date = timezone.now()
         end_date = timezone.now()
-    p.checkpoint('date computation')
     # Filter by the date ranges supplied
     findings_query = findings_query.filter(date__range=[start_date, end_date])
-    p.checkpoint('filtering on dates')
     # Get the list of closed and risk accepted findings
     findings_closed = findings_query.filter(CLOSED_FINDINGS_QUERY)
-    p.checkpoint('closed filter')
     accepted_findings = findings_query.filter(ACCEPTED_FINDINGS_QUERY)
-    p.checkpoint('accepted filter')
+
+    prod_type_kwargs = {}
+
     # filter by product type if applicable
     if len(prod_type) > 0:
         findings_closed = findings_closed.filter(test__engagement__product__prod_type__in=prod_type)
         accepted_findings = accepted_findings.filter(test__engagement__product__prod_type__in=prod_type)
-        p.checkpoint('prod type filter')
+        prod_type_kwargs = {'test__engagement__product__prod_type__in': prod_type}
+
     # Get the severity counts of risk accepted findings
     accepted_findings_counts = severity_count(accepted_findings, 'aggregate', 'severity')
-    p.checkpoint('severity counts')
 
     weeks_between, months_between = period_deltas(start_date, end_date)
-
-    p.checkpoint('date between computation')
-
-    """
-    monthly_counts = get_period_counts(findings_qs, findings_closed, accepted_findings, months_between, start_date,
-                                       relative_delta='months')
-    p.checkpoint('monthly counts')
-    weekly_counts = get_period_counts(findings_qs, findings_closed, accepted_findings, weeks_between, start_date,
-                                      relative_delta='weeks')
-    p.checkpoint('weekly counts')
-    """
-
-    prod_type_kwargs = {}
-    if len(prod_type) > 0:
-        prod_type_kwargs = {'test__engagement__product__prod_type__in': prod_type}
 
     monthly_counts = {
         'opened_per_period': metrics_period_counts(findings_qs, TruncMonth, **prod_type_kwargs),
@@ -299,29 +278,29 @@ def finding_querys(prod_type, request):
         'accepted_per_period': metrics_period_counts(findings_qs, TruncMonth, risk_accepted=True, **prod_type_kwargs),
     }
     monthly_counts = {k: metrics_helper_2(v, start_date, months_between, 'months') for k, v in monthly_counts.items()}
-    p.checkpoint('monthly counts')
+
     weekly_counts = {
         'opened_per_period': metrics_period_counts(findings_qs, TruncWeek, **prod_type_kwargs),
         'active_per_period': metrics_period_counts(findings_qs, TruncWeek, active=True, **prod_type_kwargs),
         'accepted_per_period': metrics_period_counts(findings_qs, TruncWeek, risk_accepted=True, **prod_type_kwargs),
     }
     weekly_counts = {k: metrics_helper_2(v, start_date, weeks_between, 'weeks') for k, v in weekly_counts.items()}
-    p.checkpoint('weekly counts')
 
     top_ten = get_authorized_products(Permissions.Product_View)
-    p.checkpoint('t10 prods')
     top_ten = top_ten.filter(engagement__test__finding__verified=True,
-                                     engagement__test__finding__false_p=False,
-                                     engagement__test__finding__duplicate=False,
-                                     engagement__test__finding__out_of_scope=False,
-                                     engagement__test__finding__mitigated__isnull=True,
-                                     engagement__test__finding__severity__in=(
-                                         'Critical', 'High', 'Medium', 'Low'),
-                                     prod_type__in=prod_type)
-    p.checkpoint('t10 filter')
-    top_ten = severity_count(top_ten, 'annotate', 'engagement__test__finding__severity').order_by('-critical', '-high', '-medium', '-low')[:10]
-    p.checkpoint('t10 sevcount')
-    logger.debug(p)
+                             engagement__test__finding__false_p=False,
+                             engagement__test__finding__duplicate=False,
+                             engagement__test__finding__out_of_scope=False,
+                             engagement__test__finding__mitigated__isnull=True,
+                             engagement__test__finding__severity__in=('Critical', 'High', 'Medium', 'Low'),
+                             prod_type__in=prod_type)
+
+    top_ten = severity_count(
+        top_ten, 'annotate', 'engagement__test__finding__severity'
+    ).order_by(
+        '-critical', '-high', '-medium', '-low'
+    )[:10]
+
     return {
         'all': findings,
         'closed': findings_closed,
@@ -353,7 +332,7 @@ def endpoint_querys(prod_type, request):
     form = endpoints.form
     endpoints_qs = queryset_check(endpoints)
 
-    if not endpoints_qs:
+    if not endpoints_qs.exists():
         endpoints = endpoints_query
         endpoints_qs = endpoints if isinstance(endpoints, QuerySet) else endpoints.qs
         messages.add_message(request,
@@ -378,6 +357,7 @@ def endpoint_querys(prod_type, request):
         accepted_endpoints_counts = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True,
                                                           finding__test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('finding__test__engagement__product')
+        prod_type_kwargs = {'finding__test__engagement__product__prod_type__in': prod_type}
     else:
         endpoints_closed = Endpoint_Status.objects.filter(mitigated_time__range=[start_date, end_date]).prefetch_related(
             'finding__test__engagement__product')
@@ -385,6 +365,7 @@ def endpoint_querys(prod_type, request):
             prefetch_related('finding__test__engagement__product')
         accepted_endpoints_counts = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True). \
             prefetch_related('finding__test__engagement__product')
+        prod_type_kwargs = {}
 
     endpoints_closed = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_closed, request.user)
     accepted_endpoints = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints, request.user)
@@ -393,10 +374,25 @@ def endpoint_querys(prod_type, request):
 
     weeks_between, months_between = period_deltas(start_date, end_date)
 
+    """
     monthly_counts = get_period_counts(endpoints_qs, endpoints_closed, accepted_endpoints, months_between, start_date,
                                        relative_delta='months')
     weekly_counts = get_period_counts(endpoints_qs, endpoints_closed, accepted_endpoints, weeks_between, start_date,
                                       relative_delta='weeks')
+    """
+    monthly_counts = {
+        'opened_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncMonth, **prod_type_kwargs),
+        'active_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncMonth, date__range=[start_date, end_date], **prod_type_kwargs),
+        'accepted_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncMonth, risk_accepted=True, **prod_type_kwargs),
+    }
+    monthly_counts = {k: metrics_helper_2(v, start_date, months_between, 'months') for k, v in monthly_counts.items()}
+
+    weekly_counts = {
+        'opened_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncWeek, **prod_type_kwargs),
+        'active_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncWeek, date__range=[start_date, end_date], **prod_type_kwargs),
+        'accepted_per_period': metrics_period_counts(findings_queryset('Endpoint', endpoints_qs), TruncWeek, risk_accepted=True, **prod_type_kwargs),
+    }
+    weekly_counts = {k: metrics_helper_2(v, start_date, weeks_between, 'weeks') for k, v in weekly_counts.items()}
 
     top_ten = get_authorized_products(Permissions.Product_View)
     top_ten = top_ten.filter(engagement__test__finding__status_finding__mitigated=False,
@@ -423,7 +419,7 @@ def endpoint_querys(prod_type, request):
     }
 
 
-def get_in_period_details(findings):
+def get_in_period_details_old(findings):
     in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
                         "Low": 0, "Info": 0, "Total": 0}
     in_period_details = {}
@@ -462,7 +458,7 @@ def findings_by_product(findings):
                            product_id=F('test__engagement__product__id'))
 
 
-def get_in_period_details_2(findings):
+def get_in_period_details(findings):
     in_period_counts = agg_severity_counts(findings)
     in_period_details = annotate_severity_counts(findings_by_product(findings))
 
@@ -475,7 +471,7 @@ def get_in_period_details_2(findings):
     return in_period_counts, in_period_details, age_detail
 
 
-def get_accepted_in_period_details(findings):
+def get_accepted_in_period_details_old(findings):
     accepted_in_period_details = {}
     for obj in findings:
         if obj.test.engagement.product.name not in accepted_in_period_details:
@@ -490,18 +486,18 @@ def get_accepted_in_period_details(findings):
     return accepted_in_period_details
 
 
-def get_accepted_in_period_details_2(findings):
-    return  annotate_severity_counts(findings_by_product(findings))
+def get_accepted_in_period_details(findings):
+    return annotate_severity_counts(findings_by_product(findings))
 
 
-def get_closed_in_period_details_2(findings):
+def get_closed_in_period_details(findings):
     return (
         agg_severity_counts(findings),
         annotate_severity_counts(findings_by_product(findings))
     )
 
 
-def get_closed_in_period_details(findings):
+def get_closed_in_period_details_old(findings):
     closed_in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
                                "Low": 0, "Info": 0, "Total": 0}
     closed_in_period_details = {}
@@ -560,70 +556,14 @@ def annotate_severity_counts(qs):
 
 def findings_queryset(view, qs):
     if view == 'Endpoint':
-        return Finding.objects.filter(endpoint__in=qs)
+        return Finding.objects.filter(status_finding__in=qs)
     else:
         return qs
 
-def metrics_dashboard(request):
-    p = PTimer()
-    show_pt_filter = True
-    view = identify_view(request)
-    prod_type = get_prod_type(request)
 
-    filters = {}
-    if view == 'Finding':
-        filters = finding_querys(prod_type, request)
-        p.checkpoint('finding_querys')
-    elif view == 'Endpoint':
-        filters = endpoint_querys(prod_type, request)
-        p.checkpoint('endpoint_querys')
-
-    in_period_counts = agg_severity_counts(queryset_check(filters['all']))
-
-    open_findings = findings_queryset(view, filters['all'])
-
-    in_period_counts, in_period_details, age_detail = get_in_period_details_2(open_findings)
-    p.checkpoint('period details')
-
-    accepted_in_period_details = agg_severity_counts(filters['accepted'])
-    p.checkpoint('accepted details')
-
-    closed_in_period_counts = agg_severity_counts(filters['closed'])
-    p.checkpoint('closed details')
-
-    punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'],
-                                          filters['weeks_between'], view)
-    p.checkpoint('punchcard')
-    page_name = _('%(team_name)s Metrics') % {'team_name': get_system_setting('team_name')}
-
-    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-
-    rendered = render(request, 'dojo/dashboard-metrics.html', {
-        'name': page_name,
-        'start_date': filters['start_date'],
-        'end_date': filters['end_date'],
-        'opened_per_month': filters['monthly_counts']['opened_per_period'],
-        'active_per_month': filters['monthly_counts']['active_per_period'],
-        'opened_per_week': filters['weekly_counts']['opened_per_period'],
-        'accepted_per_month': filters['monthly_counts']['accepted_per_period'],
-        'accepted_per_week': filters['weekly_counts']['accepted_per_period'],
-        'top_ten_products': filters['top_ten'],
-        'in_period_counts': in_period_counts,
-        'accepted_in_period_counts': filters['accepted_count'],
-        'closed_in_period_counts': closed_in_period_counts,
-        'punchcard': punchcard,
-        'ticks': ticks,
-        'form': filters.get('form', None),
-    })
-    p.checkpoint('rendered')
-    logger.debug(p)
-    return rendered
-
-
-# @cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
-def metrics(request, mtype):
-    p = PTimer()
+def metrics_old(request, mtype):
     template = 'dojo/metrics.html'
     show_pt_filter = True
     view = identify_view(request)
@@ -651,20 +591,18 @@ def metrics(request, mtype):
     elif view == 'Endpoint':
         page_name = _('Product Type Metrics by Affected Endpoints')
         filters = endpoint_querys(prod_type, request)
-    p.checkpoint('finding_queryies')
-    logger.debug(p)
 
-    in_period_counts, in_period_details, age_detail = get_in_period_details([
+    in_period_counts, in_period_details, age_detail = get_in_period_details_old([
         obj.finding if view == 'Endpoint' else obj
         for obj in queryset_check(filters['all'])
     ])
 
-    accepted_in_period_details = get_accepted_in_period_details([
+    accepted_in_period_details = get_accepted_in_period_details_old([
         obj.finding if view == 'Endpoint' else obj
         for obj in filters['accepted']
     ])
 
-    closed_in_period_counts, closed_in_period_details = get_closed_in_period_details([
+    closed_in_period_counts, closed_in_period_details = get_closed_in_period_details_old([
         obj.finding if view == 'Endpoint' else obj
         for obj in filters['closed']
     ])
@@ -706,7 +644,7 @@ def metrics(request, mtype):
 
 # @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
-def metrics_2(request, mtype):
+def metrics(request, mtype):
     p = PTimer()
     template = 'dojo/metrics.html'
     show_pt_filter = True
@@ -737,17 +675,17 @@ def metrics_2(request, mtype):
         filters = endpoint_querys(prod_type, request)
     p.checkpoint('finding_queryies')
 
-    in_period_counts, in_period_details, age_detail = get_in_period_details_2(
+    in_period_counts, in_period_details, age_detail = get_in_period_details(
         findings_queryset(view, queryset_check(filters['all']))
     )
     p.checkpoint('in period details')
 
-    accepted_in_period_details = get_accepted_in_period_details_2(
+    accepted_in_period_details = get_accepted_in_period_details(
         findings_queryset(view, filters['accepted'])
     )
     p.checkpoint('accepted in period details')
 
-    closed_in_period_counts, closed_in_period_details = get_closed_in_period_details_2(
+    closed_in_period_counts, closed_in_period_details = get_closed_in_period_details(
         findings_queryset(view, filters['closed'])
     )
     p.checkpoint('closed in period details')
