@@ -330,6 +330,11 @@
                                         </div>
                                     {% endif %}
                                     <div class="tab-pane table-responsive" id="tabs-2">
+                                        {% if findings.qs.count > max_findings_details %}
+                                        <div>
+                                            <em>Note:</em> {{ max_findings_details }} Findings listed of {{ findings.qs.count }} total.
+                                        </div>
+                                        {% endif %}
                                         <table class="table table-bordered table-condensed table-striped table-600">
                                             <tr>
                                                 <th class="nowrap">{% trans "Team" %}</th>
@@ -342,13 +347,13 @@
                                                 <th class="nowrap">{% trans "Reporter" %}</th>
 
                                             </tr>
-                                            {% for finding in findings.qs %}
+                                            {% for finding in findings.qs|slice:max_findings_details %}
                                                 <tr>
                                                     <td>{{ finding.test.engagement.product.prod_type.name }}</td>
                                                     <td>
-                                        <span title="{{ finding.test.engagement.product.name }}">
-                                            {{ finding.test.engagement.product.name|truncatechars_html:20 }}
-                                        </span>
+                                                        <span title="{{ finding.test.engagement.product.name }}">
+                                                            {{ finding.test.engagement.product.name|truncatechars_html:20 }}
+                                                        </span>
                                                     </td>
                                                     <td>{{ finding.severity_display }}</td>
                                                     <td>
@@ -399,15 +404,19 @@
                                                     <th>{% trans "Info" %}</th>
                                                     <th>{% trans "Total" %}</th>
                                                 </tr>
-                                                {% for key, value in in_period_details.items %}
+                                                {% for product in in_period_details %}
                                                     <tr>
-                                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
-                                                        <td>{{ value.Critical }}</td>
-                                                        <td>{{ value.High }}</td>
-                                                        <td>{{ value.Medium }}</td>
-                                                        <td>{{ value.Low }}</td>
-                                                        <td>{{ value.Info }}</td>
-                                                        <td>{{ value.Total }}</td>
+                                                        <td>
+                                                            <a href="{% url 'product_open_findings' product.product_id %}">
+                                                                {{ product.product_name }}
+                                                            </a>
+                                                        </td>
+                                                        <td>{{ product.Critical }}</td>
+                                                        <td>{{ product.High }}</td>
+                                                        <td>{{ product.Medium }}</td>
+                                                        <td>{{ product.Low }}</td>
+                                                        <td>{{ product.Info }}</td>
+                                                        <td>{{ product.Total }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -446,15 +455,19 @@
                                                     <th>{% trans "Info" %}</th>
                                                     <th>{% trans "Total" %}</th>
                                                 </tr>
-                                                {% for key, value in accepted_in_period_details.items %}
+                                                {% for product in accepted_in_period_details %}
                                                     <tr>
-                                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
-                                                        <td>{{ value.Critical }}</td>
-                                                        <td>{{ value.High }}</td>
-                                                        <td>{{ value.Medium }}</td>
-                                                        <td>{{ value.Low }}</td>
-                                                        <td>{{ value.Info }}</td>
-                                                        <td>{{ value.Total }}</td>
+                                                        <td>
+                                                            <a href="{% url 'product_open_findings' product.product_id %}">
+                                                                {{ product.product_name }}
+                                                            </a>
+                                                        </td>
+                                                        <td>{{ product.Critical }}</td>
+                                                        <td>{{ product.High }}</td>
+                                                        <td>{{ product.Medium }}</td>
+                                                        <td>{{ product.Low }}</td>
+                                                        <td>{{ product.Info }}</td>
+                                                        <td>{{ product.Total }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -496,15 +509,19 @@
                                                     <th>{% trans "Total" %}</th>
 
                                                 </tr>
-                                                {% for key, value in closed_in_period_details.items %}
+                                                {% for product in closed_in_period_details %}
                                                     <tr>
-                                                        <td><a href="{{ value.path }}">{{ key }}</a></td>
-                                                        <td>{{ value.Critical }}</td>
-                                                        <td>{{ value.High }}</td>
-                                                        <td>{{ value.Medium }}</td>
-                                                        <td>{{ value.Low }}</td>
-                                                        <td>{{ value.Info }}</td>
-                                                        <td>{{ value.Total }}</td>
+                                                        <td>
+                                                            <a href="{% url 'product_open_findings' product.product_id %}">
+                                                                {{ product.product_name }}
+                                                            </a>
+                                                        </td>
+                                                        <td>{{ product.Critical }}</td>
+                                                        <td>{{ product.High }}</td>
+                                                        <td>{{ product.Medium }}</td>
+                                                        <td>{{ product.Low }}</td>
+                                                        <td>{{ product.Info }}</td>
+                                                        <td>{{ product.Total }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -616,19 +633,19 @@
                                             </tr>
                                             <tr>
                                                 <td>{% trans "0 - 30 Days" %}</td>
-                                                <td>{{ age_detail.0 }}</td>
+                                                <td>{{ age_detail.a }}</td>
                                             </tr>
                                             <tr>
                                                 <td>{% trans "31 - 60 Days" %}</td>
-                                                <td>{{ age_detail.1 }}</td>
+                                                <td>{{ age_detail.b }}</td>
                                             </tr>
                                             <tr>
                                                 <td>{% trans "61 - 90 Days" %}</td>
-                                                <td>{{ age_detail.2 }}</td>
+                                                <td>{{ age_detail.c }}</td>
                                             </tr>
                                             <tr>
                                                 <td>{% trans "91+ Days" %}</td>
-                                                <td>{{ age_detail.3 }}</td>
+                                                <td>{{ age_detail.d }}</td>
                                             </tr>
                                         </table>
                                     </div>

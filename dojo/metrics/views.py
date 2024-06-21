@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When, F
 from django.db.models.query import QuerySet
-from django.db.models.functions import TruncMonth, TruncWeek, Extract
+from django.db.models.functions import Coalesce, ExtractDay, Now, TruncMonth, TruncWeek
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -453,22 +453,21 @@ def get_in_period_details(findings):
     return in_period_counts, in_period_details, age_detail
 
 
+def findings_by_product(findings):
+    return findings.values(product_name=F('test__engagement__product__name'),
+                           product_id=F('test__engagement__product__id'))
+
+
 def get_in_period_details_2(findings):
     in_period_counts = agg_severity_counts(findings)
-    in_period_details = agg_severity_counts(findings.values('test__engagement__product__name', 'test__engagement__product__id'))
+    in_period_details = annotate_severity_counts(findings_by_product(findings))
 
-    from django.db.models import IntegerField, Value
-    from django.db.models.functions import Cast, ExtractDay
-    from django.db.models.aggregates import Sum
-    from django.db.models.functions import Coalesce, Now
-
-    age_detail = findings.annotate(age=ExtractDay(Coalesce('mitigated', Now()) - F('date'))).annotate(
+    age_detail = findings.annotate(age=ExtractDay(Coalesce('mitigated', Now()) - F('date'))).aggregate(
         a=Sum(Case(When(age__range=[0, 30], then=Value(1))), default=Value(0), output_field=IntegerField()),
         b=Sum(Case(When(age__range=[31, 60], then=Value(1))), default=Value(0), output_field=IntegerField()),
         c=Sum(Case(When(age__range=[61, 90], then=Value(1))), default=Value(0), output_field=IntegerField()),
         d=Sum(Case(When(age__gt=90, then=Value(1))), default=Value(0), output_field=IntegerField()),
-    ).values('a', 'b', 'c', 'd').first()
-
+    )
     return in_period_counts, in_period_details, age_detail
 
 
@@ -488,13 +487,13 @@ def get_accepted_in_period_details(findings):
 
 
 def get_accepted_in_period_details_2(findings):
-    return agg_severity_counts(findings.values('test__engagement__product__name'))
+    return  annotate_severity_counts(findings_by_product(findings))
 
 
 def get_closed_in_period_details_2(findings):
     return (
         agg_severity_counts(findings),
-        agg_severity_counts(findings.values('test__engagement__product__name'))
+        annotate_severity_counts(findings_by_product(findings))
     )
 
 
@@ -535,6 +534,17 @@ def get_prod_type(request):
 
 def agg_severity_counts(qs):
     return qs.aggregate(
+        Total=(Count('id', distinct=True)),
+        Critical=Count('id', distinct=True, filter=Q(severity='Critical')),
+        High=Count('id', distinct=True, filter=Q(severity='High')),
+        Medium=Count('id', distinct=True, filter=Q(severity='Medium')),
+        Low=Count('id', distinct=True, filter=Q(severity='Low')),
+        Info=Count('id', distinct=True, filter=Q(severity='Info')),
+    )
+
+
+def annotate_severity_counts(qs):
+    return qs.annotate(
         Total=(Count('id', distinct=True)),
         Critical=Count('id', distinct=True, filter=Q(severity='Critical')),
         High=Count('id', distinct=True, filter=Q(severity='High')),
@@ -722,19 +732,21 @@ def metrics_2(request, mtype):
         page_name = _('Product Type Metrics by Affected Endpoints')
         filters = endpoint_querys(prod_type, request)
     p.checkpoint('finding_queryies')
-    logger.debug(p)
 
     in_period_counts, in_period_details, age_detail = get_in_period_details_2(
         findings_queryset(view, queryset_check(filters['all']))
     )
+    p.checkpoint('in period details')
 
     accepted_in_period_details = get_accepted_in_period_details_2(
         findings_queryset(view, filters['accepted'])
     )
+    p.checkpoint('accepted in period details')
 
     closed_in_period_counts, closed_in_period_details = get_closed_in_period_details_2(
         findings_queryset(view, filters['closed'])
     )
+    p.checkpoint('closed in period details')
 
     punchcard = []
     ticks = []
@@ -743,14 +755,16 @@ def metrics_2(request, mtype):
         punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
         page_name = _('%(team_name)s Metrics') % {'team_name': get_system_setting('team_name')}
         template = 'dojo/dashboard-metrics.html'
+        p.checkpoint('punchcard')
 
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
 
-    return render(request, template, {
+    resp = render(request, template, {
         'name': page_name,
         'start_date': filters['start_date'],
         'end_date': filters['end_date'],
         'findings': filters['all'],
+        'max_findings_details': 50,
         'opened_per_month': filters['monthly_counts']['opened_per_period'],
         'active_per_month': filters['monthly_counts']['active_per_period'],
         'opened_per_week': filters['weekly_counts']['opened_per_period'],
@@ -769,6 +783,9 @@ def metrics_2(request, mtype):
         'form': filters.get('form', None),
         'show_pt_filter': show_pt_filter,
     })
+    p.checkpoint('rendered')
+    logger.debug(p)
+    return resp
 
 
 """

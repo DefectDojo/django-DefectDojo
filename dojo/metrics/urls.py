@@ -9,7 +9,7 @@ urlpatterns = [
         name='critical_product_metrics'),
     re_path(r'^metrics/all$', views.metrics, {'mtype': 'All'},
         name='metrics_all'),
-    re_path(r'^metrics/product/type$', views.metrics, {'mtype': 'All'},
+    re_path(r'^metrics/product/type$', views.metrics_2, {'mtype': 'All'},
         name='metrics_product_type'),
     re_path(r'^metrics/simple$', views.simple_metrics,
         name='simple_metrics'),
