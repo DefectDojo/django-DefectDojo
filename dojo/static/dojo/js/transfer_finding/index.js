@@ -6,7 +6,6 @@ import { addOption} from '../helper/helper.js';
 
 var ObjFindings= {};
 export var transferId = 0;
-export var engagementId = 0;
 export var productId = 0;
 var productTypeId = 0;
 var host = window.location.host;
@@ -18,7 +17,8 @@ $(document).ready(function(){
         transferId = $(this).data('transfer-id');
         $('.alert').alert().addClass('sr-only');
         let selectEngagement = row.find('.cls-choosen-engagement')
-        engagementId = selectEngagement.selectpicker('val');
+        let engagementId = selectEngagement.selectpicker('val');
+        setSessionStorage("transferFinding", "engagementId", engagementId);
         $('#modalTransferFinding').modal('toggle');
             ObjFindings = {};
             productId = $(this).data('product-id');
@@ -69,7 +69,7 @@ $(document).ready(function() {
         let row = $(this).closest('tr');
         if (btnClass.includes('btn-success'))
             {
-                if (engagementId !== "None"){
+                if (getSessionStorage('transferFinding','engagementId') !== "None"){
                     row.find('.cls-finding-status').text("Transfer Accepted").css("color", "green");
                     let findingId = $(this).attr('data-btn-success');
                     let relatedFinding = $(this).attr('data-related-finding');
