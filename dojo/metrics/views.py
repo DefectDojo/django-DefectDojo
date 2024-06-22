@@ -161,13 +161,33 @@ def metrics_period_counts(findings, trunc_method):
                 .values('d', 't', 'c', 'h', 'm', 'l', 'i', 'cl',))
 
 
+def metrics_period_endpoints_counts(endpoints, trunc_method):
+    return list(endpoints
+                .annotate(d=trunc_method('date'))
+                .values('d')
+                .annotate(t=Count('id', distinct=True),
+                          c=Sum(Case(When(finding__severity='Critical', then=Value(1))), default=Value(0),
+                                output_field=IntegerField()),
+                          h=Sum(Case(When(finding__severity='High', then=Value(1))), default=Value(0),
+                                output_field=IntegerField()),
+                          m=Sum(Case(When(finding__severity='Medium', then=Value(1))), default=Value(0),
+                                output_field=IntegerField()),
+                          l=Sum(Case(When(finding__severity='Low', then=Value(1))), default=Value(0),
+                                output_field=IntegerField()),
+                          i=Sum(Case(When(finding__severity='Info', then=Value(1))), default=Value(0),
+                                finding__severity=IntegerField()),
+                          cl=Count('id', distinct=True, filter=Q(mitigated=True)),
+                          )
+                .values('d', 't', 'c', 'h', 'm', 'l', 'i', 'cl',))
+
+
 def js_time(d):
     if isinstance(d, date):
         d = datetime.combine(d, datetime.min.time())
     return int(d.timestamp()) * 1000
 
 
-def metrics_helper(qs, start_date, period_count, skip):
+def hydrate_chart_data(qs, start_date, period_count, skip):
     tz = timezone.get_current_timezone()
     start_date = datetime(start_date.year, start_date.month, 1, tzinfo=tz)
     by_date = {js_time(q['d']): q for q in qs}
@@ -208,7 +228,7 @@ def period_deltas(start_date, end_date):
     # include current month
     months_between += 1
 
-    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7))) + 2
+    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
     if weeks_between <= 0:
         weeks_between += 2
     return weeks_between, months_between
@@ -371,19 +391,37 @@ def endpoint_querys(prod_type, request):
 
     weeks_between, months_between = period_deltas(start_date, end_date)
 
+    """
     monthly_counts = get_monthly_counts(
-        findings_queryset('Endpoint', endpoints_qs),
-        findings_queryset('Endpoint', endpoints_qs.filter(finding__active=True)),
-        findings_queryset('Endpoint', accepted_endpoints),
+        findings_queryset(endpoints_qs),
+        findings_queryset(endpoints_qs.filter(finding__active=True)),
+        findings_queryset(accepted_endpoints),
         start_date, months_between
     )
 
     weekly_counts = get_weekly_counts(
-        findings_queryset('Endpoint', endpoints_qs),
-        findings_queryset('Endpoint', endpoints_qs.filter(finding__active=True)),
-        findings_queryset('Endpoint', accepted_endpoints),
+        findings_queryset(endpoints_qs),
+        findings_queryset(endpoints_qs.filter(finding__active=True)),
+        findings_queryset(accepted_endpoints),
         start_date, weeks_between
     )
+    """
+    monthly_counts = {
+        'opened_per_period': hydrate_chart_data(metrics_period_endpoints_counts(endpoints_qs, TruncMonth), start_date, months_between,
+                                                'months'),
+        'active_per_period': hydrate_chart_data(metrics_period_endpoints_counts(endpoints_qs.filter(finding__active=True), TruncMonth), start_date,
+                                                months_between, 'months'),
+        'accepted_per_period': hydrate_chart_data(metrics_period_endpoints_counts(accepted_endpoints, TruncMonth), start_date,
+                                                  months_between, 'months'),
+    }
+    weekly_counts = {
+        'opened_per_period': hydrate_chart_data(metrics_period_endpoints_counts(endpoints_qs, TruncWeek), start_date, weeks_between,
+                                                'weeks'),
+        'active_per_period': hydrate_chart_data(metrics_period_endpoints_counts(endpoints_qs.filter(finding__active=True), TruncWeek), start_date, weeks_between,
+                                                'weeks'),
+        'accepted_per_period': hydrate_chart_data(metrics_period_endpoints_counts(accepted_endpoints, TruncWeek), start_date,
+                                                  weeks_between, 'weeks'),
+    }
 
     top_ten = get_authorized_products(Permissions.Product_View)
     top_ten = top_ten.filter(engagement__test__finding__status_finding__mitigated=False,
@@ -412,23 +450,23 @@ def endpoint_querys(prod_type, request):
 
 def get_monthly_counts(open_qs, active_qs, accepted_qs, start_date, months_between):
     return {
-        'opened_per_period': metrics_helper(metrics_period_counts(open_qs, TruncMonth), start_date, months_between,
-                                            'months'),
-        'active_per_period': metrics_helper(metrics_period_counts(active_qs, TruncMonth), start_date, months_between,
-                                            'months'),
-        'accepted_per_period': metrics_helper(metrics_period_counts(accepted_qs, TruncMonth), start_date,
-                                              months_between, 'months'),
+        'opened_per_period': hydrate_chart_data(metrics_period_counts(open_qs, TruncMonth), start_date, months_between,
+                                                'months'),
+        'active_per_period': hydrate_chart_data(metrics_period_counts(active_qs, TruncMonth), start_date,
+                                                months_between, 'months'),
+        'accepted_per_period': hydrate_chart_data(metrics_period_counts(accepted_qs, TruncMonth), start_date,
+                                                  months_between, 'months'),
     }
 
 
 def get_weekly_counts(open_qs, active_qs, accepted_qs, start_date, weeks_between):
     return {
-        'opened_per_period': metrics_helper(metrics_period_counts(open_qs, TruncWeek), start_date, weeks_between,
-                                            'weeks'),
-        'active_per_period': metrics_helper(metrics_period_counts(active_qs, TruncWeek), start_date, weeks_between,
-                                            'weeks'),
-        'accepted_per_period': metrics_helper(metrics_period_counts(accepted_qs, TruncWeek), start_date, weeks_between,
-                                              'weeks'),
+        'opened_per_period': hydrate_chart_data(metrics_period_counts(open_qs, TruncWeek), start_date, weeks_between,
+                                                'weeks'),
+        'active_per_period': hydrate_chart_data(metrics_period_counts(active_qs, TruncWeek), start_date, weeks_between,
+                                                'weeks'),
+        'accepted_per_period': hydrate_chart_data(metrics_period_counts(accepted_qs, TruncWeek), start_date,
+                                                  weeks_between, 'weeks'),
     }
 
 
@@ -567,98 +605,16 @@ def annotate_severity_counts(qs):
     )
 
 
-def findings_queryset(view, qs):
-    if view == 'Endpoint':
+def findings_queryset(qs):
+    if qs.model is Endpoint_Status:
         return Finding.objects.filter(status_finding__in=qs)
     else:
         return qs
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
-@vary_on_cookie
-def metrics_old(request, mtype):
-    template = 'dojo/metrics.html'
-    show_pt_filter = True
-    view = identify_view(request)
-    page_name = _('Metrics')
-
-    if mtype != 'All':
-        pt = Product_Type.objects.filter(id=mtype)
-        request.GET._mutable = True
-        request.GET.appendlist('test__engagement__product__prod_type', mtype)
-        request.GET._mutable = False
-        show_pt_filter = False
-        page_name = _('%(product_type)s Metrics') % {'product_type': mtype}
-        prod_type = pt
-    elif 'test__engagement__product__prod_type' in request.GET:
-        prod_type = Product_Type.objects.filter(id__in=request.GET.getlist('test__engagement__product__prod_type', []))
-    else:
-        prod_type = get_authorized_product_types(Permissions.Product_Type_View)
-    # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
-    prod_type = prod_type.prefetch_related('prod_type')
-
-    filters = {}
-    if view == 'Finding':
-        page_name = _('Product Type Metrics by Findings')
-        filters = finding_querys(prod_type, request)
-    elif view == 'Endpoint':
-        page_name = _('Product Type Metrics by Affected Endpoints')
-        filters = endpoint_querys(prod_type, request)
-
-    in_period_counts, in_period_details, age_detail = get_in_period_details_old([
-        obj.finding if view == 'Endpoint' else obj
-        for obj in queryset_check(filters['all'])
-    ])
-
-    accepted_in_period_details = get_accepted_in_period_details_old([
-        obj.finding if view == 'Endpoint' else obj
-        for obj in filters['accepted']
-    ])
-
-    closed_in_period_counts, closed_in_period_details = get_closed_in_period_details_old([
-        obj.finding if view == 'Endpoint' else obj
-        for obj in filters['closed']
-    ])
-
-    punchcard = []
-    ticks = []
-
-    if 'view' in request.GET and 'dashboard' == request.GET['view']:
-        punchcard, ticks = get_punchcard_data(queryset_check(filters['all']), filters['start_date'], filters['weeks_between'], view)
-        page_name = _('%(team_name)s Metrics') % {'team_name': get_system_setting('team_name')}
-        template = 'dojo/dashboard-metrics.html'
-
-    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
-
-    return render(request, template, {
-        'name': page_name,
-        'start_date': filters['start_date'],
-        'end_date': filters['end_date'],
-        'findings': filters['all'],
-        'opened_per_month': filters['monthly_counts']['opened_per_period'],
-        'active_per_month': filters['monthly_counts']['active_per_period'],
-        'opened_per_week': filters['weekly_counts']['opened_per_period'],
-        'accepted_per_month': filters['monthly_counts']['accepted_per_period'],
-        'accepted_per_week': filters['weekly_counts']['accepted_per_period'],
-        'top_ten_products': filters['top_ten'],
-        'age_detail': age_detail,
-        'in_period_counts': in_period_counts,
-        'in_period_details': in_period_details,
-        'accepted_in_period_counts': filters['accepted_count'],
-        'accepted_in_period_details': accepted_in_period_details,
-        'closed_in_period_counts': closed_in_period_counts,
-        'closed_in_period_details': closed_in_period_details,
-        'punchcard': punchcard,
-        'ticks': ticks,
-        'form': filters.get('form', None),
-        'show_pt_filter': show_pt_filter,
-    })
-
-
 # @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def metrics(request, mtype):
-    p = PTimer()
     template = 'dojo/metrics.html'
     show_pt_filter = True
     view = identify_view(request)
@@ -686,22 +642,18 @@ def metrics(request, mtype):
     elif view == 'Endpoint':
         page_name = _('Product Type Metrics by Affected Endpoints')
         filters = endpoint_querys(prod_type, request)
-    p.checkpoint('finding_queryies')
 
-    all_findings = findings_queryset(view, queryset_check(filters['all']))
+    all_findings = findings_queryset(queryset_check(filters['all']))
 
     in_period_counts, in_period_details, age_detail = get_in_period_details(all_findings)
-    p.checkpoint('in period details')
 
     accepted_in_period_details = get_accepted_in_period_details(
-        findings_queryset(view, filters['accepted'])
+        findings_queryset(filters['accepted'])
     )
-    p.checkpoint('accepted in period details')
 
     closed_in_period_counts, closed_in_period_details = get_closed_in_period_details(
-        findings_queryset(view, filters['closed'])
+        findings_queryset(filters['closed'])
     )
-    p.checkpoint('closed in period details')
 
     punchcard = []
     ticks = []
@@ -710,11 +662,10 @@ def metrics(request, mtype):
         punchcard, ticks = get_punchcard_data(all_findings, filters['start_date'], filters['weeks_between'], view)
         page_name = _('%(team_name)s Metrics') % {'team_name': get_system_setting('team_name')}
         template = 'dojo/dashboard-metrics.html'
-        p.checkpoint('punchcard')
 
     add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
 
-    resp = render(request, template, {
+    return render(request, template, {
         'name': page_name,
         'start_date': filters['start_date'],
         'end_date': filters['end_date'],
@@ -738,9 +689,6 @@ def metrics(request, mtype):
         'form': filters.get('form', None),
         'show_pt_filter': show_pt_filter,
     })
-    p.checkpoint('rendered')
-    logger.debug(p)
-    return resp
 
 
 """
