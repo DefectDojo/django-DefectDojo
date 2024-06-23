@@ -542,14 +542,14 @@
                                                 </tr>
                                                 {% for week in opened_per_week %}
                                                     <tr>
-                                                        <td>{{ week.d|date:"m-d-Y" }}</td>
-                                                        <td>{{ week.c }}</td>
-                                                        <td>{{ week.h }}</td>
-                                                        <td>{{ week.m }}</td>
-                                                        <td>{{ week.l }}</td>
-                                                        <td>{{ week.i }}</td>
-                                                        <td>{{ week.t }}</td>
-                                                        <td>{{ week.cl }}</td>
+                                                        <td>{{ week.grouped_date|date:"m-d-Y" }}</td>
+                                                        <td>{{ week.critical }}</td>
+                                                        <td>{{ week.high }}</td>
+                                                        <td>{{ week.medium }}</td>
+                                                        <td>{{ week.low }}</td>
+                                                        <td>{{ week.info }}</td>
+                                                        <td>{{ week.total }}</td>
+                                                        <td>{{ week.closed }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -568,14 +568,14 @@
                                                 </tr>
                                                 {% for month in opened_per_month %}
                                                     <tr>
-                                                        <td>{{ month.d|date:"m-Y" }}</td>
-                                                        <td>{{ month.c }}</td>
-                                                        <td>{{ month.h }}</td>
-                                                        <td>{{ month.m }}</td>
-                                                        <td>{{ month.l }}</td>
-                                                        <td>{{ month.i }}</td>
-                                                        <td>{{ month.t }}</td>
-                                                        <td>{{ month.cl }}</td>
+                                                        <td>{{ month.grouped_date|date:"m-Y" }}</td>
+                                                        <td>{{ month.critical }}</td>
+                                                        <td>{{ month.high }}</td>
+                                                        <td>{{ month.medium }}</td>
+                                                        <td>{{ month.low }}</td>
+                                                        <td>{{ month.info }}</td>
+                                                        <td>{{ month.total }}</td>
+                                                        <td>{{ month.closed }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -596,13 +596,13 @@
                                                 </tr>
                                                 {% for week in accepted_per_week %}
                                                     <tr>
-                                                        <td>{{ week.d|date:"m-d-Y" }}</td>
-                                                        <td>{{ week.c }}</td>
-                                                        <td>{{ week.h }}</td>
-                                                        <td>{{ week.m }}</td>
-                                                        <td>{{ week.l }}</td>
-                                                        <td>{{ week.i }}</td>
-                                                        <td>{{ week.t }}</td>
+                                                        <td>{{ week.grouped_date|date:"m-d-Y" }}</td>
+                                                        <td>{{ week.critical }}</td>
+                                                        <td>{{ week.high }}</td>
+                                                        <td>{{ week.medium }}</td>
+                                                        <td>{{ week.low }}</td>
+                                                        <td>{{ week.info }}</td>
+                                                        <td>{{ week.total }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -620,13 +620,13 @@
                                                 </tr>
                                                 {% for month in accepted_per_month %}
                                                     <tr>
-                                                        <td>{{ month.d|date:"m-Y" }}</td>
-                                                        <td>{{ month.c }}</td>
-                                                        <td>{{ month.h }}</td>
-                                                        <td>{{ month.m }}</td>
-                                                        <td>{{ month.l }}</td>
-                                                        <td>{{ month.i }}</td>
-                                                        <td>{{ month.t }}</td>
+                                                        <td>{{ month.grouped_date|date:"m-Y" }}</td>
+                                                        <td>{{ month.critical }}</td>
+                                                        <td>{{ month.high }}</td>
+                                                        <td>{{ month.medium }}</td>
+                                                        <td>{{ month.low }}</td>
+                                                        <td>{{ month.info }}</td>
+                                                        <td>{{ month.total }}</td>
                                                     </tr>
                                                 {% endfor %}
                                             </table>
@@ -707,10 +707,10 @@
             var medium = [];
             var low = [];
             {% for month in opened_per_month %}
-                critical.push([{{ month.e }}, {{ month.c }}]);
-                high.push([{{ month.e }}, {{ month.h }}]);
-                medium.push([{{ month.e }}, {{ month.m }}]);
-                low.push([{{ month.e }}, {{ month.l }}]);
+                critical.push([{{ month.epoch }}, {{ month.critical }}]);
+                high.push([{{ month.epoch }}, {{ month.high }}]);
+                medium.push([{{ month.epoch }}, {{ month.medium }}]);
+                low.push([{{ month.epoch }}, {{ month.low }}]);
             {% endfor %}
             {% if opened_per_month %}
                 opened_per_month_2(critical, high, medium, low);
@@ -721,10 +721,10 @@
             medium = [];
             low = [];
             {% for month in active_per_month %}
-                critical.push([{{ month.e }}, {{ month.c }}]);
-                high.push([{{ month.e }}, {{ month.h }}]);
-                medium.push([{{ month.e }}, {{ month.m }}]);
-                low.push([{{ month.e }}, {{ month.l }}]);
+                critical.push([{{ month.epoch }}, {{ month.critical }}]);
+                high.push([{{ month.epoch }}, {{ month.high }}]);
+                medium.push([{{ month.epoch }}, {{ month.medium }}]);
+                low.push([{{ month.epoch }}, {{ month.low }}]);
             {% endfor %}
             {% if active_per_month %}
                 active_per_month(critical, high, medium, low);
@@ -735,10 +735,10 @@
             medium = [];
             low = [];
             {% for month in accepted_per_month %}
-                critical.push([{{ month.e }}, {{ month.c }}]);
-                high.push([{{ month.e }}, {{ month.h }}]);
-                medium.push([{{ month.e }}, {{ month.m }}]);
-                low.push([{{ month.e }}, {{ month.l }}]);
+                critical.push([{{ month.epoch }}, {{ month.critical }}]);
+                high.push([{{ month.epoch }}, {{ month.high }}]);
+                medium.push([{{ month.epoch }}, {{ month.medium }}]);
+                low.push([{{ month.epoch }}, {{ month.low }}]);
             {% endfor %}
             {%  if accepted_per_month %}
                 accepted_per_month_2(critical, high, medium, low);
@@ -753,16 +753,16 @@
             var medium1 = [];
             var low1 = [];
             {% for week in opened_per_week %}
-                critical.push([{{ week.e }}, {{ week.c }}]);
-                high.push([{{ week.e }}, {{ week.h }}]);
-                medium.push([{{ week.e }}, {{ week.m }}]);
-                low.push([{{ week.e }}, {{ week.l }}]);
+                critical.push([{{ week.epoch }}, {{ week.critical }}]);
+                high.push([{{ week.epoch }}, {{ week.high }}]);
+                medium.push([{{ week.epoch }}, {{ week.medium }}]);
+                low.push([{{ week.epoch }}, {{ week.low }}]);
             {% endfor %}
             {% for week in accepted_per_week %}
-                critical1.push([{{ week.e }}, {{ week.c }}]);
-                high1.push([{{ week.e }}, {{ week.h }}]);
-                medium1.push([{{ week.e }}, {{ week.m }}]);
-                low1.push([{{ week.e }}, {{ week.l }}]);
+                critical1.push([{{ week.epoch }}, {{ week.critical }}]);
+                high1.push([{{ week.epoch }}, {{ week.high }}]);
+                medium1.push([{{ week.epoch }}, {{ week.medium }}]);
+                low1.push([{{ week.epoch }}, {{ week.low }}]);
             {% endfor %}
             {% if not critical_prods %}
                 opened_per_week_2(critical, high, medium, low);

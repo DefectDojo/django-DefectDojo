@@ -8,6 +8,7 @@ from datetime import date, datetime, timedelta
 from functools import reduce
 from math import ceil
 from operator import itemgetter
+from typing import Union
 
 from dateutil.relativedelta import MO, relativedelta
 from django.contrib import messages
@@ -181,15 +182,34 @@ def metrics_period_endpoints_counts(endpoints, trunc_method):
                 .values('d', 't', 'c', 'h', 'm', 'l', 'i', 'cl',))
 
 
-def js_time(d):
+def js_time(
+    d: Union[date, datetime]
+) -> int:
+    """
+    Converts a date/datetime object to a JavaScript epoch time (for use in FE charts)
+
+    :param d: The date or datetime object
+    :return: The js epoch time (milliseconds since the epoch)
+    """
     if isinstance(d, date):
         d = datetime.combine(d, datetime.min.time())
     return int(d.timestamp()) * 1000
 
 
-def hydrate_chart_data(qs, start_date, period_count, skip):
+def hydrate_chart_data(
+    qs: QuerySet,
+    start_date: date,
+    period_count: int,
+    skip: str
+) -> list[dict]:
+    """
+    Fills in missing data points our aggregation didn't include (because the data didn't exist) with zeroes data.
+
+
+    """
     tz = timezone.get_current_timezone()
 
+    # Calculate the start date for our data. This will depend on whether we're generating for months or weeks.
     if skip == 'weeks':
         # For weeks, start at the first day of the specified week
         start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
@@ -198,30 +218,29 @@ def hydrate_chart_data(qs, start_date, period_count, skip):
         # For months, start on the first day of the month
         start_date = datetime(start_date.year, start_date.month, 1, tzinfo=tz)
 
-    by_date = {js_time(q['d']): q for q in qs}
-    for x in range(-1, period_count + 1):
+    # Arrange all our data by epoch date for easy lookup in the loop below.
+    # At the same time, add the epoch date to each entry as the charts will rely on that.
+    by_date = {e: {'epoch': e, **q} for q in qs if (e := js_time(q['grouped_date'])) is not None}
+    # Iterate over our period of time, adding 'empty' data entries for dates not represented
+    for x in range(-1, period_count):
         if skip == 'weeks':
+            # Start on Monday
             delta = relativedelta(weekday=MO(1), weeks=x)
         else:
+            # We started on the 1st of the month, so we can just increment
             delta = relativedelta(months=x)
-
         cur_date = start_date + delta
-        e = js_time(cur_date)
-        if e not in by_date:
+        if (e := js_time(cur_date)) not in by_date:
             by_date[e] = {
-                'd': cur_date.date(),
-                'e': e,
-                't': 0,
-                'c': 0,
-                'h': 0,
-                'm': 0,
-                'l': 0,
-                'i': 0,
-                'cl': 0, }
-        else:
-            by_date[e]['e'] = e
+                'grouped_date': cur_date.date(),
+                'epoch': e,
+                'total': 0, 'critical': 0, 'high': 0, 'medium': 0,
+                'low': 0,
+                'info': 0,
+                'closed': 0, }
 
-    return sorted(by_date.values(), key=lambda m: m['d'])
+    return sorted(by_date.values(), key=lambda m: m['grouped_date'])
+
 
 
 def period_deltas(start_date, end_date):
@@ -457,26 +476,41 @@ def endpoint_querys(prod_type, request):
     }
 
 
+def agg_period_counts(qs, trunc_method):
+    return severity_count(
+        qs.annotate(
+            grouped_date=trunc_method('date')
+        ).values('grouped_date'),
+        'annotate',
+        'severity'
+    ).annotate(
+        closed=Sum(Case(When(Q(mitigated__isnull=False), then=Value(1)), output_field=IntegerField(), default=0)),
+    ).values(
+        'grouped_date', 'total', 'critical', 'high', 'medium', 'low', 'info', 'closed'
+    )
+
+
 def get_monthly_counts(open_qs, active_qs, accepted_qs, start_date, months_between):
     return {
-        'opened_per_period': hydrate_chart_data(metrics_period_counts(open_qs, TruncMonth), start_date, months_between,
+        'opened_per_period': hydrate_chart_data(agg_period_counts(open_qs, TruncMonth), start_date, months_between,
                                                 'months'),
-        'active_per_period': hydrate_chart_data(metrics_period_counts(active_qs, TruncMonth), start_date,
+        'active_per_period': hydrate_chart_data(agg_period_counts(active_qs, TruncMonth), start_date,
                                                 months_between, 'months'),
-        'accepted_per_period': hydrate_chart_data(metrics_period_counts(accepted_qs, TruncMonth), start_date,
+        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_qs, TruncMonth), start_date,
                                                   months_between, 'months'),
     }
 
 
 def get_weekly_counts(open_qs, active_qs, accepted_qs, start_date, weeks_between):
     return {
-        'opened_per_period': hydrate_chart_data(metrics_period_counts(open_qs, TruncWeek), start_date, weeks_between,
+        'opened_per_period': hydrate_chart_data(agg_period_counts(open_qs, TruncWeek), start_date, weeks_between,
                                                 'weeks'),
-        'active_per_period': hydrate_chart_data(metrics_period_counts(active_qs, TruncWeek), start_date, weeks_between,
+        'active_per_period': hydrate_chart_data(agg_period_counts(active_qs, TruncWeek), start_date, weeks_between,
                                                 'weeks'),
-        'accepted_per_period': hydrate_chart_data(metrics_period_counts(accepted_qs, TruncWeek), start_date,
+        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_qs, TruncWeek), start_date,
                                                   weeks_between, 'weeks'),
     }
+
 
 
 def findings_by_product(findings):
