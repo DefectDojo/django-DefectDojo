@@ -8,7 +8,7 @@ from datetime import date, datetime, timedelta
 from functools import reduce
 from math import ceil
 from operator import itemgetter
-from typing import Union
+from typing import Union, Optional
 
 from dateutil.relativedelta import MO, relativedelta
 from django.contrib import messages
@@ -16,7 +16,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When, F
 from django.db.models.query import QuerySet
 from django.db.models.functions import Coalesce, ExtractDay, Now, TruncMonth, TruncWeek
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -75,15 +75,23 @@ def critical_product_metrics(request, mtype):
     })
 
 
-def get_date_range(objects):
+def get_date_range(
+    qs: QuerySet
+) -> tuple[datetime, datetime]:
+    """
+    Given a queryset of objects, returns a tuple of (earliest date, latest date) from among those objects, based on the
+    objects' 'date' attribute.
+
+    :param qs: The queryset of objects
+    :return: A tuple of (earliest date, latest date)
+    """
     tz = timezone.get_current_timezone()
 
-    start_date = objects.earliest('date').date
-    start_date = datetime(start_date.year, start_date.month, start_date.day,
-                        tzinfo=tz)
-    end_date = objects.latest('date').date
-    end_date = datetime(end_date.year, end_date.month, end_date.day,
-                        tzinfo=tz)
+    start_date = qs.earliest('date').date
+    start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
+
+    end_date = qs.latest('date').date
+    end_date = datetime(end_date.year, end_date.month, end_date.day, tzinfo=tz)
 
     return start_date, end_date
 
@@ -124,7 +132,15 @@ def severity_count(queryset, method, expression):
     )
 
 
-def identify_view(request):
+def identify_view(
+    request: HttpRequest
+) -> str:
+    """
+    Identifies the requested metrics view.
+
+    :param request: The request object
+    :return: A string, either 'Endpoint' or 'Finding,' that represents the requested metrics view.
+    """
     get_data = request.GET
     view = get_data.get('type', None)
     if view:
@@ -142,27 +158,7 @@ def identify_view(request):
     return 'Finding'
 
 
-def metrics_period_endpoints_counts(endpoints, trunc_method):
-    return list(endpoints
-                .annotate(d=trunc_method('date'))
-                .values('d')
-                .annotate(t=Count('id', distinct=True),
-                          c=Sum(Case(When(finding__severity='Critical', then=Value(1))), default=Value(0),
-                                output_field=IntegerField()),
-                          h=Sum(Case(When(finding__severity='High', then=Value(1))), default=Value(0),
-                                output_field=IntegerField()),
-                          m=Sum(Case(When(finding__severity='Medium', then=Value(1))), default=Value(0),
-                                output_field=IntegerField()),
-                          l=Sum(Case(When(finding__severity='Low', then=Value(1))), default=Value(0),
-                                output_field=IntegerField()),
-                          i=Sum(Case(When(finding__severity='Info', then=Value(1))), default=Value(0),
-                                finding__severity=IntegerField()),
-                          cl=Count('id', distinct=True, filter=Q(mitigated=True)),
-                          )
-                .values('d', 't', 'c', 'h', 'm', 'l', 'i', 'cl',))
-
-
-def js_time(
+def js_epoch(
     d: Union[date, datetime]
 ) -> int:
     """
@@ -176,21 +172,27 @@ def js_time(
     return int(d.timestamp()) * 1000
 
 
-def hydrate_chart_data(
+def get_charting_data(
     qs: QuerySet,
     start_date: date,
-    period_count: int,
-    skip: str
+    period: str,
+    period_count: int
 ) -> list[dict]:
     """
-    Fills in missing data points our aggregation didn't include (because the data didn't exist) with zeroes data.
+    Given a queryset of severities data for charting, adds epoch timestamp information and fills in missing data points
+    queryset aggregation didn't include (because the data didn't exist) with zero-element data, all useful for frontend
+    chart rendering. Returns a list of these dictionaries, sorted by date ascending.
 
-
+    :param qs: The query set
+    :param start_date: The start date
+    :param period: A string, either 'weeks' or 'months,' representing the period
+    :param period_count: The number of periods we should have data for
+    :return: A list of dictionaries representing data points for charting, sorted by date
     """
     tz = timezone.get_current_timezone()
 
     # Calculate the start date for our data. This will depend on whether we're generating for months or weeks.
-    if skip == 'weeks':
+    if period == 'weeks':
         # For weeks, start at the first day of the specified week
         start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
         start_date = start_date + timedelta(days=-start_date.weekday())
@@ -200,32 +202,23 @@ def hydrate_chart_data(
 
     # Arrange all our data by epoch date for easy lookup in the loop below.
     # At the same time, add the epoch date to each entry as the charts will rely on that.
-    by_date = {e: {'epoch': e, **q} for q in qs if (e := js_time(q['grouped_date'])) is not None}
-    # Iterate over our period of time, adding 'empty' data entries for dates not represented
+    by_date = {e: {'epoch': e, **q} for q in qs if (e := js_epoch(q['grouped_date'])) is not None}
+
+    # Iterate over our period of time, adding zero-element data entries for dates not represented
     for x in range(-1, period_count):
-        if skip == 'weeks':
-            # Start on Monday
-            delta = relativedelta(weekday=MO(1), weeks=x)
-        else:
-            # We started on the 1st of the month, so we can just increment
-            delta = relativedelta(months=x)
-        cur_date = start_date + delta
-        if (e := js_time(cur_date)) not in by_date:
+        cur_date = start_date + relativedelta(**{period: x})
+        if (e := js_epoch(cur_date)) not in by_date:
             by_date[e] = {
-                'grouped_date': cur_date.date(),
-                'epoch': e,
-                'total': 0, 'critical': 0, 'high': 0, 'medium': 0,
-                'low': 0,
-                'info': 0,
-                'closed': 0, }
+                'grouped_date': cur_date.date(), 'epoch': e,
+                'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'closed': 0, }
 
+    # Return, sorting by date
     return sorted(by_date.values(), key=lambda m: m['grouped_date'])
-
 
 
 def period_deltas(start_date, end_date):
     """
-    Given a start date and end date, returns a tuple of (weeks between the dates, months between the dates)
+    Given a start date and end date, returns a tuple of (weeks between the dates, months between the dates).
 
     :param start_date: The start date to consider
     :param end_date: The end date to consider
@@ -400,20 +393,22 @@ def endpoint_querys(prod_type, request):
     weeks_between, months_between = period_deltas(start_date, end_date)
 
     monthly_counts = {
-        'opened_per_period': hydrate_chart_data(agg_period_counts(endpoints_qs, TruncMonth, 'finding__severity'), start_date, months_between,
-                                                'months'),
-        'active_per_period': hydrate_chart_data(agg_period_counts(endpoints_qs.filter(finding__active=True), TruncMonth, 'finding__severity'), start_date,
-                                                months_between, 'months'),
-        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_endpoints, TruncMonth, 'finding__severity'), start_date,
-                                                  months_between, 'months'),
+        'opened_per_period': get_charting_data(aggregate_counts_by_period(endpoints_qs, TruncMonth, 'finding__severity', 'mitigated'),
+                                               start_date, 'months', months_between),
+        'active_per_period': get_charting_data(
+            aggregate_counts_by_period(endpoints_qs.filter(finding__active=True), TruncMonth, 'finding__severity'), start_date,
+            'months', months_between),
+        'accepted_per_period': get_charting_data(aggregate_counts_by_period(accepted_endpoints, TruncMonth, 'finding__severity'),
+                                                 start_date, 'months', months_between),
     }
     weekly_counts = {
-        'opened_per_period': hydrate_chart_data(agg_period_counts(endpoints_qs, TruncWeek, 'finding__severity'), start_date, weeks_between,
-                                                'weeks'),
-        'active_per_period': hydrate_chart_data(agg_period_counts(endpoints_qs.filter(finding__active=True), TruncWeek, 'finding__severity'), start_date, weeks_between,
-                                                'weeks'),
-        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_endpoints, TruncWeek, 'finding__severity'), start_date,
-                                                  weeks_between, 'weeks'),
+        'opened_per_period': get_charting_data(aggregate_counts_by_period(endpoints_qs, TruncWeek, 'finding__severity', 'mitigated'),
+                                               start_date, 'weeks', weeks_between),
+        'active_per_period': get_charting_data(
+            aggregate_counts_by_period(endpoints_qs.filter(finding__active=True), TruncWeek, 'finding__severity'), start_date,
+            'weeks', weeks_between),
+        'accepted_per_period': get_charting_data(aggregate_counts_by_period(accepted_endpoints, TruncWeek, 'finding__severity'),
+                                                 start_date, 'weeks', weeks_between),
     }
 
     top_ten = get_authorized_products(Permissions.Product_View)
@@ -441,39 +436,61 @@ def endpoint_querys(prod_type, request):
     }
 
 
-def agg_period_counts(qs, trunc_method, expression):
-    return severity_count(
-        qs.annotate(
-            grouped_date=trunc_method('date')
-        ).values('grouped_date'),
+def aggregate_counts_by_period(
+    qs: Union[QuerySet[Finding], QuerySet[Endpoint_Status]],
+    trunc_method: Union[TruncMonth, TruncWeek],
+    severity_lookup_expression: str,
+    closed_lookup_expression: Optional[str] = None,
+) -> QuerySet:
+    """
+    Annotates the given queryset with severity counts, grouping by desired period as defined by the specified
+    trunc_method. Optionally includes a sum of closed findings/statuses as well.
+
+    :param qs: The queryset to annotate with aggregate severity counts, either of Findings or Endpoint_Statuses
+    :param trunc_method: Database function TruncMonth or TruncWeek, for aggregating data by desired period
+    :param severity_lookup_expression: The query lookup expression for severities relative to the QuerySet model type
+    :param closed_lookup_expression: An optional query lookup expression for aggregating 'closed' finding counts,
+        matched against the constant True. If None, closed statistics will not be gathered.
+    :return: A queryset with aggregate severity counts grouped by period
+    """
+
+    desired_values = ('grouped_date', 'total', 'critical', 'high', 'medium', 'low', 'info',)
+
+    severities_by_period = severity_count(
+        # Group by desired period
+        qs.annotate(grouped_date=trunc_method('date')).values('grouped_date'),
         'annotate',
-        expression
-    ).annotate(
-        closed=Sum(Case(When(Q(mitigated__isnull=False), then=Value(1)), output_field=IntegerField(), default=0)),
-    ).values(
-        'grouped_date', 'total', 'critical', 'high', 'medium', 'low', 'info', 'closed'
+        severity_lookup_expression
     )
+    if closed_lookup_expression:
+        severities_by_period = severities_by_period.annotate(
+            # Include 'closed' counts
+            closed=Sum(Case(When(Q(**{closed_lookup_expression: True}), then=Value(1)), output_field=IntegerField(), default=0)),
+        )
+        desired_values += ('closed',)
+
+    return severities_by_period.values(*desired_values)
 
 
 def get_monthly_counts(open_qs, active_qs, accepted_qs, start_date, months_between):
     return {
-        'opened_per_period': hydrate_chart_data(agg_period_counts(open_qs, TruncMonth, 'severity'), start_date, months_between,
-                                                'months'),
-        'active_per_period': hydrate_chart_data(agg_period_counts(active_qs, TruncMonth, 'severity'), start_date,
-                                                months_between, 'months'),
-        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_qs, TruncMonth, 'severity'), start_date,
-                                                  months_between, 'months'),
+        'opened_per_period': get_charting_data(aggregate_counts_by_period(open_qs, TruncMonth, 'severity', 'is_mitigated'), start_date, 'months',
+                                               months_between),
+        'active_per_period': get_charting_data(aggregate_counts_by_period(active_qs, TruncMonth, 'severity'), start_date,
+                                               'months', months_between),
+        'accepted_per_period': get_charting_data(aggregate_counts_by_period(accepted_qs, TruncMonth, 'severity'), start_date,
+                                                 'months', months_between),
     }
 
 
 def get_weekly_counts(open_qs, active_qs, accepted_qs, start_date, weeks_between):
     return {
-        'opened_per_period': hydrate_chart_data(agg_period_counts(open_qs, TruncWeek, 'severity'), start_date, weeks_between,
-                                                'weeks'),
-        'active_per_period': hydrate_chart_data(agg_period_counts(active_qs, TruncWeek, 'severity'), start_date, weeks_between,
-                                                'weeks'),
-        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_qs, TruncWeek, 'severity'), start_date,
-                                                  weeks_between, 'weeks'),
+        'opened_per_period': get_charting_data(aggregate_counts_by_period(open_qs, TruncWeek, 'severity', 'is_mitigated'), start_date, 'weeks',
+                                               weeks_between),
+        'active_per_period': get_charting_data(aggregate_counts_by_period(active_qs, TruncWeek, 'severity'), start_date, 'weeks',
+                                               weeks_between),
+        'accepted_per_period': get_charting_data(aggregate_counts_by_period(accepted_qs, TruncWeek, 'severity'), start_date,
+                                                 'weeks', weeks_between),
     }
 
 
