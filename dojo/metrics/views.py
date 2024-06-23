@@ -142,26 +142,6 @@ def identify_view(request):
     return 'Finding'
 
 
-def metrics_period_counts(findings, trunc_method):
-    return list(findings
-                .annotate(d=trunc_method('date'))
-                .values('d')
-                .annotate(t=Count('id', distinct=True),
-                          c=Sum(Case(When(severity='Critical', then=Value(1))), default=Value(0),
-                                output_field=IntegerField()),
-                          h=Sum(Case(When(severity='High', then=Value(1))), default=Value(0),
-                                output_field=IntegerField()),
-                          m=Sum(Case(When(severity='Medium', then=Value(1))), default=Value(0),
-                                output_field=IntegerField()),
-                          l=Sum(Case(When(severity='Low', then=Value(1))), default=Value(0),
-                                output_field=IntegerField()),
-                          i=Sum(Case(When(severity='Info', then=Value(1))), default=Value(0),
-                                output_field=IntegerField()),
-                          cl=Count('id', distinct=True, filter=Q(mitigated__isnull=False)),
-                          )
-                .values('d', 't', 'c', 'h', 'm', 'l', 'i', 'cl',))
-
-
 def metrics_period_endpoints_counts(endpoints, trunc_method):
     return list(endpoints
                 .annotate(d=trunc_method('date'))
@@ -419,35 +399,20 @@ def endpoint_querys(prod_type, request):
 
     weeks_between, months_between = period_deltas(start_date, end_date)
 
-    """
-    monthly_counts = get_monthly_counts(
-        findings_queryset(endpoints_qs),
-        findings_queryset(endpoints_qs.filter(finding__active=True)),
-        findings_queryset(accepted_endpoints),
-        start_date, months_between
-    )
-
-    weekly_counts = get_weekly_counts(
-        findings_queryset(endpoints_qs),
-        findings_queryset(endpoints_qs.filter(finding__active=True)),
-        findings_queryset(accepted_endpoints),
-        start_date, weeks_between
-    )
-    """
     monthly_counts = {
-        'opened_per_period': hydrate_chart_data(metrics_period_endpoints_counts(endpoints_qs, TruncMonth), start_date, months_between,
+        'opened_per_period': hydrate_chart_data(agg_period_counts(endpoints_qs, TruncMonth, 'finding__severity'), start_date, months_between,
                                                 'months'),
-        'active_per_period': hydrate_chart_data(metrics_period_endpoints_counts(endpoints_qs.filter(finding__active=True), TruncMonth), start_date,
+        'active_per_period': hydrate_chart_data(agg_period_counts(endpoints_qs.filter(finding__active=True), TruncMonth, 'finding__severity'), start_date,
                                                 months_between, 'months'),
-        'accepted_per_period': hydrate_chart_data(metrics_period_endpoints_counts(accepted_endpoints, TruncMonth), start_date,
+        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_endpoints, TruncMonth, 'finding__severity'), start_date,
                                                   months_between, 'months'),
     }
     weekly_counts = {
-        'opened_per_period': hydrate_chart_data(metrics_period_endpoints_counts(endpoints_qs, TruncWeek), start_date, weeks_between,
+        'opened_per_period': hydrate_chart_data(agg_period_counts(endpoints_qs, TruncWeek, 'finding__severity'), start_date, weeks_between,
                                                 'weeks'),
-        'active_per_period': hydrate_chart_data(metrics_period_endpoints_counts(endpoints_qs.filter(finding__active=True), TruncWeek), start_date, weeks_between,
+        'active_per_period': hydrate_chart_data(agg_period_counts(endpoints_qs.filter(finding__active=True), TruncWeek, 'finding__severity'), start_date, weeks_between,
                                                 'weeks'),
-        'accepted_per_period': hydrate_chart_data(metrics_period_endpoints_counts(accepted_endpoints, TruncWeek), start_date,
+        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_endpoints, TruncWeek, 'finding__severity'), start_date,
                                                   weeks_between, 'weeks'),
     }
 
@@ -476,13 +441,13 @@ def endpoint_querys(prod_type, request):
     }
 
 
-def agg_period_counts(qs, trunc_method):
+def agg_period_counts(qs, trunc_method, expression):
     return severity_count(
         qs.annotate(
             grouped_date=trunc_method('date')
         ).values('grouped_date'),
         'annotate',
-        'severity'
+        expression
     ).annotate(
         closed=Sum(Case(When(Q(mitigated__isnull=False), then=Value(1)), output_field=IntegerField(), default=0)),
     ).values(
@@ -492,22 +457,22 @@ def agg_period_counts(qs, trunc_method):
 
 def get_monthly_counts(open_qs, active_qs, accepted_qs, start_date, months_between):
     return {
-        'opened_per_period': hydrate_chart_data(agg_period_counts(open_qs, TruncMonth), start_date, months_between,
+        'opened_per_period': hydrate_chart_data(agg_period_counts(open_qs, TruncMonth, 'severity'), start_date, months_between,
                                                 'months'),
-        'active_per_period': hydrate_chart_data(agg_period_counts(active_qs, TruncMonth), start_date,
+        'active_per_period': hydrate_chart_data(agg_period_counts(active_qs, TruncMonth, 'severity'), start_date,
                                                 months_between, 'months'),
-        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_qs, TruncMonth), start_date,
+        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_qs, TruncMonth, 'severity'), start_date,
                                                   months_between, 'months'),
     }
 
 
 def get_weekly_counts(open_qs, active_qs, accepted_qs, start_date, weeks_between):
     return {
-        'opened_per_period': hydrate_chart_data(agg_period_counts(open_qs, TruncWeek), start_date, weeks_between,
+        'opened_per_period': hydrate_chart_data(agg_period_counts(open_qs, TruncWeek, 'severity'), start_date, weeks_between,
                                                 'weeks'),
-        'active_per_period': hydrate_chart_data(agg_period_counts(active_qs, TruncWeek), start_date, weeks_between,
+        'active_per_period': hydrate_chart_data(agg_period_counts(active_qs, TruncWeek, 'severity'), start_date, weeks_between,
                                                 'weeks'),
-        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_qs, TruncWeek), start_date,
+        'accepted_per_period': hydrate_chart_data(agg_period_counts(accepted_qs, TruncWeek, 'severity'), start_date,
                                                   weeks_between, 'weeks'),
     }
 
