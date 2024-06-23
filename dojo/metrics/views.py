@@ -525,10 +525,10 @@ def get_in_period_details(findings):
     ).order_by('product_name')
 
     age_detail = findings.annotate(age=ExtractDay(Coalesce('mitigated', Now()) - F('date'))).aggregate(
-        a=Sum(Case(When(age__lte=30, then=Value(1))), default=Value(0), output_field=IntegerField()),
-        b=Sum(Case(When(age__range=[31, 60], then=Value(1))), default=Value(0), output_field=IntegerField()),
-        c=Sum(Case(When(age__range=[61, 90], then=Value(1))), default=Value(0), output_field=IntegerField()),
-        d=Sum(Case(When(age__gt=90, then=Value(1))), default=Value(0), output_field=IntegerField()),
+        age_under_30=Sum(Case(When(age__lte=30, then=Value(1))), default=Value(0), output_field=IntegerField()),
+        age_31_60=Sum(Case(When(age__range=[31, 60], then=Value(1))), default=Value(0), output_field=IntegerField()),
+        age_61_90=Sum(Case(When(age__range=[61, 90], then=Value(1))), default=Value(0), output_field=IntegerField()),
+        age_90_plus=Sum(Case(When(age__gt=90, then=Value(1))), default=Value(0), output_field=IntegerField()),
     )
     return in_period_counts, in_period_details, age_detail
 
