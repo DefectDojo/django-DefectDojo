@@ -479,48 +479,14 @@ def get_weekly_counts(open_qs, active_qs, accepted_qs, start_date, weeks_between
     }
 
 
-def get_in_period_details_old(findings):
-    in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
-                        "Low": 0, "Info": 0, "Total": 0}
-    in_period_details = {}
-    age_detail = [0, 0, 0, 0]
-
-    for obj in findings:
-        if 0 <= obj.age <= 30:
-            age_detail[0] += 1
-        elif 30 < obj.age <= 60:
-            age_detail[1] += 1
-        elif 60 < obj.age <= 90:
-            age_detail[2] += 1
-        elif obj.age > 90:
-            age_detail[3] += 1
-
-        # This condition should be true in nearly all cases,
-        # but there are some far edge cases
-        if obj.severity in in_period_counts:
-            in_period_counts[obj.severity] += 1
-            in_period_counts['Total'] += 1
-        # This condition should be true in nearly all cases,
-        # but there are some far edge cases
-        if obj.severity in in_period_details:
-            if obj.test.engagement.product.name not in in_period_details:
-                in_period_details[obj.test.engagement.product.name] = {
-                    'path': reverse('product_open_findings', args=(obj.test.engagement.product.id,)),
-                    'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-            in_period_details[obj.test.engagement.product.name][obj.severity] += 1
-            in_period_details[obj.test.engagement.product.name]['Total'] += 1
-
-    return in_period_counts, in_period_details, age_detail
-
-
 def findings_by_product(findings):
     return findings.values(product_name=F('test__engagement__product__name'),
                            product_id=F('test__engagement__product__id'))
 
 
 def get_in_period_details(findings):
-    in_period_counts = agg_severity_counts(findings)
-    in_period_details = annotate_severity_counts(findings_by_product(findings))
+    in_period_counts = severity_count(findings, 'aggregate', 'severity')
+    in_period_details = severity_count(findings_by_product(findings), 'annotate', 'severity')
 
     age_detail = findings.annotate(age=ExtractDay(Coalesce('mitigated', Now()) - F('date'))).aggregate(
         a=Sum(Case(When(age__range=[0, 30], then=Value(1))), default=Value(0), output_field=IntegerField()),
@@ -531,52 +497,15 @@ def get_in_period_details(findings):
     return in_period_counts, in_period_details, age_detail
 
 
-def get_accepted_in_period_details_old(findings):
-    accepted_in_period_details = {}
-    for obj in findings:
-        if obj.test.engagement.product.name not in accepted_in_period_details:
-            accepted_in_period_details[obj.test.engagement.product.name] = {
-                'path': reverse('accepted_findings') + '?test__engagement__product=' + str(obj.test.engagement.product.id),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-        accepted_in_period_details[
-            obj.test.engagement.product.name
-        ][obj.severity] += 1
-        accepted_in_period_details[obj.test.engagement.product.name]['Total'] += 1
-
-    return accepted_in_period_details
-
-
 def get_accepted_in_period_details(findings):
-    return annotate_severity_counts(findings_by_product(findings))
+    return severity_count(findings_by_product(findings), 'annotate', 'severity')
 
 
 def get_closed_in_period_details(findings):
     return (
-        agg_severity_counts(findings),
-        annotate_severity_counts(findings_by_product(findings))
+        severity_count(findings, 'aggregate', 'severity'),
+        severity_count(findings_by_product(findings), 'annotate', 'severity')
     )
-
-
-def get_closed_in_period_details_old(findings):
-    closed_in_period_counts = {"Critical": 0, "High": 0, "Medium": 0,
-                               "Low": 0, "Info": 0, "Total": 0}
-    closed_in_period_details = {}
-
-    for obj in findings:
-        closed_in_period_counts[obj.severity] += 1
-        closed_in_period_counts['Total'] += 1
-
-        if obj.test.engagement.product.name not in closed_in_period_details:
-            closed_in_period_details[obj.test.engagement.product.name] = {
-                'path': reverse('closed_findings') + '?test__engagement__product=' + str(
-                    obj.test.engagement.product.id),
-                'Critical': 0, 'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0, 'Total': 0}
-        closed_in_period_details[
-            obj.test.engagement.product.name
-        ][obj.severity] += 1
-        closed_in_period_details[obj.test.engagement.product.name]['Total'] += 1
-
-    return closed_in_period_counts, closed_in_period_details
 
 
 def get_prod_type(request):
@@ -587,28 +516,6 @@ def get_prod_type(request):
     # legacy code calls has 'prod_type' as 'related_name' for product.... so weird looking prefetch
     prod_type = prod_type.prefetch_related('prod_type')
     return prod_type
-
-
-def agg_severity_counts(qs):
-    return qs.aggregate(
-        Total=(Count('id', distinct=True)),
-        Critical=Count('id', distinct=True, filter=Q(severity='Critical')),
-        High=Count('id', distinct=True, filter=Q(severity='High')),
-        Medium=Count('id', distinct=True, filter=Q(severity='Medium')),
-        Low=Count('id', distinct=True, filter=Q(severity='Low')),
-        Info=Count('id', distinct=True, filter=Q(severity='Info')),
-    )
-
-
-def annotate_severity_counts(qs):
-    return qs.annotate(
-        Total=(Count('id', distinct=True)),
-        Critical=Count('id', distinct=True, filter=Q(severity='Critical')),
-        High=Count('id', distinct=True, filter=Q(severity='High')),
-        Medium=Count('id', distinct=True, filter=Q(severity='Medium')),
-        Low=Count('id', distinct=True, filter=Q(severity='Low')),
-        Info=Count('id', distinct=True, filter=Q(severity='Info')),
-    )
 
 
 def findings_queryset(qs):
