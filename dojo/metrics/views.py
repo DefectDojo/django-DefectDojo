@@ -190,35 +190,22 @@ def js_time(d):
 def hydrate_chart_data(qs, start_date, period_count, skip):
     tz = timezone.get_current_timezone()
 
-    """
     if skip == 'weeks':
-        start_date = datetime(start_date.year, start_date.month, 1, tzinfo=tz)
+        # For weeks, start at the first day of the specified week
+        start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
+        start_date = start_date + timedelta(days=-start_date.weekday())
     else:
+        # For months, start on the first day of the month
         start_date = datetime(start_date.year, start_date.month, 1, tzinfo=tz)
-    """
-    start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
 
     by_date = {js_time(q['d']): q for q in qs}
-    for x in range(-1, period_count):
-        """
+    for x in range(-1, period_count + 1):
         if skip == 'weeks':
-            delta = relativedelta(weekday=MO(1), **{skip: x})
+            delta = relativedelta(weekday=MO(1), weeks=x)
         else:
-            delta = relativedelta(**{skip: x})
-        """
+            delta = relativedelta(months=x)
 
-        if skip == 'months':
-            # make interval the first through last of month
-            #end_date = (start_date + relativedelta(months=x)) + relativedelta(
-            #    day=1, months=+1, days=-1)
-            cur_date = (start_date + relativedelta(months=x)) + relativedelta(day=1)
-        else:
-            # week starts the monday before
-            cur_date = start_date + relativedelta(weeks=x, weekday=MO(1))
-            #end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
-
-
-        # cur_date = start_date + delta
+        cur_date = start_date + delta
         e = js_time(cur_date)
         if e not in by_date:
             by_date[e] = {
@@ -233,7 +220,7 @@ def hydrate_chart_data(qs, start_date, period_count, skip):
                 'cl': 0, }
         else:
             by_date[e]['e'] = e
-        # cur_date += delta
+
     return sorted(by_date.values(), key=lambda m: m['d'])
 
 
@@ -590,9 +577,6 @@ def get_closed_in_period_details_old(findings):
         closed_in_period_details[obj.test.engagement.product.name]['Total'] += 1
 
     return closed_in_period_counts, closed_in_period_details
-
-
-from dojo.perf import PTimer
 
 
 def get_prod_type(request):

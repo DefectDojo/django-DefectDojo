@@ -712,7 +712,6 @@
                 medium.push([{{ month.e }}, {{ month.m }}]);
                 low.push([{{ month.e }}, {{ month.l }}]);
             {% endfor %}
-        console.log(critical)
             {% if opened_per_month %}
                 opened_per_month_2(critical, high, medium, low);
             {% endif %}
