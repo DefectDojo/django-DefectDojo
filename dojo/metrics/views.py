@@ -330,7 +330,7 @@ def finding_querys(prod_type, request):
     )[:10]
 
     return {
-        'all': findings,
+        'all': findings_query,
         'closed': findings_closed,
         'accepted': accepted_findings,
         'accepted_count': accepted_findings_counts,
@@ -486,10 +486,12 @@ def findings_by_product(findings):
 
 def get_in_period_details(findings):
     in_period_counts = severity_count(findings, 'aggregate', 'severity')
-    in_period_details = severity_count(findings_by_product(findings), 'annotate', 'severity')
+    in_period_details = severity_count(
+        findings_by_product(findings), 'annotate', 'severity'
+    ).order_by('product_name')
 
     age_detail = findings.annotate(age=ExtractDay(Coalesce('mitigated', Now()) - F('date'))).aggregate(
-        a=Sum(Case(When(age__range=[0, 30], then=Value(1))), default=Value(0), output_field=IntegerField()),
+        a=Sum(Case(When(age__lte=30, then=Value(1))), default=Value(0), output_field=IntegerField()),
         b=Sum(Case(When(age__range=[31, 60], then=Value(1))), default=Value(0), output_field=IntegerField()),
         c=Sum(Case(When(age__range=[61, 90], then=Value(1))), default=Value(0), output_field=IntegerField()),
         d=Sum(Case(When(age__gt=90, then=Value(1))), default=Value(0), output_field=IntegerField()),
@@ -498,13 +500,17 @@ def get_in_period_details(findings):
 
 
 def get_accepted_in_period_details(findings):
-    return severity_count(findings_by_product(findings), 'annotate', 'severity')
+    return severity_count(
+        findings_by_product(findings), 'annotate', 'severity'
+    ).order_by('product_name')
 
 
 def get_closed_in_period_details(findings):
     return (
         severity_count(findings, 'aggregate', 'severity'),
-        severity_count(findings_by_product(findings), 'annotate', 'severity')
+        severity_count(
+            findings_by_product(findings), 'annotate', 'severity'
+        ).order_by('product_name')
     )
 
 
