@@ -75,8 +75,12 @@ def user_can_clear_peer_review(finding, user):
 
 
 @register.filter
-def enable_transfer_finding_button(status_finding):
-    if status_finding in helper_tf.enable_flow_transfer_finding():
-        return True
+def enable_button(status_finding, button):
+    button_dict = {
+        "Add Risk Acceptance": helper_tf.enable_flow_transfer_finding
+    }
+    if button in button_dict and isinstance(button, str):
+        function_action = button_dict[button]
+        return function_action(status_finding)
     else:
-        return False
+        raise ValueError("Not implemented rules button")

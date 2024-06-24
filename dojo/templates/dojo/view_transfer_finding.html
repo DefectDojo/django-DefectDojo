@@ -101,7 +101,10 @@
                 <th scope="col">Name</th>
                 <th scope="col">Severity</th>
                 <th scope="col">Vulnerability Id</th>
-                <th scope="col">Related Finding</th>
+                <th scope="col">Related Finding
+                  <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Select a finding that is related to the finding you want to transfer. If the default value is left, a new finding will be created in its product." data-placement="right" data-container="body" data-original-title="" title="">
+                  </i>
+                </th>
                 <th scope="col">Status</th>
                 <th scope="col">Actions</th>
               </tr>
@@ -178,17 +181,17 @@
                             <td>{{transfer_findings.accepted_by}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-success btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target=""  title="Accept all Finding" class="btn btn-success btn-sm btn-tf help help-tooltip" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-check"></i>
                                     </button>
                             {% endif%}
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-warning btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-warning btn-sm btn-tf help help-tooltip" title="Reject all Finding" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-times"></i>
                                     </button>
                             {% endif%}
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Delete" %}
-                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf help help-tooltip" title="Delete all Findings" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-trash-alt"></i>
                                     </button></i>
                             {%endif%}

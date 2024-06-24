@@ -20,12 +20,10 @@ $(document).ready(function(){
         let engagementId = selectEngagement.selectpicker('val');
         setSessionStorage("transferFinding", "engagementId", engagementId);
         $('#modalTransferFinding').modal('toggle');
-            ObjFindings = {};
             productId = $(this).data('product-id');
             setSessionStorage("transferFinding","productId",productId);
             productTypeId = $(this).data('product-type-id');
             getTransferFindings(transferId)
-
             $(document).on('change', '.related-finding-chosen', function(event){
                 let selectedValue = $(this);
                 let row = $(this).closest('tr');
@@ -89,6 +87,10 @@ $(document).ready(function() {
             RemoveFinding(findingId)
         }
     }); 
+    
+    $('#modalTransferFinding').on('hide.bs.modal', function(){
+        ObjFindings = {};
+    });
 
 });
 
@@ -149,12 +151,12 @@ function innerData(data, findings_related){
             cell_status.className = "cls-finding-status"
 
             row.innerHTML = `
-            <td><a href="http://${host}/finding/${transfer_findings_finding.findings.id}/transfer_finding/${transfer_finding_item.id}", class="table-link cls-finding-id" target="_blank" type="button">${transfer_findings_finding.findings.id} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>
+            <td><a href="http://${host}/finding/${transfer_findings_finding.findings.id}/transfer_finding/${transfer_finding_item.id}", class="table-link cls-finding-id help help-toolpit" title="View Origin Finding" target="_blank" type="button">${transfer_findings_finding.findings.id} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>
             <td class="cls-transfer-finding-title">${transfer_findings_finding.findings.title}</td>
             <td>${transfer_findings_finding.findings.severity}</td>
             <td>${transfer_findings_finding.findings.cve}</td>`
             if(transfer_findings_finding.findings.risk_status.includes("Transfer Accepted")){
-                row.innerHTML += `<td><a href="http://${host}/finding/${transfer_findings_finding.finding_related}" class="table-link" target="_blank" type="button"> ${transfer_findings_finding.finding_related} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>`
+                row.innerHTML += `<td><a href="http://${host}/finding/${transfer_findings_finding.finding_related}" class="table-link help help-tooltip" title="View transfered finding" target="_blank" type="button"> ${transfer_findings_finding.finding_related} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>`
                 cell_status.innerHTML= `<span style="color:green">${transfer_findings_finding.findings.risk_status}</span>`
             }
             else if(transfer_findings_finding.findings.risk_status.includes("Transfer Reject"))
@@ -175,15 +177,15 @@ function innerData(data, findings_related){
             row.appendChild(cell_status)
             row.innerHTML += `<td>
                 ${transfer_findings_finding.permission.includes(2805) && transfer_findings_finding.permission.includes(2806)? 
-                    `<button type="button" class="btn btn-success btn-sm" data-btn-success=${transfer_findings_finding.findings.id} data-related-finding=""> 
+                    `<button type="button" class="btn btn-success btn-sm help help-tooltip" title="Accept Finding" data-btn-success=${transfer_findings_finding.findings.id} data-related-finding=""> 
                         <i class="fas fa-check"></i>
                     </button>
-                    <button type="button" class="btn btn-warning btn-sm" data-btn-warning=${transfer_findings_finding.findings.id}>
+                    <button type="button" class="btn btn-warning btn-sm help help-tooltip" title="Reject Finding" data-btn-warning=${transfer_findings_finding.findings.id}>
                         <i class="fas fa-times"></i>
                     </button>`
                     :'--'}
                 ${transfer_findings_finding.permission.includes(2807) ? 
-                    `<button type="button" class="btn btn-danger btn-sm" data-btn-danger=${transfer_findings_finding.findings.id}>
+                    `<button type="button" class="btn btn-danger btn-sm help help-tooltip" title="Delete Finding" data-btn-danger=${transfer_findings_finding.findings.id}>
                         <i class="fas fa-trash-alt"></i>
                     </button>
                     `: ''}
@@ -208,10 +210,13 @@ async function getTransferFindings(transferFindingId){
                 {
                     for(let engagement of response.data.engagements_list)
                         {
-                            for(let finding of engagement.findings)
+                            if(engagement["id"] == getSessionStorage("transferFinding","engagementId"))
+                            {
+                                for(let finding of engagement.findings)
                                 {
-                                related_findings += `<option value="${finding.id}"> ${finding.id}</option>`;
+                                    related_findings += `<option class="help help-tooltip" title="${finding.title}" value="${finding.id}"> ${finding.id}</option>`;
                                 }
+                            }
                         }
                     related_findings += `</select></td>`;
                     innerData(transferFindingResponse, related_findings);
