@@ -151,6 +151,8 @@ def get_request(request):
             for head in headers.iter("HEADER"):
                 header += str(head.findtext("key")) + ": "
                 header += str(head.findtext("value")) + "\n"
+        if request.findtext("BODY") is not None:
+            header += "BODY: " + str(request.findtext("BODY")) + "\n"
         return str(header)
     return ""
 

@@ -18,7 +18,13 @@ from openpyxl.styles import Font
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups, EndpointReportFilter, ReportFindingFilter
+from dojo.filters import (
+    EndpointFilter,
+    EndpointFilterWithoutObjectLookups,
+    EndpointReportFilter,
+    ReportFindingFilter,
+    ReportFindingFilterWithoutObjectLookups,
+)
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
@@ -73,7 +79,9 @@ class ReportBuilder(View):
 
     def get_findings(self, request: HttpRequest):
         findings = get_authorized_findings(Permissions.Finding_View)
-        return ReportFindingFilter(self.request.GET, queryset=findings)
+        filter_string_matching = get_system_setting("filter_string_matching", False)
+        filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
+        return filter_class(self.request.GET, queryset=findings)
 
     def get_endpoints(self, request: HttpRequest):
         endpoints = Endpoint.objects.filter(finding__active=True,
@@ -162,8 +170,9 @@ class CustomReport(View):
 
 def report_findings(request):
     findings = Finding.objects.filter()
-
-    findings = ReportFindingFilter(request.GET, queryset=findings)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
+    findings = filter_class(request.GET, queryset=findings)
 
     title_words = get_words_for_field(Finding, 'title')
     component_words = get_words_for_field(Finding, 'component_name')
@@ -415,14 +424,15 @@ def generate_report(request, obj, host_view=False):
         disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
     report_name = str(obj)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    report_finding_filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
     add_breadcrumb(title="Generate Report", top_level=False, request=request)
     if type(obj).__name__ == "Product_Type":
         product_type = obj
         template = "dojo/product_type_pdf_report.html"
         report_name = "Product Type Report: " + str(product_type)
         report_title = "Product Type Report"
-
-        findings = ReportFindingFilter(request.GET, prod_type=product_type, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+        findings = report_finding_filter_class(request.GET, prod_type=product_type, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product__prod_type=product_type)))
         products = Product.objects.filter(prod_type=product_type,
                                           engagement__test__finding__in=findings.qs).distinct()
@@ -472,7 +482,7 @@ def generate_report(request, obj, host_view=False):
         template = "dojo/product_pdf_report.html"
         report_name = "Product Report: " + str(product)
         report_title = "Product Report"
-        findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+        findings = report_finding_filter_class(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
             test__engagement__product=product)))
         ids = set(finding.id for finding in findings.qs)  # noqa: C401
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
@@ -499,7 +509,7 @@ def generate_report(request, obj, host_view=False):
     elif type(obj).__name__ == "Engagement":
         logger.debug('generating report for Engagement')
         engagement = obj
-        findings = ReportFindingFilter(request.GET, engagement=engagement,
+        findings = report_finding_filter_class(request.GET, engagement=engagement,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(test__engagement=engagement)))
         report_name = "Engagement Report: " + str(engagement)
         template = 'dojo/engagement_pdf_report.html'
@@ -528,7 +538,7 @@ def generate_report(request, obj, host_view=False):
 
     elif type(obj).__name__ == "Test":
         test = obj
-        findings = ReportFindingFilter(request.GET, engagement=test.engagement,
+        findings = report_finding_filter_class(request.GET, engagement=test.engagement,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(test=test)))
         template = "dojo/test_pdf_report.html"
         report_name = "Test Report: " + str(test)
@@ -561,7 +571,7 @@ def generate_report(request, obj, host_view=False):
             endpoints = Endpoint.objects.filter(pk=endpoint.id).distinct()
             report_title = "Endpoint Report"
         template = 'dojo/endpoint_pdf_report.html'
-        findings = ReportFindingFilter(request.GET,
+        findings = report_finding_filter_class(request.GET,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
         context = {'endpoint': endpoint,
@@ -580,7 +590,7 @@ def generate_report(request, obj, host_view=False):
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
     elif type(obj).__name__ in ["QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"]:
-        findings = ReportFindingFilter(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
+        findings = report_finding_filter_class(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
         report_name = 'Finding'
         template = 'dojo/finding_pdf_report.html'
         report_title = "Finding Report"
