@@ -1269,7 +1269,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Bearer CLI': ['title', 'severity'],
     'Nancy Scan': ['title', 'vuln_id_from_tool'],
     'Wiz Scan': ['title', 'description', 'severity'],
-    'Kiuwan SCA Scan': ['description', 'severity', 'component_name', 'component_version', 'cwe']
+    'Kiuwan SCA Scan': ['description', 'severity', 'component_name', 'component_version', 'cwe'],
     'Kubescape JSON Importer': ['title', 'component_name']
 }
 
