@@ -4,7 +4,8 @@ from dojo.metrics import views
 
 urlpatterns = [
     #  metrics
-    re_path(r'^metrics$', views.metrics, {'mtype': 'All'}, name='metrics'),
+    re_path(r'^metrics$', views.metrics, {'mtype': 'All'},
+        name='metrics'),
     re_path(r'^critical_product_metrics$', views.critical_product_metrics, {'mtype': 'All'},
         name='critical_product_metrics'),
     re_path(r'^metrics/all$', views.metrics, {'mtype': 'All'},
