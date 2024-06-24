@@ -8,7 +8,7 @@ from datetime import date, datetime, timedelta
 from functools import reduce, partial
 from math import ceil
 from operator import itemgetter
-from typing import Union, Optional
+from typing import Union, Optional, Callable, Protocol, TypeAlias, TypeVar
 
 from dateutil.relativedelta import MO, relativedelta
 from django.contrib import messages
@@ -55,6 +55,16 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
+
+# For type-hinting methods that take querysets we perform metrics over
+MetricsQuerySet = TypeVar('MetricsQuerySet', QuerySet[Finding], QuerySet[Endpoint_Status])
+
+
+# For type-hinting
+class _ChartingFunc(Protocol):
+    def __call__(self, qs: MetricsQuerySet, closed_lookup: Optional[str] = None) -> MetricsQuerySet: pass
+
+
 """
 Greg, Jay
 status: in production
@@ -97,7 +107,7 @@ def get_date_range(
 
 
 def severity_count(
-    queryset: QuerySet,
+    queryset: MetricsQuerySet,
     method: str,
     expression: str
 ) -> QuerySet:
@@ -185,7 +195,7 @@ def js_epoch(
 
 
 def get_charting_data(
-    qs: QuerySet,
+    qs: MetricsQuerySet,
     start_date: date,
     period: str,
     period_count: int
@@ -303,7 +313,7 @@ def finding_querys(prod_type, request):
     weeks_between, months_between = period_deltas(start_date, end_date)
 
     monthly_counts = get_monthly_counts(
-        findings_qs,
+        findings_query,
         active_findings,
         accepted_findings,
         start_date,
@@ -353,13 +363,16 @@ def finding_querys(prod_type, request):
 
 
 def endpoint_querys(prod_type, request):
-    endpoints_query = Endpoint_Status.objects.filter(mitigated=False,
-                                      finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
+    endpoints_query = Endpoint_Status.objects.filter(
+        mitigated=False,
+        finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
+    ).prefetch_related(
         'finding__test__engagement__product',
         'finding__test__engagement__product__prod_type',
         'finding__test__engagement__risk_acceptance',
         'finding__risk_acceptance_set',
-        'finding__reporter')
+        'finding__reporter'
+    )
 
     endpoints_query = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_query, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
@@ -371,10 +384,11 @@ def endpoint_querys(prod_type, request):
     if not endpoints_qs.exists():
         endpoints = endpoints_query
         endpoints_qs = endpoints if isinstance(endpoints, QuerySet) else endpoints.qs
-        messages.add_message(request,
-                                     messages.ERROR,
-                                     _('All objects have been filtered away. Displaying all objects'),
-                                     extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            _('All objects have been filtered away. Displaying all objects'),
+            extra_tags='alert-danger')
 
     try:
         start_date, end_date = get_date_range(endpoints_qs)
@@ -383,50 +397,59 @@ def endpoint_querys(prod_type, request):
         end_date = timezone.now()
 
     if len(prod_type) > 0:
-        endpoints_closed = Endpoint_Status.objects.filter(mitigated_time__range=[start_date, end_date],
-                                                 finding__test__engagement__product__prod_type__in=prod_type).prefetch_related(
-            'finding__test__engagement__product')
+        endpoints_closed = Endpoint_Status.objects.filter(
+            mitigated_time__range=[start_date, end_date],
+            finding__test__engagement__product__prod_type__in=prod_type
+        ).prefetch_related(
+            'finding__test__engagement__product'
+        )
         # capture the accepted findings in period
-        accepted_endpoints = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True,
-                                                   finding__test__engagement__product__prod_type__in=prod_type). \
-            prefetch_related('finding__test__engagement__product')
-        accepted_endpoints_counts = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True,
-                                                          finding__test__engagement__product__prod_type__in=prod_type). \
-            prefetch_related('finding__test__engagement__product')
+        accepted_endpoints = Endpoint_Status.objects.filter(
+            date__range=[start_date, end_date],
+            risk_accepted=True,
+            finding__test__engagement__product__prod_type__in=prod_type
+        ).prefetch_related(
+            'finding__test__engagement__product'
+        )
     else:
-        endpoints_closed = Endpoint_Status.objects.filter(mitigated_time__range=[start_date, end_date]).prefetch_related(
-            'finding__test__engagement__product')
-        accepted_endpoints = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True). \
-            prefetch_related('finding__test__engagement__product')
-        accepted_endpoints_counts = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True). \
-            prefetch_related('finding__test__engagement__product')
+        endpoints_closed = Endpoint_Status.objects.filter(
+            mitigated_time__range=[start_date, end_date]
+        ).prefetch_related(
+            'finding__test__engagement__product'
+        )
+        # capture the accepted findings in period
+        accepted_endpoints = Endpoint_Status.objects.filter(
+            date__range=[start_date, end_date],
+            risk_accepted=True
+        ).prefetch_related(
+            'finding__test__engagement__product'
+        )
 
     endpoints_closed = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_closed, request.user)
     accepted_endpoints = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints, request.user)
-    accepted_endpoints_counts = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints_counts, request.user)
-    accepted_endpoints_counts = severity_count(accepted_endpoints_counts, 'aggregate', 'finding__severity')
+    accepted_endpoints_counts = severity_count(accepted_endpoints, 'aggregate', 'finding__severity')
 
     weeks_between, months_between = period_deltas(start_date, end_date)
 
-    monthly_counts = {
-        'opened_per_period': get_charting_data(aggregate_counts_by_period(endpoints_qs, TruncMonth,
-                                                                          'finding__severity', 'mitigated'),
-                                               start_date, 'months', months_between),
-        'active_per_period': get_charting_data(
-            aggregate_counts_by_period(endpoints_qs.filter(finding__active=True), TruncMonth, 'finding__severity'), start_date,
-            'months', months_between),
-        'accepted_per_period': get_charting_data(aggregate_counts_by_period(accepted_endpoints, TruncMonth, 'finding__severity'),
-                                                 start_date, 'months', months_between),
-    }
-    weekly_counts = {
-        'opened_per_period': get_charting_data(aggregate_counts_by_period(endpoints_qs, TruncWeek, 'finding__severity', 'mitigated'),
-                                               start_date, 'weeks', weeks_between),
-        'active_per_period': get_charting_data(
-            aggregate_counts_by_period(endpoints_qs.filter(finding__active=True), TruncWeek, 'finding__severity'), start_date,
-            'weeks', weeks_between),
-        'accepted_per_period': get_charting_data(aggregate_counts_by_period(accepted_endpoints, TruncWeek, 'finding__severity'),
-                                                 start_date, 'weeks', weeks_between),
-    }
+    monthly_counts = get_monthly_counts(
+        endpoints_qs,
+        endpoints_qs.filter(finding__active=True),
+        accepted_endpoints,
+        start_date,
+        months_between,
+        'finding__severity',
+        'mitigated'
+    )
+
+    weekly_counts = get_weekly_counts(
+        endpoints_qs,
+        endpoints_qs.filter(finding__active=True),
+        accepted_endpoints,
+        start_date,
+        weeks_between,
+        'finding__severity',
+        'mitigated'
+    )
 
     top_ten = get_authorized_products(Permissions.Product_View)
     top_ten = top_ten.filter(engagement__test__finding__status_finding__mitigated=False,
@@ -458,7 +481,7 @@ def endpoint_querys(prod_type, request):
 
 
 def aggregate_counts_by_period(
-    qs: Union[QuerySet[Finding], QuerySet[Endpoint_Status]],
+    qs: MetricsQuerySet,
     trunc_method: Union[TruncMonth, TruncWeek],
     severity_lookup_expression: str,
     closed_lookup_expression: Optional[str] = None,
@@ -493,94 +516,66 @@ def aggregate_counts_by_period(
     return severities_by_period.values(*desired_values)
 
 
-def get_monthly_counts(open_qs, active_qs, accepted_qs, start_date, months_between):
-    return {
-        'opened_per_period': get_charting_data(aggregate_counts_by_period(open_qs, TruncMonth, 'severity', 'is_mitigated'), start_date, 'months',
-                                               months_between),
-        'active_per_period': get_charting_data(aggregate_counts_by_period(active_qs, TruncMonth, 'severity'), start_date,
-                                               'months', months_between),
-        'accepted_per_period': get_charting_data(aggregate_counts_by_period(accepted_qs, TruncMonth, 'severity'), start_date,
-                                                 'months', months_between),
-    }
-
-
-def charting_func(start_date, period, period_count, severity_lookup):
-    def c(qs, cl=None):
+def charting_func(
+    start_date: date,
+    period: str,
+    period_count: int,
+    trunc_method: Union[TruncMonth, TruncWeek],
+    severity_lookup: str
+) -> _ChartingFunc:
+    def c(
+        qs: MetricsQuerySet,
+        cl: Optional[str] = None
+    ) -> list[dict]:
         chart = partial(get_charting_data, start_date=start_date, period=period, period_count=period_count)
-        agg = partial(aggregate_counts_by_period, trunc_method=TruncMonth, severity_lookup_expression=severity_lookup)
+        agg = partial(aggregate_counts_by_period, trunc_method=trunc_method, severity_lookup_expression=severity_lookup)
         return chart(agg(qs, closed_lookup_expression=cl))
     return c
 
 
-def get_monthly_counts(open_qs, active_qs, accepted_qs, start_date, months_between, severity_lookup, closed_lookup):
-    c = charting_func(start_date, 'months', months_between, severity_lookup)
-
+def _period_counts(
+    count_func: _ChartingFunc,
+    open_qs: MetricsQuerySet,
+    active_qs: MetricsQuerySet,
+    accepted_qs: MetricsQuerySet,
+    closed_lookup: str
+) -> dict[str, list[dict]]:
     return {
-        'opened_per_period': c(open_qs, closed_lookup),
-        'active_per_period': c(active_qs),
-        'accepted_per_period': c(accepted_qs)
-    }
-
-    """
-    return {
-        'opened_per_period': get_charting_data(
-            aggregate_counts_by_period(open_qs, TruncMonth, severity_lookup, closed_lookup),
-            start_date, 'months', months_between
-        ),
-        'active_per_period': get_charting_data(
-            aggregate_counts_by_period(active_qs, TruncMonth, severity_lookup),
-            start_date, 'months', months_between
-        ),
-        'accepted_per_period': get_charting_data(
-            aggregate_counts_by_period(accepted_qs, TruncMonth, severity_lookup),
-            start_date, 'months', months_between
-        ),
-    }
-    """
-
-
-def get_weekly_counts(open_qs, active_qs, accepted_qs, start_date, weeks_between):
-    return {
-        'opened_per_period': get_charting_data(aggregate_counts_by_period(open_qs, TruncWeek, 'severity', 'is_mitigated'), start_date, 'weeks',
-                                               weeks_between),
-        'active_per_period': get_charting_data(aggregate_counts_by_period(active_qs, TruncWeek, 'severity'), start_date, 'weeks',
-                                               weeks_between),
-        'accepted_per_period': get_charting_data(aggregate_counts_by_period(accepted_qs, TruncWeek, 'severity'), start_date,
-                                                 'weeks', weeks_between),
+        'opened_per_period': count_func(open_qs, closed_lookup),
+        'active_per_period': count_func(active_qs),
+        'accepted_per_period': count_func(accepted_qs)
     }
 
 
-def get_weekly_counts(open_qs, active_qs, accepted_qs, start_date, weeks_between, severity_lookup, closed_lookup):
-    """
-    def c(qs, cl=None):
-        chart = partial(get_charting_data, start_date=start_date, period='weeks', period_count=weeks_between)
-        agg = partial(aggregate_counts_by_period, trunc_method=TruncWeek, severity_lookup_expression=severity_lookup)
-        return chart(agg(qs, closed_lookup_expression=cl))
-    """
-    c = charting_func(start_date, 'weeks', weeks_between, severity_lookup)
+def get_monthly_counts(
+    open_qs: MetricsQuerySet,
+    active_qs: MetricsQuerySet,
+    accepted_qs: MetricsQuerySet,
+    start_date: date,
+    months_between: int,
+    severity_lookup: str,
+    closed_lookup: str
+) -> dict[str, list[dict]]:
+    c = charting_func(start_date, 'months', months_between, TruncMonth, severity_lookup)
+    return _period_counts(c, open_qs, active_qs, accepted_qs, closed_lookup)
 
-    return {
-        'opened_per_period': c(open_qs, closed_lookup),
-        'active_per_period': c(active_qs),
-        'accepted_per_period': c(accepted_qs),
-    }
 
-    """
+def get_weekly_counts(
+    open_qs: MetricsQuerySet,
+    active_qs: MetricsQuerySet,
+    accepted_qs: MetricsQuerySet,
+    start_date: date,
+    weeks_between: int,
+    severity_lookup: str,
+    closed_lookup: str
+) -> dict[str, list[dict]]:
+    c = charting_func(start_date, 'weeks', weeks_between, TruncWeek, severity_lookup)
+    return _period_counts(c, open_qs, active_qs, accepted_qs, closed_lookup)
 
-    return {
-        'opened_per_period': get_charting_data(
-            aggregate_counts_by_period(open_qs, TruncWeek, severity_lookup, closed_lookup),
-            start_date, 'weeks', weeks_between),
-        'active_per_period': get_charting_data(
-            aggregate_counts_by_period(active_qs, TruncWeek, severity_lookup),
-            start_date, 'weeks', weeks_between),
-        'accepted_per_period': get_charting_data(
-            aggregate_counts_by_period(accepted_qs, TruncWeek, severity_lookup),
-            start_date, 'weeks', weeks_between),
-    }
-    """
 
-def findings_by_product(findings):
+def findings_by_product(
+    findings: QuerySet[Finding]
+) -> QuerySet[Finding]:
     return findings.values(product_name=F('test__engagement__product__name'),
                            product_id=F('test__engagement__product__id'))
 
@@ -625,7 +620,9 @@ def get_prod_type(request):
     return prod_type
 
 
-def findings_queryset(qs):
+def findings_queryset(
+    qs: MetricsQuerySet
+) -> QuerySet[Finding]:
     if qs.model is Endpoint_Status:
         return Finding.objects.filter(status_finding__in=qs)
     else:

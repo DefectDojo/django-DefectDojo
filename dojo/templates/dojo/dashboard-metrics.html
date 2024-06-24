@@ -211,10 +211,10 @@
             var medium = [];
             var low = [];
             {% for month in opened_per_month %}
-                critical.push([{{ month.e }}, {{ month.c }}]);
-                high.push([{{ month.e }}, {{ month.h }}]);
-                medium.push([{{ month.e }}, {{ month.m }}]);
-                low.push([{{ month.e }}, {{ month.l }}]);
+                critical.push([{{ month.epoch }}, {{ month.critical }}]);
+                high.push([{{ month.epoch }}, {{ month.high }}]);
+                medium.push([{{ month.epoch }}, {{ month.medium }}]);
+                low.push([{{ month.epoch }}, {{ month.low }}]);
             {% endfor %}
             opened_per_month(critical, high, medium, low);
 
@@ -223,10 +223,10 @@
             medium = [];
             low = [];
             {% for month in accepted_per_month %}
-                critical.push([{{ month.e }}, {{ month.c }}]);
-                high.push([{{ month.e }}, {{ month.h }}]);
-                medium.push([{{ month.e }}, {{ month.m }}]);
-                low.push([{{ month.e }}, {{ month.l }}]);
+                critical.push([{{ month.epoch }}, {{ month.critical }}]);
+                high.push([{{ month.epoch }}, {{ month.high }}]);
+                medium.push([{{ month.epoch }}, {{ month.medium }}]);
+                low.push([{{ month.epoch }}, {{ month.low }}]);
             {% endfor %}
             accepted_per_month(critical, high, medium, low);
 
@@ -235,10 +235,10 @@
             medium = [];
             low = [];
             {% for week in opened_per_week %}
-                critical.push([{{ week.e }}, {{ week.c }}]);
-                high.push([{{ week.e }}, {{ week.h }}]);
-                medium.push([{{ week.e }}, {{ week.m }}]);
-                low.push([{{ week.e }}, {{ week.l }}]);
+                critical.push([{{ week.epoch }}, {{ week.critical }}]);
+                high.push([{{ week.epoch }}, {{ week.high }}]);
+                medium.push([{{ week.epoch }}, {{ week.medium }}]);
+                low.push([{{ week.epoch }}, {{ week.low }}]);
             {% endfor %}
             opened_per_week(critical, high, medium, low);
 
@@ -247,10 +247,10 @@
             medium = [];
             low = [];
             {% for week in accepted_per_week %}
-                critical.push([{{ week.e }}, {{ week.c }}]);
-                high.push([{{ week.e }}, {{ week.h }}]);
-                medium.push([{{ week.e }}, {{ week.m }}]);
-                low.push([{{ week.e }}, {{ week.l }}]);
+                critical.push([{{ week.epoch }}, {{ week.critical }}]);
+                high.push([{{ week.epoch }}, {{ week.high }}]);
+                medium.push([{{ week.epoch }}, {{ week.medium }}]);
+                low.push([{{ week.epoch }}, {{ week.low }}]);
             {% endfor %}
             accepted_per_week(critical, high, medium, low);
 
@@ -271,10 +271,10 @@
                 top_ten_products(critical, high, medium, low, ticks);
             {% endif %}
 
-            critical = "{{in_period_counts.Critical|default_if_none:0}}";
-            high = "{{in_period_counts.High|default_if_none:0}}";
-            medium = "{{in_period_counts.Medium|default_if_none:0}}";
-            low = "{{in_period_counts.Low|default_if_none:0}}";
+            critical = "{{in_period_counts.critical|default_if_none:0}}";
+            high = "{{in_period_counts.high|default_if_none:0}}";
+            medium = "{{in_period_counts.medium|default_if_none:0}}";
+            low = "{{in_period_counts.low|default_if_none:0}}";
             severity_pie(critical, high, medium, low);
 
             critical = "{{accepted_in_period_counts.critical|default_if_none:0}}";
@@ -283,10 +283,10 @@
             low = "{{accepted_in_period_counts.low|default_if_none:0}}";
             total_accepted_pie(critical, high, medium, low);
 
-            critical = "{{closed_in_period_counts.Critical}}";
-            high = "{{closed_in_period_counts.High}}";
-            medium = "{{closed_in_period_counts.Medium}}";
-            low = "{{closed_in_period_counts.Low}}";
+            critical = "{{closed_in_period_counts.critical}}";
+            high = "{{closed_in_period_counts.high}}";
+            medium = "{{closed_in_period_counts.medium}}";
+            low = "{{closed_in_period_counts.low}}";
             total_closed_pie(critical, high, medium, low);
 
             {%  if punchcard %}
