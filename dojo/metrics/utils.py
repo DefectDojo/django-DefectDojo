@@ -1,30 +1,18 @@
-import collections
-import logging
-import operator
-from calendar import monthrange
-from collections import OrderedDict
+
 from datetime import date, datetime, timedelta
-from functools import reduce, partial
+from functools import partial
 from math import ceil
-from operator import itemgetter
-from typing import Union, Optional, Callable, Protocol, TypeAlias, TypeVar
+from typing import Optional, Protocol, TypeVar, Union
 
-from dateutil.relativedelta import MO, relativedelta
+from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
-from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When, F
-from django.db.models.query import QuerySet
+from django.db.models import Case, F, IntegerField, Q, Sum, Value, When
 from django.db.models.functions import Coalesce, ExtractDay, Now, TruncMonth, TruncWeek
-from django.http import HttpResponseRedirect, HttpRequest
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
+from django.db.models.query import QuerySet
+from django.http import HttpRequest
 from django.utils import timezone
-from django.utils.html import escape
 from django.utils.translation import gettext as _
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
 
-from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoint_status
 from dojo.filters import (
@@ -32,26 +20,16 @@ from dojo.filters import (
     MetricsEndpointFilterWithoutObjectLookups,
     MetricsFindingFilter,
     MetricsFindingFilterWithoutObjectLookups,
-    UserFilter,
 )
 from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, OPEN_FINDINGS_QUERY
 from dojo.finding.queries import get_authorized_findings
-from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
-from dojo.models import Dojo_User, Endpoint_Status, Engagement, Finding, Product, Product_Type, Risk_Acceptance, Test
+from dojo.models import Endpoint_Status, Finding, Product_Type
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.utils import (
-    add_breadcrumb,
-    count_findings,
-    findings_this_period,
-    get_page_items,
-    get_period_counts,
-    get_punchcard_data,
     get_system_setting,
-    opened_in_period,
     queryset_check,
 )
-
 
 # For type-hinting methods that take querysets we perform metrics over
 MetricsQuerySet = TypeVar('MetricsQuerySet', QuerySet[Finding], QuerySet[Endpoint_Status])
