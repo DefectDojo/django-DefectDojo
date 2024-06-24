@@ -29,16 +29,30 @@ class AcunetixJSONParser:
             sev = item["Severity"]
             if sev not in ["Info", "Low", "Medium", "High", "Critical"]:
                 sev = "Info"
-            mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
-            references = text_maker.handle(item.get("RemedyReferences", ""))
+            if item["RemedialProcedure"] is not None:
+                mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
+            else:
+                mitigation = None
+            if item["RemedyReferences"] is not None:
+                references = text_maker.handle(item.get("RemedyReferences", ""))
+            else:
+                references = None
             if "LookupId" in item:
                 lookupId = item["LookupId"]
-                references = (
-                    f"https://online.acunetix360.com/issues/detail/{lookupId}\n"
-                    + references
-                )
+                if references is None:
+                    references = (
+                        f"https://online.acunetix360.com/issues/detail/{lookupId}\n"
+                    )
+                else:
+                    references = (
+                        f"https://online.acunetix360.com/issues/detail/{lookupId}\n"
+                        + references
+                    )
             url = item["Url"]
-            impact = text_maker.handle(item.get("Impact", ""))
+            if item["Impact"] is not None:
+                impact = text_maker.handle(item.get("Impact", ""))
+            else:
+                impact = None
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             if request is None or len(request) <= 0:
