@@ -330,3 +330,9 @@ class TestAcunetixParser(DojoTestCase):
             parser = AcunetixParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+
+    def test_parse_file_issue_10435(self):
+        with open("unittests/scans/acunetix/issue_10435.json") as testfile:
+            parser = AcunetixParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
