@@ -430,7 +430,7 @@ def get_charting_data(
 
     :param qs: The query set
     :param start_date: The start date
-    :param period: A string, either 'weeks' or 'months,' representing the period
+    :param period: A MetricsPeriod to generate charting data across
     :param period_count: The number of periods we should have data for
     :return: A list of dictionaries representing data points for charting, sorted by date
     """
@@ -491,10 +491,9 @@ def aggregate_counts_by_period(
     trunc_method. Optionally includes a sum of closed findings/statuses as well.
 
     :param qs: The queryset to annotate with aggregate severity counts, either of Findings or Endpoint_Statuses
-    :param trunc_method: Database function TruncMonth or TruncWeek, for aggregating data by desired period
-    :param severity_lookup_expression: The query lookup expression for severities relative to the QuerySet model type
-    :param closed_lookup_expression: An optional query lookup expression for aggregating 'closed' finding counts,
-        matched against the constant True. If None, closed statistics will not be gathered.
+    :param period: A MetricsPeriod to aggregate across
+    :param metrics_type: The type of metrics to generate statistics for
+    :param include_closed: A boolean dictating whether 'closed' finding/status aggregates should be included
     :return: A queryset with aggregate severity counts grouped by period
     """
 
@@ -522,6 +521,12 @@ def aggregate_counts_by_period(
 def findings_by_product(
     findings: QuerySet[Finding]
 ) -> QuerySet[Finding]:
+    """
+    Groups the given Findings queryset around related product (name/ID)
+
+    :param findings: A queryset of Findings
+    :return: A queryset of Findings grouped by product (name/ID)
+    """
     return findings.values(product_name=F('test__engagement__product__name'),
                            product_id=F('test__engagement__product__id'))
 
@@ -529,6 +534,13 @@ def findings_by_product(
 def get_in_period_details(
     findings: QuerySet[Finding]
 ) -> tuple[QuerySet[Finding], QuerySet[Finding], dict[str, int]]:
+    """
+    Gathers details for the given queryset, corresponding to metrics information for 'in period' Findings
+
+    :param findings: A queryset of Findings
+    :return: A tuple of (a queryset of severity aggregates, a queryset of severity aggregates by product, a dict of
+        Findings by age)
+    """
     in_period_counts = severity_count(findings, 'aggregate', 'severity')
     in_period_details = severity_count(
         findings_by_product(findings), 'annotate', 'severity'
@@ -546,6 +558,12 @@ def get_in_period_details(
 def get_accepted_in_period_details(
     findings: QuerySet[Finding]
 ) -> QuerySet[Finding]:
+    """
+    Gathers details for the given queryset, corresponding to metrics information for 'accepted' Findings
+
+    :param findings: A queryset of Findings
+    :return: A queryset of severity aggregates for Findings grouped by product (name/ID)
+    """
     return severity_count(
         findings_by_product(findings), 'annotate', 'severity'
     ).order_by('product_name')
@@ -554,6 +572,13 @@ def get_accepted_in_period_details(
 def get_closed_in_period_details(
     findings: QuerySet[Finding]
 ) -> tuple[QuerySet[Finding], QuerySet[Finding]]:
+    """
+    Gathers details for the given queryset, corresponding to metrics information for 'closed' Findings
+
+    :param findings: A queryset of Findings
+    :return: A tuple of (a queryset of severity aggregates, a queryset of severity aggregates for Findings grouped by
+        product)
+    """
     return (
         severity_count(findings, 'aggregate', 'severity'),
         severity_count(
