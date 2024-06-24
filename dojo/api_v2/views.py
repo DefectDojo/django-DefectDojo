@@ -59,6 +59,7 @@ from dojo.filters import (
     ApiTemplateFindingFilter,
     ApiTestFilter,
     ReportFindingFilter,
+    ReportFindingFilterWithoutObjectLookups,
 )
 from dojo.finding.queries import (
     get_authorized_findings,
@@ -2866,13 +2867,15 @@ def report_generate(request, obj, options):
     include_finding_images = options.get("include_finding_images", False)
     include_executive_summary = options.get("include_executive_summary", False)
     include_table_of_contents = options.get("include_table_of_contents", False)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    report_finding_filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
 
     if type(obj).__name__ == "Product_Type":
         product_type = obj
 
         report_name = "Product Type Report: " + str(product_type)
 
-        findings = ReportFindingFilter(
+        findings = report_finding_filter_class(
             request.GET,
             prod_type=product_type,
             queryset=prefetch_related_findings_for_report(
@@ -2901,7 +2904,7 @@ def report_generate(request, obj, options):
 
         report_name = "Product Report: " + str(product)
 
-        findings = ReportFindingFilter(
+        findings = report_finding_filter_class(
             request.GET,
             product=product,
             queryset=prefetch_related_findings_for_report(
@@ -2915,7 +2918,7 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
-        findings = ReportFindingFilter(
+        findings = report_finding_filter_class(
             request.GET,
             engagement=engagement,
             queryset=prefetch_related_findings_for_report(
@@ -2932,7 +2935,7 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Test":
         test = obj
-        findings = ReportFindingFilter(
+        findings = report_finding_filter_class(
             request.GET,
             engagement=test.engagement,
             queryset=prefetch_related_findings_for_report(
@@ -2948,7 +2951,7 @@ def report_generate(request, obj, options):
         endpoints = Endpoint.objects.filter(
             host=host, product=endpoint.product
         ).distinct()
-        findings = ReportFindingFilter(
+        findings = report_finding_filter_class(
             request.GET,
             queryset=prefetch_related_findings_for_report(
                 Finding.objects.filter(endpoints__in=endpoints)
@@ -2956,7 +2959,7 @@ def report_generate(request, obj, options):
         )
 
     elif type(obj).__name__ == "CastTaggedQuerySet":
-        findings = ReportFindingFilter(
+        findings = report_finding_filter_class(
             request.GET,
             queryset=prefetch_related_findings_for_report(obj).distinct(),
         )

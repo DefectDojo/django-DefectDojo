@@ -1,0 +1,45 @@
+{
+    "Generated": "19/06/2024 04:48 PM",
+    "Target": {
+      "Duration": "00:00:58.0662477",
+      "Initiated": "23/02/2023 02:30 PM",
+      "ScanId": "cb10809365d246d0881eafb202e63e55",
+      "Url": "XXXX"
+    },
+    "Vulnerabilities": [
+      {
+        "Certainty": 90,
+        "Classification": null,
+        "Confirmed": false,
+        "Description": "This vulnerability is removed or expired.",
+        "ExploitationSkills": null,
+        "ExternalReferences": null,
+        "ExtraInformation": [],
+        "FirstSeenDate": "02/06/2022 05:25 PM",
+        "HttpRequest": {
+          "Content": "GET /cgi-bin/ HTTP/1.1\r\nHost: XXXX\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\r\nAccept-Language: en-us,en;q=0.5\r\nCache-Control: no-cache\r\nCookie: PHPSESSID=1adegrqlm9oebggs8mghcs78gt\r\nReferer: https://ics-monitoring.amersports.int/cgi-bin/\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.5249.62 Safari/537.36\r\nX-Scanner: Acunetix 360\r\n\r\n",
+          "Method": "GET",
+          "Parameters": []
+        },
+        "HttpResponse": {
+          "Content": "HTTP/1.1 403 Forbidden\r\nServer: Apache\r\nConnection: Keep-Alive\r\nKeep-Alive: timeout=5, max=100\r\nContent-Length: 199\r\nContent-Type: text/html; charset=iso-8859-1\r\nDate: Thu, 23 Feb 2023 09:45:56 GMT\r\n\r\n<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>403 Forbidden</title>\n</head><body>\n<h1>Forbidden</h1>\n<p>You don't have permission to access this resource.</p>\n</body></html>\n",
+          "Duration": 668.4901,
+          "StatusCode": 403
+        },
+        "LookupId": "7ce8d15a-e5f0-4dd5-1f83-aea8034f4105",
+        "Impact": null,
+        "KnownVulnerabilities": [],
+        "LastSeenDate": "23/02/2023 10:46 AM",
+        "Name": "MissingXFrameOptionsHeader",
+        "ProofOfConcept": null,
+        "RemedialActions": null,
+        "RemedialProcedure": null,
+        "RemedyReferences": null,
+        "Severity": "Low",
+        "State": "Present",
+        "Type": "MissingXFrameOptionsHeader",
+        "Url": "XXXX",
+        "Tags": []
+      }
+    ]
+  }
