@@ -248,5 +248,8 @@ def reset_finding_related(finding):
         ApiError.internal_server_error(detail=e)
 
 
-def enable_flow_transfer_finding():
-    return ["Risk Active"]
+def enable_flow_transfer_finding(finding_status):
+    # add rule custom if necessary
+    if finding_status in ["Risk Active", "Risk Expired"]:
+        return True
+    return False

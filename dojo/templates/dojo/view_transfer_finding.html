@@ -46,7 +46,7 @@
         text-overflow: ellipsis;
     }
 
-    .modal-dialog{
+    .modal-tranferfindingfinding{
       max-width: 70%;
       width: 70%;
       margin: 0 auto;
@@ -80,9 +80,10 @@
 {% block content %}
     {{ block.super }}
     {% include 'dojo/modal/confirmed.html' %}
+    {% include 'dojo/modal/loading-overlay.html'%}
     {% include 'dojo/modal/alerts.html' with title="Select an engagement please" %}
 <div class="modal fade" id="modalTransferFinding" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-tranferfindingfinding">
       <div class="modal-content">
       {% include 'dojo/modal/alerts.html' with title="Select an engagement please" %}
         <div class="modal-header">
@@ -92,6 +93,7 @@
           </button>
         </div>
         <div class="modal-body">
+        {% include 'dojo/modal/loading.html' %}
           <table class="table table-hover">
             <thead class="thead-dark">
               <tr>
@@ -99,7 +101,10 @@
                 <th scope="col">Name</th>
                 <th scope="col">Severity</th>
                 <th scope="col">Vulnerability Id</th>
-                <th scope="col">Related Finding</th>
+                <th scope="col">Related Finding
+                  <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Select a finding that is related to the finding you want to transfer. If the default value is left, a new finding will be created in its product." data-placement="right" data-container="body" data-original-title="" title="">
+                  </i>
+                </th>
                 <th scope="col">Status</th>
                 <th scope="col">Actions</th>
               </tr>
@@ -112,7 +117,8 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal"><i class="fa-solid fa-circle-xmark"></i> Close</button>
-          <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" id="save-btn" ><i class="fa-solid fa-floppy-disk"></i> Save</i> </button>
+          <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" id="save-btn" ><i class="fa-solid fa-floppy-disk"></i> Save</i>
+          </button>
         </div>
       </div>
     </div>
@@ -175,17 +181,17 @@
                             <td>{{transfer_findings.accepted_by}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-success btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target=""  title="Accept all Finding" class="btn btn-success btn-sm btn-tf help help-tooltip" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-check"></i>
                                     </button>
                             {% endif%}
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-warning btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-warning btn-sm btn-tf help help-tooltip" title="Reject all Finding" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-times"></i>
                                     </button>
                             {% endif%}
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Delete" %}
-                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf help help-tooltip" title="Delete all Findings" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-trash-alt"></i>
                                     </button></i>
                             {%endif%}
@@ -226,7 +232,7 @@
     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
     import {setSessionStorage, getSessionStorage} from '{% static "dojo/js/settings/session_storage.js" %}'
     import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
-    import { filterForStatus, productId, transferId, engagementId, generateRequestTransferFindingUpdate } from '{% static "dojo/js/transfer_finding/index.js" %}';
+    import { filterForStatus, productId, transferId, generateRequestTransferFindingUpdate } from '{% static "dojo/js/transfer_finding/index.js" %}';
     import {alertHide, alertShow} from '{% static "dojo/js/alert/alert.js" %}';
     import {all} from '{% static "dojo/js/driver_adapter/transfer_finding.js" %}'
 
@@ -235,9 +241,11 @@
     // Event update
     $(document).ready(function() {
       $('#save-btn').on("click", function(){
+        $('#loading-overlay').modal('show');
         let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Rejected"])
         if (typeof tranferAcceptedFinding === 'object' && Object.keys(tranferAcceptedFinding).length > 0){
-          if(engagementId > 0){
+          let engagementId = getSessionStorage('transferFinding', 'engagementId');
+          if(engagementId !== "None"){
             updateTransferFinding({"destination_engagement": engagementId}, transferId);
           }
           updateFindings(tranferAcceptedFinding, transferId)
@@ -246,6 +254,7 @@
         if (typeof removedFinding === 'object' && Object.keys(removedFinding).length > 0){
           removeFindings(removedFinding)
         }
+        $('#loading-overlay').modal('hide');
       });
 
       $("#confirmed_action_modal").on('click', function()
@@ -273,8 +282,9 @@
         let row = $(this).closest('tr');
         let selectEngagement = row.find('.cls-choosen-engagement')
         let product_id = row.find('.cls_transfer_finding_show_modal').data('product-id')
-        setSessionStorage('transferFinding','product_id',product_id)
+        setSessionStorage('transferFinding','productId',product_id)
         let engagementSelected = selectEngagement.selectpicker('val');
+        setSessionStorage('transferFinding','engagementId', engagementSelected)
         if(engagementSelected === "None" && $(this).hasClass('btn-success'))
         {
           alertShow(".alert");
@@ -380,9 +390,10 @@
 
   async function updateFindingsRiskStatus(action, transferFindingId ){
     let response = ""
+    let engagementId = getSessionStorage('transferFinding', 'engagementId');
     if (action == "Accepted")
     {
-        if(engagementId > 0)
+        if(engagementId !== "None")
         {
           response = await updateTransferFinding({"destination_engagement": engagementId}, transferFindingId)
         }
