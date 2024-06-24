@@ -26,8 +26,8 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import UserFilter
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
 from dojo.metrics.utils import (
-    endpoint_querys,
-    finding_querys,
+    endpoint_queries,
+    finding_queries,
     findings_queryset,
     get_accepted_in_period_details,
     get_closed_in_period_details,
@@ -98,10 +98,10 @@ def metrics(request, mtype):
     filters = {}
     if view == 'Finding':
         page_name = _('Product Type Metrics by Findings')
-        filters = finding_querys(prod_type, request)
+        filters = finding_queries(prod_type, request)
     elif view == 'Endpoint':
         page_name = _('Product Type Metrics by Affected Endpoints')
-        filters = endpoint_querys(prod_type, request)
+        filters = endpoint_queries(prod_type, request)
 
     all_findings = findings_queryset(queryset_check(filters['all']))
 
