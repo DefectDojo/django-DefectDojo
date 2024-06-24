@@ -33,12 +33,9 @@ class TestRemoteUser(DojoTestCase):
     )
     def test_basic(self):
         resp = self.client1.get('/profile',
-                                # TODO - This can be replaced by following lines in the future
-                                # Using of "headers" is supported since Django 4.2
-                                HTTP_REMOTE_USER=self.user.username,
-                                # headers={
-                                #     "Remote-User": self.user.username
-                                # }
+                                headers={
+                                    "Remote-User": self.user.username
+                                }
                                 )
         self.assertEqual(resp.status_code, 200)
 
@@ -51,18 +48,12 @@ class TestRemoteUser(DojoTestCase):
     )
     def test_update_user(self):
         resp = self.client1.get('/profile',
-                                # TODO - This can be replaced by following lines in the future
-                                # Using of "headers" is supported since Django 4.2
-                                HTTP_REMOTE_USER=self.user.username,
-                                HTTP_REMOTE_FIRSTNAME="new_first",
-                                HTTP_REMOTE_LASTNAME="new_last",
-                                HTTP_REMOTE_EMAIL="new@mail.com",
-                                # headers = {
-                                #     "Remote-User": self.user.username,
-                                #     "Remote-Firstname": "new_first",
-                                #     "Remote-Lastname": "new_last",
-                                #     "Remote-Email": "new@mail.com",
-                                # }
+                                headers={
+                                    "Remote-User": self.user.username,
+                                    "Remote-Firstname": "new_first",
+                                    "Remote-Lastname": "new_last",
+                                    "Remote-Email": "new@mail.com",
+                                }
                                 )
         self.assertEqual(resp.status_code, 200)
         updated_user = User.objects.get(pk=self.user.pk)
@@ -78,14 +69,10 @@ class TestRemoteUser(DojoTestCase):
     )
     def test_update_groups_cleanup(self):
         resp = self.client1.get('/profile',
-                                # TODO - This can be replaced by following lines in the future
-                                # Using of "headers" is supported since Django 4.2
-                                HTTP_REMOTE_USER=self.user.username,
-                                HTTP_REMOTE_GROUPS=self.group1.name,
-                                # headers = {
-                                #     "Remote-User": self.user.username,
-                                #     "Remote-Groups": self.group1.name,
-                                # }
+                                headers={
+                                    "Remote-User": self.user.username,
+                                    "Remote-Groups": self.group1.name,
+                                }
                                 )
         self.assertEqual(resp.status_code, 200)
         dgms = Dojo_Group_Member.objects.filter(user=self.user)
@@ -93,14 +80,10 @@ class TestRemoteUser(DojoTestCase):
         self.assertEqual(dgms.first().group.name, self.group1.name)
 
         resp = self.client2.get('/profile',
-                                # TODO - This can be replaced by following lines in the future
-                                # Using of "headers" is supported since Django 4.2
-                                HTTP_REMOTE_USER=self.user.username,
-                                HTTP_REMOTE_GROUPS=self.group2.name,
-                                # headers = {
-                                #     "Remote-User": self.user.username,
-                                #     "Remote-Groups": self.group2.name,
-                                # }
+                                headers={
+                                    "Remote-User": self.user.username,
+                                    "Remote-Groups": self.group2.name,
+                                }
                                 )
         self.assertEqual(resp.status_code, 200)
         dgms = Dojo_Group_Member.objects.all().filter(user=self.user)
@@ -115,14 +98,10 @@ class TestRemoteUser(DojoTestCase):
     )
     def test_update_multiple_groups_cleanup(self):
         resp = self.client1.get('/profile',
-                                # TODO - This can be replaced by following lines in the future
-                                # Using of "headers" is supported since Django 4.2
-                                HTTP_REMOTE_USER=self.user.username,
-                                HTTP_REMOTE_GROUPS=f"{self.group1.name},{self.group2.name}",
-                                # headers = {
-                                #     "Remote-User": self.user.username,
-                                #     "Remote-Groups": f"{self.group1.name},{self.group2.name}",
-                                # }
+                                headers={
+                                    "Remote-User": self.user.username,
+                                    "Remote-Groups": f"{self.group1.name},{self.group2.name}",
+                                }
                                 )
         self.assertEqual(resp.status_code, 200)
         dgms = Dojo_Group_Member.objects.filter(user=self.user)
@@ -136,26 +115,18 @@ class TestRemoteUser(DojoTestCase):
     )
     def test_update_groups_no_cleanup(self):
         resp = self.client1.get('/profile',
-                                # TODO - This can be replaced by following lines in the future
-                                # Using of "headers" is supported since Django 4.2
-                                HTTP_REMOTE_USER=self.user.username,
-                                HTTP_REMOTE_GROUPS=self.group1.name,
-                                # headers = {
-                                #     "Remote-User": self.user.username,
-                                #     "Remote-Groups": self.group1.name,
-                                # }
+                                headers={
+                                    "Remote-User": self.user.username,
+                                    "Remote-Groups": self.group1.name,
+                                }
                                 )
         self.assertEqual(resp.status_code, 200)
 
         resp = self.client2.get('/profile',
-                                # TODO - This can be replaced by following lines in the future
-                                # Using of "headers" is supported since Django 4.2
-                                HTTP_REMOTE_USER=self.user.username,
-                                HTTP_REMOTE_GROUPS=self.group2.name,
-                                # headers = {
-                                #     "Remote-User": self.user.username,
-                                #     "Remote-Groups": self.group2.name,
-                                # }
+                                headers={
+                                    "Remote-User": self.user.username,
+                                    "Remote-Groups": self.group2.name,
+                                }
                                 )
         self.assertEqual(resp.status_code, 200)
         dgms = Dojo_Group_Member.objects.filter(user=self.user)
@@ -169,12 +140,9 @@ class TestRemoteUser(DojoTestCase):
     def test_trusted_proxy(self):
         resp = self.client1.get('/profile',
                                 REMOTE_ADDR='192.168.0.42',
-                                # TODO - This can be replaced by following lines in the future
-                                # Using of "headers" is supported since Django 4.2
-                                HTTP_REMOTE_USER=self.user.username,
-                                # headers = {
-                                #     "Remote-User": self.user.username,
-                                # }
+                                headers={
+                                    "Remote-User": self.user.username,
+                                }
                                 )
         self.assertEqual(resp.status_code, 200)
 
@@ -187,12 +155,9 @@ class TestRemoteUser(DojoTestCase):
         with self.assertLogs('dojo.remote_user', level='DEBUG') as cm:
             resp = self.client1.get('/profile',
                                     REMOTE_ADDR='192.168.1.42',
-                                    # TODO - This can be replaced by following lines in the future
-                                    # Using of "headers" is supported since Django 4.2
-                                    HTTP_REMOTE_USER=self.user.username,
-                                    # headers = {
-                                    #     "Remote-User": self.user.username,
-                                    # }
+                                    headers={
+                                        "Remote-User": self.user.username,
+                                    }
                                     )
         self.assertEqual(resp.status_code, 302)
         self.assertIn('Requested came from untrusted proxy', cm.output[0])

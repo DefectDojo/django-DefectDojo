@@ -123,7 +123,7 @@ class CustomReport(View):
             self._set_state(request)
             return render(request, self.get_template(), self.get_context())
         else:
-            raise PermissionDenied()
+            raise PermissionDenied
 
     def _set_state(self, request: HttpRequest):
         self.request = request
@@ -157,7 +157,7 @@ class CustomReport(View):
         elif self.report_format == 'HTML':
             return 'dojo/custom_html_report.html'
         else:
-            raise PermissionDenied()
+            raise PermissionDenied
 
     def get_context(self):
         return {
@@ -369,7 +369,7 @@ def product_endpoint_report(request, pid):
                            'title': 'Generate Report',
                            })
         else:
-            raise Http404()
+            raise Http404
 
     product_tab = Product_Tab(product, "Product Endpoint Report", tab="endpoints")
     return render(request,
@@ -609,7 +609,7 @@ def generate_report(request, obj, host_view=False):
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
     else:
-        raise Http404()
+        raise Http404
 
     report_form = ReportOptionsForm()
 
@@ -665,7 +665,7 @@ def generate_report(request, obj, host_view=False):
                            })
 
         else:
-            raise Http404()
+            raise Http404
     paged_findings = get_page_items(request, findings.qs.distinct().order_by('numerical_severity'), 25)
 
     product_tab = None

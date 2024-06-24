@@ -1,3 +1,4 @@
+# noqa: INP001
 """
 This solution is largely based on the Playwright's browser dependencies script at
 https://github.com/microsoft/playwright/blob/main/utils/linux-browser-dependencies/inside_docker/list_dependencies.js
