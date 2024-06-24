@@ -296,7 +296,7 @@ def query_counts(
         def _aggregate_data(qs: MetricsQuerySet, include_closed: bool = False) -> list[dict]:
             chart_data = partial(get_charting_data, start_date=start_date, period=period, period_count=period_count)
             agg_qs = partial(aggregate_counts_by_period, period=period, metrics_type=metrics_type)
-            return chart_data(agg_qs(qs, include_closed=include_closed))
+            return chart_data(agg_qs(qs, include_closed=include_closed), include_closed=include_closed)
         return {
             'opened_per_period': _aggregate_data(open_qs, True),
             'active_per_period': _aggregate_data(active_qs),
@@ -421,7 +421,8 @@ def get_charting_data(
     qs: MetricsQuerySet,
     start_date: date,
     period: MetricsPeriod,
-    period_count: int
+    period_count: int,
+    include_closed: bool
 ) -> list[dict]:
     """
     Given a queryset of severities data for charting, adds epoch timestamp information and fills in missing data points
@@ -432,6 +433,7 @@ def get_charting_data(
     :param start_date: The start date
     :param period: A MetricsPeriod to generate charting data across
     :param period_count: The number of periods we should have data for
+    :param include_closed: A boolean dictating whether 'closed' finding/status aggregates should be included
     :return: A list of dictionaries representing data points for charting, sorted by date
     """
     tz = timezone.get_current_timezone()
@@ -454,8 +456,10 @@ def get_charting_data(
         cur_date = start_date + relativedelta(**{period.datetime_name: x})
         if (e := js_epoch(cur_date)) not in by_date:
             by_date[e] = {
-                'grouped_date': cur_date.date(), 'epoch': e,
-                'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'closed': 0, }
+                'epoch': e, 'grouped_date': cur_date.date(),
+                'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
+            if include_closed:
+                by_date[e]['closed'] = 0
 
     # Return, sorting by date
     return sorted(by_date.values(), key=lambda m: m['grouped_date'])
@@ -497,7 +501,7 @@ def aggregate_counts_by_period(
     :return: A queryset with aggregate severity counts grouped by period
     """
 
-    desired_values = ('grouped_date', 'total', 'critical', 'high', 'medium', 'low', 'info',)
+    desired_values = ('grouped_date', 'critical', 'high', 'medium', 'low', 'info', 'total',)
 
     severities_by_period = severity_count(
         # Group by desired period
