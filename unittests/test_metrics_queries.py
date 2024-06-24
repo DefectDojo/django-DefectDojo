@@ -8,7 +8,6 @@ from unittest.mock import patch
 import pytz
 from django.test import RequestFactory
 from django.urls import reverse
-from django.utils import timezone as djagno_timezone
 
 from dojo.metrics import utils
 from dojo.models import User
@@ -102,16 +101,16 @@ class FindingQueriesTest(DojoTestCase):
                 list(finding_queries['monthly_counts'].values()),
                 [
                     [
-                        {'epoch': 1604206800000, 'grouped_date': date(2020, 11, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0},
-                        {'epoch': 1606802400000, 'grouped_date': date(2020, 12, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0}
+                        {'epoch': 1604188800000, 'grouped_date': date(2020, 11, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0},
+                        {'epoch': 1606780800000, 'grouped_date': date(2020, 12, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0}
                     ],
                     [
-                        {'epoch': 1604206800000, 'grouped_date': date(2020, 11, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
-                        {'epoch': 1606802400000, 'grouped_date': date(2020, 12, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
+                        {'epoch': 1604188800000, 'grouped_date': date(2020, 11, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
+                        {'epoch': 1606780800000, 'grouped_date': date(2020, 12, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
                     ],
                     [
-                        {'epoch': 1604206800000, 'grouped_date': date(2020, 11, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
-                        {'epoch': 1606802400000, 'grouped_date': date(2020, 12, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
+                        {'epoch': 1604188800000, 'grouped_date': date(2020, 11, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
+                        {'epoch': 1606780800000, 'grouped_date': date(2020, 12, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
                     ]
                 ]
             )
@@ -119,19 +118,19 @@ class FindingQueriesTest(DojoTestCase):
                 finding_queries['weekly_counts'],
                 {
                     'opened_per_period': [
-                        {'epoch': 1606716000000, 'grouped_date': date(2020, 11, 30), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'closed': 0},
-                        {'epoch': 1607320800000, 'grouped_date': date(2020, 12, 7), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'closed': 0},
-                        {'epoch': 1607925600000, 'grouped_date': date(2020, 12, 14), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'closed': 0}
+                        {'epoch': 1606694400000, 'grouped_date': date(2020, 11, 30), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'closed': 0},
+                        {'epoch': 1607299200000, 'grouped_date': date(2020, 12, 7), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'closed': 0},
+                        {'epoch': 1607904000000, 'grouped_date': date(2020, 12, 14), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'closed': 0}
                     ],
                     'accepted_per_period': [
-                        {'epoch': 1606716000000, 'grouped_date': date(2020, 11, 30), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0},
-                        {'epoch': 1607320800000, 'grouped_date': date(2020, 12, 7), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0},
-                        {'epoch': 1607925600000, 'grouped_date': date(2020, 12, 14), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0}
+                        {'epoch': 1606694400000, 'grouped_date': date(2020, 11, 30), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0},
+                        {'epoch': 1607299200000, 'grouped_date': date(2020, 12, 7), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0},
+                        {'epoch': 1607904000000, 'grouped_date': date(2020, 12, 14), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0}
                     ],
                     'active_per_period': [
-                        {'epoch': 1606716000000, 'grouped_date': date(2020, 11, 30), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0},
-                        {'epoch': 1607320800000, 'grouped_date': date(2020, 12, 7), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0},
-                        {'epoch': 1607925600000, 'grouped_date': date(2020, 12, 14), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0}
+                        {'epoch': 1606694400000, 'grouped_date': date(2020, 11, 30), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0},
+                        {'epoch': 1607299200000, 'grouped_date': date(2020, 12, 7), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0},
+                        {'epoch': 1607904000000, 'grouped_date': date(2020, 12, 14), 'total': 0, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0}
                     ]
                 }
             )
@@ -223,16 +222,16 @@ class EndpointQueriesTest(DojoTestCase):
                 list(endpoint_queries['monthly_counts'].values()),
                 [
                     [
-                        {'epoch': 1590987600000, 'grouped_date': date(2020, 6, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0},
-                        {'epoch': 1593579600000, 'grouped_date': date(2020, 7, 1), 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 5, 'total': 6, 'closed': 0}
+                        {'epoch': 1590969600000, 'grouped_date': date(2020, 6, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0},
+                        {'epoch': 1593561600000, 'grouped_date': date(2020, 7, 1), 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 5, 'total': 6, 'closed': 0}
                     ],
                     [
-                        {'epoch': 1590987600000, 'grouped_date': date(2020, 6, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
-                        {'epoch': 1593579600000, 'grouped_date': date(2020, 7, 1), 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 4, 'total': 5}
+                        {'epoch': 1590969600000, 'grouped_date': date(2020, 6, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
+                        {'epoch': 1593561600000, 'grouped_date': date(2020, 7, 1), 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 4, 'total': 5}
                     ],
                     [
-                        {'epoch': 1590987600000, 'grouped_date': date(2020, 6, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
-                        {'epoch': 1593579600000, 'grouped_date': date(2020, 7, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 1, 'total': 1}
+                        {'epoch': 1590969600000, 'grouped_date': date(2020, 6, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
+                        {'epoch': 1593561600000, 'grouped_date': date(2020, 7, 1), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 1, 'total': 1}
                     ]
                 ],
             )
@@ -240,22 +239,22 @@ class EndpointQueriesTest(DojoTestCase):
                 list(endpoint_queries['weekly_counts'].values()),
                 [
                     [
-                        {'epoch': 1592802000000, 'grouped_date': date(2020, 6, 22), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0},
-                        {'epoch': 1593406800000, 'grouped_date': date(2020, 6, 29), 'total': 6, 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 5, 'closed': 0},
-                        {'epoch': 1594011600000, 'grouped_date': date(2020, 7, 6), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0}
+                        {'epoch': 1592784000000, 'grouped_date': date(2020, 6, 22), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0},
+                        {'epoch': 1593388800000, 'grouped_date': date(2020, 6, 29), 'total': 6, 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 5, 'closed': 0},
+                        {'epoch': 1593993600000, 'grouped_date': date(2020, 7, 6), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0}
                     ],
                     [
-                        {'epoch': 1592802000000, 'grouped_date': date(2020, 6, 22), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
-                        {'epoch': 1593406800000, 'grouped_date': date(2020, 6, 29), 'total': 5, 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 4},
-                        {'epoch': 1594011600000, 'grouped_date': date(2020, 7, 6), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
+                        {'epoch': 1592784000000, 'grouped_date': date(2020, 6, 22), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
+                        {'epoch': 1593388800000, 'grouped_date': date(2020, 6, 29), 'total': 5, 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 4},
+                        {'epoch': 1593993600000, 'grouped_date': date(2020, 7, 6), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
                     ],
                     [
-                        {'epoch': 1592802000000, 'grouped_date': date(2020, 6, 22), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
-                        {'epoch': 1593406800000, 'grouped_date': date(2020, 6, 29), 'total': 1, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 1},
-                        {'epoch': 1594011600000, 'grouped_date': date(2020, 7, 6), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
+                        {'epoch': 1592784000000, 'grouped_date': date(2020, 6, 22), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
+                        {'epoch': 1593388800000, 'grouped_date': date(2020, 6, 29), 'total': 1, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 1},
+                        {'epoch': 1593993600000, 'grouped_date': date(2020, 7, 6), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
                     ]
                 ],
             )
             self.assertEqual(endpoint_queries['weeks_between'], 2)
-            self.assertEqual(endpoint_queries['start_date'], datetime(2020, 7, 1, 0, 0, tzinfo=djagno_timezone.get_current_timezone()))
-            self.assertEqual(endpoint_queries['end_date'], datetime(2020, 7, 1, 0, 0, tzinfo=djagno_timezone.get_current_timezone()))
+            self.assertEqual(endpoint_queries['start_date'], datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc))
+            self.assertEqual(endpoint_queries['end_date'], datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc))
