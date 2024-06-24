@@ -559,6 +559,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserContactInfoSerializer(serializers.ModelSerializer):
+    user_profile = UserSerializer(many=False, source="user", read_only=True)
+
     class Meta:
         model = UserContactInfo
         fields = "__all__"
