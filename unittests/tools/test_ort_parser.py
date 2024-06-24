@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.ort.parser import OrtParser
 from dojo.models import Test
+from dojo.tools.ort.parser import OrtParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestOrtParser(DojoTestCase):

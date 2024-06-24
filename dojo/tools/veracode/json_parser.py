@@ -1,13 +1,14 @@
 import json
 import re
+
 from cvss import CVSS3
 from dateutil import parser
 from django.conf import settings
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
-class VeracodeJSONParser(object):
+class VeracodeJSONParser:
     """This parser is written for Veracode REST Findings.
 
     API endpoints to use: https://docs.veracode.com/r/c_findings_v2_examples

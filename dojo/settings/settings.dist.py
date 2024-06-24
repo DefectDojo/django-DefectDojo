@@ -1,20 +1,30 @@
+#########################################################################################################
+# It is not allowed to edit file 'settings.dist.py', for production deployemnts.                        #
+# Any customization of variables need to be done via environmental variables or in 'local_settings.py'. #
+# For more information check https://documentation.defectdojo.com/getting_started/configuration/        #
+#########################################################################################################
+
+#########################################################################################################
+# If as a developer of a new feature, you need to perform an update of file 'settings.dist.py',         #
+# after the change, calculate the checksum and store it related file by calling the following command:  #
+# $ sha256sum settings.dist.py | cut -d ' ' -f1 > .settings.dist.py.sha256sum                           #
+#########################################################################################################
+
 # Django settings for DefectDojo
-import os
-from datetime import timedelta
-from celery.schedules import crontab
-from dojo import __version__
-import environ
-from netaddr import IPNetwork, IPSet
 import json
 import logging
+import os
 import warnings
+from datetime import timedelta
 from email.utils import getaddresses
 
+import environ
+from celery.schedules import crontab
+from netaddr import IPNetwork, IPSet
+
+from dojo import __version__
 
 logger = logging.getLogger(__name__)
-
-# See https://documentation.defectdojo.com/getting_started/configuration/ for options
-# how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
 
@@ -180,6 +190,9 @@ env = environ.FileAwareEnv(
     DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.1/32']),
     # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
     DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
+    # `RemoteUser` is usually used behind AuthN proxy and users should not know about this mechanism from Swagger because it is not usable by users.
+    # It should be hidden by default.
+    DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
     DD_DOCUMENTATION_URL=(str, 'https://documentation.defectdojo.com'),
     # merging findings doesn't always work well with dedupe and reimport etc.
@@ -200,6 +213,8 @@ env = environ.FileAwareEnv(
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
+    # The maximum number of request/response pairs to return from the API. Values <0 return all pairs.
+    DD_MAX_REQRESP_FROM_API=(int, -1),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
     # You can set extra Jira issue types via a simple env var that supports a csv format, like "Work Item,Vulnerability"
@@ -217,7 +232,7 @@ env = environ.FileAwareEnv(
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
-    DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
+    DD_PARSER_EXCLUDE=(str, ''),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -233,7 +248,6 @@ env = environ.FileAwareEnv(
     DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
-
     # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
     # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
     # Set to True to revert to the old behaviour where all duplicates are deleted
@@ -285,6 +299,8 @@ env = environ.FileAwareEnv(
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
     # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
+    # Use System notification settings to override user's notification settings
+    DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
 )
 
 
@@ -490,10 +506,7 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
     'django.contrib.auth.hashers.BCryptPasswordHasher',
-    'django.contrib.auth.hashers.SHA1PasswordHasher',
     'django.contrib.auth.hashers.MD5PasswordHasher',
-    'django.contrib.auth.hashers.UnsaltedSHA1PasswordHasher',
-    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
 ]
 
 SOCIAL_AUTH_PIPELINE = (
@@ -600,22 +613,23 @@ SLA_BUSINESS_DAYS = env('DD_SLA_BUSINESS_DAYS')  # Use business days to calculat
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
 SIMILAR_FINDINGS_MAX_RESULTS = env('DD_SIMILAR_FINDINGS_MAX_RESULTS')
+MAX_REQRESP_FROM_API = env('DD_MAX_REQRESP_FROM_API')
 MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
-    r'^%sstatic/' % URL_PREFIX,
-    r'^%swebhook/([\w-]+)$' % URL_PREFIX,
-    r'^%swebhook/' % URL_PREFIX,
-    r'^%sjira/webhook/([\w-]+)$' % URL_PREFIX,
-    r'^%sjira/webhook/' % URL_PREFIX,
-    r'^%sreports/cover$' % URL_PREFIX,
-    r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
-    r'^%sapi/v2/' % URL_PREFIX,
+    rf'^{URL_PREFIX}static/',
+    rf'^{URL_PREFIX}webhook/([\w-]+)$',
+    rf'^{URL_PREFIX}webhook/',
+    rf'^{URL_PREFIX}jira/webhook/([\w-]+)$',
+    rf'^{URL_PREFIX}jira/webhook/',
+    rf'^{URL_PREFIX}reports/cover$',
+    rf'^{URL_PREFIX}finding/image/(?P<token>[^/]+)$',
+    rf'^{URL_PREFIX}api/v2/',
     r'complete/',
     r'empty_questionnaire/([\d]+)/answer',
-    r'^%spassword_reset/' % URL_PREFIX,
-    r'^%sforgot_username' % URL_PREFIX,
-    r'^%sreset/' % URL_PREFIX,
+    rf'^{URL_PREFIX}password_reset/',
+    rf'^{URL_PREFIX}forgot_username',
+    rf'^{URL_PREFIX}reset/',
 )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -852,7 +866,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'dojo.middleware.AdditionalHeaderMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
     'watson.middleware.SearchContextMiddleware',
-    'auditlog.middleware.AuditlogMiddleware',
+    'dojo.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'dojo.request_cache.middleware.RequestCacheMiddleware',
 ]
@@ -895,9 +909,10 @@ SAML2_ENABLED = env('DD_SAML2_ENABLED')
 SAML2_LOGIN_BUTTON_TEXT = env('DD_SAML2_LOGIN_BUTTON_TEXT')
 SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
 if SAML2_ENABLED:
+    from os import path
+
     import saml2
     import saml2.saml
-    from os import path
     # SSO_URL = env('DD_SSO_URL')
     SAML_METADATA = {}
     if len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:
@@ -907,7 +922,7 @@ if SAML2_ENABLED:
     INSTALLED_APPS += ('djangosaml2',)
     MIDDLEWARE.append('djangosaml2.middleware.SamlSessionMiddleware')
     AUTHENTICATION_BACKENDS += (env('DD_SAML2_AUTHENTICATION_BACKENDS'),)
-    LOGIN_EXEMPT_URLS += (r'^%ssaml2/' % URL_PREFIX,)
+    LOGIN_EXEMPT_URLS += (rf'^{URL_PREFIX}saml2/',)
     SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
     SAML_IGNORE_LOGOUT_ERRORS = True
     SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'username'
@@ -919,7 +934,7 @@ if SAML2_ENABLED:
     SAML_ALLOW_UNKNOWN_ATTRIBUTES = env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE')
     BASEDIR = path.dirname(path.abspath(__file__))
     if len(env('DD_SAML2_ENTITY_ID')) == 0:
-        SAML2_ENTITY_ID = '%s/saml2/metadata/' % SITE_URL
+        SAML2_ENTITY_ID = f'{SITE_URL}/saml2/metadata/'
     else:
         SAML2_ENTITY_ID = env('DD_SAML2_ENTITY_ID')
 
@@ -928,7 +943,7 @@ if SAML2_ENABLED:
         'xmlsec_binary': '/usr/bin/xmlsec1',
 
         # your entity id, usually your subdomain plus the url to the metadata view
-        'entityid': '%s' % SAML2_ENTITY_ID,
+        'entityid': str(SAML2_ENTITY_ID),
 
         # directory with attribute mapping
         'attribute_map_dir': path.join(BASEDIR, 'attribute-maps'),
@@ -952,16 +967,16 @@ if SAML2_ENABLED:
                     # url and binding to the assetion consumer service view
                     # do not change the binding or service name
                     'assertion_consumer_service': [
-                        ('%s/saml2/acs/' % SITE_URL,
+                        (f'{SITE_URL}/saml2/acs/',
                         saml2.BINDING_HTTP_POST),
                     ],
                     # url and binding to the single logout service view
                     # do not change the binding or service name
                     'single_logout_service': [
                         # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
-                        ('%s/saml2/ls/' % SITE_URL,
+                        (f'{SITE_URL}/saml2/ls/',
                         saml2.BINDING_HTTP_REDIRECT),
-                        ('%s/saml2/ls/post' % SITE_URL,
+                        (f'{SITE_URL}/saml2/ls/post',
                         saml2.BINDING_HTTP_POST),
                     ],
                 },
@@ -1042,6 +1057,7 @@ AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
 AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
 AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
 AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
+AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER = env('DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER')
 
 AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
 for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
@@ -1153,7 +1169,7 @@ if env('DD_DJANGO_METRICS_ENABLED'):
     database_engine = DATABASES.get('default').get('ENGINE')
     DATABASES['default']['ENGINE'] = database_engine.replace('django.', 'django_prometheus.', 1)
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
-    LOGIN_EXEMPT_URLS += (r'^%sdjango_metrics/' % URL_PREFIX,)
+    LOGIN_EXEMPT_URLS += (rf'^{URL_PREFIX}django_metrics/',)
 
 
 # ------------------------------------
@@ -1179,6 +1195,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['vulnerability_ids', 'component_name'],
     'Cloudsploit Scan': ['title', 'description'],
+    'Coverity Scan JSON Report': ['title', 'cwe', 'line', 'file_path', 'description'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube API Import': ['title', 'file_path', 'line'],
     'Sonatype Application Scan': ['title', 'cwe', 'file_path', 'component_name', 'component_version', 'vulnerability_ids'],
@@ -1205,7 +1222,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'DSOP Scan': ['vulnerability_ids'],
     'Acunetix Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
-    'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids'],
+    'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids', 'description'],
     'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
     'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
@@ -1248,10 +1265,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'MobSF Scan': ['title', 'description', 'severity'],
     'OSV Scan': ['title', 'description', 'severity'],
     'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
+    'Deepfence Threatmapper Report': ['title', 'description', 'severity'],
     'Bearer CLI': ['title', 'severity'],
     'Nancy Scan': ['title', 'vuln_id_from_tool'],
     'Wiz Scan': ['title', 'description', 'severity'],
     'Kiuwan SCA Scan': ['description', 'severity', 'component_name', 'component_version', 'cwe']
+    'Kubescape JSON Importer': ['title', 'component_name']
 }
 
 # Override the hardcoded settings here via the env var
@@ -1259,10 +1278,10 @@ if len(env('DD_HASHCODE_FIELDS_PER_SCANNER')) > 0:
     env_hashcode_fields_per_scanner = json.loads(env('DD_HASHCODE_FIELDS_PER_SCANNER'))
     for key, value in env_hashcode_fields_per_scanner.items():
         if key in HASHCODE_FIELDS_PER_SCANNER:
-            logger.info("Replacing {} with value {} (previously set to {}) from env var DD_HASHCODE_FIELDS_PER_SCANNER".format(key, value, HASHCODE_FIELDS_PER_SCANNER[key]))
+            logger.info(f"Replacing {key} with value {value} (previously set to {HASHCODE_FIELDS_PER_SCANNER[key]}) from env var DD_HASHCODE_FIELDS_PER_SCANNER")
             HASHCODE_FIELDS_PER_SCANNER[key] = value
         if key not in HASHCODE_FIELDS_PER_SCANNER:
-            logger.info("Adding {} with value {} from env var DD_HASHCODE_FIELDS_PER_SCANNER".format(key, value))
+            logger.info(f"Adding {key} with value {value} from env var DD_HASHCODE_FIELDS_PER_SCANNER")
             HASHCODE_FIELDS_PER_SCANNER[key] = value
 
 
@@ -1372,6 +1391,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Codechecker Report native': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Coverity Scan JSON Report': DEDUPE_ALGO_HASH_CODE,
     'Cobalt.io API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Crunch42 Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
@@ -1469,6 +1489,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Bearer CLI': DEDUPE_ALGO_HASH_CODE,
     'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
     'Kiuwan SCA Scan': DEDUPE_ALGO_HASH_CODE,
+    'Deepfence Threatmapper Report': DEDUPE_ALGO_HASH_CODE,
+    'Kubescape JSON Importer': DEDUPE_ALGO_HASH_CODE
 }
 
 # Override the hardcoded settings here via the env var
@@ -1476,10 +1498,10 @@ if len(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER')) > 0:
     env_dedup_algorithm_per_parser = json.loads(env('DD_DEDUPLICATION_ALGORITHM_PER_PARSER'))
     for key, value in env_dedup_algorithm_per_parser.items():
         if key in DEDUPLICATION_ALGORITHM_PER_PARSER:
-            logger.info("Replacing {} with value {} (previously set to {}) from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER".format(key, value, DEDUPLICATION_ALGORITHM_PER_PARSER[key]))
+            logger.info(f"Replacing {key} with value {value} (previously set to {DEDUPLICATION_ALGORITHM_PER_PARSER[key]}) from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
         if key not in DEDUPLICATION_ALGORITHM_PER_PARSER:
-            logger.info("Adding {} with value {} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER".format(key, value))
+            logger.info(f"Adding {key} with value {value} from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1562,46 +1584,46 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins', 'console'],
-            'level': '%s' % LOG_LEVEL,
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'django.security': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'celery': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
             # workaround some celery logging known issue
             'worker_hijack_root_logger': False,
         },
         'dojo': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'saml2': {
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
         'titlecase': {
             # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % LOG_LEVEL,
+            'handlers': [rf'{LOGGING_HANDLER}'],
+            'level': str(LOG_LEVEL),
             'propagate': False,
         },
     }
@@ -1686,6 +1708,10 @@ VULNERABILITY_URLS = {
     'SNYK': 'https://snyk.io/vuln/',
     'RUSTSEC': 'https://rustsec.org/advisories/',
     'VNS': 'https://vulners.com/',
+    'RHSA': 'https://access.redhat.com/errata/',
+    'RHBA': 'https://access.redhat.com/errata/',
+    'RHEA': 'https://access.redhat.com/errata/',
+    'FEDORA': 'https://bodhi.fedoraproject.org/updates/',
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
@@ -1705,6 +1731,10 @@ ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
 
+# ------------------------------------------------------------------------------
+# Notifications
+# ------------------------------------------------------------------------------
+NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env('DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP')
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings

@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class SemgrepParser(object):
+class SemgrepParser:
     def get_scan_types(self):
         return ["Semgrep JSON Report"]
 
@@ -16,7 +16,7 @@ class SemgrepParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
 
-        dupes = dict()
+        dupes = {}
 
         if "results" in data:
             for item in data.get("results", []):
@@ -139,20 +139,21 @@ class SemgrepParser(object):
         elif "INFO" == val.upper():
             return "Info"
         else:
-            raise ValueError(f"Unknown value for severity: {val}")
+            msg = f"Unknown value for severity: {val}"
+            raise ValueError(msg)
 
     def get_description(self, item):
         description = ""
 
         message = item["extra"]["message"]
-        description += "**Result message:** {}\n".format(message)
+        description += f"**Result message:** {message}\n"
 
         snippet = item["extra"].get("lines")
         if snippet is not None:
             if "<![" in snippet:
                 snippet = snippet.replace("<![", "<! [")
-                description += "**Snippet:** ***Caution:*** Please remove the space between `!` and `[` to have the real value due to a workaround to circumvent [#8435](https://github.com/DefectDojo/django-DefectDojo/issues/8435).\n```{}```\n".format(snippet)
+                description += f"**Snippet:** ***Caution:*** Please remove the space between `!` and `[` to have the real value due to a workaround to circumvent [#8435](https://github.com/DefectDojo/django-DefectDojo/issues/8435).\n```{snippet}```\n"
             else:
-                description += "**Snippet:**\n```{}```\n".format(snippet)
+                description += f"**Snippet:**\n```{snippet}```\n"
 
         return description

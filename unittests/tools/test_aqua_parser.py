@@ -1,40 +1,40 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.aqua.parser import AquaParser
-from dojo.models import Test
 from collections import Counter
+
+from dojo.models import Test
+from dojo.tools.aqua.parser import AquaParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestAquaParser(DojoTestCase):
     def test_aqua_parser_has_no_finding(self):
-        testfile = open("unittests/scans/aqua/no_vuln.json")
-        parser = AquaParser()
-        findings = parser.get_findings(testfile, Test())
-        self.assertEqual(0, len(findings))
+        with open("unittests/scans/aqua/no_vuln.json") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(0, len(findings))
 
     def test_aqua_parser_has_one_finding(self):
-        testfile = open("unittests/scans/aqua/one_vuln.json")
-        parser = AquaParser()
-        findings = parser.get_findings(testfile, Test())
-        testfile.close()
-        self.assertEqual(1, len(findings))
-        finding = findings[0]
-        self.assertEqual('CVE-2019-14697 - musl (1.1.20-r4) ', finding.title)
-        self.assertEqual('High', finding.severity)
-        self.assertEqual('CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
-        self.assertEqual('musl libc through 1.1.23 has an x87 floating-point stack adjustment imbalance, related to the math/i386/ directory. In some cases, use of this library could introduce out-of-bounds writes that are not present in an application\'s source code.', finding.description)
-        self.assertEqual('1.1.20-r5', finding.mitigation)
-        self.assertEqual('\nhttps://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-14697', finding.references)
-        self.assertEqual('musl', finding.component_name)
-        self.assertEqual('1.1.20-r4', finding.component_version)
-        self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-        self.assertEqual('CVE-2019-14697', finding.unsaved_vulnerability_ids[0])
+        with open("unittests/scans/aqua/one_vuln.json") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual('CVE-2019-14697 - musl (1.1.20-r4) ', finding.title)
+            self.assertEqual('High', finding.severity)
+            self.assertEqual('CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
+            self.assertEqual('musl libc through 1.1.23 has an x87 floating-point stack adjustment imbalance, related to the math/i386/ directory. In some cases, use of this library could introduce out-of-bounds writes that are not present in an application\'s source code.', finding.description)
+            self.assertEqual('1.1.20-r5', finding.mitigation)
+            self.assertEqual('\nhttps://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-14697', finding.references)
+            self.assertEqual('musl', finding.component_name)
+            self.assertEqual('1.1.20-r4', finding.component_version)
+            self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual('CVE-2019-14697', finding.unsaved_vulnerability_ids[0])
 
     def test_aqua_parser_has_many_findings(self):
-        testfile = open("unittests/scans/aqua/many_vulns.json")
-        parser = AquaParser()
-        findings = parser.get_findings(testfile, Test())
-        testfile.close()
-        self.assertEqual(24, len(findings))
+        with open("unittests/scans/aqua/many_vulns.json") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(24, len(findings))
 
     def test_aqua_parser_v2_has_one_finding(self):
         with open("unittests/scans/aqua/one_v2.json") as testfile:
@@ -81,7 +81,7 @@ class TestAquaParser(DojoTestCase):
         with open("unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
-            sevs = list()
+            sevs = []
 
             for finding in findings:
                 sevs.append(finding.severity)

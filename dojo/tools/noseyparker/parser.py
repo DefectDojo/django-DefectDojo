@@ -1,11 +1,11 @@
 import hashlib
 import json
-
 from datetime import datetime
+
 from dojo.models import Finding
 
 
-class NoseyParkerParser(object):
+class NoseyParkerParser:
     """
     Scanning secrets from repos
     """
@@ -45,7 +45,8 @@ class NoseyParkerParser(object):
                     rule_name = line['rule_name']
                     secret = line['match_content']
                 except Exception:
-                    raise ValueError("Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0")
+                    msg = "Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0"
+                    raise ValueError(msg)
 
                 # Set Finding details
                 for match in line['matches']:
@@ -61,9 +62,8 @@ class NoseyParkerParser(object):
                                   f"Committer Name: {json_path['commit_provenance']['commit_metadata']['committer_name']}  \n" \
                                   f"Committer Email: {json_path['commit_provenance']['commit_metadata']['committer_email']} \n" \
                                   f"Commit ID: {json_path['commit_provenance']['commit_metadata']['commit_id']}  \n" \
-                                  f"Location: {filepath} line #{line_num} \n " \
-                                  f"Line #{line_num} \n " \
-                                  f"Code Snippet Containing Secret: {match['snippet']['before']}***SECRET***{match['snippet']['after']} \n"
+                                  f"Location: {filepath} line #{line_num} \n" \
+                                  f"Line #{line_num} \n"
 
                     # Internal de-duplication
                     key = hashlib.md5((filepath + "|" + secret + "|" + str(line_num)).encode("utf-8")).hexdigest()
@@ -96,6 +96,7 @@ class NoseyParkerParser(object):
                         )
                         dupes[key] = finding
         else:
-            raise ValueError("JSON lines format not recognized (.jsonl file extension). Make sure to use Nosey Parker v0.16.0")
+            msg = "JSON lines format not recognized (.jsonl file extension). Make sure to use Nosey Parker v0.16.0"
+            raise ValueError(msg)
 
         return list(dupes.values())

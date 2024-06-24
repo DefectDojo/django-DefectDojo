@@ -1,12 +1,13 @@
-import json
-import html2text
 import datetime
+import json
 
+import html2text
 from cvss import parser as cvss_parser
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
-class NetsparkerParser(object):
+class NetsparkerParser:
     def get_scan_types(self):
         return ["Netsparker Scan"]
 
@@ -22,7 +23,7 @@ class NetsparkerParser(object):
             data = json.loads(str(tree, "utf-8-sig"))
         except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
         if "UTC" in data["Generated"]:
             scan_date = datetime.datetime.strptime(
                 data["Generated"].split(" ")[0], "%d/%m/%Y"
@@ -50,8 +51,8 @@ class NetsparkerParser(object):
             url = item["Url"]
             impact = html2text.html2text(item.get("Impact", ""))
             dupe_key = title
-            request = item["HttpRequest"]["Content"]
-            response = item["HttpResponse"]["Content"]
+            request = item["HttpRequest"].get("Content", None)
+            response = item["HttpResponse"].get("Content", None)
 
             finding = Finding(
                 title=title,
@@ -88,7 +89,7 @@ class NetsparkerParser(object):
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
-            finding.unsaved_req_resp = [{"req": request, "resp": response}]
+            finding.unsaved_req_resp = [{"req": str(request), "resp": str(response)}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
             if dupe_key in dupes:

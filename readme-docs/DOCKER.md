@@ -335,16 +335,26 @@ The integration-tests are under `tests`
 
 
 ## Running the unit tests
+
+### All tests
 This will run all unit-tests and leave the uwsgi container up:
 
 ```
 docker/setEnv.sh unit_tests
 ./dc-up.sh
 ```
-Enter the container to run more tests:
 
+### Limited tests
+If you want to enter the container to run more tests or a single test case, leave setEnv in normal or dev mode:
 ```
-docker-compose exec uwsgi bash
+docker/setEnv.sh dev
+./dc-up.sh
+```
+Then 
+```
+docker ps
+#find the name of the uwsgi container from the above command
+docker exec -ti [container-name] bash
 ```
 Rerun all the tests:
 

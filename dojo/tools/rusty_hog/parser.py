@@ -1,9 +1,10 @@
 import json
-from dojo.tools.parser_test import ParserTest
+
 from dojo.models import Finding
+from dojo.tools.parser_test import ParserTest
 
 
-class RustyhogParser(object):
+class RustyhogParser:
     def get_scan_types(self):
         return ["Rusty Hog Scan"]
 
@@ -27,13 +28,13 @@ class RustyhogParser(object):
             vulnerabilities=self.parse_json(json_output), scanner=scanner
         )
         for finding in findings:
-            unique_key = "Finding {}".format(finding)
+            unique_key = f"Finding {finding}"
             items[unique_key] = finding
         return list(items.values())
 
     def get_tests(self, scan_type, handle):
         tree = self.parse_json(handle)
-        tests = list()
+        tests = []
         parsername = "Rusty Hog"
         for node in tree:
             if (
@@ -81,9 +82,7 @@ class RustyhogParser(object):
             elif scanner == "Choctaw Hog":
                 """Choctaw Hog"""
                 found_secret_string = vulnerability.get("stringsFound")
-                description = "**This string was found:** {}".format(
-                    found_secret_string
-                )
+                description = f"**This string was found:** {found_secret_string}"
                 if vulnerability.get("commit") is not None:
                     description += "\n**Commit message:** {}".format(
                         vulnerability.get("commit")
@@ -119,9 +118,7 @@ class RustyhogParser(object):
             elif scanner == "Duroc Hog":
                 """Duroc Hog"""
                 found_secret_string = vulnerability.get("stringsFound")
-                description = "**This string was found:** {}".format(
-                    found_secret_string
-                )
+                description = f"**This string was found:** {found_secret_string}"
                 if vulnerability.get("path") is not None:
                     description += "\n**Path of Issue:** {}".format(
                         vulnerability.get("path")
@@ -137,9 +134,7 @@ class RustyhogParser(object):
             elif scanner == "Gottingen Hog":
                 """Gottingen Hog"""
                 found_secret_string = vulnerability.get("stringsFound")
-                description = "**This string was found:** {}".format(
-                    found_secret_string
-                )
+                description = f"**This string was found:** {found_secret_string}"
                 if vulnerability.get("issue_id") is not None:
                     description += "\n**JIRA Issue ID:** {}".format(
                         vulnerability.get("issue_id")
@@ -154,9 +149,7 @@ class RustyhogParser(object):
                     )
             elif scanner == "Essex Hog":
                 found_secret_string = vulnerability.get("stringsFound")
-                description = "**This string was found:** {}".format(
-                    found_secret_string
-                )
+                description = f"**This string was found:** {found_secret_string}"
                 if vulnerability.get("page_id") is not None:
                     description += "\n**Confluence URL:** [{}]({})".format(
                         vulnerability.get("url"), vulnerability.get("url")

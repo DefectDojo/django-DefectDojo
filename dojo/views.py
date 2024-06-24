@@ -1,32 +1,37 @@
 import logging
 import os
+
 from auditlog.models import LogEntry
-from django.contrib.contenttypes.models import ContentType
-from django.contrib import messages
-from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
-from django.http import Http404, HttpResponseRedirect, FileResponse
 from django.conf import settings
-from django.urls import reverse
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.http import FileResponse, Http404, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views.static import serve
-from django.shortcuts import render, get_object_or_404
-from dojo.models import Engagement, Test, Finding, Endpoint, Product, FileUpload
+
+from dojo.authorization.authorization import (
+    user_has_configuration_permission_or_403,
+    user_has_permission,
+    user_has_permission_or_403,
+)
+from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter
 from dojo.forms import ManageFileFormSet
-from dojo.utils import get_page_items, Product_Tab
-from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403, user_has_configuration_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
-
+from dojo.models import Endpoint, Engagement, FileUpload, Finding, Product, Test
+from dojo.utils import Product_Tab, get_page_items
 
 logger = logging.getLogger(__name__)
 
 
 def custom_error_view(request, exception=None):
-    return render(request, "500.html", {})
+    return render(request, "500.html", {}, status=500)
 
 
 def custom_bad_request_view(request, exception=None):
-    return render(request, "400.html", {})
+    return render(request, "400.html", {}, status=400)
 
 
 def action_history(request, cid, oid):
@@ -34,7 +39,7 @@ def action_history(request, cid, oid):
         ct = ContentType.objects.get_for_id(cid)
         obj = ct.get_object_for_this_type(pk=oid)
     except (KeyError, ObjectDoesNotExist):
-        raise Http404()
+        raise Http404
 
     product_id = None
     active_tab = None
@@ -131,7 +136,7 @@ def manage_files(request, oid, obj_type):
         user_has_permission_or_403(request.user, obj, Permissions.Finding_Edit)
         obj_vars = ('view_finding', 'finding_set')
     else:
-        raise Http404()
+        raise Http404
 
     files_formset = ManageFileFormSet(queryset=obj.files.all())
     error = False
@@ -189,7 +194,7 @@ def manage_files(request, oid, obj_type):
 def protected_serve(request, path, document_root=None, show_indexes=False):
     file = FileUpload.objects.get(file=path)
     if not file:
-        raise Http404()
+        raise Http404
     object_set = list(file.engagement_set.all()) + list(file.test_set.all()) + list(file.finding_set.all())
     # Should only one item (but not sure what type) in the list, so O(n=1)
     for obj in object_set:
@@ -213,11 +218,9 @@ def access_file(request, fid, oid, obj_type, url=False):
         obj = get_object_or_404(Finding, pk=oid)
         user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
     else:
-        raise Http404()
+        raise Http404
     # If reaching this far, user must have permission to get file
     file = get_object_or_404(FileUpload, pk=fid)
-    redirect_url = '{media_root}/{file_name}'.format(
-        media_root=settings.MEDIA_ROOT,
-        file_name=file.file.url.lstrip(settings.MEDIA_URL))
+    redirect_url = f'{settings.MEDIA_ROOT}/{file.file.url.lstrip(settings.MEDIA_URL)}'
     print(redirect_url)
     return FileResponse(open(redirect_url, "rb"))

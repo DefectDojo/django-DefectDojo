@@ -1,21 +1,20 @@
-from functools import wraps
-from dojo.models import Finding, Dojo_User
-from django.db import models
-from django.conf import settings
-
-from django_ratelimit.exceptions import Ratelimited
-from django_ratelimit.core import is_ratelimited
-from django_ratelimit import UNSAFE
-
 import logging
+from functools import wraps
 
+from django.conf import settings
+from django.db import models
+from django_ratelimit import UNSAFE
+from django_ratelimit.core import is_ratelimited
+from django_ratelimit.exceptions import Ratelimited
+
+from dojo.models import Dojo_User, Finding
 
 logger = logging.getLogger(__name__)
 
 
 def we_want_async(*args, func=None, **kwargs):
-    from dojo.utils import get_current_user
     from dojo.models import Dojo_User
+    from dojo.utils import get_current_user
 
     sync = kwargs.get('sync', False)
     if sync:
@@ -183,7 +182,7 @@ def dojo_ratelimit(key='ip', rate=None, method=UNSAFE, block=False):
                         dojo_user = Dojo_User.objects.filter(username=username).first()
                         if dojo_user:
                             Dojo_User.enable_force_password_reset(dojo_user)
-                raise Ratelimited()
+                raise Ratelimited
             return fn(request, *args, **kw)
         return _wrapped
     return decorator

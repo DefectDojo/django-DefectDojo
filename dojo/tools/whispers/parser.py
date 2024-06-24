@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class WhispersParser(object):
+class WhispersParser:
     """
     Identify hardcoded secrets in static structured text
     """

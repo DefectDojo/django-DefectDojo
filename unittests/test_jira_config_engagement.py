@@ -1,17 +1,21 @@
-from django.urls import reverse
-from .dojo_test_case import DojoTestCase
-from dojo.models import Engagement, Product
-# from dojo.models import JIRA_Project
-from django.utils.http import urlencode
-from unittest.mock import patch
-from dojo.jira_link import helper as jira_helper
 # from unittest import skip
 import logging
+from unittest.mock import patch
+
+from django.urls import reverse
+
+# from dojo.models import JIRA_Project
+from django.utils.http import urlencode
+
+from dojo.jira_link import helper as jira_helper
+from dojo.models import Engagement, Product
+
+from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 
 
-class JIRAConfigEngagementBase(object):
+class JIRAConfigEngagementBase:
     def get_new_engagement_with_jira_project_data(self):
         return {
             'name': 'new engagement',

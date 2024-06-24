@@ -80,7 +80,7 @@ class TrivyParser:
 
         # Legacy format is empty
         if data is None:
-            return list()
+            return []
         # Legacy format with results
         elif isinstance(data, list):
             return self.get_result_items(test, data)
@@ -92,7 +92,7 @@ class TrivyParser:
                 results = data.get("Results", [])
                 return self.get_result_items(test, results, artifact_name=artifact_name)
             elif cluster_name:
-                findings = list()
+                findings = []
                 vulnerabilities = data.get("Vulnerabilities", [])
                 for service in vulnerabilities:
                     namespace = service.get("Namespace")
@@ -145,12 +145,11 @@ class TrivyParser:
                     )
                 return findings
             else:
-                raise ValueError(
-                    "Schema of Trivy json report is not supported"
-                )
+                msg = "Schema of Trivy json report is not supported"
+                raise ValueError(msg)
 
     def get_result_items(self, test, results, service_name=None, artifact_name=""):
-        items = list()
+        items = []
         for target_data in results:
             if (
                 not isinstance(target_data, dict)

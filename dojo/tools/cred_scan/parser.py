@@ -1,10 +1,12 @@
 import csv
 import io
+
 from dateutil import parser
+
 from dojo.models import Finding
 
 
-class CredScanParser(object):
+class CredScanParser:
     """
     Credential Scanner (aka CredScan) is a tool developed and maintained by
     Microsoft to identify credential leaks such as those in source code and
@@ -30,7 +32,7 @@ class CredScanParser(object):
             io.StringIO(content), delimiter=",", quotechar='"'
         )
 
-        dupes = dict()
+        dupes = {}
         for row in reader:
             # Create the description
             description = row.get("Description", "Description not provided")

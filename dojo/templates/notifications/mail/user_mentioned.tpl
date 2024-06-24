@@ -13,7 +13,7 @@
                 <br/>
                 {{ note }}<br/>
                 <br/>
-                It can be reviewed at {{ url }}
+                It can be reviewed at <a href="{{ url }}">{{ url }}</a>
               {% endblocktranslate %}
             </p>
 

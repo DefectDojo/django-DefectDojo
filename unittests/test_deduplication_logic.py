@@ -1,10 +1,13 @@
-from .dojo_test_case import DojoTestCase
-from dojo.models import Finding, User, Product, Endpoint, Endpoint_Status, Test, Engagement
-from dojo.models import System_Settings
-from django.conf import settings
-from crum import impersonate
-import unittest
 import logging
+import unittest
+
+from crum import impersonate
+from django.conf import settings
+
+from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, System_Settings, Test, User
+
+from .dojo_test_case import DojoTestCase
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
@@ -1158,12 +1161,12 @@ class TestDuplicationLogic(DojoTestCase):
         else:
             logger.debug('\t\t' + 'findings:')
             for finding in findings:
-                logger.debug('\t\t\t{:4.4}'.format(str(finding.id)) + ': "' + '{:20.20}'.format(finding.title) + '": ' + '{:5.5}'.format(finding.severity) + ': act: ' + '{:5.5}'.format(str(finding.active))
-                        + ': ver: ' + '{:5.5}'.format(str(finding.verified)) + ': mit: ' + '{:5.5}'.format(str(finding.is_mitigated))
-                        + ': dup: ' + '{:5.5}'.format(str(finding.duplicate)) + ': dup_id: '
-                        + ('{:4.4}'.format(str(finding.duplicate_finding.id)) if finding.duplicate_finding else 'None') + ': hash_code: ' + str(finding.hash_code)
+                logger.debug(f'\t\t\t{str(finding.id):4.4}' + ': "' + f'{finding.title:20.20}' + '": ' + f'{finding.severity:5.5}' + ': act: ' + f'{str(finding.active):5.5}'
+                        + ': ver: ' + f'{str(finding.verified):5.5}' + ': mit: ' + f'{str(finding.is_mitigated):5.5}'
+                        + ': dup: ' + f'{str(finding.duplicate):5.5}' + ': dup_id: '
+                        + (f'{str(finding.duplicate_finding.id):4.4}' if finding.duplicate_finding else 'None') + ': hash_code: ' + str(finding.hash_code)
                         + ': eps: ' + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()])
-                        + ': uid: ' + '{:5.5}'.format(str(finding.unique_id_from_tool)) + (' fp' if finding.false_p else '')
+                        + ': uid: ' + f'{str(finding.unique_id_from_tool):5.5}' + (' fp' if finding.false_p else '')
                         )
 
         logger.debug('\t\tendpoints')

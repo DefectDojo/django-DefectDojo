@@ -1,8 +1,9 @@
 import json
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
-class HumbleParser(object):
+class HumbleParser:
     """Humble (https://github.com/rfc-st/humble)"""
 
     def get_scan_types(self):

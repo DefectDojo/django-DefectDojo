@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Finding
 
 
-class RedHatSatelliteParser(object):
+class RedHatSatelliteParser:
     def get_scan_types(self):
         return ["Red Hat Satellite"]
 
@@ -26,7 +27,7 @@ class RedHatSatelliteParser(object):
         return severity
 
     def get_findings(self, filename, test):
-        findings = list()
+        findings = []
         tree = filename.read()
         try:
             data = json.loads(str(tree, "utf-8"))
@@ -45,11 +46,11 @@ class RedHatSatelliteParser(object):
             name = result.get("name", None)
             vulntype = result.get("type", None)
             cves = result.get("cves", None)
-            bugs = result.get("bugs", None)
+            bugs = result.get("bugs", [])
             hosts_available_count = result.get("hosts_available_count", None)
             hosts_applicable_count = result.get("hosts_applicable_count", None)
             packages = result.get("packages", None)
-            module_streams = result.get("module_streams", None)
+            module_streams = result.get("module_streams", [])
             installable = result.get("installable", None)
             description += "**id:** " + str(vulnid) + "\n"
             description += "**pulp_id:** " + pulp_id + "\n"
@@ -60,19 +61,21 @@ class RedHatSatelliteParser(object):
             description += "**hosts_available_count:** " + str(hosts_available_count) + "\n"
             description += "**hosts_applicable_count:** " + str(hosts_applicable_count) + "\n"
             description += "**installable:** " + str(installable) + "\n"
-            description += "**bugs:** " + str(bugs) + "\n"
-            description += "**module_streams:** " + str(module_streams) + "\n"
+            if bugs != []:
+                description += "**bugs:** " + str(bugs) + "\n"
+            if module_streams != []:
+                description += "**module_streams:** " + str(module_streams) + "\n"
+            description += "**packages:** " + ', '.join(packages)
             find = Finding(
                 title=title,
                 test=test,
                 description=description,
                 severity=self.severity_mapping(input=severity),
                 mitigation=solution,
-                component_name=packages,
                 dynamic_finding=True,
             )
             if errata_id is not None:
-                find.unsaved_vulnerability_ids = list()
+                find.unsaved_vulnerability_ids = []
                 find.unsaved_vulnerability_ids.append(errata_id)
             if cves is not None:
                 for cve in cves:

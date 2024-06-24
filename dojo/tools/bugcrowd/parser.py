@@ -3,10 +3,11 @@ import hashlib
 import io
 
 from dateutil import parser
+
 from dojo.models import Endpoint, Finding
 
 
-class BugCrowdParser(object):
+class BugCrowdParser:
     def get_scan_types(self):
         return ["BugCrowd Scan"]
 
@@ -31,7 +32,7 @@ class BugCrowdParser(object):
         for row in reader:
             csvarray.append(row)
 
-        dupes = dict()
+        dupes = {}
         for row in csvarray:
             finding = Finding(test=test)
 
@@ -128,7 +129,7 @@ class BugCrowdParser(object):
                 finding.date = parser.parse(row.get("submitted_at"))
 
             if url:
-                finding.unsaved_endpoints = list()
+                finding.unsaved_endpoints = []
                 finding.unsaved_endpoints.append(self.get_endpoint(url))
 
             if finding is not None:

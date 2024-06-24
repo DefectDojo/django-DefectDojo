@@ -1,21 +1,23 @@
-import re
 import logging
+import re
+
 import dateutil
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
+
 LOGGER = logging.getLogger(__name__)
 
 
-class CycloneDXXMLParser(object):
+class CycloneDXXMLParser:
     def _get_findings_xml(self, file, test):
         nscan = ElementTree.parse(file)
         root = nscan.getroot()
         namespace = self.get_namespace(root)
         if not namespace.startswith("{http://cyclonedx.org/schema/bom/"):
-            raise ValueError(
-                f"This doesn't seem to be a valid CycloneDX BOM XML file. Namespace={namespace}"
-            )
+            msg = f"This doesn't seem to be a valid CycloneDX BOM XML file. Namespace={namespace}"
+            raise ValueError(msg)
         ns = {
             "b": namespace.replace("{", "").replace(
                 "}", ""
@@ -158,7 +160,7 @@ class CycloneDXXMLParser(object):
             )
         if len(cwes) > 0:
             finding.cwe = cwes[0]
-        vulnerability_ids = list()
+        vulnerability_ids = []
         # set id as first vulnerability id
         if vuln_id:
             vulnerability_ids.append(vuln_id)
@@ -207,7 +209,7 @@ class CycloneDXXMLParser(object):
             if url:
                 references += f"**URL:** {url}\n"
             references += "\n"
-        vulnerability_ids = list()
+        vulnerability_ids = []
         # set id as first vulnerability id
         if vuln_id:
             vulnerability_ids.append(vuln_id)
@@ -294,9 +296,7 @@ class CycloneDXXMLParser(object):
                         if detail:
                             finding.mitigation = (
                                 finding.mitigation
-                                + "\n**This vulnerability is mitigated and/or suppressed:** {}\n".format(
-                                    detail
-                                )
+                                + f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
                             )
             findings.append(finding)
         return findings

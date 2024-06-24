@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.qualys_webapp.parser import QualysWebAppParser
 from dojo.models import Test
+from dojo.tools.qualys_webapp.parser import QualysWebAppParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestQualysWebAppParser(DojoTestCase):
@@ -53,6 +54,6 @@ class TestQualysWebAppParser(DojoTestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        # 18 non-info findings, 21 total
-        self.assertEqual(18, len([x for x in findings if x.severity != "Info"]))
+        # 21 non-info findings, 21 total
+        self.assertEqual(21, len([x for x in findings if x.severity != "Info"]))
         self.assertEqual(21, len(findings))

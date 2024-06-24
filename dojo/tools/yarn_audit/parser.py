@@ -4,7 +4,7 @@ from dojo.models import Finding
 from dojo.tools.utils import get_npm_cwe
 
 
-class YarnAuditParser(object):
+class YarnAuditParser:
     def get_scan_types(self):
         return ["Yarn Audit Scan"]
 
@@ -16,7 +16,7 @@ class YarnAuditParser(object):
 
     def get_findings(self, json_output, test):
         if json_output is None:
-            return list()
+            return []
         tree = None
         lines = json_output.read()
         if isinstance(lines, bytes):
@@ -25,6 +25,10 @@ class YarnAuditParser(object):
             lines = lines.split('\n')
             tree = (json.loads(line) for line in lines if "{" in line)
             return self.get_items_yarn(tree, test)
+        elif '"value"' in lines:
+            lines = lines.split('\n')
+            tree = (json.loads(line) for line in lines if "{" in line)
+            return self.get_items_yarn2(tree, test)
         else:
             tree = json.loads(lines)
             return self.get_items_auditci(tree, test)
@@ -39,10 +43,42 @@ class YarnAuditParser(object):
                 items[unique_key] = item
             elif element.get("type") == "error":
                 error = element.get("data")
-                raise ValueError(
-                    "yarn audit report contains errors: %s", error
-                )
+                msg = "yarn audit report contains errors: %s"
+                raise ValueError(msg, error)
         return list(items.values())
+
+    def get_items_yarn2(self, tree, test):
+        items = []
+        for element in tree:
+            value = element.get("value", None)
+            child = element.get("children")
+            description = ""
+            childid = child.get("ID")
+            childissue = child.get("Issue")
+            childseverity = child.get("Severity")
+            child_vuln_version = child.get("Vulnerable Versions")
+            child_tree_versions = ', '.join(set(child.get("Tree Versions")))
+            child_dependents = ', '.join(set(child.get("Dependents")))
+            description += childissue + "\n"
+            description += "**Vulnerable Versions:** " + child_vuln_version + "\n"
+            description += "**Dependents:** " + child_dependents + "\n"
+            dojo_finding = Finding(
+                title=str(childid),
+                test=test,
+                severity=self.severitytranslator(severity=childseverity),
+                description=description,
+                component_version=str(child_tree_versions),
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                mitigated=None,
+                static_finding=True,
+                dynamic_finding=False,
+            )
+            items.append(dojo_finding)
+            if value is not None:
+                dojo_finding.component_name = value
+        return items
 
     def get_items_auditci(self, tree, test):  # https://github.com/DefectDojo/django-DefectDojo/issues/6495
         items = []
@@ -85,7 +121,6 @@ class YarnAuditParser(object):
                 test=test,
                 severity=self.severitytranslator(severity=tree.get("advisories").get(element).get("severity")),
                 description=description,
-                cve=tree.get("advisories").get(element).get("cves")[0],
                 mitigation=tree.get("advisories").get(element).get("recommendation"),
                 references=url + "\n" + references,
                 component_name=tree.get("advisories").get(element).get("module_name"),
@@ -98,6 +133,10 @@ class YarnAuditParser(object):
                 static_finding=True,
                 dynamic_finding=False,
             )
+            if tree.get("advisories").get(element).get("cves") != []:
+                dojo_finding.unsaved_vulnerability_ids = []
+                for cve in tree.get("advisories").get(element).get("cves"):
+                    dojo_finding.unsaved_vulnerability_ids.append(cve)
             if tree.get("advisories").get(element).get("cwe") != []:
                 dojo_finding.cwe = tree.get("advisories").get(element).get("cwe")[0].strip("CWE-")
             items.append(dojo_finding)
@@ -169,7 +208,7 @@ class YarnAuditParser(object):
             dynamic_finding=False,
         )
         if len(item_node["cves"]) > 0:
-            dojo_finding.unsaved_vulnerability_ids = list()
+            dojo_finding.unsaved_vulnerability_ids = []
             for vulnerability_id in item_node["cves"]:
                 dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
         return dojo_finding

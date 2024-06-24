@@ -1,11 +1,8 @@
-#!/usr/bin/env python
-#
-# -*- coding:utf-8 -*-
-
 import base64
 import re
 import xml.etree.ElementTree
 from datetime import datetime
+
 from dojo.models import Endpoint, Finding
 
 try:
@@ -58,8 +55,8 @@ def attach_unique_extras(
     # finding should always be none, since unique ID's are being used
     if finding is None:
         finding = Finding()
-        finding.unsaved_req_resp = list()
-        finding.unsaved_endpoints = list()
+        finding.unsaved_req_resp = []
+        finding.unsaved_endpoints = []
         if date is not None:
             finding.date = date
         finding.vuln_id_from_tool = str(qid)
@@ -119,8 +116,8 @@ def attach_unique_extras(
 def attach_extras(endpoints, requests, responses, finding, date, qid, test):
     if finding is None:
         finding = Finding()
-        finding.unsaved_req_resp = list()
-        finding.unsaved_endpoints = list()
+        finding.unsaved_req_resp = []
+        finding.unsaved_endpoints = []
         finding.test = test
         if date is not None:
             finding.date = date
@@ -358,7 +355,7 @@ def get_unique_items(
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[unique_id] = get_glossary_item(
-                glossary[index], finding, enable_weakness
+                glossary[index], finding, enable_weakness=enable_weakness
             )
     for unique_id, finding in get_unique_vulnerabilities(
         info_gathered, test, True, is_app_report
@@ -367,7 +364,7 @@ def get_unique_items(
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness
+                glossary[index], finding, True, enable_weakness=enable_weakness
             )
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
@@ -396,7 +393,7 @@ def get_items(
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[qid] = get_glossary_item(
-                glossary[index], finding, enable_weakness
+                glossary[index], finding, enable_weakness=enable_weakness
             )
     for qid, finding in get_vulnerabilities(
         info_gathered, test, True, is_app_report
@@ -404,7 +401,7 @@ def get_items(
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness
+                glossary[index], finding, True, enable_weakness=enable_weakness
             )
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
@@ -464,7 +461,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
     return items
 
 
-class QualysWebAppParser(object):
+class QualysWebAppParser:
     def get_scan_types(self):
         return ["Qualys Webapp Scan"]
 

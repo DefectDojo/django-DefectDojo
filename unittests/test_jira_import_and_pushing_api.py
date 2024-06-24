@@ -1,13 +1,15 @@
-from dojo.models import Finding_Group, User, Finding, JIRA_Instance
-from dojo.jira_link import helper as jira_helper
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-from .dojo_test_case import DojoVCRAPITestCase, get_unit_tests_path
-from crum import impersonate
 # from unittest import skip
 import logging
+
+from crum import impersonate
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 from vcr import VCR
 
+from dojo.jira_link import helper as jira_helper
+from dojo.models import Finding, Finding_Group, JIRA_Instance, User
+
+from .dojo_test_case import DojoVCRAPITestCase, get_unit_tests_path
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
-        my_vcr = super(JIRAImportAndPushTestApi, self)._get_vcr(**kwargs)
+        my_vcr = super()._get_vcr(**kwargs)
         my_vcr.record_mode = 'once'
         my_vcr.path_transformer = VCR.ensure_suffix('.yaml')
         my_vcr.filter_headers = ['Authorization', 'X-Atlassian-Token']

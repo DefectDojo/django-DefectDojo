@@ -7,7 +7,7 @@ from datetime import date
 from dojo.models import Finding
 
 
-class AWSProwlerV3Parser(object):
+class AWSProwlerV3Parser:
     SCAN_TYPE = ["AWS Prowler V3"]
 
     def get_scan_types(self):
@@ -23,10 +23,11 @@ class AWSProwlerV3Parser(object):
         if file.name.lower().endswith('.json'):
             return self.process_json(file, test)
         else:
-            raise ValueError('Unknown file format')
+            msg = 'Unknown file format'
+            raise ValueError(msg)
 
     def process_json(self, file, test):
-        dupes = dict()
+        dupes = {}
 
         data = json.load(file)
         for deserialized in data:
