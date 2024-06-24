@@ -9,7 +9,7 @@ import pytz
 from django.test import RequestFactory
 from django.urls import reverse
 
-from dojo.metrics import views
+from dojo.metrics import utils
 from dojo.models import User
 
 from .dojo_test_case import DojoTestCase
@@ -34,7 +34,7 @@ class FindingQueriesTest(DojoTestCase):
         self.request.user = user3
 
         product_types = []
-        finding_queries = views.finding_querys(
+        finding_queries = utils.finding_queries(
             product_types,
             self.request
         )
@@ -52,7 +52,7 @@ class FindingQueriesTest(DojoTestCase):
         # Queries over Finding and Risk_Acceptance
         with self.assertNumQueries(25):
             product_types = []
-            finding_queries = views.finding_querys(
+            finding_queries = utils.finding_queries(
                 product_types,
                 self.request
             )
@@ -159,7 +159,7 @@ class EndpointQueriesTest(DojoTestCase):
         self.request.user = user3
 
         product_types = []
-        endpoint_queries = views.endpoint_querys(
+        endpoint_queries = utils.endpoint_queries(
             product_types,
             self.request
         )
@@ -173,7 +173,7 @@ class EndpointQueriesTest(DojoTestCase):
         # Queries over Finding and Endpoint_Status
         with self.assertNumQueries(70):
             product_types = []
-            endpoint_queries = views.endpoint_querys(
+            endpoint_queries = utils.endpoint_queries(
                 product_types,
                 self.request
             )
