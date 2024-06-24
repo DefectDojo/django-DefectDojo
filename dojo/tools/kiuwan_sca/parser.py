@@ -1,5 +1,5 @@
-import json
 import hashlib
+import json
 
 from dojo.models import Finding
 
@@ -30,7 +30,7 @@ class KiuwanSCAParser:
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-        dupes = dict()
+        dupes = {}
 
         for row in data:
             # if a finding was "muted" in the Kiuwan UI, we ignore it (e.g. marked as false positive)
