@@ -552,7 +552,7 @@ def get_in_period_details(
 
     try:
         age_detail = findings.annotate(age=ExtractDay(Coalesce('mitigated', Now()) - F('date')))
-    except ValueError:
+    except:
         age_detail = findings.annotate(
             date_diff=ExpressionWrapper(Coalesce('mitigated', Now()) - F('date'), output_field=DurationField())
         ).annotate(
