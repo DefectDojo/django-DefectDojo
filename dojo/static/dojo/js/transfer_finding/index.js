@@ -28,7 +28,7 @@ $(document).ready(function(){
                 let selectedValue = $(this);
                 let row = $(this).closest('tr');
                 let finding = row.find('.btn-success');
-                row.find('.cls-finding-status').text("Transfer Pending").css("color", "#1371B6");
+                row.find('.label-primary').text("Transfer Pending").css("background", "#1371B6");
                 let finding_id = finding.attr('data-btn-success');
                 delete ObjFindings[finding_id];
                 finding.attr('data-related-finding',selectedValue.val());
@@ -68,7 +68,7 @@ $(document).ready(function() {
         if (btnClass.includes('btn-success'))
             {
                 if (getSessionStorage('transferFinding','engagementId') !== "None"){
-                    row.find('.cls-finding-status').text("Transfer Accepted").css("color", "green");
+                    row.find('.label-primary').text("Transfer Accepted").css("background", "green");
                     let findingId = $(this).attr('data-btn-success');
                     let relatedFinding = $(this).attr('data-related-finding');
                     AcceptanceFinding(findingId, relatedFinding)
@@ -78,11 +78,11 @@ $(document).ready(function() {
                     alertShow('.alert');
                 }
         } else if (btnClass.includes('btn-warning')) {
-            row.find('.cls-finding-status').text("Transfer Rejected").css("color", "#e7a100");
+            row.find('.label-primary').text("Transfer Rejected").css("background", "#e7a100");
             let findingId = $(this).attr('data-btn-warning');
             RejectFinding(findingId)
         } else if (btnClass.includes('btn-danger')) {
-            row.find('.cls-finding-status').text("Transfer Removed").css("color", "red");
+            row.find('.label-primary').text("Transfer Removed").css("background", "red");
             let findingId = $(this).attr('data-btn-danger');
             RemoveFinding(findingId)
         }
@@ -157,17 +157,17 @@ function innerData(data, findings_related){
             <td>${transfer_findings_finding.findings.cve}</td>`
             if(transfer_findings_finding.findings.risk_status.includes("Transfer Accepted")){
                 row.innerHTML += `<td><a href="http://${host}/finding/${transfer_findings_finding.finding_related}" class="table-link help help-tooltip" title="View transfered finding" target="_blank" type="button"> ${transfer_findings_finding.finding_related} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>`
-                cell_status.innerHTML= `<span style="color:green">${transfer_findings_finding.findings.risk_status}</span>`
+                cell_status.innerHTML= `<span class="label label-primary" style="background: green">${transfer_findings_finding.findings.risk_status}</span>`
             }
             else if(transfer_findings_finding.findings.risk_status.includes("Transfer Reject"))
             {
                 row.innerHTML += `${findings_related}`
-                cell_status.innerHTML = `<span style="color:#e7a100">Transfer Rejected</span>`
+                cell_status.innerHTML = `<span class="label label-primary" style="background: #e7a100">Transfer Rejected</span>`
             }
             else if(transfer_findings_finding.findings.risk_status.includes("Transfer Pending"))
             {
                 row.innerHTML += `${findings_related}`
-                cell_status.innerHTML = `<span style="color:#1371B6">Transfer Pending</span>`
+                cell_status.innerHTML = `<span class="label label-primary" style="background: #1371B6">Transfer Pending</span>`
             }
             else
             {
