@@ -36,7 +36,7 @@ jobs:
           "tests/tool_config.py",
           "openapi-validatator",
         ]
-        profile: ["mysql-rabbitmq", "postgres-redis"]
+        profile: ["postgres-rabbitmq", "postgres-redis"]
         os: [alpine, debian]
       fail-fast: false
 
@@ -49,6 +49,7 @@ jobs:
         uses: actions/download-artifact@v3
 
       - name: Load docker images
+        timeout-minutes: 10
         run: |-
              docker load -i nginx/nginx-${{ matrix.os }}_img
              docker load -i django/django-${{ matrix.os }}_img
@@ -58,10 +59,10 @@ jobs:
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
-      # phased startup with MySQL and RabbitMQ so we can use the exit code from integrationtest container
-      - name: Start Dojo MySQL + RabbitMQ
-        if: matrix.profile == 'mysql-rabbitmq'
-        run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d mysql nginx celerybeat celeryworker mailhog uwsgi rabbitmq
+      # phased startup with PostgreSQL and RabbitMQ so we can use the exit code from integrationtest container
+      - name: Start Dojo PostgreSQL + RabbitMQ
+        if: matrix.profile == 'postgres-rabbitmq'
+        run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi rabbitmq
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           NGINX_VERSION: ${{ matrix.os }}
@@ -74,12 +75,14 @@ jobs:
           NGINX_VERSION: ${{ matrix.os }}
 
       - name: Initialize
+        timeout-minutes: 10
         run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from initializer initializer
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           NGINX_VERSION: ${{ matrix.os }}
 
       - name: Integration tests
+        timeout-minutes: 10
         run: docker compose --profile ${{ matrix.profile }} --env-file ./docker/environments/${{ matrix.profile }}.env up --no-deps --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}

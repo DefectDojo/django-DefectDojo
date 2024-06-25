@@ -1212,7 +1212,7 @@ class DeleteFinding(View):
         # Handle the case of a successful form
         if success:
             return redirect_to_return_url_or_else(request, reverse("view_test", args=(finding.test.id,)))
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
@@ -1500,7 +1500,7 @@ def apply_template_cwe(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
@@ -1614,7 +1614,7 @@ def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
     if not finding.test.engagement.product.enable_simple_risk_acceptance:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     ra_helper.simple_risk_accept(finding)
 
@@ -1741,7 +1741,7 @@ def clear_finding_review(request, fid):
     # the review or one of the users requested to provide the review, then
     # do not allow the user to clear the review.
     if user != finding.review_requested_by and user not in finding.reviewers.all():
-        raise PermissionDenied()
+        raise PermissionDenied
 
     # in order to clear a review for a finding, we need to capture why and how it was reviewed
     # we can do this with a Note
@@ -2058,7 +2058,7 @@ def delete_stub_finding(request, fid):
                 extra_tags="alert-danger",
             )
     else:
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Edit, "fid")
@@ -2442,7 +2442,7 @@ def delete_template(request, tid):
                 extra_tags="alert-danger",
             )
     else:
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def download_finding_pic(request, token):

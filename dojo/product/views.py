@@ -839,7 +839,7 @@ def import_scan_results_prod(request, pid=None):
 
 def new_product(request, ptid=None):
     if get_authorized_product_types(Permissions.Product_Type_Add_Product).count() == 0:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     jira_project_form = None
     error = False
@@ -1822,7 +1822,7 @@ def edit_api_scan_configuration(request, pid, pascid):
 
     if product_api_scan_configuration.product.pk != int(
             pid):  # user is trying to edit Tool Configuration from another product (trying to by-pass auth)
-        raise Http404()
+        raise Http404
 
     if request.method == 'POST':
         form = Product_API_Scan_ConfigurationForm(request.POST, instance=product_api_scan_configuration)
@@ -1868,7 +1868,7 @@ def delete_api_scan_configuration(request, pid, pascid):
 
     if product_api_scan_configuration.product.pk != int(
             pid):  # user is trying to delete Tool Configuration from another product (trying to by-pass auth)
-        raise Http404()
+        raise Http404
 
     if request.method == 'POST':
         form = Product_API_Scan_ConfigurationForm(request.POST)

@@ -21,4 +21,4 @@ if not (DEBUG or ('collectstatic' in sys.argv)):
         msg = "Change of 'settings.dist.py' file was detected. It is not allowed to edit this file. " \
             "Any customization of variables need to be done via environmental variables or in 'local_settings.py'. " \
             "For more information check https://documentation.defectdojo.com/getting_started/configuration/ "
-        raise ValueError(msg)
+        sys.exit(msg)

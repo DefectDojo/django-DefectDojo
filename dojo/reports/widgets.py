@@ -11,7 +11,12 @@ from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups, ReportFindingFilter
+from dojo.filters import (
+    EndpointFilter,
+    EndpointFilterWithoutObjectLookups,
+    ReportFindingFilter,
+    ReportFindingFilterWithoutObjectLookups,
+)
 from dojo.forms import CustomReportOptionsForm
 from dojo.models import Endpoint, Finding
 from dojo.utils import get_page_items, get_system_setting, get_words_for_field
@@ -427,8 +432,9 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                     d.appendlist(item['name'], item['value'])
                 else:
                     d[item['name']] = item['value']
-
-            findings = ReportFindingFilter(d, queryset=findings)
+            filter_string_matching = get_system_setting("filter_string_matching", False)
+            filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
+            findings = filter_class(d, queryset=findings)
             user_id = user.id if user is not None else None
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = FindingList(request=request, findings=findings,
                                                                               finding_notes=finding_notes,

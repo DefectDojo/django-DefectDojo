@@ -15,7 +15,38 @@
         "severity": "MAJOR",
         "component": "testapplication",
         "project": "testapplication",
-        "flows": [],
+        "flows": [
+          {
+            "locations": [
+              {
+                "component": "asdfsdf",
+                "textRange": {
+                  "startLine": 1,
+                  "endLine": 2,
+                  "startOffset": 3,
+                  "endOffset": 4
+                },
+                "msg": "sdfasfdasfd",
+                "msgFormattings": []
+              }
+            ]
+          },
+          {
+            "locations": [
+              {
+                "component": "nonono",
+                "textRange": {
+                  "startLine": 2,
+                  "endLine": 4,
+                  "startOffset": 7,
+                  "endOffset": 9
+                },
+                "msg": "fghjfghjgfj",
+                "msgFormattings": []
+              }
+            ]
+          }
+        ],
         "status": "OPEN",
         "message": "Filename: package:1.1.2 | Reference: CVE-2024-2529 | CVSS Score: 6.4 | Category: CWE-120 | Versions of the package vulndescription .",
         "author": "",

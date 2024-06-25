@@ -402,7 +402,7 @@ def copy_test(request, tid):
 def test_calendar(request):
 
     if not get_system_setting('enable_calendar'):
-        raise Resolver404()
+        raise Resolver404
 
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         tests = get_authorized_tests(Permissions.Test_View)
@@ -714,6 +714,7 @@ def add_temp_finding(request, tid, fid):
                 new_finding.severity)
 
             new_finding.tags = form.cleaned_data['tags']
+            new_finding.cvssv3 = finding.cvssv3
             new_finding.date = form.cleaned_data['date'] or datetime.today()
 
             finding_helper.update_finding_status(new_finding, request.user)
@@ -986,7 +987,7 @@ class ReImportScanResultsView(View):
         Attempt to import with all the supplied information
         """
         try:
-            importer_client = DefaultReImporter()
+            importer_client = DefaultReImporter(**context)
             (
                 context["test"],
                 finding_count,
@@ -996,18 +997,15 @@ class ReImportScanResultsView(View):
                 untouched_finding_count,
                 _,
             ) = importer_client.process_scan(
-                **context,
+                context.pop("scan", None)
             )
             # Add a message to the view for the user to see the results
             add_success_message_to_response(importer_client.construct_imported_message(
-                context.get("scan_type"),
-                Test_Import.REIMPORT_TYPE,
                 finding_count=finding_count,
                 new_finding_count=new_finding_count,
                 closed_finding_count=closed_finding_count,
                 reactivated_finding_count=reactivated_finding_count,
                 untouched_finding_count=untouched_finding_count,
-                close_old_findings=context.get("close_old_findings"),
             ))
         except Exception as e:
             logger.exception(e)

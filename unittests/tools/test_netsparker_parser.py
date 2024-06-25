@@ -83,3 +83,17 @@ class TestNetsparkerParser(DojoTestCase):
                 self.assertEqual("High", finding.severity)
                 self.assertEqual(614, finding.cwe)
                 self.assertEqual("03/02/2019", finding.date.strftime("%d/%m/%Y"))
+
+    def test_parse_file_issue_10311(self):
+        with open("unittests/scans/netsparker/issue_10311.json") as testfile:
+            parser = NetsparkerParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(3, len(findings))
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("High", finding.severity)
+                self.assertEqual(614, finding.cwe)
+                self.assertEqual("03/02/2019", finding.date.strftime("%d/%m/%Y"))

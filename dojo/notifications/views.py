@@ -25,7 +25,7 @@ class SystemNotificationsView(View):
 
     def check_user_permissions(self, request: HttpRequest):
         if not request.user.is_superuser:
-            raise PermissionDenied()
+            raise PermissionDenied
 
     def get_form(self, request: HttpRequest, notifications: Notifications):
         # Set up the args for the form

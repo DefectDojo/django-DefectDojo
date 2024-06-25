@@ -40,17 +40,17 @@ debugpy_port = os.environ.get("DD_DEBUG_PORT") if os.environ.get("DD_DEBUG_PORT"
 if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_debugger_listening(debugpy_port) != 0:
     logger.info(f"DD_DEBUG is set to True, setting remote debugging on port {debugpy_port}")
     try:
-        import debugpy
+        import debugpy  # noqa: T100
 
         # Required, otherwise debugpy will try to use the uwsgi binary as the python interpreter - https://github.com/microsoft/debugpy/issues/262
         debugpy.configure({
                             "python": "python",
                             "subProcess": True
                         })
-        debugpy.listen(("0.0.0.0", debugpy_port))
+        debugpy.listen(("0.0.0.0", debugpy_port))  # noqa: T100
         if os.environ.get("DD_DEBUG_WAIT_FOR_CLIENT") == "True":
             logger.info(f"Waiting for the debugging client to connect on port {debugpy_port}")
-            debugpy.wait_for_client()
+            debugpy.wait_for_client()  # noqa: T100
             print("Debugging client connected, resuming execution")
     except RuntimeError as e:
         if str(e) != "Can't listen for client connections: [Errno 98] Address already in use":

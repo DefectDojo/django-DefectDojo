@@ -40,7 +40,6 @@ TEST_TITLE_NEW = 'lol importing via reimport'
 class TestDojoDefaultImporter(DojoTestCase):
     def test_parse_findings(self):
         with open(get_unit_tests_path() + "/scans/acunetix/one_finding.xml") as scan:
-            importer = DefaultImporter()
             scan_type = "Acunetix Scan"
             user, _created = User.objects.get_or_create(username="admin")
             product_type, _created = Product_Type.objects.get_or_create(name="test")
@@ -65,25 +64,23 @@ class TestDojoDefaultImporter(DojoTestCase):
                 "active": True,
                 "verified": True,
                 "sync": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
             }
+            importer = DefaultImporter(**import_options)
             # create the test
             # by default test_type == scan_type
-            test = importer.create_test(scan_type, scan_type, engagement=engagement, **import_options)
+            test = importer.create_test(scan_type)
             # parse the findings
-            parser = importer.get_parser(scan_type)
+            parser = importer.get_parser()
             parsed_findings = parser.get_findings(scan, test)
             # process
-            new_findings = importer.process_findings(
-                test,
-                parsed_findings,
-                **import_options,
-            )
+            new_findings = importer.process_findings(parsed_findings)
             for finding in new_findings:
                 self.assertIn(finding.numerical_severity, ["S0", "S1", "S2", "S3", "S4"])
 
     def test_import_scan(self):
         with open(get_unit_tests_path() + "/scans/sarif/spotbugs.sarif") as scan:
-            importer = DefaultImporter()
             scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
             user, _ = User.objects.get_or_create(username="admin")
             product_type, _ = Product_Type.objects.get_or_create(name="test2")
@@ -106,17 +103,18 @@ class TestDojoDefaultImporter(DojoTestCase):
                 "minimum_severity": "Info",
                 "active": True,
                 "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
             }
-            test, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
-                scan, scan_type, engagement, close_old_findings=False, **import_options,
-            )
+            importer = DefaultImporter(**import_options)
+            test, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(scan)
             self.assertEqual(f"SpotBugs Scan ({scan_type})", test.test_type.name)
             self.assertEqual(56, len_new_findings)
             self.assertEqual(0, len_closed_findings)
 
     def test_import_scan_without_test_scan_type(self):
         with open(f"{get_unit_tests_path()}/scans/gitlab_sast/gl-sast-report-1-vuln_v15.json") as scan:
-            importer = DefaultImporter()
             # GitLabSastParser implements get_tests but report has no scanner name
             scan_type = GitlabSastParser().get_scan_types()[0]
             user, _ = User.objects.get_or_create(username="admin")
@@ -140,10 +138,12 @@ class TestDojoDefaultImporter(DojoTestCase):
                 "minimum_severity": "Info",
                 "active": True,
                 "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
             }
-            test, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(
-                scan, scan_type, engagement, close_old_findings=False, **import_options,
-            )
+            importer = DefaultImporter(**import_options)
+            test, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(scan)
             self.assertEqual("GitLab SAST Report", test.test_type.name)
             self.assertEqual(1, len_new_findings)
             self.assertEqual(0, len_closed_findings)
@@ -517,62 +517,100 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
 
 class TestImporterUtils(DojoAPITestCase):
+    def setUp(self):
+        self.testuser, _ = User.objects.get_or_create(username="admin", is_superuser=True)
+        token, _ = Token.objects.get_or_create(user=self.testuser)
+        self.client = APIClient(raise_request_exception=True)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.force_authenticate(user=self.testuser, token=token)
+        self.create_default_data()
+
+    def __del__(self):
+        self.test_last_by_scan_type.delete()
+        self.test_with_title.delete()
+        self.test_last_by_title.delete()
+        self.test.delete()
+        self.engagement.delete()
+        self.product.delete()
+        self.product_type.delete()
+        self.testuser.delete()
+
+    def create_default_data(self):
+        # creating is much faster compare to using a fixture
+        logger.debug('creating default product + engagement')
+        Development_Environment.objects.get_or_create(name='Development')
+        self.product_type = self.create_product_type(PRODUCT_TYPE_NAME_DEFAULT)
+        self.product = self.create_product(PRODUCT_NAME_DEFAULT)
+        self.engagement = self.create_engagement(ENGAGEMENT_NAME_DEFAULT, product=self.product)
+        self.test = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title=TEST_TITLE_DEFAULT)
+        self.test_last_by_title = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title=TEST_TITLE_DEFAULT)
+        self.test_with_title = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title=TEST_TITLE_ALTERNATE)
+        self.test_last_by_scan_type = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE)
+        environment, _ = Development_Environment.objects.get_or_create(name='Development')
+        self.importer_data = {
+            "engagement": self.engagement,
+            "environment": environment,
+            "scan_type": NPM_AUDIT_SCAN_TYPE,
+        }
+
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
     def test_handle_vulnerability_ids_references_and_cve(self, mock):
-        finding = Finding()
-        finding.cve = 'CVE'
-        finding.unsaved_vulnerability_ids = ['REF-1', 'REF-2']
-
-        DefaultImporter().process_vulnerability_ids(finding)
-
+        # Why doesn't this test use the test db and query for one?
         vulnerability_ids = ['CVE', 'REF-1', 'REF-2']
+        finding = Finding()
+        finding.unsaved_vulnerability_ids = vulnerability_ids
+        finding.test = self.test
+        finding.reporter = self.testuser
+        finding.save()
+        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
 
-        self.assertEqual(6, len(mock.mock_calls))
-        self.assertEqual('CVE', mock.mock_calls[0].kwargs['vulnerability_id'])
-        self.assertEqual('CVE', mock.mock_calls[0].kwargs['finding'].cve)
-        self.assertEqual(vulnerability_ids, mock.mock_calls[0].kwargs['finding'].unsaved_vulnerability_ids)
-        self.assertEqual('REF-1', mock.mock_calls[2].kwargs['vulnerability_id'])
-        self.assertEqual('CVE', mock.mock_calls[2].kwargs['finding'].cve)
-        self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
-        self.assertEqual('REF-2', mock.mock_calls[4].kwargs['vulnerability_id'])
-        self.assertEqual('CVE', mock.mock_calls[4].kwargs['finding'].cve)
-        self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
+        self.assertEqual('CVE', finding.vulnerability_ids[0])
+        self.assertEqual('CVE', finding.cve)
+        self.assertEqual(vulnerability_ids, finding.unsaved_vulnerability_ids)
+        self.assertEqual('REF-1', finding.vulnerability_ids[1])
+        self.assertEqual('REF-2', finding.vulnerability_ids[2])
+        finding.delete()
 
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
     def test_handle_no_vulnerability_ids_references_and_cve(self, mock):
-        finding = Finding()
-        finding.cve = 'CVE'
-
-        DefaultImporter().process_vulnerability_ids(finding)
-
         vulnerability_ids = ['CVE']
+        finding = Finding()
+        finding.test = self.test
+        finding.reporter = self.testuser
+        finding.save()
+        finding.unsaved_vulnerability_ids = vulnerability_ids
 
-        self.assertEqual(2, len(mock.mock_calls))
-        self.assertEqual('CVE', mock.mock_calls[0].kwargs['vulnerability_id'])
-        self.assertEqual('CVE', mock.mock_calls[0].kwargs['finding'].cve)
-        self.assertEqual(vulnerability_ids, mock.mock_calls[0].kwargs['finding'].unsaved_vulnerability_ids)
+        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+
+        self.assertEqual('CVE', finding.vulnerability_ids[0])
+        self.assertEqual('CVE', finding.cve)
+        self.assertEqual(vulnerability_ids, finding.unsaved_vulnerability_ids)
+        finding.delete()
 
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
     def test_handle_vulnerability_ids_references_and_no_cve(self, mock):
-        finding = Finding()
-        finding.unsaved_vulnerability_ids = ['REF-1', 'REF-2']
-
-        DefaultImporter().process_vulnerability_ids(finding)
-
         vulnerability_ids = ['REF-1', 'REF-2']
+        finding = Finding()
+        finding.test = self.test
+        finding.reporter = self.testuser
+        finding.save()
+        finding.unsaved_vulnerability_ids = vulnerability_ids
+        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
 
-        self.assertEqual(4, len(mock.mock_calls))
-        self.assertEqual('REF-1', mock.mock_calls[0].kwargs['vulnerability_id'])
-        self.assertEqual('REF-1', mock.mock_calls[0].kwargs['finding'].cve)
-        self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
-        self.assertEqual('REF-2', mock.mock_calls[2].kwargs['vulnerability_id'])
-        self.assertEqual('REF-1', mock.mock_calls[2].kwargs['finding'].cve)
-        self.assertEqual(vulnerability_ids, mock.mock_calls[2].kwargs['finding'].unsaved_vulnerability_ids)
+        self.assertEqual('REF-1', finding.vulnerability_ids[0])
+        self.assertEqual('REF-1', finding.cve)
+        self.assertEqual(vulnerability_ids, finding.unsaved_vulnerability_ids)
+        self.assertEqual('REF-2', finding.vulnerability_ids[1])
+        finding.delete()
 
     @patch('dojo.importers.base_importer.Vulnerability_Id', autospec=True)
     def test_no_handle_vulnerability_ids_references_and_no_cve(self, mock):
         finding = Finding()
-
-        DefaultImporter().process_vulnerability_ids(finding)
-
-        mock.assert_not_called()
+        finding.test = self.test
+        finding.reporter = self.testuser
+        finding.save()
+        DefaultImporter(**self.importer_data).process_vulnerability_ids(finding)
+        self.assertEqual(finding.cve, None)
+        self.assertEqual(finding.unsaved_vulnerability_ids, None)
+        self.assertEqual(finding.vulnerability_ids, [])
+        finding.delete()

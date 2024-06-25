@@ -1150,9 +1150,7 @@ class ImportReimportMixin:
         import0 = self.import_scan_with_params(self.gitlab_dep_scan_components_filename,
                                                scan_type=self.scan_type_gtlab_dep_scan,
                                                minimum_severity='Info')
-
         test_id = import0['test']
-
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(6, active_findings_before)
 
@@ -1424,7 +1422,7 @@ class ImportReimportMixin:
         test_id = import0['test']
         test = Test.objects.get(id=test_id)
         findings = Finding.objects.filter(test=test)
-        self.assertEqual(4, len(findings))
+        self.assertEqual(5, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
@@ -1442,7 +1440,7 @@ class ImportReimportMixin:
 
         self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
         findings = Finding.objects.filter(test=reimport_test)
-        self.assertEqual(4, len(findings))
+        self.assertEqual(5, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])

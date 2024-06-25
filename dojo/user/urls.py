@@ -30,26 +30,26 @@ urlpatterns = [
 if settings.FORGOT_PASSWORD:
     urlpatterns.extend([
         re_path(r'^password_reset/$', views.DojoPasswordResetView.as_view(
-            template_name='dojo/password_reset.html',
+            template_name='login/password_reset.html',
         ), name="password_reset"),
         re_path(r'^password_reset/done/$', auth_views.PasswordResetDoneView.as_view(
-            template_name='dojo/password_reset_done.html',
+            template_name='login/password_reset_done.html',
         ), name='password_reset_done'),
         re_path(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,40})/$', auth_views.PasswordResetConfirmView.as_view(
-            template_name='dojo/password_reset_confirm.html',
+            template_name='login/password_reset_confirm.html',
         ), name='password_reset_confirm'),
         re_path(r'^reset/done/$', auth_views.PasswordResetCompleteView.as_view(
-            template_name='dojo/password_reset_complete.html',
+            template_name='login/password_reset_complete.html',
         ), name='password_reset_complete'),
     ])
 
 if settings.FORGOT_USERNAME:
     urlpatterns.extend([
         re_path(r'^forgot_username_done/$', auth_views.PasswordResetDoneView.as_view(
-            template_name='dojo/forgot_username_done.html',
+            template_name='login/forgot_username_done.html',
         ), name="forgot_username_done"),
         re_path(r'^forgot_username/$', views.DojoForgotUsernameView.as_view(
-            template_name='dojo/forgot_username.html',
+            template_name='login/forgot_username.html',
             success_url=reverse_lazy("forgot_username_done")
         ), name="forgot_username"),
     ])

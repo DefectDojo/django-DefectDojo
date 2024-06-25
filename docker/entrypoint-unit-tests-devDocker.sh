@@ -7,6 +7,7 @@ set -e
 set -v
 
 . /secret-file-loader.sh
+. /reach_database.sh
 
 cd /app
 # Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
@@ -14,6 +15,8 @@ unset DD_DATABASE_URL
 
 # Unset the celery broker URL so that we can force the other DD_CELERY_BROKER settings
 unset DD_CELERY_BROKER_URL
+
+wait_for_database_to_be_reachable
 
 python3 manage.py makemigrations dojo
 python3 manage.py migrate
@@ -50,7 +53,7 @@ EOF
 
 echo "Unit Tests"
 echo "------------------------------------------------------------"
-python3 manage.py test unittests -v 3 --keepdb --no-input
+python3 manage.py test unittests -v 3 --keepdb --no-input --shuffle
 
 # you can select a single file to "test" unit tests
 # python3 manage.py test unittests.tools.test_npm_audit_scan_parser.TestNpmAuditParser --keepdb -v 3

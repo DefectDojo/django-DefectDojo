@@ -127,11 +127,11 @@ def create_notification(event=None, **kwargs):
 def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
-            kwargs["description"] = _('Product {title} has been created successfully.'.format(title=kwargs['title']))
+            kwargs["description"] = _('Product %s has been created successfully.') % kwargs['title']
         elif event == 'product_type_added':
-            kwargs["description"] = _('Product Type {title} has been created successfully.'.format(title=kwargs['title']))
+            kwargs["description"] = _('Product Type %s has been created successfully.') % kwargs['title']
         else:
-            kwargs["description"] = _('Event {event}  has occurred.'.format(event=str(event)))
+            kwargs["description"] = _('Event %s has occurred.') % str(event)
 
     return kwargs["description"]
 

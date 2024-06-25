@@ -14,12 +14,12 @@ class SonarQubeRESTAPIJSON:
                     component = issue.get("component")
                     project = issue.get("project")
                     line = str(issue.get("line"))
-                    textRange = issue.get("textRange")
-                    flows = issue.get("flows")
+                    textRange = issue.get("textRange", {})
+                    flows = issue.get("flows", [])
                     status = issue.get("status")
                     message = issue.get("message")
-                    tags = issue.get("tags")
-                    type = issue.get("type")
+                    tags = issue.get("tags", [])
+                    bugtype = issue.get("type")
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
                     codeVariants = str(issue.get("codeVariants"))
@@ -29,18 +29,18 @@ class SonarQubeRESTAPIJSON:
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
                     description += "**line:** " + line + "\n"
-                    if textRange != {}:
+                    if bool(textRange):
                         res = []
                         for item in textRange:
                             res.append(item + ": " + str(textRange[item]))
                         description += "**textRange:** " + ", ".join(res) + "\n"
                     if flows != []:
-                        description += "**flows:** " + ", ".join(flows) + "\n"
+                        description += "**flows:** " + str(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     if tags != []:
                         description += "**tags:** " + ", ".join(tags) + "\n"
-                    description += "**type:** " + type + "\n"
+                    description += "**type:** " + bugtype + "\n"
                     description += "**scope:** " + scope + "\n"
                     description += self.returncomponent(json_content, component)
                     item = Finding(
@@ -57,7 +57,7 @@ class SonarQubeRESTAPIJSON:
                     rule = issue.get("rule")
                     component = issue.get("component")
                     project = issue.get("project")
-                    flows = issue.get("flows")
+                    flows = issue.get("flows", [])
                     status = issue.get("status")
                     message = issue.get("message")
                     cwe = None
@@ -86,15 +86,15 @@ class SonarQubeRESTAPIJSON:
                                 component_version = None
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
-                    codeVariants = issue.get("codeVariants")
-                    tags = issue.get("tags")
+                    codeVariants = issue.get("codeVariants", [])
+                    tags = issue.get("tags", [])
                     description = ""
                     description += "**key:** " + key + "\n"
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
                     if flows != []:
-                        description += "**flows:** " + ", ".join(flows) + "\n"
+                        description += "**flows:** " + str(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     description += "**scope:** " + scope + "\n"
@@ -147,26 +147,26 @@ class SonarQubeRESTAPIJSON:
                     component = issue.get("component")
                     project = issue.get("project")
                     line = str(issue.get("line"))
-                    textRange = issue.get("textRange")
-                    flows = issue.get("flows")
+                    textRange = issue.get("textRange", {})
+                    flows = issue.get("flows", [])
                     status = issue.get("status")
                     message = issue.get("message")
-                    tags = issue.get("tags")
+                    tags = issue.get("tags", [])
                     scope = issue.get("scope")
                     quickFixAvailable = str(issue.get("quickFixAvailable"))
-                    codeVariants = issue.get("codeVariants")
+                    codeVariants = issue.get("codeVariants", [])
                     description = ""
                     description += "**rule:** " + rule + "\n"
                     description += "**component:** " + component + "\n"
                     description += "**project:** " + project + "\n"
                     description += "**line:** " + line + "\n"
-                    if textRange != {}:
+                    if bool(textRange):
                         res = []
                         for item in textRange:
                             res.append(item + ": " + str(textRange[item]))
                         description += "**textRange:** " + ", ".join(res) + "\n"
                     if flows != []:
-                        description += "**flows:** " + ", ".join(flows) + "\n"
+                        description += "**flows:** " + str(flows) + "\n"
                     description += "**status:** " + status + "\n"
                     description += "**message:** " + message + "\n"
                     if tags != []:
@@ -195,10 +195,10 @@ class SonarQubeRESTAPIJSON:
                 status = hotspot.get("status")
                 line = str(hotspot.get("line"))
                 message = hotspot.get("message")
-                textRange = hotspot.get("textRange")
-                flows = hotspot.get("flows")
+                textRange = hotspot.get("textRange", {})
+                flows = hotspot.get("flows", [])
                 ruleKey = hotspot.get("ruleKey")
-                messageFormattings = hotspot.get("messageFormattings")
+                messageFormattings = hotspot.get("messageFormattings", [])
                 description = ""
                 description += "**key:** " + key + "\n"
                 description += "**component:** " + component + "\n"
@@ -207,13 +207,13 @@ class SonarQubeRESTAPIJSON:
                 description += "**status:** " + status + "\n"
                 description += "**line:** " + line + "\n"
                 description += "**message:** " + message + "\n"
-                if textRange != {}:
+                if bool(textRange):
                     res = []
                     for item in textRange:
                         res.append(item + ": " + str(textRange[item]))
                     description += "**textRange:** " + ", ".join(res) + "\n"
                 if flows != []:
-                    description += "**flows:** " + ", ".join(flows) + "\n"
+                    description += "**flows:** " + str(flows) + "\n"
                 description += "**ruleKey:** " + ruleKey + "\n"
                 if messageFormattings != []:
                     description += "**messageFormattings:** " + ", ".join(messageFormattings) + "\n"

@@ -114,7 +114,7 @@ logger = logging.getLogger(__name__)
 def engagement_calendar(request):
 
     if not get_system_setting('enable_calendar'):
-        raise Resolver404()
+        raise Resolver404
 
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         engagements = get_authorized_engagements(Permissions.Engagement_View)
@@ -927,17 +927,14 @@ class ImportScanResultsView(View):
         Attempt to import with all the supplied information
         """
         try:
-            importer_client = DefaultImporter()
+            importer_client = DefaultImporter(**context)
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
-                **context,
+                context.pop("scan", None)
             )
             # Add a message to the view for the user to see the results
             add_success_message_to_response(importer_client.construct_imported_message(
-                context.get("scan_type"),
-                Test_Import.IMPORT_TYPE,
                 finding_count=finding_count,
                 closed_finding_count=closed_finding_count,
-                close_old_findings=context.get("close_old_findings"),
             ))
         except Exception as e:
             logger.exception(e)
@@ -1208,7 +1205,7 @@ def add_risk_acceptance(request, eid, fid=None):
         finding = get_object_or_404(Finding, id=fid)
 
     if not eng.product.enable_full_risk_acceptance:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = RiskAcceptanceForm(request.POST, request.FILES)
@@ -1286,7 +1283,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     eng = get_object_or_404(Engagement, pk=eid)
 
     if edit_mode and not eng.product.enable_full_risk_acceptance:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     risk_acceptance_form = None
     errors = False
@@ -1458,7 +1455,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     eng = get_object_or_404(Engagement, pk=eid)
 
     if not eng.product.enable_full_risk_acceptance:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date)
 

@@ -456,14 +456,12 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def import_scan(self, payload, expected_http_status_code):
         logger.debug('import_scan payload %s', payload)
         response = self.client.post(reverse('importscan-list'), payload)
-        print(response.content)
         self.assertEqual(expected_http_status_code, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
     def reimport_scan(self, payload, expected_http_status_code):
         logger.debug('reimport_scan payload %s', payload)
         response = self.client.post(reverse('reimportscan-list'), payload)
-        print(response.content)
         self.assertEqual(expected_http_status_code, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
@@ -689,7 +687,6 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         response = http_method(reverse('finding-tags', args=(finding_id,)), data, format='json')
         # print(vars(response))
-        # print(response.content)
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response
 
@@ -715,7 +712,6 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         response = http_method(reverse('finding-remove-tags', args=(finding_id,)), data, format='json')
         # print(response)
-        # print(response.content)
         self.assertEqual(expected_response_status_code, response.status_code, response.content[:1000])
         return response.data
 
@@ -736,7 +732,6 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         response = http_method(reverse('finding-notes', args=(finding_id,)), data, format='json')
         # print(vars(response))
-        # print(response.content)
         self.assertEqual(201, response.status_code, response.content[:1000])
         return response
 
