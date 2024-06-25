@@ -561,7 +561,7 @@ def get_in_period_details(
             age=Cast('date_diff', output_field=IntegerField())
         )
     else:
-        raise ValueError("Unsupported database for metrics period details")
+        raise ValueError
 
     age_detail = age_detail.aggregate(
         age_under_30=Sum(Case(When(age__lte=30, then=Value(1))), default=Value(0), output_field=IntegerField()),
