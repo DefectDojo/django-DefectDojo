@@ -7,6 +7,7 @@ from typing import Any, Callable, NamedTuple, TypeVar, Union
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
+from django.db import connection
 from django.db.models import Case, DurationField, ExpressionWrapper, F, IntegerField, Q, Sum, Value, When
 from django.db.models.functions import Cast, Coalesce, ExtractDay, Now, TruncMonth, TruncWeek
 from django.db.models.query import QuerySet
@@ -550,14 +551,18 @@ def get_in_period_details(
         findings_by_product(findings), 'annotate', 'severity'
     ).order_by('product_name')
 
-    try:
+    # Approach to age determination is db-engine dependent
+    if 'postgresql' in connection.settings_dict['ENGINE']:
         age_detail = findings.annotate(age=ExtractDay(Coalesce('mitigated', Now()) - F('date')))
-    except:
+    elif 'mysql' in connection.settings_dict['ENGINE']:
         age_detail = findings.annotate(
             date_diff=ExpressionWrapper(Coalesce('mitigated', Now()) - F('date'), output_field=DurationField())
         ).annotate(
             age=Cast('date_diff', output_field=IntegerField())
         )
+    else:
+        raise ValueError("Unsupported database for metrics period details")
+
     age_detail = age_detail.aggregate(
         age_under_30=Sum(Case(When(age__lte=30, then=Value(1))), default=Value(0), output_field=IntegerField()),
         age_31_60=Sum(Case(When(age__range=[31, 60], then=Value(1))), default=Value(0), output_field=IntegerField()),
