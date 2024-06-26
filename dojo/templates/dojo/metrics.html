@@ -458,7 +458,7 @@
                                                 {% for product in accepted_in_period_details %}
                                                     <tr>
                                                         <td>
-                                                            <a href="{% url 'accepted_findings' product.product_id %}">
+                                                            <a href="{% url 'accepted_findings' %}?test__engagement__product={{ product.product_id }}">
                                                                 {{ product.product_name }}
                                                             </a>
                                                         </td>
@@ -512,7 +512,7 @@
                                                 {% for product in closed_in_period_details %}
                                                     <tr>
                                                         <td>
-                                                            <a href="{% url 'closed_findings' product.product_id %}">
+                                                            <a href="{% url 'closed_findings' %}?test__engagement__product={{ product.product_id }}">
                                                                 {{ product.product_name }}
                                                             </a>
                                                         </td>
