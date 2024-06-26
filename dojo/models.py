@@ -2271,7 +2271,7 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name=_("CWE"),
                               help_text=_("The CWE number associated with this flaw."))
-    cve = models.CharField(max_length=50,
+    cve = models.CharField(max_length=100,
                            null=True,
                            blank=False,
                            verbose_name=_("Vulnerability Id"),
@@ -3629,7 +3629,7 @@ class Finding_Group(TimeStampedModel):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve = models.CharField(max_length=50,
+    cve = models.CharField(max_length=100,
                            null=True,
                            blank=False,
                            verbose_name="Vulnerability Id",
@@ -3692,7 +3692,7 @@ class Finding_Template(models.Model):
 
 class Vulnerability_Id_Template(models.Model):
     finding_template = models.ForeignKey(Finding_Template, editable=False, on_delete=models.CASCADE)
-    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    vulnerability_id = models.TextField(max_length=100, blank=False, null=False)
 
 
 class Check_List(models.Model):
