@@ -8,7 +8,7 @@ from typing import Any, Callable, NamedTuple, TypeVar, Union
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.db import connection
-from django.db.models import Case, F, IntegerField, Q, Sum, Value, When
+from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce, ExtractDay, Now, TruncMonth, TruncWeek
 from django.db.models.query import QuerySet
@@ -335,7 +335,7 @@ def severity_count(
     queryset: MetricsQuerySet,
     method: str,
     expression: str
-) -> MetricsQuerySet:
+) -> Union[MetricsQuerySet, dict[str, int]]:
     """
     Aggregates counts by severity for the given queryset.
 
@@ -346,36 +346,12 @@ def severity_count(
     """
     total_expression = expression + '__in'
     return getattr(queryset, method)(
-        total=Sum(
-            Case(When(**{total_expression: ('Critical', 'High', 'Medium', 'Low', 'Info')},
-                      then=Value(1)),
-                 output_field=IntegerField(),
-                 default=0)),
-        critical=Sum(
-            Case(When(**{expression: 'Critical'},
-                      then=Value(1)),
-                 output_field=IntegerField(),
-                 default=0)),
-        high=Sum(
-            Case(When(**{expression: 'High'},
-                      then=Value(1)),
-                 output_field=IntegerField(),
-                 default=0)),
-        medium=Sum(
-            Case(When(**{expression: 'Medium'},
-                      then=Value(1)),
-                 output_field=IntegerField(),
-                 default=0)),
-        low=Sum(
-            Case(When(**{expression: 'Low'},
-                      then=Value(1)),
-                 output_field=IntegerField(),
-                 default=0)),
-        info=Sum(
-            Case(When(**{expression: 'Info'},
-                      then=Value(1)),
-                 output_field=IntegerField(),
-                 default=0)),
+        total=Count('id', filter=Q(**{total_expression: ('Critical', 'High', 'Medium', 'Low', 'Info')})),
+        critical=Count('id', filter=Q(**{expression: 'Critical'})),
+        high=Count('id', filter=Q(**{expression: 'High'})),
+        medium=Count('id', filter=Q(**{expression: 'Medium'})),
+        low=Count('id', filter=Q(**{expression: 'Low'})),
+        info=Count('id', filter=Q(**{expression: 'Info'}))
     )
 
 

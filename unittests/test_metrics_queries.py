@@ -91,7 +91,7 @@ class FindingQueriesTest(DojoTestCase):
             )
             self.assertSequenceEqual(
                 list(finding_queries['accepted_count'].values()),
-                [None, None, None, None, None, None]
+                [0, 0, 0, 0, 0, 0]
             )
             self.assertSequenceEqual(
                 finding_queries['top_ten'].values(),
@@ -240,17 +240,17 @@ class EndpointQueriesTest(DojoTestCase):
                 [
                     [
                         {'epoch': 1592784000000, 'grouped_date': date(2020, 6, 22), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0},
-                        {'epoch': 1593388800000, 'grouped_date': date(2020, 6, 29), 'total': 6, 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 5, 'closed': 0},
+                        {'epoch': 1593388800000, 'grouped_date': date(2020, 6, 29), 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 5, 'total': 6, 'closed': 0},
                         {'epoch': 1593993600000, 'grouped_date': date(2020, 7, 6), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0, 'closed': 0}
                     ],
                     [
                         {'epoch': 1592784000000, 'grouped_date': date(2020, 6, 22), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
-                        {'epoch': 1593388800000, 'grouped_date': date(2020, 6, 29), 'total': 5, 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 4},
+                        {'epoch': 1593388800000, 'grouped_date': date(2020, 6, 29), 'critical': 0, 'high': 1, 'medium': 0, 'low': 0, 'info': 4, 'total': 5},
                         {'epoch': 1593993600000, 'grouped_date': date(2020, 7, 6), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
                     ],
                     [
                         {'epoch': 1592784000000, 'grouped_date': date(2020, 6, 22), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0},
-                        {'epoch': 1593388800000, 'grouped_date': date(2020, 6, 29), 'total': 1, 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 1},
+                        {'epoch': 1593388800000, 'grouped_date': date(2020, 6, 29), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 1, 'total': 1},
                         {'epoch': 1593993600000, 'grouped_date': date(2020, 7, 6), 'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
                     ]
                 ],
