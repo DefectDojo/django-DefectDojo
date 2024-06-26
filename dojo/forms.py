@@ -271,6 +271,7 @@ class Product_TypeForm(forms.ModelForm):
             'environment_technical_contact'
         ]
         users = [cleaned_data.get(field) for field in fields]
+        users = [user for user in users if user is not None]
         if len(users) != len(set(users)):
             raise ValidationError("The users assigned to the product type must be different for each field")
 
