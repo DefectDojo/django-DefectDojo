@@ -79,6 +79,9 @@ securityContext:
     # nginx dockerfile sets USER=1001
     runAsUser: 1001
 
+dbMigrationChecker:
+  enabled: true
+
 tests:
   unitTests:
     resources:
@@ -219,7 +222,7 @@ django:
       # Enable liveness checks on uwsgi container. Those values are use on nginx readiness checks as well.
       enabled: true
       failureThreshold: 6
-      initialDelaySeconds: 120
+      initialDelaySeconds: 3
       periodSeconds: 10
       successThreshold: 1
       timeoutSeconds: 5
