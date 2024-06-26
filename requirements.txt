@@ -37,7 +37,7 @@ mysqlclient==2.1.1
 openpyxl==3.1.2
 Pillow==10.2.0  # required by django-imagekit
 psycopg2-binary==2.9.9
-cryptography==42.0.4
+cryptography==42.0.8
 python-dateutil==2.8.2
 pytz==2024.1
 redis==5.0.1
@@ -108,7 +108,7 @@ kombu==5.3.4
 python-jose==3.3.0
 six==1.16.0
 attrs==23.1.0
-idna==3.4
+idna==3.7
 importlib-metadata==6.8.0
 packaging==24.1
 pysaml2==7.4.2
