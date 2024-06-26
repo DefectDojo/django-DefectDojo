@@ -220,7 +220,7 @@ django:
       # Enable liveness checks on uwsgi container. Those values are use on nginx readiness checks as well.
       enabled: true
       failureThreshold: 6
-      initialDelaySeconds: 120
+      initialDelaySeconds: 3
       periodSeconds: 10
       successThreshold: 1
       timeoutSeconds: 5
@@ -348,6 +348,9 @@ initializer:
   # - `hostPath` - only for hostPath, file or directory from local host
   # @type: array<map>
   extraVolumes: []
+
+dbMigrationChecker:
+  enabled: true
 
 mysql:
   enabled: false

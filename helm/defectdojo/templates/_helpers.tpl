@@ -145,3 +145,50 @@ Create chart name and version as used by the chart label.
 {{ .Values.django.mediaPersistentVolume.persistentVolumeClaim.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+  Define db-migration-checker
+*/}}
+{{- define "dbMigrationChecker" -}}
+- name: db-migration-checker
+  command:
+  - sh
+  - -c
+  # - tail -f /dev/null
+  - while ! /app/manage.py migrate --check; do echo "Database is not migrated to the latest state yet"; sleep 5; done;
+  image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
+  imagePullPolicy: {{ .Values.imagePullPolicy }}
+  {{- if .Values.securityContext.enabled }}
+  securityContext:
+    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+  {{- end }}
+  envFrom:
+  - configMapRef:
+      name: {{ .fullName }}
+  - secretRef:
+      name: {{ .fullName }}-extrasecrets
+      optional: true
+  env:
+  {{- if .Values.django.uwsgi.enable_debug }}
+  - name: DD_DEBUG
+    value: 'True'
+  {{- end }}
+  - name: DD_DATABASE_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        {{- if eq .Values.database "postgresql" }}
+          name: {{ .Values.postgresql.auth.existingSecret | default "defectdojo-postgresql-specific" }}
+          key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "postgresql-password" }}
+        {{- else if eq .Values.database "postgresqlha" }}
+          name: {{ .Values.postgresqlha.postgresql.existingSecret | default "defectdojo-postgresql-ha-specific" }}
+          key: postgresql-postgres-password
+        {{- else if eq .Values.database "mysql" }}
+          name: {{ .Values.mysql.auth.existingSecret | default "defectdojo-mysql-specific" }}
+          key: {{ .Values.mysql.auth.secretKey | default "mysql-password" }}
+        {{- end }}
+  {{- if .Values.extraEnv }}
+  {{- toYaml .Values.extraEnv | nindent 8 }}
+  {{- end }}
+  resources:
+    {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
+{{- end -}}
