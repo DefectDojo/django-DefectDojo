@@ -10,7 +10,7 @@
     <h1>{{ title }}</h1>
 {% endif%}
 
-<div id="finding_list_content">
+<div id="finding_list_content" class="finding_list_content">
     {% for finding in findings %}
         {% ifchanged finding.severity %}
             <h4>{{ finding.severity|capfirst }}</h4>
