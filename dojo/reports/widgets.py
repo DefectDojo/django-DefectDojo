@@ -184,12 +184,12 @@ class CoverPage(Widget):
         self.help_text = "The cover page includes a page break after its content."
 
     def get_html(self):
-        return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.title,
+        return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.heading,
                                                                                 "sub_heading": self.sub_heading,
                                                                                 "meta_info": self.meta_info})
 
     def get_asciidoc(self):
-        return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.title,
+        return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.heading,
                                                                                 "sub_heading": self.sub_heading,
                                                                                 "meta_info": self.meta_info})
 
