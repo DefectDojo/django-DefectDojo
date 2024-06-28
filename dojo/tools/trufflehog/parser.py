@@ -156,17 +156,17 @@ class TruffleHogParser(object):
                 )
 
             severity = "Critical"
-            if not verified:
-                if (
-                    "Oauth" in detector_name
-                    or "AWS" in detector_name
-                    or "Heroku" in detector_name
-                ):
-                    severity = "Critical"
-                elif detector_name == "PrivateKey":
-                    severity = "High"
-                elif detector_name == "Generic Secret":
-                    severity = "Medium"
+            # if not verified:
+            #     if (
+            #         "Oauth" in detector_name
+            #         or "AWS" in detector_name
+            #         or "Heroku" in detector_name
+            #     ):
+            #         severity = "Critical"
+            #     elif detector_name == "PrivateKey":
+            #         severity = "High"
+            #     elif detector_name == "Generic Secret":
+            #         severity = "Medium"
 
             dupe_key = hashlib.md5(
                 (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8")

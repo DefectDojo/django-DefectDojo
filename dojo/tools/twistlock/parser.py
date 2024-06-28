@@ -8,6 +8,7 @@ import dateutil
 
 from dojo.models import Finding
 from django.conf import settings
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,13 @@ class TwistlockCSVParser(object):
         data_severity = row.get("Severity", "")
         data_cvss = row.get("CVSS", "")
         data_description = row.get("Description", "")
+        data_tag = row.get("Tag", "")
+        data_distro = row.get("Distro", "")
+        data_type = row.get("Type")
+        data_package_version = row.get("Package Version", "")
+        data_cluster = row.get("Clusters", "")
+        data_namespaces = row.get("Namespaces", "")
+        data_package_path = row.get("Package Path", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -37,17 +45,33 @@ class TwistlockCSVParser(object):
         elif data_package_name and data_package_version:
             title = data_package_name + " - " + data_package_version
         else:
-            title = data_description
+            data_description_complete = reduce(
+                lambda str, kv: str.replace(kv[0], kv[1]),
+                settings.DD_INVALID_ESCAPE_STR.items(),
+                data_description,
+            )
+            title = data_description_complete
 
         finding = Finding(
             title=textwrap.shorten(title, width=255, placeholder="..."),
             test=test,
             severity=convert_severity(data_severity),
-            description=data_description
-            + "<p> Vulnerable Package: "
-            + data_package_name
-            + "</p><p> Current Version: "
+            description="<p><strong>Description:</strong> "
+            + data_description
+            + "</p><p><strong>Type:</strong> "
+            + str(data_type)
+            + "</p><p><strong>Tag:</strong> "
+            + str(data_tag)
+            + "</p><p><strong>Cluster:</strong> "
+            + str(data_cluster)
+            + "</p><p><strong>Namespaces:</strong> "
+            + str(data_namespaces)
+            + "</p><p><strong>Vulnerable Package:</strong> "
+            + str(data_package_name)
+            + "</p><p><strong>Current Version:</strong> "
             + str(data_package_version)
+            + "</p><p><strong>Package path:</strong> "
+            + str(data_package_path)
             + "</p>",
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),

@@ -1741,12 +1741,13 @@ def request_finding_review(request, fid):
             create_notification(
                 event="review_requested",
                 title="Finding review requested",
+                subject="🧐 Review Requested 🔍",
                 requested_by=user,
                 note=new_note,
                 finding=finding,
                 reviewers=reviewers,
                 recipients=reviewers_usernames,
-                description=f"User {user.get_full_name()} has requested that user(s) {reviewers_string} review the finding \"{finding.title}\" for accuracy:\n\n{new_note}",
+                description=f"User {user.get_full_name()} has requested review the finding {finding.title}",
                 icon="check",
                 url=reverse("view_finding", args=(finding.id,)),
             )
@@ -1826,11 +1827,13 @@ def clear_finding_review(request, fid):
 
             create_notification(
                 event="code_review",
+                subject="🧐 Code Review 🔍",
                 title="Finding review completed",
-                note=new_note,
+                new_note=new_note,
                 finding=finding,
                 recipients=[finding.review_requested_by.username],
-                description=f"User {user.get_full_name()} review completed the finding \"{finding.title}\" for accuracy:\n\n{new_note}",
+                review=user.get_full_name(),
+                description=f"User <review>{user.get_full_name()} review completed the finding {finding.title}",
                 icon="check-circle",
                 color_icon="#096C11",
                 url=reverse("view_finding", args=(finding.id,)),

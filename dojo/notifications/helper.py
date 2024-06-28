@@ -146,6 +146,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
         logger.error("error during rendering of template %s exception is %s", template, e)
     finally:
         if not notification_message:
+            logger.warning("Generate notification messager for template by default")
             kwargs["description"] = create_description(event, *args, **kwargs)
             notification_message = render_to_string(f"notifications/{notification_type}/other.tpl", kwargs)
 

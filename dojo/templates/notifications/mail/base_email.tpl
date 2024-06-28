@@ -228,7 +228,19 @@
 								{% endblock%}
 								<p>
 									{% block content %}
+
+										{%block contect_description%}
+										{% endblock %}
+
 										{% block risk%}
+										{% endblock%}
+
+										{% block event %}
+											More information on this event can be found here:
+											<br/>
+											{% blocktranslate trimmed with event_url=url|full_url team_name=system_settings.team_name %}
+												<center><a href="{{event_url}}" class="proton-button" target="_blank">Go {{team_name}}</a></center>
+											{% endblocktranslate %}
 										{% endblock%}
 									{% endblock %}
 								</p>
