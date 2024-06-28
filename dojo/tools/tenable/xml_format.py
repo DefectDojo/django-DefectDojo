@@ -10,7 +10,7 @@ from dojo.models import Endpoint, Finding, Test
 LOGGER = logging.getLogger(__name__)
 
 
-class TenableXMLParser(object):
+class TenableXMLParser:
     def get_text_severity(self, severity_id):
         """Convert data of the report into severity"""
         severity = "Info"
@@ -61,11 +61,12 @@ class TenableXMLParser(object):
         root = nscan.getroot()
 
         if "NessusClientData_v2" not in root.tag:
-            raise ValueError(
+            msg = (
                 "This version of Nessus report is not supported. "
                 "Please make sure the export is "
                 "formatted using the NessusClientData_v2 schema."
             )
+            raise ValueError(msg)
 
         dupes = {}
         for report in root.iter("Report"):

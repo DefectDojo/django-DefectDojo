@@ -1,19 +1,31 @@
 from datetime import datetime
+
 from dojo.models import Finding
 
 
-class Compliance(object):
+class Compliance:
     def get_item(self, finding: dict, test):
         finding_id = finding.get("Id", "")
         title = finding.get("Title", "")
         severity = finding.get("Severity", {}).get("Label", "INFORMATIONAL").title()
+        resource_arns = []
+        for resource in finding.get("Resources", []):
+            if arn := resource.get("Id"):
+                resource_arns.append(arn)
         mitigation = ""
         impact = []
         references = []
         unsaved_vulnerability_ids = []
         epss_score = None
         mitigation = finding.get("Remediation", {}).get("Recommendation", {}).get("Text", "")
-        description = "This is a Security Hub Finding \n" + finding.get("Description", "")
+        mitigation += "\n" + finding.get("Remediation", {}).get("Recommendation", {}).get("Url", "")
+        description = "This is a Security Hub Finding \n" + finding.get("Description", "") + "\n"
+        description += f"**AWS Finding ARN:** {finding_id}\n"
+        description += f"**Resource IDs:** {', '.join(set(resource_arns))}\n"
+        description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
+        if finding.get('Region'):
+            description += f"**Region:** {finding.get('Region', '')}\n"
+        description += f"**Generator ID:** {finding.get('GeneratorId', '')}\n"
         if finding.get("Compliance", {}).get("Status", "PASSED") == "PASSED":
             is_Mitigated = True
             active = False

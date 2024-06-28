@@ -1,14 +1,15 @@
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.keys import Keys
-import unittest
 import sys
 import time
+import unittest
+
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from notifications_test import NotificationTest
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 
 
-class WaitForPageLoad(object):
+class WaitForPageLoad:
     def __init__(self, browser, timeout):
         self.browser = browser
         self.timeout = time.time() + timeout
@@ -26,9 +27,8 @@ class WaitForPageLoad(object):
                 return True
             else:
                 time.sleep(0.2)
-        raise Exception(
-            'Timeout waiting for {}s'.format(self.timeout)
-        )
+        msg = f'Timeout waiting for {self.timeout}s'
+        raise Exception(msg)
 
 
 class ProductTest(BaseTestCase):

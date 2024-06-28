@@ -1,8 +1,10 @@
 import logging
-import requests
 
+import requests
+from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from django.core.mail import EmailMessage
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -12,7 +14,7 @@ from django.utils.translation import gettext as _
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
+from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 from dojo.aws import ses_email
 
@@ -32,12 +34,17 @@ def create_notification(event=None, **kwargs):
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
-            # merge the system level notifications with the personal level
-            # this allows for system to trump the personal
-            merged_notifications = Notifications.merge_notifications_list([system_notifications, recipient_notifications])
-            merged_notifications.user = recipient_notifications.user
-            logger.debug('Sent notification to %s', merged_notifications.user)
-            process_notifications(event, merged_notifications, **kwargs)
+            if event in settings.NOTIFICATIONS_SYSTEM_LEVEL_TRUMP:
+                # merge the system level notifications with the personal level
+                # this allows for system to trump the personal
+                merged_notifications = Notifications.merge_notifications_list([system_notifications, recipient_notifications])
+                merged_notifications.user = recipient_notifications.user
+                logger.debug('Sent notification to %s', merged_notifications.user)
+                process_notifications(event, merged_notifications, **kwargs)
+            else:
+                # Do not trump user preferences and send notifications as usual
+                logger.debug('Sent notification to %s', recipient_notifications.user)
+                process_notifications(event, recipient_notifications, **kwargs)
 
     else:
         logger.debug('creating system notifications for event: %s', event)
@@ -89,7 +96,7 @@ def create_notification(event=None, **kwargs):
                 queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
                 to_attr="applicable_notifications"
             )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
-                .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True)))
+                .filter(Q(applicable_notifications_count__gt=0) | Q(is_superuser=True))
 
             # only send to authorized users or admin/superusers
             logger.debug('Filtering users for the product %s', product)
@@ -122,11 +129,11 @@ def create_notification(event=None, **kwargs):
 def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
-            kwargs["description"] = _('Product %(title)s has been created successfully.' % {'title': kwargs['title']})
+            kwargs["description"] = _('Product %s has been created successfully.') % kwargs['title']
         elif event == 'product_type_added':
-            kwargs["description"] = _('Product Type %(title)s has been created successfully.' % {'title': kwargs['title']})
+            kwargs["description"] = _('Product Type %s has been created successfully.') % kwargs['title']
         else:
-            kwargs["description"] = _('Event %(event)s  has occurred.' % {'event': str(event)})
+            kwargs["description"] = _('Event %s has occurred.') % str(event)
 
     return kwargs["description"]
 
@@ -166,20 +173,20 @@ def process_notifications(event, notifications=None, **kwargs):
     msteams_enabled = get_system_setting('enable_msteams_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
 
-    if slack_enabled and 'slack' in getattr(notifications, event):
+    if slack_enabled and 'slack' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending Slack Notification')
         send_slack_notification(event, notifications.user, **kwargs)
 
-    if msteams_enabled and 'msteams' in getattr(notifications, event):
+    if msteams_enabled and 'msteams' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending MSTeams Notification')
         send_msteams_notification(event, notifications.user, **kwargs)
 
-    if mail_enabled and 'mail' in getattr(notifications, event):
+    if mail_enabled and 'mail' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending Mail Notification')
         send_mail_notification(event, notifications.user, **kwargs)
 
-    if 'alert' in getattr(notifications, event, None):
-        logger.debug('Sending Alert')
+    if 'alert' in getattr(notifications, event, getattr(notifications, 'other')):
+        logger.debug(f'Sending Alert to {notifications.user}')
         send_alert_notification(event, notifications.user, **kwargs)
 
 
@@ -223,7 +230,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
                 # only send notification if we managed to find the slack_user_id
                 if slack_user_id:
-                    channel = '@{}'.format(slack_user_id)
+                    channel = f'@{slack_user_id}'
                     _post_slack_message(channel)
             else:
                 logger.info("The user %s does not have a email address informed for Slack in profile.", user)
@@ -231,7 +238,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
             # System scope slack notifications, and not personal would still see this go through
             if get_system_setting('slack_channel') is not None:
                 channel = get_system_setting('slack_channel')
-                logger.info("Sending system notification to system channel {}.".format(channel))
+                logger.info(f"Sending system notification to system channel {channel}.")
                 _post_slack_message(channel)
             else:
                 logger.debug('slack_channel not configured: skipping system notification')
@@ -320,6 +327,10 @@ def send_alert_notification(event, user=None, *args, **kwargs):
     try:
         # no need to differentiate between user/no user
         icon = kwargs.get('icon', 'info-circle')
+        try:
+            source = Notifications._meta.get_field(event).verbose_name.title()[:100]
+        except FieldDoesNotExist:
+            source = event.replace("_", " ").title()[:100]
         alert = Alerts(
             user_id=user,
             title=kwargs.get('title')[:250],
@@ -327,7 +338,7 @@ def send_alert_notification(event, user=None, *args, **kwargs):
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
             color_icon=kwargs.get("color_icon", "#262626"),
-            source=Notifications._meta.get_field(event).verbose_name.title()[:100]
+            source=source,
         )
         # relative urls will fail validation
         alert.clean_fields(exclude=['url'])
@@ -335,12 +346,12 @@ def send_alert_notification(event, user=None, *args, **kwargs):
     except Exception as e:
         logger.exception(e)
         log_alert(e, "Alert Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
-        pass
 
 
 def get_slack_user_id(user_email):
-    from dojo.utils import get_system_setting
     import json
+
+    from dojo.utils import get_system_setting
 
     user_id = None
 
@@ -362,10 +373,10 @@ def get_slack_user_id(user_email):
                 if user_email == user["user"]["profile"]["email"]:
                     if "id" in user["user"]:
                         user_id = user["user"]["id"]
-                        logger.debug("Slack user ID is {}".format(user_id))
+                        logger.debug(f"Slack user ID is {user_id}")
                         slack_user_is_found = True
                 else:
-                    logger.warning("A user with email {} could not be found in this Slack workspace.".format(user_email))
+                    logger.warning(f"A user with email {user_email} could not be found in this Slack workspace.")
 
             if not slack_user_is_found:
                 logger.warning("The Slack user was not found.")
@@ -382,7 +393,7 @@ def log_alert(e, notification_type=None, *args, **kwargs):
             user_id=user,
             url=kwargs.get('url', reverse('alerts')),
             title=kwargs.get('title', 'Notification issue')[:250],
-            description=kwargs.get('description', '%s' % e)[:2000],
+            description=kwargs.get('description', str(e))[:2000],
             icon="exclamation-triangle",
             color_icon=kwargs.get("color_icon", "#262626"),
             source=notification_type[:100] if notification_type else kwargs.get('source', 'unknown')[:100])
@@ -400,10 +411,10 @@ def notify_test_created(test):
 def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
     logger.debug("Scan added notifications")
 
-    new_findings = sorted(list(new_findings), key=lambda x: x.numerical_severity)
-    findings_mitigated = sorted(list(findings_mitigated), key=lambda x: x.numerical_severity)
-    findings_reactivated = sorted(list(findings_reactivated), key=lambda x: x.numerical_severity)
-    findings_untouched = sorted(list(findings_untouched), key=lambda x: x.numerical_severity)
+    new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
+    findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
+    findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
+    findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
 
     title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
 

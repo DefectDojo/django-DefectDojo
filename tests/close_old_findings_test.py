@@ -3,14 +3,12 @@ import os
 import sys
 import unittest
 
+from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
+from product_test import ProductTest
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
-
-from base_test_class import (BaseTestCase, on_exception_html_source_logger,
-                             set_suite_settings)
-from product_test import ProductTest
 
 logger = logging.getLogger(__name__)
 

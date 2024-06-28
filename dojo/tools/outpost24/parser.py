@@ -7,7 +7,7 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class Outpost24Parser(object):
+class Outpost24Parser:
     def get_scan_types(self):
         return ["Outpost24 Scan"]
 
@@ -19,7 +19,7 @@ class Outpost24Parser(object):
 
     def get_findings(self, file, test):
         tree = ElementTree.parse(file)
-        items = list()
+        items = []
         for detail in tree.iterfind(".//detaillist/detail"):
             # finding details
             title = detail.findtext("name")
@@ -57,9 +57,7 @@ class Outpost24Parser(object):
                 else:
                     severity = "Critical"
             cvss_description = detail.findtext("cvss_vector_description")
-            severity_justification = "{}\n{}".format(
-                cvss_score, cvss_description
-            )
+            severity_justification = f"{cvss_score}\n{cvss_description}"
             finding = Finding(
                 title=title,
                 test=test,

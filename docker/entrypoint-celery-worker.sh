@@ -4,6 +4,7 @@ umask 0002
 id
 
 . /secret-file-loader.sh
+. /reach_database.sh
 
 # Allow for bind-mount multiple settings.py overrides
 FILES=$(ls /app/docker/extra_settings/* 2>/dev/null)
@@ -18,12 +19,7 @@ if [ "$NUM_FILES" -gt 0 ]; then
     rm -f /app/dojo/settings/README.md
 fi
 
-echo -n "Waiting for database to be reachable "
-until echo "select 1;" | python3 manage.py dbshell > /dev/null
-do
-  echo -n "."
-  sleep 1
-done
+wait_for_database_to_be_reachable
 echo
 
 if [ "${DD_CELERY_WORKER_POOL_TYPE}" = "prefork" ]; then

@@ -1,8 +1,9 @@
 import os.path
 
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.awssecurityhub.parser import AwsSecurityHubParser
 from dojo.models import Test
+from dojo.tools.awssecurityhub.parser import AwsSecurityHubParser
+
+from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def sample_path(file_name: str):
@@ -39,6 +40,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual(3, len(findings))
             finding = findings[0]
             self.assertEqual(finding.component_name, "AwsAccount")
+            self.assertEqual("This is a Security Hub Finding \nThis AWS control checks whether AWS Multi-Factor Authentication (MFA) is enabled for all AWS Identity and Access Management (IAM) users that use a console password.\n**AWS Finding ARN:** arn:aws:securityhub:us-east-1:012345678912:subscription/aws-foundational-security-best-practices/v/1.0.0/IAM.5/finding/de861909-2d26-4e45-bd86-19d2ab6ceef1\n**Resource IDs:** AWS::::Account:012345678912\n**AwsAccountId:** 012345678912\n**Generator ID:** aws-foundational-security-best-practices/v/1.0.0/IAM.5\n", finding.description)
 
     def test_repeated_findings(self):
         with open(get_unit_tests_path() + sample_path("config_repeated_findings.json")) as test_file:
@@ -121,6 +123,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual("Low", finding.severity)
             self.assertTrue(finding.active)
             self.assertEqual("User AssumedRole : 123123123 is anomalously invoking APIs commonly used in Discovery tactics. - Resource: 123123123", finding.title)
-            self.assertEqual("TTPs/Discovery/IAMUser-AnomalousBehavior\nhttps://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html", finding.mitigation)
+            self.assertEqual("TTPs/Discovery/IAMUser-AnomalousBehavior\n[https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-active.html)", finding.mitigation)
             endpoint = findings[0].unsaved_endpoints[0]
             self.assertEqual('AwsEc2Instance arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890', endpoint.host)
+            self.assertEqual("This is a GuardDuty Finding\nAPIs commonly used in Discovery tactics were invoked by user AssumedRole : 123123123, under anomalous circumstances. Such activity is not typically seen from this user.\n**AWS Finding ARN:** arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/2123123123123\n**SourceURL:** [https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=2123123123123](https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=2123123123123)\n**AwsAccountId:** 123456789012\n**Region:** us-east-1\n**Generator ID:** arn:aws:guardduty:us-east-1:123456789012:detector/123456789\n", finding.description)

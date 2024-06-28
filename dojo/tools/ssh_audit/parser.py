@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Endpoint, Finding
 
 
-class SSHAuditParser(object):
+class SSHAuditParser:
     def get_scan_types(self):
         return ["SSH Audit Importer"]
 
@@ -51,7 +52,7 @@ class SSHAuditParser(object):
                         severity=severity,
                         static_finding=False)
                 items.append(finding)
-                finding.unsaved_endpoints = list()
+                finding.unsaved_endpoints = []
                 endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                 finding.unsaved_endpoints.append(endpoint)
             for kex in data['kex']:
@@ -69,7 +70,7 @@ class SSHAuditParser(object):
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                     finding.unsaved_endpoints.append(endpoint)
                 elif 'fail' in kex['notes']:
@@ -85,7 +86,7 @@ class SSHAuditParser(object):
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                     finding.unsaved_endpoints.append(endpoint)
                 elif 'warn' in kex['notes']:
@@ -101,7 +102,7 @@ class SSHAuditParser(object):
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                     finding.unsaved_endpoints.append(endpoint)
             for key in data['key']:
@@ -121,7 +122,7 @@ class SSHAuditParser(object):
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                     finding.unsaved_endpoints.append(endpoint)
                 elif 'fail' in key['notes']:
@@ -139,7 +140,7 @@ class SSHAuditParser(object):
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                     finding.unsaved_endpoints.append(endpoint)
                 elif 'warn' in key['notes']:
@@ -157,7 +158,7 @@ class SSHAuditParser(object):
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                     finding.unsaved_endpoints.append(endpoint)
             for mac in data['mac']:
@@ -175,7 +176,7 @@ class SSHAuditParser(object):
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                     finding.unsaved_endpoints.append(endpoint)
                 elif 'fail' in mac['notes']:
@@ -191,7 +192,7 @@ class SSHAuditParser(object):
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                     finding.unsaved_endpoints.append(endpoint)
                 elif 'warn' in mac['notes']:
@@ -207,7 +208,7 @@ class SSHAuditParser(object):
                             severity=severity,
                             static_finding=False)
                     items.append(finding)
-                    finding.unsaved_endpoints = list()
+                    finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=data['target'].split(':')[0], port=data['target'].split(':')[1])
                     finding.unsaved_endpoints.append(endpoint)
         return items

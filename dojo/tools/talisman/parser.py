@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-class TalismanParser(object):
+class TalismanParser:
     """
     A class that can be used to parse the Talisman JSON report files
     """
@@ -32,7 +32,7 @@ class TalismanParser(object):
         Converts a Talisman JSON report to DefectDojo findings
         """
         if filename is None:
-            return list()
+            return []
 
         json_data = json.load(filename)
         results = json_data.get("results")

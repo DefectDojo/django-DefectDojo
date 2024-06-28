@@ -1,27 +1,30 @@
 # Standard library imports
+import datetime
 import json
 import logging
-import datetime
+
 # Third party imports
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from django.urls import reverse
+from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.shortcuts import render, get_object_or_404
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import PermissionDenied
-# Local application/library imports
-from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
-from dojo.models import System_Settings, User, JIRA_Instance, JIRA_Issue, Notes
-from dojo.utils import add_breadcrumb, add_error_message_to_response
-from dojo.notifications.helper import create_notification
-from django.views.decorators.http import require_POST
-import dojo.jira_link.helper as jira_helper
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_configuration_permission
+
+# Local application/library imports
+from dojo.forms import DeleteJIRAInstanceForm, ExpressJIRAForm, JIRAForm
+from dojo.models import JIRA_Instance, JIRA_Issue, Notes, System_Settings, User
+from dojo.notifications.helper import create_notification
+from dojo.utils import add_breadcrumb, add_error_message_to_response
 
 logger = logging.getLogger(__name__)
 
@@ -236,10 +239,12 @@ def check_for_and_create_comment(parsed_json):
     findings = None
     if jissue.finding:
         findings = [jissue.finding]
-        create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
+        create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
     elif jissue.finding_group:
-        findings = [jissue.finding_group.findings.all()]
-        create_notification(event='other', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
+        findings = jissue.finding_group.findings.all()
+        first_finding_group = findings.first()
+        if first_finding_group:
+            create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding_group}', finding=first_finding_group, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
     elif jissue.engagement:
         return webhook_responser_handler("debug", "Comment for engagement ignored")
     else:
@@ -375,7 +380,7 @@ class ExpressJiraView(View):
                 'JIRA Configuration Successfully Created.',
                 extra_tags='alert-success')
             create_notification(
-                event='other',
+                event='jira_config_added',
                 title=f"New addition of JIRA: {jform.cleaned_data.get('configuration_name')}",
                 description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was added by {request.user}",
                 url=request.build_absolute_uri(reverse('jira')))
@@ -420,7 +425,7 @@ class NewJiraView(View):
                 'JIRA Configuration Successfully Created.',
                 extra_tags='alert-success')
             create_notification(
-                event='other',
+                event='jira_config_added',
                 title=f"New addition of JIRA: {jform.cleaned_data.get('configuration_name')}",
                 description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was added by {request.user}",
                 url=request.build_absolute_uri(reverse('jira')))
@@ -475,7 +480,7 @@ class EditJiraView(View):
                 'JIRA Configuration Successfully Saved.',
                 extra_tags='alert-success')
             create_notification(
-                event='other',
+                event='jira_config_edited',
                 title=f"Edit of JIRA: {jform.cleaned_data.get('configuration_name')}",
                 description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was edited by {request.user}",
                 url=request.build_absolute_uri(reverse('jira')))
@@ -537,13 +542,13 @@ class DeleteJiraView(View):
                         'JIRA Conf and relationships removed.',
                         extra_tags='alert-success')
                     create_notification(
-                        event='other',
-                        title='Deletion of JIRA: %s' % jira_instance.configuration_name,
+                        event='jira_config_deleted',
+                        title=_('Deletion of JIRA: %s') % jira_instance.configuration_name,
                         description=f"JIRA \"{jira_instance.configuration_name}\" was deleted by {request.user}",
                         url=request.build_absolute_uri(reverse('jira')))
                     return HttpResponseRedirect(reverse('jira'))
                 except Exception as e:
-                    add_error_message_to_response('Unable to delete JIRA Instance, probably because it is used by JIRA Issues: %s' % str(e))
+                    add_error_message_to_response(f'Unable to delete JIRA Instance, probably because it is used by JIRA Issues: {str(e)}')
         collector = NestedObjects(using=DEFAULT_DB_ALIAS)
         collector.collect([jira_instance])
         rels = collector.nested()

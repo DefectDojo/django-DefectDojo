@@ -1,23 +1,25 @@
 import json
-from dateutil import parser
+
 import html2text
 from cvss import parser as cvss_parser
+from dateutil import parser
+
 from dojo.models import Endpoint, Finding
 
 
-class AcunetixJSONParser(object):
+class AcunetixJSONParser:
     """This parser is written for Acunetix JSON Findings."""
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
         data = json.load(filename)
-        dupes = dict()
+        dupes = {}
         scan_date = parser.parse(data["Generated"])
         text_maker = html2text.HTML2Text()
         text_maker.body_width = 0
         for item in data["Vulnerabilities"]:
             title = item["Name"]
             findingdetail = text_maker.handle(item.get("Description", ""))
-            if "Cwe" in item["Classification"]:
+            if item["Classification"] is not None and "Cwe" in item["Classification"]:
                 try:
                     cwe = int(item["Classification"]["Cwe"].split(",")[0])
                 except BaseException:
@@ -27,16 +29,30 @@ class AcunetixJSONParser(object):
             sev = item["Severity"]
             if sev not in ["Info", "Low", "Medium", "High", "Critical"]:
                 sev = "Info"
-            mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
-            references = text_maker.handle(item.get("RemedyReferences", ""))
+            if item["RemedialProcedure"] is not None:
+                mitigation = text_maker.handle(item.get("RemedialProcedure", ""))
+            else:
+                mitigation = None
+            if item["RemedyReferences"] is not None:
+                references = text_maker.handle(item.get("RemedyReferences", ""))
+            else:
+                references = None
             if "LookupId" in item:
                 lookupId = item["LookupId"]
-                references = (
-                    f"https://online.acunetix360.com/issues/detail/{lookupId}\n"
-                    + references
-                )
+                if references is None:
+                    references = (
+                        f"https://online.acunetix360.com/issues/detail/{lookupId}\n"
+                    )
+                else:
+                    references = (
+                        f"https://online.acunetix360.com/issues/detail/{lookupId}\n"
+                        + references
+                    )
             url = item["Url"]
-            impact = text_maker.handle(item.get("Impact", ""))
+            if item["Impact"] is not None:
+                impact = text_maker.handle(item.get("Impact", ""))
+            else:
+                impact = None
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             if request is None or len(request) <= 0:

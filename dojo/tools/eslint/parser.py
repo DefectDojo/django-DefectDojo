@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class ESLintParser(object):
+class ESLintParser:
     def get_scan_types(self):
         return ["ESLint Scan"]
 
@@ -28,7 +28,7 @@ class ESLintParser(object):
         except Exception:
             data = json.loads(tree)
 
-        items = list()
+        items = []
         for item in data:
             findingdetail = ""
 
@@ -37,7 +37,7 @@ class ESLintParser(object):
 
             for message in item["messages"]:
                 if message["message"] is None:
-                    title = str("Finding Not defined")
+                    title = "Finding Not defined"
                 else:
                     title = str(message["message"])
 

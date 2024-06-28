@@ -18,7 +18,7 @@
                 {{ note }}
                 <br/>
                 <br/>
-                It can be reviewed at {{ url|full_url }}
+                It can be reviewed at <a href="{{ url|full_url }}">{{ url|full_url }}</a>
             </p>
             <br/>
                 {% trans "Kind regards" %}, <br/>

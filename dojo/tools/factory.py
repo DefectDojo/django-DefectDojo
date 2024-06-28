@@ -1,12 +1,14 @@
-import re
 import logging
 import os
-from inspect import isclass
-from pathlib import Path
+import re
 from importlib import import_module
 from importlib.util import find_spec
+from inspect import isclass
+from pathlib import Path
+
 from django.conf import settings
-from dojo.models import Test_Type, Tool_Type, Tool_Configuration
+
+from dojo.models import Test_Type, Tool_Configuration, Tool_Type
 
 PARSERS = {}
 
@@ -25,35 +27,38 @@ def register_parser(scan_type, parser):
     logger.debug(f"register scan_type:{scan_type} with parser:{parser}")
     # check double registration or registration with an existing key
     if scan_type in PARSERS:
-        raise ValueError(f"Try to register an existing parser '{scan_type}'")
+        msg = f"Try to register an existing parser '{scan_type}'"
+        raise ValueError(msg)
     PARSERS[scan_type] = parser
 
 
 def get_parser(scan_type):
     """Return a parser by the scan type"""
     if scan_type not in PARSERS:
-        raise ValueError(f"Parser '{scan_type}' does not exists")
+        msg = f"Parser '{scan_type}' does not exist"
+        raise ValueError(msg)
     rg = re.compile(settings.PARSER_EXCLUDE)
     if not rg.match(scan_type) or settings.PARSER_EXCLUDE.strip() == "":
         # update DB dynamicaly
         test_type, _ = Test_Type.objects.get_or_create(name=scan_type)
         if test_type.active:
             return PARSERS[scan_type]
-    raise ValueError(f"Parser {scan_type} is not active")
+    msg = f"Parser {scan_type} is not active"
+    raise ValueError(msg)
 
 
 def get_scan_types_sorted():
-    res = list()
+    res = []
     for key in PARSERS:
         res.append((key, PARSERS[key].get_description_for_scan_types(key)))
-    return sorted(tuple(res), key=lambda x: x[0].lower())
+    return sorted(res, key=lambda x: x[0].lower())
 
 
 def get_choices_sorted():
-    res = list()
+    res = []
     for key in PARSERS:
         res.append((key, key))
-    return sorted(tuple(res), key=lambda x: x[1].lower())
+    return sorted(res, key=lambda x: x[1].lower())
 
 
 def requires_file(scan_type):
@@ -68,7 +73,7 @@ def requires_file(scan_type):
 
 
 def get_api_scan_configuration_hints():
-    res = list()
+    res = []
     for name, parser in PARSERS.items():
         if hasattr(parser, "api_scan_configuration_hint"):
             scan_types = parser.get_scan_types()

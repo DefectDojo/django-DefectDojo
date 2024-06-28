@@ -367,6 +367,10 @@
                             <td>{% if user.global_role.role %} {{ user.global_role.role }} {% endif %}</td>
                         </tr>
                         <tr>
+                            <td style="width: 200px;"><strong>{% trans "Date Joined" %}</strong></td>
+                            <td>{{ user.date_joined }}</td>
+                        </tr>
+                        <tr>
                             <td style="width: 200px;"><strong>{% trans "Last Login" %}</strong></td>
                             <td>{% if user.last_login %} {{ user.last_login }} {% else %} {% trans "Never" %} {% endif %}</td>
                         </tr>

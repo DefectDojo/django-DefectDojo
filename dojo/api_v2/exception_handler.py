@@ -1,4 +1,5 @@
-from dojo.models import System_Settings
+import logging
+
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import RestrictedError
 from dojo.api_v2.api_error import ApiError
@@ -9,7 +10,8 @@ from rest_framework.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from rest_framework.views import exception_handler
-import logging
+
+from dojo.models import System_Settings
 
 logger = logging.getLogger(__name__)
 

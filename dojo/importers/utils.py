@@ -273,3 +273,4 @@ def adjust_date_format(obj):
         date_str = datetime_str[:10]  # Extract date (YYYY-MM-DD)
         obj["fields"]["date"] = date_str
     return obj
+

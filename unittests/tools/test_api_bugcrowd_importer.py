@@ -1,14 +1,15 @@
-from django.core.exceptions import ValidationError
-from django.test import TestCase
 from unittest.mock import patch
 
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+
 from dojo.models import (
-    Test,
     Engagement,
     Product,
     Product_API_Scan_Configuration,
-    Tool_Type,
+    Test,
     Tool_Configuration,
+    Tool_Type,
 )
 from dojo.tools.api_bugcrowd.importer import BugcrowdApiImporter
 

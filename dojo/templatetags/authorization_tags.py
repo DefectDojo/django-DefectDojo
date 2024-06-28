@@ -1,8 +1,9 @@
-from django import template
 import crum
+from django import template
+
+from dojo.authorization.authorization import user_has_configuration_permission as configuration_permission
+from dojo.authorization.authorization import user_has_global_permission, user_has_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import user_has_global_permission, user_has_permission, \
-    user_has_configuration_permission as configuration_permission
 from dojo.risk_acceptance.risk_pending import is_permissions_risk_acceptance 
 from dojo.utils import get_product
 from dojo.request_cache import cache_for_request

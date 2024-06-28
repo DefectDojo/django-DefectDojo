@@ -38,9 +38,8 @@ class SonarQubeAPI:
                 entry in supported_issue_types for entry in split_issue_types
             )
             if not all_clean:
-                raise Exception(
-                    f"Deteced unsupported issue type! Supported types are {', '.join(supported_issue_types)}"
-                )
+                msg = f"Detected unsupported issue type! Supported types are {', '.join(supported_issue_types)}"
+                raise Exception(msg)
 
         self.session = requests.Session()
         self.default_headers = {"User-Agent": "DefectDojo"}
@@ -53,9 +52,8 @@ class SonarQubeAPI:
         elif tool_config.authentication_type == "API":
             self.session.auth = (tool_config.api_key, "")
         else:
-            raise Exception(
-                f"SonarQube Authentication type {tool_config.authentication_type} not supported"
-            )
+            msg = f"SonarQube Authentication type {tool_config.authentication_type} not supported"
+            raise Exception(msg)
 
     def find_project(self, project_name, organization=None, branch=None):
         """
@@ -80,15 +78,16 @@ class SonarQubeAPI:
         )
 
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to find the project {project_name} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
         for component in response.json().get("components", []):
             if component["name"] == project_name:
                 return component
-        raise Exception(
+        msg = (
             f"""
                 'Expected Project "{project_name}", but it returned '
                 '{[x.get('name') for x in response.json().get('components')]}. \n'
@@ -96,6 +95,7 @@ class SonarQubeAPI:
                 'Alternatively it can also be specified the Project Key at Product configuration.
                 """
         )
+        raise Exception(msg)
 
     def get_project(self, project_key, organization=None, branch=None):
         """
@@ -125,11 +125,11 @@ class SonarQubeAPI:
             raise ValidationError(e)
 
         if not response.ok:
-            raise ValidationError(
-                detail=f"Unable to find the project key {project_key} "
-                f"due to {response.status_code} - {response.content.decode('utf-8')}"
-                f"Url: {response.url}"
+            msg = (
+                f"Unable to find the project {project_key} "
+                f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
         return response.json().get("component")
 
@@ -179,10 +179,11 @@ class SonarQubeAPI:
             )
 
             if not response.ok:
-                raise Exception(
+                msg = (
                     f"Unable to find the issues for component {component_key} "
                     f'due to {response.status_code} - {response.content.decode("utf-8")}'
                 )
+                raise Exception(msg)
 
             issues_page = response.json().get("issues")
             if not issues_page:
@@ -220,10 +221,11 @@ class SonarQubeAPI:
             )
 
             if not response.ok:
-                raise Exception(
+                msg = (
                     f"Unable to find the hotspots for project {project_key} "
                     f"due to {response.status_code} - {response.content}"
                 )
+                raise Exception(msg)
 
             hotspots_page = response.json().get("hotspots")
             if not hotspots_page:
@@ -283,20 +285,23 @@ class SonarQubeAPI:
         )
 
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to get issue {issue_key} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
+
         issues = response.json().get("issues", [])
         for issue in issues:
             if issue["key"] == issue_key:
                 return issue
-        raise Exception(
+        msg = (
             f"Expected Issue \"{issue_key}\", but it returned"
             f"{[x.get('key') for x in response.json().get('issues')]}. "
             "Full response: "
             f"{response.json()}"
         )
+        raise Exception(msg)
 
     def get_rule(self, rule_id, organization=None):
         """
@@ -319,10 +324,11 @@ class SonarQubeAPI:
                 headers=self.default_headers,
             )
             if not response.ok:
-                raise Exception(
+                msg = (
                     f"Unable to get the rule {rule_id} "
                     f'due to {response.status_code} - {response.content.decode("utf-8")}'
                 )
+                raise Exception(msg)
 
             rule = response.json()["rule"]
             self.rules_cache.update({rule_id: rule})
@@ -342,10 +348,11 @@ class SonarQubeAPI:
                 headers=self.default_headers,
             )
             if not response.ok:
-                raise Exception(
+                msg = (
                     f"Unable to get the hotspot rule {rule_id} "
                     f"due to {response.status_code} - {response.content}"
                 )
+                raise Exception(msg)
 
             rule = response.json()["rule"]
             self.rules_cache.update({rule_id: rule})
@@ -385,10 +392,11 @@ class SonarQubeAPI:
         )
 
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to transition {transition} the issue {issue_key} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
     def add_comment(self, issue_key, text):
         """
@@ -404,10 +412,11 @@ class SonarQubeAPI:
             headers=self.default_headers,
         )
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to add a comment into issue {issue_key} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
     def test_connection(self):
         """
@@ -425,20 +434,22 @@ class SonarQubeAPI:
         )
 
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to connect and search in SonarQube "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
         try:
             num_projects = response.json()["paging"]["total"]
         except RequestsJSONDecodeError:
-            raise Exception(
+            msg = (
                 f""" Test request was successful (there was no HTTP-4xx or HTTP-5xx) but response doesn't contain
                 expected JSON response. SonarQube responded with HTTP-{response.status_code} ({response.reason}).
                 This is full response: {response.text}
                 """
             )
+            raise Exception(msg)
         return f"You have access to {num_projects} projects"
 
     def test_product_connection(self, api_scan_configuration):

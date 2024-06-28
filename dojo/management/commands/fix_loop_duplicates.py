@@ -1,6 +1,9 @@
-from dojo.finding.helper import fix_loop_duplicates
-from django.core.management.base import BaseCommand
 import logging
+
+from django.core.management.base import BaseCommand
+
+from dojo.finding.helper import fix_loop_duplicates
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 

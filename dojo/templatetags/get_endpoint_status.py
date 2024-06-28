@@ -1,6 +1,8 @@
 from django import template
-from dojo.models import Endpoint_Status
 from django.db.models import Q
+
+from dojo.models import Endpoint_Status
+
 register = template.Library()
 
 

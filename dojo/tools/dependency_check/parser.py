@@ -1,19 +1,19 @@
 import hashlib
 import logging
 import re
-import dateutil
+from datetime import datetime
 
+import dateutil
 from cpe import CPE
 from defusedxml import ElementTree
 from packageurl import PackageURL
-from datetime import datetime
 
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 
-class DependencyCheckParser(object):
+class DependencyCheckParser:
     SEVERITY_MAPPING = {
         "info": "Info",
         "low": "Low",
@@ -232,9 +232,7 @@ class DependencyCheckParser(object):
 
         if component_name is None:
             logger.warning(
-                "component_name was None for File: {}, using dependency file name instead.".format(
-                    dependency_filename
-                )
+                f"component_name was None for File: {dependency_filename}, using dependency file name instead."
             )
             component_name = dependency_filename
 
@@ -296,18 +294,14 @@ class DependencyCheckParser(object):
         if related_dependency is not None:
             tags.append("related")
 
-        if vulnerability.tag == "{}suppressedVulnerability".format(namespace):
+        if vulnerability.tag == f"{namespace}suppressedVulnerability":
             if notes is None:
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("no_suppression_document")
-            mitigation = "**This vulnerability is mitigated and/or suppressed:** {}\n".format(
-                notes
-            )
+            mitigation = f"**This vulnerability is mitigated and/or suppressed:** {notes}\n"
             mitigation = (
                 mitigation
-                + "Update {}:{} to at least the version recommended in the description".format(
-                    component_name, component_version
-                )
+                + f"Update {component_name}:{component_version} to at least the version recommended in the description"
             )
             mitigated = datetime.utcnow()
             is_Mitigated = True
@@ -315,9 +309,7 @@ class DependencyCheckParser(object):
             tags.append("suppressed")
 
         else:
-            mitigation = "Update {}:{} to at least the version recommended in the description".format(
-                component_name, component_version
-            )
+            mitigation = f"Update {component_name}:{component_version} to at least the version recommended in the description"
             description += "\n**Filepath:** " + str(dependency_filepath)
             active = True
 
@@ -355,7 +347,7 @@ class DependencyCheckParser(object):
         return "OWASP Dependency Check output can be imported in Xml format."
 
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
         namespace = ""
         content = filename.read()
         #  'utf-8' This line is to pass a unittest in test_parsers.TestParsers.test_file_existence.

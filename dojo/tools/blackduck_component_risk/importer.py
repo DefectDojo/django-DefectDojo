@@ -1,13 +1,13 @@
 import csv
 import io
-import zipfile
 import logging
+import zipfile
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
-class BlackduckCRImporter(object):
+class BlackduckCRImporter:
     """
     Importer for blackduck. V3 is different in that it creates a Finding in defect dojo
     for each vulnerable component version used in a project, for each license that is
@@ -30,7 +30,8 @@ class BlackduckCRImporter(object):
         if zipfile.is_zipfile(str(report)):
             return self._process_zipfile(report)
         else:
-            raise ValueError(f"File {report} not a zip!")
+            msg = f"File {report} not a zip!"
+            raise ValueError(msg)
 
     def _process_zipfile(self, report: Path) -> (dict, dict, dict):
         """
@@ -39,8 +40,8 @@ class BlackduckCRImporter(object):
         :param report: the file
         :return: (dict, dict, dict)
         """
-        components = dict()
-        source = dict()
+        components = {}
+        source = {}
         try:
             with zipfile.ZipFile(str(report)) as zip:
                 c_file = False
@@ -64,7 +65,8 @@ class BlackduckCRImporter(object):
                 # Raise exception to error-out if the zip is missing either of
                 # these files.
                 if not (c_file and s_file):
-                    raise Exception("Zip file missing needed files!")
+                    msg = "Zip file missing needed files!"
+                    raise Exception(msg)
 
         except Exception:
             logger.exception("Could not process zip file")
