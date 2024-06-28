@@ -13,7 +13,7 @@ from dojo.models import (
 )
 from dojo.authorization.authorization import user_has_global_permission
 from dojo.notifications.helper import create_notification
-from dojo.risk_acceptance.notification import Notification
+from dojo.transfer_findings.notification import Notification as NotificationTransferFinding
 from dojo.user.queries import get_user
 from django.urls import reverse
 logger = logging.getLogger(__name__)
@@ -30,7 +30,10 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
 
     request_findings = serializer.validated_data["findings"]
     test = None
+    transfer_finding_obj = None
     system_settings = System_Settings.objects.get()
+    if transfer_finding_findings:
+        transfer_finding_obj = transfer_finding_findings[0].transfer_findings
     for transfer_finding_finding in transfer_finding_findings:
         finding = transfer_finding_finding.findings
         finding_id = str(finding.id)
@@ -54,22 +57,14 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
                         transferfinding_findigns=transfer_finding_findings,
                         system_settings=system_settings
                     )
-
-                    send_notification_transfer_finding(
-                        transfer_findings=transfer_finding_finding.transfer_findings,
-                        status="accepted"
-                    )
                 elif dict_findings["risk_status"] == "Transfer Rejected":
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = True
-                    send_notification_transfer_finding(
-                        transfer_findings=transfer_finding_finding.transfer_findings,
-                        status="rejected"
-                    )
                 finding.save()
         else:
             logger.warning(f"Finding not Found: {finding.id}")
 
+    NotificationTransferFinding.transfer_finding_status_changes(transfer_finding_obj)
 
 def created_test(origin_finding: Finding, transfer_finding: TransferFinding) -> Test:
     test: Test = None
@@ -210,7 +205,7 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
             transfer_finding_finding.findings.notes.add(note)
             transfer_finding_finding.findings.save()
             if send_notification:
-                Notification.send_notification(
+                NotificationTransferFinding.send_notification(
                     event="other",
                     subject=f"✅temporarily accepted by the parent finding {parent_finding.id} (policies for the transfer of findings)👌",
                     description=f"temporarily accepted by the parent finding <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
@@ -225,7 +220,7 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
             transfer_finding_finding.findings.notes.add(note)
             transfer_finding_finding.findings.save()
             if send_notification:
-                Notification.send_notification(
+                NotificationTransferFinding.send_notification(
                     event="other",
                     subject=f"✅This finding has been reactivated for the finding parent {parent_finding.id} (policies for the transfer of findings)👌",
                     description=f"The finding has been reactivated for the finding parent <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",

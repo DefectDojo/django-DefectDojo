@@ -1,3 +1,4 @@
+import copy
 from rest_framework.generics import GenericAPIView
 from drf_spectacular.types import OpenApiTypes
 from crum import get_current_user
@@ -176,6 +177,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import role_has_global_permission
 from dojo.user.utils import get_configuration_permissions_codenames
 import dojo.transfer_findings.helper as helper_tf
+from dojo.transfer_findings.notification import Notification as NotificationTransferFinding
 
 logger = logging.getLogger(__name__)
 
@@ -3381,10 +3383,11 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
     
     def destroy(self, request, pk=None):
         try:
+            transfer_finding_copy = copy.deepcopy(get_object_or_404(TransferFinding, id=pk))
             obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
             for transfer_finding_finding in obj_transfer_finding_findings:
-                helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
                 helper_tf.reset_finding_related(transfer_finding_finding.findings)
+            NotificationTransferFinding.transfer_finding_remove(transfer_finding_copy)
             super().destroy(request, pk)
             return http_response.no_content(message="TransferFinding Deleted")
         except Exception as e:
@@ -3426,10 +3429,10 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                 request_findings = request.data["findings"]
                 for transfer_finding_finding in obj_transfer_finding_findings:
                     if str(transfer_finding_finding.findings.id) in request_findings:
-                        helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
                         helper_tf.reset_finding_related(transfer_finding_finding.findings)
                         transfer_finding_finding.delete()
-
+                        # se debe enviar el transfer-fiding antes de elimianrse y el de despues con los cambios relaizados
+                NotificationTransferFinding.transfer_finding_finding_remove() 
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
             else:
                 helper_tf.reset_finding_related(pk)
