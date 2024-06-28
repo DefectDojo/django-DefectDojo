@@ -3423,6 +3423,7 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
     
     def destroy(self, request, pk=None):
         serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
+        transfer_finding_obj = get_object_or_404(TransferFinding, int(pk))
         if serializer.is_valid():
             if request.data.get('findings'):
                 obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
@@ -3431,8 +3432,7 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                     if str(transfer_finding_finding.findings.id) in request_findings:
                         helper_tf.reset_finding_related(transfer_finding_finding.findings)
                         transfer_finding_finding.delete()
-                        # se debe enviar el transfer-fiding antes de elimianrse y el de despues con los cambios relaizados
-                NotificationTransferFinding.transfer_finding_finding_remove() 
+                NotificationTransferFinding.transfer_finding_status_changes(transfer_finding_obj)
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
             else:
                 helper_tf.reset_finding_related(pk)
