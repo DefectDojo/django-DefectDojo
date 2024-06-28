@@ -10,6 +10,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.postgres.aggregates import StringAgg
+from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS, connection
 from django.db.models import Count, F, Max, OuterRef, Prefetch, Q, Subquery, Sum
@@ -87,6 +88,7 @@ from dojo.models import (
     Product_Group,
     Product_Member,
     Product_Type,
+    TransferFinding,
     System_Settings,
     Test,
     Test_Type,

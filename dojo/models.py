@@ -1247,6 +1247,18 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    @property
+    def engagements_list(self):
+        engagements = Engagement.objects.filter(product=self, active=True)
+        engagement_list = []
+        for engagement_dict in engagements.values("id", "name", "product_id", "status", "engagement_type", "build_id"):
+            findings = Finding.objects.filter(test__engagement__id=engagement_dict["id"], active=True, risk_status__in=["Risk Active", "Risk Expired"])
+            engagement_dict.update({"findings": list(
+                findings.values("id", "title", "cve", "severity", "description", "active",
+                                "verified", "risk_status", "risk_accepted", "accepted_by"))})
+            engagement_list.append(engagement_dict)
+        return engagement_list
+
     # only used in APIv2 serializers.py, query should be aligned with findings_count
     @cached_property
     def open_findings_list(self):
@@ -1256,6 +1268,7 @@ class Product(models.Model):
         for i in findings:
             findings_list.append(i.id)
         return findings_list
+    
 
     @property
     def has_jira_configured(self):
@@ -2256,11 +2269,11 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return '%i: %s' % (self.finding.id, self.action)
 
 
-
 class Finding(models.Model):
 
     STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
                       ('Risk Rejected', 'Risk Rejected'),
+                      ('Risk Expired', 'Risk Expired'),
                       ('Risk Accepted', 'Risk Accepted'),
                       ('Risk Active', 'Risk Active'),
                       ('Transfer Pending', 'Transfer Pending'),
@@ -2286,7 +2299,7 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name=_("CWE"),
                               help_text=_("The CWE number associated with this flaw."))
-    cve = models.CharField(max_length=50,
+    cve = models.CharField(max_length=100,
                            null=True,
                            blank=False,
                            verbose_name=_("Vulnerability Id"),
@@ -2994,6 +3007,8 @@ class Finding(models.Model):
             status += ['Risk pending']
         if self.risk_status == "Risk Rejected":
             status += ['Risk Rejected']
+        if self.risk_status == "Risk Expired":
+            status += ['Risk Expired']
         elif self.risk_accepted:
             status += ['Risk Accepted']
         if not len(status):
@@ -3476,7 +3491,7 @@ class TransferFinding(models.Model):
 class TransferFindingFinding(models.Model):
     findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
     transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
-    finding_related = models.OneToOneField(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
+    finding_related = models.ForeignKey(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
     engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE, null=True)
 
 
@@ -3490,7 +3505,7 @@ class FindingAdmin(admin.ModelAdmin):
 
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey(Finding, editable=False, on_delete=models.CASCADE)
-    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    vulnerability_id = models.TextField(max_length=100, blank=False, null=False)
 
     def __str__(self):
         return self.vulnerability_id
@@ -3609,7 +3624,7 @@ class Finding_Group(TimeStampedModel):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve = models.CharField(max_length=50,
+    cve = models.CharField(max_length=100,
                            null=True,
                            blank=False,
                            verbose_name="Vulnerability Id",
@@ -3672,7 +3687,7 @@ class Finding_Template(models.Model):
 
 class Vulnerability_Id_Template(models.Model):
     finding_template = models.ForeignKey(Finding_Template, editable=False, on_delete=models.CASCADE)
-    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    vulnerability_id = models.TextField(max_length=100, blank=False, null=False)
 
 
 class Check_List(models.Model):
@@ -4149,6 +4164,8 @@ NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
 NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
 NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
 NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
+NOTIFICATION_CHOICE_ALERT_MAIL = ("mail", "alert")
+NOTIFICATION_CHOICE_NONE = ("", "")
 
 NOTIFICATION_CHOICES = (
     NOTIFICATION_CHOICE_SLACK,
@@ -4161,38 +4178,38 @@ DEFAULT_NOTIFICATION = NOTIFICATION_CHOICE_ALERT
 
 
 class Notifications(models.Model):
-    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
 
-    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, help_text=_('Triggered whenever an (re-)import has been done that created/updated/closed findings.'))
+    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True, help_text=_('Triggered whenever an (re-)import has been done that created/updated/closed findings.'))
     scan_added_empty = MultiSelectField(choices=NOTIFICATION_CHOICES, default=[], blank=True, help_text=_('Triggered whenever an (re-)import has been done (even if that created/updated/closed no findings).'))
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
-    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
+    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
     user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
     template = models.BooleanField(default=False)
-    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
+    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True,
         verbose_name=_('SLA breach'),
         help_text=_('Get notified of (upcoming) SLA breaches'))
-    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
+    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_('Risk Acceptance Expiration'),
         help_text=_('Get notified of (upcoming) Risk Acceptance expiries'))
-    risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+    risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_('Risk Acceptance Request'),
         help_text=_('Send notification to the contacts of the product type'))
-    transfer_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True,
+    transfer_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_('Transfer Finding'),
         help_text=_('Send notification to the contacts of the product'))
-    sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
+    sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
         verbose_name=_('SLA breach (combined)'),
         help_text=_('Get notified of (upcoming) SLA breaches (a message per project)'))
 

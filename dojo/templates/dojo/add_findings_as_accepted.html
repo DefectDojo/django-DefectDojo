@@ -16,14 +16,14 @@
           </td>
           <td>
             {% if finding.title %}
-                <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+                <a rel="noopener noreferrer" title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
             {% else %}
-                <a title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
+                <a rel="noopener noreferrer" title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
             {% endif %}
           </td>
           <td>
             {% if finding.cwe > 0 %}
-                <a target="_blank" href="{{ finding.cwe|cwe_url }}">
+                <a rel="noopener noreferrer" target="_blank" href="{{ finding.cwe|cwe_url }}">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe|default:"" }}
                 </a>
             {% endif %}
@@ -32,7 +32,7 @@
             {% with finding|first_vulnerability_id as first_vulnerability_id %}
                 {% if first_vulnerability_id %}
                     {% if first_vulnerability_id|has_vulnerability_url %}
-                        <a target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
+                        <a rel="noopener noreferrer" target="_blank" href="{{ first_vulnerability_id|vulnerability_url }}">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ first_vulnerability_id }}
                     </a>
                     {% else %}

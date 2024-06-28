@@ -4,9 +4,11 @@ import io
 import json
 import logging
 import textwrap
+import dateutil
 
 from dojo.models import Finding
 from django.conf import settings
+from functools import reduce
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +21,18 @@ class TwistlockCSVParser:
         data_vulnerability_id = row.get("CVE ID", "")
         data_package_version = row.get("Package Version", "")
         data_fix_status = row.get("Fix Status", "")
-        data_package_name = row.get("Packages", "")
+        data_package_name = row.get("Source Package", "")
         row.get("Id", "")
         data_severity = row.get("Severity", "")
         data_cvss = row.get("CVSS", "")
         data_description = row.get("Description", "")
+        data_tag = row.get("Tag", "")
+        data_distro = row.get("Distro", "")
+        data_type = row.get("Type")
+        data_package_version = row.get("Package Version", "")
+        data_cluster = row.get("Clusters", "")
+        data_namespaces = row.get("Namespaces", "")
+        data_package_path = row.get("Package Path", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -36,19 +45,36 @@ class TwistlockCSVParser:
         elif data_package_name and data_package_version:
             title = data_package_name + " - " + data_package_version
         else:
-            title = data_description
+            data_description_complete = reduce(
+                lambda str, kv: str.replace(kv[0], kv[1]),
+                settings.DD_INVALID_ESCAPE_STR.items(),
+                data_description,
+            )
+            title = data_description_complete
 
         finding = Finding(
             title=textwrap.shorten(title, width=255, placeholder="..."),
             test=test,
             severity=convert_severity(data_severity),
-            description=data_description
-            + "<p> Vulnerable Package: "
-            + data_package_name
-            + "</p><p> Current Version: "
+            description="<p><strong>Description:</strong> "
+            + data_description
+            + "</p><p><strong>Type:</strong> "
+            + str(data_type)
+            + "</p><p><strong>Tag:</strong> "
+            + str(data_tag)
+            + "</p><p><strong>Cluster:</strong> "
+            + str(data_cluster)
+            + "</p><p><strong>Namespaces:</strong> "
+            + str(data_namespaces)
+            + "</p><p><strong>Vulnerable Package:</strong> "
+            + str(data_package_name)
+            + "</p><p><strong>Current Version:</strong> "
             + str(data_package_version)
+            + "</p><p><strong>Package path:</strong> "
+            + str(data_package_path)
             + "</p>",
             mitigation=data_fix_status,
+            references=row.get("Vulnerability Link", ""),
             component_name=textwrap.shorten(
                 data_package_name, width=200, placeholder="..."
             ),
@@ -59,8 +85,10 @@ class TwistlockCSVParser:
             mitigated=None,
             severity_justification=f"(CVSS v3 base score: {data_cvss})",
             impact=data_severity,
+            vuln_id_from_tool= data_vulnerability_id,
+            publish_date=dateutil.parser.parse(row.get('Published')) if row.get('Published', None) else None,
         )
-        finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
+        finding.unsaved_tags = [row.get('Custom Tag') if row.get('Custom Tag', None) else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
         finding.description = finding.description.strip()
         if data_vulnerability_id:
             finding.unsaved_vulnerability_ids = [data_vulnerability_id]
@@ -182,9 +210,11 @@ def get_item(vulnerability, test):
         mitigated=None,
         severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
         impact=severity,
-        vuln_id_from_tool= vulnerability['id']
+        vuln_id_from_tool= vulnerability['id'],
+        publish_date=dateutil.parser.parse(vulnerability.get('publishedDate')) if vulnerability.get('publishedDate', None) else None,
+
     )
-    finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
+    finding.unsaved_tags = [vulnerability['customTag'] if vulnerability.get('customTag', None) else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
     finding.description = finding.description.strip()
 

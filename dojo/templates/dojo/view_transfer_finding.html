@@ -6,6 +6,9 @@
 
 {% block add_styles %}
   {{ block.super }}
+  .cls-transfer-finding-title {
+    width: 20%;
+  }
     .chosen-container {
     width: 70% !important;
     }
@@ -36,18 +39,29 @@
         justify-content: center;
         height: 100%;
     }
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
     .limitar-texto {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
-    .modal-dialog{
+    .modal-tranferfindingfinding{
       max-width: 70%;
       width: 70%;
       margin: 0 auto;
 
+    }
+    h3{
+      color: white;
+    }
+    .modal-header .close {
+      margin-top: -26px;
+    }
+    .modal-header{
+      padding: 8px;
+      background-color:#20a6d8bf;
+      border-button:#20a6d8bf;
     }
     .confirmed-modal{
       max-width: 30%;
@@ -62,34 +76,16 @@
 {% endblock %}
 {% block add_css %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
 {% endblock %}
 {% block content %}
     {{ block.super }}
-    <!-- Tu modal confirmed-->
-    <div class="modal fade confirmed-modal" id="confirmedModal" data-tf-action="action" data-tf-id="None" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-sm" id="idconfirmedmodal" role="document">
-      <div class="modal-content">
-          <div class="modal-header">
-          <h5 class="modal-title" id="confirmModalLabel"><h3> Action Confirmed <h3></h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-          </button>
-          </div>
-          <div id="id_modal_message" class="modal-body">
-          Are you sure to perform this action?
-          </div>
-          <div class="modal-footer">
-          <input type="button" class="btn btn-primary" data-dismiss="modal" value="Cancel">
-          <input id="confirmed_action_modal" type="button" class="btn btn-success" name="#" value="Confirmed">
-          </div>
-      </div>
-      </div>
-  </div>
-    <!-- Tu modal -->
+    {% include 'dojo/modal/confirmed.html' %}
+    {% include 'dojo/modal/loading-overlay.html'%}
+    {% include 'dojo/modal/alerts.html' with title="Select an engagement please" %}
 <div class="modal fade" id="modalTransferFinding" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-tranferfindingfinding">
       <div class="modal-content">
+      {% include 'dojo/modal/alerts.html' with title="Select an engagement please" %}
         <div class="modal-header">
           <h3 class="modal-title" id="exampleModalLabel">Transfer Finding</h3>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -97,6 +93,7 @@
           </button>
         </div>
         <div class="modal-body">
+        {% include 'dojo/modal/loading.html' %}
           <table class="table table-hover">
             <thead class="thead-dark">
               <tr>
@@ -104,7 +101,10 @@
                 <th scope="col">Name</th>
                 <th scope="col">Severity</th>
                 <th scope="col">Vulnerability Id</th>
-                <th scope="col">Related Finding</th>
+                <th scope="col">Related Finding
+                  <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Select a finding that is related to the finding you want to transfer. If the default value is left, a new finding will be created in its product." data-placement="right" data-container="body" data-original-title="" title="">
+                  </i>
+                </th>
                 <th scope="col">Status</th>
                 <th scope="col">Actions</th>
               </tr>
@@ -117,7 +117,8 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal"><i class="fa-solid fa-circle-xmark"></i> Close</button>
-          <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" id="send-message-btn" ><i class="fa-solid fa-floppy-disk"></i> Save</i> </button>
+          <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal" id="save-btn" ><i class="fa-solid fa-floppy-disk"></i> Save</i>
+          </button>
         </div>
       </div>
     </div>
@@ -148,30 +149,51 @@
                         <tr>
                             <td>{{transfer_findings.id}}</td>
                             <td>
-                              <a href="#" class="table-link" id="id_transfer_finding_show_modal" type="button" data-toggle="modal" data-target="#modalTransferFinding" 
-                              data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product}}
-                              data-product-type-id={{transfer_findings.origin_product_type}}>
-                                 {{transfer_findings.title}}</a>
+                              <a href="#" class="table-link cls_transfer_finding_show_modal" id="id_transfer_finding_show_modal" type="button" 
+                              data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product.id}}
+                              data-product-type-id={{transfer_findings.origin_product_type.id}}>
+                                 {{transfer_findings.title}} <i class="fa-solid fa-magnifying-glass-plus"></i> </a>
                             </td>
                             <td>{{transfer_findings.date}}</td>
-                            <td>{{transfer_findings.origin_product_type}}</td>
-                            <td>{{transfer_findings.destination_product_type}}</td>
-                            <td>{{transfer_findings.destination_product}}</td>
-                            <td>{{transfer_findings.destination_engagement}}</td>
+                            <td data-origin-pid="{{transfer_findings.origin_product_type.id}}">{{transfer_findings.origin_product_type}}</td>
+                            <td data-destination-ptid="{{transfer_findings.destination_product_type.id}}">{{transfer_findings.destination_product_type}}</td>
+                            <td data-destination-pid="{{transfer_findings.destination_product.id}}">{{transfer_findings.destination_product}}</td>
+                            <td class="cls-destination_engagement-field">
+                              {% if transfer_findings.destination_engagement is None and transfer_findings|has_object_permission:"Transfer_Finding_Edit"%}
+                                <select class="form-control cls-choosen-engagement" data-placeholder="Please select...">
+                                  <option value="None">Select Engagement ...</option>
+                                  {% for engagement in transfer_findings.destination_product.engagement_set.all %}
+                                    <option value="{{engagement.id}}">{{engagement.name}}</option>
+                                  {% endfor%}
+                                </select>
+                              {% else %}
+                                {% if transfer_findings.destination_engagement %}
+                                  <select class="form-control cls-choosen-engagement" disabled="True" data-placeholder="Please select...">
+                                    <option value="{{transfer_findings.destination_engagement.id}}">{{transfer_findings.destination_engagement.name}}</option>
+                                  </select>
+                                {% else %}
+                                  <select class="form-control cls-choosen-engagement" disabled="True" data-placeholder="Please select...">
+                                    <option value="None">None</option>
+                                  </select>
+                                {% endif %}
+                              {% endif %}
+                            </td>
                             <td>{{transfer_findings.accepted_by}}</td>
                             <td>
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
-                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-success btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                                    <button type="button" data-toggle="modal" data-target=""  title="Accept all Finding" class="btn btn-success btn-sm btn-tf help help-tooltip" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-check"></i>
                                     </button>
-                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-warning btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                            {% endif%}
+                            {% if transfer_findings|has_object_permission:"Transfer_Finding_Edit" %}
+                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-warning btn-sm btn-tf help help-tooltip" title="Reject all Finding" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-times"></i>
                                     </button>
-                                    <button type="button" data-toggle="modal" data-target="#confirmedModal" class="btn btn-danger btn-sm btn-tf" data-tf-id="{{transfer_findings.id}}">
+                            {% endif%}
+                            {% if transfer_findings|has_object_permission:"Transfer_Finding_Delete" %}
+                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf help help-tooltip" title="Delete all Findings" data-tf-id="{{transfer_findings.id}}">
                                     <i class="fas fa-trash-alt"></i>
                                     </button></i>
-                            {% else%}
-                                    --
                             {%endif%}
                             </td>
                         </tr>
@@ -205,129 +227,200 @@
 {% block postscript %}
     {{ block.super }}
 {% csrf_token %}
-<script src="{% static 'dojo/js/transfer_finding/index.js' %}"></script>
-<script str="{% static 'dojo/js/confirmed/index.js' %}"></script>
-<script type="text/javascript">
-     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+<script src="{% static 'dojo/js/modal/confirmed.js' %}"></script>
+<script type="module">
+    {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+    import {setSessionStorage, getSessionStorage} from '{% static "dojo/js/settings/session_storage.js" %}'
+    import {MAX_RETRY, RETRY_INTERVAL} from '{% static "dojo/js/settings.js" %}'
+    import { filterForStatus, productId, transferId, generateRequestTransferFindingUpdate } from '{% static "dojo/js/transfer_finding/index.js" %}';
+    import {alertHide, alertShow} from '{% static "dojo/js/alert/alert.js" %}';
+    import {all} from '{% static "dojo/js/driver_adapter/transfer_finding.js" %}'
+
     // cookies token
      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     // Event update
     $(document).ready(function() {
-      $('#send-message-btn').on("click", function(){
+      $('#save-btn').on("click", function(){
+        $('#loading-overlay').modal('show');
         let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Rejected"])
         if (typeof tranferAcceptedFinding === 'object' && Object.keys(tranferAcceptedFinding).length > 0){
-          updateFindings(tranferAcceptedFinding)
+          let engagementId = getSessionStorage('transferFinding', 'engagementId');
+          if(engagementId !== "None"){
+            updateTransferFinding({"destination_engagement": engagementId}, transferId);
+          }
+          updateFindings(tranferAcceptedFinding, transferId)
         }
         let removedFinding = filterForStatus(["Transfer Removed"]);
         if (typeof removedFinding === 'object' && Object.keys(removedFinding).length > 0){
           removeFindings(removedFinding)
         }
+        $('#loading-overlay').modal('hide');
       });
 
-      $("#confirmed_action_modal").on('click', function(){
-        modal = $(this).closest('.modal')
-        transferFindingId = modal.data('tf-id')
-        action = modal.data('tf-action')
-        updateFindingsRiskStatus(action, transferFindingId)
-        modal.modal('hide')
-       // form.submit();
+      $("#confirmed_action_modal").on('click', function()
+      {
+        $('#spinnerContainer').modal('show') 
+        let modal = $(this).closest('.modal')
+        let transferFindingId = modal.data('tf-id')
+        let action = modal.data('tf-action')
+        updateFindingsRiskStatus(action, transferFindingId).then(function(response)
+        {
+          modal.modal('hide')
+          let product_id = getSessionStorage("transferFinding","productId");
+          all(product_id).then(function(response){
+            $('#spinnerContainer').modal('hide') 
+            $('#confirmedModal').modal('hide');
+            location.reload();
+          });
+        }).catch(function(error) {
+            console.error("updateFindingsRiskStatus:", error);
+        });
       });
 
-      $("#risk_acceptance").on('click', '.btn-success, .btn-warning, .btn-danger', function() {
-        // captura del boton
-        let transferFindingId = $(this).data('tf-id')
-        let transferFindingActions = ""
-        if($(this).hasClass('btn-success')){ 
-          transferFindingActions = "Accepted"
+      $("#risk_acceptance").on('click', '.btn-success, .btn-warning, .btn-danger', function()
+      {
+        let row = $(this).closest('tr');
+        let selectEngagement = row.find('.cls-choosen-engagement')
+        let product_id = row.find('.cls_transfer_finding_show_modal').data('product-id')
+        setSessionStorage('transferFinding','productId',product_id)
+        let engagementSelected = selectEngagement.selectpicker('val');
+        setSessionStorage('transferFinding','engagementId', engagementSelected)
+        if(engagementSelected === "None" && $(this).hasClass('btn-success'))
+        {
+          alertShow(".alert");
         }
-        else if($(this).hasClass('btn-warning')){
-          transferFindingActions = "Rejected"
+        else
+        {
+          alertHide(".alert");
+          let transferFindingId = $(this).data('tf-id')
+          let transferFindingActions = ""
+          if($(this).hasClass('btn-success')){ 
+            transferFindingActions = "Accepted"
+          }
+          else if($(this).hasClass('btn-warning')){
+            transferFindingActions = "Rejected"
+          }
+          else if($(this).hasClass('btn-danger')){
+            transferFindingActions = "Removed"
+          }
+          showConfirmedModal(transferFindingId, transferFindingActions);
+          $("#confirmedModal").modal('show')
         }
-        else if($(this).hasClass('btn-danger')){
-          transferFindingActions = "Removed"
-        }
-
-        $('#confirmedModal').on('show.bs.modal', function (event) {
-          $(this).data('tf-id', transferFindingId);
-          $(this).data('tf-action', transferFindingActions);
-        }); 
       });
     });
 
-    function updateFindings(findingChangeStatus){
-      transfer_findings= {"findings" : findingChangeStatus}
-      $.ajax({
-          url: "/api/v2/transfer_finding_findings/" + transferId + "/" + "change_status" + "/",
-          type: "POST",
+    async function updateTransferFinding(data, transferFindingId){
+      try{
+        response = await $.ajax({
+            url: "/api/v2/transfer_finding/" + transferFindingId + "/",
+            type: "PATCH",
+            headers: { "X-CSRFToken": csrftoken,
+            retry: MAX_RETRY,
+            retryInterval: RETRY_INTERVAL,
+            "Content-Type": "application/json"},
+            data: JSON.stringify(data),
+        })
+        return response
+      }
+      catch(error){
+        console.error(error)
+        throw error
+      }
+    }
+
+  async function updateFindings(findingChangeStatus, transferFindingId){
+      let transfer_findings= {"findings" : findingChangeStatus}
+      try{
+        response = await $.ajax({
+            url: "/api/v2/transfer_finding_findings/" + transferFindingId + "/" + "change_status" + "/",
+            type: "POST",
+            headers: { "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json"},
+            retry: MAX_RETRY,
+            retryInterval: RETRY_INTERVAL,
+            data: JSON.stringify(transfer_findings),
+        })
+        return response
+      }
+      catch(error){
+        console.error("updatefindings: ", error)
+        throw error
+      }
+  }
+
+  async function removeFindings(findingRemoved){
+      let transfer_findings= {"findings" : findingRemoved}
+      response = await $.ajax({
+          url: "/api/v2/transfer_finding_findings/" + transferId + "/",
+          type: "DELETE",
+          retry: MAX_RETRY,
+          retryInterval: RETRY_INTERVAL,
           headers: { "X-CSRFToken": csrftoken,
           "Content-Type": "application/json"},
           data: JSON.stringify(transfer_findings),
-          success: function(response){
-              console.log("OK" +  response)
-          },
           error: function(error){
-              console.log(error)
+              console.error(error)
           }
       })
+    }
+
+  async function removeTransferFinding(transferFindingId)
+  {
+      let response = "";
+      try
+      {
+          response = await $.ajax({
+              url: "/api/v2/transfer_finding/" + transferFindingId + "/",
+              type: "DELETE",
+              retry: MAX_RETRY,
+              retryInterval: RETRY_INTERVAL,
+              headers: {
+                  "X-CSRFToken": csrftoken,
+                  "Content-Type": "application/json"
+              }
+          });
+          return response;
+      }
+      catch (error)
+      {
+        console.error("RemoveTransferFinding: ", error.message);
+        throw error;
+      }
   }
 
-  function removeFindings(findingRemoved){
-    transfer_findings= {"findings" : findingRemoved}
-    $.ajax({
-        url: "/api/v2/transfer_finding_findings/" + transferId + "/",
-        type: "DELETE",
-        headers: { "X-CSRFToken": csrftoken,
-        "Content-Type": "application/json"},
-        data: JSON.stringify(transfer_findings),
-        success: function(response){
-            console.log("OK" +  response)
-        },
-        error: function(error){
-            console.log(error)
+  async function updateFindingsRiskStatus(action, transferFindingId ){
+    let response = ""
+    let engagementId = getSessionStorage('transferFinding', 'engagementId');
+    if (action == "Accepted")
+    {
+        if(engagementId !== "None")
+        {
+          response = await updateTransferFinding({"destination_engagement": engagementId}, transferFindingId)
         }
-    })
-  }
-
-  function removeTransferFinding(tranferFindingId){
-    console.debug("Delete", transferFindingId)
-    $.ajax({
-        url: "/api/v2/transfer_finding/" + tranferFindingId + "/",
-        type: "DELETE",
-        headers: { "X-CSRFToken": csrftoken,
-        "Content-Type": "application/json"},
-        success: function(response){
-            console.log("OK" +  response)
-        },
-        error: function(error){
-            console.log(error)
-        }
-    })
-  }
-
-  function updateFindingsRiskStatus(action, transferFindingId ){
-    console.debug("actions is: " + action + " and transerFinding is: " + transferFindingId)
-    if (action == "Accepted"){
-        generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
-        .then(function(requestFindingStatus) {
-            updateFindings(requestFindingStatus)
-        })
-        .catch(function(error) {
-            console.error("Error:", error);
-        });
+        let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
+        response = await updateFindings(requestFindingStatus, transferFindingId)
     }
     if (action == "Rejected"){
-      generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
-      .then(function(requestFindingStatus) {
-          updateFindings(requestFindingStatus)
-      })
-      .catch(function(error) {
-          console.error("Error:", error);
-      });
-    }
+      let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
+      response = await updateFindings(requestFindingStatus, transferFindingId)
+      }
     if (action == "Removed"){
-      removeTransferFinding(transferFindingId)
+      response = await removeTransferFinding(transferFindingId, transferFindingId)
     }
+    return response
   }
 
+  function showConfirmedModal(transferFindingId, transferFindingActions)
+  {
+    let modal = $('#confirmedModal')
+    modal.data('tf-id', transferFindingId);
+    modal.data('tf-action', transferFindingActions);
+    updateConfirmedModalByEvent(
+      modal,
+      new MessageConfirmed("Accept Transfer Finding?", "Reject Transfer Finding?", "Delete Transfer Finding?"),
+      new MessageConfirmed("If you accept the transfer, you accept all request transfer findings",
+      "If you reject the transfer, you reject all request transfer findings", "If you delete the transfer, you delete all request transfer findings")
+    );
+  }
 </script>
 {% endblock %}

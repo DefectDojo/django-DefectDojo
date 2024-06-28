@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0213_system_settings_enable_similar_findings"),
+        ("dojo", "0214_alter_finding_risk_status_and_more"),
     ]
 
     operations = [

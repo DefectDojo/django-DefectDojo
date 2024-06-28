@@ -10,6 +10,7 @@ from math import ceil
 from operator import itemgetter
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
@@ -24,7 +25,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.endpoint.queries import get_authorized_endpoint_status
 from dojo.filters import (
     MetricsEndpointFilter,
@@ -36,7 +37,7 @@ from dojo.filters import (
 from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY
 from dojo.finding.queries import get_authorized_findings
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
-from dojo.models import Dojo_User, Endpoint_Status, Engagement, Finding, Product, Product_Type, Risk_Acceptance, Test
+from dojo.models import Dojo_User, Endpoint_Status, Engagement, Finding, Product, Product_Type, Role, Risk_Acceptance, Test
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.utils import (
@@ -565,11 +566,14 @@ def metrics_panel(request):
     now = timezone.now()
     role = Role.objects.get(id=Roles.Maintainer)
     user = request.user.id
+    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    grafana_params = f"{settings.GRAFANA_PARAMS}&var-csrftoken={cookie_csrftoken}&var-sessionid={cookie_sessionid}"
     return render(request, 'dojo/metrics_panel.html', {
        'name': page_name,
        'grafana_url': settings.GRAFANA_URL,
        'grafana_path': settings.GRAFANA_PATH,
-       'grafana_params': settings.GRAFANA_PARAMS,
+       'grafana_params': grafana_params,
        'role': role,
        'user': user,
     })

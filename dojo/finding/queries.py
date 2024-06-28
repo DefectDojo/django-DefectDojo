@@ -78,8 +78,7 @@ def get_authorized_findings(permission, queryset=None, user=None):
 
 def get_authorized_findings_by_status(permission, queryset=None, user=None):
     findings = get_authorized_findings(permission, queryset, user)
-    rs = findings[0].risk_status
-    findings = findings.filter(risk_status="Risk Active")
+    findings = findings.filter(risk_status__in=["Risk Active", "Risk Expired"])
     return findings
 
 

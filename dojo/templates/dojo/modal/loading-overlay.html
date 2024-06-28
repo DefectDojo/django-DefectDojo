@@ -1,0 +1,17 @@
+<style>
+.no-fade-animation {
+    transition: none !important;
+  }
+.modal-contect-loading{
+    background-color: #000 !important;
+    opacity: 60%;
+    border-radius: 15px;
+}
+</style>
+<div class="modal fade bd-example-modal-sm" id="loading-overlay" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-sm no-fade-animation" role="document" style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+      <div class="modal-content modal-contect-loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>

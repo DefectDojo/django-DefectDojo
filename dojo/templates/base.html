@@ -23,7 +23,7 @@
         </title>
         {% block add_css_before %}
         {% endblock %}
-
+        
         <!-- jQuery -->
         <script src="{% static "jquery/dist/jquery.js" %}"></script>
         <!--  jQuery UI -->
@@ -162,25 +162,31 @@
                                             </a>
                                         </li>
                                         {% if API_TOKENS_ENABLED %}
-                                          <li>
-                                              <a rel="noopener noreferrer" href="{% url 'api_v2_key' %}">
-                                                <i class="fa-solid fa-key fa-fw"></i>
-                                                  {% trans "API v2 Key" %}
-                                              </a>
-                                          </li>
+                                            {% if "Swagger_Documentation"|has_global_permission%}
+                                            <li>
+                                                <a rel="noopener noreferrer" href="{% url 'api_v2_key' %}">
+                                                    <i class="fa-solid fa-key fa-fw"></i>
+                                                    {% trans "API v2 Key" %}
+                                                </a>
+                                            </li>
+                                            {%endif%}
                                         {% endif %}
                                     {% endif %}
                                     <li>
-                                        <a rel="noopener noreferrer" href="{% url 'swagger-ui_oa3' %}" target="_blank">
-                                            <i class="fa-solid fa-book fa-fw" title="OpenAPI v3 Docs"></i>
-                                            {% trans "API v2 OpenAPI3 Docs" %}
-                                        </a>
+                                        {% if "Api_v2_Key"|has_global_permission%}
+                                            <a rel="noopener noreferrer" href="{% url 'swagger-ui_oa3' %}" target="_blank">
+                                                <i class="fa-solid fa-book fa-fw" title="OpenAPI v3 Docs"></i>
+                                                {% trans "API v2 OpenAPI3 Docs" %}
+                                            </a>
+                                        {%endif%}
                                     </li>
                                     <li>
-                                        <a rel="noopener noreferrer" href="{{ DOCUMENTATION_URL }}" target="_blank">
-                                            <i class="fa-solid fa-circle-question fa-fw"></i>
-                                            {% trans "Documentation" %}
-                                        </a>
+                                        {% if "Defect_Dojo_Documentation"|has_global_permission%}
+                                            <a rel="noopener noreferrer" href="{{ DOCUMENTATION_URL }}" target="_blank">
+                                                <i class="fa-solid fa-circle-question fa-fw"></i>
+                                                {% trans "Documentation" %}
+                                            </a>
+                                        {%endif%}
                                     </li>
                                 {% endblock %}
                                 {% if request.user.is_authenticated %}
@@ -389,11 +395,11 @@
                                                 <span class="glyphicon arrow"></span>
                                             </a>
                                             <ul class="nav nav-second-level">
-                                                <li>
+                                                <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'metrics' %}?view=dashboard">
                                                         {% trans "Metrics Dashboard" %}
                                                     </a>
-                                                </li>
+                                                </li> --> 
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'critical_product_metrics' %}">
                                                         {% trans "Critical Product Metrics" %}
@@ -423,14 +429,12 @@
                                                     <a rel="noopener noreferrer" href="{% url 'engineer_metrics' %}">
                                                         {% trans "Engineer Metrics" %}
                                                     </a>
-                                                </li> -->
-                                                {% if "Metrics_Panel"|has_global_permission %}
-                                                    <li>
-                                                        <a rel="noopener noreferrer" href="{% url 'metrics_panel' %}">
-                                                            {% trans "Metrics Panel" %}
-                                                        </a>
-                                                    </li>
-                                                {% endif %}
+                                                </li> -->                            
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'metrics_panel' %}">
+                                                        {% trans "Metrics Panel" %}
+                                                    </a>
+                                                </li>                                               
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
@@ -544,9 +548,11 @@
                                                     </li>
                                                 {% endif %}
                                                 <li>
+                                                {% if "Product_Configure_Notifications"|has_configuration_permission:request%}
                                                     <a rel="noopener noreferrer" href="{% url 'notifications' %}">
                                                         {% trans "Notifications" %}
                                                     </a>
+                                                {% endif %}
                                                 </li>
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'regulations' %}">
@@ -738,12 +744,14 @@
                                                         {% trans "View Risk Accepted Findings" %}
                                                     </a>
                                                 </li>
+                                                {% if system_settings.enable_transfer_finding %}
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'view_transfer_finding' product_tab.product.id %}">
                                                         <i class="fa-solid fa-shuffle"></i>
                                                         {% trans "View Transfer Findings" %}
                                                     </a>
                                                 </li>
+                                                {%endif%}
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'product_all_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-magnifying-glass"></i>

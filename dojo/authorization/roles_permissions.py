@@ -143,6 +143,14 @@ class Permissions(IntEnum):
     Transfer_Finding_Edit = 2802
     Transfer_Finding_Delete = 2803
     Transfer_Finding_Add = 2804
+    Transfer_Finding_Finding_View = 2805
+    Transfer_Finding_Finding_Edit = 2806
+    Transfer_Finding_Finding_Delete = 2807
+    Transfer_Finding_Finding_Add = 2808
+
+    Api_v2_Key = 2901
+    Swagger_Documentation = 2902
+    Defect_Dojo_Documentation = 2903
 
     @classmethod
     def has_value(cls, value):
@@ -212,6 +220,19 @@ class Permissions(IntEnum):
             Permissions.Transfer_Finding_Edit,
             Permissions.Transfer_Finding_Delete,
             Permissions.Transfer_Finding_Add,
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Edit,
+            Permissions.Transfer_Finding_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_Add,
+        }
+
+    @classmethod
+    def get_transfer_finding_finding_permissions(cls):
+        return {
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Edit,
+            Permissions.Transfer_Finding_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_Add,
         }
 
     @classmethod
@@ -330,6 +351,7 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_API_Scan_Configuration_Add,
+            Permissions.Api_v2_Key,
         },
         Roles.Writer: {
             Permissions.Product_Type_View,
@@ -378,10 +400,12 @@ def get_roles_with_permissions():
             Permissions.Product_Type_View,
             Permissions.Product_Type_Member_Delete,
             Permissions.Product_Type_Manage_Members,
+            Permissions.Product_Type_Member_Add_Owner,
             Permissions.Product_Type_Edit,
             Permissions.Product_View,
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
+            Permissions.Product_Member_Add_Owner,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Engagement_View,
@@ -390,7 +414,9 @@ def get_roles_with_permissions():
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance_Edit,
+            Permissions.Risk_Acceptance_Bullk,
             Permissions.Risk_Unaccept,
+            Permissions.Risk_Acceptance_Expire,
             Permissions.Test_View,
             Permissions.Test_Add,
             Permissions.Test_Edit,
@@ -448,6 +474,17 @@ def get_roles_with_permissions():
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
             Permissions.Metrics_Panel,
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Edit,
+            Permissions.Transfer_Finding_Delete,
+            Permissions.Transfer_Finding_Add,
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Edit,
+            Permissions.Transfer_Finding_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_Add,
+            Permissions.Swagger_Documentation,
+            Permissions.Api_v2_Key,
+            Permissions.Defect_Dojo_Documentation,
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -549,14 +586,16 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Bullk,
             Permissions.Transfer_Finding_Add,
-            Permissions.Transfer_Finding_View
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Add,
         },
         Roles.Leader: {
             Permissions.Product_Type_View,
             Permissions.Product_View,
             Permissions.Product_Type_Edit,
-            Permissions.Product_Configure_Notifications,
             Permissions.Engagement_View,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance_Bullk,
@@ -583,6 +622,10 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_Edit,
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Edit,
+            Permissions.Transfer_Finding_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_Add,
         },
         Roles.Cibersecurity: {
             Permissions.Product_Type_View,

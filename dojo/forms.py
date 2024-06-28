@@ -31,7 +31,7 @@ from tagulous.forms import TagField
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
-from dojo.finding.queries import get_authorized_findings
+from dojo.finding.queries import get_authorized_findings, get_authorized_findings_by_status
 from dojo.transfer_findings.queries import get_products_for_transfer_findings
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 from dojo.models import (
@@ -87,6 +87,7 @@ from dojo.models import (
     SLA_Configuration,
     Stub_Finding,
     System_Settings,
+    TransferFinding,
     Test,
     Test_Type,
     TextAnswer,
@@ -97,10 +98,12 @@ from dojo.models import (
     User,
     UserContactInfo,
 )
+from dojo.group.queries import get_users_for_group
 from dojo.product.queries import get_authorized_products
-from dojo.product_type.queries import get_authorized_product_types
+from dojo.product_type.queries import get_authorized_product_types, get_owner_user, get_authorized_contacts_for_product_type
+from dojo.transfer_findings.queries import get_products_for_transfer_findings
 from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_type
-from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type
+from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type, get_all_user_by_role
 from dojo.user.utils import get_configuration_permissions_fields
 from dojo.utils import (
     get_password_requirements_string,
@@ -108,6 +111,7 @@ from dojo.utils import (
     get_system_setting,
     is_finding_groups_enabled,
     is_scan_file_too_large,
+    sla_expiration_risk_acceptance
 )
 from dojo.widgets import TableCheckboxWidget
 
@@ -253,6 +257,7 @@ class Product_TypeForm(forms.ModelForm):
             'environment_technical_contact'
         ]
         users = [cleaned_data.get(field) for field in fields]
+        users = [user for user in users if user is not None]
         if len(users) != len(set(users)):
             raise ValidationError("The users assigned to the product type must be different for each field")
 
@@ -1067,7 +1072,7 @@ class RiskPendingForm(forms.ModelForm):
     accepted_by = forms.ModelMultipleChoiceField(
         queryset=Dojo_User.objects.none(),
         required=True,
-        widget=forms.widgets.SelectMultiple(attrs={"size": 10}),
+        widget=forms.widgets.MultipleHiddenInput(),
         help_text=("select acceptors depending on the severity of the risk"),
     )
     path = forms.FileField(
@@ -1094,6 +1099,7 @@ class RiskPendingForm(forms.ModelForm):
         severity = kwargs.pop("severity", None)
         product = kwargs.pop("product_id", None)
         product_type = kwargs.pop("product_type_id", None)
+        category = kwargs.pop("category", None)
         super().__init__(*args, **kwargs)
         expiration_delta_days = sla_expiration_risk_acceptance(
             "RiskAcceptanceExpiration"
@@ -1107,6 +1113,9 @@ class RiskPendingForm(forms.ModelForm):
 
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(severity, product, product_type)
+        if category and category in settings.COMPLIANCE_FILTER_RISK:
+            self.fields['accepted_by'].widget = forms.widgets.SelectMultiple(attrs={'size': 10})
+            self.fields['accepted_by'].queryset = get_users_for_group('Compliance')
         self.fields['owner'].queryset = get_owner_user()
 
     def clean(self):
@@ -1160,8 +1169,8 @@ class TransferFindingForm(forms.ModelForm):
 
     title = forms.CharField(required=True, max_length=255)
     severity = forms.CharField(widget=forms.HiddenInput(), required=True)
+    destination_product_type = forms.ModelChoiceField(queryset=Product_Type.objects.all(), required=True)
     destination_product = forms.ModelChoiceField(queryset=Product.objects.none(), required=True)
-    destination_engagement = forms.ModelChoiceField(queryset=Engagement.objects.all(), required=False)
     notes = forms.CharField(
         required=False, max_length=2400, widget=forms.Textarea, label="Notes"
     )
@@ -1173,19 +1182,19 @@ class TransferFindingForm(forms.ModelForm):
             Permissions.Transfer_Finding_Add
         )
         self.fields["destination_product"].queryset = get_products_for_transfer_findings(Permissions.Transfer_Finding_Add)
-        self.fields["title"].initial = kwags.get("engagement_id")
         self.fields["owner"].queryset = get_owner_user()
     
     class Meta:
         model = TransferFinding
-        fields = ["findings", 
+        fields = ["findings",
                   "title",
+                  "destination_product_type",
                   "destination_product",
-                  "destination_engagement",
                   "accepted_by",
                   "path",
                   "notes",
                   "owner"]
+
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):
     def clean(self):

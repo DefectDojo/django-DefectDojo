@@ -21,7 +21,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.fields import DictField, MultipleChoiceField
 
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.authorization import user_has_permission, user_has_global_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.finding.helper import (
@@ -2013,6 +2013,34 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
+class EngagementByProductResponseSerializer(TaggitSerializer, serializers.ModelSerializer):
+    name = serializers.CharField(max_length=255)
+    findings_count = serializers.SerializerMethodField()
+    findings_list = serializers.SerializerMethodField()
+    engagements_list = serializers.SerializerMethodField()
+
+    def get_findings_count(self, obj):
+        return obj.findings_count
+
+    def get_findings_list(self, obj):
+        return obj.open_findings_list
+    
+    def get_engagements_list(self, obj):
+        return obj.engagements_list
+
+    class Meta:
+        model = Product
+        fields = ("name",
+                  "findings_count",
+                  "findings_list",
+                  "engagements_list",
+                  "description",
+                  "product_manager",
+                  "technical_contact",
+                  "team_manager",
+                  "prod_type")
+
+
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -2960,6 +2988,12 @@ class NotificationsSerializer(serializers.ModelSerializer):
     risk_acceptance_expiration = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
+    risk_acceptance_request = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
+    transfer_finding = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
     template = serializers.BooleanField(default=False)
 
     class Meta:
@@ -3009,6 +3043,7 @@ class EngagementPresetsSerializer(serializers.ModelSerializer):
 class NetworkLocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Network_Locations
+
         fields = "__all__"
 
 
@@ -3184,6 +3219,35 @@ class FindingTfSerlilizer(serializers.ModelSerializer):
 class TransferFindingFindingSerializer(serializers.ModelSerializer):
     findings = FindingTfSerlilizer(read_only=True)
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['permission'] = []
+        transfer_finding_finding_obj = TransferFindingFinding.objects.get(id=representation['id'])
+        for permission in [Permissions.Transfer_Finding_Finding_View,
+                        Permissions.Transfer_Finding_Finding_Edit,
+                        Permissions.Transfer_Finding_Finding_Delete,
+                        Permissions.Transfer_Finding_Finding_Add]:
+            user = self.context["request"].user
+
+            if user.is_superuser:
+                representation['permission'].append(permission)
+
+            elif user_has_global_permission(user, permission):
+                representation['permission'].append(permission)
+
+            elif user_has_permission(
+                    self.context["request"].user,
+                    transfer_finding_finding_obj,
+                    permission):
+                if(transfer_finding_finding_obj.findings.risk_status == "Transfer Accepted"
+                   and permission == Permissions.Transfer_Finding_Finding_View):
+                    representation['permission'].append(permission)
+                elif transfer_finding_finding_obj.findings.risk_status in ["Transfer Rejected", "Transfer Pending"]:
+                    representation['permission'].append(permission)
+
+        return representation
+            
+
     class Meta:
         model = TransferFindingFinding
         fields = '__all__'
@@ -3194,17 +3258,28 @@ class TransferFindingSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['actions'] = []
+        representation['permission'] = []
         transfer_finding_obj = TransferFinding.objects.get(id=representation.get("id"))
-        for permission in [Permissions.Transfer_Finding_View,
+        all_permissions = [Permissions.Transfer_Finding_View,
                            Permissions.Transfer_Finding_Edit,
                            Permissions.Transfer_Finding_Delete,
-                           Permissions.Transfer_Finding_Add]:
-            if user_has_permission(
-                    self.context["request"].user,
+                           Permissions.Transfer_Finding_Add]
+        user = self.context["request"].user
+        for permission in all_permissions:
+            if user.is_superuser:
+                representation['permission'].append(permission)
+
+            elif user_has_global_permission(user, permission):
+                representation['permission'].append(permission)
+
+            elif user_has_permission(
+                    user,
                     transfer_finding_obj,
                     permission):
-                representation['actions'].append(permission)
+                transfer_finding_finding = transfer_finding_obj.transfer_findings.filter(findings__risk_status="Transfer Accepted")
+                if transfer_finding_finding:
+                    if permission == Permissions.Transfer_Finding_View:
+                        representation['permission'].append(permission)
 
         return representation
 
@@ -3231,6 +3306,7 @@ class TransferFindingFindingsSerializer(serializers.ModelSerializer):
 
 class TransferFindingFindingsDetailSerializer(serializers.Serializer):
     risk_status = serializers.CharField()
+    related_finding = serializers.IntegerField(required=False)
 
 
 class TransferFindingFindingsUpdateSerializer(serializers.Serializer):

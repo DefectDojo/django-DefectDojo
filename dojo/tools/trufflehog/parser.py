@@ -156,17 +156,17 @@ class TruffleHogParser:
                 )
 
             severity = "Critical"
-            if not verified:
-                if (
-                    "Oauth" in detector_name
-                    or "AWS" in detector_name
-                    or "Heroku" in detector_name
-                ):
-                    severity = "Critical"
-                elif detector_name == "PrivateKey":
-                    severity = "High"
-                elif detector_name == "Generic Secret":
-                    severity = "Medium"
+            # if not verified:
+            #     if (
+            #         "Oauth" in detector_name
+            #         or "AWS" in detector_name
+            #         or "Heroku" in detector_name
+            #     ):
+            #         severity = "Critical"
+            #     elif detector_name == "PrivateKey":
+            #         severity = "High"
+            #     elif detector_name == "Generic Secret":
+            #         severity = "Medium"
 
             dupe_key = hashlib.md5(
                 (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8")
@@ -195,6 +195,7 @@ class TruffleHogParser:
                     dynamic_finding=False,
                     static_finding=True,
                     nb_occurences=1,
+                    vuln_id_from_tool= "SECRET_SCANNING"
                 )
                 finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")]
                 dupes[dupe_key] = finding

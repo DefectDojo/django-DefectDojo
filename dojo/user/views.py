@@ -26,6 +26,7 @@ from django.utils.http import urlencode
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
 
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -50,6 +51,8 @@ from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Pr
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
+from dojo.api_v2 import permissions
+from dojo.authorization import authorization
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +79,8 @@ class DojoLoginView(LoginView):
 
 
 # #  Django Rest Framework API v2
-
+@api_view(['GET'])
+@permission_classes([permissions.UserHasViewApiV2Key])
 def api_v2_key(request):
     # This check should not be necessary because url should not be in 'urlpatterns' but we never know
     if not settings.API_TOKENS_ENABLED:
@@ -505,7 +509,7 @@ def delete_user(request, uid):
                    })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(authorization.check_permission_produc_type_member_add_owner)
 def add_product_type_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Type_Member_UserForm(initial={'user': user.id})
@@ -533,7 +537,7 @@ def add_product_type_member(request, uid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(authorization.check_permission_product_member_add_owner)
 def add_product_member(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     memberform = Add_Product_Member_UserForm(initial={'user': user.id})

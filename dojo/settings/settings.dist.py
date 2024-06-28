@@ -112,6 +112,8 @@ env = environ.FileAwareEnv(
     DD_DATABASE_PASSWORD=(str, "defectdojo"),
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, "defectdojo"),
+    DD_DATABASE_REPLICA=(bool, False),
+    DD_TABLES_REPLICA_DEFAULT=(list, []),
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_AUTHENTICATE_ADDITIONAL_DATA_KEY=(str, "."),
@@ -351,6 +353,8 @@ env = environ.FileAwareEnv(
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
     # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
+    # Use System notification settings to override user's notification settings
+    DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
     DD_CUSTOM_TAG_PARSER=(dict, {}),
     DD_INVALID_ESCAPE_STR=(dict, {}),
     # SES Email
@@ -364,6 +368,9 @@ env = environ.FileAwareEnv(
     # ---------------RISK PENDING-------------------------
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
+    DD_COMPLIANCE_FILTER_RISK=(str, ""),
+    # System user for automated resource creation
+    DD_SYSTEM_USER=(str, "admin"),
     # These variables are the params of providers name
     DD_PROVIDER1=(str, ""),
     DD_PROVIDER2=(str, ""),
@@ -389,7 +396,7 @@ env = environ.FileAwareEnv(
                                                  "percentage": 0.82
                                              }),
     DD_TEMPORARILY_ASSUMED_VULNERABILITIES=(float, 0.40),
-
+    
     DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
         "Low": {
             "roles": ["Developer"],
@@ -444,8 +451,6 @@ env = environ.FileAwareEnv(
             }
         }
     })
-    # Use System notification settings to override user's notification settings
-    DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
 )
 
 
@@ -563,6 +568,17 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
             "PORT": secret_database["port"],
         }
     }
+    if env("DD_DATABASE_REPLICA"):
+        REPLICA_TABLES_DEFAULT = env("DD_TABLES_REPLICA_DEFAULT")
+        DATABASES["replica"] = {
+            "ENGINE": env("DD_DATABASE_ENGINE"),
+            "NAME": secret_database["dbname"],
+            "USER": secret_database["username"],
+            "PASSWORD": secret_database["password"],
+            "HOST": secret_database["hostro"],
+            "PORT": secret_database["port"],
+        }
+        DATABASE_ROUTERS = ['dojo.routers.db_router.DbRouter']
 else:
     if os.getenv("DD_DATABASE_URL") is not None:
         DATABASES = {"default": env.db("DD_DATABASE_URL")}
@@ -1114,6 +1130,7 @@ INSTALLED_APPS = (
     'tagulous',
     'fontawesomefree',
     'django_filters',
+    'django.db.migrations',
 )
 
 # ------------------------------------------------------------------------------
@@ -2012,11 +2029,13 @@ DD_INVALID_ESCAPE_STR = env('DD_INVALID_ESCAPE_STR')
 AWS_SES_EMAIL = env('DD_AWS_SES_EMAIL')
 
 
-
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
+COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
+# System user for automated resource creation
+SYSTEM_USER = env("DD_SYSTEM_USER")
 # Engine Backend
 PROVIDER1 = env("DD_PROVIDER1")
 PROVIDER2 = env("DD_PROVIDER2")
@@ -2088,4 +2107,3 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 # - https://docs.djangoproject.com/en/4.1/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 # - https://docs.djangoproject.com/en/5.0/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
 FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
-

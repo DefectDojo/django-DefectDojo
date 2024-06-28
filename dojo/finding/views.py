@@ -31,6 +31,7 @@ from imagekit.processors import ResizeToFill
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
+import dojo.risk_acceptance.risk_pending as rp_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import (
     user_has_global_permission,
@@ -82,6 +83,7 @@ from dojo.models import (
     Engagement,
     FileAccessToken,
     Finding,
+    TransferFinding,
     Finding_Group,
     Finding_Template,
     GITHUB_Issue,
@@ -494,6 +496,41 @@ class ListClosedFindings(ListFindings):
         self.filter_name = "Closed"
         self.order_by = "-mitigated"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
+
+
+class ViewFindingRender(View):
+    
+    def get_template(self):
+        return "dojo/view_finding_render.html"
+    
+    def get_initial_context(self, request: HttpRequest, finding: Finding, user: Dojo_User):
+        notes = finding.notes.all()
+        note_type_activation = Note_Type.objects.filter(is_active=True).count()
+        available_note_types = None
+        if note_type_activation:
+            available_note_types = find_available_notetypes(notes)
+        # Set the current context
+        context = {
+            "finding": finding,
+            "dojo_user": user,
+            "user": request.user,
+            "notes": notes,
+            "files": finding.files.all(),
+            "note_type_activation": note_type_activation,
+            "available_note_types": available_note_types,
+            "product_tab": Product_Tab(
+                finding.test.engagement.product, title="View Finding", tab="findings"
+            )
+        }
+
+        return context
+
+    def get(self, request: HttpRequest, finding_id: int, transfer_finding_id: int):
+        transfer_finding_obj = TransferFinding.objects.get(id=transfer_finding_id)
+        user_has_permission_or_403(request.user, transfer_finding_obj, Permissions.Transfer_Finding_View)
+        finding = Finding.objects.get(id=finding_id)
+        context = self.get_initial_context(request, finding, request.user)
+        return render(request, self.get_template(), context)
 
 
 class ViewFinding(View):
@@ -1713,12 +1750,13 @@ def request_finding_review(request, fid):
             create_notification(
                 event="review_requested",  # TODO - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title="Finding review requested",
+                subject="🧐 Review Requested 🔍",
                 requested_by=user,
                 note=new_note,
                 finding=finding,
                 reviewers=reviewers,
                 recipients=reviewers_usernames,
-                description=f"User {user.get_full_name()} has requested that user(s) {reviewers_string} review the finding \"{finding.title}\" for accuracy:\n\n{new_note}",
+                description=f"User {user.get_full_name()} has requested review the finding {finding.title}",
                 icon="check",
                 url=reverse("view_finding", args=(finding.id,)),
             )
@@ -1795,6 +1833,20 @@ def clear_finding_review(request, fid):
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
                 jira_helper.push_to_jira(finding.finding_group)
+
+            create_notification(
+                event="code_review",
+                subject="🧐 Code Review 🔍",
+                title="Finding review completed",
+                new_note=new_note,
+                finding=finding,
+                recipients=[finding.review_requested_by.username],
+                review=user.get_full_name(),
+                description=f"User <review>{user.get_full_name()} review completed the finding {finding.title}",
+                icon="check-circle",
+                color_icon="#096C11",
+                url=reverse("view_finding", args=(finding.id,)),
+            )
 
             messages.add_message(
                 request,

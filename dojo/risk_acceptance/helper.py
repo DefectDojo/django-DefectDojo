@@ -12,9 +12,11 @@ from django.utils import timezone
 
 import dojo.jira_link.helper as jira_helper
 from dojo.celery import app
+from dojo.decorators import dojo_async_task
 from dojo.jira_link.helper import escape_for_jira
 from dojo.models import Finding, Risk_Acceptance, System_Settings
-from dojo.notifications.helper import create_notification
+from dojo.transfer_findings import helper as hp_transfer_finding
+from dojo.risk_acceptance.notification import Notification
 from dojo.utils import get_full_url, get_system_setting, get_remote_json_config
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,10 @@ def expire_now(risk_acceptance):
                 logger.debug('%i:%s: unaccepting a.k.a reactivating finding.', finding.id, finding)
                 finding.active = True
                 finding.risk_accepted = False
+                finding.risk_status = "Risk Expired"
+                finding.acceptances_confirmed = 0
+                finding.accepted_by = ""
+                
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, False)
 
@@ -37,6 +43,13 @@ def expire_now(risk_acceptance):
                     finding.sla_start_date = timezone.now().date()
 
                 finding.save(dedupe_option=False)
+                # reactivate finding realted (transfer finding)
+                system_settings = System_Settings.objects.get()
+                if system_settings.enable_transfer_finding:
+                    hp_transfer_finding.close_or_reactive_related_finding(event="reactive",
+                                                    parent_finding=finding,
+                                                    notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
+                                                    send_notification=True)
                 reactivated_findings.append(finding)
                 # findings remain in this risk acceptance for reporting / metrics purposes
             else:
@@ -48,15 +61,7 @@ def expire_now(risk_acceptance):
     risk_acceptance.expiration_date = timezone.now()
     risk_acceptance.expiration_date_handled = timezone.now()
     risk_acceptance.save()
-
-    accepted_findings = risk_acceptance.accepted_findings.all()
-    title = 'Risk acceptance with ' + str(len(accepted_findings)) + " accepted findings has expired for " + \
-            str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
-
-    create_notification(event='risk_acceptance_expiration', title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
-                         reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
-                         product=risk_acceptance.engagement.product,
-                         url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+    Notification.risk_acceptance_expiration(risk_acceptance, reactivated_findings)
 
 
 def reinstate(risk_acceptance, old_expiration_date):
@@ -127,22 +132,11 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
         add_severity_to_risk_acceptance(risk_pending, finding.severity)
         if not finding.duplicate:
             finding.risk_status = "Risk Pending"
+            finding.acceptend_by = ""
             finding.save(dedupe_option=False)
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
-    title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
-    create_notification(event='risk_acceptance_request',
-                        title=title, risk_acceptance=risk_pending,
-                        subject=f"🙋‍♂️Request of aceptance of risk {risk_pending.id}🙏",
-                        accepted_findings=risk_pending.accepted_findings.all(),
-                        reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
-                        product=risk_pending.engagement.product,
-                        description=f"requested acceptance of the risks <b>{risk_pending.name}</b> for the findings",
-                        recipients=eval(risk_pending.accepted_by),
-                        icon="bell",
-                        owner=risk_pending.owner,
-                        color_icon="#1B30DE",
-                        url=reverse('view_risk_acceptance', args=(risk_pending.engagement.id, risk_pending.id, )))
+    Notification.risk_acceptance_request(risk_pending)
     post_jira_comments(risk_pending, findings, accepted_message_creator)
 
 
@@ -204,11 +198,7 @@ def expiration_handler(*args, **kwargs):
                 timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
                 str(risk_acceptance.engagement.product) + ': ' + str(risk_acceptance.engagement.name)
 
-            create_notification(event='risk_acceptance_expiration', title=notification_title, risk_acceptance=risk_acceptance,
-                                accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
-                                product=risk_acceptance.engagement.product,
-                                url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
-
+            Notification.risk_acceptance_expiration(risk_acceptance, notification_title)
             post_jira_comments(risk_acceptance, expiration_warning_message_creator, heads_up_days)
 
             risk_acceptance.expiration_date_warned = timezone.now()
@@ -363,7 +353,8 @@ def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
         status.last_modified = timezone.now()
         status.save()
 
-
+@dojo_async_task
+@app.task(ignore_result=False)
 def risk_accept_provider(
         finding_id: str,
         provider: str,
@@ -372,6 +363,7 @@ def risk_accept_provider(
         header: str,
         token: str,
     ):
+    logger.info(f"Making risk accept for {finding_id} provider: {provider}")
     formatted_url = url + f'{provider}?vulnerabilityId={finding_id}&acceptanceDays={acceptance_days}'
     headers = {}
     headers[header] = token

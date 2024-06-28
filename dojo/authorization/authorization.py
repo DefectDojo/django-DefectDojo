@@ -1,3 +1,4 @@
+import logging
 from django.core.exceptions import PermissionDenied
 
 from dojo.authorization.roles_permissions import (
@@ -26,8 +27,10 @@ from dojo.models import (
     Stub_Finding,
     TransferFinding,
     Test,
+    TransferFindingFinding,
 )
 from dojo.request_cache import cache_for_request
+logger = logging.getLogger(__name__)
 
 
 def user_has_configuration_permission(user, permission):
@@ -105,13 +108,9 @@ def user_has_permission(user, obj, permission):
             user, obj.test.engagement.product, permission
         )
     elif (isinstance(obj, TransferFinding) and permission in Permissions.get_transfer_finding_permissions()):
-        for product_type in [obj.origin_product_type, obj.destination_product_type]:
-            member = get_product_type_member(user, product_type)
-            if member is not None and role_has_permission(
-                member.role.id, permission
-            ):
-                return True
-        return False
+        return custom_permissions_transfer_findings(user, obj, permission)
+    elif (isinstance(obj, TransferFindingFinding) and permission in Permissions.get_transfer_finding_finding_permissions()):
+        return user_has_permission(user, obj.transfer_findings, permission)
     elif (
         isinstance(obj, Finding_Group)
         and permission in Permissions.get_finding_group_permissions()
@@ -302,6 +301,72 @@ def role_has_global_permission(role, permission):
     if permissions and permission in permissions:
         return True
     return role_has_permission(role, permission)
+
+
+def custom_permissions_transfer_findings(user, obj, permission):
+
+    if (
+        hasattr(user, "global_role")
+        and user.global_role.role is not None
+        and role_has_global_permission(user.global_role.role.id, permission)
+        ):
+        return True
+
+    def rule_permissions_transferfinding_accepted(obj, permission):
+        transfer_finding_finding = obj.transfer_findings.filter(findings__risk_status="Transfer Accepted")
+        result = False
+        if transfer_finding_finding:
+            if permission in [Permissions.Transfer_Finding_View,
+                              Permissions.Transfer_Finding_Finding_View,
+                              Permissions.Transfer_Finding_Finding_Edit,
+                              Permissions.Transfer_Finding_Finding_Delete]:
+                result = True
+        else:
+            result = True
+        return result
+
+    member = get_product_type_member(user, obj.destination_product_type)
+    if member is not None and role_has_permission(member.role.id, permission):
+        return rule_permissions_transferfinding_accepted(obj, permission)
+    member = get_product_type_member(user, obj.origin_product_type)
+    if member is not None and role_has_permission(member.role.id, permission):
+        return rule_permissions_transferfinding_accepted(obj, permission)
+    member = get_product_member(user, obj.destination_product)
+    if member is not None and role_has_permission(member.role.id, permission):
+        return rule_permissions_transferfinding_accepted(obj, permission)
+    member = get_product_member(user, obj.origin_product)
+    if member is not None and role_has_permission(member.role.id, permission):
+        return rule_permissions_transferfinding_accepted(obj, permission)
+
+
+        
+
+def check_permission_produc_type_member_add_owner(user):
+    try:
+        if user.is_superuser:
+            return True
+        if user.global_role:
+            if user.global_role.role:
+                return role_has_global_permission(user.global_role.role.id, Permissions.Product_Type_Member_Add_Owner)
+        return False
+
+    except Exception as e:
+        logger.error(e)
+        return False
+
+
+def check_permission_product_member_add_owner(user):
+    try:
+        if user.is_superuser:
+            return True
+        if user.global_role:
+            if user.global_role.role:
+                return role_has_global_permission(user.global_role.role.id, Permissions.Product_Member_Add_Owner)
+        return False
+
+    except Exception as e:
+        logger.error(e)
+        return False
 
 
 class NoAuthorizationImplementedError(Exception):

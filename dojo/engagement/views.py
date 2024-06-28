@@ -30,6 +30,7 @@ from openpyxl.styles import Font
 import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 import dojo.risk_acceptance.helper as ra_helper
+import dojo.risk_acceptance.risk_pending as rp_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -81,9 +82,12 @@ from dojo.models import (
     Note_Type,
     Notes,
     Product,
+    Product_Type,
     Product_API_Scan_Configuration,
     Risk_Acceptance,
     System_Settings,
+    TransferFinding,
+    TransferFindingFinding,
     Test,
     Test_Import,
 )
@@ -102,6 +106,7 @@ from dojo.utils import (
     calculate_grade,
     get_cal_event,
     get_page_items,
+    get_product,
     get_return_url,
     get_setting,
     get_system_setting,
@@ -110,7 +115,6 @@ from dojo.utils import (
 )
 
 logger = logging.getLogger(__name__)
-
 
 
 @cache_page(60 * 5)  # cache for 5 minutes
@@ -1217,8 +1221,20 @@ def get_risk_acceptance_pending(request,
             form = RiskPendingForm(severity=finding.severity, product_id=product.id,product_type_id=product_type.id,
                 initial={'owner': request.user,
                         'name': risk_acceptance_title_suggestion,
-                        'accepted_by': request.user,
+                        'accepted_by': [request.user],
                         "severity": finding.severity})
+        if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
+            form = RiskPendingForm(
+                severity=finding.severity,
+                product_id=product.id,
+                product_type_id=product_type.id,
+                category=finding.impact,
+                initial={
+                    "owner": request.user,
+                    "name": risk_acceptance_title_suggestion,
+                    "severity": finding.severity,
+                },
+            )
         elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
             risk_acceptance_title_suggestion = 'Accept: %s' % finding
             form = RiskPendingForm(severity=finding.severity,product_id=product.id, product_type_id=product_type.id,
@@ -1234,8 +1250,12 @@ def get_risk_acceptance_pending(request,
 
 
 def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: Product, product_type: Product_Type):
-    form = RiskPendingForm(request.POST, request.FILES, severity=finding.severity,product_id=product.id, product_type_id=product_type.id)
-
+    form = RiskPendingForm(request.POST,
+                           request.FILES,
+                           severity=finding.severity,
+                           category=finding.impact,
+                           product_id=product.id,
+                           product_type_id=product_type.id)
     if form.is_valid():
         notes = None
         id_risk_acceptance = None
@@ -1352,7 +1372,11 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             extra_tags='alert-success')
 
         return redirect_to_return_url_or_else(request, reverse('view_risk_acceptance', args=(eid, id_risk_acceptance)))
-
+    else:
+        logger.error(form.errors)
+        messages.add_message(
+            request, messages.ERROR, str(form.errors), extra_tags="alert-danger"
+        )
     return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
 
@@ -1373,7 +1397,13 @@ def add_risk_acceptance_pending(request, eid, fid):
             return post_risk_acceptance_pending(request, finding, eng, eid, product, product_type)
         else:
             form = get_risk_acceptance_pending(request, finding, eng, product, product_type)
-        finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng, active=True, risk_status = "Risk Active" , severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        finding_choices = Finding.objects.filter(duplicate=False,
+                                                 test__engagement=eng,
+                                                 active=True,
+                                                 risk_status__in=["Risk Active", "Risk Expired"],
+                                                 severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
+            finding_choices = finding_choices.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
         form.fields['accepted_findings'].queryset = finding_choices
         if fid:
             form.fields['accepted_findings'].initial = {fid}
@@ -1454,8 +1484,8 @@ def add_risk_acceptance(request, eid, fid=None):
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
-
     form.fields['accepted_findings'].queryset = finding_choices
+
     if fid:
         form.fields['accepted_findings'].initial = {fid}
     product_tab = Product_Tab(eng.product, title="Risk Acceptance", tab="engagements")
@@ -1469,8 +1499,8 @@ def add_risk_acceptance(request, eid, fid=None):
 
 @user_is_authorized(Engagement, Permissions.Transfer_Finding_Add, 'eid')
 def add_transfer_finding(request, eid, fid=None):
-    eng = get_object_or_404(Engagement, id=eid)
-    product = eng.product
+    origin_engagement = get_object_or_404(Engagement, id=eid)
+    product = origin_engagement.product
     finding = None
     if fid:
         finding = get_object_or_404(Finding, id=fid)
@@ -1484,8 +1514,8 @@ def add_transfer_finding(request, eid, fid=None):
                 # Save
                 transfer_findings: TransferFinding = form.save()
                 # Origin
-                transfer_findings.origin_product_type = eng.product.prod_type
-                transfer_findings.origin_product = eng.product
+                transfer_findings.origin_product_type = origin_engagement.product.prod_type
+                transfer_findings.origin_product = origin_engagement.product
                 # Destination
                 id_destination_product = data.get("destination_product")
                 destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
@@ -1510,7 +1540,7 @@ def add_transfer_finding(request, eid, fid=None):
                                     icon="check-circle",
                                     color_icon="#096C11",
                                     recipients=[transfer_findings.accepted_by.get_username()],
-                                    engagement=eng, url=reverse('view_transfer_finding', args=(product.id, )))
+                                    url=reverse('view_transfer_finding', args=(product.id, )))
                 logger.debug("Transfer Finding send notification {transfer_finding.title}")
 
             except Exception as e:
@@ -1528,16 +1558,17 @@ def add_transfer_finding(request, eid, fid=None):
         else:
             logger.error(form.errors)
     else:
-        form = TransferFindingForm(initial={"engagement_name":eng,
-                                            "title": f"transfer finding - {finding.title}",
+        form = TransferFindingForm(initial={"title": f"transfer finding - {finding.title}",
                                             "findings": finding,
                                             "owner": request.user.username,
                                             "status": "Transfer Pending",
                                             "severity": finding.severity,
                                             "owner": request.user})
 
+        form.fields["findings"].queryset = form.fields["findings"].queryset.filter(duplicate=False, test__engagement=origin_engagement, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+
     return render(request, 'dojo/add_transfer_finding.html', {
-                  'eng': eng,
+                  'eng': origin_engagement,
                   'product_tab': "product_tab test",
                   'form': form
                   })
@@ -1680,6 +1711,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if 'add_findings' in request.POST:
             add_findings_form = AddFindingsRiskAcceptanceForm(
                 request.POST, request.FILES, instance=risk_acceptance)
+
             errors = errors or not add_findings_form.is_valid()
             if not errors:
                 findings = add_findings_form.cleaned_data['accepted_findings']
@@ -1732,8 +1764,14 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     accepted_findings = risk_acceptance.accepted_findings.order_by('id')
     fpage = get_page_items(request, accepted_findings, 15)
     if settings.RISK_PENDING:
-        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), active=True, risk_status = "Risk Active", risk_accepted=False, severity=risk_acceptance.severity, duplicate=False) \
-            .exclude(id__in=accepted_findings).order_by("title")
+        unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(),
+                                                     risk_status__in=["Risk Active", "Risk Expired"],
+                                                     active=True,
+                                                     risk_accepted=False,
+                                                     severity=risk_acceptance.severity,
+                                                     duplicate=False)
+        if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
+            unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
     else:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
             .exclude(id__in=accepted_findings).order_by("title")
@@ -1775,10 +1813,7 @@ def expire_risk_acceptance(request, eid, raid):
     # Validate the engagement ID exists before moving forward
     get_object_or_404(Engagement, pk=eid)
 
-    if settings.RISK_PENDING:
-        rp_helper.expire_now_risk_pending(risk_acceptance)
-    else:
-        ra_helper.expire_now(risk_acceptance)
+    ra_helper.expire_now(risk_acceptance)
 
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 

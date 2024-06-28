@@ -7,18 +7,28 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.risk_acceptance.risk_pending import is_permissions_risk_acceptance 
 from dojo.utils import get_product
 from dojo.request_cache import cache_for_request
+import dojo.transfer_findings.helper as helper_tf
 
 register = template.Library()
 
 
 
 @register.filter
+def has_risk_acceptance_pending(engagement, findings):
+    user = crum.get_current_user()
+    product = get_product(engagement)
+    product_type = product.get_product_type
+    for finding in findings:
+        if is_permissions_risk_acceptance(engagement, finding, user, product, product_type):
+            return True
+            
+        
+@register.filter
 def has_risk_acceptance_permission(engagement, finding):
     user = crum.get_current_user()
     product = get_product(engagement)
     product_type = product.get_product_type
     return is_permissions_risk_acceptance(engagement, finding, user, product, product_type)
-
 
 @register.filter
 def has_object_permission(obj, permission):
@@ -72,3 +82,15 @@ def user_can_clear_peer_review(finding, user):
     user_requesting_review = user == finding.review_requested_by
     user_is_reviewer = user in finding.reviewers.all()
     return finding_under_review and (user_requesting_review or user_is_reviewer)
+
+
+@register.filter
+def enable_button(status_finding, button):
+    button_dict = {
+        "Add Risk Acceptance": helper_tf.enable_flow_transfer_finding
+    }
+    if button in button_dict and isinstance(button, str):
+        function_action = button_dict[button]
+        return function_action(status_finding)
+    else:
+        raise ValueError("Not implemented rules button")

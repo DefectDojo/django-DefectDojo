@@ -621,6 +621,8 @@
   </div>
 <!-- end contacts -->
 <!-- Notifications -->
+
+{% if "Product_Configure_Notifications"|has_configuration_permission:request%}
 <div class="panel panel-default panel-default-secondary" id="edit_notifications">
   <div class="panel-heading">
     {% url 'notifications' as notifications_url %}
@@ -661,6 +663,7 @@
   </div>
   </form>
 </div>
+{%endif%}
 <!-- end Notifications -->
 
 </div>

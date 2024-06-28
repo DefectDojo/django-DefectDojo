@@ -6,6 +6,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -47,6 +48,11 @@ Jay
 Status: in prod
 Product Type views
 """
+
+def get_products_name(_request, pid):
+    prod_type = Product_Type.objects.get(id=pid)
+    data = Product.objects.filter(prod_type=prod_type).values("id", "name")
+    return JsonResponse({"data": list(data)})
 
 
 def get_description_product(_request, pid):

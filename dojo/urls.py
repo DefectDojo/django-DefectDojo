@@ -14,6 +14,7 @@ from dojo.announcement.urls import urlpatterns as announcement_urls
 from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
+    ApiToken,
     ConfigurationPermissionViewSet,
     CredentialsMappingViewSet,
     CredentialsViewSet,
@@ -224,12 +225,14 @@ if hasattr(settings, 'API_TOKENS_ENABLED'):
         api_v2_urls += [
             re_path(
                 f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
-                tokenviews.obtain_auth_token,
+                ApiToken.as_view(),
                 name='api-token-auth',
             )
         ]
 
 urlpatterns = []
+
+
 
 # sometimes urlpatterns needed be added from local_settings.py before other URLs of core dojo
 if hasattr(settings, 'PRELOAD_URL_PATTERNS'):

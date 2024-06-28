@@ -22,6 +22,7 @@ from dojo.filters import LogEntryFilter
 from dojo.forms import ManageFileFormSet
 from dojo.models import Endpoint, Engagement, FileUpload, Finding, Product, Test
 from dojo.utils import Product_Tab, get_page_items
+from dojo.api_v2 import permissions
 
 logger = logging.getLogger(__name__)
 

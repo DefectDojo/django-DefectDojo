@@ -66,8 +66,10 @@ def get_item(vuln, test, check_type):
         vuln["check_name"] if "check_name" in vuln else "check_name not found"
     )
     description = f"Check Type: {check_type}\n"
+    vuln_id = ""
     if "check_id" in vuln:
         description += f"Check Id: {vuln['check_id']}\n"
+        vuln_id = vuln["check_id"]
     if "check_name" in vuln:
         description += f"{vuln['check_name']}\n"
 
@@ -87,7 +89,7 @@ def get_item(vuln, test, check_type):
     
     impact= None
     if "bc_category" in vuln:
-        impact = vuln['bc_category']
+        impact = f"{vuln['bc_category']}_{vuln_id.split('_')[1]}"
 
     mitigation = ""
 
@@ -105,7 +107,7 @@ def get_item(vuln, test, check_type):
         component_name=resource,
         static_finding=True,
         dynamic_finding=False,
-        vuln_id_from_tool= vuln['check_id'],
+        vuln_id_from_tool= vuln_id,
 
     )
     finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("checkov")]

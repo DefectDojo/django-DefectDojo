@@ -1079,18 +1079,18 @@
                                                                     </li>
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                                    {% if finding.risk_accepted or finding.risk_status == "Risk Pending" or finding.active == False %}
+                                                                    {% if finding.active == True and finding.risk_status != "Risk Pending"%}
+                                                                        <li role="presentation">
+                                                                            <a rel="noopener noreferrer" href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                                                <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptances..." %}<span>
+                                                                            </a>
+                                                                        </li>
+                                                                    {% else %}
                                                                         <li role="presentation">
                                                                             <a rel="noopener noreferrer">
                                                                                 <i class="fa-solid fa-circle-exclamation"></i><span style="color: grey"> {% trans "Add Risk Acceptance..." %}<span>
                                                                             </a>
                                                                         </li>  
-                                                                    {% else %}
-                                                                        <li role="presentation">
-                                                                            <a rel="noopener noreferrer" href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
-                                                                                <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}<span>
-                                                                            </a>
-                                                                        </li>
                                                                     {% endif %}
                                                                 {% endif %}
                                                             {% endif %}
