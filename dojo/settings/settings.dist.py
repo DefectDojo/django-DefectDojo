@@ -1222,7 +1222,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'DSOP Scan': ['vulnerability_ids'],
     'Acunetix Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
-    'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids'],
+    'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids', 'description'],
     'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
     'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],

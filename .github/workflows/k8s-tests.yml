@@ -82,6 +82,7 @@ jobs:
         uses: actions/download-artifact@v3
 
       - name: Load docker images
+        timeout-minutes: 10
         run: |-
              eval $(minikube docker-env)
              docker load -i nginx/nginx-${{ matrix.os }}_img
@@ -103,6 +104,7 @@ jobs:
               echo "rabbit=${{ env.HELM_RABBIT_BROKER_SETTINGS }}" >> $GITHUB_ENV
 
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
+        timeout-minutes: 10 
         run: |-
              helm install \
                --timeout 800s \
@@ -123,6 +125,7 @@ jobs:
              kubectl get services
 
       - name: Check Application
+        timeout-minutes: 10
         run: |-
              to_complete () {
                kubectl wait --for=$1 $2 --timeout=500s --selector=$3 2>/tmp/test || true
