@@ -1092,7 +1092,7 @@ class ImportReimportMixin:
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(0, active_findings_before)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1, untouched=1):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         self.assertEqual(reimport0['test'], test_id)
