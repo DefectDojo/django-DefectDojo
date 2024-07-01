@@ -243,17 +243,17 @@ def user_has_global_permission(user, permission):
 
 def user_has_configuration_permission_or_403(user, permission):
     if not user_has_configuration_permission(user, permission):
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def user_has_permission_or_403(user, obj, permission):
     if not user_has_permission(user, obj, permission):
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def user_has_global_permission_or_403(user, permission):
     if not user_has_global_permission(user, permission):
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def get_roles_for_permission(permission):

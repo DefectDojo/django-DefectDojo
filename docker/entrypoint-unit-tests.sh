@@ -79,4 +79,4 @@ python3 manage.py migrate
 
 echo "Unit Tests"
 echo "------------------------------------------------------------"
-python3 manage.py test unittests -v 3 --keepdb --no-input
+python3 manage.py test unittests -v 3 --keepdb --no-input --shuffle
