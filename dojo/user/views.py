@@ -612,8 +612,8 @@ class DojoForgotUsernameForm(PasswordResetForm):
         from_email = get_system_setting('email_from')
 
         url = hyperlink.parse(settings.SITE_URL)
-        subject_template_name = 'dojo/forgot_username_subject.html'
-        email_template_name = 'notifications/mail/forgot_username.tpl'
+        subject_template_name = 'login/forgot_username_subject.html'
+        email_template_name = 'login/forgot_username.tpl'
         context['site_name'] = url.host
         context['protocol'] = url.scheme
         context['domain'] = settings.SITE_URL[len(f'{url.scheme}://'):]
@@ -638,7 +638,7 @@ class DojoPasswordResetForm(PasswordResetForm):
         from_email = get_system_setting('email_from')
 
         url = hyperlink.parse(settings.SITE_URL)
-        email_template_name = 'notifications/mail/forgot_password.tpl'
+        email_template_name = 'login/forgot_password.tpl'
         context['site_name'] = url.host
         context['protocol'] = url.scheme
         context['domain'] = settings.SITE_URL[len(f'{url.scheme}://'):]

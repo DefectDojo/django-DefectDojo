@@ -2967,7 +2967,7 @@ def report_generate(request, obj, options):
         report_name = "Finding"
 
     else:
-        raise Http404()
+        raise Http404
 
     result = {
         "product_type": product_type,

@@ -377,7 +377,7 @@ def edit_questionnaire_questions(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
     if not user_has_configuration_permission(request.user, 'dojo.add_engagement_survey') and \
             not user_has_configuration_permission(request.user, 'dojo.change_engagement_survey'):
-        raise PermissionDenied()
+        raise PermissionDenied
 
     answered_surveys = Answered_Survey.objects.filter(survey=survey)
     reverted = False
@@ -548,7 +548,7 @@ def edit_question(request, qid):
     elif type == 'dojo | choice question':
         form = EditChoiceQuestionForm(instance=question)
     else:
-        raise Http404()
+        raise Http404
 
     if request.method == 'POST':
         if type == 'dojo | text question':
@@ -556,7 +556,7 @@ def edit_question(request, qid):
         elif type == 'dojo | choice question':
             form = EditChoiceQuestionForm(request.POST, instance=question)
         else:
-            raise Http404()
+            raise Http404
 
         if form.is_valid():
             form.save()
@@ -759,7 +759,7 @@ def answer_empty_survey(request, esid):
                 'You must be logged in to answer questionnaire. Otherwise, enable anonymous response in system settings.',
                 extra_tags='alert-danger')
             # will render 403
-            raise PermissionDenied()
+            raise PermissionDenied
 
     questions = [
         q.get_form()(
