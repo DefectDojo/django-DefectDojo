@@ -650,3 +650,11 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             with self.assertRaisesMessage(ValueError,
                     "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
                 parser.get_findings(file, Test())
+
+    def test_parse_json_bad_date(self):
+        with open("unittests/scans/generic/generic_bad_date.json") as fdesc:
+            parser = GenericParser()
+            findings = parser.get_findings(fdesc, Test())
+            self.assertEqual(1, len(findings))
+            # test the filters
+            self.assertEqual(1, len(Finding.objects.filter(active=True)))

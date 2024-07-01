@@ -2,7 +2,7 @@ import collections
 import decimal
 import logging
 import warnings
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import pytz
 import six
@@ -185,7 +185,10 @@ class FindingStatusFilter(ChoiceFilter):
             start_date = local_tz.localize(datetime.combine(
                 earliest_finding.date, datetime.min.time())
             )
-            self.start_date = _truncate(start_date - timedelta(days=1))
+            try:
+                self.start_date = _truncate(start_date - timedelta(days=1))
+            except OverflowError:  # this will fail when start_date is date.min
+                self.start_date = date.min
             self.end_date = _truncate(now() + timedelta(days=1))
         try:
             value = int(value)
@@ -777,7 +780,10 @@ class MetricsDateRangeFilter(ChoiceFilter):
             start_date = local_tz.localize(datetime.combine(
                 earliest_finding.date, datetime.min.time())
             )
-            self.start_date = _truncate(start_date - timedelta(days=1))
+            try:
+                self.start_date = _truncate(start_date - timedelta(days=1))
+            except OverflowError:  # this will fail when start_date is date.min
+                self.start_date = date.min
             self.end_date = _truncate(now() + timedelta(days=1))
             return qs.all()
 
@@ -845,7 +851,10 @@ class MetricsDateRangeFilter(ChoiceFilter):
             start_date = local_tz.localize(datetime.combine(
                 earliest_finding.date, datetime.min.time())
             )
-            self.start_date = _truncate(start_date - timedelta(days=1))
+            try:
+                self.start_date = _truncate(start_date - timedelta(days=1))
+            except OverflowError:  # this will fail when start_date is date.min
+                self.start_date = date.min
             self.end_date = _truncate(now() + timedelta(days=1))
         try:
             value = int(value)
