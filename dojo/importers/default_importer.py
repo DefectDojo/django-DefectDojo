@@ -108,7 +108,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         new_findings = self.determine_process_method(self.parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
-        closed_findings = self.close_old_findings(self.test.finding_set.values(), **kwargs)
+        closed_findings = self.close_old_findings(self.test.finding_set.all(), **kwargs)
         # Update the timestamps of the test object by looking at the findings imported
         self.update_timestamps()
         # Update the test meta
@@ -247,11 +247,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("REIMPORT_SCAN: Closing findings no longer present in scan report")
         # Close old active findings that are not reported by this scan.
         # Refactoring this to only call test.finding_set.values() once.
+        findings = findings.values()
         mitigated_hash_codes = []
         new_hash_codes = []
         for finding in findings:
             new_hash_codes.append(finding["hash_code"])
-            if getattr(finding, "is_mitigated", None):
+            if finding.get("is_mitigated", None):
                 mitigated_hash_codes.append(finding["hash_code"])
                 for hash_code in new_hash_codes:
                     if hash_code == finding["hash_code"]:
