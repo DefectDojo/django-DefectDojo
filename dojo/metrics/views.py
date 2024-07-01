@@ -583,7 +583,7 @@ def view_engineer(request, eid):
     user = get_object_or_404(Dojo_User, pk=eid)
     if not (request.user.is_superuser
             or request.user.username == user.username):
-        raise PermissionDenied()
+        raise PermissionDenied
     now = timezone.now()
 
     findings = Finding.objects.filter(reporter=user, verified=True)
