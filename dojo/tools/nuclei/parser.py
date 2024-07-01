@@ -150,7 +150,7 @@ class NucleiParser:
             )
 
             dupe_key = hashlib.sha256(
-                (template_id + item_type + matcher + endpoint.host).encode(
+                (template_id + item_type + matcher + host).encode(
                     "utf-8"
                 )
             ).hexdigest()
