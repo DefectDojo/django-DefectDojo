@@ -1,4 +1,3 @@
-
 import hashlib
 import json
 import textwrap
@@ -8,24 +7,6 @@ from dojo.models import Finding
 
 
 class AWSProwlerV3Parser:
-    SCAN_TYPE = ["AWS Prowler V3"]
-
-    def get_scan_types(self):
-        return AWSProwlerV3Parser.SCAN_TYPE
-
-    def get_label_for_scan_types(self, scan_type):
-        return AWSProwlerV3Parser.SCAN_TYPE[0]
-
-    def get_description_for_scan_types(self, scan_type):
-        return "Export of AWS Prowler JSON V3 format."
-
-    def get_findings(self, file, test):
-        if file.name.lower().endswith('.json'):
-            return self.process_json(file, test)
-        else:
-            msg = 'Unknown file format'
-            raise ValueError(msg)
-
     def process_json(self, file, test):
         dupes = {}
 
@@ -96,9 +77,3 @@ class AWSProwlerV3Parser:
                 dupes[dupe_key] = find
 
         return list(dupes.values())
-
-    def formatview(self, depth):
-        if depth > 1:
-            return "* "
-        else:
-            return ""
