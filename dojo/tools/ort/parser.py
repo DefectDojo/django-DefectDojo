@@ -1,6 +1,6 @@
 import hashlib
 import json
-from collections import namedtuple
+from typing import NamedTuple
 
 from dojo.models import Finding
 
@@ -192,7 +192,7 @@ how to fix : {model.rule_violation['how_to_fix']}"""
 #     projects: []
 #     rule_violation: dict
 
-RuleViolationModel = namedtuple(
+RuleViolationModel = NamedTuple(
     "RuleViolationModel", ["pkg", "license_id", "projects", "rule_violation"]
 )
 
