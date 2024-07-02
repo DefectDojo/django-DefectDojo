@@ -38,6 +38,7 @@ data:
   DD_UWSGI_PASS: unix:///run/defectdojo/uwsgi.sock
   DD_UWSGI_NUM_OF_PROCESSES: '{{ .Values.django.uwsgi.app_settings.processes | default 2 }}'
   DD_UWSGI_NUM_OF_THREADS: '{{ .Values.django.uwsgi.app_settings.threads | default 2 }}'
+  DD_UWSGI_MAX_FD: '{{ .Values.django.uwsgi.app_settings.max_fd }}'
   DD_DJANGO_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
   NGINX_METRICS_ENABLED: '{{ .Values.monitoring.enabled }}'
   METRICS_HTTP_AUTH_USER: {{ .Values.monitoring.user | default "monitoring" }}
