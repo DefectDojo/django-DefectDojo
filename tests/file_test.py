@@ -20,7 +20,6 @@ class FileUploadTest(BaseTestCase):
         return driver
 
     def test_add_file_finding_level(self):
-        # print("\n\nDebug Print Log: testing 'add image' \n")
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
         # login to site, password set to fetch from environ

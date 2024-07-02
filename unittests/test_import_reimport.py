@@ -1767,8 +1767,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         logger.debug('import_scan payload %s', payload)
         # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
         response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), payload)
-        # print(vars(response))
-        # print('url: ' + response.url)
+
         test = Test.objects.get(id=response.url.split('/')[-1])
         # f = open('response.html', 'w+')
         # f.write(str(response.content, 'utf-8'))

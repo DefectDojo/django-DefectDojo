@@ -1,15 +1,18 @@
+import logging
 import sys
 import unittest
 
 from base_test_class import BaseTestCase, on_exception_html_source_logger
 from selenium.webdriver.common.by import By
 
+logger = logging.getLogger(__name__)
+
 
 class ProductTypeTest(BaseTestCase):
 
     @on_exception_html_source_logger
     def test_create_product_type(self):
-        print("\n\nDebug Print Log: testing 'create product type' \n")
+        logger.debug("\n\nDebug Print Log: testing 'create product type' \n")
         driver = self.driver
         driver.get(self.base_url + "product/type")
         driver.find_element(By.ID, "dropdownMenu1").click()
@@ -47,7 +50,7 @@ class ProductTypeTest(BaseTestCase):
         self.assertFalse(self.is_error_message_present())
 
     def test_view_product_type(self):
-        print("\n\nDebug Print Log: testing 'view product type' \n")
+        logger.debug("\n\nDebug Print Log: testing 'view product type' \n")
         driver = self.driver
         driver.get(self.base_url + "product/type")
         driver.find_element(By.ID, "dropdownMenuProductType").click()
@@ -57,7 +60,7 @@ class ProductTypeTest(BaseTestCase):
         self.assertEqual('Product Type Product test type', product_type_text)
 
     def test_edit_product_type(self):
-        print("\n\nDebug Print Log: testing 'edit product type' \n")
+        logger.debug("\n\nDebug Print Log: testing 'edit product type' \n")
         driver = self.driver
         driver.get(self.base_url + "product/type")
         driver.find_element(By.ID, "dropdownMenuProductType").click()
@@ -69,7 +72,7 @@ class ProductTypeTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present(text='Product type updated successfully.'))
 
     def test_delete_product_type(self):
-        print("\n\nDebug Print Log: testing 'delete product type' \n")
+        logger.debug("\n\nDebug Print Log: testing 'delete product type' \n")
         driver = self.driver
         driver.get(self.base_url + "product/type")
         # TODO this assumes the first product_type in the list is the one that we just created (and can safely be deleted)
