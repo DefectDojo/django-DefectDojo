@@ -1,4 +1,5 @@
 import logging
+import sys
 from functools import wraps
 
 from django.conf import settings
@@ -26,6 +27,12 @@ def we_want_async(*args, func=None, **kwargs):
 
     if Dojo_User.wants_block_execution(user):
         logger.debug('dojo_async_task %s: running task in the foreground as block_execution is set to True for %s', func, user)
+        return False
+
+    # if a function is running as part of unittest, it should not be performed in async mode:
+    # - to be able to test functions decorated with `dojo_async_task`
+    # - to test that the task will not fail in the background in celery
+    if sys.argv[:2] == ['manage.py', 'test']:
         return False
 
     logger.debug('dojo_async_task %s: no current user, running task in the background', func)
