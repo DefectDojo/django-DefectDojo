@@ -20,4 +20,9 @@ class Migration(migrations.Migration):
             name='false_positive_mapping_resolution',
             field=models.CharField(blank=True, help_text='JIRA resolution names (comma-separated values) that maps to a False Positive Finding', max_length=300, null=True),
         ),
+        migrations.AddField(
+            model_name='jira_conf',
+            name='under_review_mapping_resolution',
+            field=models.CharField(blank=True, help_text='JIRA resolution names (comma-separated values) that maps to an Under Review Finding', max_length=300, null=True),
+        ),
     ]
