@@ -3155,8 +3155,8 @@ class AnnouncementRemoveForm(AnnouncementCreateForm):
 # Show in admin a multichoice list of validator names
 # pass this to form using field_name='validator_name' ?
 class QuestionForm(forms.Form):
-    ''' Base class for a Question
-    '''
+    """ Base class for a Question
+    """
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()

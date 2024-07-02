@@ -1,8 +1,8 @@
-'''
+"""
 Created on Feb 18, 2015
 
 @author: jay7958
-'''
+"""
 from django import template
 
 from dojo.models import Answered_Survey, Engagement_Survey
