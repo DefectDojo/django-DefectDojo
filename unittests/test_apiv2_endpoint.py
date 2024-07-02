@@ -19,7 +19,7 @@ class EndpointTest(APITestCase):
             "host": "FOO.BAR"
         }, format='json')
         self.assertEqual(r.status_code, 400, r.content[:1000])
-        self.assertIn("Attribute \'product\' is required", r.content.decode("utf-8"))
+        self.assertIn("Attribute 'product' is required", r.content.decode("utf-8"))
 
         r = self.client.post(reverse('endpoint-list'), {
             "product": 1
