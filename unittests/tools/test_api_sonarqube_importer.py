@@ -5,8 +5,7 @@ from django.core.exceptions import ValidationError
 
 from dojo.models import Engagement, Product, Product_API_Scan_Configuration, Test
 from dojo.tools.api_sonarqube.importer import SonarQubeApiImporter
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def dummy_product(self, *args, **kwargs):

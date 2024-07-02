@@ -5,8 +5,7 @@ from django.core.exceptions import ValidationError
 
 from dojo.models import Engagement, Product, Product_API_Scan_Configuration, Test, Tool_Configuration, Tool_Type
 from dojo.tools.api_cobalt.importer import CobaltApiImporter
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestCobaltApiImporter(DojoTestCase):

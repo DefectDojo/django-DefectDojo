@@ -4,8 +4,7 @@ from django.test import override_settings
 
 from dojo.models import Test
 from dojo.tools.qualys.parser import QualysParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestQualysParser(DojoTestCase):

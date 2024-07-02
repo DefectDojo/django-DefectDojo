@@ -2,8 +2,7 @@ from datetime import date
 
 from dojo.models import Test
 from dojo.tools.azure_security_center_recommendations.parser import AzureSecurityCenterRecommendationsParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAzureSecurityCenterRecommendationsParser(DojoTestCase):

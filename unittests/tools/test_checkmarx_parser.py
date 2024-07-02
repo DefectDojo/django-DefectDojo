@@ -3,8 +3,7 @@ from unittest.mock import patch
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.checkmarx.parser import CheckmarxParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestCheckmarxParser(DojoTestCase):

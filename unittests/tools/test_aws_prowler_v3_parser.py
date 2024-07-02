@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.aws_prowler_v3.parser import AWSProwlerV3Parser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAwsProwlerV3Parser(DojoTestCase):

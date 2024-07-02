@@ -11,8 +11,7 @@ from dojo.models import (
     Tool_Type,
 )
 from dojo.tools.api_sonarqube.parser import ApiSonarQubeParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 def dummy_product(self, *args, **kwargs):

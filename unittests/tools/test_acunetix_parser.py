@@ -3,8 +3,7 @@ from datetime import datetime as date
 
 from dojo.models import Test
 from dojo.tools.acunetix.parser import AcunetixParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAcunetixParser(DojoTestCase):

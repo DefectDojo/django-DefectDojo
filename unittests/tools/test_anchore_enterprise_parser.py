@@ -2,8 +2,7 @@ from os import path
 
 from dojo.models import Test
 from dojo.tools.anchore_enterprise.parser import AnchoreEnterpriseParser, extract_vulnerability_id, search_filepath
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAnchoreEnterpriseParser(DojoTestCase):
