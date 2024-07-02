@@ -5,7 +5,7 @@ import dateutil
 import html2text
 import hyperlink
 from cvss import parser as cvss_parser
-from defusedxml.ElementTree import parse
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -16,7 +16,8 @@ class AcunetixXMLParser:
     """This parser is written for Acunetix XML reports"""
     def get_findings(self, filename, test):
         dupes = {}
-        root = parse(filename).getroot()
+        parser = etree.XMLParser(resolve_entities=False)
+        root = etree.parse(filename, parser=parser).getroot()
         for scan in root.findall("Scan"):
             start_url = scan.findtext("StartURL")
             if ":" not in start_url:

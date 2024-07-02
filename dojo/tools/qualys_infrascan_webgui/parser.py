@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime
 
+import dateutil
 import html2text
-from dateutil import parser
-from defusedxml import ElementTree
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -137,13 +137,14 @@ class QualysInfrascanWebguiParser:
         return "Qualys WebGUI output files can be imported in XML format."
 
     def get_findings(self, file, test):
-        data = ElementTree.parse(file).getroot()
+        parser = etree.XMLParser(resolve_entities=False)
+        data = etree.parse(file, parser=parser).getroot()
 
         # fetch scan date e.g.: <KEY value="DATE">2020-01-30T09:45:41Z</KEY>
         scan_date = datetime.now()
         for i in data.findall("HEADER/KEY"):
             if i.get("value") == "DATE":
-                scan_date = parser.isoparse(i.text)
+                scan_date = dateutil.parser.isoparse(i.text)
 
         master_list = []
         for issue in data.findall("IP"):

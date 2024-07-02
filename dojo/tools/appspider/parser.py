@@ -1,5 +1,5 @@
 import html2text
-from defusedxml import ElementTree
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -19,8 +19,8 @@ class AppSpiderParser:
     def get_findings(self, filename, test):
         if filename is None:
             return
-
-        vscan = ElementTree.parse(filename)
+        parser = etree.XMLParser(resolve_entities=False)
+        vscan = etree.parse(filename, parser=parser)
         root = vscan.getroot()
 
         if "VulnSummary" not in str(root.tag):

@@ -2,8 +2,8 @@ import re
 import uuid
 from datetime import datetime
 
-from defusedxml import ElementTree
 from django.conf import settings
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -26,7 +26,8 @@ class VeracodeXMLParser:
     }
 
     def get_findings(self, filename, test):
-        root = ElementTree.parse(filename).getroot()
+        parser = etree.XMLParser(resolve_entities=False)
+        root = etree.parse(filename, parser=parser).getroot()
 
         app_id = root.attrib["app_id"]
         report_date = datetime.strptime(

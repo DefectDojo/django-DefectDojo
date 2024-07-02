@@ -1,7 +1,7 @@
 import datetime
 
 from cpe import CPE
-from defusedxml.ElementTree import parse
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -17,7 +17,8 @@ class NmapParser:
         return "XML output (use -oX)"
 
     def get_findings(self, file, test):
-        tree = parse(file)
+        parser = etree.XMLParser(resolve_entities=False)
+        tree = etree.parse(file, parser=parser)
         root = tree.getroot()
         dupes = {}
         if "nmaprun" not in root.tag:

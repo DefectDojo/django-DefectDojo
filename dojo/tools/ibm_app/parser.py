@@ -1,7 +1,7 @@
 import hashlib
 import logging
 
-from defusedxml import ElementTree
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -19,7 +19,8 @@ class IbmAppParser:
         return "XML file from IBM App Scanner."
 
     def get_findings(self, file, test):
-        ibm_scan_tree = ElementTree.parse(file)
+        parser = etree.XMLParser(resolve_entities=False)
+        ibm_scan_tree = etree.parse(file, parser=parser)
         root = ibm_scan_tree.getroot()
 
         # validate XML file

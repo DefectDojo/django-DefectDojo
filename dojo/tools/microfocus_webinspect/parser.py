@@ -2,7 +2,7 @@ import hashlib
 import re
 
 import html2text
-from defusedxml.ElementTree import parse
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -20,7 +20,8 @@ class MicrofocusWebinspectParser:
         return "Import XML report"
 
     def get_findings(self, file, test):
-        tree = parse(file)
+        parser = etree.XMLParser(resolve_entities=False)
+        tree = etree.parse(file, parser=parser)
         # get root of tree.
         root = tree.getroot()
         if "Sessions" not in root.tag:

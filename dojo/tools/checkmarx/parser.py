@@ -2,8 +2,8 @@ import datetime
 import json
 import logging
 
-from dateutil import parser
-from defusedxml import ElementTree
+import dateutil
+from lxml import etree
 
 from dojo.models import Finding
 from dojo.utils import add_language
@@ -44,7 +44,8 @@ class CheckmarxParser:
         - Path: There should be only one.Parent tag of Pathnodes
         - Pathnode: all the calls from the source (start) to the sink (end) of the attack vector
         """
-        cxscan = ElementTree.parse(filename)
+        parser = etree.XMLParser(resolve_entities=False)
+        cxscan = etree.parse(filename, parser=parser)
         root = cxscan.getroot()
 
         dupes = {}
@@ -58,7 +59,7 @@ class CheckmarxParser:
             language = ""
             findingdetail = ""
             group = ""
-            find_date = parser.parse(root.get("ScanStart")).date()
+            find_date = dateutil.parser.parse(root.get("ScanStart")).date()
 
             if query.get("Language") is not None:
                 language = query.get("Language")
@@ -367,7 +368,7 @@ class CheckmarxParser:
 
     def _parse_date(self, value):
         if isinstance(value, str):
-            return parser.parse(value).date()
+            return dateutil.parser.parse(value).date()
         elif isinstance(value, dict) and isinstance(value.get("seconds"), int):
             return datetime.datetime.utcfromtimestamp(value.get("seconds")).date()
         else:

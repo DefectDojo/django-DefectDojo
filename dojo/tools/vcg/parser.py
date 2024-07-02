@@ -2,7 +2,7 @@ import csv
 import hashlib
 import io
 
-from defusedxml import ElementTree
+from lxml import etree
 
 from dojo.models import Finding
 
@@ -106,7 +106,8 @@ class VCGXmlParser:
         if content is None:
             return dupes
 
-        vcgscan = ElementTree.fromstring(content)
+        parser = etree.XMLParser(resolve_entities=False)
+        vcgscan = etree.parse(content, parser=parser).getroot()
 
         for issue in vcgscan.findall("CodeIssue"):
             finding = self.parse_issue(issue, test)

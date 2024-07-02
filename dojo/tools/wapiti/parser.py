@@ -2,7 +2,7 @@ import hashlib
 import logging
 import re
 
-from defusedxml.ElementTree import parse
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -25,7 +25,8 @@ class WapitiParser:
         return "Import XML report"
 
     def get_findings(self, file, test):
-        tree = parse(file)
+        parser = etree.XMLParser(resolve_entities=False)
+        tree = etree.parse(file, parser=parser)
         # get root of tree.
         root = tree.getroot()
         # check if it is

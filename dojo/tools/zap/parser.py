@@ -1,5 +1,5 @@
-from defusedxml import ElementTree as ET
 from html2text import html2text
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -26,7 +26,8 @@ class ZapParser:
         return "ZAP XML report format."
 
     def get_findings(self, file, test):
-        tree = ET.parse(file)
+        parser = etree.XMLParser(resolve_entities=False)
+        tree = etree.parse(file, parser=parser)
         items = []
         for node in tree.findall("site"):
             for item in node.findall("alerts/alertitem"):

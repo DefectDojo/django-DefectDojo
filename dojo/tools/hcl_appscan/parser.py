@@ -1,6 +1,6 @@
 from xml.dom import NamespaceErr
 
-from defusedxml import ElementTree as ET
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -28,7 +28,8 @@ class HCLAppScanParser:
 
     def get_findings(self, file, test):
         findings = []
-        tree = ET.parse(file)
+        parser = etree.XMLParser(resolve_entities=False)
+        tree = etree.parse(file, parser=parser)
         root = tree.getroot()
         if "xml-report" not in root.tag:
             msg = "This doesn't seem to be a valid HCLAppScan xml file."

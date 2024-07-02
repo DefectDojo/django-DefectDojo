@@ -3,7 +3,7 @@ import logging
 import re
 
 import html2text
-from defusedxml import ElementTree as etree
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -31,7 +31,8 @@ class BurpParser:
         )
 
     def get_findings(self, xml_output, test):
-        tree = etree.parse(xml_output, etree.XMLParser())
+        parser = etree.XMLParser(resolve_entities=False)
+        tree = etree.parse(xml_output, parser=parser)
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
