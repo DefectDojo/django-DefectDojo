@@ -42,7 +42,7 @@ def edit_sla_config(request, slaid):
     if request.method == 'POST' and request.POST.get('delete'):
         if sla_config.id != 1:
             if Product.objects.filter(sla_configuration=sla_config).count():
-                msg = f"The \"{sla_config}\" SLA configuration could not be deleted, as it is currently in use by one or more products."
+                msg = f'The "{sla_config}" SLA configuration could not be deleted, as it is currently in use by one or more products.'
                 messages.add_message(request,
                                     messages.ERROR,
                                     msg,

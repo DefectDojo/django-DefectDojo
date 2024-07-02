@@ -6,7 +6,7 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-'''
+"""
 the npm audit json output depends on the params used. this parser
 accepts the formats for any of:
 
@@ -18,7 +18,7 @@ In order for this parser to import the same number of findings
 as the report's meta block indicates, all top level keys
 are consiered a vulnerability and as much information as provided
 is added to each
-'''
+"""
 
 
 class NpmAudit7PlusParser:

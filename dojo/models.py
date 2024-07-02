@@ -553,7 +553,7 @@ class System_Settings(models.Model):
         default=True,
         blank=False,
         verbose_name=_("Password must contain one special character"),
-        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)."))
+        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\\`~!@#$%^&*_-+=;:'\",<>./?)."))
     lowercase_character_required = models.BooleanField(
         default=True,
         blank=False,
@@ -3908,7 +3908,7 @@ class JIRA_Project(models.Model):
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
     custom_fields = models.JSONField(max_length=200, blank=True, null=True,
-                                   help_text=_("JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": [{\"name\": \"8.0.1\"}]}"))
+                                   help_text=_('JIRA custom field JSON mapping of Id to value, e.g. {"customfield_10122": [{"name": "8.0.1"}]}'))
     default_assignee = models.CharField(max_length=200, blank=True, null=True,
                                      help_text=_("JIRA default assignee (name). If left blank then it defaults to whatever is configured in JIRA."))
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
@@ -4384,9 +4384,9 @@ class Benchmark_Product_Summary(models.Model):
 # ==============================
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Question(PolymorphicModel, TimeStampedModel):
-        '''
+        """
             Represents a question.
-        '''
+        """
 
         class Meta:
             ordering = ['order']
@@ -4407,23 +4407,23 @@ with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning
 
 
 class TextQuestion(Question):
-    '''
+    """
     Question with a text answer
-    '''
+    """
     objects = PolymorphicManager()
 
     def get_form(self):
-        '''
+        """
         Returns the form for this model
-        '''
+        """
         from .forms import TextQuestionForm
         return TextQuestionForm
 
 
 class Choice(TimeStampedModel):
-    '''
+    """
     Model to store the choices for multi choice questions
-    '''
+    """
 
     order = models.PositiveIntegerField(default=1)
 
@@ -4437,10 +4437,10 @@ class Choice(TimeStampedModel):
 
 
 class ChoiceQuestion(Question):
-    '''
+    """
     Question with answers that are chosen from a list of choices defined
     by the user.
-    '''
+    """
 
     multichoice = models.BooleanField(default=False,
                                       help_text=_("Select one or more"))
@@ -4448,9 +4448,9 @@ class ChoiceQuestion(Question):
     objects = PolymorphicManager()
 
     def get_form(self):
-        '''
+        """
         Returns the form for this model
-        '''
+        """
 
         from .forms import ChoiceQuestionForm
         return ChoiceQuestionForm
@@ -4516,8 +4516,8 @@ class General_Survey(models.Model):
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Answer(PolymorphicModel, TimeStampedModel):
-        ''' Base Answer model
-        '''
+        """ Base Answer model
+        """
         question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
         answered_survey = models.ForeignKey(Answered_Survey,
