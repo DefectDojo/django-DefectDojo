@@ -4,8 +4,7 @@ from django.test import override_settings
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.nexpose.parser import NexposeParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNexposeParser(DojoTestCase):

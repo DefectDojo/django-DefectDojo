@@ -5,8 +5,7 @@ from dateutil.tz import tzlocal, tzoffset
 
 from dojo.models import Test
 from dojo.tools.dependency_check.parser import DependencyCheckParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestFile:

@@ -2,8 +2,7 @@ import os.path
 
 from dojo.models import Test
 from dojo.tools.awssecurityhub.parser import AwsSecurityHubParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def sample_path(file_name: str):

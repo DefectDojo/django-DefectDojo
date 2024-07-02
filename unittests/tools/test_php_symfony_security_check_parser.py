@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.php_symfony_security_check.parser import PhpSymfonySecurityCheckParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestPhpSymfonySecurityCheckerParser(DojoTestCase):

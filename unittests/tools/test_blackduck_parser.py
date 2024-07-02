@@ -2,8 +2,7 @@ from pathlib import Path
 
 from dojo.models import Test
 from dojo.tools.blackduck.parser import BlackduckParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestBlackduckHubParser(DojoTestCase):

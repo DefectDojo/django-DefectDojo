@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.jfrogxray.parser import JFrogXrayParser, decode_cwe_number
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestJfrogJFrogXrayParser(DojoTestCase):
