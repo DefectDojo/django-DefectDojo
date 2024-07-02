@@ -36,11 +36,13 @@ class BlackduckAPI:
         for project in self.client.get_resource("projects"):
             if project["name"] == project_name:
                 return project
+        return None
 
     def get_version_by_name(self, project, version_name):
         for version in self.client.get_resource("versions", project):
             if version["versionName"] == version_name:
                 return version
+        return None
 
     def get_vulnerable_bom_components(self, version):
         return self.client.get_resource("vulnerable-components", version)

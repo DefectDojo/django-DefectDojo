@@ -10,56 +10,47 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 def dummy_product(self, *args, **kwargs):
     with open(get_unit_tests_path() + '/scans/api_sonarqube/product.json') as json_file:
-        data = json.load(json_file)
-        return data
+        return json.load(json_file)
 
 
 def dummy_issues(self, *args, **kwargs):
     with open(get_unit_tests_path() + '/scans/api_sonarqube/issues.json') as json_file:
-        data = json.load(json_file)
-        return data
+        return json.load(json_file)
 
 
 def dummy_rule(self, *args, **kwargs):
     with open(get_unit_tests_path() + '/scans/api_sonarqube/rule.json') as json_file:
-        data = json.load(json_file)
-        return data
+        return json.load(json_file)
 
 
 def dummy_rule_wo_html_desc(self, *args, **kwargs):
     with open(get_unit_tests_path() + '/scans/api_sonarqube/rule_wo_html_desc.json') as json_file:
-        data = json.load(json_file)
-        return data
+        return json.load(json_file)
 
 
 def dummy_no_hotspot(self, *args, **kwargs):
     with open(get_unit_tests_path() + '/scans/api_sonarqube/hotspots/no_vuln.json') as json_file:
-        data = json.load(json_file)
-        return data
+        return json.load(json_file)
 
 
 def dummy_one_hotspot(self, *args, **kwargs):
     with open(get_unit_tests_path() + '/scans/api_sonarqube/hotspots/one_vuln.json') as json_file:
-        data = json.load(json_file)
-        return data
+        return json.load(json_file)
 
 
 def dummy_many_hotspots(self, *args, **kwargs):
     with open(get_unit_tests_path() + '/scans/api_sonarqube/hotspots/many_vulns.json') as json_file:
-        data = json.load(json_file)
-        return data
+        return json.load(json_file)
 
 
 def dummy_hotspot_rule(self, *args, **kwargs):
     with open(get_unit_tests_path() + '/scans/api_sonarqube/hotspots/rule.json') as json_file:
-        data = json.load(json_file)
-        return data
+        return json.load(json_file)
 
 
 def dummy_hotspot_rule_wo_risk_description(self, *args, **kwargs):
     with open(get_unit_tests_path() + '/scans/api_sonarqube/hotspots/rule_wo_risk_description.json') as json_file:
-        data = json.load(json_file)
-        return data
+        return json.load(json_file)
 
 
 def empty_list(self, *args, **kwargs):

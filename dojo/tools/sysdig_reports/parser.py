@@ -27,15 +27,14 @@ class SysdigReportsParser:
         if filename.name.lower().endswith('.csv'):
             arr_data = CSVParser().parse(filename=filename)
             return self.parse_csv(arr_data=arr_data, test=test)
-        elif filename.name.lower().endswith('.json'):
+        if filename.name.lower().endswith('.json'):
             scan_data = filename.read()
             try:
                 data = json.loads(str(scan_data, "utf-8"))
             except Exception:
                 data = json.loads(scan_data)
             return self.parse_json(data=data, test=test)
-        else:
-            return ()
+        return ()
 
     def parse_json(self, data, test):
         vulnerability = data.get("data", None)

@@ -15,12 +15,13 @@ class WFuzzParser:
     def severity_mapper(self, input):
         if 200 <= int(input) <= 299:
             return "High"
-        elif 300 <= int(input) <= 399:
+        if 300 <= int(input) <= 399:
             return "Low"
-        elif 400 <= int(input) <= 499:
+        if 400 <= int(input) <= 499:
             return "Medium"
-        elif 500 <= int(input):
+        if 500 <= int(input):
             return "Low"
+        return None
 
     def get_scan_types(self):
         return ["WFuzz JSON report"]

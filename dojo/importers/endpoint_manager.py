@@ -57,7 +57,7 @@ class EndpointManager:
                 endpoint=ep,
                 defaults={'date': finding.date})
         logger.debug(f"IMPORT_SCAN: {len(endpoints)} imported")
-        return None
+        return
 
     @dojo_async_task
     @app.task()
@@ -79,7 +79,7 @@ class EndpointManager:
                 endpoint_status.mitigated_by = user
                 endpoint_status.mitigated = True
                 endpoint_status.save()
-        return None
+        return
 
     @dojo_async_task
     @app.task()
@@ -100,7 +100,7 @@ class EndpointManager:
                 endpoint_status.mitigated = False
                 endpoint_status.last_modified = timezone.now()
                 endpoint_status.save()
-        return None
+        return
 
     def chunk_endpoints(
         self,
@@ -158,7 +158,7 @@ class EndpointManager:
                 endpoint.clean()
             except ValidationError as e:
                 logger.warning(f"DefectDojo is storing broken endpoint because cleaning wasn't successful: {e}")
-        return None
+        return
 
     def chunk_endpoints_and_reactivate(
         self,
@@ -182,7 +182,7 @@ class EndpointManager:
                 self.reactivate_endpoint_status(endpoint_status_list, sync=False)
         else:
             self.reactivate_endpoint_status(endpoint_status_list, sync=True)
-        return None
+        return
 
     def chunk_endpoints_and_mitigate(
         self,
@@ -207,7 +207,7 @@ class EndpointManager:
                 self.mitigate_endpoint_status(endpoint_status_list, user, sync=False)
         else:
             self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
-        return None
+        return
 
     def update_endpoint_status(
         self,
@@ -242,4 +242,4 @@ class EndpointManager:
             )
             self.chunk_endpoints_and_reactivate(endpoint_status_to_reactivate)
         self.chunk_endpoints_and_mitigate(endpoint_status_to_mitigate, user)
-        return None
+        return

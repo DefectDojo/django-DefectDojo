@@ -29,7 +29,7 @@ class IntSightsParser:
         Returns: A markdown formatted description
         """
 
-        description = "\n".join(
+        return "\n".join(
             [
                 alert["description"],
                 f'**Date Found**: `{alert.get("report_date", "None provided")} `',
@@ -41,7 +41,6 @@ class IntSightsParser:
                 f'**Alert Link**: {alert.get("alert_link", "None provided")}'
             ]
         )
-        return description
 
     def get_findings(self, file, test):
         duplicates = {}

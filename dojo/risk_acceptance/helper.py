@@ -204,16 +204,14 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
             (escape_for_jira(risk_acceptance.name),
             get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))),
             len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
-    else:
-        return 'Finding has been risk accepted'
+    return 'Finding has been risk accepted'
 
 
 def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
         return 'finding was unaccepted/deleted from risk acceptance [({})|{}]'.format(escape_for_jira(risk_acceptance.name),
             get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))))
-    else:
-        return 'Finding is no longer risk accepted'
+    return 'Finding is no longer risk accepted'
 
 
 def post_jira_comment(finding, message_factory, heads_up_days=0):

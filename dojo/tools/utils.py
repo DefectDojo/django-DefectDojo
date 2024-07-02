@@ -16,7 +16,7 @@ def get_npm_cwe(item_node):
     if cwe_node:
         if isinstance(cwe_node, list):
             return int(cwe_node[0][4:])
-        elif cwe_node.startswith('CWE-'):
+        if cwe_node.startswith('CWE-'):
             cwe_string = cwe_node[4:]
             if cwe_string:
                 return int(cwe_string)

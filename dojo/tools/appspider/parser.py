@@ -18,7 +18,7 @@ class AppSpiderParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return
+            return None
 
         vscan = ElementTree.parse(filename)
         root = vscan.getroot()

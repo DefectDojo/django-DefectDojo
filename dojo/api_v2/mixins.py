@@ -29,8 +29,7 @@ class DeletePreviewModelMixin:
         def flatten(elem):
             if isinstance(elem, list):
                 return itertools.chain.from_iterable(map(flatten, elem))
-            else:
-                return [elem]
+            return [elem]
 
         rels = [
             {

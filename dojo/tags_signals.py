@@ -77,3 +77,4 @@ def get_product(instance):
         return instance.engagement.product
     if isinstance(instance, Finding):
         return instance.test.engagement.product
+    return None

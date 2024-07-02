@@ -39,9 +39,7 @@ class HydraParser:
         report = self.__parse_json(json_output)
 
         metadata = HydraScanMetadata(report["generator"])
-        findings = self.__extract_findings(report["results"], metadata, test)
-
-        return findings
+        return self.__extract_findings(report["results"], metadata, test)
 
     def __extract_findings(
         self, raw_findings, metadata: HydraScanMetadata, test

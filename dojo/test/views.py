@@ -380,12 +380,11 @@ def copy_test(request, tid):
                                 recipients=[test.engagement.lead],
                                 icon="exclamation-triangle")
             return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(engagement.id, )))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Unable to copy test, please try again.',
-                extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Unable to copy test, please try again.',
+            extra_tags='alert-danger')
 
     product_tab = Product_Tab(product, title="Copy Test", tab="engagements")
     return render(request, 'dojo/copy_object.html', {
@@ -539,9 +538,8 @@ class AddFindingView(View):
             finding.save()
 
             return finding, request, True
-        else:
-            add_error_message_to_response("The form has errors, please correct them below.")
-            add_field_errors_to_response(context["form"])
+        add_error_message_to_response("The form has errors, please correct them below.")
+        add_field_errors_to_response(context["form"])
 
         return finding, request, False
 
@@ -583,8 +581,7 @@ class AddFindingView(View):
                 )
 
             return request, True, push_to_jira
-        else:
-            add_field_errors_to_response(context["jform"])
+        add_field_errors_to_response(context["jform"])
 
         return request, False, False
 
@@ -664,10 +661,8 @@ class AddFindingView(View):
         if success:
             if '_Finished' in request.POST:
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
-            else:
-                return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
-        else:
-            context["form_error"] = True
+            return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
+        context["form_error"] = True
         # Render the form
         return render(request, self.get_template(), context)
 
@@ -746,11 +741,10 @@ def add_temp_finding(request, tid, fid):
                                  extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
-        else:
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 _('The form has errors, please correct them below.'),
-                                 extra_tags='alert-danger')
+        messages.add_message(request,
+                             messages.ERROR,
+                             _('The form has errors, please correct them below.'),
+                             extra_tags='alert-danger')
 
     else:
         form = AddFindingForm(req_resp=None, product=test.engagement.product, initial={'active': False,
@@ -822,8 +816,7 @@ class ReImportScanResultsView(View):
         """
         if request.method == "POST":
             return ReImportScanForm(request.POST, request.FILES, test=test, **kwargs)
-        else:
-            return ReImportScanForm(test=test, **kwargs)
+        return ReImportScanForm(test=test, **kwargs)
 
     def get_jira_form(
         self,

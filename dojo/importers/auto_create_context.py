@@ -229,16 +229,15 @@ class AutoCreateContextManager:
         # Look for an existing object
         if product_type := self.get_target_product_type_if_exists(product_type_name=product_type_name):
             return product_type
-        else:
-            with transaction.atomic():
-                product_type, created = Product_Type.objects.select_for_update().get_or_create(name=product_type_name)
-                if created:
-                    Product_Type_Member.objects.create(
-                        user=get_current_user(),
-                        product_type=product_type,
-                        role=Role.objects.get(is_owner=True),
-                    )
-                return product_type
+        with transaction.atomic():
+            product_type, created = Product_Type.objects.select_for_update().get_or_create(name=product_type_name)
+            if created:
+                Product_Type_Member.objects.create(
+                    user=get_current_user(),
+                    product_type=product_type,
+                    role=Role.objects.get(is_owner=True),
+                )
+            return product_type
 
     def get_or_create_product(
         self,

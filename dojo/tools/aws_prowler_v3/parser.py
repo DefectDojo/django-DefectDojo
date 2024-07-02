@@ -22,9 +22,8 @@ class AWSProwlerV3Parser:
     def get_findings(self, file, test):
         if file.name.lower().endswith('.json'):
             return self.process_json(file, test)
-        else:
-            msg = 'Unknown file format'
-            raise ValueError(msg)
+        msg = 'Unknown file format'
+        raise ValueError(msg)
 
     def process_json(self, file, test):
         dupes = {}
@@ -100,5 +99,4 @@ class AWSProwlerV3Parser:
     def formatview(self, depth):
         if depth > 1:
             return "* "
-        else:
-            return ""
+        return ""

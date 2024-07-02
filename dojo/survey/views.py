@@ -75,12 +75,11 @@ def delete_engagement_survey(request, eid, sid):
                 'Questionnaire deleted successfully.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id, )))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Unable to delete Questionnaire.',
-                extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Unable to delete Questionnaire.',
+            extra_tags='alert-danger')
 
     add_breadcrumb(
         title="Delete " + survey.survey.name + " Questionnaire",
@@ -143,12 +142,11 @@ def answer_questionnaire(request, eid, sid):
                 'Successfully answered, all answers valid.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_engagement', args=(engagement.id, )))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Questionnaire has errors, please correct.',
-                extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Questionnaire has errors, please correct.',
+            extra_tags='alert-danger')
     add_breadcrumb(
         title="Answer " + survey.survey.name + " Survey",
         top_level=False,
@@ -241,12 +239,11 @@ def add_questionnaire(request, eid):
             if 'respond_survey' in request.POST:
                 return HttpResponseRedirect(reverse('answer_questionnaire', args=(eid, survey.id)))
             return HttpResponseRedirect(reverse('view_engagement', args=(eid,)))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Questionnaire could not be added.',
-                extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Questionnaire could not be added.',
+            extra_tags='alert-danger')
 
     form.fields["survey"].queryset = surveys
     add_breadcrumb(title="Add Questionnaire", top_level=False, request=request)
@@ -288,12 +285,11 @@ def edit_questionnaire(request, sid):
                     'Questionnaire successfully updated, you may now add/edit questions.',
                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('edit_questionnaire', args=(survey.id,)))
-            else:
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'No changes detected, questionnaire not updated.',
-                    extra_tags='alert-warning')
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'No changes detected, questionnaire not updated.',
+                extra_tags='alert-warning')
             if 'add_questions' in request.POST:
                 return HttpResponseRedirect(reverse('edit_questionnaire_questions', args=(survey.id,)))
         else:
@@ -355,14 +351,12 @@ def create_questionnaire(request):
                 extra_tags='alert-success')
             if 'add_questions' in request.POST:
                 return HttpResponseRedirect(reverse('edit_questionnaire_questions', args=(survey.id,)))
-            else:
-                return HttpResponseRedirect(reverse('questionnaire'))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Please correct any errors displayed below.',
-                extra_tags='alert-danger')
+            return HttpResponseRedirect(reverse('questionnaire'))
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Please correct any errors displayed below.',
+            extra_tags='alert-danger')
 
     add_breadcrumb(title="Create Questionnaire", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/create_questionnaire.html', {
@@ -406,12 +400,11 @@ def edit_questionnaire_questions(request, sid):
                 'Questionnaire questions successfully saved.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('questionnaire'))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Questionnaire questions not saved, please correct any errors displayed below.',
-                extra_tags='alert-success')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Questionnaire questions not saved, please correct any errors displayed below.',
+            extra_tags='alert-success')
 
     add_breadcrumb(title="Update Questionnaire Questions", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/edit_survey_questions.html', {
@@ -483,8 +476,7 @@ def create_question(request):
                         'Text Question added successfully.',
                         extra_tags='alert-success')
                     return HttpResponseRedirect(reverse('questions'))
-                else:
-                    error = True
+                error = True
 
             elif type == 'choice':
                 if choiceQuestionFrom.is_valid():
@@ -506,8 +498,7 @@ def create_question(request):
                         'Choice Question added successfully.',
                         extra_tags='alert-success')
                     return HttpResponseRedirect(reverse('questions'))
-                else:
-                    error = True
+                error = True
 
             if '_popup' in request.GET and not error:
                 resp = f'<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "{escape(created_question._get_pk_val())}", "{escape(created_question.text)}");</script>'
@@ -633,12 +624,11 @@ def add_empty_questionnaire(request):
             if 'respond_survey' in request.POST:
                 return HttpResponseRedirect(reverse('dashboard'))
             return HttpResponseRedirect(reverse('questionnaire'))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Questionnaire could not be added.',
-                extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Questionnaire could not be added.',
+            extra_tags='alert-danger')
 
     form.fields["survey"].queryset = surveys
     add_breadcrumb(title="Add Empty Questionnaire", top_level=False, request=request)
@@ -690,12 +680,11 @@ def delete_empty_questionnaire(request, esid):
                 'Questionnaire deleted successfully.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('survey'))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Unable to delete Questionnaire.',
-                extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Unable to delete Questionnaire.',
+            extra_tags='alert-danger')
 
     add_breadcrumb(
         title="Delete " + survey.survey.name + " Questionnaire",
@@ -726,12 +715,11 @@ def delete_general_questionnaire(request, esid):
                 'Questionnaire deleted successfully.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('questionnaire'))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Unable to delete questionnaire.',
-                extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Unable to delete questionnaire.',
+            extra_tags='alert-danger')
 
     add_breadcrumb(
         title="Delete " + survey.survey.name + " Questionnaire",
@@ -810,12 +798,11 @@ def answer_empty_survey(request, esid):
                 extra_tags='alert-success')
             return HttpResponseRedirect(
                 reverse('dashboard'))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Questionnaire has errors, please correct.',
-                extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Questionnaire has errors, please correct.',
+            extra_tags='alert-danger')
     add_breadcrumb(
         title="Answer Empty " + engagement_survey.name + " Questionnaire",
         top_level=False,
@@ -852,12 +839,11 @@ def engagement_empty_survey(request, esid):
                 'Engagement created and questionnaire successfully linked.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id, )))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Questionnaire could not be added.',
-                extra_tags='alert-danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Questionnaire could not be added.',
+            extra_tags='alert-danger')
     add_breadcrumb(
         title="Link Questionnaire to new Engagement",
         top_level=False,

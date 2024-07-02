@@ -19,7 +19,7 @@ class PhpSymfonySecurityCheckParser:
 
     def parse_json(self, json_file):
         if json_file is None:
-            return
+            return None
         try:
             data = json_file.read()
             try:
