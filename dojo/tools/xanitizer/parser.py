@@ -156,7 +156,6 @@ class XanitizerParser:
         return description
 
     def generate_file_path(self, finding):
-        pass
 
         if finding.find("endNode") is not None and finding.find("endNode").get(
             "relativePath"

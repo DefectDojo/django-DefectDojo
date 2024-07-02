@@ -124,7 +124,7 @@ class VeracodeJSONParser:
         # Attempt to get the CVSS score
         if uncleaned_cvss := finding_details.get("cvss"):
             if isinstance(uncleaned_cvss, str):
-                if uncleaned_cvss.startswith("CVSS:3.1/") or uncleaned_cvss.startswith("CVSS:3.0/"):
+                if uncleaned_cvss.startswith(("CVSS:3.1/", "CVSS:3.0/")):
                     finding.cvssv3 = CVSS3(str(uncleaned_cvss)).clean_vector(output_prefix=True)
                 elif not uncleaned_cvss.startswith("CVSS"):
                     finding.cvssv3 = CVSS3(f"CVSS:3.1/{str(uncleaned_cvss)}").clean_vector(output_prefix=True)

@@ -459,7 +459,6 @@ class ViewEngagement(View):
             check = Check_List.objects.get(engagement=eng)
         except:
             check = None
-            pass
         notes = eng.notes.all()
         note_type_activation = Note_Type.objects.filter(is_active=True).count()
         if note_type_activation:
@@ -531,7 +530,6 @@ class ViewEngagement(View):
             check = Check_List.objects.get(engagement=eng)
         except:
             check = None
-            pass
         notes = eng.notes.all()
         note_type_activation = Note_Type.objects.filter(is_active=True).count()
         if note_type_activation:
@@ -636,7 +634,6 @@ def add_tests(request, eid):
                 new_test.lead = User.objects.get(id=form['lead'].value())
             except:
                 new_test.lead = None
-                pass
 
             # Set status to in progress if a test is added
             if eng.status != "In Progress" and eng.active is True:
@@ -1152,7 +1149,6 @@ def complete_checklist(request, eid):
         checklist = Check_List.objects.get(engagement=eng)
     except:
         checklist = None
-        pass
 
     add_breadcrumb(
         parent=eng,
@@ -1174,7 +1170,6 @@ def complete_checklist(request, eid):
                 cl.engagement = eng
                 cl.save()
                 form.save_m2m()
-                pass
             messages.add_message(
                 request,
                 messages.SUCCESS,
