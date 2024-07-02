@@ -1464,6 +1464,16 @@ if env("DD_DJANGO_METRICS_ENABLED"):
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
     LOGIN_EXEMPT_URLS += (rf'^{URL_PREFIX}django_metrics/',)
 
+# ------------------------------------
+# Traces OpenTelemetry to OTLP
+# ------------------------------------
+if env("DD_OPENTELEMETRY_TRACES_ENABLED"):
+    resource = Resource.create()
+
+    trace.set_tracer_provider(TracerProvider(resource=resource))
+    # Please see the OTLP Exporter documentation for other options.
+    span_processor = BatchSpanProcessor(OTLPSpanExporter())
+    trace.get_tracer_provider().add_span_processor(span_processor)
 
 # ------------------------------------
 # Hashcode configuration
