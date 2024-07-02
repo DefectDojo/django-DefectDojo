@@ -50,6 +50,7 @@ select = [
    "LOG",
    "INP",
    "SLOT",
+   "PIE",
    "RSE",
    "TID",
    "PD",

@@ -883,7 +883,7 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
 
 def get_week_data(week_start_date, tick, day_counts):
     data = []
-    for i in range(0, len(day_counts)):
+    for i in range(len(day_counts)):
         data.append([tick, i, day_counts[i]])
     label = [tick, week_start_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")]
     return data, label
@@ -2308,7 +2308,6 @@ class async_delete:
                 logger.debug('ASYNC_DELETE: object has already been deleted elsewhere. Skipping')
                 # The id must be None
                 # The object has already been deleted elsewhere
-                pass
 
     @dojo_async_task
     @app.task

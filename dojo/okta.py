@@ -88,7 +88,6 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
             except JWTError:
                 if k is None and client_id == 'a-key':
                     k = self.get_jwks_keys()[0]
-                pass
 
             claims = jwt.decode(
                 id_token,

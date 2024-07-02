@@ -226,7 +226,7 @@ def view_product(request, pid):
                                                           benchmark_type__enabled=True).order_by('benchmark_type__name')
     sla = SLA_Configuration.objects.filter(id=prod.sla_configuration_id).first()
     benchAndPercent = []
-    for i in range(0, len(benchmarks)):
+    for i in range(len(benchmarks)):
         desired_level, total, total_pass, total_wait, total_fail, _total_viewed = asvs_calc_level(benchmarks[i])
 
         success_percent = round((float(total_pass) / float(total)) * 100, 2)
@@ -939,7 +939,6 @@ def edit_product(request, pid):
         github_inst = GITHUB_PKey.objects.get(product=product)
     except:
         github_inst = None
-        pass
 
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)

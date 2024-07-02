@@ -1540,7 +1540,6 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
             except Exception as e:
                 error = True
                 logger.exception(e)
-                pass
         else:
             logger.debug(jform.errors)
             error = True
