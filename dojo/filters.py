@@ -53,7 +53,6 @@ from dojo.finding.helper import (
     WAS_ACCEPTED_FINDINGS_QUERY,
 )
 from dojo.finding.queries import get_authorized_findings
-from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.models import (
     EFFORT_FOR_FIXING_CHOICES,
     ENGAGEMENT_STATUS_CHOICES,
@@ -70,7 +69,6 @@ from dojo.models import (
     Engagement,
     Engagement_Survey,
     Finding,
-    Finding_Group,
     Finding_Template,
     Note_Type,
     Product,
@@ -1734,12 +1732,12 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
         finding_group__name = CharFilter(
             field_name="finding_group__name",
             lookup_expr="iexact",
-            label="Finding Group Name",
+            label="Finding Group",
             help_text="Search for Finding Group names that are an exact match")
         finding_group__name_contains = CharFilter(
             field_name="finding_group__name",
             lookup_expr="icontains",
-            label="Finding Group Name Contains",
+            label="Finding Group Contains",
             help_text="Search for Finding Group names that contain a given pattern")
 
     class Meta:
@@ -1796,9 +1794,11 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         label="Test")
 
     if is_finding_groups_enabled():
-        finding_group = ModelMultipleChoiceFilter(
-            queryset=Finding_Group.objects.none(),
-            label="Finding Group")
+        finding_group = CharFilter(
+            field_name="finding_group__name",
+            lookup_expr="icontains",
+            label="Finding Group",
+            help_text="Search for Finding Group contain a given pattern")
 
     class Meta:
         model = Finding
@@ -1843,8 +1843,6 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
 
         if self.form.fields.get('test__engagement__product'):
             self.form.fields['test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
-        if self.form.fields.get('finding_group', None):
-            self.form.fields['finding_group'].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
         self.form.fields['reporter'].queryset = get_authorized_users(Permissions.Finding_View)
         self.form.fields['reviewers'].queryset = self.form.fields['reporter'].queryset
 
