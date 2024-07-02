@@ -353,6 +353,11 @@ class System_Settings(models.Model):
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
 
+    enable_webhooks_notifications = \
+        models.BooleanField(default=False,
+                            verbose_name=_('Enable Webhook notifications'),
+                            blank=False)
+
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
             "(EXPERIMENTAL) DefectDojo will automatically mark the finding as a "
@@ -4000,12 +4005,14 @@ class JIRA_Issue(models.Model):
 NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
 NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
 NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
+NOTIFICATION_CHOICE_WEBHOOKS = ("webhooks", "webhooks")
 NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
 
 NOTIFICATION_CHOICES = (
     NOTIFICATION_CHOICE_SLACK,
     NOTIFICATION_CHOICE_MSTEAMS,
     NOTIFICATION_CHOICE_MAIL,
+    NOTIFICATION_CHOICE_WEBHOOKS,
     NOTIFICATION_CHOICE_ALERT,
 )
 
@@ -4092,6 +4099,51 @@ class NotificationsAdmin(admin.ModelAdmin):
         list_fields = ['user', 'product']
         list_fields += [field.name for field in self.model._meta.fields if field.name not in list_fields]
         return list_fields
+
+
+class Notification_Webhooks(models.Model):
+    _STATUS_ACTIVE = "active"
+    _STATUS_INACTIVE = "inactive"
+    STATUS_ACTIVE = f"{_STATUS_ACTIVE}"
+    STATUS_INACTIVE_400 = f"{_STATUS_INACTIVE}_400"
+    STATUS_ACTIVE_500 = f"{_STATUS_ACTIVE}_500"
+    STATUS_INACTIVE_500 = f"{_STATUS_INACTIVE}_500"
+    STATUS_INACTIVE_OTHERS = f"{_STATUS_INACTIVE}_others"
+    STATUS_INACTIVE_MANUAL = f"{_STATUS_INACTIVE}_manual"
+    STATUS_CHOICES = (
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_INACTIVE_400, "Inactive because of 4xx error"),
+        (STATUS_ACTIVE_500, "Active but 5xx error detected"),
+        (STATUS_INACTIVE_500, "Inactive because of 5xx error"),
+        (STATUS_INACTIVE_OTHERS, "Inactive because of status code unsupported"),
+        (STATUS_INACTIVE_MANUAL, "Inactive because of manual deactivation"),
+    )
+    name = models.CharField(max_length=100, default='', blank=False, unique=True,
+                                    help_text=_('Name of the incoming webhook'))
+    url = models.URLField(max_length=200, default='', blank=False,
+                                    help_text=_('The full URL of the incoming webhook'))
+    header_name = models.CharField(max_length=100, default='', blank=True, null=True,
+                                   help_text=_('Name of the header required for interacting with Webhook endpoint'))
+    header_value = models.CharField(max_length=100, default='', blank=True, null=True,
+                                   help_text=_('Content of the header required for interacting with Webhook endpoint'))
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active", blank=False,
+                              help_text=_('Status of the incoming webhook'))
+    first_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened first time'), blank=True, null=True)
+    last_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened last time'), blank=True, null=True)
+    owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
+                              help_text=_('Owner/receiver of notification, if empty processed as system notification'))
+
+    def can_be_activated(self):
+        # Cleaning of state (from STATUS_ACTIVE_500 to STATUS_ACTIVE) is Activation in this context
+        # So all non-STATUS_ACTIVE statuses are activatable
+        return self.status != self.STATUS_ACTIVE
+
+    def can_be_deactivated(self):
+        # Even if status is any "_STATUS_INACTIVE", user might want to force status to STATUS_INACTIVE_MANUAL
+        # So all non-STATUS_INACTIVE_MANUAL statuses are deactivatable
+        return self.status != self.STATUS_INACTIVE_MANUAL
+
+    # Yes, webhook can be activatable and deactivable in the same time
 
 
 class Tool_Product_Settings(models.Model):
@@ -4627,6 +4679,7 @@ admin.site.register(GITHUB_Clone)
 admin.site.register(GITHUB_Details_Cache)
 admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
+admin.site.register(Notification_Webhooks)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)

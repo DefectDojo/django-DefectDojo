@@ -51,6 +51,7 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     NotificationsViewSet,
+    NotificationWebhooksViewSet,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -105,6 +106,7 @@ from dojo.models import (
     Languages,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -2993,3 +2995,24 @@ class AnnouncementTest(BaseClass.BaseClassTest):
 
     def test_create(self):
         self.skipTest('Only one Announcement can exists')
+
+
+class NotificationWebhooksTest(BaseClass.BaseClassTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Notification_Webhooks
+        self.endpoint_path = 'notification_webhooks'
+        self.viewname = 'notification_webhooks'
+        self.viewset = NotificationWebhooksViewSet
+        self.payload = {
+            "name": "My endpoint",
+            "url": "http://webhook.endpoint:8080/post",
+        }
+        self.update_fields = {
+            "header_name": "Auth",
+            "header_value": "token x",
+        }
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

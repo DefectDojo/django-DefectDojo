@@ -1,6 +1,8 @@
+import json
 import logging
 
 import requests
+import yaml
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.core.mail import EmailMessage
@@ -10,10 +12,19 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo
+from dojo.models import (
+    Alerts,
+    Dojo_User,
+    Notification_Webhooks,
+    Notifications,
+    System_Settings,
+    UserContactInfo,
+    get_current_datetime,
+)
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 
 logger = logging.getLogger(__name__)
@@ -144,8 +155,8 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     try:
         notification_message = render_to_string(template, kwargs)
         logger.debug("Rendering from the template %s", template)
-    except TemplateDoesNotExist:
-        logger.debug('template not found or not implemented yet: %s', template)
+    except TemplateDoesNotExist as e:
+        logger.debug(f'template not found or not implemented yet: {template} (specifically: {e.args})')
     except Exception as e:
         logger.error("error during rendering of template %s exception is %s", template, e)
     finally:
@@ -170,6 +181,7 @@ def process_notifications(event, notifications=None, **kwargs):
     slack_enabled = get_system_setting('enable_slack_notifications')
     msteams_enabled = get_system_setting('enable_msteams_notifications')
     mail_enabled = get_system_setting('enable_mail_notifications')
+    webhooks_enabled = get_system_setting('enable_webhooks_notifications')
 
     if slack_enabled and 'slack' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending Slack Notification')
@@ -182,6 +194,10 @@ def process_notifications(event, notifications=None, **kwargs):
     if mail_enabled and 'mail' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug('Sending Mail Notification')
         send_mail_notification(event, notifications.user, **kwargs)
+
+    if webhooks_enabled and 'webhooks' in getattr(notifications, event, getattr(notifications, 'other')):
+        logger.debug('Sending Webhooks Notification')
+        send_webhooks_notification(event, notifications.user, **kwargs)
 
     if 'alert' in getattr(notifications, event, getattr(notifications, 'other')):
         logger.debug(f'Sending Alert to {notifications.user}')
@@ -309,6 +325,103 @@ def send_mail_notification(event, user=None, *args, **kwargs):
         log_alert(e, "Email Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
 
 
+def webhooks_notification_request(endpoint, event, *args, **kwargs):
+    headers = {
+        "User-Agent": f"DefectDojo-{dd_version}",
+        "X-DefectDojo-Event": event,
+        "X-DefectDojo-Instance": settings.SITE_URL,
+        "Accept": "application/json",
+    }
+    if endpoint.header_name is not None:
+        headers[endpoint.header_name] = endpoint.header_value
+    yaml_data = create_notification_message(event, endpoint.owner, 'webhooks', *args, **kwargs)
+    data = yaml.safe_load(yaml_data)
+    res = requests.request(
+        method='POST',
+        url=endpoint.url,
+        headers=headers,
+        json=data,
+        timeout=60,
+    )
+    return res
+
+
+def test_webhooks_notification(endpoint):
+    res = webhooks_notification_request(endpoint, 'ping', description="Test webhook notification")
+    res.raise_for_status()
+    # in "send_webhooks_notification", we are doing deeper analysis, why it failed
+    # for now, "raise_for_status" should be enough
+
+
+@dojo_async_task
+@app.task
+def send_webhooks_notification(event, user=None, *args, **kwargs):
+    endpoints = Notification_Webhooks.objects.filter(owner=user)
+
+    if not endpoints:
+        if user:
+            logger.info(f"URLs for Webhooks not configured for user '{user}': skipping user notification")
+        else:
+            logger.info("URLs for Webhooks not configured: skipping system notification")
+        return
+
+    for endpoint in endpoints:
+        if not endpoint.status.startswith(Notification_Webhooks._STATUS_ACTIVE):
+            logger.info(f"URL for Webhook '{endpoint.name}' is not active: {endpoint.get_status_display()} ({endpoint.status})")
+            continue
+
+        try:
+            logger.debug(f"Sending webhook message to endpoint '{endpoint.name}'")
+            res = webhooks_notification_request(endpoint, event, *args, **kwargs)
+
+            if res.status_code in [200, 201]:
+                logger.debug(f"Message sent to endpoint '{endpoint.name}' sucessfully.")
+                continue
+
+            now = get_current_datetime()
+
+            # There is no reason to keep endpoint active if it is returning 4xx errors
+            if 400 <= res.status_code < 500:
+                endpoint.status = Notification_Webhooks.STATUS_INACTIVE_400
+                endpoint.first_error = now
+
+            # 5xx is also not OK
+            elif 500 <= res.status_code < 600:
+                # If there is only temporary outage (we detected 5xx first time or it was before more then one hour), we can keep endpoint active (but marked)
+
+                # First detected
+                # or first detected more then one hour ago
+                if endpoint.last_error is None or (now - endpoint.last_error).seconds > 60 * 60:
+                    endpoint.status = Notification_Webhooks.STATUS_ACTIVE_500
+                    endpoint.first_error = now  # Yes, if last fail happen before more then hour, we are considering it as a new error
+
+                # Repeated detection
+                else:
+                    # Error is repeating over more then hour
+                    if (now - endpoint.first_error).seconds > 60 * 60:
+                        endpoint.status = Notification_Webhooks.STATUS_INACTIVE_500
+
+                    # This situation shouldn't happen - only if somebody was cleaning status and didn't clean first/last_error
+                    # But we should handle it
+                    else:
+                        endpoint.status = Notification_Webhooks.STATUS_ACTIVE_500
+                        endpoint.first_error = now
+
+            # Well, we really accepts only 200 and 201
+            else:
+                endpoint.status = Notification_Webhooks.STATUS_INACTIVE_OTHERS
+                endpoint.first_error = now
+
+            endpoint.last_error = now
+            endpoint.save()
+
+            logger.error(f"Error when sending message to Webhooks (status: {res.status_code}): {res.text}")
+
+        except Exception as e:
+            logger.exception(e)
+            log_alert(e, "Webhooks Notification")
+
+
 def send_alert_notification(event, user=None, *args, **kwargs):
     logger.debug('sending alert notification to %s', user)
     try:
@@ -335,7 +448,6 @@ def send_alert_notification(event, user=None, *args, **kwargs):
 
 
 def get_slack_user_id(user_email):
-    import json
 
     from dojo.utils import get_system_setting
 
