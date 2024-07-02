@@ -6,7 +6,7 @@
   "dependencyDashboardApproval": false,
   "baseBranches": ["dev"],
   "rebaseWhen": "conflicted",
-  "ignorePaths": ["requirements.txt", "components/package.json", "components/package-lock.json", "dojo/components/yarn.lock", "dojo/components/package.json", "Dockerfile**"],
+  "ignorePaths": ["requirements.txt", "requirements-lint.txt", "components/package.json", "components/package-lock.json", "dojo/components/yarn.lock", "dojo/components/package.json", "Dockerfile**"],
   "packageRules": [{
     "packagePatterns": ["*"],
     "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{toVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
