@@ -363,7 +363,7 @@ class TrivyParser:
         # Create the table string
         table_string = f"{header_row}\n"
         for item in lines:
-            row = "\t".join(str(item.get(header, '')) for header in headers)
+            row = "\t".join(str(item.get(header, "")) for header in headers)
             table_string += f"{row}\n"
 
         return table_string

@@ -38,7 +38,7 @@ class NucleiParser:
             for template in content:
                 data.append(template)
         elif filecontent[0] == "{":
-            file = filecontent.split('\n')
+            file = filecontent.split("\n")
             for line in file:
                 if line != "":
                     data.append(json.loads(line))

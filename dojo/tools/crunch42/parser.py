@@ -58,7 +58,7 @@ class Crunch42Parser:
     def get_item(self, issue, title, test):
         fingerprint = issue["fingerprint"]
         pointer = issue["pointer"]
-        message = issue["specificDescription"] if 'specificDescription' in issue else title
+        message = issue["specificDescription"] if "specificDescription" in issue else title
         score = issue["score"]
         criticality = issue["criticality"]
         if criticality == 1:

@@ -66,4 +66,4 @@ class TestQualysWebAppParser(DojoTestCase):
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]
-        self.assertEqual(finding.unsaved_req_resp[0].get('req'), "POST: https://example.com/vulnerable/path\nReferer:  https://example.com/\n\nHost:  www.example.com\n\nUser-Agent:  Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.1 Safari/605.1.15\n\nAccept:  */*\n\nContent-Length:  39\n\nContent-Type:  application/x-www-form-urlencoded REQUEST_ONE\n\nBODY: post_param=malicious_code_here\n")
+        self.assertEqual(finding.unsaved_req_resp[0].get("req"), "POST: https://example.com/vulnerable/path\nReferer:  https://example.com/\n\nHost:  www.example.com\n\nUser-Agent:  Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.1 Safari/605.1.15\n\nAccept:  */*\n\nContent-Length:  39\n\nContent-Type:  application/x-www-form-urlencoded REQUEST_ONE\n\nBODY: post_param=malicious_code_here\n")

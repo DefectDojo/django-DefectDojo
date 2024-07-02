@@ -174,7 +174,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("CVE-2018-15473", finding.vuln_id_from_tool)
                 vulnerability_ids = finding.unsaved_vulnerability_ids
                 self.assertEqual(1, len(vulnerability_ids))
-                self.assertIn('CVE-2018-15473', vulnerability_ids)
+                self.assertIn("CVE-2018-15473", vulnerability_ids)
                 self.assertEqual(362, finding.cwe)
                 self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
                 self.assertEqual(5.3, finding.cvssv3_score)
@@ -184,7 +184,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("Exposed Prometheus metrics", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual(1, finding.nb_occurences)
-                self.assertEqual('', finding.description)
+                self.assertEqual("", finding.description)
                 self.assertIn("config", finding.unsaved_tags)
                 self.assertIn("exposure", finding.unsaved_tags)
                 self.assertIn("prometheus", finding.unsaved_tags)

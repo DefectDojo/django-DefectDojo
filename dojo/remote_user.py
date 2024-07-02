@@ -16,15 +16,15 @@ logger = logging.getLogger(__name__)
 class RemoteUserAuthentication(OriginalRemoteUserAuthentication):
     def authenticate(self, request):
         # process only if request is comming from the trusted proxy node
-        if IPAddress(request.META['REMOTE_ADDR']) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
+        if IPAddress(request.META["REMOTE_ADDR"]) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
             self.header = settings.AUTH_REMOTEUSER_USERNAME_HEADER
             if self.header in request.META:
                 return super().authenticate(request)
             else:
                 return None
         else:
-            logger.debug('Requested came from untrusted proxy %s; This is list of trusted proxies: %s',
-                IPAddress(request.META['REMOTE_ADDR']),
+            logger.debug("Requested came from untrusted proxy %s; This is list of trusted proxies: %s",
+                IPAddress(request.META["REMOTE_ADDR"]),
                 settings.AUTH_REMOTEUSER_TRUSTED_PROXY)
             return None
 
@@ -35,15 +35,15 @@ class RemoteUserMiddleware(OriginalRemoteUserMiddleware):
             return
 
         # process only if request is comming from the trusted proxy node
-        if IPAddress(request.META['REMOTE_ADDR']) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
+        if IPAddress(request.META["REMOTE_ADDR"]) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
             self.header = settings.AUTH_REMOTEUSER_USERNAME_HEADER
             if self.header in request.META:
                 return super().process_request(request)
             else:
                 return
         else:
-            logger.debug('Requested came from untrusted proxy %s; This is list of trusted proxies: %s',
-                IPAddress(request.META['REMOTE_ADDR']),
+            logger.debug("Requested came from untrusted proxy %s; This is list of trusted proxies: %s",
+                IPAddress(request.META["REMOTE_ADDR"]),
                 settings.AUTH_REMOTEUSER_TRUSTED_PROXY)
             return
 
@@ -80,12 +80,12 @@ class RemoteUserBackend(OriginalRemoteUserBackend):
 
         if settings.AUTH_REMOTEUSER_GROUPS_HEADER and \
           settings.AUTH_REMOTEUSER_GROUPS_HEADER in request.META:
-            assign_user_to_groups(user, request.META[settings.AUTH_REMOTEUSER_GROUPS_HEADER].split(','), Dojo_Group.REMOTE)
+            assign_user_to_groups(user, request.META[settings.AUTH_REMOTEUSER_GROUPS_HEADER].split(","), Dojo_Group.REMOTE)
 
         if settings.AUTH_REMOTEUSER_GROUPS_CLEANUP and \
           settings.AUTH_REMOTEUSER_GROUPS_HEADER and \
           settings.AUTH_REMOTEUSER_GROUPS_HEADER in request.META:
-            cleanup_old_groups_for_user(user, request.META[settings.AUTH_REMOTEUSER_GROUPS_HEADER].split(','))
+            cleanup_old_groups_for_user(user, request.META[settings.AUTH_REMOTEUSER_GROUPS_HEADER].split(","))
 
         if changed:
             user.save()
@@ -94,8 +94,8 @@ class RemoteUserBackend(OriginalRemoteUserBackend):
 
 
 class RemoteUserScheme(OpenApiAuthenticationExtension):
-    target_class = 'dojo.remote_user.RemoteUserAuthentication'
-    name = 'remoteUserAuth'
+    target_class = "dojo.remote_user.RemoteUserAuthentication"
+    name = "remoteUserAuth"
     match_subclasses = True
     priority = 1
 
@@ -104,12 +104,12 @@ class RemoteUserScheme(OpenApiAuthenticationExtension):
             return {}
 
         header_name = settings.AUTH_REMOTEUSER_USERNAME_HEADER
-        if header_name.startswith('HTTP_'):
+        if header_name.startswith("HTTP_"):
             header_name = header_name[5:]
-        header_name = header_name.replace('_', '-').capitalize()
+        header_name = header_name.replace("_", "-").capitalize()
 
         return {
-            'type': 'apiKey',
-            'in': 'header',
-            'name': header_name,
+            "type": "apiKey",
+            "in": "header",
+            "name": header_name,
         }

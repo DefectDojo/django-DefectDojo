@@ -32,8 +32,8 @@ class GuardDuty:
                 mitigated = datetime.utcnow()
         description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}" + "\n"
         description += f"**AWS Finding ARN:** {finding_id}\n"
-        if finding.get('SourceUrl'):
-            sourceurl = "[" + finding.get('SourceUrl') + "](" + finding.get('SourceUrl') + ")"
+        if finding.get("SourceUrl"):
+            sourceurl = "[" + finding.get("SourceUrl") + "](" + finding.get("SourceUrl") + ")"
             description += f"**SourceURL:** {sourceurl}\n"
         description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
         description += f"**Region:** {finding.get('Region', '')}\n"

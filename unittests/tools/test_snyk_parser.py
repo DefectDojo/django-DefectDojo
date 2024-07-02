@@ -157,7 +157,7 @@ class TestSnykParser(DojoTestCase):
             # Mobile-Security-Framework-MobSF@0.0.0: SQL Injection
             finding = findings[0]
             self.assertEqual("Critical", finding.severity)
-            self.assertIn('target_file:Mobile-Security-Framework-MobSF/requirements.txt', finding.unsaved_tags)
+            self.assertIn("target_file:Mobile-Security-Framework-MobSF/requirements.txt", finding.unsaved_tags)
 
     def test_snykParser_update_libs_tag(self):
         with open("unittests/scans/snyk/single_project_upgrade_libs.json") as testfile:
@@ -167,9 +167,9 @@ class TestSnykParser(DojoTestCase):
             # acme-review@1.0.0: Remote Code Execution (RCE)
             finding = findings[227]
             self.assertEqual("High", finding.severity)
-            self.assertIn('target_file:package-lock.json', finding.unsaved_tags)
-            self.assertIn('upgrade_to:react-scripts@5.0.0', finding.unsaved_tags)
-            self.assertIn('shell-quote@1.7.2', finding.mitigation)
+            self.assertIn("target_file:package-lock.json", finding.unsaved_tags)
+            self.assertIn("upgrade_to:react-scripts@5.0.0", finding.unsaved_tags)
+            self.assertIn("shell-quote@1.7.2", finding.mitigation)
 
     def test_snykcontainer_issue_9270(self):
         with open("unittests/scans/snyk/snykcontainer_issue_9270.json") as testfile:

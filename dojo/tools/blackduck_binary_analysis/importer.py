@@ -76,7 +76,7 @@ class BlackduckBinaryAnalysisImporter(Importer):
                 )
 
     def __partition_by_key(self, csv_file):
-        csv_results = csv.DictReader(csv_file, delimiter=',', quotechar='"')
+        csv_results = csv.DictReader(csv_file, delimiter=",", quotechar='"')
         vulnerabilities = defaultdict(set)
 
         key = "Object SHA1"

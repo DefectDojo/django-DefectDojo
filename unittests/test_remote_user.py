@@ -14,17 +14,17 @@ class TestRemoteUser(DojoTestCase):
 
     def setUp(self):
         self.user, _ = User.objects.get_or_create(
-            username='test_remote_user',
-            first_name='original_first',
-            last_name='original_last',
-            email='original@mail.com',
+            username="test_remote_user",
+            first_name="original_first",
+            last_name="original_last",
+            email="original@mail.com",
         )
         self.group1, _ = Dojo_Group.objects.get_or_create(name="group1", social_provider=Dojo_Group.REMOTE)
         self.group2, _ = Dojo_Group.objects.get_or_create(name="group2", social_provider=Dojo_Group.REMOTE)
 
     @override_settings(AUTH_REMOTEUSER_ENABLED=False)
     def test_disabled(self):
-        resp = self.client1.get('/profile')
+        resp = self.client1.get("/profile")
         self.assertEqual(resp.status_code, 302)
 
     @override_settings(
@@ -32,7 +32,7 @@ class TestRemoteUser(DojoTestCase):
         AUTH_REMOTEUSER_USERNAME_HEADER="HTTP_REMOTE_USER",
     )
     def test_basic(self):
-        resp = self.client1.get('/profile',
+        resp = self.client1.get("/profile",
                                 headers={
                                     "Remote-User": self.user.username
                                 }
@@ -47,7 +47,7 @@ class TestRemoteUser(DojoTestCase):
         AUTH_REMOTEUSER_EMAIL_HEADER="HTTP_REMOTE_EMAIL",
     )
     def test_update_user(self):
-        resp = self.client1.get('/profile',
+        resp = self.client1.get("/profile",
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Firstname": "new_first",
@@ -68,7 +68,7 @@ class TestRemoteUser(DojoTestCase):
         AUTH_REMOTEUSER_GROUPS_CLEANUP=True,
     )
     def test_update_groups_cleanup(self):
-        resp = self.client1.get('/profile',
+        resp = self.client1.get("/profile",
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": self.group1.name,
@@ -79,7 +79,7 @@ class TestRemoteUser(DojoTestCase):
         self.assertEqual(dgms.count(), 1)
         self.assertEqual(dgms.first().group.name, self.group1.name)
 
-        resp = self.client2.get('/profile',
+        resp = self.client2.get("/profile",
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": self.group2.name,
@@ -97,7 +97,7 @@ class TestRemoteUser(DojoTestCase):
         AUTH_REMOTEUSER_GROUPS_CLEANUP=True,
     )
     def test_update_multiple_groups_cleanup(self):
-        resp = self.client1.get('/profile',
+        resp = self.client1.get("/profile",
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": f"{self.group1.name},{self.group2.name}",
@@ -114,7 +114,7 @@ class TestRemoteUser(DojoTestCase):
         AUTH_REMOTEUSER_GROUPS_CLEANUP=False,
     )
     def test_update_groups_no_cleanup(self):
-        resp = self.client1.get('/profile',
+        resp = self.client1.get("/profile",
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": self.group1.name,
@@ -122,7 +122,7 @@ class TestRemoteUser(DojoTestCase):
                                 )
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.client2.get('/profile',
+        resp = self.client2.get("/profile",
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": self.group2.name,
@@ -135,11 +135,11 @@ class TestRemoteUser(DojoTestCase):
     @override_settings(
         AUTH_REMOTEUSER_ENABLED=True,
         AUTH_REMOTEUSER_USERNAME_HEADER="HTTP_REMOTE_USER",
-        AUTH_REMOTEUSER_TRUSTED_PROXY=IPSet(['192.168.0.0/24', '192.168.2.0/24']),
+        AUTH_REMOTEUSER_TRUSTED_PROXY=IPSet(["192.168.0.0/24", "192.168.2.0/24"]),
     )
     def test_trusted_proxy(self):
-        resp = self.client1.get('/profile',
-                                REMOTE_ADDR='192.168.0.42',
+        resp = self.client1.get("/profile",
+                                REMOTE_ADDR="192.168.0.42",
                                 headers={
                                     "Remote-User": self.user.username,
                                 }
@@ -149,18 +149,18 @@ class TestRemoteUser(DojoTestCase):
     @override_settings(
         AUTH_REMOTEUSER_ENABLED=True,
         AUTH_REMOTEUSER_USERNAME_HEADER="HTTP_REMOTE_USER",
-        AUTH_REMOTEUSER_TRUSTED_PROXY=IPSet(['192.168.0.0/24', '192.168.2.0/24']),
+        AUTH_REMOTEUSER_TRUSTED_PROXY=IPSet(["192.168.0.0/24", "192.168.2.0/24"]),
     )
     def test_untrusted_proxy(self):
-        with self.assertLogs('dojo.remote_user', level='DEBUG') as cm:
-            resp = self.client1.get('/profile',
-                                    REMOTE_ADDR='192.168.1.42',
+        with self.assertLogs("dojo.remote_user", level="DEBUG") as cm:
+            resp = self.client1.get("/profile",
+                                    REMOTE_ADDR="192.168.1.42",
                                     headers={
                                         "Remote-User": self.user.username,
                                     }
                                     )
         self.assertEqual(resp.status_code, 302)
-        self.assertIn('Requested came from untrusted proxy', cm.output[0])
+        self.assertIn("Requested came from untrusted proxy", cm.output[0])
 
     @override_settings(
         AUTH_REMOTEUSER_ENABLED=True,

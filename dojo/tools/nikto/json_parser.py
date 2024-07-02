@@ -19,7 +19,7 @@ class NiktoJSONParser:
                 f"**msg:** `{vulnerability.get('msg')}`",
                 f"**HTTP Method:** `{vulnerability.get('method')}`",
             ])
-            if vulnerability.get('OSVDB') is not None:
+            if vulnerability.get("OSVDB") is not None:
                 description += "\n" + f"**OSVDB:** `{vulnerability.get('OSVDB')}`"
             finding = Finding(
                 title=vulnerability.get("msg"),

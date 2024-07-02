@@ -406,7 +406,7 @@ class ListFindings(View, BaseListFindings):
         # show custom breadcrumb if user has filtered by exactly 1 endpoint
         if "endpoints" in request.GET:
             endpoint_ids = request.GET.getlist("endpoints", [])
-            if len(endpoint_ids) == 1 and endpoint_ids[0] != '':
+            if len(endpoint_ids) == 1 and endpoint_ids[0] != "":
                 endpoint_id = endpoint_ids[0]
                 endpoint = get_object_or_404(Endpoint, id=endpoint_id)
                 context["filter_name"] = "Vulnerable Endpoints"
@@ -585,10 +585,10 @@ class ViewFinding(View):
         test_import_finding_actions = test_import_finding_actions.filter(test_import__in=test_import_filter.qs)
         test_import_finding_action_filter = TestImportFindingActionFilter(request.GET, test_import_finding_actions)
 
-        paged_test_import_finding_actions = get_page_items_and_count(request, test_import_finding_action_filter.qs, 5, prefix='test_import_finding_actions')
-        paged_test_import_finding_actions.object_list = paged_test_import_finding_actions.object_list.prefetch_related('test_import')
+        paged_test_import_finding_actions = get_page_items_and_count(request, test_import_finding_action_filter.qs, 5, prefix="test_import_finding_actions")
+        paged_test_import_finding_actions.object_list = paged_test_import_finding_actions.object_list.prefetch_related("test_import")
 
-        latest_test_import_finding_action = finding.test_import_finding_action_set.order_by('-created').first
+        latest_test_import_finding_action = finding.test_import_finding_action_set.order_by("-created").first
 
         return {
             "test_import_filter": test_import_filter,
@@ -942,14 +942,14 @@ class EditFinding(View):
             # fp history function because it will be called by the save function
             # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
             if finding.false_p and not finding.false_p and get_system_setting("retroactive_false_positive_history"):
-                logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', finding)
+                logger.debug("FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s", finding)
 
                 existing_fp_findings = match_finding_to_existing_findings(
                     finding, product=finding.test.engagement.product
                 ).filter(false_p=True)
 
                 for fp in existing_fp_findings:
-                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                    logger.debug("FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s", fp.id, fp)
                     fp.active = finding.active
                     fp.verified = finding.verified
                     fp.false_p = False
@@ -2790,14 +2790,14 @@ def finding_bulk_update_all(request, pid=None):
                             # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
                             elif old_find.false_p and not find.false_p:
                                 if system_settings.retroactive_false_positive_history:
-                                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', find)
+                                    logger.debug("FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s", find)
 
                                     existing_fp_findings = match_finding_to_existing_findings(
                                         find, product=find.test.engagement.product
                                     ).filter(false_p=True)
 
                                     for fp in existing_fp_findings:
-                                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                                        logger.debug("FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s", fp.id, fp)
                                         fp.active = find.active
                                         fp.verified = find.verified
                                         fp.false_p = False

@@ -15,12 +15,12 @@ class TestIntSightsParser(DojoTestCase):
             finding = list(findings)[0]
 
             self.assertEqual(
-                '5c80dbf83b4a3900078b6be6',
+                "5c80dbf83b4a3900078b6be6",
                 finding.unique_id_from_tool)
             self.assertEqual(
-                'HTTP headers weakness in initech.com web server',
+                "HTTP headers weakness in initech.com web server",
                 finding.title)
-            self.assertEqual('Critical', finding.severity)
+            self.assertEqual("Critical", finding.severity)
             self.assertEqual(
                 "https://dashboard.intsights.com/#/threat-command/alerts?search=5c80dbf83b4a3900078b6be6",
                 finding.references)
