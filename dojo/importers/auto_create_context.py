@@ -49,7 +49,7 @@ class AutoCreateContextManager:
         test such that passing the whole object, or just the ID
         will suffice
         """
-        if object_id := data.get(key, None):
+        if object_id := data.get(key):
             # Convert to just the ID if the whole object as passed
             if isinstance(object_id, object_type):
                 object_id = object_id.id

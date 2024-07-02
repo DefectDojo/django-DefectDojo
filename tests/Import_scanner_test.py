@@ -103,9 +103,8 @@ class ScannerTest(BaseTestCase):
             reg = re.compile(tool.replace('_', ' '))
             matches = list(filter(reg.search, forms)) + list(filter(reg.search, acronyms))
             matches = [m.strip() for m in matches]
-            if len(matches) != 1:
-                if tool not in matches:
-                    missing_forms += [tool]
+            if len(matches) != 1 and tool not in matches:
+                missing_forms += [tool]
 
         if len(missing_forms) > 0:
             print('The following scanners are missing forms')
@@ -144,9 +143,8 @@ class ScannerTest(BaseTestCase):
             reg = re.compile(temp_tool)
             matches = list(filter(reg.search, templates)) + list(filter(reg.search, acronyms))
             matches = [m.strip() for m in matches]
-            if len(matches) == 0:
-                if temp_tool not in matches:
-                    missing_templates += [tool]
+            if len(matches) == 0 and temp_tool not in matches:
+                missing_templates += [tool]
 
         if len(missing_templates) > 0:
             print('The following scanners are missing templates')

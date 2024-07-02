@@ -98,11 +98,10 @@ def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
 
 def do_clean(value):
     myreturn = ""
-    if value is not None:
-        if len(value) > 0:
-            for x in value:
-                if x.text is not None:
-                    myreturn += x.text
+    if value is not None and len(value) > 0:
+        for x in value:
+            if x.text is not None:
+                myreturn += x.text
     return myreturn
 
 
@@ -231,7 +230,7 @@ def get_item(item_node, test):
         references = text_maker.handle(references)
 
     severity = item_node.findall("severity")[0].text
-    if "information" == severity.lower():
+    if severity.lower() == "information":
         severity = "Info"
 
     scanner_confidence = item_node.findall("confidence")[0].text

@@ -144,10 +144,7 @@ class VeracodeJSONParser:
         finding.dynamic_finding = False
         finding.static_finding = True
         # Get the finding category to get the high level info about the vuln
-        if category := finding_details.get("finding_category"):
-            category_title = category.get("name")
-        else:
-            category_title = None
+        category_title = category.get("name") if (category := finding_details.get("finding_category")) else None
         # Set the title of the finding to the name of the finding category.
         # If not present, fall back on CWE title. If that is not present, do nothing
         if category_title:
@@ -163,10 +160,9 @@ class VeracodeJSONParser:
             finding.sast_source_line = file_line_number
             finding.sast_sink_line = file_line_number
             finding.line = file_line_number
-        if function_object := finding_details.get("procedure"):
-            if isinstance(function_object, str):
-                finding.sast_source_object = function_object
-                finding.sast_sink_object = function_object
+        if (function_object := finding_details.get("procedure")) and isinstance(function_object, str):
+            finding.sast_source_object = function_object
+            finding.sast_sink_object = function_object
         # Set the exploitability if present
         if exploitability_score := finding_details.get("exploitability"):
             finding.description += f"**Exploitability Predication**: {self.exploitability_mapping.get(exploitability_score)}\n"
@@ -183,10 +179,7 @@ class VeracodeJSONParser:
         finding.dynamic_finding = True
         finding.static_finding = False
         # Get the finding category to get the high level info about the vuln
-        if category := finding_details.get("finding_category"):
-            category_title = category.get("name")
-        else:
-            category_title = None
+        category_title = category.get("name") if (category := finding_details.get("finding_category")) else None
         # Set the title of the finding to the name of the finding category.
         # If not present, fall back on CWE title. If that is not present, do nothing
         if category_title:
@@ -222,9 +215,8 @@ class VeracodeJSONParser:
         if vulnerable_parameter := finding_details.get("vulnerable_parameter"):
             finding.description += f"**Vulnerable Parameter**: {vulnerable_parameter}\n"
         # Add a note that this finding was discovered by the VSA
-        if discovered_by_vsa := finding_details.get("discovered_by_vsa"):
-            if bool(discovered_by_vsa):
-                finding.description += "**Note**: This finding was discovered by Virtual Scan Appliance\n"
+        if (discovered_by_vsa := finding_details.get("discovered_by_vsa")) and bool(discovered_by_vsa):
+            finding.description += "**Note**: This finding was discovered by Virtual Scan Appliance\n"
 
         return finding
 
@@ -240,9 +232,8 @@ class VeracodeJSONParser:
             vuln_id = cve_dict.get("name")
             finding.unsaved_vulnerability_ids.append(vuln_id)
             # See if the CVSS has already been set. If not, use the one here
-            if not finding.cvssv3:
-                if cvss_vector := cve_dict.get("cvss3", {}).get("vector"):
-                    finding.cvssv3 = CVSS3(f"CVSS:3.1/{str(cvss_vector)}").clean_vector(output_prefix=True)
+            if not finding.cvssv3 and (cvss_vector := cve_dict.get("cvss3", {}).get("vector")):
+                finding.cvssv3 = CVSS3(f"CVSS:3.1/{str(cvss_vector)}").clean_vector(output_prefix=True)
         # Put the product ID in the metadata
         if product_id := finding_details.get("product_id"):
             finding.description += f"**Product ID**: {product_id}\n"

@@ -104,19 +104,18 @@ class WpscanParser:
             )
 
         # manage Wordpress version findings
-        if "version" in tree and tree["version"]:
-            if (
-                "vulnerabilities" in tree["version"]
-                and tree["version"]["vulnerabilities"]
-            ):
-                self.get_vulnerabilities(
-                    report_date,
-                    tree["version"]["vulnerabilities"],
-                    dupes,
-                    node=None,
-                    plugin=None,
-                    detection_confidence=tree["version"].get("confidence"),
-                )
+        if "version" in tree and tree["version"] and (
+            "vulnerabilities" in tree["version"]
+            and tree["version"]["vulnerabilities"]
+        ):
+            self.get_vulnerabilities(
+                report_date,
+                tree["version"]["vulnerabilities"],
+                dupes,
+                node=None,
+                plugin=None,
+                detection_confidence=tree["version"].get("confidence"),
+            )
 
         # manage interesting interesting_findings
         for interesting_finding in tree.get("interesting_findings", []):

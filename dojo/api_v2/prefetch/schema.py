@@ -11,9 +11,8 @@ def _get_path_to_GET_serializer_map(generator):
         view,
     ) in generator._get_paths_and_endpoints():
         # print(path, path_pattern, method, view)
-        if method == "GET":
-            if hasattr(view, "get_serializer_class"):
-                path_to_GET_serializer[path] = view.get_serializer_class()
+        if method == "GET" and hasattr(view, "get_serializer_class"):
+            path_to_GET_serializer[path] = view.get_serializer_class()
 
     return path_to_GET_serializer
 

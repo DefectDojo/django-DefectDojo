@@ -270,7 +270,7 @@ class SchemaChecker:
         elif schema_type == TYPE_ARRAY:
             _check_helper(isinstance(obj, list))
         elif schema_type == TYPE_OBJECT:
-            _check_helper(isinstance(obj, OrderedDict) or isinstance(obj, dict))
+            _check_helper(isinstance(obj, (OrderedDict, dict)))
         elif schema_type == TYPE_STRING:
             _check_helper(isinstance(obj, str))
         else:
@@ -309,10 +309,10 @@ class SchemaChecker:
                         # self._with_prefix(name, _check, prop, obj_child)
                         _check(prop, obj_child)
 
-                for child_name in obj.keys():
+                for child_name in obj:
                     # TODO prefetch mixins not picked up by spectcular?
                     if child_name not in ['prefetch']:
-                        if not properties or child_name not in properties.keys():
+                        if not properties or child_name not in properties:
                             self._has_failed = True
                             self._register_error(f'unexpected property "{child_name}" found')
 
@@ -428,7 +428,7 @@ class BaseClass:
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_object_not_authorized(self):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             self.setUp_not_authorized()
@@ -440,7 +440,7 @@ class BaseClass:
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest('Authorization is not configuration based')
 
             self.setUp_not_authorized()
@@ -522,7 +522,7 @@ class BaseClass:
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list_object_not_authorized(self):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             self.setUp_not_authorized()
@@ -533,7 +533,7 @@ class BaseClass:
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest('Authorization is not configuration based')
 
             self.setUp_not_authorized()
@@ -563,7 +563,7 @@ class BaseClass:
         @skipIfNotSubclass(CreateModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
         def test_create_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             mock.return_value = False
@@ -576,7 +576,7 @@ class BaseClass:
 
         @skipIfNotSubclass(CreateModelMixin)
         def test_create_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest('Authorization is not configuration based')
 
             self.setUp_not_authorized()
@@ -626,7 +626,7 @@ class BaseClass:
         @skipIfNotSubclass(UpdateModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
         def test_update_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             mock.return_value = False
@@ -655,7 +655,7 @@ class BaseClass:
 
         @skipIfNotSubclass(UpdateModelMixin)
         def test_update_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest('Authorization is not configuration based')
 
             self.setUp_not_authorized()
@@ -716,7 +716,7 @@ class BaseClass:
         @skipIfNotSubclass(DestroyModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
         def test_delete_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             mock.return_value = False
@@ -738,7 +738,7 @@ class BaseClass:
 
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest('Authorization is not configuration based')
 
             self.setUp_not_authorized()
@@ -775,7 +775,7 @@ class BaseClass:
         @skipIfNotSubclass(UpdateModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
         def test_update_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest('Authorization is not object based')
 
             mock.return_value = False
@@ -792,7 +792,7 @@ class BaseClass:
     class AuthenticatedViewTest(BaseClassTest):
         @skipIfNotSubclass(ListModelMixin)
         def test_list_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest('Authorization is not configuration based')
 
             self.setUp_not_authorized()
@@ -802,7 +802,7 @@ class BaseClass:
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest('Authorization is not configuration based')
 
             self.setUp_not_authorized()
@@ -1107,7 +1107,7 @@ class FilesTest(DojoAPITestCase):
 
     def test_request_response_post_and_download(self):
         # Test the creation
-        for level in self.url_levels.keys():
+        for level in self.url_levels:
             length = FileUpload.objects.count()
             with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as testfile:
                 payload = {
@@ -1130,7 +1130,7 @@ class FilesTest(DojoAPITestCase):
             self.assertEqual(file_data, downloaded_file)
 
     def test_request_response_get(self):
-        for level in self.url_levels.keys():
+        for level in self.url_levels:
             response = self.client.get(f'/api/v2/{level}/files/')
             self.assertEqual(200, response.status_code)
 

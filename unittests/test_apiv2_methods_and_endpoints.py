@@ -84,9 +84,8 @@ class ApiEndpoints(DojoTestCase):
 
         self.used_models = []
         for serializer in serializers.__dict__.values():
-            if hasattr(serializer, 'Meta'):
-                if hasattr(serializer.Meta, 'model'):
-                    self.used_models.append(serializer.Meta.model)
+            if hasattr(serializer, 'Meta') and hasattr(serializer.Meta, 'model'):
+                self.used_models.append(serializer.Meta.model)
         self.no_api_models = [  # TODO: these models are excluded from check for now but implementation is needed
             Contact,
             Product_Line,

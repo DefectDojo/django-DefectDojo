@@ -83,9 +83,8 @@ class BurpGraphQLParser:
         if issue.get("description_html"):
             description = html2text.html2text(issue.get("description_html"))
 
-            if description:
-                if not finding["Description"].count(description) > 0:
-                    finding["Description"] += description + "\n\n"
+            if description and not finding["Description"].count(description) > 0:
+                finding["Description"] += description + "\n\n"
 
         if issue.get("evidence"):
             finding["Evidence"] = finding["Evidence"] + self.parse_evidence(

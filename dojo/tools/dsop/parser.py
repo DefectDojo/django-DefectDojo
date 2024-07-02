@@ -43,10 +43,7 @@ class DsopParser:
                     continue
                 title = row[headers["title"]]
                 unique_id = row[headers["ruleid"]]
-                if row[headers["severity"]] == "unknown":
-                    severity = "Info"
-                else:
-                    severity = row[headers["severity"]].title()
+                severity = "Info" if row[headers["severity"]] == "unknown" else row[headers["severity"]].title()
                 references = row[headers["refs"]]
                 description = row[headers["desc"]]
                 impact = row[headers["rationale"]]

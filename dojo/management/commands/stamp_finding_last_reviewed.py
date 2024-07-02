@@ -71,9 +71,8 @@ class Command(BaseCommand):
                 finding.last_reviewed_by = finding.reporter
                 save = True
 
-            if finding.mitigated:
-                if not finding.mitigated_by:
-                    finding.mitigated_by = finding.last_reviewed_by if finding.last_reviewed_by else finding.reporter
-                    save = True
+            if finding.mitigated and not finding.mitigated_by:
+                finding.mitigated_by = finding.last_reviewed_by if finding.last_reviewed_by else finding.reporter
+                save = True
             if save:
                 finding.save()

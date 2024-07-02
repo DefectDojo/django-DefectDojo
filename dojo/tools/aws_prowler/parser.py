@@ -66,16 +66,10 @@ class AWSProwlerParser:
             # title = re.sub(r"\[.*\]\s", "", result_extended)
             control = re.sub(r"\[.*\]\s", "", title_text)
             sev = self.getCriticalityRating(result, level, severity)
-            if result == "INFO" or result == "PASS":
-                active = False
-            else:
-                active = True
+            active = not (result == "INFO" or result == "PASS")
 
             # creating description early will help with duplication control
-            if not level:
-                level = ""
-            else:
-                level = ", " + level
+            level = "" if not level else ", " + level
             description = (
                 "**Issue:** "
                 + str(result_extended)
@@ -161,10 +155,7 @@ class AWSProwlerParser:
             sev = self.getCriticalityRating("FAIL", level, severity)
 
             # creating description early will help with duplication control
-            if not level:
-                level = ""
-            else:
-                level = ", " + level
+            level = "" if not level else ", " + level
             description = (
                 "**Issue:** "
                 + str(result_extended)
@@ -234,9 +225,6 @@ class AWSProwlerParser:
                     return "Low"
                 return severity
             else:
-                if level == "Level 1":
-                    criticality = "Critical"
-                else:
-                    criticality = "High"
+                criticality = "Critical" if level == "Level 1" else "High"
 
         return criticality

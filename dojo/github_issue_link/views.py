@@ -76,16 +76,15 @@ def delete_github(request, tid):
     # TODO Make Form
     form = DeleteGITHUBConfForm(instance=github_instance)
 
-    if request.method == 'POST':
-        if 'id' in request.POST and str(github_instance.id) == request.POST['id']:
-            form = DeleteGITHUBConfForm(request.POST, instance=github_instance)
-            if form.is_valid():
-                github_instance.delete()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'GitHub Conf and relationships removed.',
-                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('github'))
+    if request.method == 'POST' and 'id' in request.POST and str(github_instance.id) == request.POST['id']:
+        form = DeleteGITHUBConfForm(request.POST, instance=github_instance)
+        if form.is_valid():
+            github_instance.delete()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'GitHub Conf and relationships removed.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('github'))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([github_instance])

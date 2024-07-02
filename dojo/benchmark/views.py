@@ -1,3 +1,4 @@
+import contextlib
 import logging
 
 from crum import get_current_user
@@ -37,10 +38,8 @@ def add_benchmark(queryset, product):
         benchmark_product.control = requirement
         requirements.append(benchmark_product)
 
-    try:
+    with contextlib.suppress(Exception):
         Benchmark_Product.objects.bulk_create(requirements)
-    except Exception:
-        pass
 
 
 def update_benchmark(request, pid, _type):
@@ -299,27 +298,26 @@ def delete(request, pid, type):
     ).first()
     form = DeleteBenchmarkForm(instance=benchmark_product_summary)
 
-    if request.method == "POST":
-        if (
-            "id" in request.POST
-            and str(benchmark_product_summary.id) == request.POST["id"]
-        ):
-            form = DeleteBenchmarkForm(
-                request.POST, instance=benchmark_product_summary
+    if request.method == "POST" and (
+        "id" in request.POST
+        and str(benchmark_product_summary.id) == request.POST["id"]
+    ):
+        form = DeleteBenchmarkForm(
+            request.POST, instance=benchmark_product_summary
+        )
+        if form.is_valid():
+            benchmark_product = Benchmark_Product.objects.filter(
+                product=product, control__category__type=type
             )
-            if form.is_valid():
-                benchmark_product = Benchmark_Product.objects.filter(
-                    product=product, control__category__type=type
-                )
-                benchmark_product.delete()
-                benchmark_product_summary.delete()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    _("Benchmarks removed."),
-                    extra_tags="alert-success",
-                )
-                return HttpResponseRedirect(reverse("product"))
+            benchmark_product.delete()
+            benchmark_product_summary.delete()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                _("Benchmarks removed."),
+                extra_tags="alert-success",
+            )
+            return HttpResponseRedirect(reverse("product"))
 
     product_tab = Product_Tab(
         product, title=_("Delete Benchmarks"), tab="benchmarks"

@@ -126,30 +126,29 @@ class MobSFParser:
                 mobsf_findings.append(mobsf_item)
 
         # Certificate Analysis
-        if "certificate_analysis" in data:
-            if data["certificate_analysis"] != {}:
-                certificate_info = data["certificate_analysis"]["certificate_info"]
-                for details in data["certificate_analysis"]["certificate_findings"]:
-                    if len(details) == 3:
-                        mobsf_item = {
-                            "category": "Certificate Analysis",
-                            "title": details[2],
-                            "severity": details[0].title(),
-                            "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
-                            "file_path": None
-                        }
-                        mobsf_findings.append(mobsf_item)
-                    elif len(details) == 2:
-                        mobsf_item = {
-                            "category": "Certificate Analysis",
-                            "title": details[1],
-                            "severity": details[0].title(),
-                            "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
-                            "file_path": None
-                        }
-                        mobsf_findings.append(mobsf_item)
-                    else:
-                        pass
+        if "certificate_analysis" in data and data["certificate_analysis"] != {}:
+            certificate_info = data["certificate_analysis"]["certificate_info"]
+            for details in data["certificate_analysis"]["certificate_findings"]:
+                if len(details) == 3:
+                    mobsf_item = {
+                        "category": "Certificate Analysis",
+                        "title": details[2],
+                        "severity": details[0].title(),
+                        "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
+                        "file_path": None
+                    }
+                    mobsf_findings.append(mobsf_item)
+                elif len(details) == 2:
+                    mobsf_item = {
+                        "category": "Certificate Analysis",
+                        "title": details[1],
+                        "severity": details[0].title(),
+                        "description": details[1] + "\n\n**Certificate Info:** " + certificate_info,
+                        "file_path": None
+                    }
+                    mobsf_findings.append(mobsf_item)
+                else:
+                    pass
 
         # Manifest Analysis
         if "manifest_analysis" in data:
@@ -176,11 +175,22 @@ class MobSFParser:
                         mobsf_findings.append(mobsf_item)
 
         # Code Analysis
-        if "code_analysis" in data:
-            if data["code_analysis"] != {}:
-                if data["code_analysis"].get("findings"):
-                    for details in data["code_analysis"]["findings"]:
-                        metadata = data["code_analysis"]["findings"][details]
+        if "code_analysis" in data and data["code_analysis"] != {}:
+            if data["code_analysis"].get("findings"):
+                for details in data["code_analysis"]["findings"]:
+                    metadata = data["code_analysis"]["findings"][details]
+                    mobsf_item = {
+                        "category": "Code Analysis",
+                        "title": details,
+                        "severity": metadata["metadata"]["severity"].title(),
+                        "description": metadata["metadata"]["description"],
+                        "file_path": None
+                    }
+                    mobsf_findings.append(mobsf_item)
+            else:
+                for details in data["code_analysis"]:
+                    metadata = data["code_analysis"][details]
+                    if metadata.get("metadata"):
                         mobsf_item = {
                             "category": "Code Analysis",
                             "title": details,
@@ -189,25 +199,13 @@ class MobSFParser:
                             "file_path": None
                         }
                         mobsf_findings.append(mobsf_item)
-                else:
-                    for details in data["code_analysis"]:
-                        metadata = data["code_analysis"][details]
-                        if metadata.get("metadata"):
-                            mobsf_item = {
-                                "category": "Code Analysis",
-                                "title": details,
-                                "severity": metadata["metadata"]["severity"].title(),
-                                "description": metadata["metadata"]["description"],
-                                "file_path": None
-                            }
-                            mobsf_findings.append(mobsf_item)
 
         # Binary Analysis
         if "binary_analysis" in data:
             if isinstance(data["binary_analysis"], list):
                 for details in data["binary_analysis"]:
                     for binary_analysis_type in details:
-                        if "name" != binary_analysis_type:
+                        if binary_analysis_type != "name":
                             mobsf_item = {
                                 "category": "Binary Analysis",
                                 "title": details[binary_analysis_type]["description"].split(".")[0],
@@ -376,7 +374,7 @@ class MobSFParser:
         signature         => Info (it's positive so... Info)
         signatureOrSystem => Info (it's positive so... Info)
         """
-        if "dangerous" == status:
+        if status == "dangerous":
             return "High"
         else:
             return "Info"

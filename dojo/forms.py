@@ -174,10 +174,7 @@ class MonthYearWidget(Widget):
 
         output = []
 
-        if 'id' in self.attrs:
-            id_ = self.attrs['id']
-        else:
-            id_ = f'id_{name}'
+        id_ = self.attrs.get('id', f'id_{name}')
 
         month_choices = list(MONTHS.items())
         if not (self.required and value):
@@ -2990,10 +2987,9 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
             self.fields['push_to_jira'].disabled = True
 
-        if self.instance:
-            if hasattr(self.instance, 'has_jira_issue') and self.instance.has_jira_issue:
-                self.initial['jira_issue'] = self.instance.jira_issue.jira_key
-                self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+        if self.instance and hasattr(self.instance, 'has_jira_issue') and self.instance.has_jira_issue:
+            self.initial['jira_issue'] = self.instance.jira_issue.jira_key
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
         if is_finding_groups_enabled():
             self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding, or the group this finding is in.'})
         else:
@@ -3104,11 +3100,10 @@ class JIRAEngagementForm(forms.Form):
 
         super().__init__(*args, **kwargs)
 
-        if self.instance:
-            if self.instance.has_jira_issue:
-                self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
-                self.fields['push_to_jira'].label = 'Update JIRA Epic'
-                self.fields['push_to_jira'].help_text = 'Checking this will update the existing EPIC in JIRA.'
+        if self.instance and self.instance.has_jira_issue:
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['push_to_jira'].label = 'Update JIRA Epic'
+            self.fields['push_to_jira'].help_text = 'Checking this will update the existing EPIC in JIRA.'
 
     push_to_jira = forms.BooleanField(required=False, label="Create EPIC", help_text="Checking this will create an EPIC in JIRA for this engagement.")
     epic_name = forms.CharField(max_length=200, required=False, help_text="EPIC name in JIRA. If not specified, it defaults to the engagement name")
@@ -3199,10 +3194,7 @@ class TextQuestionForm(QuestionForm):
             question=self.question
         )
 
-        if initial_answer.exists():
-            initial_answer = initial_answer[0].answer
-        else:
-            initial_answer = ''
+        initial_answer = initial_answer[0].answer if initial_answer.exists() else ''
 
         self.fields['answer'] = forms.CharField(
             label=self.question.text,

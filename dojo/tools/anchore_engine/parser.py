@@ -80,15 +80,14 @@ class AnchoreEngineParser:
                         cvssv3_base_score = item["vendor_data"][0]["cvss_v3"][
                             "base_score"
                         ]
-                    elif len(item["vendor_data"]) > 1:
-                        if (
-                            "cvss_v3" in item["vendor_data"][1]
-                            and item["vendor_data"][1]["cvss_v3"]["base_score"]
-                            != -1
-                        ):
-                            cvssv3_base_score = item["vendor_data"][1][
-                                "cvss_v3"
-                            ]["base_score"]
+                    elif len(item["vendor_data"]) > 1 and (
+                        "cvss_v3" in item["vendor_data"][1]
+                        and item["vendor_data"][1]["cvss_v3"]["base_score"]
+                        != -1
+                    ):
+                        cvssv3_base_score = item["vendor_data"][1][
+                            "cvss_v3"
+                        ]["base_score"]
             # cvssv3 score spec states value should be between 0.0 and 10.0
             # anchorage provides a -1.0 in some situations which breaks spec
             if (cvssv3_base_score

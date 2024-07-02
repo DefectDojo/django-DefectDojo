@@ -34,10 +34,7 @@ class ApiEdgescanParser:
         return "In the field <b>Service key 1</b>, provide the Edgescan asset ID(s). Leaving it blank will import all assets' findings."
 
     def get_findings(self, file, test):
-        if file:
-            data = json.load(file)
-        else:
-            data = EdgescanImporter().get_findings(test)
+        data = json.load(file) if file else EdgescanImporter().get_findings(test)
 
         return self.process_vulnerabilities(test, data)
 
@@ -57,18 +54,17 @@ class ApiEdgescanParser:
             finding.cwe = int(vulnerability["cwes"][0][4:])
         if vulnerability["cves"]:
             finding.unsaved_vulnerability_ids = vulnerability["cves"]
-        if vulnerability["cvss_version"] == 3:
-            if vulnerability["cvss_vector"]:
-                cvss_objects = cvss_parser.parse_cvss_from_text(
-                    vulnerability["cvss_vector"]
-                )
-                if len(cvss_objects) > 0:
-                    finding.cvssv3 = cvss_objects[0].clean_vector()
+        if vulnerability["cvss_version"] == 3 and vulnerability["cvss_vector"]:
+            cvss_objects = cvss_parser.parse_cvss_from_text(
+                vulnerability["cvss_vector"]
+            )
+            if len(cvss_objects) > 0:
+                finding.cvssv3 = cvss_objects[0].clean_vector()
         finding.url = vulnerability["location"]
         finding.severity = ES_SEVERITIES[vulnerability["severity"]]
         finding.description = vulnerability["description"]
         finding.mitigation = vulnerability["remediation"]
-        finding.active = True if vulnerability["status"] == "open" else False
+        finding.active = vulnerability["status"] == "open"
         if vulnerability["asset_tags"]:
             finding.tags = vulnerability["asset_tags"].split(",")
         finding.unique_id_from_tool = vulnerability["id"]

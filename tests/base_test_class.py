@@ -1,3 +1,4 @@
+import contextlib
 import os
 import re
 import unittest
@@ -236,10 +237,8 @@ class BaseTestCase(unittest.TestCase):
 
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         no_content = None
-        try:
+        with contextlib.suppress(Exception):
             no_content = self.driver.find_element(By.ID, no_content_id)
-        except:
-            pass
 
         if no_content is None:
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
@@ -456,13 +455,12 @@ class BaseTestCase(unittest.TestCase):
     def tearDownDriver(cls):
         print("tearDownDriver: ", cls.__name__)
         global dd_driver
-        if dd_driver:
-            if (
-                not dd_driver_options.experimental_options
-                or not dd_driver_options.experimental_options.get("detach")
-            ):
-                print("closing browser")
-                dd_driver.quit()
+        if dd_driver and (
+            not dd_driver_options.experimental_options
+            or not dd_driver_options.experimental_options.get("detach")
+        ):
+            print("closing browser")
+            dd_driver.quit()
 
 
 class WebdriverOnlyNewLogFacade:

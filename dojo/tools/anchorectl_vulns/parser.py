@@ -77,15 +77,14 @@ class AnchoreCTLVulnsParser:
                         cvssv3_base_score = item["vendorData"][0]["cvssV3"][
                             "baseScore"
                         ]
-                    elif len(item["vendorData"]) > 1:
-                        if (
-                            "cvssV3" in item["vendorData"][1]
-                            and item["vendorData"][1]["cvssV3"]["baseScore"]
-                            != -1
-                        ):
-                            cvssv3_base_score = item["vendorData"][1][
-                                "cvssV3"
-                            ]["baseScore"]
+                    elif len(item["vendorData"]) > 1 and (
+                        "cvssV3" in item["vendorData"][1]
+                        and item["vendorData"][1]["cvssV3"]["baseScore"]
+                        != -1
+                    ):
+                        cvssv3_base_score = item["vendorData"][1][
+                            "cvssV3"
+                        ]["baseScore"]
 
             references = item["url"]
 

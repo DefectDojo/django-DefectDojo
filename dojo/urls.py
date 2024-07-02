@@ -215,15 +215,14 @@ api_v2_urls = [
     re_path(r'^{}api/v2/user_profile/'.format(get_system_setting('url_prefix')), UserProfileView.as_view(), name='user_profile'),
 ]
 
-if hasattr(settings, 'API_TOKENS_ENABLED'):
-    if settings.API_TOKENS_ENABLED:
-        api_v2_urls += [
-            re_path(
-                f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
-                tokenviews.obtain_auth_token,
-                name='api-token-auth',
-            )
-        ]
+if hasattr(settings, 'API_TOKENS_ENABLED') and settings.API_TOKENS_ENABLED:
+    api_v2_urls += [
+        re_path(
+            f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
+            tokenviews.obtain_auth_token,
+            name='api-token-auth',
+        )
+    ]
 
 urlpatterns = []
 
@@ -253,15 +252,13 @@ if hasattr(settings, 'DJANGO_METRICS_ENABLED'):
     if settings.DJANGO_METRICS_ENABLED:
         urlpatterns += [re_path(r'^{}django_metrics/'.format(get_system_setting('url_prefix')), include('django_prometheus.urls'))]
 
-if hasattr(settings, 'SAML2_ENABLED'):
-    if settings.SAML2_ENABLED:
-        # django saml2
-        urlpatterns += [re_path(r'^saml2/', include('djangosaml2.urls'))]
+if hasattr(settings, 'SAML2_ENABLED') and settings.SAML2_ENABLED:
+    # django saml2
+    urlpatterns += [re_path(r'^saml2/', include('djangosaml2.urls'))]
 
-if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
-    if settings.DJANGO_ADMIN_ENABLED:
-        #  django admin
-        urlpatterns += [re_path(r'^{}admin/'.format(get_system_setting('url_prefix')), admin.site.urls)]
+if hasattr(settings, 'DJANGO_ADMIN_ENABLED') and settings.DJANGO_ADMIN_ENABLED:
+    #  django admin
+    urlpatterns += [re_path(r'^{}admin/'.format(get_system_setting('url_prefix')), admin.site.urls)]
 
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):

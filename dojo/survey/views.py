@@ -319,17 +319,16 @@ def delete_questionnaire(request, sid):
     collector.collect([survey])
     rels = collector.nested()
 
-    if request.method == 'POST':
-        if 'id' in request.POST and str(survey.id) == request.POST['id']:
-            form = Delete_Eng_Survey_Form(request.POST, instance=survey)
-            if form.is_valid():
-                survey.delete()
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    'Questionnaire and relationships removed.',
-                    extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('questionnaire'))
+    if request.method == 'POST' and 'id' in request.POST and str(survey.id) == request.POST['id']:
+        form = Delete_Eng_Survey_Form(request.POST, instance=survey)
+        if form.is_valid():
+            survey.delete()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Questionnaire and relationships removed.',
+                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('questionnaire'))
 
     add_breadcrumb(title="Delete Questionnaire", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/delete_questionnaire.html', {
@@ -751,15 +750,14 @@ def answer_empty_survey(request, esid):
     engagement, survey = None, None
     settings = System_Settings.objects.all()[0]
 
-    if not settings.allow_anonymous_survey_repsonse:
-        if not request.user.is_authenticated:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'You must be logged in to answer questionnaire. Otherwise, enable anonymous response in system settings.',
-                extra_tags='alert-danger')
-            # will render 403
-            raise PermissionDenied
+    if not settings.allow_anonymous_survey_repsonse and not request.user.is_authenticated:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'You must be logged in to answer questionnaire. Otherwise, enable anonymous response in system settings.',
+            extra_tags='alert-danger')
+        # will render 403
+        raise PermissionDenied
 
     questions = [
         q.get_form()(
