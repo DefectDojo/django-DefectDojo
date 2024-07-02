@@ -13,4 +13,11 @@ wait_for_database_to_be_reachable() {
         exit 1
     fi
     done
+    cat <<EOD | python manage.py shell
+from django.db import connections
+from django.db.utils import OperationalError
+db_conn = connections['default']
+c = db_conn.cursor()
+EOD
+    exit $?
 }
