@@ -190,7 +190,7 @@ class TruffleHogParser:
                     references="N/A",
                     file_path=file,
                     line=line_number,  # setting it to a fake value to activate deduplication
-                    url="N/A",
+                    url=link,
                     dynamic_finding=False,
                     static_finding=True,
                     nb_occurences=1
