@@ -11,7 +11,7 @@ from ..dojo_test_case import DojoTestCase
 class TestNucleiParser(DojoTestCase):
 
     def test_parse_no_empty(self):
-        with open("unittests/scans/nuclei/empty.jsonl") as testfile:
+        with open("unittests/scans/nuclei/empty.json") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))

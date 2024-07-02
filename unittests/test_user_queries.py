@@ -1,8 +1,9 @@
 from unittest.mock import patch
+from django.contrib.auth import get_user_model
 
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Dojo_User, Global_Role, Product, Product_Member, Product_Type, Product_Type_Member, Role
-from dojo.user.queries import get_authorized_users
+from dojo.user.queries import get_authorized_users, get_all_user_by_role
 
 from .dojo_test_case import DojoTestCase
 

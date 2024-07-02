@@ -2660,7 +2660,7 @@ class Finding(models.Model):
         ]
 
     def __str__(self):
-        return self.title
+        return f"{self.id} - {self.title[:80] + '...' if len(self.title) > 80 else self.title}"
 
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
