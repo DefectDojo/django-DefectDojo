@@ -39,7 +39,6 @@ select = [
    "UP",
    "YTT",
    "ASYNC",
-   "TRIO",
    "S2", "S5", "S7",
    "C4",
    "T10",
