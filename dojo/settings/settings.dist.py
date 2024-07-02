@@ -1269,6 +1269,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Bearer CLI': ['title', 'severity'],
     'Nancy Scan': ['title', 'vuln_id_from_tool'],
     'Wiz Scan': ['title', 'description', 'severity'],
+    'Kiuwan SCA Scan': ['description', 'severity', 'component_name', 'component_version', 'cwe'],
     'Kubescape JSON Importer': ['title', 'component_name']
 }
 
@@ -1487,6 +1488,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Bearer CLI': DEDUPE_ALGO_HASH_CODE,
     'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
+    'Kiuwan SCA Scan': DEDUPE_ALGO_HASH_CODE,
     'Deepfence Threatmapper Report': DEDUPE_ALGO_HASH_CODE,
     'Kubescape JSON Importer': DEDUPE_ALGO_HASH_CODE
 }

@@ -1,0 +1,84 @@
+[
+  {
+    "id": 158713,
+    "cve": "CVE-2021-30468",
+    "cwe": "CWE-835",
+    "muted": false,
+    "lastModified": "2021/06/16 14:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv2BaseScore": "5",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "A vulnerability in the JsonMapObjectReaderWriter of Apache CXF allows an attacker to submit malformed JSON to a web service, which results in the thread getting stuck in an infinite loop, consuming CPU indefinitely. This issue affects Apache CXF versions prior to 3.4.4; Apache CXF versions prior to 3.3.11.",
+    "privateVulnerability": false,
+    "epss_score": 0.1,
+    "epss_percentile": 0.2,
+    "components": [
+      {
+        "id": 1270458,
+        "artifact": "org.apache.cxf:cxf-rt-ws-policy",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Policy",
+        "custom": false
+      },
+      {
+        "id": 1270456,
+        "artifact": "org.apache.cxf:cxf-rt-ws-addr",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Addressing",
+        "custom": false
+      },
+      {
+        "id": 1270592,
+        "artifact": "org.apache.cxf:cxf-rt-ws-security",
+        "version": "3.3.5",
+        "description": "Apache CXF Runtime WS Security",
+        "custom": false
+      },
+      {
+        "id": 1270653,
+        "artifact": "org.apache.cxf:cxf-core",
+        "version": "3.3.5",
+        "description": "Apache CXF Core",
+        "custom": false
+      }
+    ]
+  },
+  {
+    "id": 221606,
+    "cve": "CVE-2023-43642",
+    "cwe": "CWE-770",
+    "muted": false,
+    "lastModified": "2023/09/25 22:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "snappy-java is a Java port of the snappy, a fast C++ compresser/decompresser developed by Google. The SnappyInputStream was found to be vulnerable to Denial of Service (DoS) attacks when decompressing data with a too large ....",
+    "privateVulnerability": false,
+    "components": [
+      {
+        "id": 4153218,
+        "artifact": "org.xerial.snappy:snappy-java",
+        "version": "1.1.10.1",
+        "description": "snappy-java: A fast compression/decompression library",
+        "custom": false
+      }
+    ]
+  },
+	{
+    "muted": true,
+
+    "id": 22162233,
+    "cve": "CVE-2023-436421222",
+    "cwe": "CWE-77022",
+    "lastModified": "2023/09/25 22:15",
+    "exploitabilitySubscore": "3.9",
+    "impactSubscore": "3.6",
+    "cVSSv3BaseScore": "7.5",
+    "securityRisk": "HIGH",
+    "description": "muted.",
+    "privateVulnerability": false
+  }
+]
