@@ -1709,7 +1709,7 @@ def request_finding_review(request, fid):
                 finding=finding,
                 reviewers=reviewers,
                 recipients=reviewers_usernames,
-                description=f"User {user.get_full_name()} has requested that user(s) {reviewers_string} review the finding \"{finding.title}\" for accuracy:\n\n{new_note}",
+                description=f'User {user.get_full_name()} has requested that user(s) {reviewers_string} review the finding "{finding.title}" for accuracy:\n\n{new_note}',
                 icon="check",
                 url=reverse("view_finding", args=(finding.id,)),
             )

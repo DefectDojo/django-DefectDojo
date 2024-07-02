@@ -399,7 +399,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     severity=unsaved_finding.severity,
                     numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity)).order_by('id')
         else:
-            logger.error(f"Internal error: unexpected deduplication_algorithm: \"{self.deduplication_algorithm}\"")
+            logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
             return None
 
     def process_matched_finding(

@@ -1615,7 +1615,7 @@ class FindingFilterHelper(FilterSet):
             "The range of EPSS score percentages to filter on; the left input is a lower bound, "
             "the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving "
             "the lower bound input empty will filter only on the upper bound -- filtering on "
-            "\"less than or equal\")."
+            '"less than or equal").'
         ))
     epss_percentile = PercentageFilter(field_name="epss_percentile", label="EPSS percentile")
     epss_percentile_range = PercentageRangeFilter(
@@ -1624,7 +1624,7 @@ class FindingFilterHelper(FilterSet):
         help_text=(
             "The range of EPSS percentiles to filter on; the left input is a lower bound, the right "
             "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound "
-            "input empty will filter only on the upper bound -- filtering on \"less than or equal\")."
+            'input empty will filter only on the upper bound -- filtering on "less than or equal").'
         ))
 
     o = OrderingFilter(

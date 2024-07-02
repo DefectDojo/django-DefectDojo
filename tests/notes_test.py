@@ -6,10 +6,10 @@ from base_test_class import BaseTestCase
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
 
-'''
+"""
 Tests Notes functionality on all levels (Engagement, Test, and Finding)
 Private and public notes are tested
-'''
+"""
 
 
 class NoteTest(BaseTestCase):
