@@ -191,13 +191,13 @@ class NexposeParser:
                                 url_index += 1
                             else:
                                 vuln["refs"][ref.get("source")] = str(
-                                    ref.text
+                                    ref.text,
                                 ).strip()
 
                     elif item.tag == "solution":
                         for htmlType in list(item):
                             vuln["resolution"] += self.parse_html_type(
-                                htmlType
+                                htmlType,
                             )
 
                     # there is currently no method to register tags in vulns
@@ -224,7 +224,7 @@ class NexposeParser:
                         "name": "Host Up",
                         "desc": "Host is up because it replied on ICMP request or some TCP/UDP port is up",
                         "severity": "Info",
-                    }
+                    },
                 )
 
                 for names in node.findall("names"):
@@ -242,11 +242,11 @@ class NexposeParser:
                             for service in services.findall("service"):
                                 svc["name"] = service.get("name", "").lower()
                                 svc["vulns"] = self.parse_tests_type(
-                                    service, vulns
+                                    service, vulns,
                                 )
 
                                 for configs in service.findall(
-                                    "configurations"
+                                    "configurations",
                                 ):
                                     for config in configs.findall("config"):
                                         if "banner" in config.get("name"):
@@ -269,11 +269,11 @@ class NexposeParser:
                                                 "[^A-Za-z0-9]+",
                                                 "-",
                                                 service.get("name").lower(),
-                                            ).rstrip("-")
+                                            ).rstrip("-"),
                                         ]
                                         if service.get("name") != "<unknown>"
                                         else [],
-                                    }
+                                    },
                                 )
 
                         host["services"].append(svc)
@@ -308,7 +308,7 @@ class NexposeParser:
                         else service["protocol"],
                         fragment=service["protocol"].lower()
                         if service["name"] == "dns"
-                        else None
+                        else None,
                         # A little dirty hack but in case of DNS it is
                         # important to know if vulnerability is on TCP or UDP
                     )

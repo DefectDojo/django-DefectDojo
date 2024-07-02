@@ -136,7 +136,7 @@ class NotificationTest(BaseTestCase):
         originally_selected = {
             'product_added': driver.find_element(By.XPATH,
                                                  "//input[@name='product_added' and @value='mail']").is_selected(),
-            'scan_added': driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected()
+            'scan_added': driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected(),
         }
 
         driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").click()

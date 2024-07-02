@@ -77,7 +77,7 @@ class TestBanditParser(DojoTestCase):
             with self.subTest(i=50):
                 item = findings[50]
                 self.assertEqual(
-                    "Use of mark_safe() may expose cross-site scripting vulnerabilities and should be reviewed.", item.title
+                    "Use of mark_safe() may expose cross-site scripting vulnerabilities and should be reviewed.", item.title,
                 )
                 self.assertEqual(datetime.datetime(2021, 10, 3, 12, 53, 18, tzinfo=tzlocal()), item.date)
                 self.assertEqual("Medium", item.severity)

@@ -41,7 +41,7 @@ class TestKubeHunterParser(TestCase):
                 parser.get_findings(testfile, Test())
 
         self.assertEqual(
-            "Expecting value: line 1 column 1 (char 0)", str(context.exception)
+            "Expecting value: line 1 column 1 (char 0)", str(context.exception),
         )
 
     def test_kubehunter_parser_dupe(self):

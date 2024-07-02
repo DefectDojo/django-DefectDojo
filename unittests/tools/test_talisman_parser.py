@@ -27,7 +27,7 @@ class TestTalismanParser(DojoTestCase):
             self.assertEqual(3, len(findings))
             finding = findings[0]
             self.assertEqual(
-                "talisman_report/talisman_reports/data/report.json", finding.file_path
+                "talisman_report/talisman_reports/data/report.json", finding.file_path,
             )
             self.assertEqual(
                 "Secret pattern found in talisman_report/talisman_reports/data/report.json file",

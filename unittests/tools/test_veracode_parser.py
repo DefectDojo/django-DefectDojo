@@ -390,7 +390,7 @@ class TestVeracodeScannerParser(DojoTestCase):
                 host="application.insecure-company-alliance.com",
                 port=443,
                 path="api/*_*//new_user_sign_up",
-                query="param=wild-things"
+                query="param=wild-things",
             ))
 
     @override_settings(USE_FIRST_SEEN=True)

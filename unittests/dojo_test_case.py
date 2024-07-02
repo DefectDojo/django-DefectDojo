@@ -176,7 +176,7 @@ class DojoTestUtilsMixin:
             'jira-project-form-push_notes': 'on',
             'jira-project-form-product_jira_sla_notification': 'on',
             'jira-project-form-custom_fields': 'null',
-            'sla_configuration': 1
+            'sla_configuration': 1,
 
         }
 
@@ -207,7 +207,7 @@ class DojoTestUtilsMixin:
             'jira-project-form-push_notes': 'on',
             'jira-project-form-product_jira_sla_notification': 'on',
             'jira-project-form-custom_fields': 'null',
-            'sla_configuration': 1
+            'sla_configuration': 1,
 
         }
 
@@ -223,7 +223,7 @@ class DojoTestUtilsMixin:
             'jira-project-form-push_notes': 'on',
             'jira-project-form-product_jira_sla_notification': 'on',
             'jira-project-form-custom_fields': 'null',
-            'sla_configuration': 1
+            'sla_configuration': 1,
 
         }
 

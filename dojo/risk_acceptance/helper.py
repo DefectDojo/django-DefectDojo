@@ -51,7 +51,7 @@ def expire_now(risk_acceptance):
     create_notification(event='risk_acceptance_expiration', title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
                          reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
                          product=risk_acceptance.engagement.product,
-                         url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+                         url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id)))
 
 
 def reinstate(risk_acceptance, old_expiration_date):
@@ -169,7 +169,7 @@ def expiration_handler(*args, **kwargs):
             create_notification(event='risk_acceptance_expiration', title=notification_title, risk_acceptance=risk_acceptance,
                                 accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
                                 product=risk_acceptance.engagement.product,
-                                url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id, )))
+                                url=reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id)))
 
             post_jira_comments(risk_acceptance, expiration_warning_message_creator, heads_up_days)
 
@@ -266,7 +266,7 @@ def prefetch_for_expiration(risk_acceptances):
     return risk_acceptances.prefetch_related('accepted_findings', 'accepted_findings__jira_issue',
                                                 'engagement_set',
                                                 'engagement__jira_project',
-                                                'engagement__jira_project__jira_instance'
+                                                'engagement__jira_project__jira_instance',
                                              )
 
 

@@ -16,7 +16,7 @@ class NotificationsTest(APITestCase):
 
         r = self.create(
             template=True,
-            scan_added=['alert', 'slack']
+            scan_added=['alert', 'slack'],
         )
         self.assertEqual(r.status_code, 201)
 
@@ -27,7 +27,7 @@ class NotificationsTest(APITestCase):
         password = 'testTEST1234!@#$'
         r = self.client.post(reverse('user-list'), {
             "username": "api-user-notification",
-            "password": password
+            "password": password,
         }, format='json')
         return r.json()["id"]
 

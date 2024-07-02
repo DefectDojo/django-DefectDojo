@@ -36,8 +36,8 @@ class SpotbugsParser:
             # Parse <BugPattern>...<Details> html content
             html_text = html_parser.handle(
                 ET.tostring(pattern.find("Details"), method="text").decode(
-                    "utf-8"
-                )
+                    "utf-8",
+                ),
             )
 
             # Parse mitigation from html
@@ -109,7 +109,7 @@ class SpotbugsParser:
                 finding.file_path = source_extract.get("sourcepath")
                 finding.sast_source_object = source_extract.get("classname")
                 finding.sast_source_file_path = source_extract.get(
-                    "sourcepath"
+                    "sourcepath",
                 )
                 if (
                     "start" in source_extract.attrib

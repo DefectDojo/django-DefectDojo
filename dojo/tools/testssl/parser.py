@@ -20,7 +20,7 @@ class TestsslParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
 
         dupes = {}
@@ -68,7 +68,7 @@ class TestsslParser:
                     finding.cwe = int(row["cwe"].split("-")[1].strip())
                 # manage endpoint
                 finding.unsaved_endpoints = [
-                    Endpoint(host=row["fqdn/ip"].split("/")[0])
+                    Endpoint(host=row["fqdn/ip"].split("/")[0]),
                 ]
                 if row.get("port") and row["port"].isdigit():
                     finding.unsaved_endpoints[0].port = int(row["port"])
@@ -80,16 +80,16 @@ class TestsslParser:
                             finding.description,
                             finding.title,
                             str(vulnerability),
-                        ]
-                    ).encode("utf-8")
+                        ],
+                    ).encode("utf-8"),
                 ).hexdigest()
                 if dupe_key in dupes:
                     dupes[dupe_key].unsaved_endpoints.extend(
-                        finding.unsaved_endpoints
+                        finding.unsaved_endpoints,
                     )
                     if dupes[dupe_key].unsaved_vulnerability_ids:
                         dupes[dupe_key].unsaved_vulnerability_ids.extend(
-                            finding.unsaved_vulnerability_ids
+                            finding.unsaved_vulnerability_ids,
                         )
                     else:
                         dupes[

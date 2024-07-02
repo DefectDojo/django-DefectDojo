@@ -104,7 +104,7 @@ class AWSProwlerParser:
 
             # improving key to get duplicates
             dupe_key = hashlib.sha256(
-                (sev + "|" + region + "|" + result_extended).encode("utf-8")
+                (sev + "|" + region + "|" + result_extended).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -189,7 +189,7 @@ class AWSProwlerParser:
 
             # improving key to get duplicates
             dupe_key = hashlib.sha256(
-                (sev + "|" + region + "|" + result_extended).encode("utf-8")
+                (sev + "|" + region + "|" + result_extended).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]

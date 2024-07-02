@@ -118,7 +118,7 @@ def action_history(request, cid, oid):
                    "obj": obj,
                    "test": test,
                    "object_value": object_value,
-                   "finding": finding
+                   "finding": finding,
                    })
 
 

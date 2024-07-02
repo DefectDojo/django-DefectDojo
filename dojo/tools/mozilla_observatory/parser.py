@@ -41,7 +41,7 @@ class MozillaObservatoryParser:
                     + "`",
                     "**Result** : `" + node["result"] + "`"
                     "**expectation** : " + str(node.get("expectation")) + "`",
-                ]
+                ],
             )
 
             finding = Finding(

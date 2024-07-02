@@ -101,7 +101,7 @@ class AnchoreEngineParser:
             dupe_key = "|".join(
                 [
                     item.get(
-                        "image_digest", item.get("imageDigest", "None")
+                        "image_digest", item.get("imageDigest", "None"),
                     ),  # depending on version image_digest/imageDigest
                     item["feed"],
                     item["feed_group"],
@@ -109,7 +109,7 @@ class AnchoreEngineParser:
                     item["package_version"],
                     item["package_path"],
                     item["vuln"],
-                ]
+                ],
             )
 
             if dupe_key in dupes:

@@ -53,7 +53,7 @@ class AnchoreGrypeParser:
                 rel_description = related_vulnerability.get("description")
                 rel_cvss = related_vulnerability.get("cvss")
             vulnerability_ids = self.get_vulnerability_ids(
-                vuln_id, related_vulnerabilities
+                vuln_id, related_vulnerabilities,
             )
 
             matches = item["matchDetails"]
@@ -96,7 +96,7 @@ class AnchoreGrypeParser:
                         f"\n**Matcher:** {matches[0]['matcher']}"
                     )
                     finding_tags = [
-                        matches[0]["matcher"].replace("-matcher", "")
+                        matches[0]["matcher"].replace("-matcher", ""),
                     ]
                 else:
                     finding_description += "\n**Matchers:**"
@@ -198,7 +198,7 @@ class AnchoreGrypeParser:
                 vector = cvss_item["vector"]
                 cvss_objects = cvss_parser.parse_cvss_from_text(vector)
                 if len(cvss_objects) > 0 and isinstance(
-                    cvss_objects[0], CVSS3
+                    cvss_objects[0], CVSS3,
                 ):
                     return vector
         return None

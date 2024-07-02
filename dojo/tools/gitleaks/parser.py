@@ -98,7 +98,7 @@ class GitleaksParser:
         finding.unsaved_tags = issue.get("tags", "").split(", ")
 
         dupe_key = hashlib.sha256(
-            (issue["offender"] + file_path + str(line)).encode("utf-8")
+            (issue["offender"] + file_path + str(line)).encode("utf-8"),
         ).hexdigest()
 
         if dupe_key not in dupes:
@@ -152,7 +152,7 @@ class GitleaksParser:
         severity = "High"
 
         dupe_key = hashlib.md5(
-            (title + secret + str(line)).encode("utf-8")
+            (title + secret + str(line)).encode("utf-8"),
         ).hexdigest()
 
         if dupe_key in dupes:
@@ -173,7 +173,7 @@ class GitleaksParser:
                 line=line,
                 dynamic_finding=False,
                 static_finding=True,
-                nb_occurences=1
+                nb_occurences=1,
             )
             if tags:
                 finding.unsaved_tags = tags

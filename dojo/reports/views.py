@@ -112,7 +112,7 @@ class ReportBuilder(View):
     def get_context(self, request: HttpRequest) -> dict:
         return {
             "available_widgets": self.get_available_widgets(request),
-            "in_use_widgets": self.get_in_use_widgets(request), }
+            "in_use_widgets": self.get_in_use_widgets(request)}
 
 
 class CustomReport(View):
@@ -153,7 +153,7 @@ class CustomReport(View):
 
     def get_template(self):
         if self.report_format == 'AsciiDoc':
-            return 'dojo/custom_asciidoc_report.html',
+            return 'dojo/custom_asciidoc_report.html'
         elif self.report_format == 'HTML':
             return 'dojo/custom_html_report.html'
         else:
@@ -165,7 +165,7 @@ class CustomReport(View):
             "host": self.host,
             "finding_notes": self.finding_notes,
             "finding_images": self.finding_images,
-            "user_id": self.request.user.id, }
+            "user_id": self.request.user.id}
 
 
 def report_findings(request):
@@ -710,14 +710,14 @@ def prefetch_related_findings_for_report(findings):
                                      'notes',
                                      'files',
                                      'reporter',
-                                     'mitigated_by'
+                                     'mitigated_by',
                                      )
 
 
 def prefetch_related_endpoints_for_report(endpoints):
     return endpoints.prefetch_related(
                                       'product',
-                                      'tags'
+                                      'tags',
                                      )
 
 
@@ -1147,7 +1147,7 @@ class ExcelExportView(View):
 
         response = HttpResponse(
             content=stream,
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         )
         response['Content-Disposition'] = 'attachment; filename=findings.xlsx'
         return response

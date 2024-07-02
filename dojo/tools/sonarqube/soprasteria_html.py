@@ -10,7 +10,7 @@ class SonarQubeSoprasteriaHTML:
         # Check that there is at least one vulnerability (the vulnerabilities
         # table is absent when no vuln are found)
         detailTbody = tree.xpath(
-            "/html/body/div[contains(@class,'detail')]/table/tbody"
+            "/html/body/div[contains(@class,'detail')]/table/tbody",
         )
         dupes = {}
         if len(detailTbody) == 2:
@@ -32,7 +32,7 @@ class SonarQubeSoprasteriaHTML:
                 rule_key = list(vuln_properties[0].iter("a"))[0].text
                 vuln_rule_name = rule_key and rule_key.strip()
                 vuln_severity = SonarQubeSoprasteriaHelper().convert_sonar_severity(
-                    vuln_properties[1].text and vuln_properties[1].text.strip()
+                    vuln_properties[1].text and vuln_properties[1].text.strip(),
                 )
                 vuln_file_path = vuln_properties[2].text and vuln_properties[2].text.strip()
                 vuln_line = vuln_properties[3].text and vuln_properties[3].text.strip()
@@ -42,13 +42,13 @@ class SonarQubeSoprasteriaHTML:
                 if vuln_title is None or vuln_mitigation is None:
                     raise ValueError(
                         "Parser ValueError: can't find a title or a mitigation for vulnerability of name "
-                        + vuln_rule_name
+                        + vuln_rule_name,
                     )
                 try:
                     vuln_details = rulesDic[vuln_rule_name]
                     vuln_description = SonarQubeSoprasteriaHelper().get_description(vuln_details)
                     vuln_references = SonarQubeSoprasteriaHelper().get_references(
-                        vuln_rule_name, vuln_details
+                        vuln_rule_name, vuln_details,
                     )
                     vuln_cwe = SonarQubeSoprasteriaHelper().get_cwe(vuln_references)
                 except KeyError:

@@ -37,12 +37,12 @@ class OktaOAuth2(OktaMixin, BaseOAuth2):
     SCOPE_SEPARATOR = ' '
 
     DEFAULT_SCOPE = [
-        'openid', 'profile'
+        'openid', 'profile',
     ]
     EXTRA_DATA = [
         ('refresh_token', 'refresh_token', True),
         ('expires_in', 'expires'),
-        ('token_type', 'token_type', True)
+        ('token_type', 'token_type', True),
     ]
 
     def get_user_details(self, response):
@@ -58,7 +58,7 @@ class OktaOAuth2(OktaMixin, BaseOAuth2):
             self._url('v1/userinfo'),
             headers={
                 'Authorization': f'Bearer {access_token}',
-            }
+            },
         )
 
 
@@ -94,7 +94,7 @@ class OktaOpenIdConnect(OktaOAuth2, OpenIdConnectAuth):
                 k,
                 audience=client_id,
                 issuer=self.id_token_issuer(),
-                access_token=access_token
+                access_token=access_token,
             )
 
         self.validate_claims(claims)

@@ -24,13 +24,13 @@ class TestOptiEndpointStatus(MigratorTestCase):
         self.engagement = Engagement.objects.create(
             product_id=self.product.pk,
             target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
         )
         self.test = Test.objects.create(
             engagement_id=self.engagement.pk,
             target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
             target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
-            test_type_id=1
+            test_type_id=1,
         )
         from django.contrib.auth import get_user_model
         user = get_user_model().objects.create().pk
@@ -39,16 +39,16 @@ class TestOptiEndpointStatus(MigratorTestCase):
         self.endpoint = Endpoint.objects.create(host='foo.bar', product_id=self.product.pk).pk
         self.endpoint_status = Endpoint_Status.objects.create(
                 finding_id=self.finding,
-                endpoint_id=self.endpoint
+                endpoint_id=self.endpoint,
         ).pk
         Endpoint.objects.get(id=self.endpoint).endpoint_status.add(
-            Endpoint_Status.objects.get(id=self.endpoint_status)
+            Endpoint_Status.objects.get(id=self.endpoint_status),
         )
         Finding.objects.get(id=self.finding).endpoint_status.add(
-            Endpoint_Status.objects.get(id=self.endpoint_status)
+            Endpoint_Status.objects.get(id=self.endpoint_status),
         )
         Finding.objects.get(id=self.finding).endpoints.add(
-            Endpoint.objects.get(id=self.endpoint).pk
+            Endpoint.objects.get(id=self.endpoint).pk,
         )
 
         self.presudotest_before_migration()

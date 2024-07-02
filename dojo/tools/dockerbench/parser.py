@@ -34,7 +34,7 @@ def get_tests(tree, test):
 
     for node in tree["tests"]:
         items_from_results = get_results(
-            node, test, test_start, test_end, description
+            node, test, test_start, test_end, description,
         )
         items_from_tests += items_from_results
 
@@ -108,7 +108,7 @@ def get_item(vuln, test, test_start, test_end, description):
     if vuln.get("remediation-impact"):
         mitigation += "\n"
         mitigation += "mitigation impact: {}\n".format(
-            vuln["remediation-impact"]
+            vuln["remediation-impact"],
         )
 
     finding = Finding(

@@ -24,7 +24,7 @@ def new_sla_config(request):
                                  messages.SUCCESS,
                                  'SLA configuration Successfully Created.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('sla_config', ))
+            return HttpResponseRedirect(reverse('sla_config'))
     else:
         tform = SLAConfigForm()
         add_breadcrumb(
@@ -55,13 +55,13 @@ def edit_sla_config(request, slaid):
                                     messages.SUCCESS,
                                     'SLA Configuration Deleted.',
                                     extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('sla_config', ))
+            return HttpResponseRedirect(reverse('sla_config'))
         else:
             messages.add_message(request,
                                  messages.ERROR,
                                  'The Default SLA Configuration cannot be deleted.',
                                  extra_tags='alert-danger')
-            return HttpResponseRedirect(reverse('sla_config', ))
+            return HttpResponseRedirect(reverse('sla_config'))
 
     elif request.method == 'POST':
         form = SLAConfigForm(request.POST, instance=sla_config)
@@ -71,7 +71,7 @@ def edit_sla_config(request, slaid):
                                  messages.SUCCESS,
                                  'SLA configuration successfully updated. All SLA expiration dates for findings within this SLA configuration will be recalculated asynchronously.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('sla_config', ))
+            return HttpResponseRedirect(reverse('sla_config'))
     else:
         form = SLAConfigForm(instance=sla_config)
 
@@ -100,5 +100,5 @@ def sla_config(request):
     return render(request,
                   'dojo/sla_config.html',
                   {'confs': confs,
-                   'settings': settings
+                   'settings': settings,
                    })

@@ -47,7 +47,7 @@ class TestTwistlockParser(DojoTestCase):
 
     def test_parse_file_prisma_twistlock_images_no_vuln(self):
         testfile = open(
-            path.join(path.dirname(__file__), "../scans/twistlock/scan_report_prisma_twistlock_images_no_vuln.csv")
+            path.join(path.dirname(__file__), "../scans/twistlock/scan_report_prisma_twistlock_images_no_vuln.csv"),
         )
         parser = TwistlockParser()
         findings = parser.get_findings(testfile, Test())
@@ -56,7 +56,7 @@ class TestTwistlockParser(DojoTestCase):
 
     def test_parse_file_prisma_twistlock_images_four_vulns(self):
         testfile = open(
-            path.join(path.dirname(__file__), "../scans/twistlock/scan_report_prisma_twistlock_images_four_vulns.csv")
+            path.join(path.dirname(__file__), "../scans/twistlock/scan_report_prisma_twistlock_images_four_vulns.csv"),
         )
         parser = TwistlockParser()
         findings = parser.get_findings(testfile, Test())
@@ -68,8 +68,8 @@ class TestTwistlockParser(DojoTestCase):
     def test_parse_file_prisma_twistlock_images_long_package_name(self):
         testfile = open(
             path.join(
-                path.dirname(__file__), "../scans/twistlock/scan_report_prisma_twistlock_images_long_package_name.csv"
-            )
+                path.dirname(__file__), "../scans/twistlock/scan_report_prisma_twistlock_images_long_package_name.csv",
+            ),
         )
         parser = TwistlockParser()
         findings = parser.get_findings(testfile, Test())

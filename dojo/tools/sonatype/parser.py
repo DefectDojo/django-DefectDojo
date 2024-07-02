@@ -57,7 +57,7 @@ def get_finding(security_issue, component, test):
         mitigation=status,
         references=reference,
         impact=threat_category,
-        static_finding=True
+        static_finding=True,
     )
     if "cwe" in security_issue:
         finding.cwe = security_issue["cwe"]

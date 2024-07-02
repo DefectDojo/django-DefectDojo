@@ -106,7 +106,7 @@ def get_item(vulnerability, test):
     references = "\n".join(vulnerability["references"])
 
     scan_time = datetime.strptime(
-        vulnerability["artifact_scan_time"], "%Y-%m-%dT%H:%M:%S%z"
+        vulnerability["artifact_scan_time"], "%Y-%m-%dT%H:%M:%S%z",
     )
 
     # component has several parts separated by colons. Last part is the

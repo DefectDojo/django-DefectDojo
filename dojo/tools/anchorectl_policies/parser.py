@@ -72,7 +72,7 @@ class AnchoreCTLPoliciesParser:
             # import empty policies without error (e.g. policies or images
             # objects are not a dictionary)
             logger.warning(
-                "Exception at %s", "parsing anchore policy", exc_info=err
+                "Exception at %s", "parsing anchore policy", exc_info=err,
             )
         return items
 

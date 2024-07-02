@@ -33,7 +33,7 @@ class IntSightsCSVParser:
             "Closed Reason",
             "Additional Info",
             "Rating",
-            "Alert Link"
+            "Alert Link",
         ]
 
         # These keys require a value. If one ore more of the values is null or empty, the entire Alert is ignored.
@@ -47,12 +47,12 @@ class IntSightsCSVParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         csv_reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
 
         # Don't bother parsing if the keys don't match exactly what's expected
         if collections.Counter(default_keys) == collections.Counter(
-            csv_reader.fieldnames
+            csv_reader.fieldnames,
         ):
             default_valud = "None provided"
             for alert in csv_reader:
@@ -64,13 +64,13 @@ class IntSightsCSVParser:
                     "Type",
                 )
                 alert["source_date"] = alert.pop(
-                    "Source Date (UTC)", default_valud
+                    "Source Date (UTC)", default_valud,
                 )
                 alert["report_date"] = alert.pop(
-                    "Report Date (UTC)", default_valud
+                    "Report Date (UTC)", default_valud,
                 )
                 alert["network_type"] = alert.pop(
-                    "Network Type", default_valud
+                    "Network Type", default_valud,
                 )
                 alert["source_url"] = alert.pop("Source URL", default_valud)
                 alert["assets"] = alert.pop("Assets", default_valud)
@@ -89,7 +89,7 @@ class IntSightsCSVParser:
                     alerts.append(alert)
         else:
             self._LOGGER.error(
-                "The CSV file has one or more missing or unexpected header values"
+                "The CSV file has one or more missing or unexpected header values",
             )
 
         return alerts

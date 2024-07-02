@@ -55,7 +55,7 @@ class TerrascanParser:
                     + resource_type
                     + file
                     + str(line)
-                ).encode("utf-8")
+                ).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:

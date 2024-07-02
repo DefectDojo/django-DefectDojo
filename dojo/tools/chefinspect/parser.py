@@ -54,6 +54,6 @@ class ChefInspectParser:
                         description=description,
                         severity=self.convert_score(json_object.get("impact")),
                         active=True,
-                    )
+                    ),
                 )
         return result

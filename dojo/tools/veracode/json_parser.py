@@ -197,7 +197,7 @@ class VeracodeJSONParser:
         if url := finding_details.get("url"):
             # Create the Endpoint object from the url
             finding.unsaved_endpoints.append(
-                Endpoint.from_uri(url)
+                Endpoint.from_uri(url),
             )
         else:
             # build it from the other attributes
@@ -210,7 +210,7 @@ class VeracodeJSONParser:
                     host=host,
                     port=port,
                     path=path,
-                )
+                ),
             )
         # Add the plugin if available
         if plugin := finding_details.get("plugin"):

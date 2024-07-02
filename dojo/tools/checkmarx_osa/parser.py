@@ -52,7 +52,7 @@ class CheckmarxOsaParser:
             vulnerability_id = item.get("cveName", "NC")
             finding_item = Finding(
                 title="{} {} | {}".format(
-                    library["name"], library["version"], vulnerability_id
+                    library["name"], library["version"], vulnerability_id,
                 ),
                 severity=item["severity"]["name"],
                 description=item.get("description", "NC"),
@@ -69,14 +69,14 @@ class CheckmarxOsaParser:
                 cwe=1035,
                 cvssv3_score=item.get("score", None),
                 publish_date=datetime.strptime(
-                    item["publishDate"], "%Y-%m-%dT%H:%M:%S"
+                    item["publishDate"], "%Y-%m-%dT%H:%M:%S",
                 )
                 if "publishDate" in item
                 else None,
                 static_finding=True,
                 dynamic_finding=False,
                 scanner_confidence=self.checkmarx_confidence_to_defectdojo_confidence(
-                    library["confidenceLevel"]
+                    library["confidenceLevel"],
                 )
                 if "confidenceLevel" in library
                 else None,
@@ -115,7 +115,7 @@ class CheckmarxOsaParser:
     # 100% = Certain
     # 70% = Firm
     def checkmarx_confidence_to_defectdojo_confidence(
-        self, checkmarx_confidence
+        self, checkmarx_confidence,
     ):
         return round((100 - checkmarx_confidence) / 10) + 1
 

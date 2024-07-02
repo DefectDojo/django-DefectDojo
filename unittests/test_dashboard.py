@@ -21,7 +21,7 @@ def create(when: datetime, product_id: int, titles_and_severities: List[Tuple[st
         test = Test.objects.create(engagement=engagement, test_type_id=120, target_start=when, target_end=when)
         Finding.objects.bulk_create(
             (Finding(title=title, test=test, severity=severity, verified=False)
-             for title, severity in titles_and_severities)
+             for title, severity in titles_and_severities),
         )
 
 
@@ -36,7 +36,7 @@ def create_with_duplicates(when: datetime, product_id: int, titles_and_severitie
         Finding.objects.bulk_create(
             (Finding(title=title, test=test, severity=severity, verified=False,
                      duplicate=(title in originals_map), duplicate_finding=originals_map.get(title))
-             for title, severity in titles_and_severities)
+             for title, severity in titles_and_severities),
         )
 
 

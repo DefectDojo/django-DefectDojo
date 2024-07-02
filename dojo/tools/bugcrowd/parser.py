@@ -25,7 +25,7 @@ class BugCrowdParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         csvarray = []
 
@@ -38,7 +38,7 @@ class BugCrowdParser:
 
             url = row.get("bug_url", None)
             pre_description = self.split_description(
-                row.get("description", None)
+                row.get("description", None),
             )
             Description = (
                 pre_description.get("description", "")
@@ -120,7 +120,7 @@ class BugCrowdParser:
                 + row.get("vrt_lineage", "")
             )
             finding.steps_to_reproduce = pre_description.get(
-                "steps_to_reproduce", None
+                "steps_to_reproduce", None,
             )
             finding.references = References
             finding.severity = self.convert_severity(row.get("priority", 0))
@@ -139,7 +139,7 @@ class BugCrowdParser:
                     finding.description = ""
 
                 key = hashlib.md5(
-                    (finding.title + "|" + finding.description).encode("utf-8")
+                    (finding.title + "|" + finding.description).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:
@@ -173,7 +173,7 @@ class BugCrowdParser:
                 ret[
                     "steps_to_reproduce"
                 ] = "### Steps To Reproduce\n" + ret.get(
-                    "imsteps_to_reproducepact", ""
+                    "imsteps_to_reproducepact", "",
                 )
                 steps = skip = 1
                 poc = impact = 0

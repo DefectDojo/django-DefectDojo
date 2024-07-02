@@ -78,7 +78,7 @@ class AcunetixJSONParser:
                 and (item["Classification"]["Cvss"]["Vector"] is not None)
             ):
                 cvss_objects = cvss_parser.parse_cvss_from_text(
-                    item["Classification"]["Cvss"]["Vector"]
+                    item["Classification"]["Cvss"]["Vector"],
                 )
                 if len(cvss_objects) > 0:
                     finding.cvssv3 = cvss_objects[0].clean_vector()

@@ -43,10 +43,10 @@ class PhpSymfonySecurityCheckParser:
 
             for advisory in advisories:
                 item = get_item(
-                    dependency_name, dependency_version, advisory, test
+                    dependency_name, dependency_version, advisory, test,
                 )
                 unique_key = str(dependency_name) + str(
-                    dependency_data["version"] + str(advisory["cve"])
+                    dependency_data["version"] + str(advisory["cve"]),
                 )
                 items[unique_key] = item
 

@@ -34,8 +34,8 @@ class TestRemoteUser(DojoTestCase):
     def test_basic(self):
         resp = self.client1.get('/profile',
                                 headers={
-                                    "Remote-User": self.user.username
-                                }
+                                    "Remote-User": self.user.username,
+                                },
                                 )
         self.assertEqual(resp.status_code, 200)
 
@@ -53,7 +53,7 @@ class TestRemoteUser(DojoTestCase):
                                     "Remote-Firstname": "new_first",
                                     "Remote-Lastname": "new_last",
                                     "Remote-Email": "new@mail.com",
-                                }
+                                },
                                 )
         self.assertEqual(resp.status_code, 200)
         updated_user = User.objects.get(pk=self.user.pk)
@@ -72,7 +72,7 @@ class TestRemoteUser(DojoTestCase):
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": self.group1.name,
-                                }
+                                },
                                 )
         self.assertEqual(resp.status_code, 200)
         dgms = Dojo_Group_Member.objects.filter(user=self.user)
@@ -83,7 +83,7 @@ class TestRemoteUser(DojoTestCase):
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": self.group2.name,
-                                }
+                                },
                                 )
         self.assertEqual(resp.status_code, 200)
         dgms = Dojo_Group_Member.objects.all().filter(user=self.user)
@@ -101,7 +101,7 @@ class TestRemoteUser(DojoTestCase):
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": f"{self.group1.name},{self.group2.name}",
-                                }
+                                },
                                 )
         self.assertEqual(resp.status_code, 200)
         dgms = Dojo_Group_Member.objects.filter(user=self.user)
@@ -118,7 +118,7 @@ class TestRemoteUser(DojoTestCase):
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": self.group1.name,
-                                }
+                                },
                                 )
         self.assertEqual(resp.status_code, 200)
 
@@ -126,7 +126,7 @@ class TestRemoteUser(DojoTestCase):
                                 headers={
                                     "Remote-User": self.user.username,
                                     "Remote-Groups": self.group2.name,
-                                }
+                                },
                                 )
         self.assertEqual(resp.status_code, 200)
         dgms = Dojo_Group_Member.objects.filter(user=self.user)
@@ -142,7 +142,7 @@ class TestRemoteUser(DojoTestCase):
                                 REMOTE_ADDR='192.168.0.42',
                                 headers={
                                     "Remote-User": self.user.username,
-                                }
+                                },
                                 )
         self.assertEqual(resp.status_code, 200)
 
@@ -157,7 +157,7 @@ class TestRemoteUser(DojoTestCase):
                                     REMOTE_ADDR='192.168.1.42',
                                     headers={
                                         "Remote-User": self.user.username,
-                                    }
+                                    },
                                     )
         self.assertEqual(resp.status_code, 302)
         self.assertIn('Requested came from untrusted proxy', cm.output[0])

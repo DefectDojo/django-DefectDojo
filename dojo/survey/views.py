@@ -90,7 +90,7 @@ def delete_engagement_survey(request, eid, sid):
         'survey': survey,
         'form': form,
         'engagement': engagement,
-        'questions': questions
+        'questions': questions,
     })
 
 
@@ -196,7 +196,7 @@ def view_questionnaire(request, eid, sid):
         'user': request.user,
         'engagement': engagement,
         'questions': questions,
-        'name': survey.survey.name + " Questionnaire Responses"
+        'name': survey.survey.name + " Questionnaire Responses",
     })
 
 
@@ -254,7 +254,7 @@ def add_questionnaire(request, eid):
         'surveys': surveys,
         'user': user,
         'form': form,
-        'engagement': engagement
+        'engagement': engagement,
     })
 
 
@@ -519,7 +519,7 @@ def create_question(request):
         'name': 'Add Question',
         'form': form,
         'textForm': textQuestionForm,
-        'choiceForm': choiceQuestionFrom
+        'choiceForm': choiceQuestionFrom,
     })
 
 
@@ -582,7 +582,7 @@ def edit_question(request, qid):
     return render(request, 'defectDojo-engagement-survey/edit_question.html', {
         'name': 'Edit Question',
         'question': question,
-        'form': form
+        'form': form,
     })
 
 
@@ -608,7 +608,7 @@ def add_choices(request):
     add_breadcrumb(title="Add Choice", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/add_choices.html', {
         'name': 'Add Choice',
-        'form': form
+        'form': form,
     })
 
 
@@ -646,7 +646,7 @@ def add_empty_questionnaire(request):
         'surveys': surveys,
         'user': user,
         'form': form,
-        'engagement': engagement
+        'engagement': engagement,
     })
 
 
@@ -664,7 +664,7 @@ def view_empty_survey(request, esid):
         'user': request.user,
         'engagement': engagement,
         'questions': questions,
-        'name': survey.survey.name + " Questionnaire Responses"
+        'name': survey.survey.name + " Questionnaire Responses",
     })
 
 

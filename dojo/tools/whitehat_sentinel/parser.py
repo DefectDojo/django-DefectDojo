@@ -43,7 +43,7 @@ class WhiteHatSentinelParser:
         # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo
         # findings
         dojo_findings = self._convert_whitehat_sentinel_vulns_to_dojo_finding(
-            findings_collection["collection"], test
+            findings_collection["collection"], test,
         )
 
         # # Loop through each vuln from WhiteHat
@@ -54,7 +54,7 @@ class WhiteHatSentinelParser:
         return dojo_findings
 
     def _convert_whitehat_severity_id_to_dojo_severity(
-        self, whitehat_severity_id: int
+        self, whitehat_severity_id: int,
     ) -> Union[str, None]:
         """
         Converts a WhiteHat Sentinel numerical severity to a DefectDojo severity.
@@ -109,12 +109,12 @@ class WhiteHatSentinelParser:
         description = description_chunks[0]
 
         description_ref["description"] = self.__remove_paragraph_tags(
-            description
+            description,
         )
 
         if len(description_chunks) > 1:
             description_ref["reference_link"] = self.__get_href_url(
-                description_chunks[1]
+                description_chunks[1],
             )
 
         return description_ref
@@ -167,7 +167,7 @@ class WhiteHatSentinelParser:
         return re.sub(r"<p>|</p>", "", html_string)
 
     def _convert_attack_vectors_to_endpoints(
-        self, attack_vectors: List[dict]
+        self, attack_vectors: List[dict],
     ) -> List["Endpoint"]:
         """
         Takes a list of Attack Vectors dictionaries from the WhiteHat vuln API and converts them to Defect Dojo
@@ -182,13 +182,13 @@ class WhiteHatSentinelParser:
         # This should be in the Endpoint class should it not?
         for attack_vector in attack_vectors:
             endpoints_list.append(
-                Endpoint.from_uri(attack_vector["request"]["url"])
+                Endpoint.from_uri(attack_vector["request"]["url"]),
             )
 
         return endpoints_list
 
     def _convert_whitehat_sentinel_vulns_to_dojo_finding(
-        self, whitehat_sentinel_vulns: [dict], test: str
+        self, whitehat_sentinel_vulns: [dict], test: str,
     ):
         """
         Converts a WhiteHat Sentinel vuln to a DefectDojo finding
@@ -206,10 +206,10 @@ class WhiteHatSentinelParser:
             if mitigated_ts is not None:
                 mitigated_ts = datetime.strptime(mitigated_ts, "%Y-%m-%dT%H:%M:%SZ")
             cwe = self._parse_cwe_from_tags(
-                whitehat_vuln["attack_vectors"][0].get("scanner_tags", [])
+                whitehat_vuln["attack_vectors"][0].get("scanner_tags", []),
             )
             description_ref = self._parse_description(
-                whitehat_vuln["description"]
+                whitehat_vuln["description"],
             )
             description = description_ref["description"]
             references = (
@@ -225,7 +225,7 @@ class WhiteHatSentinelParser:
                 else whitehat_vuln.get("risk")
             )
             severity = self._convert_whitehat_severity_id_to_dojo_severity(
-                risk_id
+                risk_id,
             )
             false_positive = whitehat_vuln.get("status") == "invalid"
 
@@ -233,7 +233,7 @@ class WhiteHatSentinelParser:
             is_mitigated = not active
 
             dupe_key = hashlib.md5(
-                whitehat_vuln["id"].encode("utf-8")
+                whitehat_vuln["id"].encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -266,7 +266,7 @@ class WhiteHatSentinelParser:
 
                 # Get Endpoints from Attack Vectors
                 endpoints = self._convert_attack_vectors_to_endpoints(
-                    whitehat_vuln["attack_vectors"]
+                    whitehat_vuln["attack_vectors"],
                 )
 
                 finding.unsaved_endpoints = endpoints

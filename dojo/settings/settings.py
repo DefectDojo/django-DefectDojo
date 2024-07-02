@@ -9,7 +9,7 @@ from split_settings.tools import include, optional
 
 include(
     'settings.dist.py',
-    optional('local_settings.py')
+    optional('local_settings.py'),
 )
 
 if not (DEBUG or ('collectstatic' in sys.argv)):

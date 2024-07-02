@@ -91,7 +91,7 @@ class TestBugcrowdApiImporter(TestCase):
         mock_foo.count.return_value = 0
 
         with self.assertRaisesRegex(
-            ValidationError, r'There are no API Scan Configurations for this Product\. Please add at least one API Scan Configuration for bugcrowd to this Product\. Product: "Product" \(None\)'
+            ValidationError, r'There are no API Scan Configurations for this Product\. Please add at least one API Scan Configuration for bugcrowd to this Product\. Product: "Product" \(None\)',
         ):
             bugrcrowd_api_importer = BugcrowdApiImporter()
             bugrcrowd_api_importer.prepare_client(self.test)
@@ -106,11 +106,11 @@ class TestBugcrowdApiImporter(TestCase):
 
         bugrcrowd_api_importer = BugcrowdApiImporter()
         bugcrowd_api, api_scan_configuration = bugrcrowd_api_importer.prepare_client(
-            self.test
+            self.test,
         )
 
         mock_foo.filter.assert_called_with(
-            product=self.product, tool_configuration__tool_type__name="Bugcrowd API"
+            product=self.product, tool_configuration__tool_type__name="Bugcrowd API",
         )
         self.assertEqual(api_scan_configuration, self.api_scan_configuration)
         self.assertEqual(bugcrowd_api.api_token, "API_KEY")
@@ -118,7 +118,7 @@ class TestBugcrowdApiImporter(TestCase):
     def test_prepare_client_one_test_configuration(self):
         bugrcrowd_api_importer = BugcrowdApiImporter()
         bugcrowd_api, api_scan_configuration = bugrcrowd_api_importer.prepare_client(
-            self.test_2
+            self.test_2,
         )
 
         self.assertEqual(api_scan_configuration, self.api_scan_configuration_2)

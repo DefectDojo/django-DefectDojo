@@ -26,7 +26,7 @@ class SolarAppscreenerParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         csvarray = []
 

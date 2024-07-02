@@ -102,13 +102,13 @@ class FalsePositiveHistoryTest(BaseTestCase):
             product_name='QA Test',
             engagement_name='FP History Eng 1',
             test_name='FP History Test',
-            finding_name='Fake Vulnerability for Edit Test'
+            finding_name='Fake Vulnerability for Edit Test',
         )
         finding_2 = self.create_finding(
             product_name='QA Test',
             engagement_name='FP History Eng 2',
             test_name='FP History Test',
-            finding_name='Fake Vulnerability for Edit Test'
+            finding_name='Fake Vulnerability for Edit Test',
         )
         # Assert that both findings are active
         self.assert_is_active(finding_1)
@@ -130,13 +130,13 @@ class FalsePositiveHistoryTest(BaseTestCase):
             product_name='QA Test',
             engagement_name='FP History Eng 1',
             test_name='FP History Test',
-            finding_name='Fake Vulnerability for Bulk Edit Test'
+            finding_name='Fake Vulnerability for Bulk Edit Test',
         )
         finding_2 = self.create_finding(
             product_name='QA Test',
             engagement_name='FP History Eng 2',
             test_name='FP History Test',
-            finding_name='Fake Vulnerability for Bulk Edit Test'
+            finding_name='Fake Vulnerability for Bulk Edit Test',
         )
         # Assert that both findings are active
         self.assert_is_active(finding_1)

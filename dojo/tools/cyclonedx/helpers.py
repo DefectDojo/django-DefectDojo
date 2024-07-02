@@ -15,7 +15,7 @@ class Cyclonedxhelper:
             return CVSS3(raw_vector)
         except BaseException:
             LOGGER.exception(
-                f"error while parsing vector CVSS v3 {raw_vector}"
+                f"error while parsing vector CVSS v3 {raw_vector}",
             )
             return None
 

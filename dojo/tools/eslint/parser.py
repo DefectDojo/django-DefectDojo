@@ -48,7 +48,7 @@ class ESLintParser:
                 findingdetail += "Line number: " + str(message["line"]) + "\n"
 
                 sev = self._convert_eslint_severity_to_dojo_severity(
-                    message["severity"]
+                    message["severity"],
                 )
 
                 find = Finding(

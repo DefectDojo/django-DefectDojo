@@ -17,7 +17,7 @@ def finding_group_post_delete(sender, instance, using, origin, **kwargs):
             le = LogEntry.objects.get(
                 action=LogEntry.Action.DELETE,
                 content_type=ContentType.objects.get(app_label='dojo', model='finding_group'),
-                object_id=instance.id
+                object_id=instance.id,
             )
             description = _('The finding group "%(name)s" was deleted by %(user)s') % {
                                 'name': instance.name, 'user': le.actor}

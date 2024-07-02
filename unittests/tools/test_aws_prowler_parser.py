@@ -22,7 +22,7 @@ class TestAwsProwlerParser(DojoTestCase):
             open("unittests/scans/aws_prowler/one_vuln.csv"))
         self.assertEqual(1, len(findings))
         self.assertEqual(
-            "Root user in the account wasn't accessed in the last 1 days", findings[0].title
+            "Root user in the account wasn't accessed in the last 1 days", findings[0].title,
         )
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings(self):

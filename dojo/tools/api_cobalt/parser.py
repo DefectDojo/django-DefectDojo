@@ -67,7 +67,7 @@ class ApiCobaltParser:
                     "",
                     "Cobalt.io link:",
                     links["ui"]["url"],
-                ]
+                ],
             )
             mitigation = resource["suggested_fix"]
             steps_to_reproduce = resource["proof_of_concept"]

@@ -34,7 +34,7 @@ class BanditParser:
                     "```",
                     str(item.get("code")).replace("```", "\\`\\`\\`"),
                     "```",
-                ]
+                ],
             )
 
             finding = Finding(
@@ -48,7 +48,7 @@ class BanditParser:
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=":".join(
-                    [item["test_name"], item["test_id"]]
+                    [item["test_name"], item["test_id"]],
                 ),
                 nb_occurences=1,
             )

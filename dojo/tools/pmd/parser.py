@@ -22,7 +22,7 @@ class PmdParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = list(
-            csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"')
+            csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"'),
         )
 
         for row in reader:
@@ -43,7 +43,7 @@ class PmdParser:
             finding.severity = priority
 
             description = "Description: {}\n".format(
-                row["Description"].strip()
+                row["Description"].strip(),
             )
             description += "Rule set: {}\n".format(row["Rule set"].strip())
             description += "Problem: {}\n".format(row["Problem"].strip())
@@ -55,7 +55,7 @@ class PmdParser:
             finding.mitigation = "No mitigation provided"
 
             key = hashlib.sha256(
-                f"{finding.title}|{finding.description}|{finding.file_path}|{finding.line}".encode()
+                f"{finding.title}|{finding.description}|{finding.file_path}|{finding.line}".encode(),
             ).hexdigest()
 
             if key not in dupes:

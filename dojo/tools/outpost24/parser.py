@@ -26,13 +26,13 @@ class Outpost24Parser:
             # date = detail.findtext('date') # can be used for Finding.date?
             vulnerability_id = detail.findtext("./cve/id")
             url = detail.findtext(
-                "./referencelist/reference/[type='solution']/../url"
+                "./referencelist/reference/[type='solution']/../url",
             )
             description = detail.findtext("description")
             mitigation = detail.findtext("solution")
             impact = detail.findtext("information")
             cvss_score = detail.findtext("cvss_v3_score") or detail.findtext(
-                "cvss_score"
+                "cvss_score",
             )
             if not cvss_score:
                 cvss_score = 0
@@ -80,7 +80,7 @@ class Outpost24Parser:
                     logger.debug("General port given. Assigning 0 as default.")
                     port = 0
                 finding.unsaved_endpoints.append(
-                    Endpoint(protocol=protocol, host=host, port=port)
+                    Endpoint(protocol=protocol, host=host, port=port),
                 )
             items.append(finding)
         return items

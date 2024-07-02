@@ -32,7 +32,7 @@ class DateColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         finding.date = datetime.strptime(
-            column_value, "%Y-%m-%d %H:%M:%S"
+            column_value, "%Y-%m-%d %H:%M:%S",
         ).date()
 
 
@@ -101,7 +101,7 @@ class SKFParser:
 
         row_number = 0
         reader = csv.reader(
-            io.StringIO(content), delimiter=",", quotechar='"', escapechar="\\"
+            io.StringIO(content), delimiter=",", quotechar='"', escapechar="\\",
         )
         dupes = {}
         for row in reader:
@@ -116,7 +116,7 @@ class SKFParser:
             column_number = 0
             for column in row:
                 chain.process_column(
-                    column_names[column_number], column, finding
+                    column_names[column_number], column, finding,
                 )
                 column_number += 1
 
@@ -127,8 +127,8 @@ class SKFParser:
                         + "|"
                         + finding.title
                         + "|"
-                        + finding.description
-                    ).encode("utf-8")
+                        + finding.description,
+                    ).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:

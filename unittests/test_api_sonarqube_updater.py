@@ -15,83 +15,83 @@ class TestSonarQubeApiUpdater(DojoTestCase):
     def test_transitions_for_sonarqube_from_open_1(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('OPEN', 'CONFIRMED'),
-            ['confirm']
+            ['confirm'],
         )
 
     def test_transitions_for_sonarqube_from_open_2(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('OPEN', 'RESOLVED / FIXED'),
-            ['resolve']
+            ['resolve'],
         )
 
     def test_transitions_for_sonarqube_from_reopened_1(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('REOPENED', 'RESOLVED / FIXED'),
-            ['resolve']
+            ['resolve'],
         )
 
     def test_transitions_for_sonarqube_from_reopened_2(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('REOPENED', 'CONFIRMED'),
-            ['confirm']
+            ['confirm'],
         )
 
     def test_transitions_for_sonarqube_from_resolved_1(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('RESOLVED / FIXED', 'CONFIRMED'),
-            ['reopen', 'confirm']
+            ['reopen', 'confirm'],
         )
 
     def test_transitions_for_sonarqube_from_resolved_2(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('RESOLVED / FIXED', 'RESOLVED / FALSE-POSITIVE'),
-            ['reopen', 'falsepositive']
+            ['reopen', 'falsepositive'],
         )
 
     def test_transitions_for_sonarqube_from_resolved_3(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('RESOLVED / FIXED', 'RESOLVED / WONTFIX'),
-            ['reopen', 'wontfix']
+            ['reopen', 'wontfix'],
         )
 
     def test_transitions_for_sonarqube_fake_target_origin(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('FAKE_STATUS', 'RESOLVED / FIXED'),
-            None
+            None,
         )
 
     def test_transitions_for_sonarqube_fake_target_status(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('RESOLVED / FIXED', 'FAKE_STATUS'),
-            None
+            None,
         )
 
     def test_transitions_for_sonarqube_from_confirmed_1(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('CONFIRMED', 'REOPENED'),
-            ['unconfirm']
+            ['unconfirm'],
         )
 
     def test_transitions_for_sonarqube_from_confirmed_2(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('CONFIRMED', 'RESOLVED / FIXED'),
-            ['resolve']
+            ['resolve'],
         )
 
     def test_transitions_for_open_reopen_status_1(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('OPEN', 'REOPENED'),
-            None
+            None,
         )
 
     def test_transitions_for_open_reopen_status_2(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('REOPENED', 'OPEN'),
-            None
+            None,
         )
 
     def test_transitions_for_open_reopen_status_3(self):
         self.assertEqual(
             self.updater.get_sonarqube_required_transitions_for('REOPENED', 'REOPENED'),
-            None
+            None,
         )

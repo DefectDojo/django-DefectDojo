@@ -56,7 +56,7 @@ def prefetch_postprocessing_hook(result, generator, request, public):
                     prefetcher = _Prefetcher()
 
                     fields = _get_prefetchable_fields(
-                        serializer_classes[path]()
+                        serializer_classes[path](),
                     )
 
                     field_names = [
@@ -87,8 +87,8 @@ def prefetch_postprocessing_hook(result, generator, request, public):
                             "type": "object",
                             "readOnly": True,
                             "additionalProperties": {
-                                "$ref": f"#/components/schemas/{fields_to_refname[name]}"
-                            }
+                                "$ref": f"#/components/schemas/{fields_to_refname[name]}",
+                            },
                         }
                         for name in field_names
                     }
