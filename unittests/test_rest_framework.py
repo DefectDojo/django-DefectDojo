@@ -129,7 +129,7 @@ from dojo.models import (
     UserContactInfo,
 )
 
-from .dojo_test_case import DojoAPITestCase
+from .dojo_test_case import DojoAPITestCase, SerializeZapSample
 
 logger = logging.getLogger(__name__)
 
@@ -1763,7 +1763,7 @@ class ProductPermissionTest(DojoAPITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class ImportScanTest(BaseClass.BaseClassTest):
+class ImportScanTest(SerializeZapSample, BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2017,7 +2017,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
             reimporter_mock.assert_not_called()
 
 
-class ReimportScanTest(DojoAPITestCase):
+class ReimportScanTest(SerializeZapSample, DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):

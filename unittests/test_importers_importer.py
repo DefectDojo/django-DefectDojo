@@ -2,6 +2,7 @@ import logging
 import uuid
 from unittest.mock import patch
 
+from django.test.testcases import SerializeMixin
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -516,7 +517,11 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.assertEqual(import0, ['product_name parameter missing'])
 
 
-class TestImporterUtils(DojoAPITestCase):
+class SerializedTestImporterUtils(SerializeMixin):
+    lockfile = __file__
+
+
+class TestImporterUtils(SerializedTestImporterUtils, DojoAPITestCase):
     def setUp(self):
         self.testuser, _ = User.objects.get_or_create(username="admin", is_superuser=True)
         token, _ = Token.objects.get_or_create(user=self.testuser)

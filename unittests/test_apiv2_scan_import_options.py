@@ -5,8 +5,10 @@ from rest_framework.test import APIClient, APITestCase
 
 from dojo.models import Finding, Test, Test_Type
 
+from .dojo_test_case import SerializeZapSample
 
-class ScanImportOptionsTest(APITestCase):
+
+class ScanImportOptionsTest(SerializeZapSample, APITestCase):
     """
     Test the options `skip_duplicates` and `close_old_findings` for the scan
     import APIv2 endpoint with ZAP

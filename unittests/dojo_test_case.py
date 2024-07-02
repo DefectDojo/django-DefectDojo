@@ -6,6 +6,7 @@ import pprint
 from itertools import chain
 
 from django.test import TestCase
+from django.test.testcases import SerializeMixin
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
@@ -39,6 +40,10 @@ logger = logging.getLogger(__name__)
 
 def get_unit_tests_path():
     return os.path.dirname(os.path.realpath(__file__))
+
+
+class SerializeZapSample(SerializeMixin):
+    lockfile = 'tests_zap_sample_xml'
 
 
 class DojoTestUtilsMixin:
