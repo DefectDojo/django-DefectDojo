@@ -3,7 +3,7 @@ name: Ruff Linter
 on:
   workflow_dispatch:
   push:
-
+  pull_request:
 jobs:
   ruff-linting:
     runs-on: ubuntu-latest
