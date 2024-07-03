@@ -16,6 +16,9 @@ DD_DATABASE_URL=#DD_DATABASE_URL#
 # Hosts/domain names that are valid for this site;
 DD_ALLOWED_HOSTS=#DD_ALLOWED_HOSTS#
 
+# cidr addresses that are valid for this site;
+DD_ALLOWED_CIDR_NETS=#DD_ALLOWED_CIDR_NETS#
+
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx,
 # if using nginx then disable Whitenoise

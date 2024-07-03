@@ -301,6 +301,8 @@ env = environ.FileAwareEnv(
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
     # Use System notification settings to override user's notification settings
     DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
+    # Set addr cidr for allowed hosts, example: 10.144.0.0/16
+    DD_ALLOWED_CIDR_NETS=(list, []),
 )
 
 
@@ -887,6 +889,12 @@ EMAIL_CONFIG = env.email_url(
     'DD_EMAIL_URL', default='smtp://user@:password@localhost:25')
 
 vars().update(EMAIL_CONFIG)
+
+# Possible to set ALLOWED_CIDR_NETS
+# https://pypi.org/project/django-allow-cidr/
+if env('DD_ALLOWED_CIDR_NETS') != ['[]']:
+    MIDDLEWARE.append('allow_cidr.middleware.AllowCIDRMiddleware')
+    ALLOWED_CIDR_NETS = env('DD_ALLOWED_CIDR_NETS')
 
 # ------------------------------------------------------------------------------
 # SAML
