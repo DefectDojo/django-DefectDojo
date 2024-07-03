@@ -397,6 +397,19 @@ else:
             'PASSWORD': env('DD_DATABASE_PASSWORD'),
             'HOST': env('DD_DATABASE_HOST'),
             'PORT': env('DD_DATABASE_PORT'),
+            if os.getenv('DD_DATABASE_OPTIONS') is not None:
+                'OPTIONS': {
+                   if os.getenv('DD_DATABASE_OPTIONS_SSLMODE') == 'require':
+                        'sslmode': env('DD_DATABASE_OPTIONS_SSLMODE'),
+                        'sslcert': env('DD_DATABASE_OPTIONS_SSLCERT'),
+                        'sslkey': env('DD_DATABASE_OPTIONS_SSLKEY'),
+                        'sslrootcert': env('DD_DATABASE_OPTIONS_SSLROOTCERT')'
+                   elif os.getenv('DD_DATABASE_OPTIONS_SSLMODE') == 'verify-full':
+                        'sslmode': env('DD_DATABASE_OPTIONS_SSLMODE'),
+                        'sslrootcert': env('DD_DATABASE_OPTIONS_SSLROOTCERT')'
+                   elif os.getenv('DD_DATABASE_OPTIONS_SSLMODE') == 'verify-ca':
+                       'sslmode': env('DD_DATABASE_OPTIONS_SSLMODE')
+                }
         }
     }
 
