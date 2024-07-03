@@ -6,6 +6,10 @@
   "dependencyDashboardApproval": false,
   "baseBranches": ["dev"],
   "rebaseWhen": "conflicted",
+  "ignoreDeps": [
+    "mysql",
+    "rabbitmq"
+  ],
   "ignorePaths": ["requirements.txt", "components/package.json", "components/package-lock.json", "dojo/components/yarn.lock", "dojo/components/package.json", "Dockerfile**"],
   "packageRules": [{
     "packagePatterns": ["*"],
