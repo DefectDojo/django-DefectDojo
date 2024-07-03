@@ -120,6 +120,7 @@ class Widget:
         self.title = 'Base Widget'
         self.form = None
         self.multiple = "false"
+        self.widget_class = 'widget'
 
     @abc.abstractmethod
     def get_html(self, request):
@@ -138,6 +139,7 @@ class PageBreak(Widget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title = 'Page Break'
+        self.widget_class = 'page-break'
         self.form = None
         self.multiple = "true"
 
@@ -161,6 +163,7 @@ class ReportOptions(Widget):
         self.title = 'Report Options'
         self.form = CustomReportOptionsForm()
         self.extra_help = "Choose additional report options.  These will apply to the overall report."
+        self.widget_class = 'report-options'
 
     def get_asciidoc(self):
         return mark_safe('')
@@ -182,6 +185,7 @@ class CoverPage(Widget):
         self.title = 'Cover Page'
         self.form = CoverPageForm()
         self.help_text = "The cover page includes a page break after its content."
+        self.widget_class = 'cover-page'
 
     def get_html(self):
         return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.heading,
@@ -205,6 +209,7 @@ class TableOfContents(Widget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title = 'Table Of Contents'
+        self.widget_class = 'table-of-contents'
         self.form = TableOfContentsForm()
         self.help_text = "The table of contents includes a page break after its content."
 
@@ -228,6 +233,7 @@ class WYSIWYGContent(Widget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title = 'WYSIWYG Content'
+        self.widget_class = 'wysiwyg-content'
         self.form = WYSIWYGContentForm()
         self.multiple = 'true'
 
@@ -282,6 +288,7 @@ class FindingList(Widget):
         else:
             self.form = None
         self.multiple = 'true'
+        self.widget_class = 'finding-list'
         self.extra_help = "You can use this form to filter findings and select only the ones to be included in the " \
                           "report."
         self.title_words = get_words_for_field(Finding, 'title')
@@ -355,6 +362,7 @@ class EndpointList(Widget):
         self.title = 'Endpoint List'
         self.form = self.endpoints.form
         self.multiple = 'false'
+        self.widget_class = 'endpoint-list'
         if self.request is not None:
             self.paged_endpoints = get_page_items(self.request, self.endpoints.qs, 25)
         else:
