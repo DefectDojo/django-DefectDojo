@@ -81,7 +81,7 @@ class GovulncheckParser:
                     # Parsing for old govulncheck output format
                     list_vulns = data["Vulns"]
                     for cve, elems in groupby(
-                        list_vulns, key=lambda vuln: vuln["OSV"]["aliases"][0]
+                        list_vulns, key=lambda vuln: vuln["OSV"]["aliases"][0],
                     ):
                         first_elem = list(islice(elems, 1))
                         d = {
@@ -92,7 +92,7 @@ class GovulncheckParser:
                                 "package"
                             ]["name"],
                             "component_version": self.get_version(
-                                data, first_elem[0]["RequireSink"]
+                                data, first_elem[0]["RequireSink"],
                             ),
                         }
                         d["references"] = first_elem[0]["OSV"]["references"][0][
@@ -105,19 +105,19 @@ class GovulncheckParser:
                         vuln_methods = set(
                             first_elem[0]["OSV"]["affected"][0][
                                 "ecosystem_specific"
-                            ]["imports"][0]["symbols"]
+                            ]["imports"][0]["symbols"],
                         )
                         impact = set(
-                            self.get_location(data, first_elem[0]["CallSink"])
+                            self.get_location(data, first_elem[0]["CallSink"]),
                         )
                         for elem in elems:
                             impact.update(
-                                self.get_location(data, elem["CallSink"])
+                                self.get_location(data, elem["CallSink"]),
                             )
                             vuln_methods.update(
                                 elem["OSV"]["affected"][0]["ecosystem_specific"][
                                     "imports"
-                                ][0]["symbols"]
+                                ][0]["symbols"],
                             )
                         d["impact"] = "; ".join(impact) if impact else None
                         d[
@@ -151,7 +151,7 @@ class GovulncheckParser:
                         range_info = "\n ".join(formatted_ranges)
 
                         vuln_functions = ", ".join(
-                            set(osv_data["affected"][0]["ecosystem_specific"]["imports"][0].get("symbols", []))
+                            set(osv_data["affected"][0]["ecosystem_specific"]["imports"][0].get("symbols", [])),
                         )
 
                         description = (
@@ -195,7 +195,7 @@ class GovulncheckParser:
                             "references": references,
                             "file_path": path,
                             "url": db_specific_url,
-                            "unique_id_from_tool": id
+                            "unique_id_from_tool": id,
                         }
 
                         findings.append(Finding(**d))

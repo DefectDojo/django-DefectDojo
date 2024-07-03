@@ -37,7 +37,7 @@ class VulnersImporter:
                 raise ValidationError(msg)
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
-                product=product, tool_configuration__tool_type__name="Vulners"
+                product=product, tool_configuration__tool_type__name="Vulners",
             )
             if configs.count() == 1:
                 config = configs.first()

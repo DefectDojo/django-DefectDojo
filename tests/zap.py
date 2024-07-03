@@ -76,7 +76,7 @@ class Main:
         for alert in zap.core.alerts():
             sort_by_url[alert['url']].append({
                                         'risk': alert['risk'],
-                                        'alert': alert['alert']
+                                        'alert': alert['alert'],
                                             })
 
         summary = PrettyTable(["Risk", "Count"])

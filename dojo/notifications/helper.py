@@ -92,7 +92,7 @@ def create_notification(event=None, **kwargs):
             users = Dojo_User.objects.filter(is_active=True).prefetch_related(Prefetch(
                 "notifications_set",
                 queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
-                to_attr="applicable_notifications"
+                to_attr="applicable_notifications",
             )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
                 .filter(Q(applicable_notifications_count__gt=0) | Q(is_superuser=True))
 
@@ -201,7 +201,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
                 'token': get_system_setting('slack_token'),
                 'channel': channel,
                 'username': get_system_setting('slack_username'),
-                'text': create_notification_message(event, user, 'slack', *args, **kwargs)
+                'text': create_notification_message(event, user, 'slack', *args, **kwargs),
             })
 
         if 'error' in res.text:

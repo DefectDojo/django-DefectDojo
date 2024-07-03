@@ -239,5 +239,5 @@ MAP = {
         'schacUserStatus': SCHAC + '19',
         'schacProjectMembership': SCHAC + '20',
         'schacProjectSpecificRole': SCHAC + '21',
-    }
+    },
 }

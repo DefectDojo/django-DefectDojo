@@ -89,14 +89,14 @@ def do_false_positive_history(finding, *args, **kwargs):
     existing_findings = match_finding_to_existing_findings(finding, product=finding.test.engagement.product)
     deduplicationLogger.debug(
         "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product",
-        len(existing_findings)
+        len(existing_findings),
     )
 
     existing_fp_findings = existing_findings.filter(false_p=True)
     deduplicationLogger.debug(
         "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
         + "that were previously marked as false positive",
-        len(existing_fp_findings)
+        len(existing_fp_findings),
     )
 
     if existing_fp_findings:
@@ -119,7 +119,7 @@ def do_false_positive_history(finding, *args, **kwargs):
     for find in to_mark_as_fp:
         deduplicationLogger.debug(
             "FALSE_POSITIVE_HISTORY: Marking Finding %i:%s from %s as false positive",
-            find.id, find.title, find.test.engagement
+            find.id, find.title, find.test.engagement,
         )
         try:
             find.false_p = True
@@ -164,14 +164,14 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
 
     deduplicationLogger.debug(
         'Matching finding %i:%s to existing findings in %s %s using %s as deduplication algorithm.',
-        finding.id, finding.title, custom_filter_type, list(custom_filter.values())[0], deduplication_algorithm
+        finding.id, finding.title, custom_filter_type, list(custom_filter.values())[0], deduplication_algorithm,
     )
 
     if deduplication_algorithm == 'hash_code':
         return (
             Finding.objects.filter(
                 **custom_filter,
-                hash_code=finding.hash_code
+                hash_code=finding.hash_code,
             ).exclude(hash_code=None)
             .exclude(id=finding.id)
             .order_by('id')
@@ -181,7 +181,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         return (
             Finding.objects.filter(
                 **custom_filter,
-                unique_id_from_tool=finding.unique_id_from_tool
+                unique_id_from_tool=finding.unique_id_from_tool,
             ).exclude(unique_id_from_tool=None)
             .exclude(id=finding.id)
             .order_by('id')
@@ -193,7 +193,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             (
                 (Q(hash_code__isnull=False) & Q(hash_code=finding.hash_code))
                 | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=finding.unique_id_from_tool))
-            )
+            ),
         ).exclude(id=finding.id).order_by('id')
         deduplicationLogger.debug(query.query)
         return query
@@ -209,7 +209,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
                 **custom_filter,
                 title=finding.title,
                 severity=finding.severity,
-                numerical_severity=Finding.get_numerical_severity(finding.severity)
+                numerical_severity=Finding.get_numerical_severity(finding.severity),
             ).order_by('id')
         )
 
@@ -625,7 +625,7 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
             'one': 0,
             'two': 0,
             'three': 0,
-            'total': 0
+            'total': 0,
         }
         a_count = {
             'closed': 0,
@@ -633,7 +633,7 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
             'one': 0,
             'two': 0,
             'three': 0,
-            'total': 0
+            'total': 0,
         }
         for f in findings:
             if f.mitigated is not None and end_of_period >= f.mitigated >= start_of_period:
@@ -710,7 +710,7 @@ def add_breadcrumb(parent=None,
         crumbs = [
             {
                 'title': _('Home'),
-                'url': reverse('home')
+                'url': reverse('home'),
             },
         ]
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
@@ -718,7 +718,7 @@ def add_breadcrumb(parent=None,
         else:
             crumbs += [{
                 'title': title,
-                'url': request.get_full_path() if url is None else url
+                'url': request.get_full_path() if url is None else url,
             }]
     else:
         resolver = get_resolver(None).resolve
@@ -727,12 +727,12 @@ def add_breadcrumb(parent=None,
             if title is not None:
                 obj_crumbs += [{
                     'title': title,
-                    'url': request.get_full_path() if url is None else url
+                    'url': request.get_full_path() if url is None else url,
                 }]
         else:
             obj_crumbs = [{
                 'title': title,
-                'url': request.get_full_path() if url is None else url
+                'url': request.get_full_path() if url is None else url,
             }]
 
         for crumb in crumbs:
@@ -930,13 +930,13 @@ def get_period_counts_legacy(findings,
                         new_date.year,
                         new_date.month,
                         monthrange(new_date.year, new_date.month)[1],
-                        tzinfo=timezone.get_current_timezone())
+                        tzinfo=timezone.get_current_timezone()),
                 ])
         else:
             risks_a = None
 
         crit_count, high_count, med_count, low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
         for finding in findings:
             if new_date <= datetime.combine(finding.date, datetime.min.time(
@@ -956,7 +956,7 @@ def get_period_counts_legacy(findings,
              crit_count, high_count, med_count, low_count, total,
              closed_in_range_count])
         crit_count, high_count, med_count, low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
         if risks_a is not None:
             for finding in risks_a:
@@ -976,7 +976,7 @@ def get_period_counts_legacy(findings,
 
     return {
         'opened_per_period': opened_in_period,
-        'accepted_per_period': accepted_in_period
+        'accepted_per_period': accepted_in_period,
     }
 
 
@@ -1023,7 +1023,7 @@ def get_period_counts(findings,
         if accepted_findings:
             date_range = [
                 datetime(new_date.year, new_date.month, new_date.day, tzinfo=tz),
-                datetime(end_date.year, end_date.month, end_date.day, tzinfo=tz)
+                datetime(end_date.year, end_date.month, end_date.day, tzinfo=tz),
             ]
             try:
                 risks_a = accepted_findings.filter(risk_acceptance__created__date__range=date_range)
@@ -1033,13 +1033,13 @@ def get_period_counts(findings,
             risks_a = None
 
         f_crit_count, f_high_count, f_med_count, f_low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
         ra_crit_count, ra_high_count, ra_med_count, ra_low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
         active_crit_count, active_high_count, active_med_count, active_low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
 
         for finding in findings:
@@ -1113,7 +1113,7 @@ def get_period_counts(findings,
     return {
         'opened_per_period': opened_in_period,
         'accepted_per_period': accepted_in_period,
-        'active_per_period': active_in_period
+        'active_per_period': active_in_period,
     }
 
 
@@ -1191,7 +1191,7 @@ def opened_in_period(start_date, end_date, **kwargs):
             out_of_scope=False,
             mitigated__isnull=True,
             **kwargs,
-            severity__in=('Critical', 'High', 'Medium', 'Low')).count()
+            severity__in=('Critical', 'High', 'Medium', 'Low')).count(),
     }
 
     for o in opened_in_period:
@@ -2295,7 +2295,7 @@ class async_delete:
             'Engagement': [
                 (Finding, 'test__engagement'),
                 (Test, 'engagement')],
-            'Test': [(Finding, 'test')]
+            'Test': [(Finding, 'test')],
         }
 
     @dojo_async_task
@@ -2359,7 +2359,7 @@ def log_user_login(sender, request, user, **kwargs):
 
     logger.info('login user: {user} via ip: {ip}'.format(
         user=user.username,
-        ip=request.META.get('REMOTE_ADDR')
+        ip=request.META.get('REMOTE_ADDR'),
     ))
 
 
@@ -2368,7 +2368,7 @@ def log_user_logout(sender, request, user, **kwargs):
 
     logger.info('logout user: {user} via ip: {ip}'.format(
         user=user.username,
-        ip=request.META.get('REMOTE_ADDR')
+        ip=request.META.get('REMOTE_ADDR'),
     ))
 
 
@@ -2378,11 +2378,11 @@ def log_user_login_failed(sender, credentials, request, **kwargs):
     if 'username' in credentials:
         logger.warning('login failed for: {credentials} via ip: {ip}'.format(
             credentials=credentials['username'],
-            ip=request.META['REMOTE_ADDR']
+            ip=request.META['REMOTE_ADDR'],
         ))
     else:
         logger.error('login failed because of missing username via ip: {ip}'.format(
-            ip=request.META['REMOTE_ADDR']
+            ip=request.META['REMOTE_ADDR'],
         ))
 
 
@@ -2514,7 +2514,7 @@ def get_open_findings_burndown(product):
         'High': [],
         'Medium': [],
         'Low': [],
-        'Info': []
+        'Info': [],
     }
 
     # count the number of open findings for the 90-day window
