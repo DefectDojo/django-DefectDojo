@@ -9,7 +9,7 @@ from json import dumps
 from unittest.mock import ANY, MagicMock, call, patch
 
 from django.contrib.auth.models import Permission
-from django.test import tag
+from django.test import tag as test_tag
 from django.urls import reverse
 from drf_spectacular.drainage import GENERATOR_STATS
 from drf_spectacular.settings import spectacular_settings
@@ -1764,7 +1764,7 @@ class ProductPermissionTest(DojoAPITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-@tag("non-parallel")
+@test_tag("non-parallel")
 class ImportScanTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
@@ -2698,7 +2698,7 @@ class LanguageTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-@tag("non-parallel")
+@test_tag("non-parallel")
 class ImportLanguagesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
