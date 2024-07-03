@@ -312,7 +312,7 @@ Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" 
  
 or, alternatively, for helm configuration, add this to the `extraConfig` section: 
 
-```
+```yaml
 DD_SESSION_COOKIE_SECURE: 'True'
 DD_CSRF_COOKIE_SECURE: 'True'
 DD_SECURE_SSL_REDIRECT: 'True'
@@ -453,7 +453,7 @@ Some Identity Providers are able to send list of groups to which should user bel
 
 You can bypass the login form if you are only using SSO/Social authentication for login in by enabling these two environment variables:
 
-```
+```yaml
 DD_SOCIAL_LOGIN_AUTO_REDIRECT: "true"
 DD_SOCIAL_AUTH_SHOW_LOGIN_FORM: "false"
 ```
