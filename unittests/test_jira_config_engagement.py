@@ -266,6 +266,7 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_empty_jira_project_to_engagement_without_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
+        # Prevent the exception from being raised here so that the test can be ran in parallel
         with contextlib.suppress(ValueError):
             engagement = self.add_engagement_without_jira_project(expected_delta_jira_project_db=0)
             self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0)
@@ -281,6 +282,7 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_edit_empty_jira_project_to_engagement_with_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
+        # Prevent the exception from being raised here so that the test can be ran in parallel
         with contextlib.suppress(ValueError):
             engagement = self.add_engagement_with_jira_project(expected_delta_jira_project_db=1)
             # clearing out jira config used to be possible. what todo?
