@@ -9,6 +9,7 @@ from json import dumps
 from unittest.mock import ANY, MagicMock, call, patch
 
 from django.contrib.auth.models import Permission
+from django.test import tag
 from django.urls import reverse
 from drf_spectacular.drainage import GENERATOR_STATS
 from drf_spectacular.settings import spectacular_settings
@@ -690,7 +691,6 @@ class BaseClass:
 
             response = self.client.get(relative_url)
             # print('delete_preview response.data')
-
             self.assertEqual(200, response.status_code, response.content[:1000])
 
             self.check_schema_response('get', '200', response, detail=True)
@@ -957,6 +957,7 @@ class EndpointTest(BaseClass.BaseClassTest):
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Delete
         self.deleted_objects = 2
+        self.delete_id = 6
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1183,6 +1184,7 @@ class FindingsTest(BaseClass.BaseClassTest):
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Delete
         self.deleted_objects = 2
+        self.delete_id = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_duplicate(self):
@@ -1268,11 +1270,10 @@ class FindingMetadataTest(BaseClass.BaseClassTest):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.url = reverse(self.viewname + '-list')
-
-        self.current_findings = self.client.get(self.url, format='json').data["results"]
-        finding = Finding.objects.get(id=self.current_findings[0]['id'])
-
-        self.base_url = f"{self.url}{self.current_findings[0]['id']}/metadata/"
+        self.finding_id = 3
+        self.delete_id = self.finding_id
+        finding = Finding.objects.get(id=self.finding_id)
+        self.base_url = f"{self.url}{self.finding_id}/metadata/"
         metadata = DojoMeta(finding=finding, name="test_meta", value="20")
         metadata.save()
 
@@ -1763,6 +1764,7 @@ class ProductPermissionTest(DojoAPITestCase):
         self.assertEqual(response.status_code, 404)
 
 
+@tag("non-parallel")
 class ImportScanTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
@@ -2664,6 +2666,7 @@ class LanguageTypeTest(BaseClass.BaseClassTest):
         self.update_fields = {'color': 'blue'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
+        self.delete_id = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -2695,6 +2698,7 @@ class LanguageTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@tag("non-parallel")
 class ImportLanguagesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
