@@ -13,10 +13,50 @@ from dojo.models import (
 )
 from dojo.authorization.authorization import user_has_global_permission
 from dojo.notifications.helper import create_notification
+from dojo.transfer_findings.notification import Notification as TransferFindingNotification
+from dojo.transfer_findings.queries import get_expired_transfer_finding_to_handle, get_almost_expired_transfer_finding_to_handle
 from dojo.transfer_findings.notification import Notification as NotificationTransferFinding
 from dojo.user.queries import get_user
 from django.urls import reverse
+from django.utils import timezone
+from dojo.celery import app
 logger = logging.getLogger(__name__)
+
+
+@app.task
+def expiration_handler(*args, **kwargs):
+    try:
+        system_settings = System_Settings.objects.get()
+    except System_Settings.DoesNotExist:
+        logger.warning("Unable to get system_settings, skipping transfer finding expiration job")
+
+    transfer_findings = get_expired_transfer_finding_to_handle()
+
+    logger.info('expiring %i transfer_finding that are past expiration date', len(transfer_findings))
+    for transfer_finding in transfer_findings:
+        expire_now(transfer_finding)
+        # notification created by expire_now code
+
+    heads_up_days = system_settings.risk_acceptance_notify_before_expiration
+    if heads_up_days > 0:
+        transfer_findings = get_almost_expired_transfer_finding_to_handle(heads_up_days)
+
+        logger.info('notifying for %i transfer_finding that are expiring within %i days', len(transfer_findings), heads_up_days)
+        for transfer_finding in transfer_findings:
+            logger.debug('notifying for transfer finding %i:%s with %i findings', transfer_finding.id, transfer_finding, len(transfer_finding.transfer_findings.all()))
+            TransferFindingNotification.send_notification(event="transfer_finding",
+                                                          subject=f"⏳Transfer Finding has been expired : {transfer_finding.id}🚨",
+                                                          description="Transfer finding has been expired")
+            transfer_finding.expiration_date_warned = timezone.now()
+            transfer_finding.save()
+    
+
+def expire_now(transfer_finding: TransferFinding):
+    findings = transfer_finding.findings.all()
+    for finding in findings:
+        finding.risk_status = 'Risk Active'
+        finding.active = True
+
 
 
 def transfer_findings(transfer_finding_findings: TransferFindingFinding, serializer):
@@ -204,13 +244,6 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
             logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are closed")
             transfer_finding_finding.findings.notes.add(note)
             transfer_finding_finding.findings.save()
-            if send_notification:
-                NotificationTransferFinding.send_notification(
-                    event="other",
-                    subject=f"✅temporarily accepted by the parent finding {parent_finding.id} (policies for the transfer of findings)👌",
-                    description=f"temporarily accepted by the parent finding <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
-                    finding=parent_finding,
-                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
         if event == "reactive":
             transfer_finding_finding.findings.active = True
             transfer_finding_finding.findings.out_of_scope = False
@@ -219,13 +252,13 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
             logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are reactivated")
             transfer_finding_finding.findings.notes.add(note)
             transfer_finding_finding.findings.save()
-            if send_notification:
-                NotificationTransferFinding.send_notification(
-                    event="other",
-                    subject=f"✅This finding has been reactivated for the finding parent {parent_finding.id} (policies for the transfer of findings)👌",
-                    description=f"The finding has been reactivated for the finding parent <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
-                    finding=parent_finding,
-                    user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
+    if send_notification:
+        NotificationTransferFinding.send_notification(
+            event="transfer_finding",
+            subject=f"✅This transfer-finding has been reactivated{parent_finding.id} (policies for the transfer of findings)👌",
+            description=f"The finding has been reactivated for the finding parent <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
+            finding=parent_finding,
+            user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
 
 
 def reset_finding_related(finding):

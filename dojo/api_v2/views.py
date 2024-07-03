@@ -3423,7 +3423,7 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
     
     def destroy(self, request, pk=None):
         serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
-        transfer_finding_obj = get_object_or_404(TransferFinding, int(pk))
+        transfer_finding_obj = get_object_or_404(TransferFinding, pk=int(pk))
         if serializer.is_valid():
             if request.data.get('findings'):
                 obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))

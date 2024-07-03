@@ -10,19 +10,23 @@ class Notification:
     @staticmethod
     def send_notification(event: str,
                           subject: str,
-                          finding: Finding,
                           description: str,
-                          user_names: List):
+                          transfer_finding):
 
+        title = f"{transfer_finding.title[:30]} Expired"
+        pid = transfer_finding.origin_product.id
         create_notification(
-                event=event,
-                subject=subject,
-                title=finding.title,
-                description=description,
-                icon="check-circle",
-                color_icon="#096C11",
-                recipients=user_names,
-                url=reverse('view_finding', args=[str(finding.id)]))
+            event=event,
+            title=title,
+            transfer_finding=transfer_finding,
+            subject=subject,
+            product=transfer_finding.destination_product,
+            description=description,
+            recipients=[transfer_finding.accepted_by.get_username()],
+            icon="check-circle",
+            color_icon="#096C11",
+            owner=transfer_finding.owner,
+            url=reverse("view_transfer_finding", args=(pid,)))
 
     @staticmethod
     def transfer_finding_request(transfer_finding: TransferFinding):
@@ -59,7 +63,7 @@ class Notification:
             color_icon="#b97a0c",
             owner=transfer_finding.owner,
             url=reverse("view_transfer_finding", args=(pid,)))
-
+    
 
     @staticmethod
     def transfer_finding_remove(transfer_finding: TransferFinding):

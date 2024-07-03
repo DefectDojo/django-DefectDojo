@@ -136,6 +136,7 @@
                         <th>Id</th>
                         <th>Title</th>
                         <th>Creation Date</th>
+                        <th>Expiration Date</th>
                         <th>Origin ProductType</th>
                         <th>Destination ProductType</th>
                         <th>Destination Product</th>
@@ -155,6 +156,7 @@
                                  {{transfer_findings.title}} <i class="fa-solid fa-magnifying-glass-plus"></i> </a>
                             </td>
                             <td>{{transfer_findings.date}}</td>
+                            <td>{{transfer_findings.expiration_date}}</td>
                             <td data-origin-pid="{{transfer_findings.origin_product_type.id}}">{{transfer_findings.origin_product_type}}</td>
                             <td data-destination-ptid="{{transfer_findings.destination_product_type.id}}">{{transfer_findings.destination_product_type}}</td>
                             <td data-destination-pid="{{transfer_findings.destination_product.id}}">{{transfer_findings.destination_product}}</td>
