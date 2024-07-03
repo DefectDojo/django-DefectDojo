@@ -208,6 +208,7 @@ class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     def filter_queryset(self, queryset):
         return Role.objects.all().order_by('id')
 
+
 # Authorization: object-based
 @extend_schema_view(
     list=extend_schema(
