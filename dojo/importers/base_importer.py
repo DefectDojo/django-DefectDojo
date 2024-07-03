@@ -49,7 +49,6 @@ class Parser:
         TODO This should be enforced in the future, but here is not the place
         TODO once this enforced, this stub class should be removed
         """
-        pass
 
 
 class BaseImporter(ImporterOptions):
@@ -568,7 +567,7 @@ class BaseImporter(ImporterOptions):
         # Ensure the final severity is one of the supported options
         if finding.severity not in SEVERITIES:
             msg = (
-                f"Finding severity \"{finding.severity}\" is not supported. "
+                f'Finding severity "{finding.severity}" is not supported. '
                 f"Any of the following are supported: {SEVERITIES}."
             )
             raise ValidationError(msg)

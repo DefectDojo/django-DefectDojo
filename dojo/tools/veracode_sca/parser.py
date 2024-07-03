@@ -69,7 +69,7 @@ class VeracodeScaParser:
             vulnerability = issue.get("vulnerability")
             vuln_id = vulnerability.get("cve")
             if vuln_id and not (
-                vuln_id.startswith("cve") or vuln_id.startswith("CVE")
+                vuln_id.startswith(("cve", "CVE"))
             ):
                 vuln_id = "CVE-" + vuln_id
             cvss_score = issue.get("severity")
@@ -113,7 +113,7 @@ class VeracodeScaParser:
             if vulnerability.get("cwe_id"):
                 cwe = vulnerability.get("cwe_id")
                 if cwe:
-                    if cwe.startswith("CWE-") or cwe.startswith("cwe-"):
+                    if cwe.startswith(("CWE-", "cwe-")):
                         cwe = cwe[4:]
                     if cwe.isdigit():
                         finding.cwe = int(cwe)
@@ -168,7 +168,7 @@ class VeracodeScaParser:
             version = row.get("Version in use", None)
             vuln_id = row.get("CVE", None)
             if vuln_id and not (
-                vuln_id.startswith("cve") or vuln_id.startswith("CVE")
+                vuln_id.startswith(("cve", "CVE"))
             ):
                 vuln_id = "CVE-" + vuln_id
 

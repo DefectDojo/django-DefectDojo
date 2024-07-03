@@ -3,8 +3,7 @@ from datetime import datetime as date
 
 from dojo.models import Test
 from dojo.tools.acunetix.parser import AcunetixParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAcunetixParser(DojoTestCase):
@@ -327,6 +326,12 @@ class TestAcunetixParser(DojoTestCase):
 
     def test_parse_file_issue_10370(self):
         with open("unittests/scans/acunetix/issue_10370.json") as testfile:
+            parser = AcunetixParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+
+    def test_parse_file_issue_10435(self):
+        with open("unittests/scans/acunetix/issue_10435.json") as testfile:
             parser = AcunetixParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))

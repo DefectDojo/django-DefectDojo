@@ -4,8 +4,7 @@ from django.test import override_settings
 
 from dojo.models import Test
 from dojo.tools.qualys.parser import QualysParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestQualysParser(DojoTestCase):
@@ -154,7 +153,7 @@ class TestQualysParser(DojoTestCase):
                     finding_cvssv3_score = finding
                 if finding.unsaved_endpoints[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
                     finding_no_cvssv3_at_detection = finding
-                if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-121695 | NTP \"monlist\"  Feature Denial of Service Vulnerability":
+                if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == 'QID-121695 | NTP "monlist"  Feature Denial of Service Vulnerability':
                     finding_no_cvssv3 = finding
             # The CVSS Vector is not used from the Knowledgebase
             self.assertEqual(

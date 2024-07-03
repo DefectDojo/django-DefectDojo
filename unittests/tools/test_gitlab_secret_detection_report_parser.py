@@ -4,8 +4,7 @@ from dojo.models import Test
 from dojo.tools.gitlab_secret_detection_report.parser import (
     GitlabSecretDetectionReportParser,
 )
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestGitlabSecretDetectionReportParser(DojoTestCase):

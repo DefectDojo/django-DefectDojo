@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.outpost24.parser import Outpost24Parser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestOutpost24Parser(DojoTestCase):

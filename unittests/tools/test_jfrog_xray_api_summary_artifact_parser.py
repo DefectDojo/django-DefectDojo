@@ -4,8 +4,7 @@ from dojo.models import Test
 from dojo.tools.jfrog_xray_api_summary_artifact.parser import (
     JFrogXrayApiSummaryArtifactParser,
 )
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):

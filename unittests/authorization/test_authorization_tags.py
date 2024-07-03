@@ -10,8 +10,7 @@ from dojo.templatetags.authorization_tags import (
     has_object_permission,
     user_has_configuration_permission_without_group,
 )
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAuthorizationTags(DojoTestCase):

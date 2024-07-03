@@ -270,7 +270,6 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
     except Exception as e:
         logger.exception(e)
         log_alert(e, "Microsoft Teams Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
-        pass
 
 
 @dojo_async_task

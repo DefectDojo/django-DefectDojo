@@ -93,7 +93,7 @@ def attach_unique_extras(
             )
         )
 
-    for i in range(0, len(requests)):
+    for i in range(len(requests)):
         if requests[i] != "" or responses[i] != "":
             finding.unsaved_req_resp.append(
                 {"req": requests[i], "resp": responses[i]}
@@ -130,7 +130,7 @@ def attach_extras(endpoints, requests, responses, finding, date, qid, test):
     for endpoint in endpoints:
         finding.unsaved_endpoints.append(Endpoint.from_uri(endpoint))
 
-    for i in range(0, len(requests)):
+    for i in range(len(requests)):
         if requests[i] != "" or responses[i] != "":
             finding.unsaved_req_resp.append(
                 {"req": requests[i], "resp": responses[i]}
@@ -151,6 +151,8 @@ def get_request(request):
             for head in headers.iter("HEADER"):
                 header += str(head.findtext("key")) + ": "
                 header += str(head.findtext("value")) + "\n"
+        if request.findtext("BODY") is not None:
+            header += "BODY: " + str(request.findtext("BODY")) + "\n"
         return str(header)
     return ""
 

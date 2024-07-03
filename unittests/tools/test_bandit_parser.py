@@ -4,8 +4,7 @@ from dateutil.tz import tzlocal
 
 from dojo.models import Test
 from dojo.tools.bandit.parser import BanditParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestBanditParser(DojoTestCase):

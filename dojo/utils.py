@@ -883,7 +883,7 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
 
 def get_week_data(week_start_date, tick, day_counts):
     data = []
-    for i in range(0, len(day_counts)):
+    for i in range(len(day_counts)):
         data.append([tick, i, day_counts[i]])
     label = [tick, week_start_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")]
     return data, label
@@ -2059,11 +2059,11 @@ def get_current_request():
 
 
 def create_bleached_link(url, title):
-    link = '<a href=\"'
+    link = '<a href="'
     link += url
-    link += '\" target=\"_blank\" title=\"'
+    link += '" target="_blank" title="'
     link += title
-    link += '\">'
+    link += '">'
     link += title
     link += '</a>'
     return bleach.clean(link, tags={'a'}, attributes={'a': ['href', 'target', 'title']})
@@ -2308,7 +2308,6 @@ class async_delete:
                 logger.debug('ASYNC_DELETE: object has already been deleted elsewhere. Skipping')
                 # The id must be None
                 # The object has already been deleted elsewhere
-                pass
 
     @dojo_async_task
     @app.task
@@ -2399,7 +2398,7 @@ def get_password_requirements_string():
     if bool(get_system_setting('number_character_required')):
         s += ', one number (0-9)'
     if bool(get_system_setting('special_character_required')):
-        s += ', one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)'
+        s += ', one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'",<>./?)'
 
     if s.count(', ') == 1:
         password_requirements_string = s.rsplit(', ', 1)[0] + ' and ' + s.rsplit(', ', 1)[1]

@@ -618,7 +618,13 @@ def jira_environment(obj):
     if isinstance(obj, Finding):
         return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
     elif isinstance(obj, Finding_Group):
-        return "\n".join([jira_environment(finding) for finding in obj.findings.all()])
+        envs = [
+            jira_environment(finding)
+            for finding in obj.findings.all()
+        ]
+
+        jira_environments = [env for env in envs if env]
+        return "\n".join(jira_environments)
     else:
         return ''
 
@@ -1534,7 +1540,6 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
             except Exception as e:
                 error = True
                 logger.exception(e)
-                pass
         else:
             logger.debug(jform.errors)
             error = True

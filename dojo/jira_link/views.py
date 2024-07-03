@@ -241,8 +241,10 @@ def check_for_and_create_comment(parsed_json):
         findings = [jissue.finding]
         create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
     elif jissue.finding_group:
-        findings = [jissue.finding_group.findings.all()]
-        create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
+        findings = jissue.finding_group.findings.all()
+        first_finding_group = findings.first()
+        if first_finding_group:
+            create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding_group}', finding=first_finding_group, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
     elif jissue.engagement:
         return webhook_responser_handler("debug", "Comment for engagement ignored")
     else:
@@ -542,7 +544,7 @@ class DeleteJiraView(View):
                     create_notification(
                         event='jira_config_deleted',
                         title=_('Deletion of JIRA: %s') % jira_instance.configuration_name,
-                        description=f"JIRA \"{jira_instance.configuration_name}\" was deleted by {request.user}",
+                        description=f'JIRA "{jira_instance.configuration_name}" was deleted by {request.user}',
                         url=request.build_absolute_uri(reverse('jira')))
                     return HttpResponseRedirect(reverse('jira'))
                 except Exception as e:

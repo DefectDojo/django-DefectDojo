@@ -378,7 +378,7 @@ def notspecified(text):
     if text:
         return text
     else:
-        return mark_safe("<em class=\"text-muted\">Not Specified</em>")
+        return mark_safe('<em class="text-muted">Not Specified</em>')
 
 
 @register.tag
@@ -484,7 +484,7 @@ def not_specified_icon(tooltip):
 
 def stars(filled, total, tooltip):
     code = '<i class="has-popover" data-placement="bottom" data-content="' + tooltip + '">'
-    for i in range(0, total):
+    for i in range(total):
         if i < filled:
             code += '<i class="fa-solid fa-star has-popover" aria-hidden="true"></span>'
         else:

@@ -226,7 +226,7 @@ def view_product(request, pid):
                                                           benchmark_type__enabled=True).order_by('benchmark_type__name')
     sla = SLA_Configuration.objects.filter(id=prod.sla_configuration_id).first()
     benchAndPercent = []
-    for i in range(0, len(benchmarks)):
+    for i in range(len(benchmarks)):
         desired_level, total, total_pass, total_wait, total_fail, _total_viewed = asvs_calc_level(benchmarks[i])
 
         success_percent = round((float(total_pass) / float(total)) * 100, 2)
@@ -580,11 +580,11 @@ def view_product_metrics(request, pid):
     closed_findings = list(filters.get("closed", []).values('id', 'date', 'severity'))
     accepted_findings = list(filters.get("accepted", []).values('id', 'date', 'severity'))
 
-    '''
+    """
         Optimization: Create dictionaries in the structure of { finding_id: True } for index based search
         Previously the for-loop below used "if finding in open_findings" -- an average O(n^2) time complexity
         This allows for "if open_findings.get(finding_id, None)" -- an average O(n) time complexity
-    '''
+    """
     open_findings_dict = {f.get('id'): True for f in open_findings}
     closed_findings_dict = {f.get('id'): True for f in closed_findings}
     accepted_findings_dict = {f.get('id'): True for f in accepted_findings}
@@ -839,7 +839,7 @@ def import_scan_results_prod(request, pid=None):
 
 def new_product(request, ptid=None):
     if get_authorized_product_types(Permissions.Product_Type_Add_Product).count() == 0:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     jira_project_form = None
     error = False
@@ -939,7 +939,6 @@ def edit_product(request, pid):
         github_inst = GITHUB_PKey.objects.get(product=product)
     except:
         github_inst = None
-        pass
 
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
@@ -1822,7 +1821,7 @@ def edit_api_scan_configuration(request, pid, pascid):
 
     if product_api_scan_configuration.product.pk != int(
             pid):  # user is trying to edit Tool Configuration from another product (trying to by-pass auth)
-        raise Http404()
+        raise Http404
 
     if request.method == 'POST':
         form = Product_API_Scan_ConfigurationForm(request.POST, instance=product_api_scan_configuration)
@@ -1868,7 +1867,7 @@ def delete_api_scan_configuration(request, pid, pascid):
 
     if product_api_scan_configuration.product.pk != int(
             pid):  # user is trying to delete Tool Configuration from another product (trying to by-pass auth)
-        raise Http404()
+        raise Http404
 
     if request.method == 'POST':
         form = Product_API_Scan_ConfigurationForm(request.POST)
