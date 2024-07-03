@@ -38,8 +38,8 @@ class IntSightsParser:
                 f'**Source Date**: ` {alert.get("source_date", "None provided")} `',
                 f'**Source Network Type**: `{alert.get("network_type", "None provided")} `',
                 f'**Assets Affected**: `{alert.get("assets", "None provided")} `',
-                f'**Alert Link**: {alert.get("alert_link", "None provided")}'
-            ]
+                f'**Alert Link**: {alert.get("alert_link", "None provided")}',
+            ],
         )
         return description
 
@@ -66,7 +66,7 @@ class IntSightsParser:
                 references=alert["alert_link"],
                 static_finding=False,
                 dynamic_finding=True,
-                unique_id_from_tool=alert["alert_id"]
+                unique_id_from_tool=alert["alert_id"],
             )
             duplicates[dupe_key] = alert
             if dupe_key not in duplicates:

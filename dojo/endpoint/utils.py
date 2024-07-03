@@ -82,7 +82,7 @@ def endpoint_get_or_create(**kwargs):
         else:
             logger.warning(
                 f"Endpoints in your database are broken. "
-                f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them."
+                f"Please access {reverse('endpoint_migrate')} and migrate them to new format or remove them.",
             )
             # Get the oldest endpoint first, and return that instead
             # a datetime is not captured on the endpoint model, so ID
@@ -217,7 +217,7 @@ def clean_hosts_run(apps, change):
                     path=endpoint.path,
                     query=endpoint.query,
                     fragment=endpoint.fragment,
-                    product_id=product.pk if product else None
+                    product_id=product.pk if product else None,
                 ).order_by('id')
 
                 if ep.count() > 1:
@@ -280,12 +280,12 @@ def validate_endpoints_to_add(endpoints_to_add):
                 endpoint_ins.port,
                 endpoint_ins.path,
                 endpoint_ins.query,
-                endpoint_ins.fragment
+                endpoint_ins.fragment,
             ])
         except ValidationError as ves:
             for ve in ves:
                 errors.append(
-                    ValidationError(f"Invalid endpoint {endpoint}: {ve}")
+                    ValidationError(f"Invalid endpoint {endpoint}: {ve}"),
                 )
     return endpoint_list, errors
 
@@ -301,7 +301,7 @@ def save_endpoints_to_add(endpoint_list, product):
             path=e[4],
             query=e[5],
             fragment=e[6],
-            product=product
+            product=product,
         )
         processed_endpoints.append(endpoint)
     return processed_endpoints

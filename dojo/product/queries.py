@@ -244,7 +244,7 @@ def get_authorized_dojo_meta(permission):
         finding__test__engagement__product__prod_type__member=Exists(finding_authorized_product_type_roles),
         finding__test__engagement__product__member=Exists(finding_authorized_product_roles),
         finding__test__engagement__product__prod_type__authorized_group=Exists(finding_authorized_product_type_groups),
-        finding__test__engagement__product__authorized_group=Exists(finding_authorized_product_groups)
+        finding__test__engagement__product__authorized_group=Exists(finding_authorized_product_groups),
     ).order_by('name')
     dojo_meta = dojo_meta.filter(
         Q(product__prod_type__member=True)

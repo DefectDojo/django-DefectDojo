@@ -96,7 +96,7 @@ logger = logging.getLogger(__name__)
 
 local_tz = pytz.timezone(get_system_setting('time_zone'))
 
-BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
+BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'))
 EARLIEST_FINDING = None
 
 
@@ -183,7 +183,7 @@ class FindingStatusFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                earliest_finding.date, datetime.min.time()),
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -213,7 +213,7 @@ class FindingSLAFilter(ChoiceFilter):
                 risk_accepted=False,
                 is_mitigated=False,
                 mitigated=None,
-            ) & Q(sla_expiration_date__lt=timezone.now().date())
+            ) & Q(sla_expiration_date__lt=timezone.now().date()),
         )
 
     options = {
@@ -341,7 +341,7 @@ def get_finding_filterset_fields(metrics=False, similar=False, filter_string_mat
     if similar:
         fields.extend([
             'id',
-            'hash_code'
+            'hash_code',
         ])
 
     fields.extend(['title', 'component_name', 'component_version'])
@@ -609,7 +609,7 @@ class DateRangeFilter(ChoiceFilter):
         1: (_('Today'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
             f'{name}__month': now().month,
-            f'{name}__day': now().day
+            f'{name}__day': now().day,
         })),
         2: (_('Past 7 days'), lambda qs, name: qs.filter(**{
             f'{name}__gte': _truncate(now() - timedelta(days=7)),
@@ -625,7 +625,7 @@ class DateRangeFilter(ChoiceFilter):
         })),
         5: (_('Current month'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
-            f'{name}__month': now().month
+            f'{name}__month': now().month,
         })),
         6: (_('Current year'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
@@ -655,7 +655,7 @@ class DateRangeOmniFilter(ChoiceFilter):
         1: (_('Today'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
             f'{name}__month': now().month,
-            f'{name}__day': now().day
+            f'{name}__day': now().day,
         })),
         2: (_('Next 7 days'), lambda qs, name: qs.filter(**{
             f'{name}__gte': _truncate(now() + timedelta(days=1)),
@@ -683,7 +683,7 @@ class DateRangeOmniFilter(ChoiceFilter):
         })),
         8: (_('Current month'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
-            f'{name}__month': now().month
+            f'{name}__month': now().month,
         })),
         9: (_('Past year'), lambda qs, name: qs.filter(**{
             f'{name}__gte': _truncate(now() - timedelta(days=365)),
@@ -715,10 +715,10 @@ class ReportBooleanFilter(ChoiceFilter):
     options = {
         None: (_('Either'), lambda qs, name: qs.all()),
         1: (_('Yes'), lambda qs, name: qs.filter(**{
-            f'{name}': True
+            f'{name}': True,
         })),
         2: (_('No'), lambda qs, name: qs.filter(**{
-            f'{name}': False
+            f'{name}': False,
         })),
     }
 
@@ -775,7 +775,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                earliest_finding.date, datetime.min.time()),
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -787,7 +787,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         self.end_date = now()
         return qs.filter(**{
             f'{name}__year': self.start_date.year,
-            f'{name}__month': self.start_date.month
+            f'{name}__month': self.start_date.month,
         })
 
     def current_year(self, qs, name):
@@ -843,7 +843,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                earliest_finding.date, datetime.min.time()),
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -872,7 +872,7 @@ class ProductComponentFilter(DojoFilter):
             'active': 'Active',
             'duplicate': 'Duplicate',
             'total': 'Total',
-        }
+        },
     )
 
 
@@ -945,7 +945,7 @@ class EngagementDirectFilterHelper(FilterSet):
             "product__name": "Product Name",
             "product__prod_type__name": "Product Type",
             "lead__first_name": "Lead",
-        }
+        },
     )
 
 
@@ -1026,7 +1026,7 @@ class EngagementFilterHelper(FilterSet):
         field_labels={
             "name": "Product Name",
             "prod_type__name": "Product Type",
-        }
+        },
     )
 
 
@@ -1132,7 +1132,7 @@ class ProductEngagementFilterHelper(FilterSet):
         ),
         field_labels={
             'name': 'Engagement Name',
-        }
+        },
     )
 
     class Meta:
@@ -1203,7 +1203,7 @@ class ApiEngagementFilter(DojoFilter):
         ),
         field_labels={
             'name': 'Engagement Name',
-        }
+        },
 
     )
 
@@ -1240,7 +1240,7 @@ class ProductFilterHelper(FilterSet):
             ('origin', 'origin'),
             ('external_audience', 'external_audience'),
             ('internet_accessible', 'internet_accessible'),
-            ('findings_count', 'findings_count')
+            ('findings_count', 'findings_count'),
         ),
         field_labels={
             'name': 'Product Name',
@@ -1253,7 +1253,7 @@ class ProductFilterHelper(FilterSet):
             'external_audience': 'External Audience ',
             'internet_accessible': 'Internet Accessible ',
             'findings_count': 'Findings Count ',
-        }
+        },
     )
 
 
@@ -1283,7 +1283,7 @@ class ProductFilter(ProductFilterHelper, DojoFilter):
         fields = [
             "name", "name_exact", "prod_type", "business_criticality",
             "platform", "lifecycle", "origin", "external_audience",
-            "internet_accessible", "tags"
+            "internet_accessible", "tags",
         ]
 
 
@@ -1377,8 +1377,8 @@ class ApiProductFilter(DojoFilter):
             ('prod_type', 'prod_type'),
             ('prod_type__name', 'prod_type__name'),
             ('updated', 'updated'),
-            ('user_records', 'user_records')
-        )
+            ('user_records', 'user_records'),
+        ),
     )
 
 
@@ -1528,7 +1528,7 @@ class PercentageFilter(NumberFilter):
         max_val = value + decimal.Decimal(f"1E{exponent}")
         lookup_kwargs = {
             f"{name}__gte": value,
-            f"{name}__lt": max_val, }
+            f"{name}__lt": max_val}
         return queryset.filter(**lookup_kwargs)
 
 
@@ -1652,7 +1652,7 @@ class FindingFilterHelper(FilterSet):
             'test__engagement__product__name': 'Product Name',
             'epss_score': 'EPSS Score',
             'epss_percentile': 'EPSS Percentile',
-        }
+        },
     )
 
     def __init__(self, *args, **kwargs):
@@ -1752,7 +1752,7 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce',]
+                   'severity_justification', 'steps_to_reproduce']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -1810,7 +1810,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce',]
+                   'severity_justification', 'steps_to_reproduce']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -1832,7 +1832,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
             del self.form.fields['test__engagement__product__prod_type']
             # TODO add authorized check to be sure
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
-                product_id=self.pid
+                product_id=self.pid,
             ).all()
             self.form.fields['test'].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related('test_type')
         else:
@@ -1991,7 +1991,7 @@ class TemplateFindingFilter(DojoFilter):
         ),
         field_labels={
             'numerical_severity': 'Severity',
-        }
+        },
     )
 
     class Meta:
@@ -2204,7 +2204,7 @@ class MetricsEndpointFilter(MetricsEndpointFilterHelper):
         if self.pid:
             del self.form.fields["finding__test__engagement__product__prod_type"]
             self.form.fields["finding__test__engagement"].queryset = Engagement.objects.filter(
-                product_id=self.pid
+                product_id=self.pid,
             ).all()
         else:
             self.form.fields["finding__test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View).order_by("name")
@@ -2669,7 +2669,7 @@ class EngagementTestFilterHelper(FilterSet):
         ),
         field_labels={
             'name': 'Test Name',
-        }
+        },
     )
 
 
@@ -2804,7 +2804,7 @@ class ApiTestFilter(DojoFilter):
         ),
         field_labels={
             'name': 'Test Name',
-        }
+        },
     )
 
     class Meta:
@@ -3141,7 +3141,7 @@ class UserFilter(DojoFilter):
             'username': 'User Name',
             'is_active': 'Active',
             'is_superuser': 'Superuser',
-        }
+        },
     )
 
     class Meta:
@@ -3177,7 +3177,7 @@ class TestImportFilter(DojoFilter):
             ('build_id', 'build_id'),
             ('commit_hash', 'commit_hash'),
 
-        )
+        ),
     )
 
     class Meta:
@@ -3191,7 +3191,7 @@ class TestImportFindingActionFilter(DojoFilter):
         # tuple-mapping retains order
         fields=(
             ('action', 'action'),
-        )
+        ),
     )
 
     class Meta:
@@ -3219,8 +3219,8 @@ class LogEntryFilter(DojoFilter):
                 'filter_class': CharFilter,
                 'extra': lambda f: {
                     'lookup_expr': 'icontains',
-                }
-            }
+                },
+            },
         }
 
 

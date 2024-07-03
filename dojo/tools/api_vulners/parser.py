@@ -91,7 +91,7 @@ class ApiVulnersParser:
                 finding.cvssv3 = CVSS3(
                     vuln.get("cvss3", {})
                     .get("cvssV3", {})
-                    .get("vectorString", "")
+                    .get("vectorString", ""),
                 ).clean_vector()
 
             # References

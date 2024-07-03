@@ -30,7 +30,7 @@ class CrashtestSecurityJsonParser:
             crashtest_scan = crashtest_scan["data"]
 
         descriptions = self.create_descriptions_dict(
-            crashtest_scan["descriptions"]
+            crashtest_scan["descriptions"],
         )
 
         # Iterate scanner which contain the items
@@ -39,14 +39,14 @@ class CrashtestSecurityJsonParser:
             # Iterate all findings of the scanner
             for finding in scanner:
                 items.append(
-                    self.generate_finding(finding, test, descriptions)
+                    self.generate_finding(finding, test, descriptions),
                 )
 
                 # Iterate all connected CVE findings if any
                 if "cve_findings" in finding:
                     for cve_finding in finding["cve_findings"]:
                         items.append(
-                            self.generate_cve_finding(cve_finding, test)
+                            self.generate_cve_finding(cve_finding, test),
                         )
         return items
 
@@ -103,7 +103,7 @@ class CrashtestSecurityJsonParser:
         """
         severity = self.get_severity(cve_finding["cvss"])
         references = "https://nvd.nist.gov/vuln/detail/{}".format(
-            cve_finding["cve_id"]
+            cve_finding["cve_id"],
         )
         finding = Finding(
             title=cve_finding["cve_id"],
