@@ -559,7 +559,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     def test_engagement_epic_creation(self):
         eng = self.get_engagement(3)
         # Set epic_mapping to true
-        self.toggle_jira_project_epic_mapping(eng, True)
+        self.toggle_jira_project_epic_mapping(eng, value=True)
         self.create_engagement_epic(eng)
         self.assertTrue(eng.has_jira_issue)
 
@@ -568,7 +568,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     def test_engagement_epic_mapping_enabled_create_epic_and_push_findings(self):
         eng = self.get_engagement(3)
         # Set epic_mapping to true
-        self.toggle_jira_project_epic_mapping(eng, True)
+        self.toggle_jira_project_epic_mapping(eng, value=True)
         self.create_engagement_epic(eng)
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3, verified=True)
         test_id = import0["test"]
@@ -586,7 +586,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     def test_engagement_epic_mapping_enabled_no_epic_and_push_findings(self):
         eng = self.get_engagement(3)
         # Set epic_mapping to true
-        self.toggle_jira_project_epic_mapping(eng, True)
+        self.toggle_jira_project_epic_mapping(eng, value=True)
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3, verified=True)
         test_id = import0["test"]
         # Correct number of issues are pushed to jira
@@ -603,7 +603,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     def test_engagement_epic_mapping_disabled_create_epic_and_push_findings(self):
         eng = self.get_engagement(3)
         # Set epic_mapping to true
-        self.toggle_jira_project_epic_mapping(eng, False)
+        self.toggle_jira_project_epic_mapping(eng, value=False)
         self.create_engagement_epic(eng)
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3, verified=True)
         test_id = import0["test"]
@@ -621,7 +621,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     def test_engagement_epic_mapping_disabled_no_epic_and_push_findings(self):
         eng = self.get_engagement(3)
         # Set epic_mapping to true
-        self.toggle_jira_project_epic_mapping(eng, False)
+        self.toggle_jira_project_epic_mapping(eng, value=False)
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, engagement=3, verified=True)
         test_id = import0["test"]
         # Correct number of issues are pushed to jira

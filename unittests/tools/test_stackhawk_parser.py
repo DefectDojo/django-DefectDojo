@@ -45,8 +45,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012",
                 "20012",
                 "10",
-                False,
-                False,
+                false_positive=False,
+                risk_accepted=False,
             )
 
     def test_stackhawk_parser_with_many_vuln_has_many_findings_and_removes_duplicates(self):
@@ -66,8 +66,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/90027",
                 "90027",
                 "10",
-                False,
-                False,
+                false_positive=False,
+                risk_accepted=False,
             )
 
             self.__assertFindingEquals(
@@ -80,8 +80,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/40025",
                 "40025",
                 "10",
-                False,
-                False,
+                false_positive=False,
+                risk_accepted=False,
             )
 
             self.__assertFindingEquals(
@@ -94,8 +94,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/20012",
                 "20012",
                 "10",
-                False,
-                False,
+                false_positive=False,
+                risk_accepted=False,
             )
 
             self.__assertFindingEquals(
@@ -108,8 +108,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/40012",
                 "40012",
                 "1",
-                False,
-                False,
+                false_positive=False,
+                risk_accepted=False,
             )
 
             self.__assertFindingEquals(
@@ -122,8 +122,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/10038",
                 "10038",
                 "12",
-                False,
-                False,
+                false_positive=False,
+                risk_accepted=False,
             )
 
             self.__assertFindingEquals(
@@ -136,8 +136,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/10063",
                 "10063",
                 "12",
-                False,
-                False,
+                false_positive=False,
+                risk_accepted=False,
             )
 
     def test_that_a_scan_import_updates_the_test_description(self):
@@ -168,8 +168,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/90027",
                 "90027",
                 "3",
-                True,
-                False,
+                false_positive=True,
+                risk_accepted=False,
             )
 
     def test_that_a_scan_with_all_risk_accepted_endpoints_on_a_finding_marks_as_risk_accepted(self):
@@ -188,8 +188,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/90027",
                 "90027",
                 "3",
-                False,
-                True,
+                false_positive=False,
+                risk_accepted=True,
             )
 
     def test_that_a_scan_with_endpoints_in_differing_statuses_does_not_mark_as_risk_accepted_or_false_positive(self):
@@ -208,8 +208,8 @@ class TestStackHawkParser(DojoTestCase):
                 "https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27/finding/90027",
                 "90027",
                 "3",
-                False,
-                False,
+                false_positive=False,
+                risk_accepted=False,
             )
 
     def __assertFindingEquals(

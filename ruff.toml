@@ -40,6 +40,7 @@ select = [
    "YTT",
    "ASYNC",
    "S2", "S5", "S7",
+   "FBT001", "FBT003",
    "COM",
    "C4",
    "T10",
@@ -74,3 +75,6 @@ unfixable = []
 preview = true
 
 per-file-ignores = {}
+
+[lint.flake8-boolean-trap]
+extend-allowed-calls = ["dojo.utils.get_system_setting"]

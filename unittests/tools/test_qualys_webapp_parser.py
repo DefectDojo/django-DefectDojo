@@ -48,7 +48,7 @@ class TestQualysWebAppParser(DojoTestCase):
             get_unit_tests_path() + "/scans/qualys_webapp/qualys_webapp_many_vuln.xml",
         )
         parser = QualysWebAppParser()
-        findings = parser.get_findings(testfile, Test(), True)
+        findings = parser.get_findings(testfile, Test(), enable_weakness=True)
         testfile.close()
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
@@ -62,7 +62,7 @@ class TestQualysWebAppParser(DojoTestCase):
             get_unit_tests_path() + "/scans/qualys_webapp/discussion_10239.xml",
         )
         parser = QualysWebAppParser()
-        findings = parser.get_findings(testfile, Test(), True)
+        findings = parser.get_findings(testfile, Test(), enable_weakness=True)
         testfile.close()
         self.assertEqual(1, len(findings))
         finding = findings[0]

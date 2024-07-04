@@ -244,6 +244,7 @@ class AutoCreateContextManager:
         self,
         product_name: str = None,
         product_type_name: str = None,
+        *,
         auto_create_context: bool = False,
         **kwargs: dict,
     ) -> Product:
@@ -279,6 +280,7 @@ class AutoCreateContextManager:
         engagement_name: str = None,
         product_name: str = None,
         product_type_name: str = None,
+        *,
         auto_create_context: bool = False,
         deduplication_on_engagement: bool = False,
         source_code_management_uri: str = None,
