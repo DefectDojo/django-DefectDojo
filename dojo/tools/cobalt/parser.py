@@ -28,7 +28,12 @@ class CobaltParser:
             io.StringIO(content), delimiter=",", quotechar='"',
         )
         dupes = {}
-        for row in reader:
+
+        # FIXME double loop, could lead to performance pb if the number of
+        # issues is big
+        csvarray = list(reader)
+
+        for row in csvarray:
             finding = Finding(test=test)
             finding.title = (
                 row["Title"] if row["Title"][0] != "'" else row["Title"][1:]

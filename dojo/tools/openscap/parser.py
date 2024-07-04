@@ -40,12 +40,8 @@ class OpenscapParser:
             }
         # go to test result
         test_result = tree.find(f"./{namespace}TestResult")
-        ips = []
-        # append all target in a list.
-        for ip in test_result.findall(f"./{namespace}target"):
-            ips.append(ip.text)
-        for ip in test_result.findall(f"./{namespace}target-address"):
-            ips.append(ip.text)
+        ips = [ip.text for ip in test_result.findall(f"./{namespace}target")] \
+              + [ip.text for ip in test_result.findall(f"./{namespace}target-address")]
 
         dupes = {}
         # run both rule, and rule-result in parallel so that we can get title
@@ -65,11 +61,8 @@ class OpenscapParser:
                         "**Title:** `" + title + "`",
                     ],
                 )
-                vulnerability_ids = []
-                for vulnerability_id in rule_result.findall(
-                    f"./{namespace}ident[@system='http://cve.mitre.org']",
-                ):
-                    vulnerability_ids.append(vulnerability_id.text)
+                vulnerability_ids = [vulnerability_id.text
+                    for vulnerability_id in rule_result.findall(f"./{namespace}ident[@system='http://cve.mitre.org']")]
                 # get severity.
                 severity = (
                     rule_result.attrib.get("severity", "medium")

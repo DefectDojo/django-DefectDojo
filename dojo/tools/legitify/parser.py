@@ -39,7 +39,7 @@ class LegitifyParser:
         report_tree = self.parse_json(file)
 
         findings = []
-        for content_key, content_value in report_tree.get("content", {}).items():
+        for content_value in report_tree.get("content", {}).values():
             policy_info = content_value.get("policyInfo", {})
             is_finding = False
             endpoints = set()

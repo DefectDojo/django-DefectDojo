@@ -28,10 +28,7 @@ class SolarAppscreenerParser:
         reader = csv.DictReader(
             io.StringIO(content), delimiter=",", quotechar='"',
         )
-        csvarray = []
-
-        for row in reader:
-            csvarray.append(row)
+        csvarray = list(reader)
 
         items = []
         for row in csvarray:
