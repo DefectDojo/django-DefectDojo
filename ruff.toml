@@ -66,7 +66,7 @@ select = [
    "NPY",
    "AIR",
 ]
-ignore = ["E501", "E722", "F821"]
+ignore = ["E501", "E722"]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
