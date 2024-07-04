@@ -1,6 +1,5 @@
 from dojo.models import Test
 from dojo.tools.kiuwan_sca.parser import KiuwanSCAParser
-
 from unittests.dojo_test_case import DojoTestCase
 
 
