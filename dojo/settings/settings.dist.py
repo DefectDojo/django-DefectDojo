@@ -1270,7 +1270,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Nancy Scan': ['title', 'vuln_id_from_tool'],
     'Wiz Scan': ['title', 'description', 'severity'],
     'Kiuwan SCA Scan': ['description', 'severity', 'component_name', 'component_version', 'cwe'],
-    'Kubescape JSON Importer': ['title', 'component_name']
+    'Kubescape JSON Importer': ['title', 'component_name'],
 }
 
 # Override the hardcoded settings here via the env var

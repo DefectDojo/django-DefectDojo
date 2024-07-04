@@ -16,7 +16,7 @@ class KiuwanSCAParser:
         "Low": "Low",
         "Medium": "Medium",
         "High": "High",
-        "Critical": "Critical"
+        "Critical": "Critical",
     }
 
     def get_scan_types(self):
@@ -80,7 +80,7 @@ class KiuwanSCAParser:
                     + finding.component_version
                     + "|"
                     + str(finding.cwe)
-                ).encode("utf-8")
+                ).encode("utf-8"),
             ).hexdigest()
 
             if key not in dupes:

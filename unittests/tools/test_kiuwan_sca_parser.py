@@ -1,7 +1,7 @@
 from dojo.models import Test
 from dojo.tools.kiuwan_sca.parser import KiuwanSCAParser
 
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 # ./dc-unittest.sh --profile postgres-redis --test-case unittests.tools.test_kiuwan_sca_parser.TestKiuwanSCAParser
