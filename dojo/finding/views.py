@@ -2419,7 +2419,7 @@ def edit_template(request, tid):
                 extra_tags="alert-danger",
             )
 
-    count = apply_cwe_mitigation(True, template, False)
+    count = apply_cwe_mitigation(apply_to_findings=True, template=template, update=False)
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(
         request,

@@ -1082,14 +1082,14 @@ if AUTH_REMOTEUSER_ENABLED:
 # Celery settings
 CELERY_BROKER_URL = env("DD_CELERY_BROKER_URL") \
     if len(env("DD_CELERY_BROKER_URL")) > 0 else generate_url(
-    env("DD_CELERY_BROKER_SCHEME"),
-    True,
-    env("DD_CELERY_BROKER_USER"),
-    env("DD_CELERY_BROKER_PASSWORD"),
-    env("DD_CELERY_BROKER_HOST"),
-    env("DD_CELERY_BROKER_PORT"),
-    env("DD_CELERY_BROKER_PATH"),
-    env("DD_CELERY_BROKER_PARAMS"),
+    scheme=env("DD_CELERY_BROKER_SCHEME"),
+    double_slashes=True,
+    user=env("DD_CELERY_BROKER_USER"),
+    password=env("DD_CELERY_BROKER_PASSWORD"),
+    host=env("DD_CELERY_BROKER_HOST"),
+    port=env("DD_CELERY_BROKER_PORT"),
+    path=env("DD_CELERY_BROKER_PATH"),
+    params=env("DD_CELERY_BROKER_PARAMS"),
 )
 CELERY_TASK_IGNORE_RESULT = env("DD_CELERY_TASK_IGNORE_RESULT")
 CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")

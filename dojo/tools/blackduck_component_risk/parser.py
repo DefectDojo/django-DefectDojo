@@ -86,7 +86,7 @@ class BlackduckComponentRiskParser:
                 title = "Review " + self.license_title(component)
                 description = self.license_description(component, source)
                 severity = self.license_severity(component)
-                mitigation = self.license_mitigation(component, False)
+                mitigation = self.license_mitigation(component, violation=False)
                 impact = "N/A"
                 references = self.license_references(component)
                 finding = Finding(

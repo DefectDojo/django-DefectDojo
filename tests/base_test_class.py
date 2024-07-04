@@ -79,7 +79,7 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options.add_argument("--window-size=1280,1024")
             # dd_driver_options.add_argument("--start-maximized")
 
-            dd_driver_options.set_capability("acceptInsecureCerts", True)
+            dd_driver_options.set_capability(name="acceptInsecureCerts", value=True)
 
             # some extra logging can be turned on if you want to query the browser javascripe console in your tests
             desired = webdriver.DesiredCapabilities.CHROME
