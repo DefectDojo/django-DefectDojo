@@ -35,7 +35,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
         # 'path: (binary)
         'owner': 1,
         'expiration_date': '2021-07-15',
-        'reactivate_expired': True
+        'reactivate_expired': True,
     }
 
     data_remove_finding_from_ra = {
@@ -53,7 +53,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
     def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
 
         if fid:
-            args = (eid, fid, )
+            args = (eid, fid)
         else:
             args = (eid, )
 
@@ -103,7 +103,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data_add_findings_to_ra = {
             'add_findings': 'Add Selected Findings',
-            'accepted_findings': [4, 5]
+            'accepted_findings': [4, 5],
         }
 
         response = self.client.post(reverse('view_risk_acceptance', args=(1, ra.id)),
@@ -133,7 +133,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        self.client.post(reverse('delete_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('delete_risk_acceptance', args=(1, ra.id)), data)
 
         self.assert_all_active_not_risk_accepted(findings)
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(test__engagement=1))
@@ -148,7 +148,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id)), data)
 
         ra.refresh_from_db()
         self.assert_all_active_not_risk_accepted(findings)
@@ -170,7 +170,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id)), data)
 
         ra.refresh_from_db()
         # no reactivation on expiry
@@ -193,7 +193,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id)), data)
 
         ra.refresh_from_db()
 
@@ -209,7 +209,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id)), data)
 
         ra.refresh_from_db()
 
@@ -224,7 +224,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        self.client.post(reverse('reinstate_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('reinstate_risk_acceptance', args=(1, ra.id)), data)
 
         ra.refresh_from_db()
         expiration_delta_days = get_system_setting('risk_acceptance_form_default_days', 90)

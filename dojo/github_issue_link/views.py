@@ -44,14 +44,14 @@ def new_github(request):
                                      messages.SUCCESS,
                                      'GitHub Configuration Successfully Created.',
                                      extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('github', ))
+                return HttpResponseRedirect(reverse('github'))
             except Exception as info:
                 logger.error(info)
                 messages.add_message(request,
                                      messages.ERROR,
                                      'Unable to authenticate on GitHub.',
                                      extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('github', ))
+                return HttpResponseRedirect(reverse('github'))
     else:
         gform = GITHUBForm()
         add_breadcrumb(title="New GitHub Configuration", top_level=False, request=request)

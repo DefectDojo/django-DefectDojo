@@ -38,7 +38,7 @@ class StackHawkParser:
         return findings
 
     def __extract_findings(
-        self, completed_scan, metadata: StackHawkScanMetadata, test
+        self, completed_scan, metadata: StackHawkScanMetadata, test,
     ):
         findings = {}
 
@@ -49,19 +49,19 @@ class StackHawkParser:
                 key = raw_finding["pluginId"]
                 if key not in findings:
                     finding = self.__extract_finding(
-                        raw_finding, metadata, test
+                        raw_finding, metadata, test,
                     )
                     findings[key] = finding
 
         # Update the test description these scan results are linked to.
         test.description = "View scan details here: " + self.__hyperlink(
-            completed_scan["scan"]["scanURL"]
+            completed_scan["scan"]["scanURL"],
         )
 
         return list(findings.values())
 
     def __extract_finding(
-        self, raw_finding, metadata: StackHawkScanMetadata, test
+        self, raw_finding, metadata: StackHawkScanMetadata, test,
     ) -> Finding:
         steps_to_reproduce = "Use a specific message link and click 'Validate' to see the cURL!\n\n"
 
@@ -83,10 +83,10 @@ class StackHawkParser:
             endpoints.append(endpoint)
 
         are_all_endpoints_risk_accepted = self.__are_all_endpoints_in_status(
-            paths, "RISK_ACCEPTED"
+            paths, "RISK_ACCEPTED",
         )
         are_all_endpoints_false_positive = self.__are_all_endpoints_in_status(
-            paths, "FALSE_POSITIVE"
+            paths, "FALSE_POSITIVE",
         )
 
         finding = Finding(

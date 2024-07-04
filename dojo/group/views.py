@@ -244,7 +244,7 @@ class DeleteGroup(View):
         return {
             "form": self.get_group_form(request, group),
             "to_delete": group,
-            "rels": collector.nested()
+            "rels": collector.nested(),
         }
 
     def process_forms(self, request: HttpRequest, group: Dojo_Group, context: dict):
@@ -418,7 +418,7 @@ def add_group_member(request, gid):
     add_breadcrumb(title="Add Group Member", top_level=False, request=request)
     return render(request, 'dojo/new_group_member.html', {
         'group': group,
-        'form': groupform
+        'form': groupform,
     })
 
 
@@ -460,7 +460,7 @@ def edit_group_member(request, mid):
     add_breadcrumb(title="Edit a Group Member", top_level=False, request=request)
     return render(request, 'dojo/edit_group_member.html', {
         'memberid': mid,
-        'form': memberform
+        'form': memberform,
     })
 
 
@@ -501,7 +501,7 @@ def delete_group_member(request, mid):
     add_breadcrumb("Delete a group member", top_level=False, request=request)
     return render(request, 'dojo/delete_group_member.html', {
         'memberid': mid,
-        'form': memberform
+        'form': memberform,
     })
 
 
@@ -531,7 +531,7 @@ def add_product_group(request, gid):
     add_breadcrumb(title="Add Product Group", top_level=False, request=request)
     return render(request, 'dojo/new_product_group_group.html', {
         'group': group,
-        'form': group_form
+        'form': group_form,
     })
 
 

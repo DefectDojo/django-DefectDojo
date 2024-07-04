@@ -35,14 +35,14 @@ class CoverityApiParser:
                     f"**Type:** `{issue.get('displayType')}`",
                     f"**Status:** `{issue.get('status')}`",
                     f"**Classification:** `{issue.get('classification')}`",
-                ]
+                ],
             )
 
             finding = Finding()
             finding.test = test
             finding.title = issue["displayType"]
             finding.severity = self.convert_displayImpact(
-                issue.get("displayImpact")
+                issue.get("displayImpact"),
             )
             finding.description = description_formated
             finding.static_finding = True
@@ -51,7 +51,7 @@ class CoverityApiParser:
 
             if "firstDetected" in issue:
                 finding.date = datetime.strptime(
-                    issue["firstDetected"], "%m/%d/%y"
+                    issue["firstDetected"], "%m/%d/%y",
                 ).date()
 
             if "cwe" in issue and isinstance(issue["cwe"], int):

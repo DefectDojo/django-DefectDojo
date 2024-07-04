@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.auditjs.parser import AuditJSParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAuditJSParser(DojoTestCase):
@@ -65,7 +64,7 @@ class TestAuditJSParser(DojoTestCase):
                 parser.get_findings(testfile, Test())
 
         self.assertTrue(
-            "Invalid JSON format. Are you sure you used --json option ?" in str(context.exception)
+            "Invalid JSON format. Are you sure you used --json option ?" in str(context.exception),
         )
 
     def test_auditjs_parser_with_package_name_has_namespace(self):

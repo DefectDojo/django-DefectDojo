@@ -50,12 +50,12 @@ RESOLVED_STATUS = [
     'Mitigated',
     'False Positive',
     'Out of Scope',
-    'Duplicate'
+    'Duplicate',
 ]
 
 OPEN_STATUS = [
     'Active',
-    'Verified'
+    'Verified',
 ]
 
 
@@ -618,7 +618,13 @@ def jira_environment(obj):
     if isinstance(obj, Finding):
         return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
     elif isinstance(obj, Finding_Group):
-        return "\n".join([jira_environment(finding) for finding in obj.findings.all()])
+        envs = [
+            jira_environment(finding)
+            for finding in obj.findings.all()
+        ]
+
+        jira_environments = [env for env in envs if env]
+        return "\n".join(jira_environments)
     else:
         return ''
 
@@ -1297,7 +1303,7 @@ def add_epic(engagement, **kwargs):
             epic_name = engagement.name
         issue_dict = {
             'project': {
-                'key': jira_project.project_key
+                'key': jira_project.project_key,
             },
             'summary': epic_name,
             'description': epic_name,
@@ -1387,7 +1393,7 @@ def add_simple_jira_comment(jira_instance, jira_issue, comment):
         jira = get_jira_connection(jira_instance)
 
         jira.add_comment(
-            jira_issue.jira_id, comment
+            jira_issue.jira_id, comment,
         )
         return True
     except Exception as e:
@@ -1534,7 +1540,6 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
             except Exception as e:
                 error = True
                 logger.exception(e)
-                pass
         else:
             logger.debug(jform.errors)
             error = True
@@ -1615,7 +1620,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.false_p = False
                 ra = Risk_Acceptance.objects.create(
                     accepted_by=assignee_name,
-                    owner=finding.reporter
+                    owner=finding.reporter,
                 )
                 finding.test.engagement.risk_acceptance.add(ra)
                 ra_helper.add_findings_to_risk_acceptance(ra, [finding])

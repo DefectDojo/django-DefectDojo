@@ -45,7 +45,7 @@ class SystemNotificationsView(View):
             'form': self.get_form(request, notifications),
             'scope': scope,
             'enabled_notifications': self.get_enabled_notifications(),
-            'admin': request.user.is_superuser
+            'admin': request.user.is_superuser,
         }
 
     def set_breadcrumbs(self, request: HttpRequest):

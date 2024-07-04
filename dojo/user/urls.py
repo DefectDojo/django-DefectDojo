@@ -25,7 +25,7 @@ urlpatterns = [
     re_path(r'^user/(?P<uid>\d+)/add_product_type_member$', views.add_product_type_member, name='add_product_type_member_user'),
     re_path(r'^user/(?P<uid>\d+)/add_product_member$', views.add_product_member, name='add_product_member_user'),
     re_path(r'^user/(?P<uid>\d+)/add_group_member$', views.add_group_member, name='add_group_member_user'),
-    re_path(r'^user/(?P<uid>\d+)/edit_permissions$', views.edit_permissions, name='edit_user_permissions')
+    re_path(r'^user/(?P<uid>\d+)/edit_permissions$', views.edit_permissions, name='edit_user_permissions'),
 ]
 if settings.FORGOT_PASSWORD:
     urlpatterns.extend([
@@ -50,7 +50,7 @@ if settings.FORGOT_USERNAME:
         ), name="forgot_username_done"),
         re_path(r'^forgot_username/$', views.DojoForgotUsernameView.as_view(
             template_name='login/forgot_username.html',
-            success_url=reverse_lazy("forgot_username_done")
+            success_url=reverse_lazy("forgot_username_done"),
         ), name="forgot_username"),
     ])
 

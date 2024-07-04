@@ -96,7 +96,7 @@ logger = logging.getLogger(__name__)
 
 local_tz = pytz.timezone(get_system_setting('time_zone'))
 
-BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
+BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'))
 EARLIEST_FINDING = None
 
 
@@ -183,7 +183,7 @@ class FindingStatusFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                earliest_finding.date, datetime.min.time()),
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -213,7 +213,7 @@ class FindingSLAFilter(ChoiceFilter):
                 risk_accepted=False,
                 is_mitigated=False,
                 mitigated=None,
-            ) & Q(sla_expiration_date__lt=timezone.now().date())
+            ) & Q(sla_expiration_date__lt=timezone.now().date()),
         )
 
     options = {
@@ -341,7 +341,7 @@ def get_finding_filterset_fields(metrics=False, similar=False, filter_string_mat
     if similar:
         fields.extend([
             'id',
-            'hash_code'
+            'hash_code',
         ])
 
     fields.extend(['title', 'component_name', 'component_version'])
@@ -595,6 +595,10 @@ class FindingTagStringFilter(FilterSet):
         help_text="Search for tags on a Product that are an exact match, and exclude them",
         exclude=True)
 
+    def delete_tags_from_form(self, tag_list: list):
+        for tag in tag_list:
+            self.form.fields.pop(tag, None)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -605,7 +609,7 @@ class DateRangeFilter(ChoiceFilter):
         1: (_('Today'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
             f'{name}__month': now().month,
-            f'{name}__day': now().day
+            f'{name}__day': now().day,
         })),
         2: (_('Past 7 days'), lambda qs, name: qs.filter(**{
             f'{name}__gte': _truncate(now() - timedelta(days=7)),
@@ -621,7 +625,7 @@ class DateRangeFilter(ChoiceFilter):
         })),
         5: (_('Current month'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
-            f'{name}__month': now().month
+            f'{name}__month': now().month,
         })),
         6: (_('Current year'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
@@ -651,7 +655,7 @@ class DateRangeOmniFilter(ChoiceFilter):
         1: (_('Today'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
             f'{name}__month': now().month,
-            f'{name}__day': now().day
+            f'{name}__day': now().day,
         })),
         2: (_('Next 7 days'), lambda qs, name: qs.filter(**{
             f'{name}__gte': _truncate(now() + timedelta(days=1)),
@@ -679,7 +683,7 @@ class DateRangeOmniFilter(ChoiceFilter):
         })),
         8: (_('Current month'), lambda qs, name: qs.filter(**{
             f'{name}__year': now().year,
-            f'{name}__month': now().month
+            f'{name}__month': now().month,
         })),
         9: (_('Past year'), lambda qs, name: qs.filter(**{
             f'{name}__gte': _truncate(now() - timedelta(days=365)),
@@ -711,10 +715,10 @@ class ReportBooleanFilter(ChoiceFilter):
     options = {
         None: (_('Either'), lambda qs, name: qs.all()),
         1: (_('Yes'), lambda qs, name: qs.filter(**{
-            f'{name}': True
+            f'{name}': True,
         })),
         2: (_('No'), lambda qs, name: qs.filter(**{
-            f'{name}': False
+            f'{name}': False,
         })),
     }
 
@@ -771,7 +775,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                earliest_finding.date, datetime.min.time()),
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -783,7 +787,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         self.end_date = now()
         return qs.filter(**{
             f'{name}__year': self.start_date.year,
-            f'{name}__month': self.start_date.month
+            f'{name}__month': self.start_date.month,
         })
 
     def current_year(self, qs, name):
@@ -839,7 +843,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
         earliest_finding = get_earliest_finding(qs)
         if earliest_finding is not None:
             start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
+                earliest_finding.date, datetime.min.time()),
             )
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
@@ -868,7 +872,7 @@ class ProductComponentFilter(DojoFilter):
             'active': 'Active',
             'duplicate': 'Duplicate',
             'total': 'Total',
-        }
+        },
     )
 
 
@@ -941,7 +945,7 @@ class EngagementDirectFilterHelper(FilterSet):
             "product__name": "Product Name",
             "product__prod_type__name": "Product Type",
             "lead__first_name": "Lead",
-        }
+        },
     )
 
 
@@ -1022,7 +1026,7 @@ class EngagementFilterHelper(FilterSet):
         field_labels={
             "name": "Product Name",
             "prod_type__name": "Product Type",
-        }
+        },
     )
 
 
@@ -1128,7 +1132,7 @@ class ProductEngagementFilterHelper(FilterSet):
         ),
         field_labels={
             'name': 'Engagement Name',
-        }
+        },
     )
 
     class Meta:
@@ -1199,7 +1203,7 @@ class ApiEngagementFilter(DojoFilter):
         ),
         field_labels={
             'name': 'Engagement Name',
-        }
+        },
 
     )
 
@@ -1236,7 +1240,7 @@ class ProductFilterHelper(FilterSet):
             ('origin', 'origin'),
             ('external_audience', 'external_audience'),
             ('internet_accessible', 'internet_accessible'),
-            ('findings_count', 'findings_count')
+            ('findings_count', 'findings_count'),
         ),
         field_labels={
             'name': 'Product Name',
@@ -1249,7 +1253,7 @@ class ProductFilterHelper(FilterSet):
             'external_audience': 'External Audience ',
             'internet_accessible': 'Internet Accessible ',
             'findings_count': 'Findings Count ',
-        }
+        },
     )
 
 
@@ -1279,7 +1283,7 @@ class ProductFilter(ProductFilterHelper, DojoFilter):
         fields = [
             "name", "name_exact", "prod_type", "business_criticality",
             "platform", "lifecycle", "origin", "external_audience",
-            "internet_accessible", "tags"
+            "internet_accessible", "tags",
         ]
 
 
@@ -1373,8 +1377,8 @@ class ApiProductFilter(DojoFilter):
             ('prod_type', 'prod_type'),
             ('prod_type__name', 'prod_type__name'),
             ('updated', 'updated'),
-            ('user_records', 'user_records')
-        )
+            ('user_records', 'user_records'),
+        ),
     )
 
 
@@ -1524,7 +1528,7 @@ class PercentageFilter(NumberFilter):
         max_val = value + decimal.Decimal(f"1E{exponent}")
         lookup_kwargs = {
             f"{name}__gte": value,
-            f"{name}__lt": max_val, }
+            f"{name}__lt": max_val}
         return queryset.filter(**lookup_kwargs)
 
 
@@ -1611,7 +1615,7 @@ class FindingFilterHelper(FilterSet):
             "The range of EPSS score percentages to filter on; the left input is a lower bound, "
             "the right is an upper bound. Leaving one empty will skip that bound (e.g., leaving "
             "the lower bound input empty will filter only on the upper bound -- filtering on "
-            "\"less than or equal\")."
+            '"less than or equal").'
         ))
     epss_percentile = PercentageFilter(field_name="epss_percentile", label="EPSS percentile")
     epss_percentile_range = PercentageRangeFilter(
@@ -1620,7 +1624,7 @@ class FindingFilterHelper(FilterSet):
         help_text=(
             "The range of EPSS percentiles to filter on; the left input is a lower bound, the right "
             "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the lower bound "
-            "input empty will filter only on the upper bound -- filtering on \"less than or equal\")."
+            'input empty will filter only on the upper bound -- filtering on "less than or equal").'
         ))
 
     o = OrderingFilter(
@@ -1648,7 +1652,7 @@ class FindingFilterHelper(FilterSet):
             'test__engagement__product__name': 'Product Name',
             'epss_score': 'EPSS Score',
             'epss_percentile': 'EPSS Percentile',
-        }
+        },
     )
 
     def __init__(self, *args, **kwargs):
@@ -1716,12 +1720,12 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
         label="Engagement name Contains",
         help_text="Search for Engagement names that contain a given pattern")
     test__name = CharFilter(
-        field_name="test__engagement__name",
+        field_name="test__name",
         lookup_expr="iexact",
         label="Test Name",
         help_text="Search for Test names that are an exact match")
     test__name_contains = CharFilter(
-        field_name="test__engagement__name",
+        field_name="test__name",
         lookup_expr="icontains",
         label="Test name Contains",
         help_text="Search for Test names that contain a given pattern")
@@ -1748,7 +1752,7 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce',]
+                   'severity_justification', 'steps_to_reproduce']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -1806,7 +1810,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'reviewers', 'created', 'files',
                    'sla_start_date', 'sla_expiration_date', 'cvssv3',
-                   'severity_justification', 'steps_to_reproduce',]
+                   'severity_justification', 'steps_to_reproduce']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -1828,7 +1832,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
             del self.form.fields['test__engagement__product__prod_type']
             # TODO add authorized check to be sure
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
-                product_id=self.pid
+                product_id=self.pid,
             ).all()
             self.form.fields['test'].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related('test_type')
         else:
@@ -1987,21 +1991,13 @@ class TemplateFindingFilter(DojoFilter):
         ),
         field_labels={
             'numerical_severity': 'Severity',
-        }
+        },
     )
 
     class Meta:
         model = Finding_Template
         exclude = ['description', 'mitigation', 'impact',
                    'references', 'numerical_severity']
-
-    not_tags = ModelMultipleChoiceFilter(
-        field_name='tags__name',
-        to_field_name='name',
-        exclude=True,
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
-        # label='tags', # doesn't work with tagulous, need to set in __init__ below
-    )
 
     not_test__tags = ModelMultipleChoiceFilter(
         field_name='test__tags__name',
@@ -2029,8 +2025,6 @@ class TemplateFindingFilter(DojoFilter):
         queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
-
-    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -2210,7 +2204,7 @@ class MetricsEndpointFilter(MetricsEndpointFilterHelper):
         if self.pid:
             del self.form.fields["finding__test__engagement__product__prod_type"]
             self.form.fields["finding__test__engagement"].queryset = Engagement.objects.filter(
-                product_id=self.pid
+                product_id=self.pid,
             ).all()
         else:
             self.form.fields["finding__test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View).order_by("name")
@@ -2675,7 +2669,7 @@ class EngagementTestFilterHelper(FilterSet):
         ),
         field_labels={
             'name': 'Test Name',
-        }
+        },
     )
 
 
@@ -2810,7 +2804,7 @@ class ApiTestFilter(DojoFilter):
         ),
         field_labels={
             'name': 'Test Name',
-        }
+        },
     )
 
     class Meta:
@@ -2877,42 +2871,31 @@ class EndpointReportFilter(DojoFilter):
         exclude = ['product']
 
 
-class ReportFindingFilter(FindingTagFilter):
+class ReportFindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr='icontains', label='Name')
     date = DateFromToRangeFilter(field_name='date', label="Date Discovered")
-    test__engagement__product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.none(), label="Product")
-    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.none(),
-        label="Product Type")
-    test__engagement__product__lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, label="Product Lifecycle")
-    test__engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
-    risk_acceptance = ReportRiskAcceptanceFilter(
-        label="Risk Accepted")
-    # queryset will be restricted in __init__, here we don't have access to the logged in user
+    risk_acceptance = ReportRiskAcceptanceFilter(label="Risk Accepted")
     duplicate = ReportBooleanFilter()
-    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
     out_of_scope = ReportBooleanFilter()
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
-
     file_path = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'references', 'sonarqube_issue',
-                   'thread_id', 'notes',
+                   'references', 'sonarqube_issue', 'duplicate_finding',
+                   'thread_id', 'notes', 'inherited_tags', 'endpoints',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
-    def __init__(self, *args, **kwargs):
+    def manage_kwargs(self, kwargs):
         self.prod_type = None
         self.product = None
         self.engagement = None
@@ -2926,6 +2909,24 @@ class ReportFindingFilter(FindingTagFilter):
         if 'test' in kwargs:
             self.test = kwargs.pop('test')
 
+    @property
+    def qs(self):
+        parent = super().qs
+        return get_authorized_findings(Permissions.Finding_View, parent)
+
+
+class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
+    test__engagement__product = ModelMultipleChoiceFilter(
+        queryset=Product.objects.none(), label="Product")
+    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+        queryset=Product_Type.objects.none(),
+        label="Product Type")
+    test__engagement__product__lifecycle = MultipleChoiceFilter(choices=Product.LIFECYCLE_CHOICES, label="Product Lifecycle")
+    test__engagement = ModelMultipleChoiceFilter(queryset=Engagement.objects.none(), label="Engagement")
+    duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())
+
+    def __init__(self, *args, **kwargs):
+        self.manage_kwargs(kwargs)
         super().__init__(*args, **kwargs)
 
         # duplicate_finding queryset needs to restricted in line with permissions
@@ -2961,10 +2962,161 @@ class ReportFindingFilter(FindingTagFilter):
         if 'test__engagement' in self.form.fields:
             self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
-    @property
-    def qs(self):
-        parent = super().qs
-        return get_authorized_findings(Permissions.Finding_View, parent)
+
+class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, FindingTagStringFilter):
+    test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
+    test__engagement__product = NumberFilter(widget=HiddenInput())
+    test__engagement = NumberFilter(widget=HiddenInput())
+    test = NumberFilter(widget=HiddenInput())
+    endpoint = NumberFilter(widget=HiddenInput())
+    reporter = CharFilter(
+        field_name="reporter__username",
+        lookup_expr="iexact",
+        label="Reporter Username",
+        help_text="Search for Reporter names that are an exact match")
+    reporter_contains = CharFilter(
+        field_name="reporter__username",
+        lookup_expr="icontains",
+        label="Reporter Username Contains",
+        help_text="Search for Reporter names that contain a given pattern")
+    reviewers = CharFilter(
+        field_name="reviewers__username",
+        lookup_expr="iexact",
+        label="Reviewer Username",
+        help_text="Search for Reviewer names that are an exact match")
+    reviewers_contains = CharFilter(
+        field_name="reviewers__username",
+        lookup_expr="icontains",
+        label="Reviewer Username Contains",
+        help_text="Search for Reviewer usernames that contain a given pattern")
+    last_reviewed_by = CharFilter(
+        field_name="last_reviewed_by__username",
+        lookup_expr="iexact",
+        label="Last Reviewed By Username",
+        help_text="Search for Last Reviewed By names that are an exact match")
+    last_reviewed_by_contains = CharFilter(
+        field_name="last_reviewed_by__username",
+        lookup_expr="icontains",
+        label="Last Reviewed By Username Contains",
+        help_text="Search for Last Reviewed By usernames that contain a given pattern")
+    review_requested_by = CharFilter(
+        field_name="review_requested_by__username",
+        lookup_expr="iexact",
+        label="Review Requested By Username",
+        help_text="Search for Review Requested By names that are an exact match")
+    review_requested_by_contains = CharFilter(
+        field_name="review_requested_by__username",
+        lookup_expr="icontains",
+        label="Review Requested By Username Contains",
+        help_text="Search for Review Requested By usernames that contain a given pattern")
+    mitigated_by = CharFilter(
+        field_name="mitigated_by__username",
+        lookup_expr="iexact",
+        label="Mitigator Username",
+        help_text="Search for Mitigator names that are an exact match")
+    mitigated_by_contains = CharFilter(
+        field_name="mitigated_by__username",
+        lookup_expr="icontains",
+        label="Mitigator Username Contains",
+        help_text="Search for Mitigator usernames that contain a given pattern")
+    defect_review_requested_by = CharFilter(
+        field_name="defect_review_requested_by__username",
+        lookup_expr="iexact",
+        label="Requester of Defect Review Username",
+        help_text="Search for Requester of Defect Review names that are an exact match")
+    defect_review_requested_by_contains = CharFilter(
+        field_name="defect_review_requested_by__username",
+        lookup_expr="icontains",
+        label="Requester of Defect Review Username Contains",
+        help_text="Search for Requester of Defect Review usernames that contain a given pattern")
+    test__engagement__product__prod_type__name = CharFilter(
+        field_name="test__engagement__product__prod_type__name",
+        lookup_expr="iexact",
+        label="Product Type Name",
+        help_text="Search for Product Type names that are an exact match")
+    test__engagement__product__prod_type__name_contains = CharFilter(
+        field_name="test__engagement__product__prod_type__name",
+        lookup_expr="icontains",
+        label="Product Type Name Contains",
+        help_text="Search for Product Type names that contain a given pattern")
+    test__engagement__product__name = CharFilter(
+        field_name="test__engagement__product__name",
+        lookup_expr="iexact",
+        label="Product Name",
+        help_text="Search for Product names that are an exact match")
+    test__engagement__product__name_contains = CharFilter(
+        field_name="test__engagement__product__name",
+        lookup_expr="icontains",
+        label="Product name Contains",
+        help_text="Search for Product names that contain a given pattern")
+    test__engagement__name = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="iexact",
+        label="Engagement Name",
+        help_text="Search for Engagement names that are an exact match")
+    test__engagement__name_contains = CharFilter(
+        field_name="test__engagement__name",
+        lookup_expr="icontains",
+        label="Engagement name Contains",
+        help_text="Search for Engagement names that contain a given pattern")
+    test__name = CharFilter(
+        field_name="test__name",
+        lookup_expr="iexact",
+        label="Test Name",
+        help_text="Search for Test names that are an exact match")
+    test__name_contains = CharFilter(
+        field_name="test__name",
+        lookup_expr="icontains",
+        label="Test name Contains",
+        help_text="Search for Test names that contain a given pattern")
+
+    def __init__(self, *args, **kwargs):
+        self.manage_kwargs(kwargs)
+        super().__init__(*args, **kwargs)
+
+        product_type_refs = [
+            "test__engagement__product__prod_type__name",
+            "test__engagement__product__prod_type__name_contains",
+        ]
+        product_refs = [
+            "test__engagement__product__name",
+            "test__engagement__product__name_contains",
+            "test__engagement__product__tags",
+            "test__engagement__product__tags_contains",
+            "not_test__engagement__product__tags",
+            "not_test__engagement__product__tags_contains",
+        ]
+        engagement_refs = [
+            "test__engagement__name",
+            "test__engagement__name_contains",
+            "test__engagement__tags",
+            "test__engagement__tags_contains",
+            "not_test__engagement__tags",
+            "not_test__engagement__tags_contains",
+        ]
+        test_refs = [
+            "test__name",
+            "test__name_contains",
+            "test__tags",
+            "test__tags_contains",
+            "not_test__tags",
+            "not_test__tags_contains",
+        ]
+
+        if self.test:
+            self.delete_tags_from_form(product_type_refs)
+            self.delete_tags_from_form(product_refs)
+            self.delete_tags_from_form(engagement_refs)
+            self.delete_tags_from_form(test_refs)
+        elif self.engagement:
+            self.delete_tags_from_form(product_type_refs)
+            self.delete_tags_from_form(product_refs)
+            self.delete_tags_from_form(engagement_refs)
+        elif self.product:
+            self.delete_tags_from_form(product_type_refs)
+            self.delete_tags_from_form(product_refs)
+        elif self.prod_type:
+            self.delete_tags_from_form(product_type_refs)
 
 
 class UserFilter(DojoFilter):
@@ -2989,7 +3141,7 @@ class UserFilter(DojoFilter):
             'username': 'User Name',
             'is_active': 'Active',
             'is_superuser': 'Superuser',
-        }
+        },
     )
 
     class Meta:
@@ -3025,7 +3177,7 @@ class TestImportFilter(DojoFilter):
             ('build_id', 'build_id'),
             ('commit_hash', 'commit_hash'),
 
-        )
+        ),
     )
 
     class Meta:
@@ -3039,7 +3191,7 @@ class TestImportFindingActionFilter(DojoFilter):
         # tuple-mapping retains order
         fields=(
             ('action', 'action'),
-        )
+        ),
     )
 
     class Meta:
@@ -3067,8 +3219,8 @@ class LogEntryFilter(DojoFilter):
                 'filter_class': CharFilter,
                 'extra': lambda f: {
                     'lookup_expr': 'icontains',
-                }
-            }
+                },
+            },
         }
 
 

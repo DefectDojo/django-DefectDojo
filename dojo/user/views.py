@@ -126,7 +126,7 @@ def login_view(request):
         settings.AUTH0_OAUTH2_ENABLED,
         settings.KEYCLOAK_OAUTH2_ENABLED,
         settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
-        settings.SAML2_ENABLED
+        settings.SAML2_ENABLED,
     ]) == 1 and 'force_login_form' not in request.GET:
         if settings.GOOGLE_OAUTH_ENABLED:
             social_auth = 'google-oauth2'
@@ -587,7 +587,7 @@ def add_group_member(request, uid):
     add_breadcrumb(title=_("Add Group Member"), top_level=False, request=request)
     return render(request, 'dojo/new_group_member_user.html', {
         'user': user,
-        'form': memberform
+        'form': memberform,
     })
 
 

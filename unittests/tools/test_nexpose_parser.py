@@ -4,8 +4,7 @@ from django.test import override_settings
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.nexpose.parser import NexposeParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNexposeParser(DojoTestCase):
@@ -65,7 +64,7 @@ class TestNexposeParser(DojoTestCase):
 
             # vuln 5
             finding = findings[5]
-            self.assertEqual("Default SSH password: root password \"root\"", finding.title)
+            self.assertEqual('Default SSH password: root password "root"', finding.title)
             self.assertEqual(1, len(finding.unsaved_endpoints))
 
             # vuln 5 - endpoint
