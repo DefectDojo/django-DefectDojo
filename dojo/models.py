@@ -1243,9 +1243,7 @@ class Product(models.Model):
     def open_findings_list(self):
         findings = Finding.objects.filter(test__engagement__product=self,
                                           active=True)
-        findings_list = []
-        for i in findings:
-            findings_list.append(i.id)
+        findings_list = [i.id for i in findings]
         return findings_list
 
     @property
@@ -3318,10 +3316,7 @@ class Finding(models.Model):
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_set.all()
-        vulnerability_ids = []
-        for vulnerability_id in vulnerability_ids_model:
-            vulnerability_ids.append(vulnerability_id.vulnerability_id)
-
+        vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
         # the cve field is not needed anymore and can be removed.
@@ -3517,10 +3512,7 @@ class Finding_Template(models.Model):
     def vulnerability_ids(self):
         # Get vulnerability ids from database and convert to list of strings
         vulnerability_ids_model = self.vulnerability_id_template_set.all()
-        vulnerability_ids = []
-        for vulnerability_id in vulnerability_ids_model:
-            vulnerability_ids.append(vulnerability_id.vulnerability_id)
-
+        vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
         # the cve field is not needed anymore and can be removed.

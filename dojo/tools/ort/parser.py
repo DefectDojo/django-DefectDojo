@@ -64,10 +64,8 @@ class OrtParser:
 
 
 def get_unresolved_rule_violations(rule_violations):
-    rule_violations_unresolved = []
-    for violation in rule_violations:
-        if is_rule_violation_unresolved(violation):
-            rule_violations_unresolved.append(violation)
+    rule_violations_unresolved = [violation for violation in rule_violations
+        if is_rule_violation_unresolved(violation)]
     return rule_violations_unresolved
 
 
@@ -92,10 +90,10 @@ def find_in_dependency_tree(tree, package_id):
 
 
 def get_project_ids_for_package(dependency_trees, package_id):
-    project_ids = []
-    for project in dependency_trees:
-        if find_in_dependency_tree(project, package_id):
-            project_ids.append(project["pkg"])
+    project_ids = [project["pkg"]
+      for project in dependency_trees
+        if find_in_dependency_tree(project, package_id)]
+
     return project_ids
 
 
@@ -111,13 +109,9 @@ def get_name_id_for_package(packages, package__id):
 def get_rule_violation_models(
     rule_violations_unresolved, packages, licenses, dependency_trees,
 ):
-    models = []
-    for violation in rule_violations_unresolved:
-        models.append(
-            get_rule_violation_model(
+    models = [get_rule_violation_model(
                 violation, packages, licenses, dependency_trees,
-            ),
-        )
+            ) for violation in rule_violations_unresolved]
     return models
 
 
@@ -127,9 +121,7 @@ def get_rule_violation_model(
     project_ids = get_project_ids_for_package(
         dependency_trees, rule_violation_unresolved["pkg"],
     )
-    project_names = []
-    for id in project_ids:
-        project_names.append(get_name_id_for_package(packages, id))
+    project_names = [get_name_id_for_package(packages, id) for id in project_ids]
     package = find_package_by_id(packages, rule_violation_unresolved["pkg"])
     if "license" in rule_violation_unresolved:
         license_tmp = rule_violation_unresolved["license"]
