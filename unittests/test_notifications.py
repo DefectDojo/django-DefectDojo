@@ -494,7 +494,7 @@ class TestNotificationWebhooks(DojoTestCase):
             'X-DefectDojo-Event': 'product_type_added',
             'X-DefectDojo-Instance': 'http://localhost:8080',
             'Accept': 'application/json',
-            'Auth': 'Token xxx'
+            'Auth': 'Token xxx',
         })
 
     @patch('requests.request')
@@ -612,16 +612,16 @@ class TestNotificationWebhooks(DojoTestCase):
             notifications_helper.notify_scan_added(test,
                 updated_count=4,
                 new_findings=[
-                    Finding.objects.create(test=test, title='New Finding', severity='Critical')
+                    Finding.objects.create(test=test, title='New Finding', severity='Critical'),
                 ],
                 findings_mitigated=[
-                    Finding.objects.create(test=test, title='Mitigated Finding', severity='Medium')
+                    Finding.objects.create(test=test, title='Mitigated Finding', severity='Medium'),
                 ],
                 findings_reactivated=[
-                    Finding.objects.create(test=test, title='Reactivated Finding', severity='Low')
+                    Finding.objects.create(test=test, title='Reactivated Finding', severity='Low'),
                 ],
                 findings_untouched=[
-                    Finding.objects.create(test=test, title='Untouched Finding', severity='Info')
+                    Finding.objects.create(test=test, title='Untouched Finding', severity='Info'),
                 ],
             )
             self.assertEqual(mock.call_args.kwargs['headers']['X-DefectDojo-Event'], 'scan_added')
@@ -631,24 +631,24 @@ class TestNotificationWebhooks(DojoTestCase):
                     'id': 232,
                     'title': 'New Finding',
                     'severity': 'Critical',
-                    'url': 'http://localhost:8080/finding/232'
+                    'url': 'http://localhost:8080/finding/232',
                 }],
                 'mitigated': [{
                     'id': 233,
                     'title': 'Mitigated Finding',
                     'severity': 'Medium',
-                    'url': 'http://localhost:8080/finding/233'
+                    'url': 'http://localhost:8080/finding/233',
                 }],
                 'reactivated': [{
                     'id': 234,
                     'title': 'Reactivated Finding',
                     'severity': 'Low',
-                    'url': 'http://localhost:8080/finding/234'
+                    'url': 'http://localhost:8080/finding/234',
                 }],
                 'untouched': [{
                     'id': 235,
                     'title': 'Untouched Finding',
                     'severity': 'Info',
-                    'url': 'http://localhost:8080/finding/235'
+                    'url': 'http://localhost:8080/finding/235',
                 }],
             })
