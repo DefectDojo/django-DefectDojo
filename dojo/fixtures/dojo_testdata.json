@@ -3074,6 +3074,7 @@
       "status": "active",
       "first_error": null,
       "last_error": null,
+      "note": null,
       "owner": null
     }
   },
@@ -3088,6 +3089,7 @@
       "status": "active",
       "first_error": null,
       "last_error": null,
+      "note": null,
       "owner": 2
     }
   }
