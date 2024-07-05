@@ -66,7 +66,9 @@
                 var id = this.id;
                 if (id) {
                     var label = $("label[for=" + id + "]");
-                    $(this).attr("placeholder", label.html().replace(':', "..."));
+                    if (label && label.html()) {
+                        $(this).attr("placeholder", label.html().replace(':', "..."));
+                    }
                 }
             });
 
@@ -74,10 +76,12 @@
                 var id = this.id;
                 if (id) {
                     var label = $("label[for=" + id + "]");
-                    $(this).chosen({
-                        'placeholder_text_multiple': label.html().replace(':', "..."),
-                        'width': '200px !important'
-                    });
+                    if (label && label.html()){
+                        $(this).chosen({
+                            'placeholder_text_multiple': label.html().replace(':', "..."),
+                            'width': '200px !important'
+                        });
+                    }
                 }
             });
 

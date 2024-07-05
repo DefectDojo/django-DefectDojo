@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class PhpSymfonySecurityCheckParser(object):
+class PhpSymfonySecurityCheckParser:
     def get_scan_types(self):
         return ["PHP Symfony Security Check"]
 
@@ -27,7 +27,8 @@ class PhpSymfonySecurityCheckParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise Exception("Invalid format")
+            msg = "Invalid format"
+            raise Exception(msg)
 
         return tree
 

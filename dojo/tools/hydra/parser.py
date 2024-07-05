@@ -1,9 +1,10 @@
 import json
-from datetime import date
 import logging
+from datetime import date
 
-from dojo.models import Finding, Endpoint
 from django.utils.dateparse import parse_datetime
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class HydraScanMetadata:
         self.server = generator.get("server")
 
 
-class HydraParser(object):
+class HydraParser:
     """
     Weak password findings from THC-Hydra (https://github.com/vanhauser-thc/thc-hydra)
     """
@@ -72,9 +73,8 @@ class HydraParser(object):
             or (username is None)
             or (password is None)
         ):
-            raise ValueError(
-                "Vital information is missing for this finding! Skipping this finding!"
-            )
+            msg = "Vital information is missing for this finding! Skipping this finding!"
+            raise ValueError(msg)
 
         finding = Finding(
             test=test,
@@ -103,8 +103,7 @@ class HydraParser(object):
         report = json.load(json_output)
 
         if "generator" not in report or "results" not in report:
-            raise ValueError(
-                "Unexpected JSON format provided. That doesn't look like a Hydra scan!"
-            )
+            msg = "Unexpected JSON format provided. That doesn't look like a Hydra scan!"
+            raise ValueError(msg)
 
         return report

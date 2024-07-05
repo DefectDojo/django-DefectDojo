@@ -1,11 +1,12 @@
-import json
 import hashlib
+import json
+
 import hyperlink
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
-class WFuzzParser(object):
+class WFuzzParser:
     """
     A class that can be used to parse the WFuzz JSON report files
     """

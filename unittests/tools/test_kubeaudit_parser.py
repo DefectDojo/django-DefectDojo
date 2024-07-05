@@ -1,6 +1,7 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.kubeaudit.parser import KubeAuditParser
 from dojo.models import Test
+from dojo.tools.kubeaudit.parser import KubeAuditParser
+
+from ..dojo_test_case import DojoTestCase
 
 
 class TestKubeAuditParser(DojoTestCase):

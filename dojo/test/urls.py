@@ -25,5 +25,8 @@ urlpatterns = [
     re_path(r'^test/(?P<tid>\d+)/add_findings/(?P<fid>\d+)$',
         views.add_temp_finding, name='add_temp_finding'),
     re_path(r'^test/(?P<tid>\d+)/search$', views.search, name='search'),
-    re_path(r'^test/(?P<tid>\d+)/re_import_scan_results', views.re_import_scan_results, name='re_import_scan_results'),
+    re_path(
+        r'^test/(?P<test_id>\d+)/re_import_scan_results',
+        views.ReImportScanResultsView.as_view(),
+        name='re_import_scan_results'),
 ]

@@ -1,4 +1,6 @@
+import logging
 import os
+
 from celery import Celery
 from celery.signals import setup_logging, beat_init, worker_ready, worker_shutdown, after_task_publish
 from django.conf import settings
@@ -29,7 +31,7 @@ app.steps["worker"].add(LivenessProbe)
 
 @app.task(bind=True)
 def debug_task(self):
-    logger.debug(('Request: {0!r}'.format(self.request)))
+    logger.debug(f'Request: {self.request!r}')
 
 
 @setup_logging.connect

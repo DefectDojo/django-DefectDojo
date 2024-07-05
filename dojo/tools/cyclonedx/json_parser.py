@@ -1,12 +1,15 @@
 import json
 import logging
+
 import dateutil
+
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
+
 LOGGER = logging.getLogger(__name__)
 
 
-class CycloneDXJSONParser(object):
+class CycloneDXJSONParser:
     def _get_findings_json(self, file, test):
         """Load a CycloneDX file in JSON format"""
         data = json.load(file)
@@ -86,7 +89,7 @@ class CycloneDXJSONParser(object):
                                 finding.severity = Cyclonedxhelper().fix_severity(severity)
                             else:
                                 finding.severity = cvssv3.severities()[0]
-                vulnerability_ids = list()
+                vulnerability_ids = []
                 # set id as first vulnerability id
                 if vulnerability.get("id"):
                     vulnerability_ids.append(vulnerability.get("id"))
@@ -126,9 +129,7 @@ class CycloneDXJSONParser(object):
                             if detail:
                                 finding.mitigation = (
                                     finding.mitigation
-                                    + "\n**This vulnerability is mitigated and/or suppressed:** {}\n".format(
-                                        detail
-                                    )
+                                    + f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
                                 )
                 findings.append(finding)
         return findings

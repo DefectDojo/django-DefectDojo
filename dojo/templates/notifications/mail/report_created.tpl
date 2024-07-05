@@ -9,7 +9,7 @@
             </p>
             <p>
               {% blocktranslate trimmed with report_name=report.name report_url=url|full_url %}
-                Your report "{{ report_name }}" is ready. It can be downloaded here: {{ report_url }}
+                Your report "{{ report_name }}" is ready. It can be downloaded here: <a href="{{ report_url }}">{{ report_url }}</a>
               {% endblocktranslate %}
             </p>
                 {% trans "Kind regards" %}, <br/>

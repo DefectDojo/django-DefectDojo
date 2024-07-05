@@ -2,11 +2,12 @@ import json
 from datetime import datetime
 
 from dateutil.parser import parse
+
 from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
 
 
-class HorusecParser(object):
+class HorusecParser:
     """Horusec (https://github.com/ZupIT/horusec)"""
 
     ID = "Horusec"

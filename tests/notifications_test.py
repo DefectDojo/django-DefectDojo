@@ -1,25 +1,25 @@
-import unittest
 import sys
+import unittest
 
 from base_test_class import BaseTestCase
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver import ActionChains
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 class NotificationTest(BaseTestCase):
 
     def __init__(self, method_name, type):
-        super(NotificationTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.type = type
 
     def enable_notification(self):
         driver = self.driver
         # Navigate to the System Settings
         driver.get(self.base_url + "system_settings")
-        mail_control = driver.find_element(By.ID, "id_enable_{}_notifications".format(self.type))
+        mail_control = driver.find_element(By.ID, f"id_enable_{self.type}_notifications")
         if not mail_control.is_selected():
             mail_control.click()
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
@@ -28,7 +28,7 @@ class NotificationTest(BaseTestCase):
         driver = self.driver
         # Navigate to the System Settings
         driver.get(self.base_url + "system_settings")
-        mail_control = driver.find_element(By.ID, "id_enable_{}_notifications".format(self.type))
+        mail_control = driver.find_element(By.ID, f"id_enable_{self.type}_notifications")
         if mail_control.is_selected():
             mail_control.click()
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
@@ -42,7 +42,7 @@ class NotificationTest(BaseTestCase):
         self.disable_notification()
         driver.get(self.base_url + "notifications")
         try:
-            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
             assert False
         except NoSuchElementException:
             assert True
@@ -55,7 +55,7 @@ class NotificationTest(BaseTestCase):
         self.enable_notification()
         driver.get(self.base_url + "notifications")
         try:
-            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
             assert True
         except NoSuchElementException:
             if self.type == 'msteams':
@@ -73,7 +73,7 @@ class NotificationTest(BaseTestCase):
         self.disable_notification()
         driver.get(self.base_url + "notifications/system")
         try:
-            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
             assert False
         except NoSuchElementException:
             assert True
@@ -86,7 +86,7 @@ class NotificationTest(BaseTestCase):
         self.enable_notification()
         driver.get(self.base_url + "notifications/system")
         try:
-            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
             assert True
         except NoSuchElementException:
             assert False
@@ -100,7 +100,7 @@ class NotificationTest(BaseTestCase):
         self.disable_notification()
         driver.get(self.base_url + "notifications/template")
         try:
-            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
             assert False
         except NoSuchElementException:
             assert True
@@ -113,7 +113,7 @@ class NotificationTest(BaseTestCase):
         self.enable_notification()
         driver.get(self.base_url + "notifications/template")
         try:
-            driver.find_element(By.XPATH, "//input[@name='product_added' and @value='{}']".format(self.type))
+            driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
             assert True
         except NoSuchElementException:
             if self.type == 'msteams':

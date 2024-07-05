@@ -1,13 +1,16 @@
-from .dojo_test_case import DojoTestCase
-from dojo.models import Finding, Test, Vulnerability_Id, Finding_Template, Vulnerability_Id_Template
-from django.contrib.auth.models import User
+import datetime
+import logging
 from unittest import mock
 from unittest.mock import patch
+
 from crum import impersonate
-import datetime
+from django.contrib.auth.models import User
 from django.utils import timezone
-import logging
+
 from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
+from dojo.models import Finding, Finding_Template, Test, Vulnerability_Id, Vulnerability_Id_Template
+
+from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 

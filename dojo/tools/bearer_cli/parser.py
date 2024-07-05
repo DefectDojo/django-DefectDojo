@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Finding
 
 
-class BearerParser(object):
+class BearerParser:
     """
     Bearer CLI tool is a SAST scanner for multiple languages
     """
@@ -19,7 +20,7 @@ class BearerParser(object):
     def get_findings(self, file, test):
         data = json.load(file)
 
-        items = list()
+        items = []
         dupes = set()
 
         for content in data:

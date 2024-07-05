@@ -1,16 +1,15 @@
-import re
 import hashlib
 import logging
+import re
 
 from defusedxml.ElementTree import parse
 
 from dojo.models import Endpoint, Finding
 
-
 logger = logging.getLogger(__name__)
 
 
-class WapitiParser(object):
+class WapitiParser:
     """The web-application vulnerability scanner
 
     see: https://wapiti.sourceforge.io/
@@ -31,9 +30,8 @@ class WapitiParser(object):
         root = tree.getroot()
         # check if it is
         if "report" not in root.tag:
-            raise ValueError(
-                "This doesn't seem to be a valid Wapiti XML file."
-            )
+            msg = "This doesn't seem to be a valid Wapiti XML file."
+            raise ValueError(msg)
 
         severity_mapping = {
             "4": "Critical",
@@ -45,7 +43,7 @@ class WapitiParser(object):
 
         url = root.findtext('report_infos/info[@name="target"]')
 
-        dupes = dict()
+        dupes = {}
         for vulnerability in root.findall("vulnerabilities/vulnerability"):
             category = vulnerability.attrib["name"]
             description = vulnerability.findtext("description")

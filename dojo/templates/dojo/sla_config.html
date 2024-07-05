@@ -61,16 +61,16 @@
                                     {% if conf.description %}{{ conf.description }}{% endif %}
                                 </td>
                                 <td>
-                                    {% if conf.critical %}{{ conf.critical }}{% endif %}
+                                    {% if conf.critical and conf.enforce_critical %}{{ conf.critical }}{% endif %}
                                 </td>
                                 <td>
-                                    {% if conf.high %}{{ conf.high }}{% endif %}
+                                    {% if conf.high and conf.enforce_high %}{{ conf.high }}{% endif %}
                                 </td>
                                 <td>
-                                    {% if conf.medium %}{{ conf.medium }}{% endif %}
+                                    {% if conf.medium and conf.enforce_medium %}{{ conf.medium }}{% endif %}
                                 </td>
                                 <td>
-                                    {% if conf.low %}{{ conf.low }}{% endif %}
+                                    {% if conf.low and conf.enforce_low %}{{ conf.low }}{% endif %}
                                 </td>
                             </tr>
                         {% endfor %}

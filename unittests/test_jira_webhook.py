@@ -1,10 +1,14 @@
-from django.urls import reverse
-from .dojo_test_case import DojoTestCase
-from dojo.models import JIRA_Issue
 import json
+
 # from unittest import skip
 import logging
+
+from django.urls import reverse
+
 import dojo.jira_link.helper as jira_helper
+from dojo.models import JIRA_Issue
+
+from .dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 
@@ -566,7 +570,6 @@ class JIRAWebhookTest(DojoTestCase):
         response = self.client.post(reverse('jira_web_hook_secret', args=(self.correct_secret, )),
                                     body,
                                     content_type="application/json")
-        # print(response.content)
 
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertEqual(b'Comment for engagement ignored', response.content)

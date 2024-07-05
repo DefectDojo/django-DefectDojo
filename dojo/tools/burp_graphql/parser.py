@@ -1,15 +1,15 @@
-import logging
 import json
+import logging
 import re
-import html2text
 
+import html2text
 
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
 
-class BurpGraphQLParser(object):
+class BurpGraphQLParser:
     def get_scan_types(self):
         return ["Burp GraphQL API"]
 
@@ -23,14 +23,15 @@ class BurpGraphQLParser(object):
         data = json.load(filename)
 
         if "Issues" not in data:
-            raise ValueError("No Issues found")
+            msg = "No Issues found"
+            raise ValueError(msg)
 
         return self.create_findings(data.get("Issues"), test)
 
     def create_findings(self, scan_data, test):
         finding_data = self.parse_findings(scan_data)
 
-        items = list()
+        items = []
 
         for issue in finding_data:
             find = Finding(
@@ -58,13 +59,14 @@ class BurpGraphQLParser(object):
         return items
 
     def parse_findings(self, scan_data):
-        issue_dict = dict()
+        issue_dict = {}
 
         for issue in scan_data:
             if not issue.get("issue_type") or not issue["issue_type"].get(
                 "name"
             ):
-                raise ValueError("Issue does not have a name")
+                msg = "Issue does not have a name"
+                raise ValueError(msg)
 
             issue_name = issue["issue_type"]["name"]
 
@@ -95,7 +97,7 @@ class BurpGraphQLParser(object):
         )
 
     def create_finding(self, issue):
-        finding = dict()
+        finding = {}
         finding["Impact"] = ""
         finding["Description"] = ""
         finding["Mitigation"] = ""
@@ -169,7 +171,7 @@ class BurpGraphQLParser(object):
 
     def parse_evidence(self, evidence):
         evidence_len = len(evidence)
-        req_resp_list = list()
+        req_resp_list = []
 
         i = 0
         while i < evidence_len:

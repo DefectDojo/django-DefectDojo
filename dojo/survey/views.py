@@ -1,29 +1,55 @@
 import pickle
-from datetime import date
+from datetime import date, timedelta
 
 from django.contrib import messages
+from django.contrib.admin.utils import NestedObjects
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
-from django.urls import reverse
-from django.http.response import HttpResponseRedirect, HttpResponse, Http404
-from django.shortcuts import render, get_object_or_404
-from django.utils.html import escape
-from datetime import timedelta
-from django.utils import timezone as tz
-from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
+from django.http.response import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils import timezone as tz
+from django.utils.html import escape
 
-from dojo.filters import QuestionnaireFilter, QuestionFilter
-from dojo.models import Engagement, System_Settings
-from dojo.utils import add_breadcrumb, get_page_items
-from dojo.forms import Add_Questionnaire_Form, Delete_Questionnaire_Form, CreateQuestionnaireForm, Delete_Eng_Survey_Form, \
-    EditQuestionnaireQuestionsForm, CreateQuestionForm, CreateTextQuestionForm, AssignUserForm, \
-    CreateChoiceQuestionForm, EditTextQuestionForm, EditChoiceQuestionForm, AddChoicesForm, \
-    AddEngagementForm, AddGeneralQuestionnaireForm, DeleteGeneralQuestionnaireForm
-from dojo.models import Answered_Survey, Engagement_Survey, Answer, TextQuestion, ChoiceQuestion, Choice, General_Survey, Question
-from dojo.authorization.authorization import user_has_permission_or_403, user_has_permission, user_has_configuration_permission
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import (
+    user_has_configuration_permission,
+    user_has_permission,
+    user_has_permission_or_403,
+)
 from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.filters import QuestionFilter, QuestionnaireFilter
+from dojo.forms import (
+    Add_Questionnaire_Form,
+    AddChoicesForm,
+    AddEngagementForm,
+    AddGeneralQuestionnaireForm,
+    AssignUserForm,
+    CreateChoiceQuestionForm,
+    CreateQuestionForm,
+    CreateQuestionnaireForm,
+    CreateTextQuestionForm,
+    Delete_Eng_Survey_Form,
+    Delete_Questionnaire_Form,
+    DeleteGeneralQuestionnaireForm,
+    EditChoiceQuestionForm,
+    EditQuestionnaireQuestionsForm,
+    EditTextQuestionForm,
+)
+from dojo.models import (
+    Answer,
+    Answered_Survey,
+    Choice,
+    ChoiceQuestion,
+    Engagement,
+    Engagement_Survey,
+    General_Survey,
+    Question,
+    System_Settings,
+    TextQuestion,
+)
+from dojo.utils import add_breadcrumb, get_page_items
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
@@ -484,8 +510,7 @@ def create_question(request):
                     error = True
 
             if '_popup' in request.GET and not error:
-                resp = '<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "%s", "%s");</script>' \
-                       % (escape(created_question._get_pk_val()), escape(created_question.text))
+                resp = f'<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "{escape(created_question._get_pk_val())}", "{escape(created_question.text)}");</script>'
                 resp += '<script type="text/javascript">window.close();</script>'
                 return HttpResponse(resp)
 
@@ -577,8 +602,7 @@ def add_choices(request):
             if '_popup' in request.GET:
                 resp = ''
                 if created:
-                    resp = '<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "%s", "%s");</script>' \
-                           % (escape(choice._get_pk_val()), escape(choice.label))
+                    resp = f'<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "{escape(choice._get_pk_val())}", "{escape(choice.label)}");</script>'
                 resp += '<script type="text/javascript">window.close();</script>'
                 return HttpResponse(resp)
     add_breadcrumb(title="Add Choice", top_level=False, request=request)

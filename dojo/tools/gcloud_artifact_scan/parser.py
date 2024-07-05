@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Finding
 
 
-class GCloudArtifactScanParser(object):
+class GCloudArtifactScanParser:
     def get_scan_types(self):
         return ["Google Cloud Artifact Vulnerability Scan"]
 
@@ -20,7 +21,8 @@ class GCloudArtifactScanParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
         return tree
 
     def get_findings(self, json_output, test):

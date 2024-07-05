@@ -1,21 +1,23 @@
-from django.core.exceptions import PermissionDenied
-from django.utils import timezone
-from dojo.utils import get_system_setting, get_full_url, get_remote_json_config
-from dateutil.relativedelta import relativedelta
-import dojo.jira_link.helper as jira_helper
-from dojo.jira_link.helper import escape_for_jira
-from dojo.risk_acceptance.notification import Notification
-from dojo.transfer_findings import helper as hp_transfer_finding
-from django.urls import reverse
-from dojo.celery import app
-from dojo.models import System_Settings, Risk_Acceptance, Finding
-from dojo.decorators import dojo_async_task
 import logging
 import crum
 import requests
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from django.conf import settings
+
+from dateutil.relativedelta import relativedelta
+from django.core.exceptions import PermissionDenied
+from django.urls import reverse
+from django.utils import timezone
+
+import dojo.jira_link.helper as jira_helper
+from dojo.celery import app
+from dojo.decorators import dojo_async_task
+from dojo.jira_link.helper import escape_for_jira
+from dojo.models import Finding, Risk_Acceptance, System_Settings
+from dojo.transfer_findings import helper as hp_transfer_finding
+from dojo.risk_acceptance.notification import Notification
+from dojo.utils import get_full_url, get_system_setting, get_remote_json_config
 
 logger = logging.getLogger(__name__)
 
@@ -236,8 +238,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
 
 def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
-        return 'finding was unaccepted/deleted from risk acceptance [(%s)|%s]' % \
-            (escape_for_jira(risk_acceptance.name),
+        return 'finding was unaccepted/deleted from risk acceptance [({})|{}]'.format(escape_for_jira(risk_acceptance.name),
             get_full_url(reverse('view_risk_acceptance', args=(risk_acceptance.engagement.id, risk_acceptance.id))))
     else:
         return 'Finding is no longer risk accepted'

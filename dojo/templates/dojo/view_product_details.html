@@ -505,19 +505,43 @@
         <tbody>
           <tr>
             <td style="width: 160px;"><strong>Critical</strong></td>
-            <td>{{ sla.critical }} days to remediate</td>
+            <td>
+              {% if sla.enforce_critical %}
+                {{ sla.critical }} days to remediate
+              {% else %}
+                <em class="text-muted">Not Enforced</em>
+              {% endif %}
+            </td>
           </tr>
           <tr>
             <td style="width: 160px;"><strong>High</strong></td>
-            <td>{{ sla.high }} days to remediate</td>
+            <td>
+              {% if sla.enforce_high %}
+                {{ sla.high }} days to remediate
+              {% else %}
+                <em class="text-muted">Not Enforced</em>
+              {% endif %}
+            </td>
           </tr>
           <tr>
             <td style="width: 160px;"><strong>Medium</strong></td>
-            <td>{{ sla.medium }} days to remediate</td>
+            <td>
+              {% if sla.enforce_medium %}
+                {{ sla.medium }} days to remediate
+              {% else %}
+                <em class="text-muted">Not Enforced</em>
+              {% endif %}
+            </td>
           </tr>
           <tr>
             <td style="width: 160px;"><strong>Low</strong></td>
-            <td>{{ sla.low }} days to remediate</td>
+            <td>
+              {% if sla.enforce_low %}
+                {{ sla.low }} days to remediate
+              {% else %}
+                <em class="text-muted">Not Enforced</em>
+              {% endif %}
+            </td>
           </tr>
         </tbody>
       </table>

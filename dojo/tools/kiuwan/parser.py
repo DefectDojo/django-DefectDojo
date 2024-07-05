@@ -25,7 +25,7 @@ class Severityfilter:
             self.severity = "Info"
 
 
-class KiuwanParser(object):
+class KiuwanParser:
     def get_scan_types(self):
         return ["Kiuwan Scan"]
 
@@ -47,7 +47,7 @@ class KiuwanParser(object):
         for row in reader:
             csvarray.append(row)
 
-        dupes = dict()
+        dupes = {}
         for row in csvarray:
             finding = Finding(test=test)
             findingdict = {}

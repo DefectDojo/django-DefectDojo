@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-class ScantistParser(object):
+class ScantistParser:
     """
     Scantist Parser: Scantist does a deep scan of source code and binaries for vulnerabilities and has reports
     following three main categories
@@ -77,7 +77,7 @@ class ScantistParser(object):
                 finding.unsaved_vulnerability_ids = [vulnerability_id]
             return finding
 
-        items = dict()
+        items = {}
         for node in tree:
             item = get_findings(node, test)
 

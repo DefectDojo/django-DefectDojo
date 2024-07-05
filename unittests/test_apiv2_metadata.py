@@ -1,6 +1,6 @@
-from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase
 
 
 class MetadataTest(APITestCase):
@@ -35,7 +35,7 @@ class MetadataTest(APITestCase):
 
     def test_query_product_endpoint(self):
         r = self.client.get(reverse('product-detail', args=(1,)))
-        self.assertIn(dict(name='foo', value='bar'), r.json()['product_meta'])
+        self.assertIn({'name': 'foo', 'value': 'bar'}, r.json()['product_meta'])
 
     def test_delete(self):
         r = self.client.delete(reverse('metadata-detail', args=(self.mid,)))
@@ -45,7 +45,7 @@ class MetadataTest(APITestCase):
         self.assertEqual(r.status_code, 404)
 
         r = self.client.get(reverse('product-detail', args=(1,)))
-        self.assertNotIn(dict(name='foo', value='bar'), r.json()['product_meta'])
+        self.assertNotIn({'name': 'foo', 'value': 'bar'}, r.json()['product_meta'])
 
     def test_no_product_or_endpoint_as_parameter(self):
         r = self.create(name='foo', value='bar')

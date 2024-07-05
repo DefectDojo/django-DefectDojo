@@ -2,7 +2,7 @@ from dojo.tools.nikto.json_parser import NiktoJSONParser
 from dojo.tools.nikto.xml_parser import NiktoXMLParser
 
 
-class NiktoParser(object):
+class NiktoParser:
     """Nikto web server scanner - https://cirt.net/Nikto2
 
     The current parser support 3 sources:
@@ -30,4 +30,5 @@ class NiktoParser(object):
         elif filename.name.lower().endswith(".json"):
             return NiktoJSONParser().process_json(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

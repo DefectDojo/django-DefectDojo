@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Finding
 
 
-class KubescapeParser(object):
+class KubescapeParser:
     def get_scan_types(self):
         return ["Kubescape JSON Importer"]
 

@@ -15,11 +15,8 @@ class VulnersAPI:
             if tool_config.url:
                 self.vulners_api_url = tool_config.url
         else:
-            raise Exception(
-                "Vulners.com Authentication type {} not supported".format(
-                    tool_config.authentication_type
-                )
-            )
+            msg = f"Vulners.com Authentication type {tool_config.authentication_type} not supported"
+            raise Exception(msg)
 
     def get_client(self):
         return vulners.VulnersApi(

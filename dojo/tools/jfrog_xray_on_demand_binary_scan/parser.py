@@ -8,7 +8,7 @@ from django.conf import settings
 from functools import reduce
 
 
-class JFrogXrayOnDemandBinaryScanParser(object):
+class JFrogXrayOnDemandBinaryScanParser:
     """jfrog_xray_scan JSON reports"""
 
     def get_scan_types(self):
@@ -160,7 +160,7 @@ def get_item_set(vulnerability):
     severity = get_severity(vulnerability)
     references = get_references(vulnerability)
     vuln_id_from_tool = get_vuln_id_from_tool(vulnerability)
-    vulnerability_ids = list()
+    vulnerability_ids = []
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score."
     # Some entries have no CVE entries, despite they exist. Example CVE-2017-1000502.

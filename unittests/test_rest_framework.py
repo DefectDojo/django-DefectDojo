@@ -1,53 +1,135 @@
-from collections import OrderedDict
-from drf_spectacular.drainage import GENERATOR_STATS
-# from drf_spectacular.renderers import OpenApiJsonRenderer
-from unittest.mock import MagicMock, call, patch, ANY
-from dojo.models import Development_Environment, Product, Engagement, Test, Finding, \
-    JIRA_Issue, Test_Type, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    User, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
-    Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Product_API_Scan_Configuration, Notes, \
-    BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
-    Role, Product_Type_Member, Product_Member, Product_Type_Group, Risk_Acceptance, \
-    Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
-    Notifications, UserContactInfo, Cred_Mapping, Cred_User, \
-    TextQuestion, ChoiceQuestion, TextAnswer, ChoiceAnswer, Engagement_Survey, \
-    Answered_Survey, General_Survey, Announcement
-from dojo.api_v2.views import DevelopmentEnvironmentViewSet, EndPointViewSet, EngagementViewSet, \
-    FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
-    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
-    StubFindingsViewSet, TestTypesViewSet, TestsViewSet, \
-    ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
-    UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
-    EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet, ProductTypeViewSet, \
-    DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
-    ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, RiskAcceptanceViewSet, \
-    DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
-    NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet, \
-    ConfigurationPermissionViewSet, CredentialsMappingViewSet, \
-    CredentialsViewSet, QuestionnaireQuestionViewSet, QuestionnaireAnswerViewSet, \
-    QuestionnaireGeneralSurveyViewSet, QuestionnaireEngagementSurveyViewSet, QuestionnaireAnsweredSurveyViewSet, \
-    AnnouncementViewSet
-from json import dumps
-from enum import Enum
-from django.urls import reverse
-from django.contrib.auth.models import Permission
-from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-from .dojo_test_case import DojoAPITestCase
-from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
-from rest_framework.mixins import \
-    ListModelMixin, RetrieveModelMixin, CreateModelMixin, \
-    DestroyModelMixin, UpdateModelMixin
-from dojo.api_v2.mixins import DeletePreviewModelMixin
-from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
-from drf_spectacular.settings import spectacular_settings
+import json
 import logging
 import pathlib
-import json
-from dojo.authorization.roles_permissions import Permissions
+from collections import OrderedDict
+from enum import Enum
+from json import dumps
 
+# from drf_spectacular.renderers import OpenApiJsonRenderer
+from unittest.mock import ANY, MagicMock, call, patch
+
+from django.contrib.auth.models import Permission
+from django.urls import reverse
+from drf_spectacular.drainage import GENERATOR_STATS
+from drf_spectacular.settings import spectacular_settings
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
+from rest_framework.test import APIClient
+
+from dojo.api_v2.mixins import DeletePreviewModelMixin
+from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
+from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
+from dojo.api_v2.views import (
+    AnnouncementViewSet,
+    AppAnalysisViewSet,
+    ConfigurationPermissionViewSet,
+    CredentialsMappingViewSet,
+    CredentialsViewSet,
+    DevelopmentEnvironmentViewSet,
+    DojoGroupMemberViewSet,
+    DojoGroupViewSet,
+    EndpointStatusViewSet,
+    EndPointViewSet,
+    EngagementViewSet,
+    FindingTemplatesViewSet,
+    FindingViewSet,
+    GlobalRoleViewSet,
+    ImportLanguagesView,
+    ImportScanView,
+    JiraInstanceViewSet,
+    JiraIssuesViewSet,
+    JiraProjectViewSet,
+    LanguageTypeViewSet,
+    LanguageViewSet,
+    NotesViewSet,
+    NoteTypeViewSet,
+    NotificationsViewSet,
+    ProductAPIScanConfigurationViewSet,
+    ProductGroupViewSet,
+    ProductMemberViewSet,
+    ProductTypeGroupViewSet,
+    ProductTypeMemberViewSet,
+    ProductTypeViewSet,
+    ProductViewSet,
+    QuestionnaireAnsweredSurveyViewSet,
+    QuestionnaireAnswerViewSet,
+    QuestionnaireEngagementSurveyViewSet,
+    QuestionnaireGeneralSurveyViewSet,
+    QuestionnaireQuestionViewSet,
+    RiskAcceptanceViewSet,
+    RoleViewSet,
+    SonarqubeIssueViewSet,
+    StubFindingsViewSet,
+    TestsViewSet,
+    TestTypesViewSet,
+    ToolConfigurationsViewSet,
+    ToolProductSettingsViewSet,
+    ToolTypesViewSet,
+    UserContactInfoViewSet,
+    UsersViewSet,
+)
+from dojo.authorization.roles_permissions import Permissions
+from dojo.models import (
+    Announcement,
+    Answered_Survey,
+    App_Analysis,
+    BurpRawRequestResponse,
+    ChoiceAnswer,
+    ChoiceQuestion,
+    Cred_Mapping,
+    Cred_User,
+    Development_Environment,
+    Dojo_Group,
+    Dojo_Group_Member,
+    DojoMeta,
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Engagement_Survey,
+    FileUpload,
+    Finding,
+    Finding_Template,
+    General_Survey,
+    Global_Role,
+    JIRA_Instance,
+    JIRA_Issue,
+    JIRA_Project,
+    Language_Type,
+    Languages,
+    Note_Type,
+    Notes,
+    Notifications,
+    Product,
+    Product_API_Scan_Configuration,
+    Product_Group,
+    Product_Member,
+    Product_Type,
+    Product_Type_Group,
+    Product_Type_Member,
+    Risk_Acceptance,
+    Role,
+    Sonarqube_Issue,
+    Sonarqube_Issue_Transition,
+    Stub_Finding,
+    Test,
+    Test_Type,
+    TextAnswer,
+    TextQuestion,
+    Tool_Configuration,
+    Tool_Product_Settings,
+    Tool_Type,
+    User,
+    UserContactInfo,
+)
+
+from .dojo_test_case import DojoAPITestCase
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +143,7 @@ TYPE_BOOLEAN = "boolean"  #:
 TYPE_ARRAY = "array"  #:
 TYPE_FILE = "file"  #:
 
-IMPORTER_MOCK_RETURN_VALUE = None, 0, 0, None
+IMPORTER_MOCK_RETURN_VALUE = None, 0, 0, 0, 0, 0, MagicMock()
 REIMPORTER_MOCK_RETURN_VALUE = None, 0, 0, 0, 0, 0, MagicMock()
 
 
@@ -86,7 +168,7 @@ def skipIfNotSubclass(baseclass):
     def decorate(f):
         def wrapper(self, *args, **kwargs):
             if not issubclass(self.viewset, baseclass):
-                self.skipTest('This view does not inherit from %s' % baseclass)
+                self.skipTest(f'This view does not inherit from {baseclass}')
             else:
                 f(self, *args, **kwargs)
         return wrapper
@@ -111,7 +193,7 @@ def format_url(path):
     return f"{BASE_API_URL}{path}"
 
 
-class SchemaChecker():
+class SchemaChecker:
     def __init__(self, components):
         self._prefix = []
         self._has_failed = False
@@ -272,7 +354,7 @@ class TestType(Enum):
     CONFIGURATION_PERMISSIONS = 3
 
 
-class BaseClass():
+class BaseClass:
     class RESTEndpointTest(DojoAPITestCase):
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
@@ -301,10 +383,10 @@ class BaseClass():
         def get_endpoint_schema(self, path, method):
             paths = self.schema["paths"]
             methods = paths.get(path, None)
-            assert methods is not None, f"{path} not found in {[path for path in paths.keys()]}"
+            assert methods is not None, f"{path} not found in {list(paths.keys())}"
 
             endpoint = methods.get(method, None)
-            assert endpoint is not None, f"Method {method} not found in {[method for method in methods.keys()]}"
+            assert endpoint is not None, f"Method {method} not found in {list(methods.keys())}"
 
             return endpoint
 
@@ -376,7 +458,7 @@ class BaseClass():
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code, response.content[:1000])
             # sensitive data must be set to write_only so those are not returned in the response
@@ -390,14 +472,14 @@ class BaseClass():
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][-1]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][-1]['id'])
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(UpdateModelMixin)
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(200, response.status_code, response.content[:1000])
 
@@ -435,7 +517,7 @@ class BaseClass():
         @skipIfNotSubclass(DeletePreviewModelMixin)
         def test_delete_preview(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/delete_preview/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/delete_preview/'.format(current_objects['results'][0]['id'])
             response = self.client.get(relative_url)
             # print('delete_preview response.data')
 
@@ -467,7 +549,7 @@ class BaseClass():
             prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
 
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             response = self.client.get(relative_url, data={
                 "prefetch": ','.join(prefetchable_fields)
             })
@@ -555,7 +637,7 @@ class BaseClass():
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
             response = self.client.get(relative_url)
             self.assertEqual(404, response.status_code, response.content[:1000])
 
@@ -582,7 +664,7 @@ class BaseClass():
             mock.return_value = False
 
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             self.client.delete(relative_url)
 
             if self.endpoint_model == Endpoint_Status:
@@ -605,7 +687,7 @@ class BaseClass():
             mock.return_value = False
 
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
 
             if self.endpoint_model == Endpoint_Status:
                 permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
@@ -644,7 +726,7 @@ class BaseClass():
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
             response = self.client.get(relative_url)
             self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -666,7 +748,7 @@ class BaseClass():
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
             response = self.client.delete(relative_url)
             self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -678,7 +760,7 @@ class BaseClass():
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
 
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(403, response.status_code, response.content[:1000])
@@ -692,7 +774,7 @@ class BaseClass():
 
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(405, response.status_code, response.content[:1000])
 
@@ -710,7 +792,7 @@ class BaseClass():
             mock.return_value = False
 
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
 
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
@@ -740,7 +822,7 @@ class BaseClass():
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + '%s/' % current_objects[0].id
+            relative_url = self.url + f'{current_objects[0].id}/'
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code, response.content[:1000])
 
@@ -837,7 +919,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
             'finding': object2['finding']
         }
 
-        relative_url = self.url + '%s/' % object1['id']
+        relative_url = self.url + '{}/'.format(object1['id'])
 
         response = self.client.patch(relative_url, unsucessful_payload)
         self.assertEqual(400, response.status_code, response.content[:1000])
@@ -858,7 +940,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
             'finding': object2['finding']
         }
 
-        relative_url = self.url + '%s/' % object1['id']
+        relative_url = self.url + '{}/'.format(object1['id'])
 
         response = self.client.put(relative_url, unsucessful_payload)
         self.assertEqual(400, response.status_code, response.content[:1000])
@@ -991,7 +1073,7 @@ class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
             "notes": []
         }
         current_objects = self.client.get(self.url, format='json').data
-        relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+        relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
         response = self.client.put(relative_url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -1041,17 +1123,19 @@ class FilesTest(DojoAPITestCase):
         # Test the creation
         for level in self.url_levels.keys():
             length = FileUpload.objects.count()
-            payload = {
-                "title": level,
-                "file": open(f'{str(self.path)}/scans/acunetix/one_finding.xml', 'r')
-            }
-            response = self.client.post(f'/api/v2/{level}/files/', payload)
-            self.assertEqual(201, response.status_code, response.data)
-            self.assertEqual(FileUpload.objects.count(), length + 1)
-            # Save the ID of the newly created file object
-            self.url_levels[level] = response.data.get('id')
+            with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as testfile:
+                payload = {
+                    "title": level,
+                    "file": testfile
+                }
+                response = self.client.post(f'/api/v2/{level}/files/', payload)
+                self.assertEqual(201, response.status_code, response.data)
+                self.assertEqual(FileUpload.objects.count(), length + 1)
+                # Save the ID of the newly created file object
+                self.url_levels[level] = response.data.get('id')
+
         #  Test the download
-        with open(f'{str(self.path)}/scans/acunetix/one_finding.xml', 'r') as file:
+        with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as file:
             file_data = file.read()
         for level, file_id in self.url_levels.items():
             response = self.client.get(f'/api/v2/{level}/files/download/{file_id}/')
@@ -1130,7 +1214,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         assert result.status_code == status.HTTP_200_OK, "Could not check duplicate status"
         result_json = result.json()
         # Should return all duplicates for id=3
-        assert set(x["id"] for x in result_json) == {2, 4, 5, 6}
+        assert set(x["id"] for x in result_json) == {2, 4, 5, 6}  # noqa: C401
 
         # Reset duplicate
         result = self.client.post(self.url + "2/duplicate/reset/")
@@ -1700,12 +1784,14 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         self.endpoint_path = 'import-scan'
         self.viewname = 'importscan'
         self.viewset = ImportScanView
+
+        testfile = open('tests/zap_sample.xml')
         self.payload = {
             "minimum_severity": 'Low',
             "active": False,
             "verified": True,
             "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
+            "file": testfile,
             "engagement": 1,
             "lead": 2,
             "tags": ["ci/cd", "api"],
@@ -1715,128 +1801,135 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Import_Scan_Result
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    def __del__(self: object):
+        self.payload['file'].close()
+
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_name": 'Python How-to',
-            "engagement_name": 'April monthly engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_name": 'Python How-to',
+                "engagement_name": 'April monthly engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Engagement.objects.get(id=2),  # engagement id found via product name and engagement name
-            Permissions.Import_Scan_Result)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Engagement.objects.get(id=2),  # engagement id found via product name and engagement name
+                Permissions.Import_Scan_Result)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_name": 'Python How-to',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_name": 'Python How-to',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Product.objects.get(id=1),
-            Permissions.Engagement_Add)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Product.objects.get(id=1),
+                Permissions.Engagement_Add)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_type_name": "books",
-            "product_name": 'New Product',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_type_name": "books",
+                "product_name": 'New Product',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Product_Type.objects.get(id=1),
-            Permissions.Product_Type_Add_Product)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Product_Type.objects.get(id=1),
+                Permissions.Product_Type_Add_Product)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_type_name": "more books",
-            "product_name": 'New Product',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_type_name": "more books",
+                "product_name": 'New Product',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Permissions.Product_Type_Add)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Permissions.Product_Type_Add)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """
@@ -1846,93 +1939,95 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_name": 'Python How-to',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_name": 'Python How-to',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-        mock.assert_has_calls([
-            call(User.objects.get(username='admin'),
-                Product.objects.get(id=1),
-                Permissions.Engagement_Add),
-            call(User.objects.get(username='admin'),
-                Product.objects.get(id=1),
-                Permissions.Import_Scan_Result)
-        ])
-        importer_mock.assert_called_once()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(201, response.status_code, response.content[:1000])
+            mock.assert_has_calls([
+                call(User.objects.get(username='admin'),
+                    Product.objects.get(id=1),
+                    Permissions.Engagement_Add),
+                call(User.objects.get(username='admin'),
+                    Product.objects.get(id=1),
+                    Permissions.Import_Scan_Result)
+            ])
+            importer_mock.assert_called_once()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_type_name": "books",
+                "product_name": 'New Product',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_type_name": "books",
-            "product_name": 'New Product',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+            response = self.client.post(self.url, payload)
+            self.assertEqual(201, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Product_Type.objects.get(id=1),
+                Permissions.Product_Type_Add_Product)
+            importer_mock.assert_called_once()
+            reimporter_mock.assert_not_called()
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Product_Type.objects.get(id=1),
-            Permissions.Product_Type_Add_Product)
-        importer_mock.assert_called_once()
-        reimporter_mock.assert_not_called()
-
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_type_name": "more books",
-            "product_name": 'New Product',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_type_name": "more books",
+                "product_name": 'New Product',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Permissions.Product_Type_Add)
-        importer_mock.assert_called_once()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(201, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Permissions.Product_Type_Add)
+            importer_mock.assert_called_once()
+            reimporter_mock.assert_not_called()
 
 
 class ReimportScanTest(DojoAPITestCase):
@@ -1947,89 +2042,92 @@ class ReimportScanTest(DojoAPITestCase):
 
     # Specific tests for reimport
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     def test_reimport_zap_xml(self, importer_mock, reimporter_mock):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        length = Test.objects.all().count()
-        response = self.client.post(
-            reverse('reimportscan-list'), {
-                "minimum_severity": 'Low',
-                "active": True,
-                "verified": True,
-                "scan_type": 'ZAP Scan',
-                "file": open('tests/zap_sample.xml'),
-                "test": 3,
-                "version": "1.0.1",
-            })
-        self.assertEqual(length, Test.objects.all().count())
-        self.assertEqual(201, response.status_code, response.content[:1000])
-        # TODO add schema check
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_called_once()
+        with open('tests/zap_sample.xml') as testfile:
+            length = Test.objects.all().count()
+            response = self.client.post(
+                reverse('reimportscan-list'), {
+                    "minimum_severity": 'Low',
+                    "active": True,
+                    "verified": True,
+                    "scan_type": 'ZAP Scan',
+                    "file": testfile,
+                    "test": 3,
+                    "version": "1.0.1",
+                })
+            self.assertEqual(length, Test.objects.all().count())
+            self.assertEqual(201, response.status_code, response.content[:1000])
+            # TODO add schema check
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_called_once()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_name": 'Security How-to',
-            "engagement_name": 'April monthly engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_name": 'Security How-to',
+                "engagement_name": 'April monthly engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Test.objects.get(id=4),  # test id found via product name and engagement name and scan_type
-            Permissions.Import_Scan_Result)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Test.objects.get(id=4),  # test id found via product name and engagement name and scan_type
+                Permissions.Import_Scan_Result)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_scan_type_title_auto_create(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_name": 'Security How-to',
-            "engagement_name": 'April monthly engagement',
-            "test_title": 'My ZAP Scan NEW',
-            "version": "1.0.0",
-            "auto_create_context": True,
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_name": 'Security How-to',
+                "engagement_name": 'April monthly engagement',
+                "test_title": 'My ZAP Scan NEW',
+                "version": "1.0.0",
+                "auto_create_context": True,
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Engagement.objects.get(id=4),
-            Permissions.Import_Scan_Result)
-        importer_mock.assert_called_once()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(201, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Engagement.objects.get(id=4),
+                Permissions.Import_Scan_Result)
+            importer_mock.assert_called_once()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """
@@ -2039,266 +2137,275 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_name": 'Python How-to',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_name": 'Python How-to',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-        mock.assert_has_calls([
-            call(User.objects.get(username='admin'),
-                Product.objects.get(id=1),
-                Permissions.Engagement_Add),
-            call(User.objects.get(username='admin'),
-                Product.objects.get(id=1),
-                Permissions.Import_Scan_Result)
-        ])
-        importer_mock.assert_called_once()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(201, response.status_code, response.content[:1000])
+            mock.assert_has_calls([
+                call(User.objects.get(username='admin'),
+                    Product.objects.get(id=1),
+                    Permissions.Engagement_Add),
+                call(User.objects.get(username='admin'),
+                    Product.objects.get(id=1),
+                    Permissions.Import_Scan_Result)
+            ])
+            importer_mock.assert_called_once()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_type_name": "books",
-            "product_name": 'New Product',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_type_name": "books",
+                "product_name": 'New Product',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Product_Type.objects.get(id=1),
-            Permissions.Product_Type_Add_Product)
-        importer_mock.assert_called_once()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(201, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Product_Type.objects.get(id=1),
+                Permissions.Product_Type_Add_Product)
+            importer_mock.assert_called_once()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_type_name": "more books",
-            "product_name": 'New Product',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_type_name": "more books",
+                "product_name": 'New Product',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Permissions.Product_Type_Add)
-        importer_mock.assert_called_once()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(201, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Permissions.Product_Type_Add)
+            importer_mock.assert_called_once()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_test_id(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-                "minimum_severity": 'Low',
-                "active": True,
-                "verified": True,
-                "scan_type": 'ZAP Scan',
-                "file": open('tests/zap_sample.xml'),
-                "test": 3,
-                "version": "1.0.1"
-        }
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Test.objects.get(id=3),
-            Permissions.Import_Scan_Result)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                    "minimum_severity": 'Low',
+                    "active": True,
+                    "verified": True,
+                    "scan_type": 'ZAP Scan',
+                    "file": testfile,
+                    "test": 3,
+                    "version": "1.0.1"
+            }
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Test.objects.get(id=3),
+                Permissions.Import_Scan_Result)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
     # copied tests from import, unsure how to use inheritance/mixins with test_ methods
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_name": 'Python How-to',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_name": 'Python How-to',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Product.objects.get(id=1),
-            Permissions.Engagement_Add)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Product.objects.get(id=1),
+                Permissions.Engagement_Add)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_type_name": "books",
-            "product_name": 'New Product',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_type_name": "books",
+                "product_name": 'New Product',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Product_Type.objects.get(id=1),
-            Permissions.Product_Type_Add_Product)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Product_Type.objects.get(id=1),
+                Permissions.Product_Type_Add_Product)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_global_permission')
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_type_name": "more books",
-            "product_name": 'New Product',
-            "engagement_name": 'New engagement',
-            "lead": 2,
-            "tags": ["ci/cd", "api"],
-            "version": "1.0.0",
-            "auto_create_context": True
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_type_name": "more books",
+                "product_name": 'New Product',
+                "engagement_name": 'New engagement',
+                "lead": 2,
+                "tags": ["ci/cd", "api"],
+                "version": "1.0.0",
+                "auto_create_context": True
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Permissions.Product_Type_Add)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Permissions.Product_Type_Add)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_scan_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_name": 'Security How-to',
-            "engagement_name": 'April monthly engagement',
-            "version": "1.0.0",
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_name": 'Security How-to',
+                "engagement_name": 'April monthly engagement',
+                "version": "1.0.0",
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Test.objects.get(id=4),  # engagement id found via product name and engagement name
-            Permissions.Import_Scan_Result)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Test.objects.get(id=4),  # engagement id found via product name and engagement name
+                Permissions.Import_Scan_Result)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.reimporter.reimporter.DojoDefaultReImporter.reimport_scan')
-    @patch('dojo.importers.importer.importer.DojoDefaultImporter.import_scan')
+    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
+    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
     @patch('dojo.api_v2.permissions.user_has_permission')
     def test_create_not_authorized_product_name_engagement_name_scan_type_title(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        payload = {
-            "minimum_severity": 'Low',
-            "active": False,
-            "verified": True,
-            "scan_type": 'ZAP Scan',
-            "file": open('tests/zap_sample.xml'),
-            "product_name": 'Security How-to',
-            "engagement_name": 'April monthly engagement',
-            "test_title": 'My ZAP Scan',
-            "version": "1.0.0",
-        }
+        with open('tests/zap_sample.xml') as testfile:
+            payload = {
+                "minimum_severity": 'Low',
+                "active": False,
+                "verified": True,
+                "scan_type": 'ZAP Scan',
+                "file": testfile,
+                "product_name": 'Security How-to',
+                "engagement_name": 'April monthly engagement',
+                "test_title": 'My ZAP Scan',
+                "version": "1.0.0",
+            }
 
-        response = self.client.post(self.url, payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-        mock.assert_called_with(User.objects.get(username='admin'),
-            Test.objects.get(id=4),  # test id found via product name and engagement name and scan_type and test_title
-            Permissions.Import_Scan_Result)
-        importer_mock.assert_not_called()
-        reimporter_mock.assert_not_called()
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                Test.objects.get(id=4),  # test id found via product name and engagement name and scan_type and test_title
+                Permissions.Import_Scan_Result)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
 
 
 class ProductTypeTest(BaseClass.RESTEndpointTest):
@@ -2373,7 +2480,7 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
         self.setUp_not_authorized()
 
         current_objects = self.endpoint_model.objects.all()
-        relative_url = self.url + '%s/' % current_objects[0].id
+        relative_url = self.url + f'{current_objects[0].id}/'
         response = self.client.get(relative_url)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -2618,6 +2725,9 @@ class ImportLanguagesTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Language_Add
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def __del__(self: object):
+        self.payload['file'].close()
+
     def test_create(self):
         BaseClass.RESTEndpointTest.test_create(self)
 
@@ -2706,7 +2816,7 @@ class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
 
     def test_delete(self):
         current_objects = self.client.get(self.url, format='json').data
-        relative_url = self.url + '%s/' % current_objects['results'][-1]['id']
+        relative_url = self.url + '{}/'.format(current_objects['results'][-1]['id'])
         response = self.client.delete(relative_url)
         self.assertEqual(409, response.status_code, response.content[:1000])
 

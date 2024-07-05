@@ -273,3 +273,4 @@ def adjust_date_format(obj):
             if field in obj["fields"] and obj["fields"][field] is not None:
                 obj["fields"][field] = obj["fields"][field][:10]  # Extract date (YYYY-MM-DD)
     return obj
+
