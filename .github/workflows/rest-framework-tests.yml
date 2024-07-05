@@ -35,7 +35,7 @@ jobs:
 
       # phased startup so we can use the exit code from unit test container
       - name: Start Postgres
-        run: docker compose up -d postgres
+        run: docker compose up -d postgres webhook.endpoint
 
       # no celery or initializer needed for unit tests
       - name: Unit tests
