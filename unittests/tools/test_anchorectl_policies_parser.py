@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.anchorectl_policies.parser import AnchoreCTLPoliciesParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAnchoreCTLPoliciesParser(DojoTestCase):

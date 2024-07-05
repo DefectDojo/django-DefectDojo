@@ -134,7 +134,7 @@ def product(request):
     # see https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     name_words = prods.values_list('name', flat=True)
     prods = prods.annotate(
-        findings_count=Count('engagement__test__finding', filter=Q(engagement__test__finding__active=True))
+        findings_count=Count('engagement__test__finding', filter=Q(engagement__test__finding__active=True)),
     )
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
@@ -226,7 +226,7 @@ def view_product(request, pid):
                                                           benchmark_type__enabled=True).order_by('benchmark_type__name')
     sla = SLA_Configuration.objects.filter(id=prod.sla_configuration_id).first()
     benchAndPercent = []
-    for i in range(0, len(benchmarks)):
+    for i in range(len(benchmarks)):
         desired_level, total, total_pass, total_wait, total_fail, _total_viewed = asvs_calc_level(benchmarks[i])
 
         success_percent = round((float(total_pass) / float(total)) * 100, 2)
@@ -241,7 +241,7 @@ def view_product(request, pid):
             'waiting': {'count': total_wait, 'percent': waiting_percent},
             'fail': {'count': total_fail, 'percent': fail_percent},
             'pass': total_pass + total_fail,
-            'total': total
+            'total': total,
         })
     system_settings = System_Settings.objects.get()
 
@@ -336,7 +336,7 @@ def view_product_components(request, pid):
         'filter': comp_filter,
         'product_tab': product_tab,
         'result': result,
-        'component_words': sorted(set(component_words))
+        'component_words': sorted(set(component_words)),
     })
 
 
@@ -410,18 +410,18 @@ def finding_querys(request, prod):
     filters['open_vulns'] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(
         cwe__isnull=False,
     ).order_by('cwe').values(
-        'cwe'
+        'cwe',
     ).annotate(
-        count=Count('cwe')
+        count=Count('cwe'),
     )
 
     filters['all_vulns'] = findings_qs.filter(
         duplicate=False,
         cwe__isnull=False,
     ).order_by('cwe').values(
-        'cwe'
+        'cwe',
     ).annotate(
-        count=Count('cwe')
+        count=Count('cwe'),
     )
 
     filters['start_date'] = start_date
@@ -496,21 +496,21 @@ def endpoint_querys(request, prod):
         mitigated=True,
         finding__cwe__isnull=False,
     ).order_by('finding__cwe').values(
-        'finding__cwe'
+        'finding__cwe',
     ).annotate(
-        count=Count('finding__cwe')
+        count=Count('finding__cwe'),
     ).annotate(
-        cwe=F('finding__cwe')
+        cwe=F('finding__cwe'),
     )
 
     filters['all_vulns'] = endpoints_qs.filter(
         finding__cwe__isnull=False,
     ).order_by('finding__cwe').values(
-        'finding__cwe'
+        'finding__cwe',
     ).annotate(
-        count=Count('finding__cwe')
+        count=Count('finding__cwe'),
     ).annotate(
-        cwe=F('finding__cwe')
+        cwe=F('finding__cwe'),
     )
 
     filters['start_date'] = start_date
@@ -580,11 +580,11 @@ def view_product_metrics(request, pid):
     closed_findings = list(filters.get("closed", []).values('id', 'date', 'severity'))
     accepted_findings = list(filters.get("accepted", []).values('id', 'date', 'severity'))
 
-    '''
+    """
         Optimization: Create dictionaries in the structure of { finding_id: True } for index based search
         Previously the for-loop below used "if finding in open_findings" -- an average O(n^2) time complexity
         This allows for "if open_findings.get(finding_id, None)" -- an average O(n) time complexity
-    '''
+    """
     open_findings_dict = {f.get('id'): True for f in open_findings}
     closed_findings_dict = {f.get('id'): True for f in closed_findings}
     accepted_findings_dict = {f.get('id'): True for f in accepted_findings}
@@ -743,7 +743,7 @@ def async_burndown_metrics(request, pid):
         'low': open_findings_burndown.get('Low', []),
         'info': open_findings_burndown.get('Info', []),
         'max': open_findings_burndown.get('y_max', 0),
-        'min': open_findings_burndown.get('y_min', 0)
+        'min': open_findings_burndown.get('y_min', 0),
     })
 
 
@@ -800,15 +800,15 @@ def view_engagements(request, pid):
 
 def prefetch_for_view_engagements(engagements, recent_test_day_count):
     engagements = engagements.select_related(
-        'lead'
+        'lead',
     ).prefetch_related(
         Prefetch('test_set', queryset=Test.objects.filter(
             id__in=Subquery(
                 Test.objects.filter(
                     engagement_id=OuterRef('engagement_id'),
-                    updated__gte=timezone.now() - timedelta(days=recent_test_day_count)
-                ).values_list('id', flat=True)
-            ))
+                    updated__gte=timezone.now() - timedelta(days=recent_test_day_count),
+                ).values_list('id', flat=True),
+            )),
                  ),
         'test_set__test_type',
     ).annotate(
@@ -939,7 +939,6 @@ def edit_product(request, pid):
         github_inst = GITHUB_PKey.objects.get(product=product)
     except:
         github_inst = None
-        pass
 
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
@@ -1003,7 +1002,7 @@ def edit_product(request, pid):
                    'product_tab': product_tab,
                    'jform': jform,
                    'gform': gform,
-                   'product': product
+                   'product': product,
                    })
 
 
@@ -1359,7 +1358,7 @@ class AdHocFindingView(View):
                 # Set the initial form args
                 kwargs = {
                     "enabled": jira_helper.is_push_all_issues(test),
-                    "prefix": "githubform"
+                    "prefix": "githubform",
                 }
 
                 return GITHUBFindingForm(*args, **kwargs)
@@ -1374,11 +1373,11 @@ class AdHocFindingView(View):
             if closing_disabled != 0:
                 error_inactive = ValidationError(
                     _('Can not set a finding as inactive without adding all mandatory notes'),
-                    code='inactive_without_mandatory_notes'
+                    code='inactive_without_mandatory_notes',
                 )
                 error_false_p = ValidationError(
                     _('Can not set a finding as false positive without adding all mandatory notes'),
-                    code='false_p_without_mandatory_notes'
+                    code='false_p_without_mandatory_notes',
                 )
                 if context["form"]['active'].value() is False:
                     context["form"].add_error('active', error_inactive)
@@ -1448,7 +1447,7 @@ class AdHocFindingView(View):
             # Determine if a message should be added
             if jira_message:
                 messages.add_message(
-                    request, messages.SUCCESS, jira_message, extra_tags="alert-success"
+                    request, messages.SUCCESS, jira_message, extra_tags="alert-success",
                 )
 
             return request, True, push_to_jira
@@ -1812,7 +1811,7 @@ def view_api_scan_configurations(request, pid):
                   {
                       'product_api_scan_configurations': product_api_scan_configurations,
                       'product_tab': product_tab,
-                      'pid': pid
+                      'pid': pid,
                   })
 
 
@@ -1886,7 +1885,7 @@ def delete_api_scan_configuration(request, pid, pascid):
                   'dojo/delete_product_api_scan_configuration.html',
                   {
                       'form': form,
-                      'product_tab': product_tab
+                      'product_tab': product_tab,
                   })
 
 

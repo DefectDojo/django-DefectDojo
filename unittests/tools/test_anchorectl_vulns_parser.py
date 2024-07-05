@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.anchorectl_vulns.parser import AnchoreCTLVulnsParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAnchoreCTLVulnsParser(DojoTestCase):

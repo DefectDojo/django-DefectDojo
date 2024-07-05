@@ -35,10 +35,10 @@ class ZapParser:
                     title=item.findtext("alert"),
                     description=html2text(item.findtext("desc")),
                     severity=self.MAPPING_SEVERITY.get(
-                        item.findtext("riskcode")
+                        item.findtext("riskcode"),
                     ),
                     scanner_confidence=self.MAPPING_CONFIDENCE.get(
-                        item.findtext("riskcode")
+                        item.findtext("riskcode"),
                     ),
                     mitigation=html2text(item.findtext("solution")),
                     references=html2text(item.findtext("reference")),
@@ -62,10 +62,10 @@ class ZapParser:
                     if instance.findtext("requestheader") is not None:
                         # Assemble the request from header and body
                         request = instance.findtext(
-                            "requestheader"
+                            "requestheader",
                         ) + instance.findtext("requestbody")
                         response = instance.findtext(
-                            "responseheader"
+                            "responseheader",
                         ) + instance.findtext("responsebody")
                     else:
                         # The report is in the regular XML format, without requests and responses.
@@ -81,7 +81,7 @@ class ZapParser:
                     endpoint.fragment = None
                     finding.unsaved_endpoints.append(endpoint)
                     finding.unsaved_req_resp.append(
-                        {"req": request, "resp": response}
+                        {"req": request, "resp": response},
                     )
                 items.append(finding)
         return items

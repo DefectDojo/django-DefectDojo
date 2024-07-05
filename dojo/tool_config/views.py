@@ -34,7 +34,7 @@ def new_tool_config(request):
                                      messages.SUCCESS,
                                      'Tool Configuration successfully updated.',
                                      extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('tool_config', ))
+                return HttpResponseRedirect(reverse('tool_config'))
             except Exception as e:
                 logger.exception(e)
                 messages.add_message(request,
@@ -72,7 +72,7 @@ def edit_tool_config(request, ttid):
                                      messages.SUCCESS,
                                      'Tool Configuration successfully updated.',
                                      extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('tool_config', ))
+                return HttpResponseRedirect(reverse('tool_config'))
             except Exception as e:
                 logger.info(e)
                 messages.add_message(request,

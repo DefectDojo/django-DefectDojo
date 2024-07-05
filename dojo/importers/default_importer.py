@@ -216,7 +216,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 findings,
                 self.group_by,
                 create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
-                **kwargs
+                **kwargs,
             )
             if self.push_to_jira:
                 if findings[0].finding_group is not None:
@@ -226,7 +226,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         sync = kwargs.get('sync', True)
         if not sync:
-            return [serialize('json', [finding, ]) for finding in new_findings]
+            return [serialize('json', [finding]) for finding in new_findings]
         return new_findings
 
     def close_old_findings(
@@ -259,12 +259,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Get the initial filtered list of old findings to be closed without
         # considering the scope of the product or engagement
         old_findings = Finding.objects.exclude(
-            test=self.test
+            test=self.test,
         ).exclude(
-            hash_code__in=new_hash_codes
+            hash_code__in=new_hash_codes,
         ).filter(
             test__test_type=self.test.test_type,
-            active=True
+            active=True,
         )
         # Accommodate for product scope or engagement scope
         if self.close_old_findings_product_scope:

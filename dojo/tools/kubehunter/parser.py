@@ -74,7 +74,7 @@ class KubeHunterParser:
                 duplicate=False,
                 out_of_scope=False,
                 vuln_id_from_tool=vulnerability_id,
-                steps_to_reproduce=steps_to_reproduce
+                steps_to_reproduce=steps_to_reproduce,
             )
 
             # internal de-duplication

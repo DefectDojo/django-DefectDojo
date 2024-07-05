@@ -55,7 +55,7 @@ def get_item(vulnerability, test):
         file_path=vulnerability["file"],
         line=vulnerability["line"],
         description="Vulnerability ID: {}\nDetails: {}\n".format(
-            vulnerability["code"], vulnerability["message"]
+            vulnerability["code"], vulnerability["message"],
         ),
         static_finding=True,
         dynamic_finding=False,

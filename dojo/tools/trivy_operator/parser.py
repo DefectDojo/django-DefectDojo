@@ -43,7 +43,7 @@ class TrivyOperatorParser:
         findings = []
         if report is not None:
             resource_namespace = labels.get(
-                "trivy-operator.resource.namespace", ""
+                "trivy-operator.resource.namespace", "",
             )
             resource_kind = labels.get("trivy-operator.resource.kind", "")
             resource_name = labels.get("trivy-operator.resource.name", "")

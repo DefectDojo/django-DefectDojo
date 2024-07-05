@@ -20,21 +20,21 @@ class CycloneDXXMLParser:
             raise ValueError(msg)
         ns = {
             "b": namespace.replace("{", "").replace(
-                "}", ""
+                "}", "",
             ),  # we accept whatever the version
             "v": "http://cyclonedx.org/schema/ext/vulnerability/1.0",
         }
         # get report date
         report_date = None
         report_date_raw = root.findtext(
-            "b:metadata/b:timestamp", namespaces=ns
+            "b:metadata/b:timestamp", namespaces=ns,
         )
         if report_date_raw:
             report_date = dateutil.parser.parse(report_date_raw)
         bom_refs = {}
         findings = []
         for component in root.findall(
-            "b:components/b:component", namespaces=ns
+            "b:components/b:component", namespaces=ns,
         ):
             component_name = component.findtext(f"{namespace}name")
             component_version = component.findtext(f"{namespace}version")
@@ -46,7 +46,7 @@ class CycloneDXXMLParser:
                 }
             # for each vulnerabilities add a finding
             for vulnerability in component.findall(
-                "v:vulnerabilities/v:vulnerability", namespaces=ns
+                "v:vulnerabilities/v:vulnerability", namespaces=ns,
             ):
                 finding_vuln = self.manage_vulnerability_legacy(
                     vulnerability,
@@ -59,20 +59,20 @@ class CycloneDXXMLParser:
                 findings.append(finding_vuln)
         # manage adhoc vulnerabilities
         for vulnerability in root.findall(
-            "v:vulnerabilities/v:vulnerability", namespaces=ns
+            "v:vulnerabilities/v:vulnerability", namespaces=ns,
         ):
             finding_vuln = self.manage_vulnerability_legacy(
-                vulnerability, ns, bom_refs, report_date
+                vulnerability, ns, bom_refs, report_date,
             )
             findings.append(finding_vuln)
         # manage adhoc vulnerabilities (compatible with 1.4 of the spec)
         for vulnerability in root.findall(
-            "b:vulnerabilities/b:vulnerability", namespaces=ns
+            "b:vulnerabilities/b:vulnerability", namespaces=ns,
         ):
             findings.extend(
                 self._manage_vulnerability_xml(
-                    vulnerability, ns, bom_refs, report_date
-                )
+                    vulnerability, ns, bom_refs, report_date,
+                ),
             )
         return findings
 
@@ -94,7 +94,7 @@ class CycloneDXXMLParser:
         vuln_id = vulnerability.findtext("v:id", namespaces=ns)
 
         severity = vulnerability.findtext(
-            "v:ratings/v:rating/v:severity", namespaces=ns
+            "v:ratings/v:rating/v:severity", namespaces=ns,
         )
         description = vulnerability.findtext("v:description", namespaces=ns)
         # by the schema, only id and ref are mandatory, even the severity is
@@ -105,7 +105,7 @@ class CycloneDXXMLParser:
                     f"**Ref:** {ref}",
                     f"**Id:** {vuln_id}",
                     f"**Severity:** {str(severity)}",
-                ]
+                ],
             )
         if component_name is None:
             bom = bom_refs[ref]
@@ -115,7 +115,7 @@ class CycloneDXXMLParser:
         severity = Cyclonedxhelper().fix_severity(severity)
         references = ""
         for adv in vulnerability.findall(
-            "v:advisories/v:advisory", namespaces=ns
+            "v:advisories/v:advisory", namespaces=ns,
         ):
             references += f"{adv.text}\n"
         finding = Finding(
@@ -132,14 +132,14 @@ class CycloneDXXMLParser:
             finding.date = report_date
         mitigation = ""
         for recommend in vulnerability.findall(
-            "v:recommendations/v:recommendation", namespaces=ns
+            "v:recommendations/v:recommendation", namespaces=ns,
         ):
             mitigation += f"{recommend.text}\n"
         if mitigation != "":
             finding.mitigation = mitigation
         # manage CVSS
         for rating in vulnerability.findall(
-            "v:ratings/v:rating", namespaces=ns
+            "v:ratings/v:rating", namespaces=ns,
         ):
             if "CVSSv3" == rating.findtext("v:method", namespaces=ns):
                 raw_vector = rating.findtext("v:vector", namespaces=ns)
@@ -156,7 +156,7 @@ class CycloneDXXMLParser:
         if len(cwes) > 1:
             # FIXME support more than one CWE
             LOGGER.debug(
-                f"more than one CWE for a finding {cwes}. NOT supported by parser API"
+                f"more than one CWE for a finding {cwes}. NOT supported by parser API",
             )
         if len(cwes) > 0:
             finding.cwe = cwes[0]
@@ -171,7 +171,7 @@ class CycloneDXXMLParser:
     def get_cwes(self, node, prefix, namespaces):
         cwes = []
         for cwe in node.findall(
-            prefix + ":cwes/" + prefix + ":cwe", namespaces
+            prefix + ":cwes/" + prefix + ":cwe", namespaces,
         ):
             if cwe.text.isdigit():
                 cwes.append(int(cwe.text))
@@ -195,12 +195,12 @@ class CycloneDXXMLParser:
             else:
                 description = f"\n{detail}"
         severity = vulnerability.findtext(
-            "b:ratings/b:rating/b:severity", namespaces=ns
+            "b:ratings/b:rating/b:severity", namespaces=ns,
         )
         severity = Cyclonedxhelper().fix_severity(severity)
         references = ""
         for advisory in vulnerability.findall(
-            "b:advisories/b:advisory", namespaces=ns
+            "b:advisories/b:advisory", namespaces=ns,
         ):
             title = advisory.findtext("b:title", namespaces=ns)
             if title:
@@ -215,7 +215,7 @@ class CycloneDXXMLParser:
             vulnerability_ids.append(vuln_id)
         # check references to see if we have other vulnerability ids
         for reference in vulnerability.findall(
-            "b:references/b:reference", namespaces=ns
+            "b:references/b:reference", namespaces=ns,
         ):
             vulnerability_id = reference.findtext("b:id", namespaces=ns)
             if vulnerability_id:
@@ -223,18 +223,18 @@ class CycloneDXXMLParser:
         # for all component affected
         findings = []
         for target in vulnerability.findall(
-            "b:affects/b:target", namespaces=ns
+            "b:affects/b:target", namespaces=ns,
         ):
             ref = target.find("b:ref", namespaces=ns)
             component_name, component_version = Cyclonedxhelper()._get_component(
-                bom_refs, ref.text
+                bom_refs, ref.text,
             )
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
                 severity=severity,
                 mitigation=vulnerability.findtext(
-                    "b:recommendation", namespaces=ns
+                    "b:recommendation", namespaces=ns,
                 ),
                 references=references,
                 component_name=component_name,
@@ -250,7 +250,7 @@ class CycloneDXXMLParser:
                 finding.date = report_date
             # manage CVSS
             for rating in vulnerability.findall(
-                "b:ratings/b:rating", namespaces=ns
+                "b:ratings/b:rating", namespaces=ns,
             ):
                 method = rating.findtext("b:method", namespaces=ns)
                 if "CVSSv3" == method or "CVSSv31" == method:
@@ -270,7 +270,7 @@ class CycloneDXXMLParser:
             if len(cwes) > 1:
                 # FIXME support more than one CWE
                 LOGGER.debug(
-                    f"more than one CWE for a finding {cwes}. NOT supported by parser API"
+                    f"more than one CWE for a finding {cwes}. NOT supported by parser API",
                 )
             if len(cwes) > 0:
                 finding.cwe = cwes[0]
@@ -291,7 +291,7 @@ class CycloneDXXMLParser:
                         finding.active = False
                     if not finding.active:
                         detail = analysis[0].findtext(
-                            "b:detail", namespaces=ns
+                            "b:detail", namespaces=ns,
                         )
                         if detail:
                             finding.mitigation = (
