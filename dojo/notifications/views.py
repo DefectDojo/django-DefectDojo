@@ -138,11 +138,11 @@ class NotificationWebhooksView(View):
 
     def check_webhooks_enabled(self):
         if not get_system_setting('enable_webhooks_notifications'):
-            raise Http404()
+            raise Http404
 
     def check_user_permissions(self, request: HttpRequest):
         if not request.user.is_superuser:
-            raise PermissionDenied()
+            raise PermissionDenied
         # TODO finished access for other users
         # if not user_has_configuration_permission(request.user, self.permission):
         #     raise PermissionDenied()
@@ -288,7 +288,7 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
             'name': 'Edit Notification Webhook',
             'user': request.user,
             'form': self.get_form(request, instance=nwh),
-            'nwh': nwh
+            'nwh': nwh,
         }
 
     def process_form(self, request: HttpRequest, nwh: Notification_Webhooks, context: dict):
@@ -383,7 +383,7 @@ class DeleteNotificationWebhooksView(NotificationWebhooksView):
     def get_initial_context(self, request: HttpRequest, nwh: Notification_Webhooks):
         return {
             'form': self.get_form(request, instance=nwh),
-            'nwh': nwh
+            'nwh': nwh,
         }
 
     def process_form(self, request: HttpRequest, nwh: Notification_Webhooks, context: dict):
