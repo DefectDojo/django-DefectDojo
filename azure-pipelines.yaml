@@ -65,7 +65,7 @@ steps:
       coverage xml
     displayName: "Unit test"
 
-  - task: SonarQubePrepare@5
+  - task: SonarQubePrepare@6
     displayName: "Prepare analysis on SonarQube"
     inputs:
       SonarQube: SonarQube
@@ -83,7 +83,7 @@ steps:
         sonar.language=py
         sonar.python.version=3.10
 
-  - task: SonarQubeAnalyze@5
+  - task: SonarQubeAnalyze@6
     displayName: "Run Code Analysis"
 
   - task: sonar-buildbreaker@8
@@ -93,7 +93,7 @@ steps:
 
   - bash: "cp -r dojo/ requirements.txt docker/ wsgi.py manage.py tests/ unittests/ components/ wsgi_params nginx/ Dockerfile.django-debian Dockerfile.integration-tests-debian Dockerfile.nginx-debian $(Build.ArtifactStagingDirectory)"
     displayName: "Copy Files"
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: ArchiveFiles@2
     displayName: "Archive Artifact"
@@ -101,14 +101,14 @@ steps:
       rootFolderOrFile: "$(Build.ArtifactStagingDirectory)"
       includeRootFolder: false
       archiveFile: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifact: $(DefinitionName)_artifact"
     inputs:
       PathtoPublish: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
       ArtifactName: "$(DefinitionName)_artifact"
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: ArtifactoryGenericUpload@2
     displayName: "Artifactory Generic Upload"
