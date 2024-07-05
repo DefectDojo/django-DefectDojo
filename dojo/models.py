@@ -357,6 +357,8 @@ class System_Settings(models.Model):
         models.BooleanField(default=False,
                             verbose_name=_('Enable Webhook notifications'),
                             blank=False)
+    webhooks_notifications_timeout = models.IntegerField(default=60,
+                                          help_text=_("How many seconds will DefectDojo waits for response from webhook endpoint"))
 
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
@@ -4120,18 +4122,14 @@ class Notification_Webhooks(models.Model):
     _STATUS_ACTIVE = "active"
     _STATUS_INACTIVE = "inactive"
     STATUS_ACTIVE = f"{_STATUS_ACTIVE}"
-    STATUS_INACTIVE_400 = f"{_STATUS_INACTIVE}_400"
-    STATUS_ACTIVE_500 = f"{_STATUS_ACTIVE}_500"
-    STATUS_INACTIVE_500 = f"{_STATUS_INACTIVE}_500"
-    STATUS_INACTIVE_OTHERS = f"{_STATUS_INACTIVE}_others"
-    STATUS_INACTIVE_MANUAL = f"{_STATUS_INACTIVE}_manual"
+    STATUS_ACTIVE_TMP = f"{_STATUS_ACTIVE}_tmp"
+    STATUS_INACTIVE_TMP = f"{_STATUS_INACTIVE}_tmp"
+    STATUS_INACTIVE_PERMANENT = f"{_STATUS_INACTIVE}_permanent"
     STATUS_CHOICES = (
         (STATUS_ACTIVE, "Active"),
-        (STATUS_INACTIVE_400, "Inactive because of 4xx error"),
-        (STATUS_ACTIVE_500, "Active but 5xx error detected"),
-        (STATUS_INACTIVE_500, "Inactive because of 5xx error"),
-        (STATUS_INACTIVE_OTHERS, "Inactive because of status code unsupported"),
-        (STATUS_INACTIVE_MANUAL, "Inactive because of manual deactivation"),
+        (STATUS_ACTIVE_TMP, "Active but 5xx (or similar) error detected"),
+        (STATUS_INACTIVE_TMP, "Temporary inactive because of 5xx (or similar) error"),
+        (STATUS_INACTIVE_PERMANENT, "Permanently inactive"),
     )
     name = models.CharField(max_length=100, default='', blank=False, unique=True,
                                     help_text=_('Name of the incoming webhook'))
@@ -4145,6 +4143,7 @@ class Notification_Webhooks(models.Model):
                               help_text=_('Status of the incoming webhook'))
     first_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened first time'), blank=True, null=True)
     last_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened last time'), blank=True, null=True)
+    note = models.CharField(default='', blank=True, null=True, help_text=_('Description of the latest error'))
     owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
                               help_text=_('Owner/receiver of notification, if empty processed as system notification'))
 
@@ -4633,6 +4632,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Risk_Acceptance)
     auditlog.register(Finding_Template)
     auditlog.register(Cred_User, exclude_fields=["password"])
+    auditlog.register(Notification_Webhooks, exclude_fields=['header_name', 'header_value'])
 
 from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
 
