@@ -2,8 +2,7 @@ from datetime import datetime, timezone
 
 from dojo.models import Test
 from dojo.tools.bugcrowd.parser import BugCrowdParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestBugCrowdParser(DojoTestCase):

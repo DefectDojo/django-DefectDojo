@@ -1,7 +1,6 @@
 from dojo.models import Engagement, Product, Test
 from dojo.tools.mobsf.parser import MobSFParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestMobSFParser(DojoTestCase):

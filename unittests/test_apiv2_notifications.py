@@ -18,7 +18,7 @@ class NotificationsTest(DojoAPITestCase):
 
         r = self.create(
             template=True,
-            scan_added=['alert', 'slack']
+            scan_added=['alert', 'slack'],
         )
         self.creation_id = r.json()["id"]
         self.assertEqual(r.status_code, 201)
@@ -33,7 +33,7 @@ class NotificationsTest(DojoAPITestCase):
         password = 'testTEST1234!@#$'
         r = self.client.post(reverse('user-list'), {
             "username": "api-user-notification",
-            "password": password
+            "password": password,
         }, format='json')
         return r.json()["id"]
 

@@ -25,7 +25,7 @@ class CobaltParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         dupes = {}
         for row in reader:
@@ -76,7 +76,7 @@ class CobaltParser:
                     finding.description = ""
 
                 key = hashlib.md5(
-                    (finding.title + "|" + finding.description).encode("utf-8")
+                    (finding.title + "|" + finding.description).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:

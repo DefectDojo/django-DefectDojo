@@ -100,7 +100,7 @@ class XanitizerParser:
 
     def generate_description(self, finding):
         description = "**Description:**\n{}".format(
-            finding.find("description").text
+            finding.find("description").text,
         )
 
         if finding.find("startNode") is not None:
@@ -108,11 +108,11 @@ class XanitizerParser:
             endnode = finding.find("endNode")
             description = f"{description}\n-----\n"
             description = "{}\n**Starting at:** {} - **Line** {}".format(
-                description, startnode.get("classFQN"), startnode.get("lineNo")
+                description, startnode.get("classFQN"), startnode.get("lineNo"),
             )
             description = self.add_code(startnode, False, description)
             description = "{}\n\n**Ending at:** {} - **Line** {}".format(
-                description, endnode.get("classFQN"), endnode.get("lineNo")
+                description, endnode.get("classFQN"), endnode.get("lineNo"),
             )
             description = self.add_code(endnode, True, description)
         elif finding.find("node") is not None:
@@ -146,24 +146,23 @@ class XanitizerParser:
             for code in codelines:
                 if code.text:
                     description = "{}\n{}: {}".format(
-                        description, code.get("lineNo"), code.text
+                        description, code.get("lineNo"), code.text,
                     )
                 else:
                     description = "{}\n{}: ".format(
-                        description, code.get("lineNo")
+                        description, code.get("lineNo"),
                     )
 
         return description
 
     def generate_file_path(self, finding):
-        pass
 
         if finding.find("endNode") is not None and finding.find("endNode").get(
-            "relativePath"
+            "relativePath",
         ):
             return finding.find("endNode").get("relativePath")
         elif finding.find("node") is not None and finding.find("node").get(
-            "relativePath"
+            "relativePath",
         ):
             return finding.find("node").get("relativePath")
 
