@@ -1745,8 +1745,8 @@ warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWa
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
 
 # TODO - remove these lines, they are here only for testing that following error is the only stopper for upgrade to py3.12
-warnings.filterwarnings("ignore", message="pkg_resources is deprecated as an API")  # monitor https://github.com/DefectDojo/django-DefectDojo/pull/10334, specially https://github.com/pypi/support/issues/4164
-warnings.filterwarnings("ignore", message=r"datetime\.datetime\.utcnow\(\) is deprecated and scheduled for removal in a future version\. Use timezone-aware objects to represent datetimes in UTC: datetime\.datetime\.now\(datetime\.UTC\)\.")  # monitor https://github.com/DefectDojo/django-DefectDojo/pull/9948 but it might pop-up somewhere else again. pygithub is just first known location.
+warnings.filterwarnings("ignore", module="polymorphic", message="pkg_resources is deprecated as an API")  # monitor https://github.com/DefectDojo/django-DefectDojo/pull/10334, specially https://github.com/pypi/support/issues/4164
+warnings.filterwarnings("ignore", module="PyGithub", message=r"datetime\.datetime\.utcnow\(\) is deprecated and scheduled for removal in a future version\. Use timezone-aware objects to represent datetimes in UTC: datetime\.datetime\.now\(datetime\.UTC\)\.")  # monitor https://github.com/DefectDojo/django-DefectDojo/pull/9948 but it might pop-up somewhere else again. pygithub is just first known location.
 
 # This setting is here to override default renderer of forms (use div-based, instred of table-based).
 # It has effect only on templates that use "{{ form }}" in the body. Only "Delete forms" now.
