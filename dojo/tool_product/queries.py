@@ -12,10 +12,10 @@ def get_authorized_tool_product_settings(permission):
         return Tool_Product_Settings.objects.none()
 
     if user.is_superuser:
-        return Tool_Product_Settings.objects.all()
+        return Tool_Product_Settings.objects.all().order_by("id")
 
     if user_has_global_permission(user, permission):
-        return Tool_Product_Settings.objects.all()
+        return Tool_Product_Settings.objects.all().order_by("id")
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -38,7 +38,7 @@ def get_authorized_tool_product_settings(permission):
         product__prod_type__member=Exists(authorized_product_type_roles),
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        product__authorized_group=Exists(authorized_product_groups))
+        product__authorized_group=Exists(authorized_product_groups)).order_by("id")
     tool_product_settings = tool_product_settings.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))

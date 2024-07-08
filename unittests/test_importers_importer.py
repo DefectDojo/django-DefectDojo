@@ -525,7 +525,7 @@ class TestImporterUtils(DojoAPITestCase):
         self.client.force_authenticate(user=self.testuser, token=token)
         self.create_default_data()
 
-    def __del__(self):
+    def tearDown(self):
         self.test_last_by_scan_type.delete()
         self.test_with_title.delete()
         self.test_last_by_title.delete()
