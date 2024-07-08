@@ -2665,6 +2665,7 @@ def get_remote_json_config(connection: Connection, path_file: str):
         return data
     except Exception as e:
         logger.error("Error getting remote configuration file: " + str(e))
+        raise e
 
 class Response:
 
