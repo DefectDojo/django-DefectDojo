@@ -39,7 +39,7 @@ def action_history(request, cid, oid):
         ct = ContentType.objects.get_for_id(cid)
         obj = ct.get_object_for_this_type(pk=oid)
     except (KeyError, ObjectDoesNotExist):
-        raise Http404()
+        raise Http404
 
     product_id = None
     active_tab = None
@@ -136,7 +136,7 @@ def manage_files(request, oid, obj_type):
         user_has_permission_or_403(request.user, obj, Permissions.Finding_Edit)
         obj_vars = ('view_finding', 'finding_set')
     else:
-        raise Http404()
+        raise Http404
 
     files_formset = ManageFileFormSet(queryset=obj.files.all())
     error = False
@@ -194,7 +194,7 @@ def manage_files(request, oid, obj_type):
 def protected_serve(request, path, document_root=None, show_indexes=False):
     file = FileUpload.objects.get(file=path)
     if not file:
-        raise Http404()
+        raise Http404
     object_set = list(file.engagement_set.all()) + list(file.test_set.all()) + list(file.finding_set.all())
     # Should only one item (but not sure what type) in the list, so O(n=1)
     for obj in object_set:
@@ -218,7 +218,7 @@ def access_file(request, fid, oid, obj_type, url=False):
         obj = get_object_or_404(Finding, pk=oid)
         user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
     else:
-        raise Http404()
+        raise Http404
     # If reaching this far, user must have permission to get file
     file = get_object_or_404(FileUpload, pk=fid)
     redirect_url = f'{settings.MEDIA_ROOT}/{file.file.url.lstrip(settings.MEDIA_URL)}'

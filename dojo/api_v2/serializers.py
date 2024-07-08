@@ -559,6 +559,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserContactInfoSerializer(serializers.ModelSerializer):
+    user_profile = UserSerializer(many=False, source="user", read_only=True)
+
     class Meta:
         model = UserContactInfo
         fields = "__all__"
@@ -1643,10 +1645,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
-    related_fields = serializers.SerializerMethodField()
+    related_fields = serializers.SerializerMethodField(allow_null=True)
     # for backwards compatibility
-    jira_creation = serializers.SerializerMethodField(read_only=True)
-    jira_change = serializers.SerializerMethodField(read_only=True)
+    jira_creation = serializers.SerializerMethodField(read_only=True, allow_null=True)
+    jira_change = serializers.SerializerMethodField(read_only=True, allow_null=True)
     display_status = serializers.SerializerMethodField()
     finding_groups = FindingGroupSerializer(
         source="finding_group_set", many=True, read_only=True

@@ -315,7 +315,7 @@ class ImportReimportMixin:
         self.assert_finding_count_json(5, findings)
         # scan_date provided, so date should be equal to that overriding that from the parser
         self.log_finding_summary_json_api(findings)
-        self.assertEqual(findings['results'][2]['date'], "2020-02-02")
+        self.assertEqual(findings['results'][4]['date'], "2020-02-02")
 
     # Test re-import with unique_id_from_tool algorithm
     # import sonar scan with detailed parser, testing:
