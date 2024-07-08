@@ -27,7 +27,7 @@ Note that the following abbreviations were used:
 - med: amount of medium findings within the product
 - low: amount of low findings within the product
 
-```
+```python
 health=100
 if crit > 0:
     health = 40
