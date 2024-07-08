@@ -3266,7 +3266,7 @@ class ConfigurationPermissionViewSet(
 
     def filter_queryset(self, queryset):
         return Permission.objects.filter(
-            codename__in=get_configuration_permissions_codenames()
+            codename__in=get_configuration_permissions_codenames(),
         ).order_by("id")
 
 
