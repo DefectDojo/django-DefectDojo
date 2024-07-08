@@ -421,7 +421,7 @@ def webhook_status_cleanup(*args, **kwargs):
         endpoint.last_error = None
         endpoint.note = f'Reactivation from {Notification_Webhooks.STATUS_ACTIVE_TMP}'
         endpoint.save()
-        logger.debug(f"Webhook endpoint '{endpoints.pk}' reactivated to '{Notification_Webhooks.STATUS_ACTIVE_TMP}'")
+        logger.debug(f"Webhook endpoint '{endpoint.name}' reactivated from '{Notification_Webhooks.STATUS_ACTIVE_TMP}' to '{Notification_Webhooks.STATUS_ACTIVE}'")
 
     # Reactivation of STATUS_INACTIVE_TMP endpoints.
     # They should reactive automatically in 60s, however in case of some unexpected event (e.g. start of whole stack),
@@ -462,7 +462,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
             res = webhooks_notification_request(endpoint, event, *args, **kwargs)
 
             if res.status_code in [200, 201]:
-                logger.debug(f"Message sent to endpoint '{endpoint.name}' sucessfully.")
+                logger.debug(f"Message sent to endpoint '{endpoint.name}' successfully.")
                 continue
 
             # HTTP request passed successfully but we still need to check status code
