@@ -27,23 +27,23 @@ class TestParsers(DojoTestCase):
                     doc_file = os.path.join(basedir, 'docs', 'content', 'en', 'integrations', 'parsers', category, f"{doc_name}.md")
                     self.assertTrue(
                         os.path.isfile(doc_file),
-                        f"Documentation file '{doc_file}' is missing or using different name"
+                        f"Documentation file '{doc_file}' is missing or using different name",
                                     )
 
                     with open(doc_file) as file:
                         content = file.read()
                         self.assertTrue(re.search("title:", content),
-                                        f"Documentation file '{doc_file}' does not contain a title"
+                                        f"Documentation file '{doc_file}' does not contain a title",
                                         )
                         self.assertTrue(re.search("toc_hide: true", content),
-                                        f"Documentation file '{doc_file}' does not contain toc_hide: true"
+                                        f"Documentation file '{doc_file}' does not contain toc_hide: true",
                                         )
                         if category == "file":
                             self.assertTrue(re.search("### Sample Scan Data", content),
-                                            f"Documentation file '{doc_file}' does not contain ### Sample Scan Data"
+                                            f"Documentation file '{doc_file}' does not contain ### Sample Scan Data",
                                             )
                             self.assertTrue(re.search("https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans", content),
-                                            f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans"
+                                            f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
                                             )
 
             if parser_dir.name not in [
@@ -53,7 +53,7 @@ class TestParsers(DojoTestCase):
                     parser_test_file = os.path.join(basedir, 'unittests', 'tools', f"test_{parser_dir.name}_parser.py")
                     self.assertTrue(
                         os.path.isfile(parser_test_file),
-                        f"Unittest of parser '{parser_test_file}' is missing or using different name"
+                        f"Unittest of parser '{parser_test_file}' is missing or using different name",
                     )
 
             if parser_dir.name not in [
@@ -63,7 +63,7 @@ class TestParsers(DojoTestCase):
                     scan_dir = os.path.join(basedir, 'unittests', 'scans', parser_dir.name)
                     self.assertTrue(
                         os.path.isdir(scan_dir),
-                        f"Test files for unittest of parser '{scan_dir}' are missing or using different name"
+                        f"Test files for unittest of parser '{scan_dir}' are missing or using different name",
                     )
 
             if category == 'api':
@@ -75,7 +75,7 @@ class TestParsers(DojoTestCase):
                         importer_test_file = os.path.join(basedir, 'unittests', 'tools', f"test_{parser_dir.name}_importer.py")
                         self.assertTrue(
                             os.path.isfile(importer_test_file),
-                            f"Unittest of importer '{importer_test_file}' is missing or using different name"
+                            f"Unittest of importer '{importer_test_file}' is missing or using different name",
                         )
             for file in os.scandir(os.path.join(basedir, 'dojo', 'tools', parser_dir.name)):
                 if file.is_file() and file.name != '__pycache__' and file.name != "__init__.py":
@@ -100,11 +100,11 @@ class TestParsers(DojoTestCase):
     def test_parser_existence(self):
         for docs in os.scandir(os.path.join(basedir, 'docs', 'content', 'en', 'integrations', 'parsers', 'file')):
             if docs.name not in [
-                '_index.md', 'codeql.md', 'edgescan.md'
+                '_index.md', 'codeql.md', 'edgescan.md',
             ]:
                 with self.subTest(parser=docs.name.split('.md')[0], category='parser'):
                     parser = os.path.join(basedir, 'dojo', 'tools', f"{docs.name.split('.md')[0]}", "parser.py")
                     self.assertTrue(
                         os.path.isfile(parser),
-                        f"Parser '{parser}' is missing or using different name"
+                        f"Parser '{parser}' is missing or using different name",
                                     )

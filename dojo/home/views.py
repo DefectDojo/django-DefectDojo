@@ -47,7 +47,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     punchcard, ticks = get_punchcard_data(findings, today - relativedelta(weeks=26), 26)
 
     if user_has_configuration_permission(request.user, 'dojo.view_engagement_survey'):
-        unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0, ) \
+        unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0) \
             .filter(Q(engagement__isnull=True) | Q(engagement__in=engagements))
     else:
         unassigned_surveys = None

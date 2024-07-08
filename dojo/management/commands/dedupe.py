@@ -38,7 +38,7 @@ class Command(BaseCommand):
             '--parser',
             dest='parser',
             action='append',
-            help="""List of parsers for which hash_code needs recomputing (defaults to all parsers)"""
+            help="""List of parsers for which hash_code needs recomputing (defaults to all parsers)""",
         )
 
         parser.add_argument('--hash_code_only', action='store_true', help='Only compute hash codes')

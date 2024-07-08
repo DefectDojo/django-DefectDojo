@@ -26,7 +26,7 @@ def new_regulation(request):
                                  messages.SUCCESS,
                                  'Regulation Successfully Created.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('regulations', ))
+            return HttpResponseRedirect(reverse('regulations'))
     else:
         tform = RegulationForm()
         add_breadcrumb(title="New regulation", top_level=False, request=request)
@@ -44,7 +44,7 @@ def edit_regulations(request, ttid):
                              messages.SUCCESS,
                              'Regulation Deleted.',
                              extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('regulations', ))
+        return HttpResponseRedirect(reverse('regulations'))
     elif request.method == 'POST':
         tform = RegulationForm(request.POST, instance=regulation)
         if tform.is_valid():
@@ -53,7 +53,7 @@ def edit_regulations(request, ttid):
                                  messages.SUCCESS,
                                  'Regulation Successfully Updated.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('regulations', ))
+            return HttpResponseRedirect(reverse('regulations'))
     else:
         tform = RegulationForm(instance=regulation)
     add_breadcrumb(title="Edit Regulation", top_level=False, request=request)

@@ -93,7 +93,7 @@ class TestGitlabContainerScanParser(DojoTestCase):
             finding = findings[50]
             self.assertIsNone(finding.date)
             self.assertEqual(
-                "openssl: Infinite loop in BN_mod_sqrt() reachable when parsing certificates", finding.title
+                "openssl: Infinite loop in BN_mod_sqrt() reachable when parsing certificates", finding.title,
             )
             self.assertEqual("libretls", finding.component_name)
             self.assertEqual("3.3.4-r2", finding.component_version)

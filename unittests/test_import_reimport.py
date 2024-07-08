@@ -1491,8 +1491,8 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
                 'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
                 'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
-            }
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4},
+            },
         })
 
         test_id = import0['test']
@@ -1541,8 +1541,8 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                     'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
                     'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
                     'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0}}
-            }
+                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0}},
+            },
         })
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
@@ -1591,8 +1591,8 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                     'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
                     'low': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
                     'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'total': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}}
-            }
+                    'total': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}},
+            },
         })
 
     # without import history, there are no delta statistics
@@ -1609,8 +1609,8 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
                 'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
                 'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
-            }
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4},
+            },
         })
 
         test_id = import0['test']
@@ -1624,7 +1624,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
                 'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
                 'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4},
             },
             'after': {
                 'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
@@ -1632,8 +1632,8 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
                 'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
                 'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
-            }
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5},
+            },
         })
 
         with assertTestImportModelsCreated(self, reimports=0, affected_findings=0, closed=0, reactivated=0, untouched=0):
@@ -1646,7 +1646,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
                 'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
                 'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5},
             },
             'after': {
                 'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
@@ -1654,8 +1654,8 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
                 'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
                 'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
                 'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
-            }
+                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5},
+            },
         })
     # Reimport tests to test Scan_Date logic (usecase not supported on UI)
 

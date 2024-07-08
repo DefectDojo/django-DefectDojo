@@ -22,7 +22,7 @@ class Command(BaseCommand):
                 Permission.objects.create(
                     name='Can change Google Sheet',
                     content_type=content_type_system_settings,
-                    codename='change_google_sheet'
+                    codename='change_google_sheet',
                 )
 
             logger.info('Non-standard permissions have been created')

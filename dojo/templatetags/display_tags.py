@@ -53,25 +53,25 @@ markdown_attrs = {
 }
 
 markdown_styles = [
-    "background-color"
+    "background-color",
 ]
 
 finding_related_action_classes_dict = {
     'reset_finding_duplicate_status': 'fa-solid fa-eraser',
     'set_finding_as_original': 'fa-brands fa-superpowers',
-    'mark_finding_duplicate': 'fa-solid fa-copy'
+    'mark_finding_duplicate': 'fa-solid fa-copy',
 }
 
 finding_related_action_title_dict = {
     'reset_finding_duplicate_status': 'Reset duplicate status',
     'set_finding_as_original': 'Set as original',
-    'mark_finding_duplicate': 'Mark as duplicate'
+    'mark_finding_duplicate': 'Mark as duplicate',
 }
 
 supported_file_formats = [
     'apng', 'avif', 'gif', 'jpg',
     'jpeg', 'jfif', 'pjpeg', 'pjp',
-    'png', 'svg', 'webp', 'pdf'
+    'png', 'svg', 'webp', 'pdf',
 ]
 
 
@@ -237,7 +237,7 @@ def asvs_level(benchmark_score):
     return _("Checklist is %(level)s full (pass: %(total_viewed)s, total: %(total)s)") % {
         'level': level,
         'total_viewed': total_viewed,
-        'total': total
+        'total': total,
     }
 
 
@@ -734,7 +734,7 @@ def finding_display_status(finding):
     if 'Risk Accepted' in display_status:
         ra = finding.risk_acceptance
         if ra:
-            url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
+            url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id))
             info = ra.name_and_expiration_info
             link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
             display_status = display_status.replace('Risk Accepted', link)

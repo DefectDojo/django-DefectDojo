@@ -20,7 +20,7 @@ class TestApiEdgescanParser(TestCase):
         parser = ApiEdgescanParser()
         self.assertEqual(
             parser.get_description_for_scan_types(scan_type),
-            "Edgescan findings can be imported by API or JSON file."
+            "Edgescan findings can be imported by API or JSON file.",
         )
 
     def test_requires_file(self):

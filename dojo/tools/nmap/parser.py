@@ -27,7 +27,7 @@ class NmapParser:
         report_date = None
         try:
             report_date = datetime.datetime.fromtimestamp(
-                int(root.attrib["start"])
+                int(root.attrib["start"]),
             )
         except ValueError:
             pass
@@ -57,7 +57,7 @@ class NmapParser:
                         )
                     if "accuracy" in os_match.attrib:
                         host_info += "**Accuracy:** {}%\n".format(
-                            os_match.attrib["accuracy"]
+                            os_match.attrib["accuracy"],
                         )
 
                 host_info += "\n\n"
@@ -65,7 +65,7 @@ class NmapParser:
             for port_element in host.findall("ports/port"):
                 protocol = port_element.attrib["protocol"]
                 endpoint = Endpoint(
-                    host=fqdn if fqdn else ip, protocol=protocol
+                    host=fqdn if fqdn else ip, protocol=protocol,
                 )
                 if (
                     "portid" in port_element.attrib
@@ -104,10 +104,10 @@ class NmapParser:
                 # manage some script like
                 # https://github.com/vulnersCom/nmap-vulners
                 for script_element in port_element.findall(
-                    'script[@id="vulners"]'
+                    'script[@id="vulners"]',
                 ):
                     self.manage_vulner_script(
-                        test, dupes, script_element, endpoint, report_date
+                        test, dupes, script_element, endpoint, report_date,
                     )
 
                 severity = "Info"
@@ -153,7 +153,7 @@ class NmapParser:
             return "Critical"
 
     def manage_vulner_script(
-        self, test, dupes, script_element, endpoint, report_date=None
+        self, test, dupes, script_element, endpoint, report_date=None,
     ):
         for component_element in script_element.findall("table"):
             component_cpe = CPE(component_element.attrib["key"])
