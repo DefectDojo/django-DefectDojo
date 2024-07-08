@@ -12,10 +12,10 @@ def get_authorized_engagements(permission):
         return Engagement.objects.none()
 
     if user.is_superuser:
-        return Engagement.objects.all()
+        return Engagement.objects.all().order_by("id")
 
     if user_has_global_permission(user, permission):
-        return Engagement.objects.all()
+        return Engagement.objects.all().order_by("id")
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -38,7 +38,7 @@ def get_authorized_engagements(permission):
         product__prod_type__member=Exists(authorized_product_type_roles),
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        product__authorized_group=Exists(authorized_product_groups))
+        product__authorized_group=Exists(authorized_product_groups)).order_by("id")
     engagements = engagements.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
