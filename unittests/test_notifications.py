@@ -30,7 +30,13 @@ from dojo.models import (
     User,
     get_current_datetime,
 )
-from dojo.notifications.helper import create_notification, send_alert_notification, send_webhooks_notification
+from dojo.notifications.helper import (
+    create_notification,
+    send_alert_notification,
+    send_webhooks_notification,
+    webhook_reactivation,
+    webhook_status_cleanup,
+)
 
 from .dojo_test_case import DojoTestCase
 
@@ -441,7 +447,7 @@ class TestNotificationWebhooks(DojoTestCase):
     def test_system_webhook_sucessful(self):
         with self.assertLogs('dojo.notifications.helper', level='DEBUG') as cm:
             send_webhooks_notification(event='dummy')
-        self.assertIn("Message sent to endpoint 'My webhook endpoint' sucessfully.", cm.output[-1])
+        self.assertIn("Message sent to endpoint 'My webhook endpoint' successfully.", cm.output[-1])
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE)
@@ -465,20 +471,17 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.url = f"{self.url_base}/status/500"
         self.sys_wh.save()
 
-        send_webhooks_notification(event='dummy', title='Dummy event')
+        with self.assertLogs('dojo.notifications.helper', level='ERROR') as cm:
+            send_webhooks_notification(event='dummy', title='Dummy event')
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_TMP)
         self.assertIsNotNone(updated_wh.first_error)
         self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+        self.assertEqual('Response status code: 500', updated_wh.note)
+        self.assertIn("Error when sending message to Webhooks 'My webhook endpoint' (status: 500)", cm.output[-1])
 
     def test_system_webhook_second_5xx_within_one_day(self):
-
-        # For proper testing, block_execution needs to be disabled for this task
-        testuser = User.objects.get(username='admin')
-        testuser.usercontactinfo.block_execution = False
-        testuser.save()
-
         ten_mins_ago = get_current_datetime() - datetime.timedelta(minutes=10)
         self.sys_wh.url = f"{self.url_base}/status/500"
         self.sys_wh.status = Notification_Webhooks.STATUS_ACTIVE_TMP
@@ -486,20 +489,17 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.last_error = ten_mins_ago
         self.sys_wh.save()
 
-        send_webhooks_notification(event='dummy', title='Dummy event')
+        with self.assertLogs('dojo.notifications.helper', level='ERROR') as cm:
+            send_webhooks_notification(event='dummy', title='Dummy event')
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_TMP)
         self.assertEqual(updated_wh.first_error, ten_mins_ago)
         self.assertGreater(updated_wh.last_error, ten_mins_ago)
+        self.assertEqual('Response status code: 500', updated_wh.note)
+        self.assertIn("Error when sending message to Webhooks 'My webhook endpoint' (status: 500)", cm.output[-1])
 
     def test_system_webhook_third_5xx_after_more_then_day(self):
-
-        # For proper testing, block_execution needs to be disabled for this task
-        testuser = User.objects.get(username='admin')
-        testuser.usercontactinfo.block_execution = False
-        testuser.save()
-
         now = get_current_datetime()
         day_ago = now - datetime.timedelta(hours=24, minutes=10)
         ten_minutes_ago = now - datetime.timedelta(minutes=10)
@@ -509,40 +509,160 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.last_error = ten_minutes_ago
         self.sys_wh.save()
 
-        send_webhooks_notification(event='dummy', title='Dummy event')
+        with self.assertLogs('dojo.notifications.helper', level='ERROR') as cm:
+            send_webhooks_notification(event='dummy', title='Dummy event')
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_PERMANENT)
         self.assertEqual(updated_wh.first_error, day_ago)
         self.assertGreater(updated_wh.last_error, ten_minutes_ago)
+        self.assertEqual('Response status code: 500', updated_wh.note)
+        self.assertIn("Error when sending message to Webhooks 'My webhook endpoint' (status: 500)", cm.output[-1])
+
+    def test_webhook_reactivation(self):
+        with self.subTest('active'):
+            wh = Notification_Webhooks.objects.filter(owner=None).first()
+            webhook_reactivation(endpoint_id=wh.pk)
+
+            updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE)
+            self.assertIsNone(updated_wh.first_error)
+            self.assertIsNone(updated_wh.last_error)
+            self.assertIsNone(updated_wh.note)
+
+        with self.subTest('inactive'):
+            now = get_current_datetime()
+            wh = Notification_Webhooks.objects.filter(owner=None).first()
+            wh.status = Notification_Webhooks.STATUS_INACTIVE_TMP
+            wh.first_error = now
+            wh.last_error = now
+            wh.note = "Response status code: 418"
+            wh.save()
+
+            with self.assertLogs('dojo.notifications.helper', level='DEBUG') as cm:
+                webhook_reactivation(endpoint_id=wh.pk)
+
+            updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_TMP)
+            self.assertIsNotNone(updated_wh.first_error)
+            self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+            self.assertEqual(updated_wh.note, "Response status code: 418")
+            self.assertIn("Webhook endpoint 'My webhook endpoint' reactivated to 'active_tmp'", cm.output[-1])
+
+    def test_webhook_status_cleanup(self):
+        with self.subTest('active'):
+            webhook_status_cleanup()
+
+            updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE)
+            self.assertIsNone(updated_wh.first_error)
+            self.assertIsNone(updated_wh.last_error)
+            self.assertIsNone(updated_wh.note)
+
+        with self.subTest('active_tmp_new'):
+            now = get_current_datetime()
+            wh = Notification_Webhooks.objects.filter(owner=None).first()
+            wh.status = Notification_Webhooks.STATUS_ACTIVE_TMP
+            wh.first_error = now
+            wh.last_error = now
+            wh.note = "Response status code: 503"
+            wh.save()
+
+            webhook_status_cleanup()
+
+            updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_TMP)
+            self.assertIsNotNone(updated_wh.first_error)
+            self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+            self.assertEqual(updated_wh.note, "Response status code: 503")
+
+        with self.subTest('active_tmp_old'):
+            day_ago = get_current_datetime() - datetime.timedelta(hours=24, minutes=10)
+            wh = Notification_Webhooks.objects.filter(owner=None).first()
+            wh.status = Notification_Webhooks.STATUS_ACTIVE_TMP
+            wh.first_error = day_ago
+            wh.last_error = day_ago
+            wh.note = "Response status code: 503"
+            wh.save()
+
+            with self.assertLogs('dojo.notifications.helper', level='DEBUG') as cm:
+                webhook_status_cleanup()
+
+            updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE)
+            self.assertIsNone(updated_wh.first_error)
+            self.assertIsNone(updated_wh.last_error)
+            self.assertEqual(updated_wh.note, 'Reactivation from active_tmp')
+            self.assertIn("Webhook endpoint 'My webhook endpoint' reactivated from 'active_tmp' to 'active'", cm.output[-1])
+
+        with self.subTest('inactive_tmp_new'):
+            minute_ago = get_current_datetime() - datetime.timedelta(minutes=1)
+            wh = Notification_Webhooks.objects.filter(owner=None).first()
+            wh.status = Notification_Webhooks.STATUS_INACTIVE_TMP
+            wh.first_error = minute_ago
+            wh.last_error = minute_ago
+            wh.note = "Response status code: 503"
+            wh.save()
+
+            webhook_status_cleanup()
+
+            updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_TMP)
+            self.assertEqual(updated_wh.first_error, minute_ago)
+            self.assertEqual(updated_wh.last_error, minute_ago)
+            self.assertEqual(updated_wh.note, "Response status code: 503")
+
+        with self.subTest('inactive_tmp_old'):
+            ten_minutes_ago = get_current_datetime() - datetime.timedelta(minutes=10)
+            wh = Notification_Webhooks.objects.filter(owner=None).first()
+            wh.status = Notification_Webhooks.STATUS_INACTIVE_TMP
+            wh.first_error = ten_minutes_ago
+            wh.last_error = ten_minutes_ago
+            wh.note = "Response status code: 503"
+            wh.save()
+
+            with self.assertLogs('dojo.notifications.helper', level='DEBUG') as cm:
+                webhook_status_cleanup()
+
+            updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
+            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_TMP)
+            self.assertEqual(updated_wh.first_error, ten_minutes_ago)
+            self.assertEqual(updated_wh.last_error, ten_minutes_ago)
+            self.assertEqual(updated_wh.note, "Response status code: 503")
+            self.assertIn("Webhook endpoint 'My webhook endpoint' reactivated to 'active_tmp'", cm.output[-1])
 
     def test_system_webhook_timeout(self):
-
-        self.sys_wh.url = f"{self.url_base}/delay/10"
+        self.sys_wh.url = f"{self.url_base}/delay/3"
         self.sys_wh.save()
 
         system_settings = System_Settings.objects.get()
-        system_settings.webhooks_notifications_timeout = 3
+        system_settings.webhooks_notifications_timeout = 1
         system_settings.save()
 
-        send_webhooks_notification(event='dummy', title='Dummy event')
+        with self.assertLogs('dojo.notifications.helper', level='ERROR') as cm:
+            send_webhooks_notification(event='dummy', title='Dummy event')
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_TMP)
         self.assertIsNotNone(updated_wh.first_error)
         self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+        self.assertIn("HTTPConnectionPool(host='webhook.endpoint', port=8080): Read timed out.", updated_wh.note)
+        self.assertIn("Timeout when sending message to Webhook 'My webhook endpoint'", cm.output[-1])
 
     def test_system_webhook_wrong_fqdn(self):
 
         self.sys_wh.url = "http://non.existing.place"
         self.sys_wh.save()
 
-        send_webhooks_notification(event='dummy', title='Dummy event')
+        with self.assertLogs('dojo.notifications.helper', level='ERROR') as cm:
+            send_webhooks_notification(event='dummy', title='Dummy event')
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_PERMANENT)
         self.assertIsNotNone(updated_wh.first_error)
         self.assertEqual(updated_wh.first_error, updated_wh.last_error)
+        self.assertIn("HTTPConnectionPool(host='non.existing.place', port=80): Max retries exceeded with url: /", updated_wh.note)
+        self.assertIn("HTTPConnectionPool(host='non.existing.place', port=80): Max retries exceeded with url: /", cm.output[-1])
 
     @patch('requests.request', **{'return_value.status_code': 200})
     def test_headers(self, mock):
@@ -563,9 +683,9 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs['json'], {
                 'description': None,
                 'user': None,
-                'url': 'http://localhost:8080/product/type/4',
+                'url': f'http://localhost:8080/product/type/{prod_type.pk}',
                 'product_type': {
-                    'id': 4,
+                    'id': prod_type.pk,
                     'name': 'notif prod type',
                 },
             })
@@ -576,13 +696,13 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs['json'], {
                 'description': None,
                 'user': None,
-                'url': 'http://localhost:8080/product/4',
+                'url': f'http://localhost:8080/product/{prod.pk}',
                 'product_type': {
-                    'id': 4,
+                    'id': prod_type.pk,
                     'name': 'notif prod type',
                 },
                 'product': {
-                    'id': 4,
+                    'id': prod.pk,
                     'name': 'notif prod',
                 },
             })
@@ -593,17 +713,17 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs['json'], {
                 'description': None,
                 'user': None,
-                'url': 'http://localhost:8080/engagement/7',
+                'url': f'http://localhost:8080/engagement/{eng.pk}',
                 'product_type': {
-                    'id': 4,
+                    'id': prod_type.pk,
                     'name': 'notif prod type',
                 },
                 'product': {
-                    'id': 4,
+                    'id': prod.pk,
                     'name': 'notif prod',
                 },
                 'engagement': {
-                    'id': 7,
+                    'id': eng.pk,
                     'name': 'notif eng',
                 },
             })
@@ -615,21 +735,21 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs['json'], {
                 'description': None,
                 'user': None,
-                'url': 'http://localhost:8080/test/90',
+                'url': f'http://localhost:8080/test/{test.pk}',
                 'product_type': {
-                    'id': 4,
+                    'id': prod_type.pk,
                     'name': 'notif prod type',
                 },
                 'product': {
-                    'id': 4,
+                    'id': prod.pk,
                     'name': 'notif prod',
                 },
                 'engagement': {
-                    'id': 7,
+                    'id': eng.pk,
                     'name': 'notif eng',
                 },
                 'test': {
-                    'id': 90,
+                    'id': test.pk,
                     'title': 'notif test',
                 },
             })
@@ -640,21 +760,21 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs['json'], {
                 'description': None,
                 'user': None,
-                'url': 'http://localhost:8080/test/90',
+                'url': f'http://localhost:8080/test/{test.pk}',
                 'product_type': {
-                    'id': 4,
+                    'id': prod_type.pk,
                     'name': 'notif prod type',
                 },
                 'product': {
-                    'id': 4,
+                    'id': prod.pk,
                     'name': 'notif prod',
                 },
                 'engagement': {
-                    'id': 7,
+                    'id': eng.pk,
                     'name': 'notif eng',
                 },
                 'test': {
-                    'id': 90,
+                    'id': test.pk,
                     'title': 'notif test',
                 },
                 'finding_count': 0,
