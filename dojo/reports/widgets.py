@@ -189,8 +189,8 @@ class CoverPage(Widget):
 
     def get_html(self):
         return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.heading,
-                                                                                "sub_heading": self.sub_heading,
-                                                                                "meta_info": self.meta_info})
+                                                                            "sub_heading": self.sub_heading,
+                                                                            "meta_info": self.meta_info})
 
     def get_asciidoc(self):
         return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.heading,
@@ -214,11 +214,11 @@ class TableOfContents(Widget):
         self.help_text = "The table of contents includes a page break after its content."
 
     def get_html(self):
-        return render_to_string("dojo/custom_html_toc.html", {"title": self.title,
-                                                                  "depth": self.depth})
+        return render_to_string("dojo/custom_html_toc.html", {"heading": self.heading,
+                                                              "depth": self.depth})
 
     def get_asciidoc(self):
-        return render_to_string("dojo/custom_asciidoc_toc.html", {"title": self.title,
+        return render_to_string("dojo/custom_asciidoc_toc.html", {"heading": self.heading,
                                                                   "depth": self.depth})
 
     def get_option_form(self):
@@ -238,12 +238,12 @@ class WYSIWYGContent(Widget):
         self.multiple = 'true'
 
     def get_html(self):
-        html = render_to_string("dojo/custom_html_report_wysiwyg_content.html", {"title": self.title,
-                                                                                "content": self.content})
+        html = render_to_string("dojo/custom_html_report_wysiwyg_content.html", {"heading": self.heading,
+                                                                                 "content": self.content})
         return mark_safe(html)
 
     def get_asciidoc(self):
-        asciidoc = render_to_string("dojo/custom_asciidoc_report_wysiwyg_content.html", {"title": self.title,
+        asciidoc = render_to_string("dojo/custom_asciidoc_report_wysiwyg_content.html", {"heading": self.heading,
                                                                                          "content": self.content})
         return mark_safe(asciidoc)
 
@@ -451,7 +451,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
 
         if list(widget.keys())[0] == 'wysiwyg-content':
             wysiwyg_content = WYSIWYGContent(request=request)
-            wysiwyg_content.title = \
+            wysiwyg_content.heading = \
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)['value']
             wysiwyg_content.content = \
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'hidden_content'), None)['value']
@@ -471,14 +471,14 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             selected_widgets[list(widget.keys())[0]] = options
         if list(widget.keys())[0] == 'table-of-contents':
             toc = TableOfContents(request=request)
-            toc.title = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)[
+            toc.heading = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)[
                 'value']
             toc.depth = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'depth'), None)['value']
             toc.depth = int(toc.depth) + 1
             selected_widgets[list(widget.keys())[0]] = toc
         if list(widget.keys())[0] == 'cover-page':
             cover_page = CoverPage(request=request)
-            cover_page.title = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)[
+            cover_page.heading = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)[
                 'value']
             cover_page.sub_heading = \
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'sub_heading'), None)['value']
