@@ -162,7 +162,7 @@ class ReportOptions(Widget):
         super().__init__(*args, **kwargs)
         self.title = 'Report Options'
         self.form = CustomReportOptionsForm()
-        self.extra_help = "Choose additional report options.  These will apply to the overall report."
+        self.extra_help = "Choose additional report options. These will apply to the overall report."
         self.widget_class = 'report-options'
 
     def get_asciidoc(self):
