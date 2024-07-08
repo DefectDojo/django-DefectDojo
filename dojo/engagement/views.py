@@ -92,6 +92,7 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.transfer_findings.notification import Notification as TransferFindingsNotification
 from dojo.product.queries import get_authorized_products
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
