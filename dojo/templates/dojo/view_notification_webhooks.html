@@ -46,8 +46,9 @@
                         <thead>
                         <tr>
                             <th>{% dojo_sort request 'Notification Webhook Name' 'name' 'asc' %}</th>
-                            <th>URL TODO trans</th>
+                            <th>URL</th>
                             <th>Status</th>
+                            <th>Note</th>
                             <th>Owner</th>
                         </tr>
                         </thead>
@@ -57,6 +58,7 @@
                               <td><a>{{ nwh.name }}</a></td>
                               <td><a>{{ nwh.url }}</a></td>
                               <td><a>{{ nwh.get_status_display }}</a></td>
+                              <td><a>{{ nwh.note }}</a></td>
                               <td><a>{% if nwh.owner %}<a class="" href="{% url 'view_user' nwh.owner.id %}">{{ nwh.owner }}</a>{% else %}System Webhook{% endif %}</a></td>
                               {% if "dojo.edit_notification_webhook"|has_configuration_permission:request %}
                                 <td>

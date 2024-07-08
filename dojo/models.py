@@ -4147,18 +4147,6 @@ class Notification_Webhooks(models.Model):
     owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
                               help_text=_('Owner/receiver of notification, if empty processed as system notification'))
 
-    def can_be_activated(self):
-        # Cleaning of state (from STATUS_ACTIVE_500 to STATUS_ACTIVE) is Activation in this context
-        # So all non-STATUS_ACTIVE statuses are activatable
-        return self.status != self.STATUS_ACTIVE
-
-    def can_be_deactivated(self):
-        # Even if status is any "_STATUS_INACTIVE", user might want to force status to STATUS_INACTIVE_MANUAL
-        # So all non-STATUS_INACTIVE_MANUAL statuses are deactivatable
-        return self.status != self.STATUS_INACTIVE_MANUAL
-
-    # Yes, webhook can be activatable and deactivable in the same time
-
 
 class Tool_Product_Settings(models.Model):
     name = models.CharField(max_length=200, null=False)

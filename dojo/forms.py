@@ -2791,6 +2791,7 @@ class NotificationsWebhookForm(forms.ModelForm):
         self.fields['status'].disabled = True  # TODO - same for API
         self.fields['first_error'].disabled = True
         self.fields['last_error'].disabled = True
+        self.fields['note'].disabled = True
         if not is_superuser:  # Only superadmins can edit owner
             self.fields['owner'].disabled = True  # TODO needs to be tested
 
