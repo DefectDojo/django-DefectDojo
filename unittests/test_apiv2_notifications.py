@@ -1,9 +1,11 @@
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APIClient
+
+from unittests.dojo_test_case import DojoAPITestCase
 
 
-class NotificationsTest(APITestCase):
+class NotificationsTest(DojoAPITestCase):
     """
     Test the metadata APIv2 endpoint.
     """
@@ -18,7 +20,11 @@ class NotificationsTest(APITestCase):
             template=True,
             scan_added=['alert', 'slack']
         )
+        self.creation_id = r.json()["id"]
         self.assertEqual(r.status_code, 201)
+
+    def tearDown(self):
+        self.client.delete(f"{reverse('notifications-list')}/{self.creation_id}")
 
     def create(self, **kwargs):
         return self.client.post(reverse('notifications-list'), kwargs, format='json')
@@ -34,13 +40,15 @@ class NotificationsTest(APITestCase):
     def test_notification_get(self):
         r = self.client.get(reverse('notifications-list'), format='json')
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.json()['results'][0]['template'], False)
+        item = self.get_results_by_id(r.json()['results'], 1)
+        self.assertEqual(item['template'], False)
 
     def test_notification_template(self):
         q = {'template': True}
         r = self.client.get(reverse('notifications-list'), q, format='json')
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.json()['results'][0]['template'], True)
+        item = self.get_results_by_id(r.json()['results'], self.creation_id)
+        self.assertEqual(item['template'], True)
 
     def test_notification_template_multiple(self):
         q = {'template': True, 'scan_added': ['alert', 'slack']}
@@ -54,6 +62,7 @@ class NotificationsTest(APITestCase):
         user = {"user": self.create_test_user()}
         r = self.client.get(reverse('notifications-list'), user, format='json')
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.json()['results'][0]['template'], False)
-        self.assertIn('alert', r.json()['results'][0]['scan_added'])
-        self.assertIn('slack', r.json()['results'][0]['scan_added'])
+        item = r.json()['results'][-1]
+        self.assertEqual(item['template'], False)
+        self.assertIn('alert', item['scan_added'])
+        self.assertIn('slack', item['scan_added'])

@@ -30,10 +30,10 @@ def get_authorized_group_members(permission):
         return Dojo_Group_Member.objects.none()
 
     if user.is_superuser:
-        return Dojo_Group_Member.objects.all().select_related('role')
+        return Dojo_Group_Member.objects.all().order_by("id").select_related('role')
 
     groups = get_authorized_groups(permission)
-    return Dojo_Group_Member.objects.filter(group__in=groups).select_related('role')
+    return Dojo_Group_Member.objects.filter(group__in=groups).order_by("id").select_related('role')
 
 
 def get_authorized_group_members_for_user(user):
