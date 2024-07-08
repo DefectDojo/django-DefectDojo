@@ -468,7 +468,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def endpoint_meta_import_scan(self, payload, expected_http_status_code):
         logger.debug('endpoint_meta_import_scan payload %s', payload)
         response = self.client.post(reverse('endpointmetaimport-list'), payload)
-        print(response.content)
+        # print(response.content)
         self.assertEqual(expected_http_status_code, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
@@ -477,6 +477,12 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code, response.content[:1000])
         # print('test.content: ', response.content)
         return json.loads(response.content)
+
+    def get_results_by_id(self, results: list, object_id: int) -> dict | None:
+        for item in results:
+            if item.get("id") == object_id:
+                return item
+        return None
 
     def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
@@ -740,18 +746,14 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return response.data
 
     def log_finding_summary_json_api(self, findings_content_json=None):
-        print('summary')
-        print(findings_content_json)
-        print(findings_content_json['count'])
+        logger.debug('summary')
+        logger.debug(findings_content_json)
+        logger.debug(findings_content_json['count'])
 
         if not findings_content_json or findings_content_json['count'] == 0:
             logger.debug('no findings')
         else:
             for finding in findings_content_json['results']:
-                print(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified'])
-                        + ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']])
-                        + ": endpoints: " + str(finding['endpoints']))
-
                 logger.debug(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified'])
                         + ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']])
                         + ": endpoints: " + str(finding['endpoints']))
