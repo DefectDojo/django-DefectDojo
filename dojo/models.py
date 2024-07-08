@@ -3469,6 +3469,12 @@ class TransferFinding(models.Model):
         null=True,
         on_delete=models.CASCADE,
         help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
+    
+    expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_('When the Transfer-Finding expires, the findings will be reactivated (unless disabled below).'))
+    expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) Date at which notice about the transfer-finding expiration was sent.'))
+    expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) When the transfer-finding expiration was handled (manually or by the daily job).'))
+    reactivate_expired = models.BooleanField(null=False, blank=False, default=True, verbose_name=_('Reactivate findings on expiration'), help_text=_('Reactivate findings when transfer-finding expires?'))
+    restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name=_('Restart SLA on expiration'), help_text=_("When enabled, the SLA for findings is restarted when the transfer-finding expires."))
 
     path = models.FileField(upload_to='transfer_finding/%Y/%m/%d',
                             editable=True, null=True,

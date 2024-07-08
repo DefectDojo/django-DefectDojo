@@ -1429,6 +1429,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
         "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
     },
+    "transfer_finding_expiration_handler": {
+        "task": "dojo.transfer_findings.helper.expiration_handler",
+        "schedule": crontab(minute=1),  # every 1 minute
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
