@@ -44,7 +44,7 @@ class HydraParser:
         return findings
 
     def __extract_findings(
-        self, raw_findings, metadata: HydraScanMetadata, test
+        self, raw_findings, metadata: HydraScanMetadata, test,
     ):
         findings = []
 
@@ -54,13 +54,13 @@ class HydraParser:
                 findings.append(finding)
             except ValueError:
                 logger.warning(
-                    "Error when digesting a finding from hydra! Please revise supplied report, vital information was missing (e.g. host)!"
+                    "Error when digesting a finding from hydra! Please revise supplied report, vital information was missing (e.g. host)!",
                 )
 
         return findings
 
     def __extract_finding(
-        self, raw_finding, metadata: HydraScanMetadata, test
+        self, raw_finding, metadata: HydraScanMetadata, test,
     ) -> Finding:
         host = raw_finding.get("host")
         port = raw_finding.get("port")
@@ -92,7 +92,7 @@ class HydraParser:
             + password,
             static_finding=False,
             dynamic_finding=True,
-            service=metadata.service_type
+            service=metadata.service_type,
         )
         finding.unsaved_endpoints = [Endpoint(host=host, port=port)]
 

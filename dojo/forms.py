@@ -169,8 +169,7 @@ class MonthYearWidget(Widget):
             if isinstance(value, str):
                 match = RE_DATE.match(value)
                 if match:
-                    year_val,
-                    month_val,
+                    year_val, month_val = match[1], match[2]
 
         output = []
 
@@ -540,13 +539,13 @@ class ImportScanForm(forms.Form):
         help_text="If set to True, the tags will be applied to the findings",
         label="Apply Tags to Findings",
         required=False,
-        initial=False
+        initial=False,
     )
     apply_tags_to_endpoints = forms.BooleanField(
         help_text="If set to True, the tags will be applied to the endpoints",
         label="Apply Tags to Endpoints",
         required=False,
-        initial=False
+        initial=False,
     )
 
     if is_finding_groups_enabled():
@@ -652,13 +651,13 @@ class ReImportScanForm(forms.Form):
         help_text="If set to True, the tags will be applied to the findings",
         label="Apply Tags to Findings",
         required=False,
-        initial=False
+        initial=False,
     )
     apply_tags_to_endpoints = forms.BooleanField(
         help_text="If set to True, the tags will be applied to the endpoints",
         label="Apply Tags to Endpoints",
         required=False,
-        initial=False
+        initial=False,
     )
 
     if is_finding_groups_enabled():
@@ -724,17 +723,17 @@ class ImportEndpointMetaForm(forms.Form):
         label="Create nonexisting Endpoint",
         initial=True,
         required=False,
-        help_text="Create endpoints that do not already exist",)
+        help_text="Create endpoints that do not already exist")
     create_tags = forms.BooleanField(
         label="Add Tags",
         initial=True,
         required=False,
-        help_text="Add meta from file as tags in the format key:value",)
+        help_text="Add meta from file as tags in the format key:value")
     create_dojo_meta = forms.BooleanField(
         label="Add Meta",
         initial=False,
         required=False,
-        help_text="Add data from file as Metadata. Metadata is used for displaying custom fields",)
+        help_text="Add data from file as Metadata. Metadata is used for displaying custom fields")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -885,7 +884,7 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
         queryset=Finding.objects.none(),
         required=True,
         label="",
-        widget=TableCheckboxWidget(attrs={'size': 25})
+        widget=TableCheckboxWidget(attrs={'size': 25}),
     )
 
     class Meta:
@@ -926,7 +925,7 @@ class CheckForm(forms.ModelForm):
                   'configuration_management', 'config_issues', 'authentication', 'auth_issues',
                   'authorization_and_access_control', 'author_issues',
                   'data_input_sanitization_validation', 'data_issues',
-                  'sensitive_data', 'sensitive_issues', 'other', 'other_issues', ]
+                  'sensitive_data', 'sensitive_issues', 'other', 'other_issues']
 
 
 class EngForm(forms.ModelForm):
@@ -1607,7 +1606,7 @@ class EditEndpointForm(forms.ModelForm):
             path=path,
             query=query,
             fragment=fragment,
-            product=self.product
+            product=self.product,
         )
         if endpoint.count() > 1 or (endpoint.count() == 1 and endpoint.first().pk != self.endpoint_instance.pk):
             msg = 'It appears as though an endpoint with this data already exists for this product.'
@@ -1651,7 +1650,7 @@ class AddEndpointForm(forms.Form):
                 path=e[4],
                 query=e[5],
                 fragment=e[6],
-                product=self.product
+                product=self.product,
             )
             processed_endpoints.append(endpoint)
         return processed_endpoints
@@ -3120,12 +3119,12 @@ class LoginBanner(forms.Form):
         label="Enable login banner",
         initial=False,
         required=False,
-        help_text='Tick this box to enable a text banner on the login page'
+        help_text='Tick this box to enable a text banner on the login page',
     )
 
     banner_message = forms.CharField(
         required=False,
-        label="Message to display on the login page"
+        label="Message to display on the login page",
     )
 
     def clean(self):
@@ -3155,8 +3154,8 @@ class AnnouncementRemoveForm(AnnouncementCreateForm):
 # Show in admin a multichoice list of validator names
 # pass this to form using field_name='validator_name' ?
 class QuestionForm(forms.Form):
-    ''' Base class for a Question
-    '''
+    """ Base class for a Question
+    """
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -3196,7 +3195,7 @@ class TextQuestionForm(QuestionForm):
 
         initial_answer = TextAnswer.objects.filter(
             answered_survey=self.answered_survey,
-            question=self.question
+            question=self.question,
         )
 
         if initial_answer.exists():
@@ -3271,14 +3270,14 @@ class ChoiceQuestionForm(QuestionForm):
             required=not self.question.optional,
             choices=choices,
             initial=initial_choices,
-            widget=widget
+            widget=widget,
         )
 
         self.fields['answer'] = field
 
         # Render choice buttons inline
         self.helper.layout = Layout(
-            inline_type('answer')
+            inline_type('answer'),
         )
 
     def clean_answer(self):
@@ -3318,7 +3317,7 @@ class ChoiceQuestionForm(QuestionForm):
             # create a ChoiceAnswer
             choice_answer = ChoiceAnswer.objects.create(
                 answered_survey=self.answered_survey,
-                question=self.question
+                question=self.question,
             )
 
         # re save out the choices

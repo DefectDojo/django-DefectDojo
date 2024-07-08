@@ -25,7 +25,7 @@ def new_tool_type(request):
                                  messages.SUCCESS,
                                  _('Tool Type Configuration Successfully Created.'),
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('tool_type', ))
+            return HttpResponseRedirect(reverse('tool_type'))
     else:
         tform = ToolTypeForm()
         if 'name' in request.GET:
@@ -46,7 +46,7 @@ def edit_tool_type(request, ttid):
                                  messages.SUCCESS,
                                  _('Tool Type successfully updated.'),
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('tool_type', ))
+            return HttpResponseRedirect(reverse('tool_type'))
     else:
         tform = ToolTypeForm(instance=tool_type)
 

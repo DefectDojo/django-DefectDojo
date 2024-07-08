@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.mend.parser import MendParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestMendParser(DojoTestCase):
@@ -31,7 +30,7 @@ class TestMendParser(DojoTestCase):
 
     def test_parse_file_with_multiple_vuln_cli_output(self):
         with open(
-            get_unit_tests_path() + "/scans/mend/cli_generated_many_vulns.json"
+            get_unit_tests_path() + "/scans/mend/cli_generated_many_vulns.json",
         ) as testfile:
             parser = MendParser()
             findings = parser.get_findings(testfile, Test())

@@ -4,8 +4,7 @@ from django.test import override_settings
 
 from dojo.models import Endpoint, Engagement, Product, Product_Type, Test
 from dojo.tools.veracode.parser import VeracodeParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestVeracodeScannerParser(DojoTestCase):
@@ -391,7 +390,7 @@ class TestVeracodeScannerParser(DojoTestCase):
                 host="application.insecure-company-alliance.com",
                 port=443,
                 path="api/*_*//new_user_sign_up",
-                query="param=wild-things"
+                query="param=wild-things",
             ))
 
     @override_settings(USE_FIRST_SEEN=True)

@@ -1,7 +1,6 @@
 from dojo.models import Finding, Test
 from dojo.tools.zap.parser import ZapParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestZapParser(DojoTestCase):

@@ -289,7 +289,7 @@ class OpenVASCSVParser:
             column_number = 0
             for column in row:
                 chain.process_column(
-                    column_names[column_number], column, finding
+                    column_names[column_number], column, finding,
                 )
                 column_number += 1
             if finding is not None and row_number > 0:
@@ -306,7 +306,7 @@ class OpenVASCSVParser:
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
                 if key not in dupes:
                     dupes[key] = finding

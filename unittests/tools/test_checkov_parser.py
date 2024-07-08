@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.checkov.parser import CheckovParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestCheckovParser(DojoTestCase):
@@ -54,7 +53,7 @@ class TestCheckovParser(DojoTestCase):
                 'Check Type: terraform\n'
                 'Check Id: CKV_AWS_161\n'
                 'Ensure RDS database has IAM authentication enabled\n',
-                first_terraform_finding.description
+                first_terraform_finding.description,
             )
             self.assertEqual('/aws/db-app.tf', first_terraform_finding.file_path)
             self.assertEqual(1, first_terraform_finding.line)
@@ -69,7 +68,7 @@ class TestCheckovParser(DojoTestCase):
                 'Check Type: dockerfile\n'
                 'Check Id: CKV_DOCKER_3\n'
                 'Ensure that a user for the container has been created\n',
-                first_dockerfile_finding.description
+                first_dockerfile_finding.description,
             )
             self.assertEqual('/aws/resources/Dockerfile', first_dockerfile_finding.file_path)
             self.assertEqual(0, first_dockerfile_finding.line)
@@ -77,7 +76,7 @@ class TestCheckovParser(DojoTestCase):
             self.assertEqual('', first_dockerfile_finding.mitigation)
             self.assertEqual(
                 'https://docs.bridgecrew.io/docs/ensure-that-a-user-for-the-container-has-been-created',
-                first_dockerfile_finding.references
+                first_dockerfile_finding.references,
             )
 
     def test_parse_file_with_specified_severity(self):

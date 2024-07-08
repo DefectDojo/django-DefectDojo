@@ -2,8 +2,7 @@ import datetime
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.contrast.parser import ContrastParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestContrastParser(DojoTestCase):

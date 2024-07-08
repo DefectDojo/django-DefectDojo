@@ -364,7 +364,7 @@ def simple_search(request):
         response.delete_cookie("highlight", path='/')
     return response
 
-    '''
+    """
     query:     some keywords
     operators: {}
     keywords:  ['some', 'keywords']
@@ -400,7 +400,7 @@ def simple_search(request):
     query:     tags:anchore vulnerability_id:CVE-2020-1234 jquery
     operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
     keywords:  ['jquery']
-    '''
+    """
 
 
 # it's not google grade parsing, but let's do some basic stuff right

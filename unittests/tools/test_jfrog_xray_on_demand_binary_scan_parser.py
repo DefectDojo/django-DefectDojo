@@ -4,8 +4,7 @@ from dojo.tools.jfrog_xray_on_demand_binary_scan.parser import (
     clean_title,
     get_component_name_version,
 )
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
