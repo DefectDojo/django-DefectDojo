@@ -17,7 +17,7 @@ class ScanImportOptionsTest(APITestCase):
 </OWASPZAPReport>
 """
 
-    def __del__(self):
+    def tearDown(self):
         self.payload['file'].close()
 
     def setUp(self):
