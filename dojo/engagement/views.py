@@ -93,6 +93,7 @@ from dojo.models import (
 )
 from dojo.notifications.helper import create_notification
 from dojo.transfer_findings.notification import Notification as TransferFindingsNotification
+from dojo.transfer_findings.helper import get_sla_expiration_transfer_finding
 from dojo.product.queries import get_authorized_products
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
@@ -1522,6 +1523,8 @@ def add_transfer_finding(request, eid, fid=None):
                 destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
                 transfer_findings.destination_product_type = destination_product_obj.prod_type
                 transfer_findings.destination_product = destination_product_obj
+                __, expiration_date, __ = get_sla_expiration_transfer_finding()
+                transfer_findings.expiration_date = expiration_date
                 transfer_findings.save()
                 findings = request.POST.getlist('findings')
                 for finding in findings:

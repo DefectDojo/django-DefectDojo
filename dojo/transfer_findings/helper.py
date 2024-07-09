@@ -1,6 +1,7 @@
 import logging
 from dojo.api_v2.api_error import ApiError
 from django.conf import settings
+from dateutil.relativedelta import relativedelta
 from dojo.models import (
     Test,
     Finding,
@@ -14,7 +15,11 @@ from dojo.models import (
 from dojo.authorization.authorization import user_has_global_permission
 from dojo.notifications.helper import create_notification
 from dojo.transfer_findings.notification import Notification as TransferFindingNotification
-from dojo.transfer_findings.queries import get_expired_transfer_finding_to_handle, get_almost_expired_transfer_finding_to_handle
+from dojo.transfer_findings.queries import (
+    get_expired_transfer_finding_to_handle,
+    get_almost_expired_transfer_finding_to_handle,
+    sla_expiration_transfer_finding
+)
 from dojo.transfer_findings.notification import Notification as NotificationTransferFinding
 from dojo.user.queries import get_user
 from django.urls import reverse
@@ -281,3 +286,11 @@ def enable_flow_transfer_finding(finding_status):
     if finding_status in ["Risk Active", "Risk Expired"]:
         return True
     return False
+
+
+def get_sla_expiration_transfer_finding():
+    expiration_delta_days = sla_expiration_transfer_finding('TransferFindingExpiration')
+    logger.debug(f"Update RiskAcceptanceExpiration: {expiration_delta_days}")
+    expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days.get("critical"))
+    created_date = timezone.now().date()
+    return expiration_delta_days.get('critical'), expiration_date, created_date
