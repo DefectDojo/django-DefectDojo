@@ -205,7 +205,7 @@ class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ["id", "name"]
     permission_classes = (IsAuthenticated,)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Role.objects.all().order_by('id')
 
 
@@ -309,7 +309,7 @@ class GlobalRoleViewSet(
     filterset_fields = ["id", "user", "group", "role"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Global_Role.objects.all().order_by("id")
 
 
@@ -1506,7 +1506,7 @@ class JiraInstanceViewSet(
     filterset_fields = ["id", "url"]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return JIRA_Instance.objects.all().order_by("id")
 
 
@@ -1573,7 +1573,7 @@ class SonarqubeIssueViewSet(
     filterset_fields = ["id", "key", "status", "type"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Sonarqube_Issue.objects.all().order_by("id")
 
 
@@ -1593,7 +1593,7 @@ class SonarqubeIssueTransitionViewSet(
     ]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Sonarqube_Issue_Transition.objects.all().order_by("id")
 
 
@@ -2130,7 +2130,7 @@ class DevelopmentEnvironmentViewSet(
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Development_Environment.objects.all().order_by("id")
 
 
@@ -2351,7 +2351,7 @@ class TestTypesViewSet(
     ]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Test_Type.objects.all().order_by("id")
 
 
@@ -2452,7 +2452,7 @@ class ToolConfigurationsViewSet(
     ]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Tool_Configuration.objects.all().order_by("id")
 
 
@@ -2490,7 +2490,7 @@ class ToolTypesViewSet(
     filterset_fields = ["id", "name", "description"]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Tool_Type.objects.all().order_by("id")
 
 
@@ -2504,7 +2504,7 @@ class RegulationsViewSet(
     filterset_fields = ["id", "name", "description"]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Regulation.objects.all().order_by("id")
 
 
@@ -2526,7 +2526,7 @@ class UsersViewSet(
     ]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return User.objects.all().order_by("id")
 
     def destroy(self, request, *args, **kwargs):
@@ -2574,7 +2574,7 @@ class UserContactInfoViewSet(
     filterset_fields = "__all__"
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return UserContactInfo.objects.all().order_by("id")
 
 
@@ -2714,7 +2714,7 @@ class LanguageTypeViewSet(
     filterset_fields = ["id", "language", "color"]
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Language_Type.objects.all().order_by("id")
 
 
@@ -2858,7 +2858,7 @@ class NoteTypeViewSet(
     ]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Note_Type.objects.all().order_by("id")
 
 
@@ -2882,7 +2882,7 @@ class NotesViewSet(
     ]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Notes.objects.all().order_by("id")
 
 
@@ -3183,7 +3183,7 @@ class SystemSettingsViewSet(
     serializer_class = serializers.SystemSettingsSerializer
     queryset = System_Settings.objects.none()
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return System_Settings.objects.all().order_by("id")
 
 
@@ -3221,7 +3221,7 @@ class NotificationsViewSet(
     filterset_fields = ["id", "user", "product", "template"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Notifications.objects.all().order_by("id")
 
 
@@ -3250,7 +3250,7 @@ class NetworkLocationsViewset(
     filterset_fields = ["id", "location"]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Network_Locations.objects.all().order_by("id")
 
 
@@ -3264,7 +3264,7 @@ class ConfigurationPermissionViewSet(
     filterset_fields = ["id", "name", "codename"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Permission.objects.filter(
             codename__in=get_configuration_permissions_codenames()
         ).order_by("id")
@@ -3278,7 +3278,7 @@ class SLAConfigurationViewset(
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return SLA_Configuration.objects.all().order_by("id")
 
 
@@ -3294,7 +3294,7 @@ class QuestionnaireQuestionViewSet(
         DjangoModelPermissions,
     )
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Question.objects.all().order_by("id")
 
 
@@ -3310,7 +3310,7 @@ class QuestionnaireAnswerViewSet(
         DjangoModelPermissions,
     )
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Answer.objects.all().order_by("id")
 
 
@@ -3325,7 +3325,7 @@ class QuestionnaireGeneralSurveyViewSet(
         DjangoModelPermissions,
     )
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return General_Survey.objects.all().order_by("id")
 
 
@@ -3340,7 +3340,7 @@ class QuestionnaireEngagementSurveyViewSet(
         DjangoModelPermissions,
     )
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Engagement_Survey.objects.all().order_by("id")
 
 
@@ -3357,7 +3357,7 @@ class QuestionnaireAnsweredSurveyViewSet(
         DjangoModelPermissions,
     )
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Answered_Survey.objects.all().order_by("id")
 
 
@@ -3371,5 +3371,5 @@ class AnnouncementViewSet(
     filterset_fields = "__all__"
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         return Announcement.objects.all().order_by("id")
