@@ -727,24 +727,26 @@ class RiskAcceptanceViewSet(
 
         return response
     
-    @action(detail=True, methods=["get"])
+    @extend_schema(
+        methods=["POST"],
+        responses=None,
+        request=None
+    )
+    @action(detail=True, methods=["post"])
     def accept_bullk(self, request, pk=None):
-        user = get_current_user()
-        risk_acceptance = get_object_or_404(Risk_Acceptance.objects, id=request.data["note_id"])
-        if user.global_role:
-            if user.global_role.role:
-                if role_has_global_permission(user.global_role.role.id, Permissions.Risk_Acceptance):
-                    pass
-                    # accept_risk_pending_bullk(eng, risk_acceptance, product, product_type)
-                    # proces de aceptacion bullk 
+        risk_acceptance = get_object_or_404(Risk_Acceptance.objects, id=pk)
+        try:
+            eng = Risk_Acceptance.objects.filter(id=pk).first().accepted_findings.all().first().test.engagement
+            product = eng.product
+            product_type = product.prod_type
+        except Exception as e:
+            logger.error("Failed accept bullk {e}")
+            ApiError.internal_server_error(detail=str(e))
 
-            # proceso de aceptacion total
-        # metod de return aceptacion ok o no
+        accept_risk_pending_bullk(eng, risk_acceptance, product, product_type)
+        return http_response.ok(message="Acceptance process completed")
 
 
-
-# These are technologies in the UI and the API!
-# Authorization: object-based
 class AppAnalysisViewSet(
     PrefetchDojoModelViewSet,
 ):
