@@ -13,6 +13,6 @@ def check_configuration_deduplication(app_configs, **kwargs):
                         hint=f'Check configuration ["HASHCODE_FIELDS_PER_SCANNER"]["{scanner}"] value',
                         obj=settings.HASHCODE_FIELDS_PER_SCANNER[scanner],
                         id="dojo.E001",
-                    )
+                    ),
                 )
     return errors

@@ -16,7 +16,7 @@ class GenericCSVParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
 
         dupes = {}
@@ -27,7 +27,7 @@ class GenericCSVParser:
                 date=parse(row["Date"]).date(),
                 severity=self.get_severity(row["Severity"]),
                 duplicate=self._convert_bool(
-                    row.get("Duplicate", "FALSE")
+                    row.get("Duplicate", "FALSE"),
                 ),  # bool False by default
                 nb_occurences=1,
             )
@@ -56,11 +56,11 @@ class GenericCSVParser:
             if "Vulnerability Id" in row and row["Vulnerability Id"]:
                 if finding.unsaved_vulnerability_ids:
                     finding.unsaved_vulnerability_ids.append(
-                        row["Vulnerability Id"]
+                        row["Vulnerability Id"],
                     )
                 else:
                     finding.unsaved_vulnerability_ids = [
-                        row["Vulnerability Id"]
+                        row["Vulnerability Id"],
                     ]
             # manage CWE
             if "CweId" in row:
@@ -76,19 +76,19 @@ class GenericCSVParser:
                 finding.unsaved_endpoints = [
                     Endpoint.from_uri(row["Url"])
                     if "://" in row["Url"]
-                    else Endpoint.from_uri("//" + row["Url"])
+                    else Endpoint.from_uri("//" + row["Url"]),
                 ]
 
             # manage internal de-duplication
             key = hashlib.sha256(
-                f"{finding.severity}|{finding.title}|{finding.description}".encode()
+                f"{finding.severity}|{finding.title}|{finding.description}".encode(),
             ).hexdigest()
             if key in dupes:
                 find = dupes[key]
                 find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                 if find.unsaved_vulnerability_ids:
                     find.unsaved_vulnerability_ids.extend(
-                        finding.unsaved_vulnerability_ids
+                        finding.unsaved_vulnerability_ids,
                     )
                 else:
                     find.unsaved_vulnerability_ids = (

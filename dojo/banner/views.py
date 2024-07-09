@@ -37,11 +37,11 @@ def configure_banner(request):
             initial={
                 "banner_enable": banner_config.banner_enable,
                 "banner_message": banner_config.banner_message,
-            }
+            },
         )
 
     add_breadcrumb(
-        title="Banner Configuration", top_level=True, request=request
+        title="Banner Configuration", top_level=True, request=request,
     )
     return render(
         request,

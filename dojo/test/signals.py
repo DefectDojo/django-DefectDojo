@@ -19,7 +19,7 @@ def test_post_delete(sender, instance, using, origin, **kwargs):
             le = LogEntry.objects.get(
                 action=LogEntry.Action.DELETE,
                 content_type=ContentType.objects.get(app_label='dojo', model='test'),
-                object_id=instance.id
+                object_id=instance.id,
             )
             description = _('The test "%(name)s" was deleted by %(user)s') % {
                                 'name': str(instance), 'user': le.actor}

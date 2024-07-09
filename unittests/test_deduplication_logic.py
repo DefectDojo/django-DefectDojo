@@ -1166,7 +1166,7 @@ class TestDuplicationLogic(DojoTestCase):
                         + ': dup: ' + f'{str(finding.duplicate):5.5}' + ': dup_id: '
                         + (f'{str(finding.duplicate_finding.id):4.4}' if finding.duplicate_finding else 'None') + ': hash_code: ' + str(finding.hash_code)
                         + ': eps: ' + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()])
-                        + ': uid: ' + f'{str(finding.unique_id_from_tool):5.5}' + (' fp' if finding.false_p else '')
+                        + ': uid: ' + f'{str(finding.unique_id_from_tool):5.5}' + (' fp' if finding.false_p else ''),
                         )
 
         logger.debug('\t\tendpoints')

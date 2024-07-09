@@ -15,5 +15,5 @@ MAP = {
         'last_name': X500ATTR_OID + '4',
         'email': PKCS_9 + '1',
         'uid': UCL_DIR_PILOT + '1',
-    }
+    },
 }

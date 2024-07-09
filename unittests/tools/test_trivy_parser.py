@@ -3,8 +3,7 @@ import re
 
 from dojo.models import Test
 from dojo.tools.trivy.parser import TrivyParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def sample_path(file_name):
@@ -82,25 +81,25 @@ class TestTrivyParser(DojoTestCase):
             finding = findings[2]
             self.assertEqual('DS002 - Image user should not be \'root\'', finding.title)
             self.assertEqual('High', finding.severity)
-            description = '''**Target:** Dockerfile
+            description = """**Target:** Dockerfile
 **Type:** Dockerfile Security Check
 
 Running containers with 'root' user can lead to a container escape situation. It is a best practice to run containers as non-root users, which can be done by adding a 'USER' statement to the Dockerfile.
 Specify at least 1 USER command in Dockerfile with non-root user as argument
-'''
+"""
             self.assertEqual(description, finding.description)
             self.assertEqual('Add \'USER <non root user name>\' line to the Dockerfile', finding.mitigation)
-            references = '''https://avd.aquasec.com/misconfig/ds002
-https://docs.docker.com/develop/develop-images/dockerfile_best-practices/'''
+            references = """https://avd.aquasec.com/misconfig/ds002
+https://docs.docker.com/develop/develop-images/dockerfile_best-practices/"""
             self.assertEqual(references, finding.references)
             self.assertEqual(['config', 'dockerfile'], finding.tags)
             finding = findings[3]
             self.assertEqual('Secret detected in Dockerfile - GitHub Personal Access Token', finding.title)
             self.assertEqual('Critical', finding.severity)
-            description = '''GitHub Personal Access Token
+            description = """GitHub Personal Access Token
 **Category:** GitHub
 **Match:** ENV GITHUB_PAT=*****
-'''
+"""
             self.assertEqual(description, finding.description)
             self.assertEqual('Dockerfile', finding.file_path)
             self.assertEqual(24, finding.line)
@@ -114,13 +113,13 @@ https://docs.docker.com/develop/develop-images/dockerfile_best-practices/'''
             finding = findings[0]
             self.assertEqual('CVE-2020-27350 apt 1.8.2.1', finding.title)
             self.assertEqual('Medium', finding.severity)
-            description = '''apt: integer overflows and underflows while parsing .deb packages
+            description = """apt: integer overflows and underflows while parsing .deb packages
 **Target:** gcr.io/google_samples/gb-redis-follower:v2 (debian 10.4)
 **Type:** debian
 **Fixed version:** 1.8.2.2
 
 APT had several integer overflows and underflows while parsing .deb packages, aka GHSL-2020-168 GHSL-2020-169, in files apt-pkg/contrib/extracttar.cc, apt-pkg/deb/debfile.cc, and apt-pkg/contrib/arfile.cc. This issue affects: apt 1.2.32ubuntu0 versions prior to 1.2.32ubuntu0.2; 1.6.12ubuntu0 versions prior to 1.6.12ubuntu0.2; 2.0.2ubuntu0 versions prior to 2.0.2ubuntu0.2; 2.1.10ubuntu0 versions prior to 2.1.10ubuntu0.1;
-'''
+"""
             self.assertEqual(description, finding.description)
             self.assertEqual('1.8.2.2', finding.mitigation)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
@@ -133,13 +132,13 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
             finding = findings[5]
             self.assertEqual('CVE-2020-27350 apt 1.8.2.1', finding.title)
             self.assertEqual('Medium', finding.severity)
-            description = '''apt: integer overflows and underflows while parsing .deb packages
+            description = """apt: integer overflows and underflows while parsing .deb packages
 **Target:** docker.io/redis:6.0.5 (debian 10.4)
 **Type:** debian
 **Fixed version:** 1.8.2.2
 
 APT had several integer overflows and underflows while parsing .deb packages, aka GHSL-2020-168 GHSL-2020-169, in files apt-pkg/contrib/extracttar.cc, apt-pkg/deb/debfile.cc, and apt-pkg/contrib/arfile.cc. This issue affects: apt 1.2.32ubuntu0 versions prior to 1.2.32ubuntu0.2; 1.6.12ubuntu0 versions prior to 1.6.12ubuntu0.2; 2.0.2ubuntu0 versions prior to 2.0.2ubuntu0.2; 2.1.10ubuntu0 versions prior to 2.1.10ubuntu0.1;
-'''
+"""
             self.assertEqual(description, finding.description)
             self.assertEqual('1.8.2.2', finding.mitigation)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
@@ -151,7 +150,7 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
             finding = findings[10]
             self.assertEqual('KSV001 - Process can elevate its own privileges', finding.title)
             self.assertEqual('Medium', finding.severity)
-            description = '''**Target:** Deployment/redis-follower
+            description = """**Target:** Deployment/redis-follower
 **Type:** Kubernetes Security Check
 
 A program inside the container can elevate its own privileges and run as root, which might give the program control over the container and node.
@@ -166,7 +165,7 @@ Number  Content
 138                       resources:
 139                         requests:
 140                             cpu: 100m
-141'''
+141"""
             re_description = re.sub(r"\s+", " ", description)
             re_finding_description = re.sub(r"\s+", " ", finding.description)
             self.assertEqual(re_description.strip(), re_finding_description.strip())
@@ -187,10 +186,10 @@ Number  Content
             self.assertEqual("", finding.file_path)
             self.assertEqual(1, finding.scanner_confidence)
             self.assertEqual("", finding.url)
-            description = '''GPL-2.0
+            description = """GPL-2.0
 **Category:** restricted
 **Package:** alpine-baselayout
-'''
+"""
             self.assertEqual(description, finding.description)
 
     def test_issue_9092(self):

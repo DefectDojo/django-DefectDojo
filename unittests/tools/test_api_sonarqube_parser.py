@@ -11,8 +11,7 @@ from dojo.models import (
     Tool_Type,
 )
 from dojo.tools.api_sonarqube.parser import ApiSonarQubeParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 def dummy_product(self, *args, **kwargs):
@@ -51,10 +50,10 @@ class TestApiSonarQubeParser(DojoTestCase):
         # build Sonarqube conf (the parser need it)
         tool_type, _ = Tool_Type.objects.get_or_create(name="SonarQube")
         tool_conf, _ = Tool_Configuration.objects.get_or_create(
-            name="SQ1_unittests", authentication_type="API", tool_type=tool_type, url='http://dummy.url.foo.bar/api'
+            name="SQ1_unittests", authentication_type="API", tool_type=tool_type, url='http://dummy.url.foo.bar/api',
         )
         pasc, _ = Product_API_Scan_Configuration.objects.get_or_create(
-            product=product, tool_configuration=tool_conf, service_key_1='ABCD'
+            product=product, tool_configuration=tool_conf, service_key_1='ABCD',
         )
         self.test = Test(engagement=engagement, api_scan_configuration=pasc)
 

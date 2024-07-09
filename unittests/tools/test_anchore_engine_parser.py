@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.anchore_engine.parser import AnchoreEngineParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAnchoreEngineParser(DojoTestCase):

@@ -8,8 +8,7 @@ from django.test import RequestFactory
 from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Product_Type
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAuthorizationDecorators(DojoTestCase):

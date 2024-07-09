@@ -116,7 +116,7 @@ class KubescapeParser:
                         severity=severity,
                         component_name=resourceid,
                         static_finding=True,
-                        dynamic_finding=False
+                        dynamic_finding=False,
                     )
                     findings.append(find)
         return findings

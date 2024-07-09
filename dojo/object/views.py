@@ -51,7 +51,7 @@ def view_objects(request, pid):
                   {
                       'object_queryset': object_queryset,
                       'product_tab': product_tab,
-                      'product': product
+                      'product': product,
                   })
 
 
@@ -81,7 +81,7 @@ def edit_object(request, pid, ttid):
                   'dojo/edit_object.html',
                   {
                       'tform': tform,
-                      'product_tab': product_tab
+                      'product_tab': product_tab,
                   })
 
 
@@ -109,5 +109,5 @@ def delete_object(request, pid, ttid):
                   'dojo/delete_object.html',
                   {
                       'tform': tform,
-                      'product_tab': product_tab
+                      'product_tab': product_tab,
                   })
