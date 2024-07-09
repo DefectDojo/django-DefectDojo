@@ -157,6 +157,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
         notification_message = render_to_string(template, kwargs)
         logger.debug("Rendering from the template %s", template)
     except TemplateDoesNotExist as e:
+        # In some cases, template includes another templates, if the interior one is missing, we will see it in "specifically" section
         logger.debug(f'template not found or not implemented yet: {template} (specifically: {e.args})')
     except Exception as e:
         logger.error("error during rendering of template %s exception is %s", template, e)

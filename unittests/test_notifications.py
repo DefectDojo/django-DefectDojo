@@ -779,10 +779,10 @@ class TestNotificationWebhooks(DojoTestCase):
                 },
                 'finding_count': 0,
                 'findings': {
-                    'mitigated': None,
-                    'new': None,
-                    'reactivated': None,
-                    'untouched': None,
+                    'mitigated': [],
+                    'new': [],
+                    'reactivated': [],
+                    'untouched': [],
                 },
             })
 

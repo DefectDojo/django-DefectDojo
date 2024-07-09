@@ -5,4 +5,6 @@
       title: {{ finding.title }}
       severity: {{ finding.severity }}
       url: {{ finding_url|full_url }}
+{% else %}
+    []
 {% endfor %}

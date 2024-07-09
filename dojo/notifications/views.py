@@ -179,16 +179,12 @@ class ListNotificationWebhooksView(NotificationWebhooksView):
             'metric': False,
             'user': request.user,
             'nwhs': nwhs,
-            # 'ntl': ntl,
         }
 
     def get_notification_webhooks(self, request: HttpRequest):
         nwhs = Notification_Webhooks.objects.all().order_by('name')
-        # name_words = initial_queryset.values_list('name', flat=True)
-        # ntl = NoteTypesFilter(request.GET, queryset=initial_queryset)
-        # nwhs = get_page_items(request, initial_queryset.qs, 25)
         # TODO finished pagination
-        # TODO restrict based on user
+        # TODO restrict based on user - not only superadmins have access and they see everything
         return nwhs
 
     def get(self, request: HttpRequest):
@@ -232,7 +228,8 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
                 )
                 return request, False
             else:
-                # User can put here what ever he want, these are only valid defaults
+                # User can put here what ever he want
+                # we override it with our only valid defaults
                 nwh = form.save(commit=False)
                 nwh.status = Notification_Webhooks.STATUS_ACTIVE
                 nwh.first_error = None
