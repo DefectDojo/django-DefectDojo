@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0218_alter_finding_cve_alter_finding_template_cve_and_more"),
+        ("dojo", "0219_sla_configuration_enforce_critical_and_more"),
     ]
 
     operations = [
