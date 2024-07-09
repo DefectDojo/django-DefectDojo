@@ -42,7 +42,7 @@ from dojo.api_v2 import (
     serializers,
 )
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import role_has_global_permission
+from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
 from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
@@ -165,6 +165,7 @@ from dojo.reports.views import (
 )
 from dojo.risk_acceptance import api as ra_api
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
+from dojo.risk_acceptance.risk_pending import accept_risk_pending_bullk 
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
@@ -725,6 +726,21 @@ class RiskAcceptanceViewSet(
         ] = f'attachment; filename="{risk_acceptance.filename()}"'
 
         return response
+    
+    @action(detail=True, methods=["get"])
+    def accept_bullk(self, request, pk=None):
+        user = get_current_user()
+        risk_acceptance = get_object_or_404(Risk_Acceptance.objects, id=request.data["note_id"])
+        if user.global_role:
+            if user.global_role.role:
+                if role_has_global_permission(user.global_role.role.id, Permissions.Risk_Acceptance):
+                    pass
+                    # accept_risk_pending_bullk(eng, risk_acceptance, product, product_type)
+                    # proces de aceptacion bullk 
+
+            # proceso de aceptacion total
+        # metod de return aceptacion ok o no
+
 
 
 # These are technologies in the UI and the API!
