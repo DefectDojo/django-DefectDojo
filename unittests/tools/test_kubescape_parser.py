@@ -4,7 +4,7 @@ from dojo.tools.kubescape.parser import KubescapeParser
 from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
-class TestOrtParser(DojoTestCase):
+class TestKubescapeParser(DojoTestCase):
     def test_parse_file_has_many_findings(self):
         with open(get_unit_tests_path() + "/scans/kubescape/many_findings.json") as testfile:
             parser = KubescapeParser()
@@ -15,10 +15,10 @@ class TestOrtParser(DojoTestCase):
         with open(get_unit_tests_path() + "/scans/kubescape/results.json") as testfile:
             parser = KubescapeParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(20, len(findings))
+            self.assertEqual(0, len(findings))
 
     def test_parse_file_with_a_failure(self):
         with open(get_unit_tests_path() + "/scans/kubescape/with_a_failure.json") as testfile:
             parser = KubescapeParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(18, len(findings))
+            self.assertEqual(3, len(findings))

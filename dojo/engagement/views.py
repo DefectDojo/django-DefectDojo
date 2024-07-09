@@ -114,7 +114,7 @@ logger = logging.getLogger(__name__)
 def engagement_calendar(request):
 
     if not get_system_setting('enable_calendar'):
-        raise Resolver404()
+        raise Resolver404
 
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         engagements = get_authorized_engagements(Permissions.Engagement_View)
@@ -1205,7 +1205,7 @@ def add_risk_acceptance(request, eid, fid=None):
         finding = get_object_or_404(Finding, id=fid)
 
     if not eng.product.enable_full_risk_acceptance:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = RiskAcceptanceForm(request.POST, request.FILES)
@@ -1283,7 +1283,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     eng = get_object_or_404(Engagement, pk=eid)
 
     if edit_mode and not eng.product.enable_full_risk_acceptance:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     risk_acceptance_form = None
     errors = False
@@ -1455,7 +1455,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     eng = get_object_or_404(Engagement, pk=eid)
 
     if not eng.product.enable_full_risk_acceptance:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     ra_helper.reinstate(risk_acceptance, risk_acceptance.expiration_date)
 

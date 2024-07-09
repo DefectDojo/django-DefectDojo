@@ -402,7 +402,7 @@ def copy_test(request, tid):
 def test_calendar(request):
 
     if not get_system_setting('enable_calendar'):
-        raise Resolver404()
+        raise Resolver404
 
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         tests = get_authorized_tests(Permissions.Test_View)

@@ -9,6 +9,7 @@ from json import dumps
 from unittest.mock import ANY, MagicMock, call, patch
 
 from django.contrib.auth.models import Permission
+from django.test import tag as test_tag
 from django.urls import reverse
 from drf_spectacular.drainage import GENERATOR_STATS
 from drf_spectacular.settings import spectacular_settings
@@ -173,20 +174,6 @@ def skipIfNotSubclass(baseclass):
                 f(self, *args, **kwargs)
         return wrapper
     return decorate
-
-
-# def testIsBroken(method):
-#     return tag("broken")(method)
-
-
-def check_response_valid(expected_code, response):
-    def _data_to_str(response):
-        if hasattr(response, "data"):
-            return response.data
-        return None
-
-    assert response.status_code == expected_code, \
-        f"Response invalid, returned with code {response.status_code}\nResponse Data:\n{_data_to_str(response)}"
 
 
 def format_url(path):
@@ -367,28 +354,28 @@ class BaseClass:
             self.url = reverse(self.viewname + '-list')
             self.schema = open_api3_json_schema
 
+        def setUp_not_authorized(self):
+            testuser = User.objects.get(id=3)
+            token = Token.objects.get(user=testuser)
+            self.client = APIClient()
+            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        def setUp_global_reader(self):
+            testuser = User.objects.get(id=5)
+            token = Token.objects.get(user=testuser)
+            self.client = APIClient()
+            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+        def setUp_global_owner(self):
+            testuser = User.objects.get(id=6)
+            token = Token.objects.get(user=testuser)
+            self.client = APIClient()
+            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
         def check_schema(self, schema, obj):
             schema_checker = SchemaChecker(self.schema["components"])
             # print(vars(schema_checker))
             schema_checker.check(self.schema, obj)
-
-        # def get_valid_object_id(self):
-        #     response = self.client.get(format_url(f"/{self.viewname}/"))
-        #     check_response_valid(status.HTTP_200_OK, response)
-        #     if len(response.data["results"]) == 0:
-        #         return None
-
-        #     return response.data["results"][0].get('id', None)
-
-        def get_endpoint_schema(self, path, method):
-            paths = self.schema["paths"]
-            methods = paths.get(path, None)
-            assert methods is not None, f"{path} not found in {list(paths.keys())}"
-
-            endpoint = methods.get(method, None)
-            assert endpoint is not None, f"Method {method} not found in {list(methods.keys())}"
-
-            return endpoint
 
         def check_schema_response(self, method, status_code, response, detail=False):
             detail_path = '{id}/' if detail else ''
@@ -397,6 +384,74 @@ class BaseClass:
             obj = response.data
             self.check_schema(schema, obj)
 
+    class RetrieveRequestTest(RESTEndpointTest):
+        @skipIfNotSubclass(RetrieveModelMixin)
+        def test_detail(self):
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            response = self.client.get(relative_url)
+            self.assertEqual(200, response.status_code, response.content[:1000])
+            # sensitive data must be set to write_only so those are not returned in the response
+            # https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-8q8j-7wc4-vjg5
+            self.assertNotIn('password', response.data)
+            self.assertNotIn('ssh', response.data)
+            self.assertNotIn('api_key', response.data)
+
+            self.check_schema_response('get', '200', response, detail=True)
+
+        @skipIfNotSubclass(PrefetchRetrieveMixin)
+        def test_detail_prefetch(self):
+            # print("=======================================================")
+            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
+
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            response = self.client.get(relative_url, data={
+                "prefetch": ','.join(prefetchable_fields)
+            })
+
+            self.assertEqual(200, response.status_code)
+            obj = response.data
+            self.assertIn("prefetch", obj)
+
+            for field in prefetchable_fields:
+                field_value = obj.get(field, None)
+                if field_value is None:
+                    continue
+
+                self.assertIn(field, obj["prefetch"])
+                values = field_value if isinstance(field_value, list) else [field_value]
+
+                for value in values:
+                    self.assertIn(value, obj["prefetch"][field])
+
+            # TODO add schema check
+
+        @skipIfNotSubclass(RetrieveModelMixin)
+        def test_detail_object_not_authorized(self):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+                self.skipTest('Authorization is not object based')
+
+            self.setUp_not_authorized()
+
+            current_objects = self.endpoint_model.objects.all()
+            relative_url = self.url + f'{current_objects[0].id}/'
+            response = self.client.get(relative_url)
+            self.assertEqual(404, response.status_code, response.content[:1000])
+
+        @skipIfNotSubclass(RetrieveModelMixin)
+        def test_detail_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            current_objects = self.endpoint_model.objects.all()
+            relative_url = self.url + f'{current_objects[0].id}/'
+            response = self.client.get(relative_url)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+
+    class ListRequestTest(RESTEndpointTest):
         @skipIfNotSubclass(ListModelMixin)
         def test_list(self):
             # print(open_api3_json_schema)
@@ -437,6 +492,57 @@ class BaseClass:
 
             self.check_schema_response('get', '200', response)
 
+        @skipIfNotSubclass(PrefetchListMixin)
+        def test_list_prefetch(self):
+            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
+
+            response = self.client.get(self.url, data={
+                "prefetch": ','.join(prefetchable_fields)
+            })
+
+            self.assertEqual(200, response.status_code)
+            objs = response.data
+            self.assertIn("results", objs)
+            self.assertIn("prefetch", objs)
+
+            for obj in objs["results"]:
+                for field in prefetchable_fields:
+                    field_value = obj.get(field, None)
+                    if field_value is None:
+                        continue
+
+                    self.assertIn(field, objs["prefetch"])
+                    values = field_value if isinstance(field_value, list) else [field_value]
+
+                    for value in values:
+                        if not isinstance(value, int):
+                            value = value['id']
+                        self.assertIn(value, objs["prefetch"][field])
+
+            # TODO add schema check
+
+        @skipIfNotSubclass(ListModelMixin)
+        def test_list_object_not_authorized(self):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+                self.skipTest('Authorization is not object based')
+
+            self.setUp_not_authorized()
+
+            response = self.client.get(self.url, format='json')
+            self.assertFalse(response.data['results'])
+            self.assertEqual(200, response.status_code, response.content[:1000])
+
+        @skipIfNotSubclass(ListModelMixin)
+        def test_list_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            response = self.client.get(self.url, format='json')
+            self.assertEqual(403, response.status_code, response.content[:1000])
+
+    class CreateRequestTest(RESTEndpointTest):
         @skipIfNotSubclass(CreateModelMixin)
         def test_create(self):
             length = self.endpoint_model.objects.count()
@@ -455,27 +561,31 @@ class BaseClass:
 
             self.check_schema_response('post', '201', response)
 
-        @skipIfNotSubclass(RetrieveModelMixin)
-        def test_detail(self):
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
-            response = self.client.get(relative_url)
-            self.assertEqual(200, response.status_code, response.content[:1000])
-            # sensitive data must be set to write_only so those are not returned in the response
-            # https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-8q8j-7wc4-vjg5
-            self.assertNotIn('password', response.data)
-            self.assertNotIn('ssh', response.data)
-            self.assertNotIn('api_key', response.data)
+        @skipIfNotSubclass(CreateModelMixin)
+        @patch('dojo.api_v2.permissions.user_has_permission')
+        def test_create_object_not_authorized(self, mock):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+                self.skipTest('Authorization is not object based')
 
-            self.check_schema_response('get', '200', response, detail=True)
+            mock.return_value = False
 
-        @skipIfNotSubclass(DestroyModelMixin)
-        def test_delete(self):
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][-1]['id'])
-            response = self.client.delete(relative_url)
-            self.assertEqual(204, response.status_code, response.content[:1000])
+            response = self.client.post(self.url, self.payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock.assert_called_with(User.objects.get(username='admin'),
+                ANY,
+                self.permission_create)
 
+        @skipIfNotSubclass(CreateModelMixin)
+        def test_create_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            response = self.client.post(self.url, self.payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+
+    class UpdateRequestTest(RESTEndpointTest):
         @skipIfNotSubclass(UpdateModelMixin)
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
@@ -514,170 +624,6 @@ class BaseClass:
 
             self.check_schema_response('put', '200', response, detail=True)
 
-        @skipIfNotSubclass(DeletePreviewModelMixin)
-        def test_delete_preview(self):
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/delete_preview/'.format(current_objects['results'][0]['id'])
-            response = self.client.get(relative_url)
-            # print('delete_preview response.data')
-
-            self.assertEqual(200, response.status_code, response.content[:1000])
-
-            self.check_schema_response('get', '200', response, detail=True)
-
-            self.assertNotIn('push_to_jira', response.data)
-            self.assertNotIn('password', response.data)
-            self.assertNotIn('ssh', response.data)
-            self.assertNotIn('api_key', response.data)
-
-            self.assertIsInstance(response.data['results'], list)
-            self.assertGreater(len(response.data['results']), 0, "Length: {}".format(len(response.data['results'])))
-
-            for obj in response.data['results']:
-                self.assertIsInstance(obj, dict)
-                self.assertEqual(len(obj), 3)
-                self.assertIsInstance(obj['model'], str)
-                if obj['id']:  # It needs to be None or int
-                    self.assertIsInstance(obj['id'], int)
-                self.assertIsInstance(obj['name'], str)
-
-            self.assertEqual(self.deleted_objects, len(response.data['results']), response.content[:1000])
-
-        @skipIfNotSubclass(PrefetchRetrieveMixin)
-        def test_detail_prefetch(self):
-            # print("=======================================================")
-            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
-
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
-            response = self.client.get(relative_url, data={
-                "prefetch": ','.join(prefetchable_fields)
-            })
-
-            self.assertEqual(200, response.status_code)
-            obj = response.data
-            self.assertIn("prefetch", obj)
-
-            for field in prefetchable_fields:
-                field_value = obj.get(field, None)
-                if field_value is None:
-                    continue
-
-                self.assertIn(field, obj["prefetch"])
-                values = field_value if isinstance(field_value, list) else [field_value]
-
-                for value in values:
-                    self.assertIn(value, obj["prefetch"][field])
-
-            # TODO add schema check
-
-        @skipIfNotSubclass(PrefetchListMixin)
-        def test_list_prefetch(self):
-            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
-
-            response = self.client.get(self.url, data={
-                "prefetch": ','.join(prefetchable_fields)
-            })
-
-            self.assertEqual(200, response.status_code)
-            objs = response.data
-            self.assertIn("results", objs)
-            self.assertIn("prefetch", objs)
-
-            for obj in objs["results"]:
-                for field in prefetchable_fields:
-                    field_value = obj.get(field, None)
-                    if field_value is None:
-                        continue
-
-                    self.assertIn(field, objs["prefetch"])
-                    values = field_value if isinstance(field_value, list) else [field_value]
-
-                    for value in values:
-                        if not isinstance(value, int):
-                            value = value['id']
-                        self.assertIn(value, objs["prefetch"][field])
-
-            # TODO add schema check
-
-        def setUp_not_authorized(self):
-            testuser = User.objects.get(id=3)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-
-        def setUp_global_reader(self):
-            testuser = User.objects.get(id=5)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-
-        def setUp_global_owner(self):
-            testuser = User.objects.get(id=6)
-            token = Token.objects.get(user=testuser)
-            self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-
-        @skipIfNotSubclass(ListModelMixin)
-        def test_list_object_not_authorized(self):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
-
-            self.setUp_not_authorized()
-
-            response = self.client.get(self.url, format='json')
-            self.assertFalse(response.data['results'])
-            self.assertEqual(200, response.status_code, response.content[:1000])
-
-        @skipIfNotSubclass(RetrieveModelMixin)
-        def test_detail_object_not_authorized(self):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
-
-            self.setUp_not_authorized()
-
-            current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + f'{current_objects[0].id}/'
-            response = self.client.get(relative_url)
-            self.assertEqual(404, response.status_code, response.content[:1000])
-
-        @skipIfNotSubclass(CreateModelMixin)
-        @patch('dojo.api_v2.permissions.user_has_permission')
-        def test_create_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
-
-            mock.return_value = False
-
-            response = self.client.post(self.url, self.payload)
-            self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
-                ANY,
-                self.permission_create)
-
-        @skipIfNotSubclass(DestroyModelMixin)
-        @patch('dojo.api_v2.permissions.user_has_permission')
-        def test_delete_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
-
-            mock.return_value = False
-
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
-            self.client.delete(relative_url)
-
-            if self.endpoint_model == Endpoint_Status:
-                permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
-            elif self.endpoint_model == JIRA_Issue:
-                permission_object = Finding.objects.get(id=current_objects['results'][0]['finding'])
-            else:
-                permission_object = self.permission_check_class.objects.get(id=current_objects['results'][0]['id'])
-
-            mock.assert_called_with(User.objects.get(username='admin'),
-                permission_object,
-                self.permission_delete)
-
         @skipIfNotSubclass(UpdateModelMixin)
         @patch('dojo.api_v2.permissions.user_has_permission')
         def test_update_object_not_authorized(self, mock):
@@ -708,50 +654,6 @@ class BaseClass:
                 permission_object,
                 self.permission_update)
 
-        @skipIfNotSubclass(ListModelMixin)
-        def test_list_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
-
-            self.setUp_not_authorized()
-
-            response = self.client.get(self.url, format='json')
-            self.assertEqual(403, response.status_code, response.content[:1000])
-
-        @skipIfNotSubclass(RetrieveModelMixin)
-        def test_detail_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
-
-            self.setUp_not_authorized()
-
-            current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + f'{current_objects[0].id}/'
-            response = self.client.get(relative_url)
-            self.assertEqual(403, response.status_code, response.content[:1000])
-
-        @skipIfNotSubclass(CreateModelMixin)
-        def test_create_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
-
-            self.setUp_not_authorized()
-
-            response = self.client.post(self.url, self.payload)
-            self.assertEqual(403, response.status_code, response.content[:1000])
-
-        @skipIfNotSubclass(DestroyModelMixin)
-        def test_delete_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
-
-            self.setUp_not_authorized()
-
-            current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + f'{current_objects[0].id}/'
-            response = self.client.delete(relative_url)
-            self.assertEqual(403, response.status_code, response.content[:1000])
-
         @skipIfNotSubclass(UpdateModelMixin)
         def test_update_configuration_not_authorized(self):
             if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
@@ -768,10 +670,97 @@ class BaseClass:
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
 
-    class MemberEndpointTest(RESTEndpointTest):
-        def __init__(self, *args, **kwargs):
-            BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+    class DeleteRequestTest(RESTEndpointTest):
+        @skipIfNotSubclass(DestroyModelMixin)
+        def test_delete(self):
+            if delete_id := getattr(self, "delete_id", None):
+                relative_url = f"{self.url}{delete_id}/"
+            else:
+                current_objects = self.client.get(self.url, format='json').data
+                relative_url = f"{self.url}{current_objects['results'][-1]['id']}/"
+            response = self.client.delete(relative_url)
+            self.assertEqual(204, response.status_code, response.content[:1000])
 
+        @skipIfNotSubclass(DeletePreviewModelMixin)
+        def test_delete_preview(self):
+            if delete_id := getattr(self, "delete_id", None):
+                relative_url = f"{self.url}{delete_id}/delete_preview/"
+            else:
+                current_objects = self.client.get(self.url, format='json').data
+                relative_url = f"{self.url}{current_objects['results'][0]['id']}/delete_preview/"
+
+            response = self.client.get(relative_url)
+            # print('delete_preview response.data')
+            self.assertEqual(200, response.status_code, response.content[:1000])
+
+            self.check_schema_response('get', '200', response, detail=True)
+
+            self.assertNotIn('push_to_jira', response.data)
+            self.assertNotIn('password', response.data)
+            self.assertNotIn('ssh', response.data)
+            self.assertNotIn('api_key', response.data)
+
+            self.assertIsInstance(response.data['results'], list)
+            self.assertGreater(len(response.data['results']), 0, "Length: {}".format(len(response.data['results'])))
+
+            for obj in response.data['results']:
+                self.assertIsInstance(obj, dict)
+                self.assertEqual(len(obj), 3)
+                self.assertIsInstance(obj['model'], str)
+                if obj['id']:  # It needs to be None or int
+                    self.assertIsInstance(obj['id'], int)
+                self.assertIsInstance(obj['name'], str)
+
+            self.assertEqual(self.deleted_objects, len(response.data['results']), response.content)
+
+        @skipIfNotSubclass(DestroyModelMixin)
+        @patch('dojo.api_v2.permissions.user_has_permission')
+        def test_delete_object_not_authorized(self, mock):
+            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+                self.skipTest('Authorization is not object based')
+
+            mock.return_value = False
+
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            self.client.delete(relative_url)
+
+            if self.endpoint_model == Endpoint_Status:
+                permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
+            elif self.endpoint_model == JIRA_Issue:
+                permission_object = Finding.objects.get(id=current_objects['results'][0]['finding'])
+            else:
+                permission_object = self.permission_check_class.objects.get(id=current_objects['results'][0]['id'])
+
+            mock.assert_called_with(User.objects.get(username='admin'),
+                permission_object,
+                self.permission_delete)
+
+        @skipIfNotSubclass(DestroyModelMixin)
+        def test_delete_configuration_not_authorized(self):
+            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+                self.skipTest('Authorization is not configuration based')
+
+            self.setUp_not_authorized()
+
+            if delete_id := getattr(self, "delete_id", None):
+                relative_url = self.url + f'{delete_id}/'
+            else:
+                current_objects = self.endpoint_model.objects.all()
+                relative_url = self.url + f'{current_objects[0].id}/'
+            response = self.client.delete(relative_url)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+
+    class BaseClassTest(
+        RetrieveRequestTest,
+        ListRequestTest,
+        CreateRequestTest,
+        UpdateRequestTest,
+        DeleteRequestTest,
+    ):
+        pass
+
+    class MemberEndpointTest(BaseClassTest):
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
@@ -800,10 +789,7 @@ class BaseClass:
                 self.permission_check_class.objects.get(id=current_objects['results'][0]['id']),
                 self.permission_update)
 
-    class AuthenticatedViewTest(RESTEndpointTest):
-        def __init__(self, *args, **kwargs):
-            BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
+    class AuthenticatedViewTest(BaseClassTest):
         @skipIfNotSubclass(ListModelMixin)
         def test_list_configuration_not_authorized(self):
             if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
@@ -827,7 +813,7 @@ class BaseClass:
             self.assertEqual(200, response.status_code, response.content[:1000])
 
 
-class AppAnalysisTest(BaseClass.RESTEndpointTest):
+class AppAnalysisTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -856,7 +842,7 @@ class AppAnalysisTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class EndpointStatusTest(BaseClass.RESTEndpointTest):
+class EndpointStatusTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -947,7 +933,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
         self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
 
 
-class EndpointTest(BaseClass.RESTEndpointTest):
+class EndpointTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -971,10 +957,11 @@ class EndpointTest(BaseClass.RESTEndpointTest):
         self.permission_update = Permissions.Endpoint_Edit
         self.permission_delete = Permissions.Endpoint_Delete
         self.deleted_objects = 2
+        self.delete_id = 6
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class EngagementTest(BaseClass.RESTEndpointTest):
+class EngagementTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1005,7 +992,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class RiskAcceptanceTest(BaseClass.RESTEndpointTest):
+class RiskAcceptanceTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1149,7 +1136,7 @@ class FilesTest(DojoAPITestCase):
             self.assertEqual(200, response.status_code)
 
 
-class FindingsTest(BaseClass.RESTEndpointTest):
+class FindingsTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1197,6 +1184,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         self.permission_update = Permissions.Finding_Edit
         self.permission_delete = Permissions.Finding_Delete
         self.deleted_objects = 2
+        self.delete_id = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_duplicate(self):
@@ -1262,7 +1250,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
         assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
 
 
-class FindingMetadataTest(BaseClass.RESTEndpointTest):
+class FindingMetadataTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1282,11 +1270,10 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.url = reverse(self.viewname + '-list')
-
-        self.current_findings = self.client.get(self.url, format='json').data["results"]
-        finding = Finding.objects.get(id=self.current_findings[0]['id'])
-
-        self.base_url = f"{self.url}{self.current_findings[0]['id']}/metadata/"
+        self.finding_id = 3
+        self.delete_id = self.finding_id
+        finding = Finding.objects.get(id=self.finding_id)
+        self.base_url = f"{self.url}{self.finding_id}/metadata/"
         metadata = DojoMeta(finding=finding, name="test_meta", value="20")
         metadata.save()
 
@@ -1324,7 +1311,7 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
         assert len(result) == 0, "Metadata not deleted correctly"
 
 
-class FindingTemplatesTest(BaseClass.RESTEndpointTest):
+class FindingTemplatesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1347,7 +1334,7 @@ class FindingTemplatesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class JiraInstancesTest(BaseClass.RESTEndpointTest):
+class JiraInstancesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1377,7 +1364,7 @@ class JiraInstancesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class JiraIssuesTest(BaseClass.RESTEndpointTest):
+class JiraIssuesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1400,7 +1387,7 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class JiraProjectTest(BaseClass.RESTEndpointTest):
+class JiraProjectTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1427,7 +1414,7 @@ class JiraProjectTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class SonarqubeIssueTest(BaseClass.RESTEndpointTest):
+class SonarqubeIssueTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1446,7 +1433,7 @@ class SonarqubeIssueTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class SonarqubeIssuesTransitionTest(BaseClass.RESTEndpointTest):
+class SonarqubeIssuesTransitionTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1465,7 +1452,7 @@ class SonarqubeIssuesTransitionTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class Product_API_Scan_ConfigurationTest(BaseClass.RESTEndpointTest):
+class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1488,7 +1475,7 @@ class Product_API_Scan_ConfigurationTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ProductTest(BaseClass.RESTEndpointTest):
+class ProductTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1515,7 +1502,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class StubFindingsTest(BaseClass.RESTEndpointTest):
+class StubFindingsTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1546,7 +1533,7 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
         assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
 
 
-class TestsTest(BaseClass.RESTEndpointTest):
+class TestsTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1576,11 +1563,12 @@ class TestsTest(BaseClass.RESTEndpointTest):
         self.permission_create = Permissions.Test_Add
         self.permission_update = Permissions.Test_Edit
         self.permission_delete = Permissions.Test_Delete
-        self.deleted_objects = 18
+        self.deleted_objects = 5
+        self.delete_id = 55
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ToolConfigurationsTest(BaseClass.RESTEndpointTest):
+class ToolConfigurationsTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1606,7 +1594,7 @@ class ToolConfigurationsTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ToolProductSettingsTest(BaseClass.RESTEndpointTest):
+class ToolProductSettingsTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1632,7 +1620,7 @@ class ToolProductSettingsTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ToolTypesTest(BaseClass.RESTEndpointTest):
+class ToolTypesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1650,7 +1638,7 @@ class ToolTypesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class NoteTypesTest(BaseClass.RESTEndpointTest):
+class NoteTypesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1671,7 +1659,7 @@ class NoteTypesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class NotesTest(BaseClass.RESTEndpointTest):
+class NotesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1690,7 +1678,7 @@ class NotesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class UsersTest(BaseClass.RESTEndpointTest):
+class UsersTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1735,7 +1723,7 @@ class UsersTest(BaseClass.RESTEndpointTest):
         self.assertEqual(set(user_permissions), set(payload['configuration_permissions'] + [26, 28]))
 
 
-class UserContactInfoTest(BaseClass.RESTEndpointTest):
+class UserContactInfoTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -1776,7 +1764,8 @@ class ProductPermissionTest(DojoAPITestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class ImportScanTest(BaseClass.RESTEndpointTest):
+@test_tag("non-parallel")
+class ImportScanTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2408,7 +2397,7 @@ class ReimportScanTest(DojoAPITestCase):
             reimporter_mock.assert_not_called()
 
 
-class ProductTypeTest(BaseClass.RESTEndpointTest):
+class ProductTypeTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2449,7 +2438,7 @@ class ProductTypeTest(BaseClass.RESTEndpointTest):
         self.assertEqual(201, response.status_code, response.content[:1000])
 
 
-class DojoGroupsTest(BaseClass.RESTEndpointTest):
+class DojoGroupsTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2539,7 +2528,7 @@ class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class RolesTest(BaseClass.RESTEndpointTest):
+class RolesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2551,7 +2540,7 @@ class RolesTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class GlobalRolesTest(BaseClass.RESTEndpointTest):
+class GlobalRolesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2589,7 +2578,7 @@ class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
         self.permission_update = Permissions.Product_Type_Manage_Members
         self.permission_delete = Permissions.Product_Type_Member_Delete
         self.deleted_objects = 1
-        BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class ProductMemberTest(BaseClass.MemberEndpointTest):
@@ -2612,7 +2601,7 @@ class ProductMemberTest(BaseClass.MemberEndpointTest):
         self.permission_update = Permissions.Product_Manage_Members
         self.permission_delete = Permissions.Product_Member_Delete
         self.deleted_objects = 1
-        BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
@@ -2635,7 +2624,7 @@ class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
         self.permission_update = Permissions.Product_Type_Group_Edit
         self.permission_delete = Permissions.Product_Type_Group_Delete
         self.deleted_objects = 1
-        BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class ProductGroupTest(BaseClass.MemberEndpointTest):
@@ -2658,10 +2647,10 @@ class ProductGroupTest(BaseClass.MemberEndpointTest):
         self.permission_update = Permissions.Product_Group_Edit
         self.permission_delete = Permissions.Product_Group_Delete
         self.deleted_objects = 1
-        BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class LanguageTypeTest(BaseClass.RESTEndpointTest):
+class LanguageTypeTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2676,11 +2665,12 @@ class LanguageTypeTest(BaseClass.RESTEndpointTest):
         }
         self.update_fields = {'color': 'blue'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 2
+        self.deleted_objects = 1
+        self.delete_id = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class LanguageTest(BaseClass.RESTEndpointTest):
+class LanguageTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2708,7 +2698,8 @@ class LanguageTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ImportLanguagesTest(BaseClass.RESTEndpointTest):
+@test_tag("non-parallel")
+class ImportLanguagesTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2729,7 +2720,7 @@ class ImportLanguagesTest(BaseClass.RESTEndpointTest):
         self.payload['file'].close()
 
     def test_create(self):
-        BaseClass.RESTEndpointTest.test_create(self)
+        BaseClass.CreateRequestTest.test_create(self)
 
         languages = Languages.objects.filter(product=1).order_by('language')
 
@@ -2750,7 +2741,7 @@ class ImportLanguagesTest(BaseClass.RESTEndpointTest):
         self.assertEqual(languages[1].code, 51056)
 
 
-class NotificationsTest(BaseClass.RESTEndpointTest):
+class NotificationsTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2838,7 +2829,7 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ConfigurationPermissionTest(BaseClass.RESTEndpointTest):
+class ConfigurationPermissionTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2850,7 +2841,7 @@ class ConfigurationPermissionTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class CredentialMappingTest(BaseClass.RESTEndpointTest):
+class CredentialMappingTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2873,7 +2864,7 @@ class CredentialMappingTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class CredentialTest(BaseClass.RESTEndpointTest):
+class CredentialTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2895,7 +2886,7 @@ class CredentialTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class TextQuestionTest(BaseClass.RESTEndpointTest):
+class TextQuestionTest(BaseClass.BaseClassTest):
     fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2908,7 +2899,7 @@ class TextQuestionTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ChoiceQuestionTest(BaseClass.RESTEndpointTest):
+class ChoiceQuestionTest(BaseClass.BaseClassTest):
     fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2921,7 +2912,7 @@ class ChoiceQuestionTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class TextAnswerTest(BaseClass.RESTEndpointTest):
+class TextAnswerTest(BaseClass.BaseClassTest):
     fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2934,7 +2925,7 @@ class TextAnswerTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ChoiceAnswerTest(BaseClass.RESTEndpointTest):
+class ChoiceAnswerTest(BaseClass.BaseClassTest):
     fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2947,7 +2938,7 @@ class ChoiceAnswerTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class GeneralSurveyTest(BaseClass.RESTEndpointTest):
+class GeneralSurveyTest(BaseClass.BaseClassTest):
     fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2960,7 +2951,7 @@ class GeneralSurveyTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class EngagementSurveyTest(BaseClass.RESTEndpointTest):
+class EngagementSurveyTest(BaseClass.BaseClassTest):
     fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2973,7 +2964,7 @@ class EngagementSurveyTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class AnsweredSurveyTest(BaseClass.RESTEndpointTest):
+class AnsweredSurveyTest(BaseClass.BaseClassTest):
     fixtures = ['questionnaire_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -2986,7 +2977,7 @@ class AnsweredSurveyTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class AnnouncementTest(BaseClass.RESTEndpointTest):
+class AnnouncementTest(BaseClass.BaseClassTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):

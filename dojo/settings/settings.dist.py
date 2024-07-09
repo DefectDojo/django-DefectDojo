@@ -1222,7 +1222,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'DSOP Scan': ['vulnerability_ids'],
     'Acunetix Scan': ['title', 'description'],
     'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
-    'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids'],
+    'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids', 'description'],
     'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
     'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
@@ -1265,9 +1265,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'MobSF Scan': ['title', 'description', 'severity'],
     'OSV Scan': ['title', 'description', 'severity'],
     'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
+    'Deepfence Threatmapper Report': ['title', 'description', 'severity'],
     'Bearer CLI': ['title', 'severity'],
     'Nancy Scan': ['title', 'vuln_id_from_tool'],
-    'Wiz Scan': ['title', 'description', 'severity']
+    'Wiz Scan': ['title', 'description', 'severity'],
+    'Kubescape JSON Importer': ['title', 'component_name']
 }
 
 # Override the hardcoded settings here via the env var
@@ -1485,6 +1487,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Bearer CLI': DEDUPE_ALGO_HASH_CODE,
     'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
+    'Deepfence Threatmapper Report': DEDUPE_ALGO_HASH_CODE,
+    'Kubescape JSON Importer': DEDUPE_ALGO_HASH_CODE
 }
 
 # Override the hardcoded settings here via the env var
