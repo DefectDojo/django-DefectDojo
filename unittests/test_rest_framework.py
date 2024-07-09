@@ -407,7 +407,7 @@ class BaseClass:
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
             response = self.client.get(relative_url, data={
-                "prefetch": ','.join(prefetchable_fields)
+                "prefetch": ','.join(prefetchable_fields),
             })
 
             self.assertEqual(200, response.status_code)
@@ -497,7 +497,7 @@ class BaseClass:
             prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
 
             response = self.client.get(self.url, data={
-                "prefetch": ','.join(prefetchable_fields)
+                "prefetch": ','.join(prefetchable_fields),
             })
 
             self.assertEqual(200, response.status_code)
@@ -830,7 +830,7 @@ class AppAnalysisTest(BaseClass.BaseClassTest):
             'icon': '',
             'website': '',
             'website_found': '',
-            'created': '2018-08-16T16:58:23.908Z'
+            'created': '2018-08-16T16:58:23.908Z',
         }
         self.update_fields = {'version': '9.0'}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -902,7 +902,7 @@ class EndpointStatusTest(BaseClass.BaseClassTest):
 
         unsucessful_payload = {
             'endpoint': object2['endpoint'],
-            'finding': object2['finding']
+            'finding': object2['finding'],
         }
 
         relative_url = self.url + '{}/'.format(object1['id'])
@@ -923,7 +923,7 @@ class EndpointStatusTest(BaseClass.BaseClassTest):
 
         unsucessful_payload = {
             'endpoint': object2['endpoint'],
-            'finding': object2['finding']
+            'finding': object2['finding'],
         }
 
         relative_url = self.url + '{}/'.format(object1['id'])
@@ -948,7 +948,7 @@ class EndpointTest(BaseClass.BaseClassTest):
             'query': 'test=true',
             'fragment': 'test-1',
             'product': 1,
-            "tags": ["mytag", "yourtag"]
+            "tags": ["mytag", "yourtag"],
         }
         self.update_fields = {'protocol': 'ftp', 'tags': ['one_new_tag']}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -980,7 +980,7 @@ class EngagementTest(BaseClass.BaseClassTest):
             "reason": "",
             "test_strategy": "",
             "product": "1",
-            "tags": ["mytag"]
+            "tags": ["mytag"],
         }
         self.update_fields = {'version': 'latest'}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -1018,9 +1018,9 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
             "updated": "2023-09-15T17:17:39.462854Z",
             "owner": 1,
             "accepted_findings": [
-                226
+                226,
             ],
-            "notes": []
+            "notes": [],
         }
         self.update_fields = {'name': 'newName'}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -1055,9 +1055,9 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
             "updated": "2023-09-15T17:17:39.462854Z",
             "owner": 1,
             "accepted_findings": [
-                4
+                4,
             ],
-            "notes": []
+            "notes": [],
         }
         current_objects = self.client.get(self.url, format='json').data
         relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
@@ -1077,7 +1077,7 @@ class FindingRequestResponseTest(DojoAPITestCase):
     def test_request_response_post(self):
         length = BurpRawRequestResponse.objects.count()
         payload = {
-            "req_resp": [{"request": "POST", "response": "200"}]
+            "req_resp": [{"request": "POST", "response": "200"}],
         }
         response = self.client.post('/api/v2/findings/7/request_response/', dumps(payload), content_type='application/json')
         self.assertEqual(200, response.status_code, response.content[:1000])
@@ -1103,7 +1103,7 @@ class FilesTest(DojoAPITestCase):
         self.url_levels = {
             'findings/7': 0,
             'tests/3': 0,
-            'engagements/1': 0
+            'engagements/1': 0,
         }
 
     def test_request_response_post_and_download(self):
@@ -1113,7 +1113,7 @@ class FilesTest(DojoAPITestCase):
             with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as testfile:
                 payload = {
                     "title": level,
-                    "file": testfile
+                    "file": testfile,
                 }
                 response = self.client.post(f'/api/v2/{level}/files/', payload)
                 self.assertEqual(201, response.status_code, response.data)
@@ -1356,7 +1356,7 @@ class JiraInstancesTest(BaseClass.BaseClassTest):
             "high_mapping_severity": "LOW",
             "critical_mapping_severity": "LOW",
             "finding_text": "",
-            "global_jira_sla_notification": False
+            "global_jira_sla_notification": False,
         }
         self.update_fields = {'epic_name_id': 1}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
@@ -1425,7 +1425,7 @@ class SonarqubeIssueTest(BaseClass.BaseClassTest):
         self.payload = {
             "key": "AREwS5n5TxsFUNm31CxP",
             "status": "OPEN",
-            "type": "VULNERABILITY"
+            "type": "VULNERABILITY",
         }
         self.update_fields = {'key': 'AREwS5n5TxsFUNm31CxP'}
         self.test_type = TestType.STANDARD
@@ -1445,7 +1445,7 @@ class SonarqubeIssuesTransitionTest(BaseClass.BaseClassTest):
             "sonarqube_issue": 1,
             "finding_status": "Active, Verified",
             "sonarqube_status": "OPEN",
-            "transitions": "confirm"
+            "transitions": "confirm",
         }
         self.update_fields = {'sonarqube_status': 'CLOSED'}
         self.test_type = TestType.STANDARD
@@ -1463,7 +1463,7 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.payload = {
             "product": 2,
             "service_key_1": "dojo_sonar_key",
-            "tool_configuration": 3
+            "tool_configuration": 3,
         }
         self.update_fields = {'tool_configuration': 2}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -1490,7 +1490,7 @@ class ProductTest(BaseClass.BaseClassTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag", "yourtag"]
+            "tags": ["mytag", "yourtag"],
         }
         self.update_fields = {'prod_type': 2}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -1630,7 +1630,7 @@ class ToolTypesTest(BaseClass.BaseClassTest):
         self.viewset = ToolTypesViewSet
         self.payload = {
             "name": "Tool Type",
-            "description": "test tool type"
+            "description": "test tool type",
         }
         self.update_fields = {'description': 'changed description'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
@@ -1651,7 +1651,7 @@ class NoteTypesTest(BaseClass.BaseClassTest):
             "description": "not that much",
             "is_single": False,
             "is_active": True,
-            "is_mandatory": False
+            "is_mandatory": False,
         }
         self.update_fields = {'description': 'changed description'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
@@ -1671,7 +1671,7 @@ class NotesTest(BaseClass.BaseClassTest):
             "id": 1,
             "entry": "updated_entry",
             "author": '{"username": "admin"}',
-            "editor": '{"username": "user1"}'
+            "editor": '{"username": "user1"}',
         }
         self.update_fields = {'entry': 'changed entry'}
         self.test_type = TestType.STANDARD
@@ -1692,7 +1692,7 @@ class UsersTest(BaseClass.BaseClassTest):
             "last_name": "user",
             "email": "example@email.com",
             "is_active": True,
-            "configuration_permissions": [217, 218]
+            "configuration_permissions": [217, 218],
         }
         self.update_fields = {"first_name": "test changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
@@ -1843,7 +1843,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -1875,7 +1875,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -1907,7 +1907,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -1940,7 +1940,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -1951,7 +1951,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
                     Permissions.Engagement_Add),
                 call(User.objects.get(username='admin'),
                     Product.objects.get(id=1),
-                    Permissions.Import_Scan_Result)
+                    Permissions.Import_Scan_Result),
             ])
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
@@ -1976,7 +1976,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -2008,7 +2008,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -2138,7 +2138,7 @@ class ReimportScanTest(DojoAPITestCase):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -2149,7 +2149,7 @@ class ReimportScanTest(DojoAPITestCase):
                     Permissions.Engagement_Add),
                 call(User.objects.get(username='admin'),
                     Product.objects.get(id=1),
-                    Permissions.Import_Scan_Result)
+                    Permissions.Import_Scan_Result),
             ])
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
@@ -2175,7 +2175,7 @@ class ReimportScanTest(DojoAPITestCase):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -2207,7 +2207,7 @@ class ReimportScanTest(DojoAPITestCase):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -2233,7 +2233,7 @@ class ReimportScanTest(DojoAPITestCase):
                     "scan_type": 'ZAP Scan',
                     "file": testfile,
                     "test": 3,
-                    "version": "1.0.1"
+                    "version": "1.0.1",
             }
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
@@ -2265,7 +2265,7 @@ class ReimportScanTest(DojoAPITestCase):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -2297,7 +2297,7 @@ class ReimportScanTest(DojoAPITestCase):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -2329,7 +2329,7 @@ class ReimportScanTest(DojoAPITestCase):
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
@@ -2409,7 +2409,7 @@ class ProductTypeTest(BaseClass.BaseClassTest):
             "name": "Test Product Type",
             "description": "Test",
             "key_product": True,
-            "critical_product": False
+            "critical_product": False,
         }
         self.update_fields = {'description': "changed"}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -2516,7 +2516,7 @@ class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
         self.payload = {
             "group": 1,
             "user": 3,
-            "role": 4
+            "role": 4,
         }
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -2550,7 +2550,7 @@ class GlobalRolesTest(BaseClass.BaseClassTest):
         self.viewset = GlobalRoleViewSet
         self.payload = {
             "user": 2,
-            "role": 2
+            "role": 2,
         }
         self.update_fields = {'role': 3}
         self.test_type = TestType.STANDARD
@@ -2569,7 +2569,7 @@ class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
         self.payload = {
             "product_type": 1,
             "user": 3,
-            "role": 2
+            "role": 2,
         }
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -2592,7 +2592,7 @@ class ProductMemberTest(BaseClass.MemberEndpointTest):
         self.payload = {
             "product": 3,
             "user": 2,
-            "role": 2
+            "role": 2,
         }
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -2615,7 +2615,7 @@ class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
         self.payload = {
             "product_type": 1,
             "group": 2,
-            "role": 2
+            "role": 2,
         }
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -2638,7 +2638,7 @@ class ProductGroupTest(BaseClass.MemberEndpointTest):
         self.payload = {
             "product": 1,
             "group": 2,
-            "role": 2
+            "role": 2,
         }
         self.update_fields = {'role': 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -2661,7 +2661,7 @@ class LanguageTypeTest(BaseClass.BaseClassTest):
         self.payload = {
             'language': 'Test',
             'color': 'red',
-            'created': '2018-08-16T16:58:23.908Z'
+            'created': '2018-08-16T16:58:23.908Z',
         }
         self.update_fields = {'color': 'blue'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
@@ -2686,7 +2686,7 @@ class LanguageTest(BaseClass.BaseClassTest):
             'blank': 3,
             'comment': 4,
             'code': 5,
-            'created': '2018-08-16T16:58:23.908Z'
+            'created': '2018-08-16T16:58:23.908Z',
         }
         self.update_fields = {'code': 10}
         self.test_type = TestType.OBJECT_PERMISSIONS
@@ -2709,7 +2709,7 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
         self.viewset = ImportLanguagesView
         self.payload = {
             'product': 1,
-            'file': open("unittests/files/defectdojo_cloc.json")
+            'file': open("unittests/files/defectdojo_cloc.json"),
         }
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages
@@ -2752,7 +2752,7 @@ class NotificationsTest(BaseClass.BaseClassTest):
         self.payload = {
             'product': 1,
             'user': 3,
-            'product_type_added': ["alert", "msteams"]
+            'product_type_added': ["alert", "msteams"],
         }
         self.update_fields = {'product_added': ["alert", "msteams"]}
         self.test_type = TestType.STANDARD
@@ -2798,7 +2798,7 @@ class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
         self.viewname = 'development_environment'
         self.viewset = DevelopmentEnvironmentViewSet
         self.payload = {
-            'name': 'Test_1'
+            'name': 'Test_1',
         }
         self.update_fields = {'name': 'Test_2'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
@@ -2821,7 +2821,7 @@ class TestTypeTest(BaseClass.AuthenticatedViewTest):
         self.viewname = 'test_type'
         self.viewset = TestTypesViewSet
         self.payload = {
-            'name': 'Test_1'
+            'name': 'Test_1',
         }
         self.update_fields = {'name': 'Test_2'}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
@@ -2852,7 +2852,7 @@ class CredentialMappingTest(BaseClass.BaseClassTest):
         self.payload = {
             'cred_id': 1,
             'product': 1,
-            'url': 'https://google.com'
+            'url': 'https://google.com',
         }
         self.update_fields = {'url': 'https://bing.com'}
         self.test_type = TestType.OBJECT_PERMISSIONS

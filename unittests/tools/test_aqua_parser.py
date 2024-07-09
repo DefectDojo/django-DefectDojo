@@ -2,8 +2,7 @@ from collections import Counter
 
 from dojo.models import Test
 from dojo.tools.aqua.parser import AquaParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAquaParser(DojoTestCase):

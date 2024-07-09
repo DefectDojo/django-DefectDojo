@@ -63,7 +63,7 @@ class FortifyFPRParser:
                               unique_id_from_tool=ClassID,
                               file_path=SourceLocationpath,
                               line=SourceLocationline,
-                        )
+                        ),
                     )
         return items
 

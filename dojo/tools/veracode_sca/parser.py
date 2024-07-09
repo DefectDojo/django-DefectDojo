@@ -69,7 +69,7 @@ class VeracodeScaParser:
             vulnerability = issue.get("vulnerability")
             vuln_id = vulnerability.get("cve")
             if vuln_id and not (
-                vuln_id.startswith("cve") or vuln_id.startswith("CVE")
+                vuln_id.startswith(("cve", "CVE"))
             ):
                 vuln_id = "CVE-" + vuln_id
             cvss_score = issue.get("severity")
@@ -81,7 +81,7 @@ class VeracodeScaParser:
                 "Project name: {}\n"
                 "Title: \n>{}"
                 "\n\n-----\n\n".format(
-                    issue.get("project_name"), vulnerability.get("title")
+                    issue.get("project_name"), vulnerability.get("title"),
                 )
             )
 
@@ -113,13 +113,13 @@ class VeracodeScaParser:
             if vulnerability.get("cwe_id"):
                 cwe = vulnerability.get("cwe_id")
                 if cwe:
-                    if cwe.startswith("CWE-") or cwe.startswith("cwe-"):
+                    if cwe.startswith(("CWE-", "cwe-")):
                         cwe = cwe[4:]
                     if cwe.isdigit():
                         finding.cwe = int(cwe)
 
             finding.references = "\n\n" + issue.get("_links").get("html").get(
-                "href"
+                "href",
             )
             status = issue.get("issue_status")
             if (
@@ -144,7 +144,7 @@ class VeracodeScaParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         csvarray = []
 
@@ -162,13 +162,13 @@ class VeracodeScaParser:
                 issueId = list(row.values())[0]
             library = row.get("Library", None)
             if row.get("Package manager") == "MAVEN" and row.get(
-                "Coordinate 2"
+                "Coordinate 2",
             ):
                 library = row.get("Coordinate 2")
             version = row.get("Version in use", None)
             vuln_id = row.get("CVE", None)
             if vuln_id and not (
-                vuln_id.startswith("cve") or vuln_id.startswith("CVE")
+                vuln_id.startswith(("cve", "CVE"))
             ):
                 vuln_id = "CVE-" + vuln_id
 
@@ -178,11 +178,11 @@ class VeracodeScaParser:
             try:
                 if settings.USE_FIRST_SEEN:
                     date = datetime.strptime(
-                        row.get("Issue opened: Scan date"), "%d %b %Y %H:%M%p %Z"
+                        row.get("Issue opened: Scan date"), "%d %b %Y %H:%M%p %Z",
                     )
                 else:
                     date = datetime.strptime(
-                        row.get("Issue opened: Scan date"), "%d %b %Y %H:%M%p %Z"
+                        row.get("Issue opened: Scan date"), "%d %b %Y %H:%M%p %Z",
                     )
             except Exception:
                 date = None

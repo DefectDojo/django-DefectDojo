@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.kubescape.parser import KubescapeParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestKubescapeParser(DojoTestCase):

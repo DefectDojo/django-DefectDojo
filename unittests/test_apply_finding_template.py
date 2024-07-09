@@ -179,7 +179,7 @@ class TestApplyFindingTemplate(DojoTestCase):
                                     'severity': 'High',
                                     'description': 'Finding for Testing Apply Template Functionality',
                                     'mitigation': 'template mitigation',
-                                    'impact': 'template impact'}
+                                    'impact': 'template impact'},
                                    )
         self.assertEqual(302, result.status_code)
         self.assertIn('login', result.url)

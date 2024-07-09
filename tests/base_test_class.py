@@ -70,7 +70,7 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options.add_argument("--no-sandbox")
             dd_driver_options.add_argument("--disable-dev-shm-usage")
             dd_driver_options.add_argument(
-                "--disable-gpu"
+                "--disable-gpu",
             )  # on windows sometimes chrome can't start with certain gpu driver versions, even in headless mode
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow
@@ -89,7 +89,7 @@ class BaseTestCase(unittest.TestCase):
 
             # change path of chromedriver according to which directory you have chromedriver.
             print(
-                "starting chromedriver with options: ", vars(dd_driver_options), desired
+                "starting chromedriver with options: ", vars(dd_driver_options), desired,
             )
 
             # TODO - this filter needs to be removed
@@ -124,14 +124,14 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element(By.ID, "id_username").send_keys(os.environ["DD_ADMIN_USER"])
         driver.find_element(By.ID, "id_password").clear()
         driver.find_element(By.ID, "id_password").send_keys(
-            os.environ["DD_ADMIN_PASSWORD"]
+            os.environ["DD_ADMIN_PASSWORD"],
         )
         driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
 
         self.assertFalse(
             self.is_element_by_css_selector_present(
-                ".alert-danger", "Please enter a correct username and password"
-            )
+                ".alert-danger", "Please enter a correct username and password",
+            ),
         )
         return driver
 
@@ -146,8 +146,8 @@ class BaseTestCase(unittest.TestCase):
 
         self.assertFalse(
             self.is_element_by_css_selector_present(
-                ".alert-danger", "Please enter a correct username and password"
-            )
+                ".alert-danger", "Please enter a correct username and password",
+            ),
         )
         return driver
 
@@ -244,7 +244,7 @@ class BaseTestCase(unittest.TestCase):
         if no_content is None:
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
             WebDriverWait(self.driver, 30).until(
-                EC.presence_of_element_located((By.ID, wrapper_id))
+                EC.presence_of_element_located((By.ID, wrapper_id)),
             )
 
     def is_element_by_css_selector_present(self, selector, text=None):
@@ -353,7 +353,7 @@ class BaseTestCase(unittest.TestCase):
             # check if it's enabled after reload
             self.assertTrue(
                 driver.find_element(By.ID, "id_block_execution").is_selected()
-                == block_execution
+                == block_execution,
             )
         return driver
 
@@ -428,19 +428,19 @@ class BaseTestCase(unittest.TestCase):
 
                 print(entry)
                 print(
-                    "There was a SEVERE javascript error in the console, please check all steps fromt the current test to see where it happens"
+                    "There was a SEVERE javascript error in the console, please check all steps fromt the current test to see where it happens",
                 )
                 print(
                     "Currently there is no reliable way to find out at which url the error happened, but it could be: ."
-                    + self.driver.current_url
+                    + self.driver.current_url,
                 )
                 if self.accept_javascript_errors:
                     print(
-                        "WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!"
+                        "WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!",
                     )
                 elif re.search(accepted_javascript_messages, entry["message"]):
                     print(
-                        "WARNING: skipping javascript errors related to known issues images, see https://github.com/DefectDojo/django-DefectDojo/blob/master/tests/base_test_class.py#L324"
+                        "WARNING: skipping javascript errors related to known issues images, see https://github.com/DefectDojo/django-DefectDojo/blob/master/tests/base_test_class.py#L324",
                     )
                 else:
                     self.assertNotEqual(entry["level"], "SEVERE")

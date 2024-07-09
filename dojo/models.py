@@ -360,16 +360,16 @@ class System_Settings(models.Model):
             "has been previously marked as a false positive on the same product. "
             "ATTENTION: Although the deduplication algorithm is used to determine "
             "if a finding should be marked as a false positive, this feature will "
-            "not work if deduplication is enabled since it doesn't make sense to use both."
-        )
+            "not work if deduplication is enabled since it doesn't make sense to use both.",
+        ),
     )
 
     retroactive_false_positive_history = models.BooleanField(
         default=False, help_text=_(
             "(EXPERIMENTAL) FP History will also retroactively mark/unmark all "
             "existing equal findings in the same product as a false positives. "
-            "Only works if the False Positive History feature is also enabled."
-        )
+            "Only works if the False Positive History feature is also enabled.",
+        ),
     )
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text=_("URL prefix if DefectDojo is installed in it's own virtual subdirectory."))
@@ -470,7 +470,7 @@ class System_Settings(models.Model):
         default=False,
         blank=False,
         verbose_name=_('Allow Anonymous Survey Responses'),
-        help_text=_("Enable anyone with a link to the survey to answer a survey")
+        help_text=_("Enable anyone with a link to the survey to answer a survey"),
     )
     credentials = models.TextField(max_length=3000, blank=True)
     disclaimer = models.TextField(max_length=3000, default='', blank=True,
@@ -553,7 +553,7 @@ class System_Settings(models.Model):
         default=True,
         blank=False,
         verbose_name=_("Password must contain one special character"),
-        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)."))
+        help_text=_("Requires user passwords to contain at least one special character (()[]{}|\\`~!@#$%^&*_-+=;:'\",<>./?)."))
     lowercase_character_required = models.BooleanField(
         default=True,
         blank=False,
@@ -580,7 +580,7 @@ class System_Settings(models.Model):
         verbose_name=_("Filter String Matching Optimization"),
         help_text=_(
             "When turned on, all filter operations in the UI will require string matches rather than ID. "
-            "This is a performance enhancement to avoid fetching objects unnecessarily."
+            "This is a performance enhancement to avoid fetching objects unnecessarily.",
         ))
 
     from dojo.middleware import System_Settings_Manager
@@ -1590,7 +1590,7 @@ class Endpoint_Status(models.Model):
             models.Index(fields=['endpoint', 'mitigated']),
         ]
         constraints = [
-            models.UniqueConstraint(fields=['finding', 'endpoint'], name='endpoint-finding relation')
+            models.UniqueConstraint(fields=['finding', 'endpoint'], name='endpoint-finding relation'),
         ]
 
     def __str__(self):
@@ -1672,7 +1672,7 @@ class Endpoint(models.Model):
                         )
                         for qe in self.query.split("&")
                     ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
-                    fragment=self.fragment or ''
+                    fragment=self.fragment or '',
                 )
                 # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
                 # Example: https://google.com and https://google.com:443
@@ -1828,7 +1828,7 @@ class Endpoint(models.Model):
             mitigated=False,
             false_positive=False,
             out_of_scope=False,
-            risk_accepted=False
+            risk_accepted=False,
         ).count() > 0
 
     @property
@@ -1844,7 +1844,7 @@ class Endpoint(models.Model):
             duplicate=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
-            status_finding__risk_accepted=False
+            status_finding__risk_accepted=False,
         ).order_by('numerical_severity')
         return findings
 
@@ -1858,7 +1858,7 @@ class Endpoint(models.Model):
             duplicate=False,
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
-            status_finding__risk_accepted=False
+            status_finding__risk_accepted=False,
         ).order_by('numerical_severity')
         return findings
 
@@ -1913,7 +1913,7 @@ class Endpoint(models.Model):
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
-            endpoints__in=self.host_endpoints()
+            endpoints__in=self.host_endpoints(),
         ).order_by('numerical_severity')
         return findings
 
@@ -1928,7 +1928,7 @@ class Endpoint(models.Model):
             status_finding__false_positive=False,
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
-            endpoints__in=self.host_endpoints()
+            endpoints__in=self.host_endpoints(),
         ).order_by('numerical_severity')
         return findings
 
@@ -2030,7 +2030,7 @@ class Test(models.Model):
     target_start = models.DateTimeField()
     target_end = models.DateTimeField()
     estimated_time = models.TimeField(null=True, blank=True, editable=False)
-    actual_time = models.TimeField(null=True, blank=True, editable=False, )
+    actual_time = models.TimeField(null=True, blank=True, editable=False)
     percent_complete = models.IntegerField(null=True, blank=True,
                                            editable=True)
     notes = models.ManyToManyField(Notes, blank=True,
@@ -2852,7 +2852,7 @@ class Finding(models.Model):
             # sort endpoints strings
             endpoint_str = ''.join(
                 sorted(
-                    endpoint_str_list
+                    endpoint_str_list,
                 ))
         return endpoint_str
 
@@ -3055,7 +3055,6 @@ class Finding(models.Model):
             github_conf = github_product_key.conf
         except:
             github_conf = None
-            pass
         return github_conf
 
     # newer version that can work with prefetching
@@ -3064,7 +3063,6 @@ class Finding(models.Model):
             return self.test.engagement.product.github_pkey_set.all()[0].git_conf
         except:
             return None
-            pass
 
     @property
     def has_jira_issue(self):
@@ -3676,7 +3674,7 @@ class Risk_Acceptance(models.Model):
         bc = self.engagement_set.first().get_breadcrumbs()
         bc += [{'title': str(self),
                 'url': reverse('view_risk_acceptance', args=(
-                    self.engagement_set.first().product.id, self.id,))}]
+                    self.engagement_set.first().product.id, self.id))}]
         return bc
 
     @property
@@ -3738,7 +3736,7 @@ ANNOUNCEMENT_STYLE_CHOICES = (
     ('info', 'Info'),
     ('success', 'Success'),
     ('warning', 'Warning'),
-    ('danger', 'Danger')
+    ('danger', 'Danger'),
 )
 
 
@@ -3822,7 +3820,7 @@ class JIRA_Instance(models.Model):
                                         ('Epic', 'Epic'),
                                         ('Spike', 'Spike'),
                                         ('Bug', 'Bug'),
-                                        ('Security', 'Security')
+                                        ('Security', 'Security'),
                                     )
     default_issue_type = models.CharField(max_length=255,
                                           choices=default_issue_type_choices,
@@ -3910,7 +3908,7 @@ class JIRA_Project(models.Model):
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
     custom_fields = models.JSONField(max_length=200, blank=True, null=True,
-                                   help_text=_("JIRA custom field JSON mapping of Id to value, e.g. {\"customfield_10122\": [{\"name\": \"8.0.1\"}]}"))
+                                   help_text=_('JIRA custom field JSON mapping of Id to value, e.g. {"customfield_10122": [{"name": "8.0.1"}]}'))
     default_assignee = models.CharField(max_length=200, blank=True, null=True,
                                      help_text=_("JIRA default assignee (name). If left blank then it defaults to whatever is configured in JIRA."))
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
@@ -4046,7 +4044,7 @@ class Notifications(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user', 'product'], name="notifications_user_product")
+            models.UniqueConstraint(fields=['user', 'product'], name="notifications_user_product"),
         ]
         indexes = [
             models.Index(fields=['user', 'product']),
@@ -4386,9 +4384,9 @@ class Benchmark_Product_Summary(models.Model):
 # ==============================
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Question(PolymorphicModel, TimeStampedModel):
-        '''
+        """
             Represents a question.
-        '''
+        """
 
         class Meta:
             ordering = ['order']
@@ -4409,23 +4407,23 @@ with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning
 
 
 class TextQuestion(Question):
-    '''
+    """
     Question with a text answer
-    '''
+    """
     objects = PolymorphicManager()
 
     def get_form(self):
-        '''
+        """
         Returns the form for this model
-        '''
+        """
         from .forms import TextQuestionForm
         return TextQuestionForm
 
 
 class Choice(TimeStampedModel):
-    '''
+    """
     Model to store the choices for multi choice questions
-    '''
+    """
 
     order = models.PositiveIntegerField(default=1)
 
@@ -4439,10 +4437,10 @@ class Choice(TimeStampedModel):
 
 
 class ChoiceQuestion(Question):
-    '''
+    """
     Question with answers that are chosen from a list of choices defined
     by the user.
-    '''
+    """
 
     multichoice = models.BooleanField(default=False,
                                       help_text=_("Select one or more"))
@@ -4450,9 +4448,9 @@ class ChoiceQuestion(Question):
     objects = PolymorphicManager()
 
     def get_form(self):
-        '''
+        """
         Returns the form for this model
-        '''
+        """
 
         from .forms import ChoiceQuestionForm
         return ChoiceQuestionForm
@@ -4469,7 +4467,7 @@ class Engagement_Survey(models.Model):
     class Meta:
         verbose_name = _("Engagement Survey")
         verbose_name_plural = "Engagement Surveys"
-        ordering = ('-active', 'name',)
+        ordering = ('-active', 'name')
 
     def __str__(self):
         return self.name
@@ -4518,8 +4516,8 @@ class General_Survey(models.Model):
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Answer(PolymorphicModel, TimeStampedModel):
-        ''' Base Answer model
-        '''
+        """ Base Answer model
+        """
         question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
         answered_survey = models.ForeignKey(Answered_Survey,

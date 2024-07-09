@@ -25,7 +25,7 @@ def ldd(file_path):
     # For simplicity, I'm assuming if we get an error, the code is non-zero.
     try:
         result = subprocess.run(
-            ["ldd", file_path], capture_output=True, text=True
+            ["ldd", file_path], capture_output=True, text=True,
         )
         stdout = result.stdout
         code = result.returncode

@@ -137,7 +137,7 @@ def engagement_calendar(request):
             'caltype': 'engagements',
             'leads': request.GET.getlist('lead', ''),
             'engagements': engagements,
-            'users': get_authorized_users(Permissions.Engagement_View)
+            'users': get_authorized_users(Permissions.Engagement_View),
         })
 
 
@@ -158,7 +158,7 @@ def get_filtered_engagements(request, view):
     if System_Settings.objects.get().enable_jira:
         engagements = engagements.prefetch_related(
             'jira_project__jira_instance',
-            'product__jira_project_set__jira_instance'
+            'product__jira_project_set__jira_instance',
         )
 
     filter_string_matching = get_system_setting("filter_string_matching", False)
@@ -174,11 +174,11 @@ def get_test_counts(engagements):
     engagement_test_counts = {
         test['engagement']: test['test_count']
         for test in Test.objects.filter(
-            engagement__in=engagements
+            engagement__in=engagements,
         ).values(
-            'engagement'
+            'engagement',
         ).annotate(
-            test_count=Count('engagement')
+            test_count=Count('engagement'),
         )
     }
     return engagement_test_counts
@@ -221,7 +221,7 @@ def engagements_all(request):
     products_filter_class = ProductEngagementsFilterWithoutObjectLookups if filter_string_matching else ProductEngagementsFilter
     engagement_query = Engagement.objects.annotate(test_count=Count('test__id'))
     filter_qs = products_with_engagements.prefetch_related(
-        Prefetch('engagement_set', queryset=products_filter_class(request.GET, engagement_query).qs)
+        Prefetch('engagement_set', queryset=products_filter_class(request.GET, engagement_query).qs),
     )
 
     filter_qs = filter_qs.prefetch_related(
@@ -233,12 +233,12 @@ def engagements_all(request):
     if System_Settings.objects.get().enable_jira:
         filter_qs = filter_qs.prefetch_related(
             'engagement_set__jira_project__jira_instance',
-            'jira_project_set__jira_instance'
+            'jira_project_set__jira_instance',
         )
     filter_class = EngagementFilterWithoutObjectLookups if filter_string_matching else EngagementFilter
     filtered = filter_class(
         request.GET,
-        queryset=filter_qs
+        queryset=filter_qs,
     )
 
     prods = get_page_items(request, filtered.qs, 25)
@@ -459,7 +459,6 @@ class ViewEngagement(View):
             check = Check_List.objects.get(engagement=eng)
         except:
             check = None
-            pass
         notes = eng.notes.all()
         note_type_activation = Note_Type.objects.filter(is_active=True).count()
         if note_type_activation:
@@ -501,7 +500,7 @@ class ViewEngagement(View):
                 'creds': creds,
                 'cred_eng': cred_eng,
                 'network': network,
-                'preset_test_type': preset_test_type
+                'preset_test_type': preset_test_type,
             })
 
     def post(self, request, eid, *args, **kwargs):
@@ -531,7 +530,6 @@ class ViewEngagement(View):
             check = Check_List.objects.get(engagement=eng)
         except:
             check = None
-            pass
         notes = eng.notes.all()
         note_type_activation = Note_Type.objects.filter(is_active=True).count()
         if note_type_activation:
@@ -591,7 +589,7 @@ class ViewEngagement(View):
                 'creds': creds,
                 'cred_eng': cred_eng,
                 'network': network,
-                'preset_test_type': preset_test_type
+                'preset_test_type': preset_test_type,
             })
 
 
@@ -636,7 +634,6 @@ def add_tests(request, eid):
                 new_test.lead = User.objects.get(id=form['lead'].value())
             except:
                 new_test.lead = None
-                pass
 
             # Set status to in progress if a test is added
             if eng.status != "In Progress" and eng.active is True:
@@ -689,7 +686,7 @@ def add_tests(request, eid):
         'form': form,
         'cred_form': cred_form,
         'eid': eid,
-        'eng': eng
+        'eng': eng,
     })
 
 
@@ -770,9 +767,9 @@ class ImportScanResultsView(View):
             return CredMappingForm(
                 initial={
                     "cred_user_queryset": Cred_Mapping.objects.filter(
-                        engagement=engagement
+                        engagement=engagement,
                     ).order_by('cred_id'),
-                }
+                },
             )
 
     def get_jira_form(
@@ -793,12 +790,12 @@ class ImportScanResultsView(View):
                 jira_form = JIRAImportScanForm(
                     request.POST,
                     push_all=push_all_jira_issues,
-                    prefix='jiraform'
+                    prefix='jiraform',
                 )
             else:
                 jira_form = JIRAImportScanForm(
                     push_all=push_all_jira_issues,
-                    prefix='jiraform'
+                    prefix='jiraform',
                 )
         return jira_form, push_all_jira_issues
 
@@ -929,7 +926,7 @@ class ImportScanResultsView(View):
         try:
             importer_client = DefaultImporter(**context)
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
-                context.pop("scan", None)
+                context.pop("scan", None),
             )
             # Add a message to the view for the user to see the results
             add_success_message_to_response(importer_client.construct_imported_message(
@@ -1026,7 +1023,7 @@ class ImportScanResultsView(View):
             # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
             cred_user = Cred_Mapping.objects.filter(
                 pk=cred_user.id,
-                engagement=context.get("engagement")
+                engagement=context.get("engagement"),
             ).first()
             # Create the new credential mapping object
             new_cred_mapping = form.save(commit=False)
@@ -1152,7 +1149,6 @@ def complete_checklist(request, eid):
         checklist = Check_List.objects.get(engagement=eng)
     except:
         checklist = None
-        pass
 
     add_breadcrumb(
         parent=eng,
@@ -1174,7 +1170,6 @@ def complete_checklist(request, eid):
                 cl.engagement = eng
                 cl.save()
                 form.save_m2m()
-                pass
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -1263,7 +1258,7 @@ def add_risk_acceptance(request, eid, fid=None):
     return render(request, 'dojo/add_risk_acceptance.html', {
                   'eng': eng,
                   'product_tab': product_tab,
-                  'form': form
+                  'form': form,
                   })
 
 
@@ -1556,7 +1551,7 @@ def engagement_ics(request, eid):
             f"Set aside for engagement {eng.name}, on product {eng.product.name}. "
             f"Additional detail can be found at {request.build_absolute_uri(reverse('view_engagement', args=(eng.id, )))}"
         ),
-        uid
+        uid,
     )
     output = cal.serialize()
     response = HttpResponse(content=output)
@@ -1692,7 +1687,7 @@ def excel_export(request):
 
     response = HttpResponse(
         content=stream,
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
     response['Content-Disposition'] = 'attachment; filename=engagements.xlsx'
     return response

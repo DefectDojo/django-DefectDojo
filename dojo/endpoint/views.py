@@ -400,7 +400,7 @@ def endpoint_bulk_update_all(request, pid=None):
                     mitigated=True,
                     mitigated_by=request.user,
                     mitigated_time=timezone.now(),
-                    last_modified=timezone.now()
+                    last_modified=timezone.now(),
                 )
 
                 if updated_endpoint_count > 0:
@@ -472,7 +472,7 @@ def migrate_endpoints_view(request):
         request, 'dojo/migrate_endpoints.html', {
             'product_tab': None,
             "name": view_name,
-            "html_log": html_log
+            "html_log": html_log,
         })
 
 
