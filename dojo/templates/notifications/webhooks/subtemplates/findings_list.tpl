@@ -5,6 +5,6 @@
       title: {{ finding.title | default_if_none:'' }}
       severity: {{ finding.severity | default_if_none:'' }}
       url: {{ finding_url|full_url }}
-{% else %}
+{% empty %}
     []
 {% endfor %}
