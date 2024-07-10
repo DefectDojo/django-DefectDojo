@@ -302,7 +302,7 @@ def reset_finding_related(finding):
 
     except Exception as e:
         logger.error(e)
-        ApiError.internal_server_error(detail=e)
+        raise ApiError.internal_server_error(detail=e)
 
 
 def enable_flow_transfer_finding(finding_status):

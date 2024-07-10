@@ -3360,17 +3360,13 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                         "owner"]
     
     def destroy(self, request, pk=None):
-        try:
-            # transfer_finding_copy = copy.deepcopy(get_object_or_404(TransferFinding, id=pk))
-            obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
-            for transfer_finding_finding in obj_transfer_finding_findings:
-                helper_tf.reset_finding_related(transfer_finding_finding.findings)
-            # NotificationTransferFinding.transfer_finding_remove(transfer_finding_copy)
-            super().destroy(request, pk)
-            return http_response.no_content(message="TransferFinding Deleted")
-        except Exception as e:
-            logger.error(e)
-            raise ApiError.not_found(detail=e)
+        transfer_finding = get_object_or_404(TransferFinding, id=pk)
+        obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+        for transfer_finding_finding in obj_transfer_finding_findings:
+            helper_tf.reset_finding_related(transfer_finding_finding.findings)
+        NotificationTransferFinding.transfer_finding_remove(transfer_finding)
+        super().destroy(request, pk)
+        return http_response.no_content(message="TransferFinding Deleted")
 
 
 class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
