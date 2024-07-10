@@ -3496,6 +3496,3 @@ class ApiToken(ObtainAuthToken):
     def delete(self, request, *args, **kwargs):
         Token.objects.filter(user=request.user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def get_queryset(self):
-        return Announcement.objects.all().order_by("id")
