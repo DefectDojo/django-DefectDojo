@@ -40,7 +40,6 @@ def expiration_handler(*args, **kwargs):
     logger.info('expiring %i transfer_finding that are past expiration date', len(transfer_findings))
     for transfer_finding in transfer_findings:
         expire_now(transfer_finding)
-        # notification created by expire_now code
 
     heads_up_days = system_settings.risk_acceptance_notify_before_expiration
     if heads_up_days > 0:
@@ -51,17 +50,37 @@ def expiration_handler(*args, **kwargs):
             logger.debug('notifying for transfer finding %i:%s with %i findings', transfer_finding.id, transfer_finding, len(transfer_finding.transfer_findings.all()))
             TransferFindingNotification.send_notification(event="transfer_finding",
                                                           subject=f"⏳Transfer Finding has been expired : {transfer_finding.id}🚨",
-                                                          description="Transfer finding has been expired")
+                                                          description="Transfer finding has been expired",
+                                                          transfer_finding=transfer_finding)
             transfer_finding.expiration_date_warned = timezone.now()
             transfer_finding.save()
     
 
 def expire_now(transfer_finding: TransferFinding):
-    findings = transfer_finding.findings.all()
-    for finding in findings:
-        finding.risk_status = 'Risk Active'
-        finding.active = True
+    system_user = get_user(settings.SYSTEM_USER)
+    logger.debug(f"Expiration Now {transfer_finding.id}")
+    transfer_finding.expiration_date_handled = timezone.now()
+    transfer_finding.save()
+    transfer_finding_findings = transfer_finding.transfer_findings.all()
 
+    for transfer_finding_finding in transfer_finding_findings:
+        try:
+            finding = transfer_finding_finding.findings
+            finding.risk_status = 'Transfer Expired'
+            finding.active = True
+            note = Notes(entry=f"Finding Expired para el Transfer-finding id: {transfer_finding.id}",
+                         author=system_user)
+            note.save()
+            finding.notes.add(note)
+            finding.save()
+            TransferFindingNotification.send_notification(
+                event="transfer_finding",
+                subject=f"⏳Transfer Finding expired : {transfer_finding.id}🚨",
+                description="Transfer finding expired",
+                transfer_finding=transfer_finding)
+        except Exception as e:
+            logger.error(f"Error while updating finding for tranfer-finding {finding.id} : {e}")
+            raise ApiError.internal_server_error(detail=str(e))
 
 
 def transfer_findings(transfer_finding_findings: TransferFindingFinding, serializer):
@@ -86,7 +105,12 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
             dict_findings = request_findings[finding_id]
             if dict_findings:
                 if (dict_findings["risk_status"] == "Transfer Accepted"
-                    and finding.risk_status in ["Transfer Rejected", "Risk Active", "Transfer Pending", "Risk Expired"]):
+                    and finding.risk_status in [
+                        "Transfer Rejected",
+                        "Transfer Pending",
+                        "Transfer Expired",
+                        "Risk Active",
+                        "Risk Expired",]):
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = False
                     if not test:

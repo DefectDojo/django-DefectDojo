@@ -4,7 +4,7 @@
 {% load display_tags %}
 {% block content %}
     {% for transfer_finding_finding in transfer_finding.transfer_findings.all %}
-        {% url 'view_finding' transfer_finding_finding.findings.id as finding_url %}
+        {% url 'view_finding_render' transfer_finding_finding.findings.id transfer_finding.id as finding_url %}
         <li>
             <a href="{{ finding_url|full_url }}">{{ transfer_finding_finding.findings.title }}</a> ({{ transfer_finding_finding.findings.severity }}) {{ transfer_finding_finding.findings.status }}
             <br/>
