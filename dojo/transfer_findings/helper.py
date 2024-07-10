@@ -68,7 +68,7 @@ def expire_now(transfer_finding: TransferFinding):
             finding = transfer_finding_finding.findings
             finding.risk_status = 'Transfer Expired'
             finding.active = True
-            note = Notes(entry=f"Finding Expired para el Transfer-finding id: {transfer_finding.id}",
+            note = Notes(entry=f"Finding Expired for Transfer-finding id: {transfer_finding.id}",
                          author=system_user)
             note.save()
             finding.notes.add(note)
