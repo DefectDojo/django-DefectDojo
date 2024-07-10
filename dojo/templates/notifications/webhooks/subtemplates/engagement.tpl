@@ -4,5 +4,5 @@
 {% include 'notifications/webhooks/subtemplates/product.tpl' with product=engagement.product %}
 {% endif %}
 engagement:
-    name: {{ engagement.name }}
+    name: {{ engagement.name | default_if_none:'' }}
     id: {{ engagement.pk }}

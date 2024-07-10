@@ -1,6 +1,6 @@
 {% load display_tags %}
 ---
-description: {{ description | default_if_none:'' }}  # TODO add "quote or none" - to all strings
+description: {{ description | default_if_none:'' }}
 user: {{ user | default_if_none:'' }}
 {% if url %}
 url:  {{ url|full_url }}
