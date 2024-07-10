@@ -68,14 +68,73 @@ def get_authorized_product_type_members(permission):
         return Product_Type_Member.objects.none()
 
     if user.is_superuser:
-        return Product_Type_Member.objects.all().select_related('role')
+        return Product_Type_Member.objects.all().order_by("id").select_related('role')
 
     if user_has_global_permission(user, permission):
-        return Product_Type_Member.objects.all().select_related('role')
+        return Product_Type_Member.objects.all().order_by("id").select_related('role')
 
     product_types = get_authorized_product_types(permission)
-    return Product_Type_Member.objects.filter(product_type__in=product_types).select_related('role')
+    return Product_Type_Member.objects.filter(product_type__in=product_types).order_by("id").select_related('role')
 
+
+def query_contacts(*args):
+    contacts = list(Product_Type.objects.all().values(*args))
+    contacts_dict = {}
+    for contact_dict in contacts:
+        contacts_dict.update({value: key for key, value in contact_dict.items()})
+    return contacts_dict
+    
+
+def get_authorized_contacts_for_product_type(severity, product, product_type):
+    contacts_result = []
+    user = get_current_user()
+    rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(severity)
+    product_obj = Product.objects.get(id=product)
+    product_type_obj = Product_Type.objects.get(id=product_type)
+    type_contacts = rule["type_contacts"][json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type_obj.name.split(" - ")[0]]]
+    contacts_list = type_contacts["users"]
+
+    if user.is_superuser:
+        contacts_result.append(user.id)
+
+    if hasattr(user, "global_role"):
+        if user.global_role.role:
+            if user.global_role.role.name in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
+                contacts_result.append(user.id)
+
+    if contacts_list == [] and type_contacts["number_acceptors"] == 0:
+        contacts_result.append(user.id)
+
+    elif not contacts_result:
+        for contact_type in contacts_list:
+            leader = getattr(product_obj, contact_type, None) if contact_type == "team_manager" else getattr(product_type_obj, contact_type, None)
+            if leader:
+                contacts_result.append(leader.id)
+            else:
+                lider_dict = json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split('//')[2])
+                dict_inverter = {valor: clave for clave, valor in lider_dict.items()}
+                user_leader = dict_inverter.get(contact_type, "Leader")
+                message = f"The {user_leader} must log in to proceed with the acceptance of findings process"
+                raise ValueError(message)
+    
+    if contacts_result:
+        contacts_result += query_user_by_rol(settings.ROLE_ALLOWED_TO_ACCEPT_RISKS)
+        return Dojo_User.objects.filter(id__in=contacts_result)
+
+
+def query_user_by_rol(rol):
+    # get ids for rol name
+    user_list_maintainer = []
+    ids_role = list(
+        Role.objects.filter(name__in=rol).values_list("id", flat=True))
+    if ids_role:
+        user_list_maintainer = Global_Role.objects.filter(role_id__in=ids_role).values_list("user_id", flat=True)
+    return list(user_list_maintainer)
+
+def get_owner_user():
+    user = get_current_user()
+    user_owner = Dojo_User.objects.filter(id=user.id)
+    return user_owner
 
 def query_contacts(*args):
     contacts = list(Product_Type.objects.all().values(*args))
@@ -159,9 +218,7 @@ def get_authorized_product_type_groups(permission):
         return Product_Type_Group.objects.none()
 
     if user.is_superuser:
-        return Product_Type_Group.objects.all().select_related('role')
+        return Product_Type_Group.objects.all().order_by("id").select_related('role')
 
     product_types = get_authorized_product_types(permission)
-    return Product_Type_Group.objects.filter(product_type__in=product_types).select_related('role')
-
-
+    return Product_Type_Group.objects.filter(product_type__in=product_types).order_by("id").select_related('role')
