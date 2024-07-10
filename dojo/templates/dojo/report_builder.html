@@ -91,11 +91,11 @@
         function initWysiwyg($we) {
             const $toolbar = $we.find("[data-role=editor-toolbar]"),
                 $ed = $we.find(".editor");
-                $ed.removeAttr('id');
-                $ed.uniqueId();
-                const toolbarId = `editor-toolbar-${$ed.prop('id')}`;
-                $toolbar.attr("data-role", toolbarId);
-                $ed.wysiwyg({toolbarSelector: `[data-role=${toolbarId}]`});
+            $ed.removeAttr('id');
+            $ed.uniqueId();
+            const toolbarId = `editor-toolbar-${$ed.prop('id')}`;
+            $toolbar.attr("data-role", toolbarId);
+            $ed.wysiwyg({toolbarSelector: `[data-role=${toolbarId}]`});
         }
 
         function resetWidgetToAvailable(item) {
@@ -149,8 +149,8 @@
             var valid = true;
 
             $('.in-use-widgets .form-control').not('#finding-list .form-control')
-                    .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control')
-                    .not('.bs-searchbox .form-control').not('div').each(function () {
+                .not('#endpoint-list .form-control').not('#wysiwyg-content .form-control')
+                .not('.bs-searchbox .form-control').not('div').each(function () {
                 if ($(this).val() === '')
                     valid = false;
             });
@@ -262,10 +262,22 @@
 
             setUpFindingFilters();
 
+            // Initializes any filter fields in $el
+            function filterFieldInit($el) {
+                $('select', $el)
+                    .addClass('selectpicker')
+                    .attr('data-live-search', 'true')
+                    .attr('data-container', 'body')
+                    .css('width', '70%')
+                    .selectpicker('render');
+            }
+
             $(document).on('submit', 'form.finding-list', function (event) {
                 var form = this;
                 $.get("{% url 'report_findings' %}?" + $(this).serialize()).done(function (data) {
-                    $(form).closest('li.finding-list').html(data);
+                    filterFieldInit(
+                        $(form).closest('li.finding-list').html(data)
+                    );
                     setUpFindingFilters();
                 });
 
@@ -273,9 +285,10 @@
             });
 
             $(document).on('click', 'form.finding-list a.clear.centered, div.finding-pagination a', function (event) {
-                var link_href = $(this).attr('href')
-                $.get("{% url 'report_findings' %}"+link_href).done(function (data) {
-                    $('div.in-use-widgets li.finding-list').html(data);
+                $.get("{% url 'report_findings' %}").done(function (data) {
+                    filterFieldInit(
+                        $('div.in-use-widgets li.finding-list').html(data)
+                    );
                     setUpFindingFilters();
                 });
 
@@ -285,7 +298,9 @@
             $(document).on('submit', 'form.endpoint-list', function (event) {
                 var form = this;
                 $.get("{% url 'report_endpoints' %}?" + $(this).serialize()).done(function (data) {
-                    $(form).closest('li.endpoint-list').html(data);
+                    filterFieldInit(
+                        $(form).closest('li.endpoint-list').html(data)
+                    );
                     setUpFindingFilters();
                 });
 
@@ -294,7 +309,9 @@
 
             $(document).on('click', 'form.endpoint-list a.clear.centered, div.endpoint-pagination a', function (event) {
                 $.get("{% url 'report_endpoints' %}").done(function (data) {
-                    $('div.in-use-widgets li.endpoint-list').html(data);
+                    filterFieldInit(
+                        $('div.in-use-widgets li.endpoint-list').html(data)
+                    );
                     setUpFindingFilters();
                 });
 
