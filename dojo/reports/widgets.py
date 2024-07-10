@@ -106,7 +106,7 @@ class Div(form_widget):
 
 
 class WYSIWYGContentForm(forms.Form):
-    heading = forms.CharField(max_length=200, required=False, initial="WYSIWYG Content")
+    heading = forms.CharField(max_length=200, required=False, initial="Custom Content")
     content = forms.CharField(required=False, widget=Div(attrs={'class': 'editor'}))
     hidden_content = forms.CharField(widget=forms.HiddenInput(), required=True)
 
@@ -232,7 +232,7 @@ class TableOfContents(Widget):
 class WYSIWYGContent(Widget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.title = 'WYSIWYG Content'
+        self.title = 'Custom Content'
         self.widget_class = 'wysiwyg-content'
         self.form = WYSIWYGContentForm()
         self.multiple = 'true'
