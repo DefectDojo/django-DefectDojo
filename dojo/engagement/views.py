@@ -1223,7 +1223,7 @@ def get_risk_acceptance_pending(request,
                         'name': risk_acceptance_title_suggestion,
                         'accepted_by': [request.user],
                         "severity": finding.severity})
-        if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
+        elif finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
             form = RiskPendingForm(
                 severity=finding.severity,
                 product_id=product.id,

@@ -229,7 +229,7 @@ def is_permissions_risk_acceptance(
     if (
         (finding.impact and finding.impact  in settings.COMPLIANCE_FILTER_RISK)
         and finding.risk_accepted is False
-        and len(user.groups.filter(dojo_group__name=finding.impact)) > 0
+        and len(user.groups.filter(dojo_group__name="Compliance")) > 0
     ):
         result = True
 
