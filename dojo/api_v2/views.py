@@ -3366,7 +3366,7 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
             for transfer_finding_finding in obj_transfer_finding_findings:
                 helper_tf.reset_finding_related(transfer_finding_finding.findings)
             # NotificationTransferFinding.transfer_finding_remove(transfer_finding_copy)
-            # super().destroy(request, pk)
+            super().destroy(request, pk)
             return http_response.no_content(message="TransferFinding Deleted")
         except Exception as e:
             logger.error(e)
