@@ -1587,7 +1587,7 @@ ul#sortable1 li div.panel-heading:hover, ul#sortable2 li div.panel-heading:hover
     margin-bottom: 10px;
 }
 
-.report-widget-page-break {
+.report-page-break {
     display: flex;
     align-items: center;
     text-align: center;
@@ -1595,19 +1595,18 @@ ul#sortable1 li div.panel-heading:hover, ul#sortable2 li div.panel-heading:hover
     margin-bottom: 5px;
 }
 
-.report-widget-page-break::before,
-
-.report-widget-page-break::after {
+.report-page-break::before,
+.report-page-break::after {
     content: '';
     flex: 1;
     border-bottom: 1px dashed #000;
 }
 
-.report-widget-page-break:not(:empty)::before {
+.report-page-break:not(:empty)::before {
     margin-right: 0.25em;
 }
 
-.report-widget-page-break:not(:empty)::after {
+.report-page-break:not(:empty)::after {
     margin-left: 0.25em;
 }
 
