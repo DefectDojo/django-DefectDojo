@@ -20,7 +20,6 @@ steps:
       docker volume create defectdojo_data_unit_tests
 
       echo "docker run"
-      # docker run -d -p 3306:3306/tcp -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=test_defectdojo -e MYSQL_USER=defectdojo -e MYSQL_PASSWORD=defectdojo -v defectdojo_data_unit_tests:/var/lib/mysql $(image)
       docker run -d -p 5432:5432/tcp -e POSTGRES_DB=test_defectdojo -e POSTGRES_USER=defectdojo -e POSTGRES_PASSWORD=defectdojo -v defectdojo_data_unit_tests:/var/lib/postgresql/data $(image)
       docker ps
     displayName: "Start DB"
@@ -53,7 +52,6 @@ steps:
       unset DD_CELERY_BROKER_URL
       export DD_DATABASE_ENGINE=django.db.backends.postgresql
       export DD_DATABASE_HOST=127.0.0.1
-      # export DD_DATABASE_PORT=3306
       export DD_DATABASE_PORT=5432
       export DD_DATABASE_NAME=test_defectdojo
       export DD_SECRET_KEY='.'
@@ -63,10 +61,12 @@ steps:
       python manage.py makemigrations dojo
       python manage.py migrate
 
-      #python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
-      #python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
+      python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
+      python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
       coverage run --source='dojo' --data-file= manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
+      ls -al
       coverage run --source='dojo' -a manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
+      ls -al
       coverage xml
     displayName: "Unit test"
 

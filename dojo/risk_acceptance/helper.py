@@ -361,7 +361,7 @@ def risk_accept_provider(
         acceptance_days: int,
         url: str,
         header: str,
-        token: str,
+        token: str
     ):
     logger.info(f"Making risk accept for {finding_id} provider: {provider}")
     formatted_url = url + f'{provider}?vulnerabilityId={finding_id}&acceptanceDays={acceptance_days}'
