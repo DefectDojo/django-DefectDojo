@@ -4,3 +4,6 @@
 <div class="wysiwyg_content report_widget">
     {{ content|safe }}
 </div>
+{% if page_break_after %}
+<div class="report-page-break">Page Break</div>
+{% endif %}
