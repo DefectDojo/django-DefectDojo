@@ -109,7 +109,7 @@ class WYSIWYGContentForm(forms.Form):
     heading = forms.CharField(max_length=200, required=False, initial="Custom Content")
     content = forms.CharField(required=False, widget=Div(attrs={'class': 'editor'}))
     hidden_content = forms.CharField(widget=forms.HiddenInput(), required=True)
-    page_break_after = forms.BooleanField(required=False, help_text='Include a page break after the widget')
+    page_break_after = forms.BooleanField(required=False, help_text='Include a page break after the custom content.')
 
     class Meta:
         exclude = []
@@ -239,8 +239,13 @@ class WYSIWYGContent(Widget):
         self.multiple = 'true'
 
     def get_html(self):
-        html = render_to_string("dojo/custom_html_report_wysiwyg_content.html", {"heading": self.heading,
-                                                                                 "content": self.content})
+        html = render_to_string(
+            "dojo/custom_html_report_wysiwyg_content.html",
+            {
+                "heading": self.heading,
+                "content": self.content,
+                "page_break_after": self.page_break_after,
+            })
         return mark_safe(html)
 
     def get_asciidoc(self):
@@ -456,6 +461,8 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)['value']
             wysiwyg_content.content = \
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'hidden_content'), None)['value']
+            wysiwyg_content.page_break_after = \
+                next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'page_break_after'), None)['value']
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = wysiwyg_content
         if list(widget.keys())[0] == 'report-options':
             options = ReportOptions(request=request)
