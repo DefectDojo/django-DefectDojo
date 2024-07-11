@@ -61,8 +61,6 @@ steps:
       python manage.py makemigrations dojo
       python manage.py migrate
 
-      python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
-      python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
       coverage run --source='dojo' --data-file= manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
       ls -al
       coverage run --source='dojo' -a manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
