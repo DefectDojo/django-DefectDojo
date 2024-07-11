@@ -140,7 +140,7 @@ class CustomReport(View):
             self.finding_notes = (options.include_finding_notes == '1')
             self.finding_images = (options.include_finding_images == '1')
         else:
-            self.report_format = 'AsciiDoc'
+            self.report_format = 'HTML'
             self.finding_notes = True
             self.finding_images = True
 
@@ -152,9 +152,7 @@ class CustomReport(View):
         return CustomReportJsonForm(request.POST)
 
     def get_template(self):
-        if self.report_format == 'AsciiDoc':
-            return 'dojo/custom_asciidoc_report.html',
-        elif self.report_format == 'HTML':
+        if self.report_format == 'HTML':
             return 'dojo/custom_html_report.html'
         else:
             raise PermissionDenied
@@ -277,7 +275,7 @@ def product_endpoint_report(request, pid):
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
-    report_format = request.GET.get('report_type', 'AsciiDoc')
+    report_format = request.GET.get('report_type', 'HTML')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
     include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
@@ -326,30 +324,7 @@ def product_endpoint_report(request, pid):
                                              mitigated__isnull=False)
     if generate:
         report_form = ReportOptionsForm(request.GET)
-        if report_format == 'AsciiDoc':
-            return render(request,
-                          'dojo/asciidoc_report.html',
-                          {'product_type': None,
-                           'product': product,
-                           'accepted_findings': accepted_findings,
-                           'open_findings': open_findings,
-                           'closed_findings': closed_findings,
-                           'verified_findings': verified_findings,
-                           'engagement': None,
-                           'test': None,
-                           'endpoints': endpoints.qs,
-                           'endpoint': None,
-                           'findings': None,
-                           'include_finding_notes': include_finding_notes,
-                           'include_finding_images': include_finding_images,
-                           'include_executive_summary': include_executive_summary,
-                           'include_table_of_contents': include_table_of_contents,
-                           'include_disclaimer': include_disclaimer,
-                           'disclaimer': disclaimer,
-                           'user': request.user,
-                           'title': 'Generate Report',
-                           })
-        elif report_format == 'HTML':
+        if report_format == 'HTML':
             return render(request,
                           template,
                           {'product_type': None,
@@ -413,7 +388,7 @@ def generate_report(request, obj, host_view=False):
             msg = f'Report cannot be generated for object of type {type(obj).__name__}'
             raise Exception(msg)
 
-    report_format = request.GET.get('report_type', 'AsciiDoc')
+    report_format = request.GET.get('report_type', 'HTML')
     include_finding_notes = int(request.GET.get('include_finding_notes', 0))
     include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
@@ -615,30 +590,7 @@ def generate_report(request, obj, host_view=False):
 
     if generate:
         report_form = ReportOptionsForm(request.GET)
-        if report_format == 'AsciiDoc':
-            return render(request,
-                          'dojo/asciidoc_report.html',
-                          {'product_type': product_type,
-                           'product': product,
-                           'engagement': engagement,
-                           'test': test,
-                           'endpoint': endpoint,
-                           'findings': findings.qs.distinct().order_by('numerical_severity'),
-                           'include_finding_notes': include_finding_notes,
-                           'include_finding_images': include_finding_images,
-                           'include_executive_summary': include_executive_summary,
-                           'include_table_of_contents': include_table_of_contents,
-                           'include_disclaimer': include_disclaimer,
-                           'disclaimer': disclaimer,
-                           'user': user,
-                           'team_name': settings.TEAM_NAME,
-                           'title': report_title,
-                           'user_id': request.user.id,
-                           'host': report_url_resolver(request),
-                           'host_view': host_view,
-                           'context': context,
-                           })
-        elif report_format == 'HTML':
+        if report_format == 'HTML':
             return render(request,
                           template,
                           {'product_type': product_type,

@@ -128,10 +128,6 @@ class Widget:
         return
 
     @abc.abstractmethod
-    def get_asciidoc(self):
-        return
-
-    @abc.abstractmethod
     def get_option_form(self):
         return
 
@@ -146,9 +142,6 @@ class PageBreak(Widget):
 
     def get_html(self):
         return mark_safe('<div class="report-page-break">Page Break</div>')
-
-    def get_asciidoc(self):
-        return mark_safe('<br/><<<<br/>')
 
     def get_option_form(self):
         return mark_safe(
@@ -165,9 +158,6 @@ class ReportOptions(Widget):
         self.form = CustomReportOptionsForm()
         self.extra_help = "Choose additional report options. These will apply to the overall report."
         self.widget_class = 'report-options'
-
-    def get_asciidoc(self):
-        return mark_safe('')
 
     def get_html(self):
         return mark_safe('')
@@ -193,11 +183,6 @@ class CoverPage(Widget):
                                                                             "sub_heading": self.sub_heading,
                                                                             "meta_info": self.meta_info})
 
-    def get_asciidoc(self):
-        return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.heading,
-                                                                                "sub_heading": self.sub_heading,
-                                                                                "meta_info": self.meta_info})
-
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
                                                             "multiple": self.multiple,
@@ -217,10 +202,6 @@ class TableOfContents(Widget):
     def get_html(self):
         return render_to_string("dojo/custom_html_toc.html", {"heading": self.heading,
                                                               "depth": self.depth})
-
-    def get_asciidoc(self):
-        return render_to_string("dojo/custom_asciidoc_toc.html", {"heading": self.heading,
-                                                                  "depth": self.depth})
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -247,11 +228,6 @@ class WYSIWYGContent(Widget):
                 "page_break_after": self.page_break_after,
             })
         return mark_safe(html)
-
-    def get_asciidoc(self):
-        asciidoc = render_to_string("dojo/custom_asciidoc_report_wysiwyg_content.html", {"heading": self.heading,
-                                                                                         "content": self.content})
-        return mark_safe(asciidoc)
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -304,15 +280,6 @@ class FindingList(Widget):
             self.paged_findings = get_page_items(self.request, self.findings.qs, 25)
         else:
             self.paged_findings = self.findings
-
-    def get_asciidoc(self):
-        asciidoc = render_to_string("dojo/custom_asciidoc_report_findings.html",
-                                    {"findings": self.findings.qs,
-                                     "host": self.host,
-                                     "include_finding_notes": self.finding_notes,
-                                     "include_finding_images": self.finding_images,
-                                     "user_id": self.user_id})
-        return mark_safe(asciidoc)
 
     def get_html(self):
         html = render_to_string("dojo/custom_html_report_finding_list.html",
@@ -386,15 +353,6 @@ class EndpointList(Widget):
                                  "host": self.host,
                                  "user_id": self.user_id})
         return mark_safe(html)
-
-    def get_asciidoc(self):
-        asciidoc = render_to_string("dojo/custom_asciidoc_report_endpoints.html",
-                                    {"endpoints": self.endpoints.qs,
-                                     "host": self.host,
-                                     "include_finding_notes": self.finding_notes,
-                                     "include_finding_images": self.finding_images,
-                                     "user_id": self.user_id})
-        return mark_safe(asciidoc)
 
     def get_option_form(self):
         html = render_to_string('dojo/report_endpoints.html',
