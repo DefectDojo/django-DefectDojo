@@ -540,7 +540,7 @@ Custom reports, generated with the Report Builder, allow you to select specific 
 5.  Vulnerable Endpoints
 6.  Page Breaks
 
-DefectDojo's reports can be generated in HTML and AsciiDoc.
+DefectDojo's reports can be generated in HTML.
 
 ## Metrics
 

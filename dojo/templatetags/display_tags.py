@@ -115,21 +115,6 @@ def checklist_status(value):
     return Check_List.get_status(value)
 
 
-@register.filter(is_safe=True, needs_autoescape=True)
-@stringfilter
-def linebreaksasciidocbr(value, autoescape=None):
-    """
-    Converts all newlines in a piece of plain text to HTML line breaks
-    (``+ <br />``).
-    """
-    autoescape = autoescape and not isinstance(value, SafeData)
-    value = normalize_newlines(value)
-    if autoescape:
-        value = escape(value)
-
-    return mark_safe(value.replace('\n', '&nbsp;+<br />'))
-
-
 @register.simple_tag
 def dojo_version():
     from dojo import __version__
