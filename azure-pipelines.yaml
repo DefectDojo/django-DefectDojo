@@ -23,7 +23,7 @@ steps:
       # docker run -d -p 3306:3306/tcp -e MYSQL_RANDOM_ROOT_PASSWORD=yes -e MYSQL_DATABASE=test_defectdojo -e MYSQL_USER=defectdojo -e MYSQL_PASSWORD=defectdojo -v defectdojo_data_unit_tests:/var/lib/mysql $(image)
       docker run -d -p 5432:5432/tcp -e POSTGRES_DB=test_defectdojo -e POSTGRES_USER=defectdojo -e POSTGRES_PASSWORD=defectdojo -v defectdojo_data_unit_tests:/var/lib/postgresql/data $(image)
       docker ps
-    displayName: "Start MySQL"
+    displayName: "Start DB"
 
   - bash: |
       set -e
@@ -65,9 +65,8 @@ steps:
 
       #python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
       #python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
-      COVERAGE_FILE=.coverage_1 coverage run --source='dojo' --data-file= manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
-      COVERAGE_FILE=.coverage_2 coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
-      coverage combine
+      coverage run --source='dojo' --data-file= manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
+      coverage run --source='dojo' -a manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
       coverage xml
     displayName: "Unit test"
 
