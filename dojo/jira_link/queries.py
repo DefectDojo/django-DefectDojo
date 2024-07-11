@@ -13,7 +13,7 @@ def get_authorized_jira_projects(permission, user=None):
     if user is None:
         return JIRA_Project.objects.none()
 
-    jira_projects = JIRA_Project.objects.all()
+    jira_projects = JIRA_Project.objects.all().order_by("id")
 
     if user.is_superuser:
         return jira_projects
@@ -82,7 +82,7 @@ def get_authorized_jira_issues(permission):
     if user is None:
         return JIRA_Issue.objects.none()
 
-    jira_issues = JIRA_Issue.objects.all()
+    jira_issues = JIRA_Issue.objects.all().order_by("id")
 
     if user.is_superuser:
         return jira_issues
