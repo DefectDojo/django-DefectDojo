@@ -105,7 +105,6 @@ requests-toolbelt==1.0.0
 smmap==5.0.0
 wcwidth==0.2.6
 kombu==5.3.4
-python-jose==3.3.0
 six==1.16.0
 attrs==23.1.0
 idna==3.7
