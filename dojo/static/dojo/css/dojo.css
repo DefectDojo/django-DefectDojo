@@ -1591,8 +1591,6 @@ ul#sortable1 li div.panel-heading:hover, ul#sortable2 li div.panel-heading:hover
     display: flex;
     align-items: center;
     text-align: center;
-    margin-top: 5px;
-    margin-bottom: 5px;
 }
 
 .report-page-break::before,
