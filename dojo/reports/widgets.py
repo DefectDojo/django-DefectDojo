@@ -109,6 +109,7 @@ class WYSIWYGContentForm(forms.Form):
     heading = forms.CharField(max_length=200, required=False, initial="Custom Content")
     content = forms.CharField(required=False, widget=Div(attrs={'class': 'editor'}))
     hidden_content = forms.CharField(widget=forms.HiddenInput(), required=True)
+    page_break_after = forms.BooleanField(required=False, help_text='Include a page break after the widget')
 
     class Meta:
         exclude = []
@@ -144,7 +145,7 @@ class PageBreak(Widget):
         self.multiple = "true"
 
     def get_html(self):
-        return mark_safe('<hr title="Page Break" class="report-page-break"/>')
+        return mark_safe('<div class="report-page-break">Page Break</div>')
 
     def get_asciidoc(self):
         return mark_safe('<br/><<<<br/>')
