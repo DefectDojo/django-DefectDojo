@@ -155,9 +155,13 @@ function innerData(data, findings_related){
             <td class="cls-transfer-finding-title">${transfer_findings_finding.findings.title}</td>
             <td>${transfer_findings_finding.findings.severity}</td>
             <td>${transfer_findings_finding.findings.cve}</td>`
-            if(transfer_findings_finding.findings.risk_status.includes("Transfer Accepted")){
+            if(["Transfer Accepted", "Transfer Expired"].includes(transfer_findings_finding.findings.risk_status)){
                 row.innerHTML += `<td><a href="http://${host}/finding/${transfer_findings_finding.finding_related}" class="table-link help help-tooltip" title="View transfered finding" target="_blank" type="button"> ${transfer_findings_finding.finding_related} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>`
-                cell_status.innerHTML= `<span class="label label-primary" style="background: green">${transfer_findings_finding.findings.risk_status}</span>`
+                if(transfer_findings_finding.findings.risk_status.includes("Transfer Accepted")){
+                    cell_status.innerHTML= `<span class="label label-primary" style="background: green">${transfer_findings_finding.findings.risk_status}</span>`
+                }else{
+                    cell_status.innerHTML= `<span class="label label-primary" style="background: #e7a100">${transfer_findings_finding.findings.risk_status}</span>`
+                }
             }
             else if(transfer_findings_finding.findings.risk_status.includes("Transfer Reject"))
             {
@@ -168,6 +172,11 @@ function innerData(data, findings_related){
             {
                 row.innerHTML += `${findings_related}`
                 cell_status.innerHTML = `<span class="label label-primary" style="background: #1371B6">Transfer Pending</span>`
+            }
+            else if(transfer_findings_finding.findings.risk_status.includes("Transfer Expired"))
+            {
+                row.innerHTML += `${findings_related}`
+                cell_status.innerHTML = `<span class="label label-primary" style="background: #e7a100">Transfer Expired</span>`
             }
             else
             {

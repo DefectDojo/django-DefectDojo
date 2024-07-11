@@ -313,7 +313,7 @@ def custom_permissions_transfer_findings(user, obj, permission):
         return True
 
     def rule_permissions_transferfinding_accepted(obj, permission):
-        transfer_finding_finding = obj.transfer_findings.filter(findings__risk_status="Transfer Accepted")
+        transfer_finding_finding = obj.transfer_findings.filter(findings__risk_status__in=["Transfer Accepted", "Transfer Expired"])
         result = False
         if transfer_finding_finding:
             if permission in [Permissions.Transfer_Finding_View,

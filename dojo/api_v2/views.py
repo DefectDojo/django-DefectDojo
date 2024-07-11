@@ -1,3 +1,4 @@
+import copy
 import base64
 import logging
 import mimetypes
@@ -170,6 +171,7 @@ from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
 from dojo.user.utils import get_configuration_permissions_codenames
 import dojo.transfer_findings.helper as helper_tf
+from dojo.transfer_findings.notification import Notification as NotificationTransferFinding
 from dojo.utils import (
     async_delete,
     get_setting,
@@ -3358,16 +3360,13 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                         "owner"]
     
     def destroy(self, request, pk=None):
-        try:
-            obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
-            for transfer_finding_finding in obj_transfer_finding_findings:
-                helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
-                helper_tf.reset_finding_related(transfer_finding_finding.findings)
-            super().destroy(request, pk)
-            return http_response.no_content(message="TransferFinding Deleted")
-        except Exception as e:
-            logger.error(e)
-            raise ApiError.not_found(detail=e)
+        transfer_finding = get_object_or_404(TransferFinding, id=pk)
+        obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+        for transfer_finding_finding in obj_transfer_finding_findings:
+            helper_tf.reset_finding_related(transfer_finding_finding.findings)
+        NotificationTransferFinding.transfer_finding_remove(transfer_finding)
+        super().destroy(request, pk)
+        return http_response.no_content(message="TransferFinding Deleted")
 
 
 class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
@@ -3398,16 +3397,16 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
     
     def destroy(self, request, pk=None):
         serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
+        transfer_finding_obj = get_object_or_404(TransferFinding, pk=int(pk))
         if serializer.is_valid():
             if request.data.get('findings'):
                 obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
                 request_findings = request.data["findings"]
                 for transfer_finding_finding in obj_transfer_finding_findings:
                     if str(transfer_finding_finding.findings.id) in request_findings:
-                        helper_tf.send_notification_transfer_finding(transfer_finding_finding.transfer_findings, status="removed")
                         helper_tf.reset_finding_related(transfer_finding_finding.findings)
                         transfer_finding_finding.delete()
-
+                NotificationTransferFinding.transfer_finding_status_changes(transfer_finding_obj)
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
             else:
                 helper_tf.reset_finding_related(pk)

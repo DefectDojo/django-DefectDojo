@@ -1177,11 +1177,15 @@ class TransferFindingForm(forms.ModelForm):
     accepted_by = forms.ModelChoiceField(queryset=Dojo_User.objects.all(), required=True)  # Usar widget Select
 
     def __init__(self, *args, **kwags):
+        product = (kwags.pop("product") if "product" in kwags else None)
         super().__init__(*args, **kwags)
         self.fields["findings"].queryset = get_authorized_findings_by_status(
             Permissions.Transfer_Finding_Add
         )
-        self.fields["destination_product"].queryset = get_products_for_transfer_findings(Permissions.Transfer_Finding_Add)
+        self.fields["destination_product"].queryset = get_products_for_transfer_findings(
+            permission=Permissions.Transfer_Finding_Add,
+            user=None,
+            product=product)
         self.fields["owner"].queryset = get_owner_user()
     
     class Meta:

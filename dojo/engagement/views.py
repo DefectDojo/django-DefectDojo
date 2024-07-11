@@ -92,6 +92,8 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.transfer_findings.notification import Notification as TransferFindingsNotification
+from dojo.transfer_findings.helper import get_sla_expiration_transfer_finding
 from dojo.product.queries import get_authorized_products
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
@@ -1508,7 +1510,7 @@ def add_transfer_finding(request, eid, fid=None):
     if request.method == 'POST':
         request.POST._mutable = True
         data = request.POST
-        form = TransferFindingForm(request.POST, request.FILES)
+        form = TransferFindingForm(request.POST, request.FILES, product=product)
         if form.is_valid():
             try:
                 # Save
@@ -1521,6 +1523,8 @@ def add_transfer_finding(request, eid, fid=None):
                 destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
                 transfer_findings.destination_product_type = destination_product_obj.prod_type
                 transfer_findings.destination_product = destination_product_obj
+                __, expiration_date, __ = get_sla_expiration_transfer_finding()
+                transfer_findings.expiration_date = expiration_date
                 transfer_findings.save()
                 findings = request.POST.getlist('findings')
                 for finding in findings:
@@ -1535,12 +1539,7 @@ def add_transfer_finding(request, eid, fid=None):
                     transfer_finding_finding.save()
                     logger.debug("Risk Transfer created {transfer_finding_finding.name}")
                     # Create notification
-                create_notification(event="transfer_finding",
-                                    title=f"{transfer_findings.title[:30]}",
-                                    icon="check-circle",
-                                    color_icon="#096C11",
-                                    recipients=[transfer_findings.accepted_by.get_username()],
-                                    url=reverse('view_transfer_finding', args=(product.id, )))
+                TransferFindingsNotification.transfer_finding_request(transfer_findings)
                 logger.debug("Transfer Finding send notification {transfer_finding.title}")
 
             except Exception as e:
@@ -1563,7 +1562,8 @@ def add_transfer_finding(request, eid, fid=None):
                                             "owner": request.user.username,
                                             "status": "Transfer Pending",
                                             "severity": finding.severity,
-                                            "owner": request.user})
+                                            "owner": request.user},
+                                   product=product)
 
         form.fields["findings"].queryset = form.fields["findings"].queryset.filter(duplicate=False, test__engagement=origin_engagement, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
