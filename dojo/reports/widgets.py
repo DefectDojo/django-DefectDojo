@@ -51,7 +51,6 @@ class CoverPageForm(forms.Form):
 
 class TableOfContentsForm(forms.Form):
     heading = forms.CharField(max_length=200, required=False, initial="Table of Contents")
-    depth = forms.IntegerField(min_value=1, required=False, max_value=6, initial=4)
 
     class Meta:
         exclude = []
@@ -200,8 +199,7 @@ class TableOfContents(Widget):
         self.help_text = "The table of contents includes a page break after its content."
 
     def get_html(self):
-        return render_to_string("dojo/custom_html_toc.html", {"heading": self.heading,
-                                                              "depth": self.depth})
+        return render_to_string("dojo/custom_html_toc.html", {"heading": self.heading})
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -413,14 +411,15 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                                                                               finding_images=finding_images,
                                                                               host=host, user_id=user_id)
 
-        if list(widget.keys())[0] == 'wysiwyg-content':
+        if list(widget.keys())[0] == 'custom-content':
             wysiwyg_content = WYSIWYGContent(request=request)
             wysiwyg_content.heading = \
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)['value']
             wysiwyg_content.content = \
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'hidden_content'), None)['value']
             wysiwyg_content.page_break_after = \
-                next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'page_break_after'), None)['value']
+                next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'page_break_after'),
+                     {'value': False})['value']
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = wysiwyg_content
         if list(widget.keys())[0] == 'report-options':
             options = ReportOptions(request=request)
@@ -439,8 +438,6 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             toc = TableOfContents(request=request)
             toc.heading = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)[
                 'value']
-            toc.depth = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'depth'), None)['value']
-            toc.depth = int(toc.depth) + 1
             selected_widgets[list(widget.keys())[0]] = toc
         if list(widget.keys())[0] == 'cover-page':
             cover_page = CoverPage(request=request)
