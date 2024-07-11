@@ -65,8 +65,8 @@ steps:
 
       #python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
       #python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
-      coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
-      coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
+      COVERAGE_FILE=.coverage_1 coverage run --source='dojo' --data-file= manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
+      COVERAGE_FILE=.coverage_2 coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
       coverage combine
       coverage xml
     displayName: "Unit test"
