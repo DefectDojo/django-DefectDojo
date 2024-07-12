@@ -51,7 +51,6 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in missing_tests:
                 logger.info(test)
-            logger.info()
         assert len(missing_tests) == 0
 
     def test_check_for_doc(self):
@@ -79,7 +78,6 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs\n")
             for tool in missing_docs:
                 logger.info(tool)
-            logger.info()
         assert len(missing_docs) == 0
 
     def test_check_for_forms(self):
@@ -117,7 +115,6 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/forms.py\n")
             for tool in missing_forms:
                 logger.info(tool)
-            logger.info()
         assert len(missing_forms) == 0
 
     @unittest.skip("Deprecated since Dynamic Parser infrastructure")
@@ -158,7 +155,6 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/templates/dojo/import_scan_results.html\n")
             for tool in missing_templates:
                 logger.info(tool)
-            logger.info()
         assert len(missing_templates) == 0
 
     def test_engagement_import_scan_result(self):
@@ -244,7 +240,6 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in failed_tests:
                 logger.info(test)
-            logger.info()
         assert len(failed_tests) == 0
 
     def tearDown(self):

@@ -109,8 +109,7 @@ class Main:
         logger.info(summary)
 
         for url in sort_by_url:
-            logger.info()
-            logger.info(url)
+            logger.info("\n" + url)
 
             results = PrettyTable(["Risk", "Description"])
             results.padding_width = 1
