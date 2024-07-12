@@ -16,13 +16,15 @@ RUN \
     bind-tools \
     mysql-client \
     mariadb-dev \
-    postgresql14-client \
+    postgresql16-client \
     xmlsec \
     git \
     util-linux \
     curl-dev \
     openssl \
     libffi-dev \
+    python3-dev \
+    libpq-dev \
     && \
     rm -rf /var/cache/apk/* && \
   true
