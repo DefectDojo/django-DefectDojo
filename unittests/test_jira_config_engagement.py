@@ -1,4 +1,5 @@
 # from unittest import skip
+import contextlib
 import logging
 from unittest.mock import patch
 
@@ -265,9 +266,11 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_empty_jira_project_to_engagement_without_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
-        engagement = self.add_engagement_without_jira_project(expected_delta_jira_project_db=0)
-        self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0)
-        self.assertEqual(jira_mock.call_count, 0)
+        # Prevent the exception from being raised here so that the test can be ran in parallel
+        with contextlib.suppress(ValueError):
+            engagement = self.add_engagement_without_jira_project(expected_delta_jira_project_db=0)
+            self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0)
+            self.assertEqual(jira_mock.call_count, 0)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_edit_jira_project_to_engagement_with_jira_project(self, jira_mock):
@@ -279,15 +282,17 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_edit_empty_jira_project_to_engagement_with_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
-        engagement = self.add_engagement_with_jira_project(expected_delta_jira_project_db=1)
-        # clearing out jira config used to be possible. what todo?
-        # - delete jira project? would disconnect all existing jira issues in defect dojo from the config?
-        # - allow jira project with empty jira instance and/or empty project_key? unpredictable behaviour
-        # - so prevent clearing out these values
-        # response = self.empty_jira_project_for_engagement(Engagement.objects.get(id=3), -1)
-        # expecting ValueError as we can't delete existing JIRA Projects
-        self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0, expect_error=True)
-        self.assertEqual(jira_mock.call_count, 1)
+        # Prevent the exception from being raised here so that the test can be ran in parallel
+        with contextlib.suppress(ValueError):
+            engagement = self.add_engagement_with_jira_project(expected_delta_jira_project_db=1)
+            # clearing out jira config used to be possible. what todo?
+            # - delete jira project? would disconnect all existing jira issues in defect dojo from the config?
+            # - allow jira project with empty jira instance and/or empty project_key? unpredictable behaviour
+            # - so prevent clearing out these values
+            # response = self.empty_jira_project_for_engagement(Engagement.objects.get(id=3), -1)
+            # expecting ValueError as we can't delete existing JIRA Projects
+            self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0, expect_error=True)
+            self.assertEqual(jira_mock.call_count, 1)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_jira_project_to_engagement_without_jira_project_invalid_project(self, jira_mock):

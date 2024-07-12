@@ -211,10 +211,13 @@ class PrefetchDojoModelViewSet(
 # Authorization: authenticated users
 class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.RoleSerializer
-    queryset = Role.objects.all()
+    queryset = Role.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name"]
     permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return Role.objects.all().order_by('id')
 
 
 # Authorization: object-based
@@ -316,6 +319,9 @@ class GlobalRoleViewSet(
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "user", "group", "role"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Global_Role.objects.all().order_by("id")
 
 
 # Authorization: object-based
@@ -755,8 +761,10 @@ class CredentialsViewSet(
     serializer_class = serializers.CredentialSerializer
     queryset = Cred_User.objects.all()
     filter_backends = (DjangoFilterBackend,)
-
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Cred_User.objects.all().order_by("id")
 
 
 # Authorization: configuration
@@ -782,10 +790,13 @@ class FindingTemplatesViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.FindingTemplateSerializer
-    queryset = Finding_Template.objects.all()
+    queryset = Finding_Template.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiTemplateFindingFilter
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
+
+    def get_queryset(self):
+        return Finding_Template.objects.all().order_by("id")
 
 
 # Authorization: object-based
@@ -1506,10 +1517,13 @@ class JiraInstanceViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.JIRAInstanceSerializer
-    queryset = JIRA_Instance.objects.all()
+    queryset = JIRA_Instance.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "url"]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
+
+    def get_queryset(self):
+        return JIRA_Instance.objects.all().order_by("id")
 
 
 # Authorization: object-based
@@ -1570,10 +1584,13 @@ class SonarqubeIssueViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.SonarqubeIssueSerializer
-    queryset = Sonarqube_Issue.objects.all()
+    queryset = Sonarqube_Issue.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "key", "status", "type"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Sonarqube_Issue.objects.all().order_by("id")
 
 
 # Authorization: superuser
@@ -1581,7 +1598,7 @@ class SonarqubeIssueTransitionViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.SonarqubeIssueTransitionSerializer
-    queryset = Sonarqube_Issue_Transition.objects.all()
+    queryset = Sonarqube_Issue_Transition.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = [
         "id",
@@ -1591,6 +1608,9 @@ class SonarqubeIssueTransitionViewSet(
         "transitions",
     ]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Sonarqube_Issue_Transition.objects.all().order_by("id")
 
 
 # Authorization: object-based
@@ -1662,9 +1682,6 @@ class DojoMetaViewSet(
         IsAuthenticated,
         permissions.UserHasDojoMetaPermission,
     )
-    # swagger_schema = prefetch.get_prefetch_schema(
-    #     ["metadata_list", "metadata_read"], serializers.MetaSerializer
-    # ).to_schema()
 
     def get_queryset(self):
         return get_authorized_dojo_meta(Permissions.Product_View)
@@ -2133,9 +2150,12 @@ class DevelopmentEnvironmentViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.DevelopmentEnvironmentSerializer
-    queryset = Development_Environment.objects.all()
+    queryset = Development_Environment.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Development_Environment.objects.all().order_by("id")
 
 
 # Authorization: object-based
@@ -2348,12 +2368,15 @@ class TestTypesViewSet(
     viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.TestTypeSerializer
-    queryset = Test_Type.objects.all()
+    queryset = Test_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = [
         "name",
     ]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Test_Type.objects.all().order_by("id")
 
 
 @extend_schema_view(
@@ -2442,7 +2465,7 @@ class ToolConfigurationsViewSet(
     PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.ToolConfigurationSerializer
-    queryset = Tool_Configuration.objects.all()
+    queryset = Tool_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = [
         "id",
@@ -2452,6 +2475,9 @@ class ToolConfigurationsViewSet(
         "authentication_type",
     ]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
+
+    def get_queryset(self):
+        return Tool_Configuration.objects.all().order_by("id")
 
 
 # Authorization: object-based
@@ -2483,10 +2509,13 @@ class ToolTypesViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.ToolTypeSerializer
-    queryset = Tool_Type.objects.all()
+    queryset = Tool_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name", "description"]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
+
+    def get_queryset(self):
+        return Tool_Type.objects.all().order_by("id")
 
 
 # Authorization: authenticated, configuration
@@ -2494,10 +2523,13 @@ class RegulationsViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.RegulationSerializer
-    queryset = Regulation.objects.all()
+    queryset = Regulation.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name", "description"]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Regulation.objects.all().order_by("id")
 
 
 # Authorization: configuration
@@ -2505,7 +2537,7 @@ class UsersViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.UserSerializer
-    queryset = User.objects.all()
+    queryset = User.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = [
         "id",
@@ -2517,6 +2549,9 @@ class UsersViewSet(
         "is_superuser",
     ]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
+
+    def get_queryset(self):
+        return User.objects.all().order_by("id")
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -2558,10 +2593,13 @@ class UserContactInfoViewSet(
     PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.UserContactInfoSerializer
-    queryset = UserContactInfo.objects.all()
+    queryset = UserContactInfo.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = "__all__"
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return UserContactInfo.objects.all().order_by("id")
 
 
 # Authorization: authenticated users
@@ -2677,7 +2715,7 @@ class EndpointMetaImporterView(
 
     serializer_class = serializers.EndpointMetaImporterSerializer
     parser_classes = [MultiPartParser]
-    queryset = Product.objects.all()
+    queryset = Product.objects.none()
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasMetaImportPermission,
@@ -2695,10 +2733,13 @@ class LanguageTypeViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.LanguageTypeSerializer
-    queryset = Language_Type.objects.all()
+    queryset = Language_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "language", "color"]
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
+
+    def get_queryset(self):
+        return Language_Type.objects.all().order_by("id")
 
 
 # Authorization: object-based
@@ -2829,7 +2870,7 @@ class NoteTypeViewSet(
     DojoModelViewSet,
 ):
     serializer_class = serializers.NoteTypeSerializer
-    queryset = Note_Type.objects.all()
+    queryset = Note_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = [
         "id",
@@ -2841,6 +2882,9 @@ class NoteTypeViewSet(
     ]
     permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
 
+    def get_queryset(self):
+        return Note_Type.objects.all().order_by("id")
+
 
 # Authorization: superuser
 class NotesViewSet(
@@ -2848,7 +2892,7 @@ class NotesViewSet(
     viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.NoteSerializer
-    queryset = Notes.objects.all()
+    queryset = Notes.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = [
         "id",
@@ -2861,6 +2905,9 @@ class NotesViewSet(
         "editor",
     ]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Notes.objects.all().order_by("id")
 
 
 def report_generate(request, obj, options):
@@ -2989,7 +3036,7 @@ def report_generate(request, obj, options):
         report_name = "Finding"
 
     else:
-        raise Http404()
+        raise Http404
 
     result = {
         "product_type": product_type,
@@ -3158,7 +3205,10 @@ class SystemSettingsViewSet(
 
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
     serializer_class = serializers.SystemSettingsSerializer
-    queryset = System_Settings.objects.all()
+    queryset = System_Settings.objects.none()
+
+    def get_queryset(self):
+        return System_Settings.objects.all().order_by("id")
 
 
 # Authorization: superuser
@@ -3190,10 +3240,13 @@ class NotificationsViewSet(
     PrefetchDojoModelViewSet,
 ):
     serializer_class = serializers.NotificationsSerializer
-    queryset = Notifications.objects.all()
+    queryset = Notifications.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "user", "product", "template"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Notifications.objects.all().order_by("id")
 
 
 class EngagementPresetsViewset(
@@ -3212,29 +3265,17 @@ class EngagementPresetsViewset(
         return get_authorized_engagement_presets(Permissions.Product_View)
 
 
-class EngagementCheckListViewset(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.EngagementCheckListSerializer
-    queryset = Check_List.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasEngagementPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_engagement_checklists(Permissions.Product_View)
-
-
 class NetworkLocationsViewset(
     DojoModelViewSet,
 ):
     serializer_class = serializers.NetworkLocationsSerializer
-    queryset = Network_Locations.objects.all()
+    queryset = Network_Locations.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "location"]
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Network_Locations.objects.all().order_by("id")
 
 
 # Authorization: superuser
@@ -3242,21 +3283,27 @@ class ConfigurationPermissionViewSet(
     viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.ConfigurationPermissionSerializer
-    queryset = Permission.objects.filter(
-        codename__in=get_configuration_permissions_codenames()
-    )
+    queryset = Permission.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id", "name", "codename"]
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return Permission.objects.filter(
+            codename__in=get_configuration_permissions_codenames()
+        ).order_by("id")
 
 
 class SLAConfigurationViewset(
     DojoModelViewSet,
 ):
     serializer_class = serializers.SLAConfigurationSerializer
-    queryset = SLA_Configuration.objects.all()
+    queryset = SLA_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return SLA_Configuration.objects.all().order_by("id")
 
 
 class QuestionnaireQuestionViewSet(
@@ -3264,12 +3311,15 @@ class QuestionnaireQuestionViewSet(
     dojo_mixins.QuestionSubClassFieldsMixin,
 ):
     serializer_class = serializers.QuestionnaireQuestionSerializer
-    queryset = Question.objects.all()
+    queryset = Question.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
         permissions.UserHasEngagementPermission,
         DjangoModelPermissions,
     )
+
+    def get_queryset(self):
+        return Question.objects.all().order_by("id")
 
 
 class QuestionnaireAnswerViewSet(
@@ -3277,36 +3327,45 @@ class QuestionnaireAnswerViewSet(
     dojo_mixins.AnswerSubClassFieldsMixin,
 ):
     serializer_class = serializers.QuestionnaireAnswerSerializer
-    queryset = Answer.objects.all()
+    queryset = Answer.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
         permissions.UserHasEngagementPermission,
         DjangoModelPermissions,
     )
+
+    def get_queryset(self):
+        return Answer.objects.all().order_by("id")
 
 
 class QuestionnaireGeneralSurveyViewSet(
     viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.QuestionnaireGeneralSurveySerializer
-    queryset = General_Survey.objects.all()
+    queryset = General_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
         permissions.UserHasEngagementPermission,
         DjangoModelPermissions,
     )
+
+    def get_queryset(self):
+        return General_Survey.objects.all().order_by("id")
 
 
 class QuestionnaireEngagementSurveyViewSet(
     viewsets.ReadOnlyModelViewSet
 ):
     serializer_class = serializers.QuestionnaireEngagementSurveySerializer
-    queryset = Engagement_Survey.objects.all()
+    queryset = Engagement_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
         permissions.UserHasEngagementPermission,
         DjangoModelPermissions,
     )
+
+    def get_queryset(self):
+        return Engagement_Survey.objects.all().order_by("id")
 
 
 class QuestionnaireAnsweredSurveyViewSet(
@@ -3315,23 +3374,15 @@ class QuestionnaireAnsweredSurveyViewSet(
     viewsets.ReadOnlyModelViewSet,
 ):
     serializer_class = serializers.QuestionnaireAnsweredSurveySerializer
-    queryset = Answered_Survey.objects.all()
+    queryset = Answered_Survey.objects.none()
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (
         permissions.UserHasEngagementPermission,
         DjangoModelPermissions,
     )
 
-
-# Authorization: configuration
-class AnnouncementViewSet(
-    DojoModelViewSet
-):
-    serializer_class = serializers.AnnouncementSerializer
-    queryset = Announcement.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = "__all__"
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
+    def get_queryset(self):
+        return Answered_Survey.objects.all().order_by("id")
 
 
 # Authorization: configuration
@@ -3339,10 +3390,13 @@ class AnnouncementViewSet(
     DojoModelViewSet
 ):
     serializer_class = serializers.AnnouncementSerializer
-    queryset = Announcement.objects.all()
+    queryset = Announcement.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = "__all__"
     permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
+
+    def get_queryset(self):
+        return Announcement.objects.all().order_by("id")
 
 
 class TransferFindingViewSet(prefetch.PrefetchListMixin,

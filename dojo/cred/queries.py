@@ -12,7 +12,7 @@ def get_authorized_cred_mappings(permission, queryset=None):
         return Cred_Mapping.objects.none()
 
     if queryset is None:
-        cred_mappings = Cred_Mapping.objects.all()
+        cred_mappings = Cred_Mapping.objects.all().order_by("id")
     else:
         cred_mappings = queryset
 

@@ -300,7 +300,7 @@ def prefetch_for_expiration(risk_acceptances):
 
 def simple_risk_accept(finding, perform_save=True):
     if not finding.test.engagement.product.enable_simple_risk_acceptance:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     logger.debug('accepting finding %i:%s', finding.id, finding)
     finding.risk_accepted = True
@@ -361,7 +361,7 @@ def risk_accept_provider(
         acceptance_days: int,
         url: str,
         header: str,
-        token: str,
+        token: str
     ):
     logger.info(f"Making risk accept for {finding_id} provider: {provider}")
     formatted_url = url + f'{provider}?vulnerabilityId={finding_id}&acceptanceDays={acceptance_days}'
