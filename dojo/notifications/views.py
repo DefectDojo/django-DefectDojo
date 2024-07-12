@@ -137,7 +137,7 @@ class TemplateNotificationsView(SystemNotificationsView):
 class NotificationWebhooksView(View):
 
     def check_webhooks_enabled(self):
-        if not get_system_setting('enable_webhooks_notifications'):
+        if not get_system_setting("enable_webhooks_notifications"):
             raise Http404
 
     def check_user_permissions(self, request: HttpRequest):
@@ -170,19 +170,19 @@ class NotificationWebhooksView(View):
 
 class ListNotificationWebhooksView(NotificationWebhooksView):
     template = "dojo/view_notification_webhooks.html"
-    permission = 'dojo.view_notification_webhooks'
+    permission = "dojo.view_notification_webhooks"
     breadcrumb = "Notification Webhook List"
 
     def get_initial_context(self, request: HttpRequest, nwhs: Notification_Webhooks):
         return {
-            'name': 'Notification Webhook List',
-            'metric': False,
-            'user': request.user,
-            'nwhs': nwhs,
+            "name": "Notification Webhook List",
+            "metric": False,
+            "user": request.user,
+            "nwhs": nwhs,
         }
 
     def get_notification_webhooks(self, request: HttpRequest):
-        nwhs = Notification_Webhooks.objects.all().order_by('name')
+        nwhs = Notification_Webhooks.objects.all().order_by("name")
         # TODO finished pagination
         # TODO restrict based on user - not only superadmins have access and they see everything
         return nwhs
@@ -201,17 +201,17 @@ class ListNotificationWebhooksView(NotificationWebhooksView):
 
 
 class AddNotificationWebhooksView(NotificationWebhooksView):
-    template = 'dojo/add_notification_webhook.html'
-    permission = 'dojo.add_notification_webhooks'
+    template = "dojo/add_notification_webhook.html"
+    permission = "dojo.add_notification_webhooks"
     breadcrumb = "Add Notification Webhook"
 
     # TODO Disable Owner if not superadmin
 
     def get_initial_context(self, request: HttpRequest):
         return {
-            'name': 'Add Notification Webhook',
-            'user': request.user,
-            'form': self.get_form(request),
+            "name": "Add Notification Webhook",
+            "user": request.user,
+            "form": self.get_form(request),
         }
 
     def process_form(self, request: HttpRequest, context: dict):
@@ -223,8 +223,8 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    _('Test of endpoint was not successful: %(error)s') % {'error': str(e)},
-                    extra_tags='alert-danger',
+                    _("Test of endpoint was not successful: %(error)s") % {"error": str(e)},
+                    extra_tags="alert-danger",
                 )
                 return request, False
             else:
@@ -239,7 +239,7 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    _('Notification Webhook added successfully.'),
+                    _("Notification Webhook added successfully."),
                     extra_tags="alert-success",
                 )
                 return request, True
@@ -271,8 +271,8 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
 
 
 class EditNotificationWebhooksView(NotificationWebhooksView):
-    template = 'dojo/edit_notification_webhook.html'
-    permission = 'dojo.change_notification_webhooks'
+    template = "dojo/edit_notification_webhook.html"
+    permission = "dojo.change_notification_webhooks"
     # TODO this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
     breadcrumb = "Edit Notification Webhook"
 
@@ -283,24 +283,24 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
 
     def get_initial_context(self, request: HttpRequest, nwh: Notification_Webhooks):
         return {
-            'name': 'Edit Notification Webhook',
-            'user': request.user,
-            'form': self.get_form(request, instance=nwh),
-            'nwh': nwh,
+            "name": "Edit Notification Webhook",
+            "user": request.user,
+            "form": self.get_form(request, instance=nwh),
+            "nwh": nwh,
         }
 
     def process_form(self, request: HttpRequest, nwh: Notification_Webhooks, context: dict):
         form = context["form"]
-        if 'deactivate_webhook' in request.POST:  # TODO add this to API as well
+        if "deactivate_webhook" in request.POST:  # TODO add this to API as well
             nwh.status = Notification_Webhooks.STATUS_INACTIVE_PERMANENT
             nwh.first_error = None
             nwh.last_error = None
-            nwh.note = 'Deactivate from UI'
+            nwh.note = "Deactivate from UI"
             nwh.save()
             messages.add_message(
                                     request,
                                     messages.SUCCESS,
-                                    _('Notification Webhook deactivated successfully.'),
+                                    _("Notification Webhook deactivated successfully."),
                                     extra_tags="alert-success",
                                 )
             return request, True
@@ -312,8 +312,8 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    _('Test of endpoint was not successful: %(error)s') % {'error': str(e)},
-                    extra_tags='alert-danger')
+                    _("Test of endpoint was not successful: %(error)s") % {"error": str(e)},
+                    extra_tags="alert-danger")
                 return request, False
             else:
                 # correct definition reset defaults
@@ -326,7 +326,7 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    _('Notification Webhook updated successfully.'),
+                    _("Notification Webhook updated successfully."),
                     extra_tags="alert-success",
                 )
                 return request, True
@@ -360,8 +360,8 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
 
 
 class DeleteNotificationWebhooksView(NotificationWebhooksView):
-    template = 'dojo/delete_notification_webhook.html'
-    permission = 'dojo.delete_notification_webhooks'
+    template = "dojo/delete_notification_webhook.html"
+    permission = "dojo.delete_notification_webhooks"
     # TODO this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
     breadcrumb = "Edit Notification Webhook"
 
@@ -382,8 +382,8 @@ class DeleteNotificationWebhooksView(NotificationWebhooksView):
 
     def get_initial_context(self, request: HttpRequest, nwh: Notification_Webhooks):
         return {
-            'form': self.get_form(request, instance=nwh),
-            'nwh': nwh,
+            "form": self.get_form(request, instance=nwh),
+            "nwh": nwh,
         }
 
     def process_form(self, request: HttpRequest, nwh: Notification_Webhooks, context: dict):
@@ -393,7 +393,7 @@ class DeleteNotificationWebhooksView(NotificationWebhooksView):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Notification Webhook deleted successfully.'),
+                _("Notification Webhook deleted successfully."),
                 extra_tags="alert-success",
             )
             return request, True
