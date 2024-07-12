@@ -147,6 +147,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             test_import_history,
         )
 
+    def determine_deduplication_algorithm(self) -> str:
+        """
+        Determines what dedupe algorithm to use for the Test being processed.
+        :return: A string representing the dedupe algorithm to use.
+        """
+        return self.test.deduplication_algorithm
+
     def process_findings(
         self,
         parsed_findings: List[Finding],
@@ -160,7 +167,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         at import time
         """
 
-        self.deduplication_algorithm = self.test.deduplication_algorithm
+        self.deduplication_algorithm = self.determine_deduplication_algorithm()
         self.original_items = list(self.test.finding_set.all())
         self.new_items = []
         self.reactivated_items = []
