@@ -3002,12 +3002,12 @@ class AnnouncementTest(BaseClass.BaseClassTest):
 
 
 class NotificationWebhooksTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Notification_Webhooks
-        self.endpoint_path = 'notification_webhooks'
-        self.viewname = 'notification_webhooks'
+        self.endpoint_path = "notification_webhooks"
+        self.viewname = "notification_webhooks"
         self.viewset = NotificationWebhooksViewSet
         self.payload = {
             "name": "My endpoint",

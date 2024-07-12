@@ -355,7 +355,7 @@ class System_Settings(models.Model):
 
     enable_webhooks_notifications = \
         models.BooleanField(default=False,
-                            verbose_name=_('Enable Webhook notifications'),
+                            verbose_name=_("Enable Webhook notifications"),
                             blank=False)
     webhooks_notifications_timeout = models.IntegerField(default=60,
                                           help_text=_("How many seconds will DefectDojo waits for response from webhook endpoint"))
@@ -4131,21 +4131,21 @@ class Notification_Webhooks(models.Model):
         (STATUS_INACTIVE_TMP, "Temporary inactive because of 5xx (or similar) error"),
         (STATUS_INACTIVE_PERMANENT, "Permanently inactive"),
     )
-    name = models.CharField(max_length=100, default='', blank=False, unique=True,
-                                    help_text=_('Name of the incoming webhook'))
-    url = models.URLField(max_length=200, default='', blank=False,
-                                    help_text=_('The full URL of the incoming webhook'))
-    header_name = models.CharField(max_length=100, default='', blank=True, null=True,
-                                   help_text=_('Name of the header required for interacting with Webhook endpoint'))
-    header_value = models.CharField(max_length=100, default='', blank=True, null=True,
-                                   help_text=_('Content of the header required for interacting with Webhook endpoint'))
+    name = models.CharField(max_length=100, default="", blank=False, unique=True,
+                                    help_text=_("Name of the incoming webhook"))
+    url = models.URLField(max_length=200, default="", blank=False,
+                                    help_text=_("The full URL of the incoming webhook"))
+    header_name = models.CharField(max_length=100, default="", blank=True, null=True,
+                                   help_text=_("Name of the header required for interacting with Webhook endpoint"))
+    header_value = models.CharField(max_length=100, default="", blank=True, null=True,
+                                   help_text=_("Content of the header required for interacting with Webhook endpoint"))
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active", blank=False,
-                              help_text=_('Status of the incoming webhook'))
-    first_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened first time'), blank=True, null=True)
-    last_error = models.DateTimeField(help_text=_('If endpoint is active, when error happened last time'), blank=True, null=True)
-    note = models.CharField(max_length=1000, default='', blank=True, null=True, help_text=_('Description of the latest error'))
+                              help_text=_("Status of the incoming webhook"))
+    first_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened first time"), blank=True, null=True)
+    last_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened last time"), blank=True, null=True)
+    note = models.CharField(max_length=1000, default="", blank=True, null=True, help_text=_("Description of the latest error"))
     owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
-                              help_text=_('Owner/receiver of notification, if empty processed as system notification'))
+                              help_text=_("Owner/receiver of notification, if empty processed as system notification"))
 
 
 class Tool_Product_Settings(models.Model):
@@ -4620,7 +4620,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Risk_Acceptance)
     auditlog.register(Finding_Template)
     auditlog.register(Cred_User, exclude_fields=["password"])
-    auditlog.register(Notification_Webhooks, exclude_fields=['header_name', 'header_value'])
+    auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
 
 from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
 

@@ -158,7 +158,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
         logger.debug("Rendering from the template %s", template)
     except TemplateDoesNotExist as e:
         # In some cases, template includes another templates, if the interior one is missing, we will see it in "specifically" section
-        logger.debug(f'template not found or not implemented yet: {template} (specifically: {e.args})')
+        logger.debug(f"template not found or not implemented yet: {template} (specifically: {e.args})")
     except Exception as e:
         logger.error("error during rendering of template %s exception is %s", template, e)
     finally:
@@ -197,8 +197,8 @@ def process_notifications(event, notifications=None, **kwargs):
         logger.debug("Sending Mail Notification")
         send_mail_notification(event, notifications.user, **kwargs)
 
-    if webhooks_enabled and 'webhooks' in getattr(notifications, event, getattr(notifications, 'other')):
-        logger.debug('Sending Webhooks Notification')
+    if webhooks_enabled and "webhooks" in getattr(notifications, event, getattr(notifications, "other")):
+        logger.debug("Sending Webhooks Notification")
         send_webhooks_notification(event, notifications.user, **kwargs)
 
     if "alert" in getattr(notifications, event, getattr(notifications, "other")):
@@ -327,41 +327,6 @@ def send_mail_notification(event, user=None, *args, **kwargs):
         log_alert(e, "Email Notification", title=kwargs["title"], description=str(e), url=kwargs["url"])
 
 
-@dojo_async_task
-@app.task
-def send_webhooks_notification(event, user=None, *args, **kwargs):
-    from dojo.utils import get_system_setting
-
-    try:
-        if get_system_setting('webhooks_url') is not None:
-            logger.debug('sending webhook message')
-            headers={
-                "User-Agent": f"DefectDojo-{dd_version}",
-                "X-DefectDojo-Event": event,
-                "X-DefectDojo-Instance": settings.SITE_URL,
-            }
-            if get_system_setting('webhooks_token') is not None:
-                headers["X-DefectDojo-Token"] = get_system_setting('webhooks_token')
-            if user:
-                headers["X-DefectDojo-User"] = user
-            res = requests.request(
-                method='POST',
-                url=get_system_setting('webhooks_url'),
-                headers=headers,
-                data=create_notification_message(event, user, 'webhooks', *args, **kwargs))
-            if res.status_code != 200:
-                logger.error("Error when sending message to Webhooks")
-                logger.error(res.status_code)
-                logger.error(res.text)
-                raise RuntimeError('Error posting message to Webhooks: ' + res.text)
-        else:
-            logger.info('URL for Webhooks not configured: skipping system notification')
-    except Exception as e:
-        logger.exception(e)
-        log_alert(e, "Webhooks Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
-        pass
-
-
 def webhooks_notification_request(endpoint, event, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -373,13 +338,13 @@ def webhooks_notification_request(endpoint, event, *args, **kwargs):
     }
     if endpoint.header_name is not None:
         headers[endpoint.header_name] = endpoint.header_value
-    yaml_data = create_notification_message(event, endpoint.owner, 'webhooks', *args, **kwargs)
+    yaml_data = create_notification_message(event, endpoint.owner, "webhooks", *args, **kwargs)
     data = yaml.safe_load(yaml_data)
 
-    timeout = get_system_setting('webhooks_notifications_timeout')
+    timeout = get_system_setting("webhooks_notifications_timeout")
 
     res = requests.request(
-        method='POST',
+        method="POST",
         url=endpoint.url,
         headers=headers,
         json=data,
@@ -389,7 +354,7 @@ def webhooks_notification_request(endpoint, event, *args, **kwargs):
 
 
 def test_webhooks_notification(endpoint):
-    res = webhooks_notification_request(endpoint, 'ping', description="Test webhook notification")
+    res = webhooks_notification_request(endpoint, "ping", description="Test webhook notification")
     res.raise_for_status()
     # in "send_webhooks_notification", we are doing deeper analysis, why it failed
     # for now, "raise_for_status" should be enough
@@ -397,7 +362,7 @@ def test_webhooks_notification(endpoint):
 
 @app.task(ignore_result=True)
 def webhook_reactivation(*args, **kwargs):
-    endpoint = Notification_Webhooks.objects.get(pk=kwargs.get('endpoint_id'))
+    endpoint = Notification_Webhooks.objects.get(pk=kwargs.get("endpoint_id"))
 
     # User already changed status of endpoint
     if endpoint.status != Notification_Webhooks.STATUS_INACTIVE_TMP:
@@ -420,7 +385,7 @@ def webhook_status_cleanup(*args, **kwargs):
         endpoint.status = Notification_Webhooks.STATUS_ACTIVE
         endpoint.first_error = None
         endpoint.last_error = None
-        endpoint.note = f'Reactivation from {Notification_Webhooks.STATUS_ACTIVE_TMP}'
+        endpoint.note = f"Reactivation from {Notification_Webhooks.STATUS_ACTIVE_TMP}"
         endpoint.save()
         logger.debug(f"Webhook endpoint '{endpoint.name}' reactivated from '{Notification_Webhooks.STATUS_ACTIVE_TMP}' to '{Notification_Webhooks.STATUS_ACTIVE}'")
 
@@ -439,8 +404,8 @@ def webhook_status_cleanup(*args, **kwargs):
 @app.task
 def send_webhooks_notification(event, user=None, *args, **kwargs):
 
-    ERROR_PERMANENT = 'permanent'
-    ERROR_TEMPORARY = 'temporary'
+    ERROR_PERMANENT = "permanent"
+    ERROR_TEMPORARY = "temporary"
 
     endpoints = Notification_Webhooks.objects.filter(owner=user)
 
@@ -502,7 +467,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
                 endpoint.status = Notification_Webhooks.STATUS_INACTIVE_TMP
 
                 # In case of failure within one day, endpoint can be deactivated temporally only for one minute
-                webhook_reactivation.apply_async(kwargs={'endpoint_id': endpoint.pk}, countdown=60)
+                webhook_reactivation.apply_async(kwargs={"endpoint_id": endpoint.pk}, countdown=60)
 
         # There is no reason to keep endpoint active if it is returning 4xx errors
         else:
