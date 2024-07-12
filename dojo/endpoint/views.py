@@ -28,6 +28,7 @@ from dojo.utils import (
     calculate_grade,
     get_page_items,
     get_period_counts,
+    get_setting,
     get_system_setting,
     is_scan_file_too_large,
     redirect,
@@ -223,9 +224,12 @@ def delete_endpoint(request, eid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([endpoint])
-    rels = collector.nested()
+    rels = ["Previewing the relationships has been disabled.", ""]
+    display_preview = get_setting("DELETE_PREVIEW")
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([endpoint])
+        rels = collector.nested()
 
     product_tab = Product_Tab(endpoint.product, "Delete Endpoint", tab="endpoints")
 

@@ -24,7 +24,7 @@ from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.forms import DeleteJIRAInstanceForm, ExpressJIRAForm, JIRAForm
 from dojo.models import JIRA_Instance, JIRA_Issue, Notes, System_Settings, User
 from dojo.notifications.helper import create_notification
-from dojo.utils import add_breadcrumb, add_error_message_to_response
+from dojo.utils import add_breadcrumb, add_error_message_to_response, get_setting
 
 logger = logging.getLogger(__name__)
 
@@ -515,9 +515,12 @@ class DeleteJiraView(View):
             raise PermissionDenied
         jira_instance = get_object_or_404(JIRA_Instance, pk=tid)
         form = self.get_form_class()(instance=jira_instance)
-        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-        collector.collect([jira_instance])
-        rels = collector.nested()
+        rels = ["Previewing the relationships has been disabled.", ""]
+        display_preview = get_setting("DELETE_PREVIEW")
+        if display_preview:
+            collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+            collector.collect([jira_instance])
+            rels = collector.nested()
 
         add_breadcrumb(title="Delete", top_level=False, request=request)
         return render(request, self.get_template(), {
@@ -549,9 +552,13 @@ class DeleteJiraView(View):
                     return HttpResponseRedirect(reverse('jira'))
                 except Exception as e:
                     add_error_message_to_response(f'Unable to delete JIRA Instance, probably because it is used by JIRA Issues: {str(e)}')
-        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-        collector.collect([jira_instance])
-        rels = collector.nested()
+
+        rels = ["Previewing the relationships has been disabled.", ""]
+        display_preview = get_setting("DELETE_PREVIEW")
+        if display_preview:
+            collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+            collector.collect([jira_instance])
+            rels = collector.nested()
 
         add_breadcrumb(title="Delete", top_level=False, request=request)
         return render(request, self.get_template(), {
