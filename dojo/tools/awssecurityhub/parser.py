@@ -33,8 +33,8 @@ class AwsSecurityHubParser:
         test = ParserTest(
             name=self.ID, type=self.ID, version="",
         )
-        test.description = "**AWS Accounts:** " + ', '.join(set(aws_acc)) + "\n"
-        test.description += "**Finding Origins:** " + ', '.join(set(prod)) + "\n"
+        test.description = "**AWS Accounts:** " + ", ".join(set(aws_acc)) + "\n"
+        test.description += "**Finding Origins:** " + ", ".join(set(prod)) + "\n"
         test.findings = self.get_items(data, report_date)
         return [test]
 

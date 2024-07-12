@@ -41,9 +41,9 @@ class SonarQubeParser:
                 return []
         if file.name.endswith(".zip"):
             if str(file.__class__) == "<class '_io.TextIOWrapper'>":
-                input_zip = zipfile.ZipFile(file.name, 'r')
+                input_zip = zipfile.ZipFile(file.name, "r")
             else:
-                input_zip = zipfile.ZipFile(file, 'r')
+                input_zip = zipfile.ZipFile(file, "r")
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
             return SonarQubeRESTAPIZIP().get_items(zipdata, test, self.mode)
         else:

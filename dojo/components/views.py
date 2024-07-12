@@ -25,7 +25,7 @@ def components(request):
             .order_by("component_name")
             .annotate(
                 component_version=StringAgg(
-                    "component_version", delimiter=separator, distinct=True, default=Value(''),
+                    "component_version", delimiter=separator, distinct=True, default=Value(""),
                 ),
             )
         )

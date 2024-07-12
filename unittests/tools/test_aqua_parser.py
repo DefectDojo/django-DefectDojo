@@ -18,16 +18,16 @@ class TestAquaParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual('CVE-2019-14697 - musl (1.1.20-r4) ', finding.title)
-            self.assertEqual('High', finding.severity)
-            self.assertEqual('CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H', finding.cvssv3)
-            self.assertEqual('musl libc through 1.1.23 has an x87 floating-point stack adjustment imbalance, related to the math/i386/ directory. In some cases, use of this library could introduce out-of-bounds writes that are not present in an application\'s source code.', finding.description)
-            self.assertEqual('1.1.20-r5', finding.mitigation)
-            self.assertEqual('\nhttps://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-14697', finding.references)
-            self.assertEqual('musl', finding.component_name)
-            self.assertEqual('1.1.20-r4', finding.component_version)
+            self.assertEqual("CVE-2019-14697 - musl (1.1.20-r4) ", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H", finding.cvssv3)
+            self.assertEqual("musl libc through 1.1.23 has an x87 floating-point stack adjustment imbalance, related to the math/i386/ directory. In some cases, use of this library could introduce out-of-bounds writes that are not present in an application's source code.", finding.description)
+            self.assertEqual("1.1.20-r5", finding.mitigation)
+            self.assertEqual("\nhttps://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2019-14697", finding.references)
+            self.assertEqual("musl", finding.component_name)
+            self.assertEqual("1.1.20-r4", finding.component_version)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-            self.assertEqual('CVE-2019-14697', finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("CVE-2019-14697", finding.unsaved_vulnerability_ids[0])
 
     def test_aqua_parser_has_many_findings(self):
         with open("unittests/scans/aqua/many_vulns.json") as testfile:
@@ -41,12 +41,12 @@ class TestAquaParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual('CVE-2019-15601: curl', finding.title)
-            self.assertEqual('Medium', finding.severity)
-            self.assertEqual('CURL before 7.68.0 lacks proper input validation, which allows users to create a `FILE:` URL that can make the client access a remote file using SMB (Windows-only issue).', finding.description)
-            self.assertEqual('Upgrade to curl 7.68.0', finding.mitigation)
+            self.assertEqual("CVE-2019-15601: curl", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("CURL before 7.68.0 lacks proper input validation, which allows users to create a `FILE:` URL that can make the client access a remote file using SMB (Windows-only issue).", finding.description)
+            self.assertEqual("Upgrade to curl 7.68.0", finding.mitigation)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-            self.assertEqual('CVE-2019-15601', finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("CVE-2019-15601", finding.unsaved_vulnerability_ids[0])
 
     def test_aqua_parser_v2_has_many_findings(self):
         with open("unittests/scans/aqua/many_v2.json") as testfile:
@@ -86,8 +86,8 @@ class TestAquaParser(DojoTestCase):
                 sevs.append(finding.severity)
 
             d = Counter(sevs)
-            self.assertEqual(1, d['Critical'])
-            self.assertEqual(1, d['High'])
-            self.assertEqual(2, d['Medium'])
-            self.assertEqual(2, d['Low'])
-            self.assertEqual(7, d['Info'])
+            self.assertEqual(1, d["Critical"])
+            self.assertEqual(1, d["High"])
+            self.assertEqual(2, d["Medium"])
+            self.assertEqual(2, d["Low"])
+            self.assertEqual(7, d["Info"])

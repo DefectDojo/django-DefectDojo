@@ -15,10 +15,10 @@ class AWSProwlerV3plusParser:
         return "Exports from AWS Prowler v3 in JSON format or from Prowler v4 in OCSF-JSON format."
 
     def get_findings(self, file, test):
-        if file.name.lower().endswith('.ocsf.json'):
+        if file.name.lower().endswith(".ocsf.json"):
             return AWSProwlerV4Parser().process_ocsf_json(file, test)
-        elif file.name.lower().endswith('.json'):
+        elif file.name.lower().endswith(".json"):
             return AWSProwlerV3Parser().process_json(file, test)
         else:
-            msg = 'Unknown file format'
+            msg = "Unknown file format"
             raise ValueError(msg)
