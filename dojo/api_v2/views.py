@@ -173,9 +173,9 @@ logger = logging.getLogger(__name__)
 
 class DojoOpenApiJsonRenderer(OpenApiJsonRenderer2):
     def get_indent(self, accepted_media_type, renderer_context):
-        if accepted_media_type and 'indent' in accepted_media_type:
+        if accepted_media_type and "indent" in accepted_media_type:
             return super().get_indent(accepted_media_type, renderer_context)
-        return renderer_context.get('indent', None)
+        return renderer_context.get("indent", None)
 
 
 class DojoSpectacularAPIView(SpectacularAPIView):
@@ -206,7 +206,7 @@ class RoleViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Role.objects.all().order_by('id')
+        return Role.objects.all().order_by("id")
 
 
 # Authorization: object-based

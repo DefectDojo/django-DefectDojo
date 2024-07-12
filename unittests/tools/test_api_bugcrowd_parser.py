@@ -151,7 +151,7 @@ class TestApiBugcrowdParser(TestCase):
     def test_parse_file_with_broken_bug_url(self):
         with open("unittests/scans/api_bugcrowd/bugcrowd_broken_bug_url.json") as testfile:
             parser = ApiBugcrowdParser()
-            with self.assertLogs('dojo.tools.api_bugcrowd.parser', level='ERROR') as cm:
+            with self.assertLogs("dojo.tools.api_bugcrowd.parser", level="ERROR") as cm:
                 parser.get_findings(testfile, Test())
-            self.assertEqual(cm.output, ['ERROR:dojo.tools.api_bugcrowd.parser:'
-                'Error parsing bugcrowd bug_url : curl https://example.com/'])
+            self.assertEqual(cm.output, ["ERROR:dojo.tools.api_bugcrowd.parser:"
+                "Error parsing bugcrowd bug_url : curl https://example.com/"])

@@ -147,9 +147,9 @@ class TestStackHawkParser(DojoTestCase):
             parser.get_findings(testfile, test)
             self.assertEqual(
                 test.description,
-                'View scan details here: '
-                + '[https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27]'
-                + '(https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27)',
+                "View scan details here: "
+                + "[https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27]"
+                + "(https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27)",
             )
 
     def test_that_a_scan_with_all_false_positive_endpoints_on_a_finding_marks_as_false_positive(self):
@@ -231,7 +231,7 @@ class TestStackHawkParser(DojoTestCase):
         self.assertEqual(application_name, actual_finding.component_name)
         self.assertEqual(environment, actual_finding.component_version)
         self.assertEqual(severity, actual_finding.severity)
-        self.assertEqual("View this finding in the StackHawk platform at:\n[" + finding_url + '](' + finding_url + ')',
+        self.assertEqual("View this finding in the StackHawk platform at:\n[" + finding_url + "](" + finding_url + ")",
                          actual_finding.description)
         self.assertRegex(
             actual_finding.steps_to_reproduce,

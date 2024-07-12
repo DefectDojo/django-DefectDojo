@@ -56,20 +56,20 @@ EXCEL_CHAR_LIMIT = 32767
 
 
 def down(request):
-    return render(request, 'disabled.html')
+    return render(request, "disabled.html")
 
 
 def report_url_resolver(request):
     try:
-        url_resolver = request.META['HTTP_X_FORWARDED_PROTO'] + "://" + request.META['HTTP_X_FORWARDED_FOR']
+        url_resolver = request.META["HTTP_X_FORWARDED_PROTO"] + "://" + request.META["HTTP_X_FORWARDED_FOR"]
     except:
-        hostname = request.META['HTTP_HOST']
+        hostname = request.META["HTTP_HOST"]
         port_index = hostname.find(":")
         if port_index != -1:
             url_resolver = request.scheme + "://" + hostname[:port_index]
         else:
             url_resolver = request.scheme + "://" + hostname
-    return url_resolver + ":" + request.META['SERVER_PORT']
+    return url_resolver + ":" + request.META["SERVER_PORT"]
 
 
 class ReportBuilder(View):
@@ -107,7 +107,7 @@ class ReportBuilder(View):
         return [ReportOptions(request=request)]
 
     def get_template(self):
-        return 'dojo/report_builder.html'
+        return "dojo/report_builder.html"
 
     def get_context(self, request: HttpRequest) -> dict:
         return {
@@ -132,19 +132,19 @@ class CustomReport(View):
         self.widgets = list(self.selected_widgets.values())
 
     def get_selected_widgets(self, request):
-        selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, host=self.host,
+        selected_widgets = report_widget_factory(json_data=request.POST["json"], request=request, host=self.host,
                                                       user=self.request.user, finding_notes=False, finding_images=False)
 
-        if options := selected_widgets.get('report-options', None):
+        if options := selected_widgets.get("report-options", None):
             self.report_format = options.report_type
-            self.finding_notes = (options.include_finding_notes == '1')
-            self.finding_images = (options.include_finding_images == '1')
+            self.finding_notes = (options.include_finding_notes == "1")
+            self.finding_images = (options.include_finding_images == "1")
         else:
-            self.report_format = 'AsciiDoc'
+            self.report_format = "AsciiDoc"
             self.finding_notes = True
             self.finding_images = True
 
-        return report_widget_factory(json_data=request.POST['json'], request=request, host=self.host,
+        return report_widget_factory(json_data=request.POST["json"], request=request, host=self.host,
                               user=request.user, finding_notes=self.finding_notes,
                               finding_images=self.finding_images)
 
@@ -152,10 +152,10 @@ class CustomReport(View):
         return CustomReportJsonForm(request.POST)
 
     def get_template(self):
-        if self.report_format == 'AsciiDoc':
-            return 'dojo/custom_asciidoc_report.html'
-        elif self.report_format == 'HTML':
-            return 'dojo/custom_html_report.html'
+        if self.report_format == "AsciiDoc":
+            return "dojo/custom_asciidoc_report.html"
+        elif self.report_format == "HTML":
+            return "dojo/custom_html_report.html"
         else:
             raise PermissionDenied
 
@@ -174,13 +174,13 @@ def report_findings(request):
     filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
     findings = filter_class(request.GET, queryset=findings)
 
-    title_words = get_words_for_field(Finding, 'title')
-    component_words = get_words_for_field(Finding, 'component_name')
+    title_words = get_words_for_field(Finding, "title")
+    component_words = get_words_for_field(Finding, "component_name")
 
-    paged_findings = get_page_items(request, findings.qs.distinct().order_by('numerical_severity'), 25)
+    paged_findings = get_page_items(request, findings.qs.distinct().order_by("numerical_severity"), 25)
 
     return render(request,
-                  'dojo/report_findings.html',
+                  "dojo/report_findings.html",
                   {"findings": paged_findings,
                    "filtered": findings,
                    "title_words": title_words,
@@ -202,7 +202,7 @@ def report_endpoints(request):
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
     return render(request,
-                  'dojo/report_endpoints.html',
+                  "dojo/report_endpoints.html",
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
                    "title": "endpoint-list",
@@ -210,24 +210,24 @@ def report_endpoints(request):
 
 
 def report_cover_page(request):
-    report_title = request.GET.get('title', 'Report')
-    report_subtitle = request.GET.get('subtitle', '')
-    report_info = request.GET.get('info', '')
+    report_title = request.GET.get("title", "Report")
+    report_subtitle = request.GET.get("subtitle", "")
+    report_info = request.GET.get("info", "")
 
     return render(request,
-                  'dojo/report_cover_page.html',
-                  {'report_title': report_title,
-                   'report_subtitle': report_subtitle,
-                   'report_info': report_info})
+                  "dojo/report_cover_page.html",
+                  {"report_title": report_title,
+                   "report_subtitle": report_subtitle,
+                   "report_info": report_info})
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_View, "ptid")
 def product_type_report(request, ptid):
     product_type = get_object_or_404(Product_Type, id=ptid)
     return generate_report(request, product_type)
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_report(request, pid):
     product = get_object_or_404(Product, id=pid)
     return generate_report(request, product)
@@ -238,61 +238,61 @@ def product_findings_report(request):
     return generate_report(request, findings)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def engagement_report(request, eid):
     engagement = get_object_or_404(Engagement, id=eid)
     return generate_report(request, engagement)
 
 
-@user_is_authorized(Test, Permissions.Test_View, 'tid')
+@user_is_authorized(Test, Permissions.Test_View, "tid")
 def test_report(request, tid):
     test = get_object_or_404(Test, id=tid)
     return generate_report(request, test)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
 def endpoint_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, False)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
 def endpoint_host_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, True)
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_endpoint_report(request, pid):
-    product = get_object_or_404(Product.objects.all().prefetch_related('engagement_set__test_set__test_type', 'engagement_set__test_set__environment'), id=pid)
+    product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
     endpoint_ids = Endpoint.objects.filter(product=product,
                                            finding__active=True,
                                            finding__verified=True,
                                            finding__false_p=False,
                                            finding__duplicate=False,
                                            finding__out_of_scope=False,
-                                           ).values_list('id', flat=True)
+                                           ).values_list("id", flat=True)
 
     endpoints = prefetch_related_endpoints_for_report(Endpoint.objects.filter(id__in=endpoint_ids))
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
-    report_format = request.GET.get('report_type', 'AsciiDoc')
-    include_finding_notes = int(request.GET.get('include_finding_notes', 0))
-    include_finding_images = int(request.GET.get('include_finding_images', 0))
-    include_executive_summary = int(request.GET.get('include_executive_summary', 0))
-    include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
-    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
-    disclaimer = get_system_setting('disclaimer')
+    report_format = request.GET.get("report_type", "AsciiDoc")
+    include_finding_notes = int(request.GET.get("include_finding_notes", 0))
+    include_finding_images = int(request.GET.get("include_finding_images", 0))
+    include_executive_summary = int(request.GET.get("include_executive_summary", 0))
+    include_table_of_contents = int(request.GET.get("include_table_of_contents", 0))
+    include_disclaimer = int(request.GET.get("include_disclaimer", 0))
+    disclaimer = get_system_setting("disclaimer")
     if include_disclaimer and len(disclaimer) == 0:
-        disclaimer = 'Please configure in System Settings.'
+        disclaimer = "Please configure in System Settings."
     generate = "_generate" in request.GET
     add_breadcrumb(parent=product, title="Vulnerable Product Endpoints Report", top_level=False, request=request)
     report_form = ReportOptionsForm()
     template = "dojo/product_endpoint_pdf_report.html"
 
     try:
-        start_date = Finding.objects.filter(endpoints__in=endpoints.qs).order_by('date')[:1][0].date
+        start_date = Finding.objects.filter(endpoints__in=endpoints.qs).order_by("date")[:1][0].date
     except:
         start_date = timezone.now()
 
@@ -326,58 +326,58 @@ def product_endpoint_report(request, pid):
                                              mitigated__isnull=False)
     if generate:
         report_form = ReportOptionsForm(request.GET)
-        if report_format == 'AsciiDoc':
+        if report_format == "AsciiDoc":
             return render(request,
-                          'dojo/asciidoc_report.html',
-                          {'product_type': None,
-                           'product': product,
-                           'accepted_findings': accepted_findings,
-                           'open_findings': open_findings,
-                           'closed_findings': closed_findings,
-                           'verified_findings': verified_findings,
-                           'engagement': None,
-                           'test': None,
-                           'endpoints': endpoints.qs,
-                           'endpoint': None,
-                           'findings': None,
-                           'include_finding_notes': include_finding_notes,
-                           'include_finding_images': include_finding_images,
-                           'include_executive_summary': include_executive_summary,
-                           'include_table_of_contents': include_table_of_contents,
-                           'include_disclaimer': include_disclaimer,
-                           'disclaimer': disclaimer,
-                           'user': request.user,
-                           'title': 'Generate Report',
+                          "dojo/asciidoc_report.html",
+                          {"product_type": None,
+                           "product": product,
+                           "accepted_findings": accepted_findings,
+                           "open_findings": open_findings,
+                           "closed_findings": closed_findings,
+                           "verified_findings": verified_findings,
+                           "engagement": None,
+                           "test": None,
+                           "endpoints": endpoints.qs,
+                           "endpoint": None,
+                           "findings": None,
+                           "include_finding_notes": include_finding_notes,
+                           "include_finding_images": include_finding_images,
+                           "include_executive_summary": include_executive_summary,
+                           "include_table_of_contents": include_table_of_contents,
+                           "include_disclaimer": include_disclaimer,
+                           "disclaimer": disclaimer,
+                           "user": request.user,
+                           "title": "Generate Report",
                            })
-        elif report_format == 'HTML':
+        elif report_format == "HTML":
             return render(request,
                           template,
-                          {'product_type': None,
-                           'product': product,
-                           'engagement': None,
-                           'test': None,
-                           'endpoint': None,
-                           'endpoints': endpoints.qs,
-                           'findings': None,
-                           'include_finding_notes': include_finding_notes,
-                           'include_finding_images': include_finding_images,
-                           'include_executive_summary': include_executive_summary,
-                           'include_table_of_contents': include_table_of_contents,
-                           'include_disclaimer': include_disclaimer,
-                           'disclaimer': disclaimer,
-                           'user': request.user,
-                           'title': 'Generate Report',
+                          {"product_type": None,
+                           "product": product,
+                           "engagement": None,
+                           "test": None,
+                           "endpoint": None,
+                           "endpoints": endpoints.qs,
+                           "findings": None,
+                           "include_finding_notes": include_finding_notes,
+                           "include_finding_images": include_finding_images,
+                           "include_executive_summary": include_executive_summary,
+                           "include_table_of_contents": include_table_of_contents,
+                           "include_disclaimer": include_disclaimer,
+                           "disclaimer": disclaimer,
+                           "user": request.user,
+                           "title": "Generate Report",
                            })
         else:
             raise Http404
 
     product_tab = Product_Tab(product, "Product Endpoint Report", tab="endpoints")
     return render(request,
-                  'dojo/request_endpoint_report.html',
+                  "dojo/request_endpoint_report.html",
                   {"endpoints": paged_endpoints,
                    "filtered": endpoints,
                    "product_tab": product_tab,
-                   'report_form': report_form,
+                   "report_form": report_form,
                    "name": "Vulnerable Product Endpoints",
                    })
 
@@ -407,21 +407,21 @@ def generate_report(request, obj, host_view=False):
         pass
     else:
         if obj is None:
-            msg = 'No object is given to generate report for'
+            msg = "No object is given to generate report for"
             raise Exception(msg)
         else:
-            msg = f'Report cannot be generated for object of type {type(obj).__name__}'
+            msg = f"Report cannot be generated for object of type {type(obj).__name__}"
             raise Exception(msg)
 
-    report_format = request.GET.get('report_type', 'AsciiDoc')
-    include_finding_notes = int(request.GET.get('include_finding_notes', 0))
-    include_finding_images = int(request.GET.get('include_finding_images', 0))
-    include_executive_summary = int(request.GET.get('include_executive_summary', 0))
-    include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
-    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
-    disclaimer = get_system_setting('disclaimer')
+    report_format = request.GET.get("report_type", "AsciiDoc")
+    include_finding_notes = int(request.GET.get("include_finding_notes", 0))
+    include_finding_images = int(request.GET.get("include_finding_images", 0))
+    include_executive_summary = int(request.GET.get("include_executive_summary", 0))
+    include_table_of_contents = int(request.GET.get("include_table_of_contents", 0))
+    include_disclaimer = int(request.GET.get("include_disclaimer", 0))
+    disclaimer = get_system_setting("disclaimer")
     if include_disclaimer and len(disclaimer) == 0:
-        disclaimer = 'Please configure in System Settings.'
+        disclaimer = "Please configure in System Settings."
     generate = "_generate" in request.GET
     report_name = str(obj)
     filter_string_matching = get_system_setting("filter_string_matching", False)
@@ -452,30 +452,30 @@ def generate_report(request, obj, host_view=False):
         # include current month
         months_between += 1
 
-        endpoint_monthly_counts = get_period_counts_legacy(findings.qs.order_by('numerical_severity'), findings.qs.order_by('numerical_severity'), None,
+        endpoint_monthly_counts = get_period_counts_legacy(findings.qs.order_by("numerical_severity"), findings.qs.order_by("numerical_severity"), None,
                                                             months_between, start_date,
-                                                            relative_delta='months')
+                                                            relative_delta="months")
 
-        context = {'product_type': product_type,
-                   'products': products,
-                   'engagements': engagements,
-                   'tests': tests,
-                   'report_name': report_name,
-                   'endpoint_opened_per_month': endpoint_monthly_counts[
-                       'opened_per_period'] if endpoint_monthly_counts is not None else [],
-                   'endpoint_active_findings': findings.qs.distinct().order_by('numerical_severity'),
-                   'findings': findings.qs.distinct().order_by('numerical_severity'),
-                   'include_finding_notes': include_finding_notes,
-                   'include_finding_images': include_finding_images,
-                   'include_executive_summary': include_executive_summary,
-                   'include_table_of_contents': include_table_of_contents,
-                   'include_disclaimer': include_disclaimer,
-                   'disclaimer': disclaimer,
-                   'user': user,
-                   'team_name': settings.TEAM_NAME,
-                   'title': report_title,
-                   'host': report_url_resolver(request),
-                   'user_id': request.user.id}
+        context = {"product_type": product_type,
+                   "products": products,
+                   "engagements": engagements,
+                   "tests": tests,
+                   "report_name": report_name,
+                   "endpoint_opened_per_month": endpoint_monthly_counts[
+                       "opened_per_period"] if endpoint_monthly_counts is not None else [],
+                   "endpoint_active_findings": findings.qs.distinct().order_by("numerical_severity"),
+                   "findings": findings.qs.distinct().order_by("numerical_severity"),
+                   "include_finding_notes": include_finding_notes,
+                   "include_finding_images": include_finding_images,
+                   "include_executive_summary": include_executive_summary,
+                   "include_table_of_contents": include_table_of_contents,
+                   "include_disclaimer": include_disclaimer,
+                   "disclaimer": disclaimer,
+                   "user": user,
+                   "team_name": settings.TEAM_NAME,
+                   "title": report_title,
+                   "host": report_url_resolver(request),
+                   "user_id": request.user.id}
 
     elif type(obj).__name__ == "Product":
         product = obj
@@ -488,53 +488,53 @@ def generate_report(request, obj, host_view=False):
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=product).distinct()
-        context = {'product': product,
-                   'engagements': engagements,
-                   'tests': tests,
-                   'report_name': report_name,
-                   'findings': findings.qs.distinct().order_by('numerical_severity'),
-                   'include_finding_notes': include_finding_notes,
-                   'include_finding_images': include_finding_images,
-                   'include_executive_summary': include_executive_summary,
-                   'include_table_of_contents': include_table_of_contents,
-                   'include_disclaimer': include_disclaimer,
-                   'disclaimer': disclaimer,
-                   'user': user,
-                   'team_name': settings.TEAM_NAME,
-                   'title': report_title,
-                   'endpoints': endpoints,
-                   'host': report_url_resolver(request),
-                   'user_id': request.user.id}
+        context = {"product": product,
+                   "engagements": engagements,
+                   "tests": tests,
+                   "report_name": report_name,
+                   "findings": findings.qs.distinct().order_by("numerical_severity"),
+                   "include_finding_notes": include_finding_notes,
+                   "include_finding_images": include_finding_images,
+                   "include_executive_summary": include_executive_summary,
+                   "include_table_of_contents": include_table_of_contents,
+                   "include_disclaimer": include_disclaimer,
+                   "disclaimer": disclaimer,
+                   "user": user,
+                   "team_name": settings.TEAM_NAME,
+                   "title": report_title,
+                   "endpoints": endpoints,
+                   "host": report_url_resolver(request),
+                   "user_id": request.user.id}
 
     elif type(obj).__name__ == "Engagement":
-        logger.debug('generating report for Engagement')
+        logger.debug("generating report for Engagement")
         engagement = obj
         findings = report_finding_filter_class(request.GET, engagement=engagement,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(test__engagement=engagement)))
         report_name = "Engagement Report: " + str(engagement)
-        template = 'dojo/engagement_pdf_report.html'
+        template = "dojo/engagement_pdf_report.html"
         report_title = "Engagement Report"
 
         ids = set(finding.id for finding in findings.qs)  # noqa: C401
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
 
-        context = {'engagement': engagement,
-                   'tests': tests,
-                   'report_name': report_name,
-                   'findings': findings.qs.distinct().order_by('numerical_severity'),
-                   'include_finding_notes': include_finding_notes,
-                   'include_finding_images': include_finding_images,
-                   'include_executive_summary': include_executive_summary,
-                   'include_table_of_contents': include_table_of_contents,
-                   'include_disclaimer': include_disclaimer,
-                   'disclaimer': disclaimer,
-                   'user': user,
-                   'team_name': settings.TEAM_NAME,
-                   'title': report_title,
-                   'host': report_url_resolver(request),
-                   'user_id': request.user.id,
-                   'endpoints': endpoints}
+        context = {"engagement": engagement,
+                   "tests": tests,
+                   "report_name": report_name,
+                   "findings": findings.qs.distinct().order_by("numerical_severity"),
+                   "include_finding_notes": include_finding_notes,
+                   "include_finding_images": include_finding_images,
+                   "include_executive_summary": include_executive_summary,
+                   "include_table_of_contents": include_table_of_contents,
+                   "include_disclaimer": include_disclaimer,
+                   "disclaimer": disclaimer,
+                   "user": user,
+                   "team_name": settings.TEAM_NAME,
+                   "title": report_title,
+                   "host": report_url_resolver(request),
+                   "user_id": request.user.id,
+                   "endpoints": endpoints}
 
     elif type(obj).__name__ == "Test":
         test = obj
@@ -544,20 +544,20 @@ def generate_report(request, obj, host_view=False):
         report_name = "Test Report: " + str(test)
         report_title = "Test Report"
 
-        context = {'test': test,
-                   'report_name': report_name,
-                   'findings': findings.qs.distinct().order_by('numerical_severity'),
-                   'include_finding_notes': include_finding_notes,
-                   'include_finding_images': include_finding_images,
-                   'include_executive_summary': include_executive_summary,
-                   'include_table_of_contents': include_table_of_contents,
-                   'include_disclaimer': include_disclaimer,
-                   'disclaimer': disclaimer,
-                   'user': user,
-                   'team_name': settings.TEAM_NAME,
-                   'title': report_title,
-                   'host': report_url_resolver(request),
-                   'user_id': request.user.id}
+        context = {"test": test,
+                   "report_name": report_name,
+                   "findings": findings.qs.distinct().order_by("numerical_severity"),
+                   "include_finding_notes": include_finding_notes,
+                   "include_finding_images": include_finding_images,
+                   "include_executive_summary": include_executive_summary,
+                   "include_table_of_contents": include_table_of_contents,
+                   "include_disclaimer": include_disclaimer,
+                   "disclaimer": disclaimer,
+                   "user": user,
+                   "team_name": settings.TEAM_NAME,
+                   "title": report_title,
+                   "host": report_url_resolver(request),
+                   "user_id": request.user.id}
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
@@ -570,44 +570,44 @@ def generate_report(request, obj, host_view=False):
             report_name = "Endpoint Report: " + str(endpoint)
             endpoints = Endpoint.objects.filter(pk=endpoint.id).distinct()
             report_title = "Endpoint Report"
-        template = 'dojo/endpoint_pdf_report.html'
+        template = "dojo/endpoint_pdf_report.html"
         findings = report_finding_filter_class(request.GET,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
-        context = {'endpoint': endpoint,
-                   'endpoints': endpoints,
-                   'report_name': report_name,
-                   'findings': findings.qs.distinct().order_by('numerical_severity'),
-                   'include_finding_notes': include_finding_notes,
-                   'include_finding_images': include_finding_images,
-                   'include_executive_summary': include_executive_summary,
-                   'include_table_of_contents': include_table_of_contents,
-                   'include_disclaimer': include_disclaimer,
-                   'disclaimer': disclaimer,
-                   'user': user,
-                   'team_name': get_system_setting('team_name'),
-                   'title': report_title,
-                   'host': report_url_resolver(request),
-                   'user_id': request.user.id}
+        context = {"endpoint": endpoint,
+                   "endpoints": endpoints,
+                   "report_name": report_name,
+                   "findings": findings.qs.distinct().order_by("numerical_severity"),
+                   "include_finding_notes": include_finding_notes,
+                   "include_finding_images": include_finding_images,
+                   "include_executive_summary": include_executive_summary,
+                   "include_table_of_contents": include_table_of_contents,
+                   "include_disclaimer": include_disclaimer,
+                   "disclaimer": disclaimer,
+                   "user": user,
+                   "team_name": get_system_setting("team_name"),
+                   "title": report_title,
+                   "host": report_url_resolver(request),
+                   "user_id": request.user.id}
     elif type(obj).__name__ in ["QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"]:
         findings = report_finding_filter_class(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
-        report_name = 'Finding'
-        template = 'dojo/finding_pdf_report.html'
+        report_name = "Finding"
+        template = "dojo/finding_pdf_report.html"
         report_title = "Finding Report"
 
-        context = {'findings': findings.qs.distinct().order_by('numerical_severity'),
-                   'report_name': report_name,
-                   'include_finding_notes': include_finding_notes,
-                   'include_finding_images': include_finding_images,
-                   'include_executive_summary': include_executive_summary,
-                   'include_table_of_contents': include_table_of_contents,
-                   'include_disclaimer': include_disclaimer,
-                   'disclaimer': disclaimer,
-                   'user': user,
-                   'team_name': settings.TEAM_NAME,
-                   'title': report_title,
-                   'host': report_url_resolver(request),
-                   'user_id': request.user.id}
+        context = {"findings": findings.qs.distinct().order_by("numerical_severity"),
+                   "report_name": report_name,
+                   "include_finding_notes": include_finding_notes,
+                   "include_finding_images": include_finding_images,
+                   "include_executive_summary": include_executive_summary,
+                   "include_table_of_contents": include_table_of_contents,
+                   "include_disclaimer": include_disclaimer,
+                   "disclaimer": disclaimer,
+                   "user": user,
+                   "team_name": settings.TEAM_NAME,
+                   "title": report_title,
+                   "host": report_url_resolver(request),
+                   "user_id": request.user.id}
     else:
         raise Http404
 
@@ -615,58 +615,58 @@ def generate_report(request, obj, host_view=False):
 
     if generate:
         report_form = ReportOptionsForm(request.GET)
-        if report_format == 'AsciiDoc':
+        if report_format == "AsciiDoc":
             return render(request,
-                          'dojo/asciidoc_report.html',
-                          {'product_type': product_type,
-                           'product': product,
-                           'engagement': engagement,
-                           'test': test,
-                           'endpoint': endpoint,
-                           'findings': findings.qs.distinct().order_by('numerical_severity'),
-                           'include_finding_notes': include_finding_notes,
-                           'include_finding_images': include_finding_images,
-                           'include_executive_summary': include_executive_summary,
-                           'include_table_of_contents': include_table_of_contents,
-                           'include_disclaimer': include_disclaimer,
-                           'disclaimer': disclaimer,
-                           'user': user,
-                           'team_name': settings.TEAM_NAME,
-                           'title': report_title,
-                           'user_id': request.user.id,
-                           'host': report_url_resolver(request),
-                           'host_view': host_view,
-                           'context': context,
+                          "dojo/asciidoc_report.html",
+                          {"product_type": product_type,
+                           "product": product,
+                           "engagement": engagement,
+                           "test": test,
+                           "endpoint": endpoint,
+                           "findings": findings.qs.distinct().order_by("numerical_severity"),
+                           "include_finding_notes": include_finding_notes,
+                           "include_finding_images": include_finding_images,
+                           "include_executive_summary": include_executive_summary,
+                           "include_table_of_contents": include_table_of_contents,
+                           "include_disclaimer": include_disclaimer,
+                           "disclaimer": disclaimer,
+                           "user": user,
+                           "team_name": settings.TEAM_NAME,
+                           "title": report_title,
+                           "user_id": request.user.id,
+                           "host": report_url_resolver(request),
+                           "host_view": host_view,
+                           "context": context,
                            })
-        elif report_format == 'HTML':
+        elif report_format == "HTML":
             return render(request,
                           template,
-                          {'product_type': product_type,
-                           'product': product,
-                           'engagement': engagement,
-                           'report_name': report_name,
-                           'test': test,
-                           'endpoint': endpoint,
-                           'endpoints': endpoints,
-                           'findings': findings.qs.distinct().order_by('numerical_severity'),
-                           'include_finding_notes': include_finding_notes,
-                           'include_finding_images': include_finding_images,
-                           'include_executive_summary': include_executive_summary,
-                           'include_table_of_contents': include_table_of_contents,
-                           'include_disclaimer': include_disclaimer,
-                           'disclaimer': disclaimer,
-                           'user': user,
-                           'team_name': settings.TEAM_NAME,
-                           'title': report_title,
-                           'user_id': request.user.id,
-                           'host': "",
-                           'host_view': host_view,
-                           'context': context,
+                          {"product_type": product_type,
+                           "product": product,
+                           "engagement": engagement,
+                           "report_name": report_name,
+                           "test": test,
+                           "endpoint": endpoint,
+                           "endpoints": endpoints,
+                           "findings": findings.qs.distinct().order_by("numerical_severity"),
+                           "include_finding_notes": include_finding_notes,
+                           "include_finding_images": include_finding_images,
+                           "include_executive_summary": include_executive_summary,
+                           "include_table_of_contents": include_table_of_contents,
+                           "include_disclaimer": include_disclaimer,
+                           "disclaimer": disclaimer,
+                           "user": user,
+                           "team_name": settings.TEAM_NAME,
+                           "title": report_title,
+                           "user_id": request.user.id,
+                           "host": "",
+                           "host_view": host_view,
+                           "context": context,
                            })
 
         else:
             raise Http404
-    paged_findings = get_page_items(request, findings.qs.distinct().order_by('numerical_severity'), 25)
+    paged_findings = get_page_items(request, findings.qs.distinct().order_by("numerical_severity"), 25)
 
     product_tab = None
     if engagement:
@@ -683,41 +683,41 @@ def generate_report(request, obj, host_view=False):
         else:
             product_tab = Product_Tab(endpoint.product, title="Endpoint Report", tab="endpoints")
 
-    return render(request, 'dojo/request_report.html',
-                  {'product_type': product_type,
-                   'product': product,
-                   'product_tab': product_tab,
-                   'engagement': engagement,
-                   'test': test,
-                   'endpoint': endpoint,
-                   'findings': findings,
-                   'paged_findings': paged_findings,
-                   'report_form': report_form,
-                   'host_view': host_view,
-                   'context': context,
+    return render(request, "dojo/request_report.html",
+                  {"product_type": product_type,
+                   "product": product,
+                   "product_tab": product_tab,
+                   "engagement": engagement,
+                   "test": test,
+                   "endpoint": endpoint,
+                   "findings": findings,
+                   "paged_findings": paged_findings,
+                   "report_form": report_form,
+                   "host_view": host_view,
+                   "context": context,
                    })
 
 
 def prefetch_related_findings_for_report(findings):
-    return findings.prefetch_related('test',
-                                     'test__engagement__product',
-                                     'test__engagement__product__prod_type',
-                                     'risk_acceptance_set',
-                                     'risk_acceptance_set__accepted_findings',
-                                     'burprawrequestresponse_set',
-                                     'endpoints',
-                                     'tags',
-                                     'notes',
-                                     'files',
-                                     'reporter',
-                                     'mitigated_by',
+    return findings.prefetch_related("test",
+                                     "test__engagement__product",
+                                     "test__engagement__product__prod_type",
+                                     "risk_acceptance_set",
+                                     "risk_acceptance_set__accepted_findings",
+                                     "burprawrequestresponse_set",
+                                     "endpoints",
+                                     "tags",
+                                     "notes",
+                                     "files",
+                                     "reporter",
+                                     "mitigated_by",
                                      )
 
 
 def prefetch_related_endpoints_for_report(endpoints):
     return endpoints.prefetch_related(
-                                      'product',
-                                      'tags',
+                                      "product",
+                                      "tags",
                                      )
 
 
@@ -730,23 +730,23 @@ def get_list_index(list, index):
 
 
 def get_findings(request):
-    url = request.META.get('QUERY_STRING')
+    url = request.META.get("QUERY_STRING")
     if not url:
-        msg = 'Please use the report button when viewing findings'
+        msg = "Please use the report button when viewing findings"
         raise Http404(msg)
     else:
-        if url.startswith('url='):
+        if url.startswith("url="):
             url = url[4:]
 
-    views = ['all', 'open', 'inactive', 'verified',
-             'closed', 'accepted', 'out_of_scope',
-             'false_positive', 'inactive']
+    views = ["all", "open", "inactive", "verified",
+             "closed", "accepted", "out_of_scope",
+             "false_positive", "inactive"]
     # request.path = url
     obj_name = obj_id = view = query = None
-    path_items = list(filter(None, re.split(r'/|\?', url)))
+    path_items = list(filter(None, re.split(r"/|\?", url)))
 
     try:
-        finding_index = path_items.index('finding')
+        finding_index = path_items.index("finding")
     except ValueError:
         finding_index = -1
     # There is a engagement or product here
@@ -775,32 +775,32 @@ def get_findings(request):
 
     filter_name = None
     if view:
-        if view == 'open':
-            filter_name = 'Open'
-        elif view == 'inactive':
-            filter_name = 'Inactive'
-        elif view == 'verified':
-            filter_name = 'Verified'
-        elif view == 'closed':
-            filter_name = 'Closed'
-        elif view == 'accepted':
-            filter_name = 'Accepted'
-        elif view == 'out_of_scope':
-            filter_name = 'Out of Scope'
-        elif view == 'false_positive':
-            filter_name = 'False Positive'
+        if view == "open":
+            filter_name = "Open"
+        elif view == "inactive":
+            filter_name = "Inactive"
+        elif view == "verified":
+            filter_name = "Verified"
+        elif view == "closed":
+            filter_name = "Closed"
+        elif view == "accepted":
+            filter_name = "Accepted"
+        elif view == "out_of_scope":
+            filter_name = "Out of Scope"
+        elif view == "false_positive":
+            filter_name = "False Positive"
 
     obj = pid = eid = tid = None
     if obj_id:
-        if 'product' in obj_name:
+        if "product" in obj_name:
             pid = obj_id
             obj = get_object_or_404(Product, id=pid)
             user_has_permission_or_403(request.user, obj, Permissions.Product_View)
-        elif 'engagement' in obj_name:
+        elif "engagement" in obj_name:
             eid = obj_id
             obj = get_object_or_404(Engagement, id=eid)
             user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-        elif 'test' in obj_name:
+        elif "test" in obj_name:
             tid = obj_id
             obj = get_object_or_404(Test, id=tid)
             user_has_permission_or_403(request.user, obj, Permissions.Test_View)
@@ -821,7 +821,7 @@ class QuickReportView(View):
         return self.findings
 
     def get_template(self):
-        return 'dojo/finding_pdf_report.html'
+        return "dojo/finding_pdf_report.html"
 
     def get(self, request):
         findings, obj = get_findings(request)
@@ -841,29 +841,29 @@ class QuickReportView(View):
                 test = obj
 
         return render(request, self.get_template(), {
-                        'report_name': 'Finding Report',
-                        'product': product,
-                        'engagement': engagement,
-                        'test': test,
-                        'findings': findings,
-                        'user': request.user,
-                        'team_name': settings.TEAM_NAME,
-                        'title': 'Finding Report',
-                        'user_id': request.user.id,
+                        "report_name": "Finding Report",
+                        "product": product,
+                        "engagement": engagement,
+                        "test": test,
+                        "findings": findings,
+                        "user": request.user,
+                        "team_name": settings.TEAM_NAME,
+                        "title": "Finding Report",
+                        "user_id": request.user.id,
                   })
 
 
 def get_excludes():
-    return ['SEVERITIES', 'age', 'github_issue', 'jira_issue', 'objects', 'risk_acceptance',
-    'test__engagement__product__authorized_group', 'test__engagement__product__member',
-    'test__engagement__product__prod_type__authorized_group', 'test__engagement__product__prod_type__member',
-    'unsaved_endpoints', 'unsaved_vulnerability_ids', 'unsaved_files', 'unsaved_request', 'unsaved_response',
-    'unsaved_tags', 'vulnerability_ids', 'cve']
+    return ["SEVERITIES", "age", "github_issue", "jira_issue", "objects", "risk_acceptance",
+    "test__engagement__product__authorized_group", "test__engagement__product__member",
+    "test__engagement__product__prod_type__authorized_group", "test__engagement__product__prod_type__member",
+    "unsaved_endpoints", "unsaved_vulnerability_ids", "unsaved_files", "unsaved_request", "unsaved_response",
+    "unsaved_tags", "vulnerability_ids", "cve"]
 
 
 def get_foreign_keys():
-    return ['defect_review_requested_by', 'duplicate_finding', 'finding_group', 'last_reviewed_by',
-        'mitigated_by', 'reporter', 'review_requested_by', 'sonarqube_issue', 'test']
+    return ["defect_review_requested_by", "duplicate_finding", "finding_group", "last_reviewed_by",
+        "mitigated_by", "reporter", "review_requested_by", "sonarqube_issue", "test"]
 
 
 def get_attributes():
@@ -884,8 +884,8 @@ class CSVExportView(View):
         findings, _obj = get_findings(request)
         self.findings = findings
         findings = self.add_findings_data()
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=findings.csv'
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename=findings.csv"
         writer = csv.writer(response)
         allowed_attributes = get_attributes()
         excludes_list = get_excludes()
@@ -899,23 +899,23 @@ class CSVExportView(View):
                 self.fields = fields
                 for key in dir(finding):
                     try:
-                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
                             if callable(getattr(finding, key)) and key not in allowed_attributes:
                                 continue
                             fields.append(key)
                     except Exception as exc:
-                        logger.error('Error in attribute: ' + str(exc))
+                        logger.error("Error in attribute: " + str(exc))
                         fields.append(key)
                         continue
-                fields.append('test')
-                fields.append('found_by')
-                fields.append('engagement_id')
-                fields.append('engagement')
-                fields.append('product_id')
-                fields.append('product')
-                fields.append('endpoints')
-                fields.append('vulnerability_ids')
-                fields.append('tags')
+                fields.append("test")
+                fields.append("found_by")
+                fields.append("engagement_id")
+                fields.append("engagement")
+                fields.append("product_id")
+                fields.append("product")
+                fields.append("endpoints")
+                fields.append("vulnerability_ids")
+                fields.append("tags")
                 self.fields = fields
                 self.add_extra_headers()
 
@@ -926,7 +926,7 @@ class CSVExportView(View):
                 fields = []
                 for key in dir(finding):
                     try:
-                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
                             if not callable(getattr(finding, key)):
                                 value = finding.__dict__.get(key)
                             if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
@@ -937,10 +937,10 @@ class CSVExportView(View):
                                 else:
                                     value = str(getattr(finding, key))
                             if value and isinstance(value, str):
-                                value = value.replace('\n', ' NEWLINE ').replace('\r', '')
+                                value = value.replace("\n", " NEWLINE ").replace("\r", "")
                             fields.append(value)
                     except Exception as exc:
-                        logger.error('Error in attribute: ' + str(exc))
+                        logger.error("Error in attribute: " + str(exc))
                         fields.append("Value not supported")
                         continue
                 fields.append(finding.test.title)
@@ -950,40 +950,40 @@ class CSVExportView(View):
                 fields.append(finding.test.engagement.product.id)
                 fields.append(finding.test.engagement.product.name)
 
-                endpoint_value = ''
+                endpoint_value = ""
                 num_endpoints = 0
                 for endpoint in finding.endpoints.all():
                     num_endpoints += 1
-                    endpoint_value += f'{str(endpoint)}; '
-                if endpoint_value.endswith('; '):
+                    endpoint_value += f"{str(endpoint)}; "
+                if endpoint_value.endswith("; "):
                     endpoint_value = endpoint_value[:-2]
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
-                    endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + '...'
+                    endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."
                 fields.append(endpoint_value)
 
-                vulnerability_ids_value = ''
+                vulnerability_ids_value = ""
                 num_vulnerability_ids = 0
                 for vulnerability_id in finding.vulnerability_ids:
                     num_vulnerability_ids += 1
                     if num_vulnerability_ids > 5:
-                        vulnerability_ids_value += '...'
+                        vulnerability_ids_value += "..."
                         break
-                    vulnerability_ids_value += f'{str(vulnerability_id)}; '
+                    vulnerability_ids_value += f"{str(vulnerability_id)}; "
                 if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
                     vulnerability_ids_value += finding.cve
-                if vulnerability_ids_value.endswith('; '):
+                if vulnerability_ids_value.endswith("; "):
                     vulnerability_ids_value = vulnerability_ids_value[:-2]
                 fields.append(vulnerability_ids_value)
                 # Tags
-                tags_value = ''
+                tags_value = ""
                 num_tags = 0
                 for tag in finding.tags.all():
                     num_tags += 1
                     if num_tags > 5:
-                        tags_value += '...'
+                        tags_value += "..."
                         break
-                    tags_value += f'{str(tag)}; '
-                if tags_value.endswith('; '):
+                    tags_value += f"{str(tag)}; "
+                if tags_value.endswith("; "):
                     tags_value = tags_value[:-2]
                 fields.append(tags_value)
 
@@ -1014,7 +1014,7 @@ class ExcelExportView(View):
         workbook = Workbook()
         workbook.iso_dates = True
         worksheet = workbook.active
-        worksheet.title = 'Findings'
+        worksheet.title = "Findings"
         self.worksheet = worksheet
         font_bold = Font(bold=True)
         self.font_bold = font_bold
@@ -1028,38 +1028,38 @@ class ExcelExportView(View):
                 col_num = 1
                 for key in dir(finding):
                     try:
-                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
                             if callable(getattr(finding, key)) and key not in allowed_attributes:
                                 continue
                             cell = worksheet.cell(row=row_num, column=col_num, value=key)
                             cell.font = font_bold
                             col_num += 1
                     except Exception as exc:
-                        logger.error('Error in attribute: ' + str(exc))
+                        logger.error("Error in attribute: " + str(exc))
                         cell = worksheet.cell(row=row_num, column=col_num, value=key)
                         continue
-                cell = worksheet.cell(row=row_num, column=col_num, value='found_by')
+                cell = worksheet.cell(row=row_num, column=col_num, value="found_by")
                 cell.font = font_bold
                 col_num += 1
-                worksheet.cell(row=row_num, column=col_num, value='engagement_id')
+                worksheet.cell(row=row_num, column=col_num, value="engagement_id")
                 cell = cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value='engagement')
+                cell = worksheet.cell(row=row_num, column=col_num, value="engagement")
                 cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value='product_id')
+                cell = worksheet.cell(row=row_num, column=col_num, value="product_id")
                 cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value='product')
+                cell = worksheet.cell(row=row_num, column=col_num, value="product")
                 cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value='endpoints')
+                cell = worksheet.cell(row=row_num, column=col_num, value="endpoints")
                 cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value='vulnerability_ids')
+                cell = worksheet.cell(row=row_num, column=col_num, value="vulnerability_ids")
                 cell.font = font_bold
                 col_num += 1
-                cell = worksheet.cell(row=row_num, column=col_num, value='tags')
+                cell = worksheet.cell(row=row_num, column=col_num, value="tags")
                 cell.font = font_bold
                 col_num += 1
                 self.row_num = row_num
@@ -1071,7 +1071,7 @@ class ExcelExportView(View):
                 col_num = 1
                 for key in dir(finding):
                     try:
-                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith('_'):
+                        if key not in excludes_list and (not callable(getattr(finding, key)) or key in allowed_attributes) and not key.startswith("_"):
                             if not callable(getattr(finding, key)):
                                 value = finding.__dict__.get(key)
                             if (key in allowed_foreign_keys or key in allowed_attributes) and getattr(finding, key):
@@ -1086,7 +1086,7 @@ class ExcelExportView(View):
                             worksheet.cell(row=row_num, column=col_num, value=value)
                             col_num += 1
                     except Exception as exc:
-                        logger.error('Error in attribute: ' + str(exc))
+                        logger.error("Error in attribute: " + str(exc))
                         worksheet.cell(row=row_num, column=col_num, value="Value not supported")
                         continue
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
@@ -1100,37 +1100,37 @@ class ExcelExportView(View):
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.name)
                 col_num += 1
 
-                endpoint_value = ''
+                endpoint_value = ""
                 num_endpoints = 0
                 for endpoint in finding.endpoints.all():
                     num_endpoints += 1
-                    endpoint_value += f'{str(endpoint)}; \n'
-                if endpoint_value.endswith('; \n'):
+                    endpoint_value += f"{str(endpoint)}; \n"
+                if endpoint_value.endswith("; \n"):
                     endpoint_value = endpoint_value[:-3]
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
-                    endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + '...'
+                    endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."
                 worksheet.cell(row=row_num, column=col_num, value=endpoint_value)
                 col_num += 1
 
-                vulnerability_ids_value = ''
+                vulnerability_ids_value = ""
                 num_vulnerability_ids = 0
                 for vulnerability_id in finding.vulnerability_ids:
                     num_vulnerability_ids += 1
                     if num_vulnerability_ids > 5:
-                        vulnerability_ids_value += '...'
+                        vulnerability_ids_value += "..."
                         break
-                    vulnerability_ids_value += f'{str(vulnerability_id)}; \n'
+                    vulnerability_ids_value += f"{str(vulnerability_id)}; \n"
                 if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
                     vulnerability_ids_value += finding.cve
-                if vulnerability_ids_value.endswith('; \n'):
+                if vulnerability_ids_value.endswith("; \n"):
                     vulnerability_ids_value = vulnerability_ids_value[:-3]
                 worksheet.cell(row=row_num, column=col_num, value=vulnerability_ids_value)
                 col_num += 1
                 # tags
-                tags_value = ''
+                tags_value = ""
                 for tag in finding.tags.all():
-                    tags_value += f'{str(tag)}; \n'
-                if tags_value.endswith('; \n'):
+                    tags_value += f"{str(tag)}; \n"
+                if tags_value.endswith("; \n"):
                     tags_value = tags_value[:-3]
                 worksheet.cell(row=row_num, column=col_num, value=tags_value)
                 col_num += 1
@@ -1147,7 +1147,7 @@ class ExcelExportView(View):
 
         response = HttpResponse(
             content=stream,
-            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response['Content-Disposition'] = 'attachment; filename=findings.xlsx'
+        response["Content-Disposition"] = "attachment; filename=findings.xlsx"
         return response

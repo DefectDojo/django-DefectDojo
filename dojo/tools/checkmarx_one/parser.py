@@ -193,7 +193,7 @@ class CheckmarxOneParser:
         for result in results:
             id = result.get("identifiers")[0].get("value")
             cwe = None
-            if 'vulnerabilityDetails' in result:
+            if "vulnerabilityDetails" in result:
                 cwe = result.get("vulnerabilites").get("cweId")
             severity = result.get("severity")
             locations_uri = result.get("location").get("file")
