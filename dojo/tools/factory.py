@@ -48,7 +48,12 @@ def get_parser(scan_type):
 
 
 def get_inactive_test_types():
-    return Test_Type.objects.filter(active=False).values_list("name", flat=True)
+    try:
+        return list(Test_Type.objects.filter(active=False).values_list("name", flat=True))
+    except Exception:
+        # This exception is reached in the event of loading fixtures in to an empty database
+        # prior to migrations runnings
+        return []
 
 
 def get_scan_types_sorted():
