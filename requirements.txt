@@ -50,7 +50,7 @@ whitenoise==5.2.0
 titlecase==2.4.1
 social-auth-app-django==5.4.1
 social-auth-core==4.5.4
-python-jose==3.3.0
+Python-jose==3.3.0
 GitPython==3.1.43
 debugpy==1.8.2
 python-gitlab==4.6.0
