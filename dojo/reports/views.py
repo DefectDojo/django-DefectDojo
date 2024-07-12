@@ -28,7 +28,7 @@ from dojo.filters import (
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
-from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Risk_Acceptance, Test
+from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.widgets import (
     CoverPage,
     CustomReportJsonForm,
@@ -289,39 +289,6 @@ def product_endpoint_report(request, pid):
     report_form = ReportOptionsForm()
     template = "dojo/product_endpoint_pdf_report.html"
 
-    try:
-        start_date = Finding.objects.filter(endpoints__in=endpoints.qs).order_by('date')[:1][0].date
-    except:
-        start_date = timezone.now()
-
-    end_date = timezone.now()
-
-    risk_acceptances = Risk_Acceptance.objects.filter(engagement__test__finding__endpoints__in=endpoints.qs)
-
-    accepted_findings = [finding for ra in risk_acceptances
-                         for finding in ra.accepted_findings.filter(endpoints__in=endpoints.qs)]
-
-    verified_findings = Finding.objects.filter(endpoints__in=endpoints.qs,
-                                               date__range=[start_date, end_date],
-                                               false_p=False,
-                                               verified=True,
-                                               duplicate=False,
-                                               out_of_scope=False)
-
-    open_findings = Finding.objects.filter(endpoints__in=endpoints.qs,
-                                           false_p=False,
-                                           verified=True,
-                                           duplicate=False,
-                                           out_of_scope=False,
-                                           active=True,
-                                           mitigated__isnull=True)
-
-    closed_findings = Finding.objects.filter(endpoints__in=endpoints.qs,
-                                             false_p=False,
-                                             verified=True,
-                                             duplicate=False,
-                                             out_of_scope=False,
-                                             mitigated__isnull=False)
     if generate:
         report_form = ReportOptionsForm(request.GET)
         if report_format == 'HTML':
