@@ -62,9 +62,7 @@ steps:
       python manage.py migrate
 
       coverage run --source='dojo' --data-file= manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
-      ls -al
-      coverage run --source='dojo' -a manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
-      ls -al
+      coverage run --append --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
       coverage xml
     displayName: "Unit test"
 
