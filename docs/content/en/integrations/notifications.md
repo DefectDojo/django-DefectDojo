@@ -127,6 +127,6 @@ The scope of this setting is customizable (see environmental variable `DD_NOTIFI
 
 For more information about this behavior see the [related pull request #9699](https://github.com/DefectDojo/django-DefectDojo/pull/9699/)
 
-### Webhooks
+## Webhooks (experimental)
 
-# TODO
+DefectDojo also supports webhooks that follow the same events as other notifications (you can be notified in the same situations). Details about setup are described in [related page](../notification_webhooks/).

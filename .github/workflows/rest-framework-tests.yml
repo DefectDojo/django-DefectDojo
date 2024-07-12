@@ -34,7 +34,7 @@ jobs:
         run: docker/setEnv.sh unit_tests_cicd
 
       # phased startup so we can use the exit code from unit test container
-      - name: Start Postgres
+      - name: Start Postgres and webhook.endpoint
         run: docker compose up -d postgres webhook.endpoint
 
       # no celery or initializer needed for unit tests

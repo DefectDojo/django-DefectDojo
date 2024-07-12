@@ -4,6 +4,8 @@ weight: 5
 chapter: true
 ---
 
+Event `scan_added_empty` describes a situation when reimport did not affect the existing test (no finding has been created or closed). 
+
 ## Event HTTP header for scan_added
 ```yaml
 X-DefectDojo-Event: scan_added
