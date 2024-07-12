@@ -1744,6 +1744,10 @@ NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env('DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP')
 warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
 
+# TODO - remove these lines, they are here only for testing that following error is the only stopper for upgrade to py3.12
+warnings.filterwarnings("ignore", module="polymorphic")  # monitor https://github.com/DefectDojo/django-DefectDojo/pull/10334, specially https://github.com/pypi/support/issues/4164
+warnings.filterwarnings("ignore", module="github")  # monitor https://github.com/DefectDojo/django-DefectDojo/pull/9948 but it might pop-up somewhere else again. pygithub is just first known location.
+
 # This setting is here to override default renderer of forms (use div-based, instred of table-based).
 # It has effect only on templates that use "{{ form }}" in the body. Only "Delete forms" now.
 # The setting is here to avoid RemovedInDjango50Warning. It is here only for transition period.
