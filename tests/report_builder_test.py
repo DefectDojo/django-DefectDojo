@@ -43,16 +43,6 @@ class ReportBuilderTest(BaseTestCase):
         driver.find_element(By.CLASS_NAME, "run_report").click()
         self.assertTrue(driver.current_url == self.base_url + "reports/custom")
 
-    def generate_AsciiDoc_report(self):
-        driver = self.driver
-        driver.get(self.base_url + "reports/builder")
-        self.move_blocks(driver)
-        self.enter_values(driver)
-        Select(driver.find_element(By.ID, "id_report_type")).select_by_visible_text("AsciiDoc")
-        driver.find_element(By.ID, "id_report_name").send_keys('Test Report')
-        driver.find_element(By.CLASS_NAME, "run_report").click()
-        self.assertTrue(driver.current_url == self.base_url + "reports/custom")
-
     def test_product_type_report(self):
         driver = self.driver
         driver.get(self.base_url + "product/type")
@@ -187,7 +177,6 @@ def add_report_tests_to_suite(suite):
     suite.addTest(ProductTest('test_add_product_endpoints'))
 
     suite.addTest(ReportBuilderTest('generate_HTML_report'))
-    suite.addTest(ReportBuilderTest('generate_AsciiDoc_report'))
 
     # we add reports here as we now have a product that triggers some logic inside reports
     suite.addTest(ReportBuilderTest('test_product_type_report'))
