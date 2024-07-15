@@ -22,7 +22,7 @@ class TestPopeyeParser(DojoTestCase):
                             "**Group** : test-group" + "\n\n" + \
                             "**Severity** : Warning" + "\n\n" + \
                             "**Message** : [POP-106] No resources requests/limits defined"
-        finding_vuln_id_from_tool = 'POP-106'
+        finding_vuln_id_from_tool = "POP-106"
         testfile.close()
         self.assertEqual(1, len(findings))
         self.assertEqual("Low", findings[0].severity)

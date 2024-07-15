@@ -54,7 +54,7 @@ class BlackduckBinaryAnalysisParser:
                 # Some of the CVSSv2 vectors have a trailing
                 # colon that needs to be removed
                 cvss_v3 = False
-                cvss_vectors = i.cvss_vector_v2.replace(':/', '/')
+                cvss_vectors = i.cvss_vector_v2.replace(":/", "/")
                 cvss_obj = CVSS2(cvss_vectors)
             else:
                 cvss_vectors = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"

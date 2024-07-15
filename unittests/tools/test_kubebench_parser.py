@@ -41,9 +41,9 @@ class TestKubeBenchParser(DojoTestCase):
             medium_severities = 0
             info_severities = 0
             for finding in findings:
-                if finding.severity == 'Medium':
+                if finding.severity == "Medium":
                     medium_severities += 1
-                if finding.severity == 'Info':
+                if finding.severity == "Info":
                     info_severities += 1
 
             self.assertEqual(36, medium_severities)

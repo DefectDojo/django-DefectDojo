@@ -16,9 +16,9 @@ class TestAnchoreCTLPoliciesParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             singleFinding = findings[0]
-            self.assertEqual(singleFinding.severity, 'Medium')
-            self.assertEqual(singleFinding.title, 'RootUser - gate|dockerfile - trigger|b2605c2ddbdb02b8e2365c9248dada5a')
-            self.assertEqual(singleFinding.description, 'User root found as effective user, which is not on the allowed list')
+            self.assertEqual(singleFinding.severity, "Medium")
+            self.assertEqual(singleFinding.title, "RootUser - gate|dockerfile - trigger|b2605c2ddbdb02b8e2365c9248dada5a")
+            self.assertEqual(singleFinding.description, "User root found as effective user, which is not on the allowed list")
 
     def test_anchore_engine_parser_has_many_findings(self):
         with open("unittests/scans/anchorectl_policies/many_violations.json") as testfile:
