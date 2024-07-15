@@ -3,8 +3,7 @@ from os import path
 
 from dojo.models import Test
 from dojo.tools.dawnscanner.parser import DawnScannerParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestDawnScannerParser(DojoTestCase):

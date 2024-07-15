@@ -63,7 +63,7 @@ class BurpGraphQLParser:
 
         for issue in scan_data:
             if not issue.get("issue_type") or not issue["issue_type"].get(
-                "name"
+                "name",
             ):
                 msg = "Issue does not have a name"
                 raise ValueError(msg)
@@ -89,11 +89,11 @@ class BurpGraphQLParser:
 
         if issue.get("evidence"):
             finding["Evidence"] = finding["Evidence"] + self.parse_evidence(
-                issue.get("evidence")
+                issue.get("evidence"),
             )
 
         finding["Endpoints"].append(
-            Endpoint.from_uri(issue["origin"] + issue["path"])
+            Endpoint.from_uri(issue["origin"] + issue["path"]),
         )
 
     def create_finding(self, issue):
@@ -107,18 +107,18 @@ class BurpGraphQLParser:
         if issue.get("description_html"):
             finding["Description"] += "**Issue Detail**\n"
             finding["Description"] += html2text.html2text(
-                issue.get("description_html")
+                issue.get("description_html"),
             )
 
             if issue["issue_type"].get("description_html"):
                 finding["Impact"] += "**Issue Background**\n"
                 finding["Impact"] += html2text.html2text(
-                    issue["issue_type"].get("description_html")
+                    issue["issue_type"].get("description_html"),
                 )
         elif issue["issue_type"].get("description_html"):
             finding["Description"] += "**Issue Background**\n"
             finding["Description"] += html2text.html2text(
-                issue["issue_type"].get("description_html")
+                issue["issue_type"].get("description_html"),
             )
 
         if issue.get("remediation_html"):
@@ -128,12 +128,12 @@ class BurpGraphQLParser:
             if issue["issue_type"].get("remediation_html"):
                 finding["Mitigation"] += "**Remediation Background**\n"
                 finding["Mitigation"] += html2text.html2text(
-                    issue["issue_type"].get("remediation_html")
+                    issue["issue_type"].get("remediation_html"),
                 )
         elif issue["issue_type"].get("remediation_html"):
             finding["Impact"] += "**Remediation Background**\n"
             finding["Impact"] += html2text.html2text(
-                issue["issue_type"].get("remediation_html")
+                issue["issue_type"].get("remediation_html"),
             )
 
         if issue.get("severity"):
@@ -142,7 +142,7 @@ class BurpGraphQLParser:
             finding["Severity"] = "Info"
 
         finding["Endpoints"] = [
-            Endpoint.from_uri(issue["origin"] + issue["path"])
+            Endpoint.from_uri(issue["origin"] + issue["path"]),
         ]
 
         if issue.get("evidence"):
@@ -153,16 +153,16 @@ class BurpGraphQLParser:
         if issue["issue_type"].get("references_html"):
             finding["References"] += "**References**\n"
             finding["References"] += html2text.html2text(
-                issue["issue_type"].get("references_html")
+                issue["issue_type"].get("references_html"),
             )
 
         if issue["issue_type"].get("vulnerability_classifications_html"):
             finding["References"] += "**CWE Information**\n"
             finding["References"] += html2text.html2text(
-                issue["issue_type"].get("vulnerability_classifications_html")
+                issue["issue_type"].get("vulnerability_classifications_html"),
             )
             finding["CWE"] = self.get_cwe(
-                issue["issue_type"].get("vulnerability_classifications_html")
+                issue["issue_type"].get("vulnerability_classifications_html"),
             )
         else:
             finding["CWE"] = 0
@@ -182,11 +182,11 @@ class BurpGraphQLParser:
                 for data in request_dict.get("request_segments"):
                     if data.get("data_html"):
                         request += html2text.html2text(
-                            data.get("data_html")
+                            data.get("data_html"),
                         ).strip()
                     elif data.get("highlight_html"):
                         request += html2text.html2text(
-                            data.get("highlight_html")
+                            data.get("highlight_html"),
                         ).strip()
 
             if (
@@ -201,11 +201,11 @@ class BurpGraphQLParser:
                 for data in response_dict.get("response_segments"):
                     if data.get("data_html"):
                         response += html2text.html2text(
-                            data.get("data_html")
+                            data.get("data_html"),
                         ).strip()
                     elif data.get("highlight_html"):
                         response += html2text.html2text(
-                            data.get("highlight_html")
+                            data.get("highlight_html"),
                         ).strip()
 
                 i += 2

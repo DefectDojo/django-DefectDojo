@@ -1,13 +1,12 @@
 from dojo.models import Test
 from dojo.tools.trustwave_fusion_api.parser import TrustwaveFusionAPIParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestTrustwaveFusionAPIParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/trustwave_fusion_api/trustwave_fusion_api_zero_vul.json"
+            get_unit_tests_path() + "/scans/trustwave_fusion_api/trustwave_fusion_api_zero_vul.json",
         ) as testfile:
             parser = TrustwaveFusionAPIParser()
             findings = parser.get_findings(testfile, Test())
@@ -27,7 +26,7 @@ class TestTrustwaveFusionAPIParser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2017-7529", finding.unsaved_vulnerability_ids[0])
             self.assertEqual(
-                "Vulnerability/Missing Patch", finding.description
+                "Vulnerability/Missing Patch", finding.description,
             )
 
             # second example
@@ -43,7 +42,7 @@ class TestTrustwaveFusionAPIParser(DojoTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/trustwave_fusion_api/trustwave_fusion_api_many_vul.json"
+            get_unit_tests_path() + "/scans/trustwave_fusion_api/trustwave_fusion_api_many_vul.json",
         ) as testfile:
             parser = TrustwaveFusionAPIParser()
             findings = parser.get_findings(testfile, Test())
@@ -59,7 +58,7 @@ class TestTrustwaveFusionAPIParser(DojoTestCase):
             self.assertEqual("0123456:id", finding.unique_id_from_tool)
             self.assertEqual("Website Detected", finding.title)
             self.assertEqual(
-                "Information/Service Discovery", finding.description
+                "Information/Service Discovery", finding.description,
             )
             self.assertIsNone(finding.unsaved_vulnerability_ids)
             date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f%z")

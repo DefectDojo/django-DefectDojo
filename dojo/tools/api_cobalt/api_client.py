@@ -44,7 +44,7 @@ class CobaltAPI:
         else:
             msg = (
                 "Unable to get assets due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8")
+                    response.status_code, response.content.decode("utf-8"),
                 )
             )
             raise Exception(msg)
@@ -65,7 +65,7 @@ class CobaltAPI:
         else:
             msg = (
                 "Unable to get asset findings due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8")
+                    response.status_code, response.content.decode("utf-8"),
                 )
             )
             raise Exception(msg)
@@ -86,7 +86,7 @@ class CobaltAPI:
         if response_orgs.ok and response_assets.ok:
             data = response_orgs.json().get("data")
             orgs = filter(
-                lambda org: org["resource"]["token"] == self.org_token, data
+                lambda org: org["resource"]["token"] == self.org_token, data,
             )
             org = list(orgs)[0]
             org_name = org["resource"]["name"]
