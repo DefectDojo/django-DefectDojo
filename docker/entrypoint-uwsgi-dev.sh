@@ -29,4 +29,5 @@ exec uwsgi \
   --buffer-size="${DD_UWSGI_BUFFER_SIZE:-8192}" \
   --lazy-apps \
   --touch-reload="/app/dojo/setting/settings.py" \
+  --log-master \
   --logformat "${DD_UWSGI_LOGFORMAT:-$DD_UWSGI_LOGFORMAT_DEFAULT}"
