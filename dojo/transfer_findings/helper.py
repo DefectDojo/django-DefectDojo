@@ -1,4 +1,5 @@
 import logging
+import time
 from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
@@ -94,11 +95,12 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
     """
 
     request_findings = serializer.validated_data["findings"]
+    engagement_id = serializer.validated_data["engagement_id"]
     test = None
     transfer_finding_obj = None
     system_settings = System_Settings.objects.get()
     if transfer_finding_findings:
-        transfer_finding_obj = transfer_finding_findings[0].transfer_findings
+        transfer_finding_obj = transfer_finding_findings.first().transfer_findings
     for transfer_finding_finding in transfer_finding_findings:
         finding = transfer_finding_finding.findings
         finding_id = str(finding.id)
@@ -115,6 +117,9 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = False
                     if not test:
+                        engagement = Engagement.objects.get(id=engagement_id)
+                        transfer_finding_obj.destination_engagement = engagement
+                        transfer_finding_obj.save()
                         test = created_test(
                             origin_finding=finding,
                             transfer_finding=transfer_finding_finding.transfer_findings,
@@ -136,20 +141,16 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
 
     NotificationTransferFinding.transfer_finding_status_changes(transfer_finding_obj)
 
+
 def created_test(origin_finding: Finding, transfer_finding: TransferFinding) -> Test:
     test: Test = None
-    tests = transfer_finding.destination_engagement.test_set.all().order_by('-id')
-    if tests:
-        test = tests[0]
-        logger.debug(f"Select test {test.id} for transfer finding")
-    else:
-        test = Test.objects.create(
-            engagement=transfer_finding.destination_engagement,
-            test_type=origin_finding.test.test_type,
-            target_start=origin_finding.test.target_start,
-            target_end=origin_finding.test.target_end,
-        )
-        logger.debug(f"Created new test {test.id} for transfer finding")
+    test = Test.objects.create(
+        engagement=transfer_finding.destination_engagement,
+        test_type=origin_finding.test.test_type,
+        target_start=origin_finding.test.target_start,
+        target_end=origin_finding.test.target_end,
+    )
+    test.save()
     return test
 
 
@@ -168,8 +169,6 @@ def transfer_finding(
         except Exception as e:
             logger.error(e)
             raise ApiError.not_found(datail=f" {e} : finding_related: {finding_related_id}")
-
-    if isinstance(origin_finding, Finding) and isinstance(transfer_finding.destination_engagement, Engagement):
 
         add_finding_related(transferfinding_findigns,
                             origin_finding,

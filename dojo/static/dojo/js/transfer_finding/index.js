@@ -267,7 +267,6 @@ export async function generateRequestTransferFindingUpdate(transferFindingId, ri
                 requestFindingStatus[finding.findings.id] = {"risk_status": riskStatus};
             });
         });
-
         return requestFindingStatus;
     } catch (error) {
         console.error(error);

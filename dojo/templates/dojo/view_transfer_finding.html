@@ -254,10 +254,8 @@
         let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Rejected"])
         if (typeof tranferAcceptedFinding === 'object' && Object.keys(tranferAcceptedFinding).length > 0){
           let engagementId = getSessionStorage('transferFinding', 'engagementId');
-          if(engagementId !== "None"){
-            updateTransferFinding({"destination_engagement": engagementId}, transferId);
-          }
-          updateFindings(tranferAcceptedFinding, transferId)
+          let requests = {"findings": tranferAcceptedFinding, "engagement_id": engagementId}
+          updateFindings(requests, transferId)
         }
         let removedFinding = filterForStatus(["Transfer Removed"]);
         if (typeof removedFinding === 'object' && Object.keys(removedFinding).length > 0){
@@ -320,7 +318,7 @@
 
     async function updateTransferFinding(data, transferFindingId){
       try{
-        response = await $.ajax({
+        const response = $.ajax({
             url: "/api/v2/transfer_finding/" + transferFindingId + "/",
             type: "PATCH",
             headers: { "X-CSRFToken": csrftoken,
@@ -338,7 +336,6 @@
     }
 
   async function updateFindings(findingChangeStatus, transferFindingId){
-      let transfer_findings= {"findings" : findingChangeStatus}
       try{
         response = await $.ajax({
             url: "/api/v2/transfer_finding_findings/" + transferFindingId + "/" + "change_status" + "/",
@@ -347,7 +344,7 @@
             "Content-Type": "application/json"},
             retry: MAX_RETRY,
             retryInterval: RETRY_INTERVAL,
-            data: JSON.stringify(transfer_findings),
+            data: JSON.stringify(findingChangeStatus),
         })
         return response
       }
@@ -428,22 +425,20 @@
     let engagementId = getSessionStorage('transferFinding', 'engagementId');
     if (action == "Accepted")
     {
-        if(engagementId !== "None")
-        {
-          response = await updateTransferFinding({"destination_engagement": engagementId}, transferFindingId)
-        }
-        let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
-        response = await updateFindings(requestFindingStatus, transferFindingId)
+        let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted");
+        let requests = {"findings": requestFindingStatus, "engagement_id": engagementId}
+        response = await updateFindings(requests, transferFindingId);
     }
     if (action == "Rejected"){
-      let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
-      response = await updateFindings(requestFindingStatus, transferFindingId)
+      let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected");
+      let requests = {"findings": requestFindingStatus, "engagement_id": engagementId}
+      response = await updateFindings(requests, transferFindingId);
       }
     if (action == "Removed"){
       //response = await removeTransferFinding(transferFindingId, transferFindingId)
-      response = await removeTransferFindingView(transferFindingId)
+      response = await removeTransferFindingView(transferFindingId);
     }
-    return response
+    return response;
   }
 
   function showConfirmedModal(transferFindingId, transferFindingActions)

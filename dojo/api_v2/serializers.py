@@ -3312,6 +3312,7 @@ class TransferFindingFindingsDetailSerializer(serializers.Serializer):
 
 
 class TransferFindingFindingsUpdateSerializer(serializers.Serializer):
+    engagement_id = serializers.IntegerField(required=True)
     findings = serializers.DictField(child=TransferFindingFindingsDetailSerializer())
 
 class AnnouncementSerializer(serializers.ModelSerializer):
