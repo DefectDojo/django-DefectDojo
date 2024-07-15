@@ -1,5 +1,4 @@
 import logging
-import time
 from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
@@ -169,6 +168,8 @@ def transfer_finding(
         except Exception as e:
             logger.error(e)
             raise ApiError.not_found(datail=f" {e} : finding_related: {finding_related_id}")
+
+    if isinstance(origin_finding, Finding) and isinstance(transfer_finding.destination_engagement, Engagement):
 
         add_finding_related(transferfinding_findigns,
                             origin_finding,
