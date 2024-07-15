@@ -49,7 +49,7 @@ from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Product_Type_Member
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
-from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
+from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
 
 logger = logging.getLogger(__name__)
 
@@ -199,9 +199,10 @@ def delete_alerts(request):
             extra_tags='alert-success')
         return HttpResponseRedirect('alerts')
 
-    return render(request,
-                    'dojo/delete_alerts.html',
-                    {'alerts': alerts})
+    return render(request, 'dojo/delete_alerts.html', {
+        "alerts": alerts,
+        "delete_preview": get_setting('DELETE_PREVIEW'),
+    })
 
 
 @login_required
@@ -493,9 +494,12 @@ def delete_user(request, uid):
                                             extra_tags='alert-warning')
                     return HttpResponseRedirect(reverse('users'))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([user])
-    rels = collector.nested()
+    rels = ["Previewing the relationships has been disabled.", ""]
+    display_preview = get_setting("DELETE_PREVIEW")
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([user])
+        rels = collector.nested()
 
     add_breadcrumb(title=_("Delete User"), top_level=False, request=request)
     return render(request, 'dojo/delete_user.html',
