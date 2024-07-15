@@ -39,7 +39,7 @@ def get_parser(scan_type):
         raise ValueError(msg)
     rg = re.compile(settings.PARSER_EXCLUDE)
     if not rg.match(scan_type) or settings.PARSER_EXCLUDE.strip() == "":
-        # update DB dynamicaly
+        # update DB dynamically
         test_type, _ = Test_Type.objects.get_or_create(name=scan_type)
         if test_type.active:
             return PARSERS[scan_type]
@@ -47,17 +47,30 @@ def get_parser(scan_type):
     raise ValueError(msg)
 
 
+def get_inactive_test_types():
+    try:
+        return list(Test_Type.objects.filter(active=False).values_list("name", flat=True))
+    except Exception:
+        # This exception is reached in the event of loading fixtures in to an empty database
+        # prior to migrations runnings
+        return []
+
+
 def get_scan_types_sorted():
     res = []
+    inactive_test_types = get_inactive_test_types()
     for key in PARSERS:
-        res.append((key, PARSERS[key].get_description_for_scan_types(key)))
+        if key not in inactive_test_types:
+            res.append((key, PARSERS[key].get_description_for_scan_types(key)))
     return sorted(res, key=lambda x: x[0].lower())
 
 
 def get_choices_sorted():
     res = []
+    inactive_test_types = get_inactive_test_types()
     for key in PARSERS:
-        res.append((key, key))
+        if key not in inactive_test_types:
+            res.append((key, key))
     return sorted(res, key=lambda x: x[1].lower())
 
 
@@ -74,8 +87,9 @@ def requires_file(scan_type):
 
 def get_api_scan_configuration_hints():
     res = []
+    inactive_test_types = get_inactive_test_types()
     for name, parser in PARSERS.items():
-        if hasattr(parser, "api_scan_configuration_hint"):
+        if name not in inactive_test_types and hasattr(parser, "api_scan_configuration_hint"):
             scan_types = parser.get_scan_types()
             for scan_type in scan_types:
                 tool_type = parser.requires_tool_type(scan_type)
