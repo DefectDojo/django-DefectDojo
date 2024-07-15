@@ -1,6 +1,10 @@
 import logging
-from dojo.api_v2.api_error import ApiError
+from django.urls import reverse
+from django.utils import timezone
 from django.conf import settings
+from django.shortcuts import get_object_or_404
+from dojo.celery import app
+from dojo.api_v2.api_error import ApiError
 from dateutil.relativedelta import relativedelta
 from dojo.models import (
     Test,
@@ -22,9 +26,6 @@ from dojo.transfer_findings.queries import (
 )
 from dojo.transfer_findings.notification import Notification as NotificationTransferFinding
 from dojo.user.queries import get_user
-from django.urls import reverse
-from django.utils import timezone
-from dojo.celery import app
 logger = logging.getLogger(__name__)
 
 
@@ -318,3 +319,15 @@ def get_sla_expiration_transfer_finding():
     expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days.get("critical"))
     created_date = timezone.now().date()
     return expiration_delta_days.get('critical'), expiration_date, created_date
+
+
+def delete_transfer_finding_finding(transfer_finding):
+    try:
+        obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=transfer_finding.id)
+        for transfer_finding_finding in obj_transfer_finding_findings:
+            reset_finding_related(transfer_finding_finding.findings)
+        NotificationTransferFinding.transfer_finding_remove(transfer_finding)
+    except Exception as e:
+        logger.error(e)
+        raise ApiError.internal_server_error(detail=e)
+    return True
