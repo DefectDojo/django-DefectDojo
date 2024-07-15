@@ -276,7 +276,7 @@ env = environ.FileAwareEnv(
     DD_DELETE_PREVIEW=(bool, True),
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
-                                 '.sarif', '.xslx', '.doc', '.html', '.js', '.nessus', '.zip']),
+                                 '.sarif', '.xlsx', '.doc', '.html', '.js', '.nessus', '.zip']),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be

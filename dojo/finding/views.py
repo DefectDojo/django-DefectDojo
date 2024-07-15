@@ -2756,6 +2756,7 @@ def finding_bulk_update_all(request, pid=None):
                     )
 
                 finds = prefetch_for_findings(finds)
+                note = None
                 if form.cleaned_data["severity"] or form.cleaned_data["status"]:
                     for find in finds:
                         old_find = copy.deepcopy(find)
@@ -3083,6 +3084,8 @@ def finding_bulk_update_all(request, pid=None):
                                 "pushing to jira from finding.finding_bulk_update_all()"
                             )
                             jira_helper.push_to_jira(finding)
+                            if note is not None and isinstance(note, Notes):
+                                jira_helper.add_comment(finding, note)
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():

@@ -2951,6 +2951,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = None
         product = None
+        template = False
 
         if self.instance is not None:
             user = self.instance.user
@@ -2960,25 +2961,26 @@ class NotificationsSerializer(serializers.ModelSerializer):
             user = data.get("user")
         if "product" in data:
             product = data.get("product")
+        if "template" in data:
+            template = data.get("template")
 
+        if (
+            template
+            and Notifications.objects.filter(template=True).count() > 0
+        ):
+            msg = "Notification template already exists"
+            raise ValidationError(msg)
         if (
             self.instance is None
             or user != self.instance.user
             or product != self.instance.product
         ):
             notifications = Notifications.objects.filter(
-                user=user, product=product, template=False
+                user=user, product=product, template=template
             ).count()
             if notifications > 0:
                 msg = "Notification for user and product already exists"
                 raise ValidationError(msg)
-        if (
-            data.get("template")
-            and Notifications.objects.filter(template=True).count() > 0
-        ):
-            msg = "Notification template already exists"
-            raise ValidationError(msg)
-
         return data
 
 
