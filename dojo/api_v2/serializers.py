@@ -2976,7 +2976,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
             or product != self.instance.product
         ):
             notifications = Notifications.objects.filter(
-                user=user, product=product, template=template
+                user=user, product=product, template=template,
             ).count()
             if notifications > 0:
                 msg = "Notification for user and product already exists"

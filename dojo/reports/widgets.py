@@ -106,9 +106,9 @@ class Div(form_widget):
 
 class WYSIWYGContentForm(forms.Form):
     heading = forms.CharField(max_length=200, required=False, initial="Custom Content")
-    content = forms.CharField(required=False, widget=Div(attrs={'class': 'editor'}))
+    content = forms.CharField(required=False, widget=Div(attrs={"class": "editor"}))
     hidden_content = forms.CharField(widget=forms.HiddenInput(), required=True)
-    page_break_after = forms.BooleanField(required=False, help_text='Include a page break after the custom content.')
+    page_break_after = forms.BooleanField(required=False, help_text="Include a page break after the custom content.")
 
     class Meta:
         exclude = []
@@ -120,7 +120,7 @@ class Widget:
         self.title = "Base Widget"
         self.form = None
         self.multiple = "false"
-        self.widget_class = 'widget'
+        self.widget_class = "widget"
 
     @abc.abstractmethod
     def get_html(self, request):
@@ -175,7 +175,7 @@ class CoverPage(Widget):
         self.title = "Cover Page"
         self.form = CoverPageForm()
         self.help_text = "The cover page includes a page break after its content."
-        self.widget_class = 'cover-page'
+        self.widget_class = "cover-page"
 
     def get_html(self):
         return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.heading,

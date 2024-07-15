@@ -199,9 +199,9 @@ def delete_alerts(request):
             extra_tags="alert-success")
         return HttpResponseRedirect("alerts")
 
-    return render(request, 'dojo/delete_alerts.html', {
+    return render(request, "dojo/delete_alerts.html", {
         "alerts": alerts,
-        "delete_preview": get_setting('DELETE_PREVIEW'),
+        "delete_preview": get_setting("DELETE_PREVIEW"),
     })
 
 
