@@ -51,11 +51,8 @@ class KiuwanSCAParser:
             if not finding.title:
                 finding.title = row["cve"]
 
-            if "cwe" in row:
-                try:
-                    finding.cwe = int(row["cwe"].replace("CWE-", ""))
-                except Exception:
-                    pass
+            if "cwe" in row and "CWE-" in row["cwe"]:
+                finding.cwe = int(row["cwe"].replace("CWE-", ""))
 
             if "epss_score" in row:
                 finding.epss_score = row["epss_score"]

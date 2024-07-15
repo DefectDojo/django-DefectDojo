@@ -1,5 +1,5 @@
 ---
-title: "Kiuwan Scanner (SCA i.e. \"Insights\")"
+title: Kiuwan Scanner (SCA i.e. "Insights")
 toc_hide: true
 ---
 Import Kiuwan Insights Scan in JSON format. Export via API endpoint `insights/analysis/security` as json and create a file for importing to DefectDojo.
