@@ -296,6 +296,9 @@ def do_dedupe_finding_task(new_finding, *args, **kwargs):
 
 
 def do_dedupe_finding(new_finding, *args, **kwargs):
+    if dedupe_method := get_custom_method('FINDING_DEDUPE_METHOD'):
+        return dedupe_method(new_finding, *args, **kwargs)
+
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
