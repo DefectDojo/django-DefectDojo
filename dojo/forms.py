@@ -4669,9 +4669,4 @@ class ConfigurationPermissionsForm(forms.Form):
                 msg = 'Neither user or group are set'
                 raise Exception(msg)
 
-class DeleteTransferFindingForm(forms.ModelForm):
-    id = forms.IntegerField(required=True, widget=forms.widgets.HiddenInput())
 
-    class Meta:
-        model = TransferFinding
-        fields = ["id"]

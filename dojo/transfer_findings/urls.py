@@ -1,10 +1,10 @@
-from django.urls import re_path
+from django.urls import re_path, path
 from dojo.transfer_findings import views
 
 urlpatterns = [
-    re_path(
-        r'^transfer_finding/(?P<transfer_finding_id>\d+)/delete$',
-        views.ViewTransferFinding.as_view(),
-        name='View_TranferFinding'
+    path(
+        "transfer_finding/delete/",
+        views.TransferFindingDeleteView.as_view(),
+        name='view_tranferFinding_delete'
     ),
 ]

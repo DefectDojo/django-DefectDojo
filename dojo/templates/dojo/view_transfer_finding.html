@@ -193,9 +193,16 @@
                                     </button>
                             {% endif%}
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Delete" %}
-                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf help help-tooltip" title="Delete all Findings" data-tf-id="{{transfer_findings.id}}">
-                                    <i class="fas fa-trash-alt"></i>
-                                    </button></i>
+                              {% comment %} <form method="post" action="{% url 'view_tranferFinding_delete'%}">{% csrf_token %}
+                                <input type="hidden" name="id" value="{{transfer_findings.id}}">
+                                <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf help help-tooltip" title="Delete all Findings" data-tf-id="{{transfer_findings.id}}">
+                                  <i class="fas fa-trash-alt"></i>
+                                </button></i>
+                              </form> {% endcomment %}
+                              <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf help help-tooltip" title="Delete all Findings" data-tf-id="{{transfer_findings.id}}">
+                                <i class="fas fa-trash-alt"></i>
+                              </button></i>
+
                             {%endif%}
                             </td>
                         </tr>
@@ -390,6 +397,32 @@
       }
   }
 
+  
+  async function removeTransferFindingView(transferFindingId)
+  {
+      let response = "";
+      try
+      {
+          response = await $.ajax({
+              url: "/transfer_finding/delete/",
+              type: "POST",
+              retry: MAX_RETRY,
+              data: { id: transferFindingId },
+              retryInterval: RETRY_INTERVAL,
+              headers: {
+                  "X-CSRFToken": csrftoken,
+              }
+          });
+          return response;
+      }
+      catch (error)
+      {
+        console.error("RemoveTransferFinding: ", error.message);
+        throw error;
+      }
+  }
+
+
   async function updateFindingsRiskStatus(action, transferFindingId ){
     let response = ""
     let engagementId = getSessionStorage('transferFinding', 'engagementId');
@@ -407,7 +440,8 @@
       response = await updateFindings(requestFindingStatus, transferFindingId)
       }
     if (action == "Removed"){
-      response = await removeTransferFinding(transferFindingId, transferFindingId)
+      //response = await removeTransferFinding(transferFindingId, transferFindingId)
+      response = await removeTransferFindingView(transferFindingId)
     }
     return response
   }
