@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.spotbugs.parser import SpotbugsParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestSpotbugsParser(DojoTestCase):
@@ -76,7 +75,7 @@ class TestSpotbugsParser(DojoTestCase):
         test_finding = findings[0]
         # Test if line 13 is correct
         self.assertEqual(
-            "At IdentityFunctionCommandInjection.kt:[lines 20-170]", test_finding.description.splitlines()[12]
+            "At IdentityFunctionCommandInjection.kt:[lines 20-170]", test_finding.description.splitlines()[12],
         )
 
     def test_mitigation(self):

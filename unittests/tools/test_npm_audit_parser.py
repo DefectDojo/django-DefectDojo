@@ -2,8 +2,7 @@ from os import path
 
 from dojo.models import Test
 from dojo.tools.npm_audit.parser import NpmAuditParser, censor_path_hashes
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNpmAuditParser(DojoTestCase):
@@ -35,8 +34,8 @@ class TestNpmAuditParser(DojoTestCase):
                 if find.file_path == "express>fresh":
                     self.assertEqual(1, len(find.unsaved_vulnerability_ids))
                     self.assertEqual("CVE-2017-16119", find.unsaved_vulnerability_ids[0])
-            self.assertEqual('mime', findings[4].component_name)
-            self.assertEqual('1.3.4', findings[4].component_version)
+            self.assertEqual("mime", findings[4].component_name)
+            self.assertEqual("1.3.4", findings[4].component_version)
 
     def test_npm_audit_parser_multiple_cwes_per_finding(self):
         # cwes formatted as escaped list: "cwe": "[\"CWE-346\",\"CWE-453\"]",

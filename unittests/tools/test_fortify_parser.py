@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.fortify.parser import FortifyParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestFortifyParser(DojoTestCase):
@@ -28,7 +27,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("app/build/intermediates/bundle_manifest/developDebug/processDevelopDebugManifest/bundle-manifest/AndroidManifest.xml", finding.file_path)
                 self.assertEqual(11, finding.line)
-                self.assertEqual('53C25D2FC6950554F16D3CEF9E41EF6F', finding.unique_id_from_tool)
+                self.assertEqual("53C25D2FC6950554F16D3CEF9E41EF6F", finding.unique_id_from_tool)
 
     def test_fortify_few_findings_count_chart(self):
         with open("unittests/scans/fortify/fortify_few_findings_count_chart.xml") as testfile:
@@ -41,7 +40,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("app/build/intermediates/bundle_manifest/developDebug/processDevelopDebugManifest/bundle-manifest/AndroidManifest.xml", finding.file_path)
                 self.assertEqual(11, finding.line)
-                self.assertEqual('53C25D2FC6950554F16D3CEF9E41EF6F', finding.unique_id_from_tool)
+                self.assertEqual("53C25D2FC6950554F16D3CEF9E41EF6F", finding.unique_id_from_tool)
 
     def test_fortify_issue6260(self):
         with open("unittests/scans/fortify/issue6260.xml") as testfile:
@@ -54,7 +53,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("src/main/java/command.java", finding.file_path)
                 self.assertEqual(40, finding.line)
-                self.assertEqual('7A2F1C728BDDBB17C7CB31CEDF5D8F85', finding.unique_id_from_tool)
+                self.assertEqual("7A2F1C728BDDBB17C7CB31CEDF5D8F85", finding.unique_id_from_tool)
 
     def test_fortify_issue6082(self):
         with open("unittests/scans/fortify/issue6082.xml") as testfile:
@@ -67,14 +66,14 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("login.html", finding.file_path)
                 self.assertEqual(19, finding.line)
-                self.assertEqual('F46C9EF7203D77D83D3486BCDC78565F', finding.unique_id_from_tool)
+                self.assertEqual("F46C9EF7203D77D83D3486BCDC78565F", finding.unique_id_from_tool)
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("Unreleased Resource: Database - MyContextListener.java: 28", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("src/adrui/MyContextListener.java", finding.file_path)
                 self.assertEqual(28, finding.line)
-                self.assertEqual('B5B15F27E10F4D7799BD0ED1E6D34C5D', finding.unique_id_from_tool)
+                self.assertEqual("B5B15F27E10F4D7799BD0ED1E6D34C5D", finding.unique_id_from_tool)
 
     def test_fortify_many_fdr_findings(self):
         with open("unittests/scans/fortify/many_findings.fpr") as testfile:
@@ -85,6 +84,6 @@ class TestFortifyParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("Cross-Site Request Forgery 114E5A67-3446-4DD5-B578-D0E6FDBB304E", finding.title)
                 self.assertEqual("High", finding.severity)
-                self.assertEqual('114E5A67-3446-4DD5-B578-D0E6FDBB304E', finding.unique_id_from_tool)
+                self.assertEqual("114E5A67-3446-4DD5-B578-D0E6FDBB304E", finding.unique_id_from_tool)
                 finding = findings[12]
                 self.assertEqual("Critical", finding.severity)

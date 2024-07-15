@@ -75,7 +75,7 @@ class FortifyXMLParser:
         dupes = set()
         for issue_key, issue in issue_map.items():
             title = self.format_title(
-                issue["Category"], issue["FileName"], issue["LineStart"]
+                issue["Category"], issue["FileName"], issue["LineStart"],
             )
             if title not in dupes:
                 items.append(
@@ -89,7 +89,7 @@ class FortifyXMLParser:
                         description=self.format_description(issue, cat_meta),
                         mitigation=self.format_mitigation(issue, cat_meta),
                         unique_id_from_tool=issue_key,
-                    )
+                    ),
                 )
                 dupes.add(title)
         return items
@@ -117,7 +117,7 @@ class FortifyXMLParser:
                 "##Source:\nThis snippet provides more context on the execution path that "
                 "leads to this finding. \n"
                 "####Snippet:\n**File: {}: {}**\n```\n{}\n```\n".format(
-                    source["FileName"], source["LineStart"], source["Snippet"]
+                    source["FileName"], source["LineStart"], source["Snippet"],
                 )
             )
         if explanation:

@@ -42,7 +42,7 @@ class TestSysdigParser(TestCase):
                     for endpoint in finding.unsaved_endpoints:
                         endpoint.clean()
         self.assertEqual(
-            "Number of fields in row (22) does not match number of headers (21)", str(context.exception)
+            "Number of fields in row (22) does not match number of headers (21)", str(context.exception),
         )
 
     def test_sysdig_parser_missing_cve_field_not_starting_with_cve(self):
@@ -54,7 +54,7 @@ class TestSysdigParser(TestCase):
                     for endpoint in finding.unsaved_endpoints:
                         endpoint.clean()
         self.assertEqual(
-            "Number of fields in row (22) does not match number of headers (21)", str(context.exception)
+            "Number of fields in row (22) does not match number of headers (21)", str(context.exception),
         )
 
     def test_sysdig_parser_json_with_many_findings(self):
