@@ -140,7 +140,7 @@ class CustomReport(View):
             self.finding_notes = (options.include_finding_notes == "1")
             self.finding_images = (options.include_finding_images == "1")
         else:
-            self.report_format = 'HTML'
+            self.report_format = "HTML"
             self.finding_notes = True
             self.finding_images = True
 
@@ -152,8 +152,8 @@ class CustomReport(View):
         return CustomReportJsonForm(request.POST)
 
     def get_template(self):
-        if self.report_format == 'HTML':
-            return 'dojo/custom_html_report.html'
+        if self.report_format == "HTML":
+            return "dojo/custom_html_report.html"
         else:
             raise PermissionDenied
 
@@ -275,13 +275,13 @@ def product_endpoint_report(request, pid):
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
-    report_format = request.GET.get('report_type', 'HTML')
-    include_finding_notes = int(request.GET.get('include_finding_notes', 0))
-    include_finding_images = int(request.GET.get('include_finding_images', 0))
-    include_executive_summary = int(request.GET.get('include_executive_summary', 0))
-    include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
-    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
-    disclaimer = get_system_setting('disclaimer')
+    report_format = request.GET.get("report_type", "HTML")
+    include_finding_notes = int(request.GET.get("include_finding_notes", 0))
+    include_finding_images = int(request.GET.get("include_finding_images", 0))
+    include_executive_summary = int(request.GET.get("include_executive_summary", 0))
+    include_table_of_contents = int(request.GET.get("include_table_of_contents", 0))
+    include_disclaimer = int(request.GET.get("include_disclaimer", 0))
+    disclaimer = get_system_setting("disclaimer")
     if include_disclaimer and len(disclaimer) == 0:
         disclaimer = "Please configure in System Settings."
     generate = "_generate" in request.GET
@@ -291,7 +291,7 @@ def product_endpoint_report(request, pid):
 
     if generate:
         report_form = ReportOptionsForm(request.GET)
-        if report_format == 'HTML':
+        if report_format == "HTML":
             return render(request,
                           template,
                           {"product_type": None,
@@ -355,13 +355,13 @@ def generate_report(request, obj, host_view=False):
             msg = f"Report cannot be generated for object of type {type(obj).__name__}"
             raise Exception(msg)
 
-    report_format = request.GET.get('report_type', 'HTML')
-    include_finding_notes = int(request.GET.get('include_finding_notes', 0))
-    include_finding_images = int(request.GET.get('include_finding_images', 0))
-    include_executive_summary = int(request.GET.get('include_executive_summary', 0))
-    include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
-    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
-    disclaimer = get_system_setting('disclaimer')
+    report_format = request.GET.get("report_type", "HTML")
+    include_finding_notes = int(request.GET.get("include_finding_notes", 0))
+    include_finding_images = int(request.GET.get("include_finding_images", 0))
+    include_executive_summary = int(request.GET.get("include_executive_summary", 0))
+    include_table_of_contents = int(request.GET.get("include_table_of_contents", 0))
+    include_disclaimer = int(request.GET.get("include_disclaimer", 0))
+    disclaimer = get_system_setting("disclaimer")
 
     if include_disclaimer and len(disclaimer) == 0:
         disclaimer = "Please configure in System Settings."
@@ -558,7 +558,7 @@ def generate_report(request, obj, host_view=False):
 
     if generate:
         report_form = ReportOptionsForm(request.GET)
-        if report_format == 'HTML':
+        if report_format == "HTML":
             return render(request,
                           template,
                           {"product_type": product_type,

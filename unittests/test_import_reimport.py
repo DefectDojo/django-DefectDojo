@@ -517,21 +517,21 @@ class ImportReimportMixin:
     def test_import_sonar1_measure_minimum_severity_counts(self):
         # Critical
         response_json = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, minimum_severity="Critical")
-        test_id = response_json['test']
+        test_id = response_json["test"]
         # Count all findings
         self.assert_finding_count_json(3, self.get_test_findings_api(test_id))
         self.assert_finding_count_json(3, self.get_test_findings_api(test_id, severity="Critical"))
 
         # High
         response_json = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, minimum_severity="High")
-        test_id = response_json['test']
+        test_id = response_json["test"]
         # Count all findings
         self.assert_finding_count_json(4, self.get_test_findings_api(test_id))
         self.assert_finding_count_json(1, self.get_test_findings_api(test_id, severity="High"))
 
         # Low
         response_json = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, minimum_severity="Low")
-        test_id = response_json['test']
+        test_id = response_json["test"]
         # Count all findings
         self.assert_finding_count_json(6, self.get_test_findings_api(test_id))
         self.assert_finding_count_json(2, self.get_test_findings_api(test_id, severity="Low"))

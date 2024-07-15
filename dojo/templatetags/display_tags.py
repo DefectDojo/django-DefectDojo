@@ -113,7 +113,7 @@ def get_pwd(value):
 def checklist_status(value):
     return Check_List.get_status(value)
 
-  
+
 @register.simple_tag
 def dojo_version():
     from dojo import __version__
