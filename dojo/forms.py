@@ -4668,5 +4668,3 @@ class ConfigurationPermissionsForm(forms.Form):
             else:
                 msg = 'Neither user or group are set'
                 raise Exception(msg)
-
-
