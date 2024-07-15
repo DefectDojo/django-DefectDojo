@@ -79,6 +79,8 @@ def endpoint_get_or_create(**kwargs):
         count = qs.count()
         if count == 0:
             return Endpoint.objects.get_or_create(**kwargs)
+        elif count == 1:
+            return qs.order_by("id").first(), False
         else:
             logger.warning(
                 f"Endpoints in your database are broken. "
