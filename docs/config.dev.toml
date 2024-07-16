@@ -85,7 +85,8 @@ weight = 1
       # See a complete list of available styles at https://xyproto.github.io/splash/docs/all.html
       style = "dracula"
       # Uncomment if you want your chosen highlight style used for code blocks without a specified language
-      guessSyntax = "true"
+      # Do not uncomment otherwise it breaks mermaid
+      # guessSyntax = "true"
 
 # Everything below this are Site Params
 
@@ -198,3 +199,6 @@ enable = false
 	url = "https://owasp.slack.com/archives/C014H3ZV9U6"
 	icon = "fab fa-slack"
         desc = "Chat with other project developers"
+
+[params.mermaid]
+enable = true
