@@ -175,7 +175,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # make sure the severity is something is digestible
             unsaved_finding = self.sanitize_severity(unsaved_finding)
             # Filter on minimum severity if applicable
-            if (minimum_severity := kwargs.get("minimum_severity")) and (Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[minimum_severity]):
+            if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
