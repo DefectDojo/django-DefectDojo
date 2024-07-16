@@ -193,9 +193,16 @@
                                     </button>
                             {% endif%}
                             {% if transfer_findings|has_object_permission:"Transfer_Finding_Delete" %}
-                                    <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf help help-tooltip" title="Delete all Findings" data-tf-id="{{transfer_findings.id}}">
-                                    <i class="fas fa-trash-alt"></i>
-                                    </button></i>
+                              {% comment %} <form method="post" action="{% url 'view_tranferFinding_delete'%}">{% csrf_token %}
+                                <input type="hidden" name="id" value="{{transfer_findings.id}}">
+                                <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf help help-tooltip" title="Delete all Findings" data-tf-id="{{transfer_findings.id}}">
+                                  <i class="fas fa-trash-alt"></i>
+                                </button></i>
+                              </form> {% endcomment %}
+                              <button type="button" data-toggle="modal" data-target="" class="btn btn-danger btn-sm btn-tf help help-tooltip" title="Delete all Findings" data-tf-id="{{transfer_findings.id}}">
+                                <i class="fas fa-trash-alt"></i>
+                              </button></i>
+
                             {%endif%}
                             </td>
                         </tr>
@@ -247,10 +254,8 @@
         let tranferAcceptedFinding = filterForStatus(["Transfer Accepted", "Transfer Rejected"])
         if (typeof tranferAcceptedFinding === 'object' && Object.keys(tranferAcceptedFinding).length > 0){
           let engagementId = getSessionStorage('transferFinding', 'engagementId');
-          if(engagementId !== "None"){
-            updateTransferFinding({"destination_engagement": engagementId}, transferId);
-          }
-          updateFindings(tranferAcceptedFinding, transferId)
+          let requests = {"findings": tranferAcceptedFinding, "engagement_id": engagementId}
+          updateFindings(requests, transferId)
         }
         let removedFinding = filterForStatus(["Transfer Removed"]);
         if (typeof removedFinding === 'object' && Object.keys(removedFinding).length > 0){
@@ -313,7 +318,7 @@
 
     async function updateTransferFinding(data, transferFindingId){
       try{
-        response = await $.ajax({
+        const response = $.ajax({
             url: "/api/v2/transfer_finding/" + transferFindingId + "/",
             type: "PATCH",
             headers: { "X-CSRFToken": csrftoken,
@@ -331,7 +336,6 @@
     }
 
   async function updateFindings(findingChangeStatus, transferFindingId){
-      let transfer_findings= {"findings" : findingChangeStatus}
       try{
         response = await $.ajax({
             url: "/api/v2/transfer_finding_findings/" + transferFindingId + "/" + "change_status" + "/",
@@ -340,7 +344,7 @@
             "Content-Type": "application/json"},
             retry: MAX_RETRY,
             retryInterval: RETRY_INTERVAL,
-            data: JSON.stringify(transfer_findings),
+            data: JSON.stringify(findingChangeStatus),
         })
         return response
       }
@@ -390,26 +394,51 @@
       }
   }
 
+  
+  async function removeTransferFindingView(transferFindingId)
+  {
+      let response = "";
+      try
+      {
+          response = await $.ajax({
+              url: "/transfer_finding/delete/",
+              type: "POST",
+              retry: MAX_RETRY,
+              data: { id: transferFindingId },
+              retryInterval: RETRY_INTERVAL,
+              headers: {
+                  "X-CSRFToken": csrftoken,
+              }
+          });
+          return response;
+      }
+      catch (error)
+      {
+        console.error("RemoveTransferFinding: ", error.message);
+        throw error;
+      }
+  }
+
+
   async function updateFindingsRiskStatus(action, transferFindingId ){
     let response = ""
     let engagementId = getSessionStorage('transferFinding', 'engagementId');
     if (action == "Accepted")
     {
-        if(engagementId !== "None")
-        {
-          response = await updateTransferFinding({"destination_engagement": engagementId}, transferFindingId)
-        }
-        let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted")
-        response = await updateFindings(requestFindingStatus, transferFindingId)
+        let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Accepted");
+        let requests = {"findings": requestFindingStatus, "engagement_id": engagementId}
+        response = await updateFindings(requests, transferFindingId);
     }
     if (action == "Rejected"){
-      let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected")
-      response = await updateFindings(requestFindingStatus, transferFindingId)
+      let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected");
+      let requests = {"findings": requestFindingStatus}
+      response = await updateFindings(requests, transferFindingId);
       }
     if (action == "Removed"){
-      response = await removeTransferFinding(transferFindingId, transferFindingId)
+      //response = await removeTransferFinding(transferFindingId, transferFindingId)
+      response = await removeTransferFindingView(transferFindingId);
     }
-    return response
+    return response;
   }
 
   function showConfirmedModal(transferFindingId, transferFindingActions)

@@ -1,6 +1,10 @@
 import logging
-from dojo.api_v2.api_error import ApiError
+from django.urls import reverse
+from django.utils import timezone
 from django.conf import settings
+from django.shortcuts import get_object_or_404
+from dojo.celery import app
+from dojo.api_v2.api_error import ApiError
 from dateutil.relativedelta import relativedelta
 from dojo.models import (
     Test,
@@ -22,9 +26,6 @@ from dojo.transfer_findings.queries import (
 )
 from dojo.transfer_findings.notification import Notification as NotificationTransferFinding
 from dojo.user.queries import get_user
-from django.urls import reverse
-from django.utils import timezone
-from dojo.celery import app
 logger = logging.getLogger(__name__)
 
 
@@ -97,7 +98,7 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
     transfer_finding_obj = None
     system_settings = System_Settings.objects.get()
     if transfer_finding_findings:
-        transfer_finding_obj = transfer_finding_findings[0].transfer_findings
+        transfer_finding_obj = transfer_finding_findings.first().transfer_findings
     for transfer_finding_finding in transfer_finding_findings:
         finding = transfer_finding_finding.findings
         finding_id = str(finding.id)
@@ -114,6 +115,9 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = False
                     if not test:
+                        engagement = Engagement.objects.get(id=serializer.validated_data["engagement_id"])
+                        transfer_finding_obj.destination_engagement = engagement
+                        transfer_finding_obj.save()
                         test = created_test(
                             origin_finding=finding,
                             transfer_finding=transfer_finding_finding.transfer_findings,
@@ -135,20 +139,16 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
 
     NotificationTransferFinding.transfer_finding_status_changes(transfer_finding_obj)
 
+
 def created_test(origin_finding: Finding, transfer_finding: TransferFinding) -> Test:
     test: Test = None
-    tests = transfer_finding.destination_engagement.test_set.all().order_by('-id')
-    if tests:
-        test = tests[0]
-        logger.debug(f"Select test {test.id} for transfer finding")
-    else:
-        test = Test.objects.create(
-            engagement=transfer_finding.destination_engagement,
-            test_type=origin_finding.test.test_type,
-            target_start=origin_finding.test.target_start,
-            target_end=origin_finding.test.target_end,
-        )
-        logger.debug(f"Created new test {test.id} for transfer finding")
+    test = Test.objects.create(
+        engagement=transfer_finding.destination_engagement,
+        test_type=origin_finding.test.test_type,
+        target_start=origin_finding.test.target_start,
+        target_end=origin_finding.test.target_end,
+    )
+    test.save()
     return test
 
 
@@ -263,6 +263,7 @@ def send_notification_transfer_finding(transfer_findings, status="accepted"):
 
 def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes: str, send_notification: bool):
     transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
+    transfer_finding_finding_reactive = None
     system_user = get_user(settings.SYSTEM_USER)
     for transfer_finding_finding in transfer_finding_findings:
         if event == "close":
@@ -281,13 +282,15 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
             logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are reactivated")
             transfer_finding_finding.findings.notes.add(note)
             transfer_finding_finding.findings.save()
-    if send_notification:
+            transfer_finding_finding_reactive = transfer_finding_finding
+
+    if send_notification and transfer_finding_finding_reactive:
         NotificationTransferFinding.send_notification(
             event="transfer_finding",
             subject=f"✅This transfer-finding has been reactivated{parent_finding.id} (policies for the transfer of findings)👌",
             description=f"The finding has been reactivated for the finding parent <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
             finding=parent_finding,
-            user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
+            user_names=[transfer_finding_finding_reactive.transfer_findings.owner.get_username()])
 
 
 def reset_finding_related(finding):
@@ -318,3 +321,15 @@ def get_sla_expiration_transfer_finding():
     expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days.get("critical"))
     created_date = timezone.now().date()
     return expiration_delta_days.get('critical'), expiration_date, created_date
+
+
+def delete_transfer_finding_finding(transfer_finding):
+    try:
+        obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=transfer_finding.id)
+        for transfer_finding_finding in obj_transfer_finding_findings:
+            reset_finding_related(transfer_finding_finding.findings)
+        NotificationTransferFinding.transfer_finding_remove(transfer_finding)
+    except Exception as e:
+        logger.error(e)
+        raise ApiError.internal_server_error(detail=e)
+    return True
