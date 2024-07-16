@@ -94,7 +94,6 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
     """
 
     request_findings = serializer.validated_data["findings"]
-    engagement_id = serializer.validated_data["engagement_id"]
     test = None
     transfer_finding_obj = None
     system_settings = System_Settings.objects.get()
@@ -116,7 +115,7 @@ def transfer_findings(transfer_finding_findings: TransferFindingFinding, seriali
                     finding.risk_status = dict_findings["risk_status"]
                     finding.active = False
                     if not test:
-                        engagement = Engagement.objects.get(id=engagement_id)
+                        engagement = Engagement.objects.get(id=serializer.validated_data["engagement_id"])
                         transfer_finding_obj.destination_engagement = engagement
                         transfer_finding_obj.save()
                         test = created_test(
@@ -264,6 +263,7 @@ def send_notification_transfer_finding(transfer_findings, status="accepted"):
 
 def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes: str, send_notification: bool):
     transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
+    transfer_finding_finding_reactive = None
     system_user = get_user(settings.SYSTEM_USER)
     for transfer_finding_finding in transfer_finding_findings:
         if event == "close":
@@ -282,13 +282,15 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
             logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are reactivated")
             transfer_finding_finding.findings.notes.add(note)
             transfer_finding_finding.findings.save()
-    if send_notification:
+            transfer_finding_finding_reactive = transfer_finding_finding
+
+    if send_notification and transfer_finding_finding_reactive:
         NotificationTransferFinding.send_notification(
             event="transfer_finding",
             subject=f"✅This transfer-finding has been reactivated{parent_finding.id} (policies for the transfer of findings)👌",
             description=f"The finding has been reactivated for the finding parent <b>{parent_finding.title}</b> with id <b>{parent_finding.id}</b>",
             finding=parent_finding,
-            user_names=[transfer_finding_finding.transfer_findings.owner.get_username()])
+            user_names=[transfer_finding_finding_reactive.transfer_findings.owner.get_username()])
 
 
 def reset_finding_related(finding):

@@ -431,7 +431,7 @@
     }
     if (action == "Rejected"){
       let requestFindingStatus = await generateRequestTransferFindingUpdate(transferFindingId, "Transfer Rejected");
-      let requests = {"findings": requestFindingStatus, "engagement_id": engagementId}
+      let requests = {"findings": requestFindingStatus}
       response = await updateFindings(requests, transferFindingId);
       }
     if (action == "Removed"){
