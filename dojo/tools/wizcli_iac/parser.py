@@ -85,3 +85,19 @@ class WizcliIaCParser:
             )
             findings.append(finding)
         return findings
+
+    def get_findings(self, filename, test):
+        with open(filename, 'r') as file:
+            data = json.load(file)
+
+        findings = []
+        results = data.get("result", {})
+        
+        if "ruleMatches" in results:
+            findings.extend(self.parse_rule_matches(results["ruleMatches"], test))
+        
+        if "secrets" in results:
+            findings.extend(self.parse_secrets(results["secrets"], test))
+
+        return findings
+
