@@ -53,3 +53,35 @@ class WizcliIaCParser:
                 )
                 findings.append(finding)
         return findings
+
+    def parse_secrets(self, secrets, test):
+        findings = []
+        for secret in secrets:
+            secret_id = secret["id"]
+            secret_name = secret["contains"][0]["name"]
+            severity = "high".lower().capitalize()
+            file_name = secret["path"]
+            line_number = secret.get("lineNumber", "N/A")
+            match_content = secret["type"]
+
+            description = (
+                f"**Secret ID**: {secret_id}\n"
+                f"**Secret Name**: {secret_name}\n"
+                f"**File Name**: {file_name}\n"
+                f"**Line Number**: {line_number}\n"
+                f"**Match Content**: {match_content}\n"
+            )
+
+            finding = Finding(
+                title=f"Secret: {secret_name}",
+                description=description,
+                severity=severity,
+                file_path=file_name,
+                line=line_number,
+                static_finding=True,
+                dynamic_finding=False,
+                mitigation=None,
+                test=test,
+            )
+            findings.append(finding)
+        return findings
