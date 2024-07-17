@@ -1272,17 +1272,18 @@ def close_finding(request, fid):
                 finding_in_group = finding.has_finding_group
                 # Check if there is a jira issue that needs to be updated
                 jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+                # fetch the project
+                jira_instance = jira_helper.get_jira_instance(finding)
+                jira_project = jira_helper.get_jira_project(finding)
                 # Only push if the finding is not in a group
                 if jira_issue_exists:
                     # Determine if any automatic sync should occur
-                    push_to_jira = jira_helper.is_push_all_issues(finding) \
-                        or jira_helper.get_jira_instance(finding).finding_jira_sync
-                # Add the closing note
-                if push_to_jira and not finding_in_group:
-                    jira_helper.add_comment(finding, new_note, force_push=True)
+                    push_to_jira = jira_helper.is_push_all_issues(finding) or jira_instance.finding_jira_sync
+                    # Add the closing note
+                    if (jira_project.push_notes or push_to_jira) and not finding_in_group:
+                        jira_helper.add_comment(finding, new_note, force_push=True)
                 # Save the finding
                 finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-
                 # we only push the group after saving the finding to make sure
                 # the updated data of the finding is pushed as part of the group
                 if push_to_jira and finding_in_group:
