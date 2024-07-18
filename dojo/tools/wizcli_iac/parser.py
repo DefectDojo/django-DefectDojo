@@ -87,9 +87,6 @@ class WizcliIaCParser:
         return findings
 
     def get_findings(self, filename, test):
-        with open(filename, 'r') as file:
-            data = json.load(file)
-
         findings = []
         results = data.get("result", {})
         
