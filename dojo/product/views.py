@@ -1625,9 +1625,12 @@ def delete_engagement_presets(request, pid, eid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('engagement_presets', args=(pid,)))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([preset])
-    rels = collector.nested()
+    rels = ["Previewing the relationships has been disabled.", ""]
+    display_preview = get_setting("DELETE_PREVIEW")
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([preset])
+        rels = collector.nested()
 
     product_tab = Product_Tab(prod, title=_("Delete Engagement Preset"), tab="settings")
     return render(request, 'dojo/delete_presets.html',

@@ -648,7 +648,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None, component_name=None, component_version=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None, component_name=None, component_version=None, severity=None):
         payload = {'test': test_id}
         if active is not None:
             payload['active'] = active
@@ -660,6 +660,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             payload['component_name'] = component_name
         if component_version is not None:
             payload['component_version'] = component_version
+        if severity is not None:
+            payload['severity'] = severity
 
         response = self.client.get(reverse('finding-list'), payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])

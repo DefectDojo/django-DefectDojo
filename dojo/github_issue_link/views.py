@@ -16,7 +16,7 @@ from dojo.authorization.authorization_decorators import user_is_configuration_au
 # Local application/library imports
 from dojo.forms import DeleteGITHUBConfForm, GITHUBForm
 from dojo.models import GITHUB_Conf
-from dojo.utils import add_breadcrumb
+from dojo.utils import add_breadcrumb, get_setting
 
 logger = logging.getLogger(__name__)
 
@@ -87,9 +87,12 @@ def delete_github(request, tid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('github'))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([github_instance])
-    rels = collector.nested()
+    rels = ["Previewing the relationships has been disabled.", ""]
+    display_preview = get_setting("DELETE_PREVIEW")
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([github_instance])
+        rels = collector.nested()
 
     add_breadcrumb(title="Delete", top_level=False, request=request)
     return render(request, 'dojo/delete_github.html',

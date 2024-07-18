@@ -49,7 +49,7 @@ from dojo.models import (
     System_Settings,
     TextQuestion,
 )
-from dojo.utils import add_breadcrumb, get_page_items
+from dojo.utils import add_breadcrumb, get_page_items, get_setting
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
@@ -315,9 +315,12 @@ def edit_questionnaire(request, sid):
 def delete_questionnaire(request, sid):
     survey = get_object_or_404(Engagement_Survey, id=sid)
     form = Delete_Eng_Survey_Form(instance=survey)
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([survey])
-    rels = collector.nested()
+    rels = ["Previewing the relationships has been disabled.", ""]
+    display_preview = get_setting("DELETE_PREVIEW")
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([survey])
+        rels = collector.nested()
 
     if request.method == 'POST':
         if 'id' in request.POST and str(survey.id) == request.POST['id']:
