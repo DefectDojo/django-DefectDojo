@@ -13,35 +13,72 @@ class WizcliIaCParser:
 
     def parse_rule_matches(self, rule_matches, test):
         findings = []
-        for rule_match in rule_matches:
-            rule = rule_match["rule"]
-            rule_id = rule["id"]
-            rule_name = rule["name"]
-            severity = rule_match["severity"].lower().capitalize()
+        if rule_matches:
+            for rule_match in rule_matches:
+                rule = rule_match.get("rule", {})
+                rule_id = rule.get("id", "N/A")
+                rule_name = rule.get("name", "N/A")
+                severity = rule_match.get("severity", "low").lower().capitalize()
 
-            for match in rule_match["matches"]:
-                resource_name = match["resourceName"]
-                file_name = match["fileName"]
-                line_number = match.get("lineNumber", "N/A")
-                match_content = match["matchContent"]
-                expected = match["expected"]
-                found = match["found"]
-                file_type = match["fileType"]
+                matches = rule_match.get("matches", [])
+                if matches:
+                    for match in matches:
+                        resource_name = match.get("resourceName", "N/A")
+                        file_name = match.get("fileName", "N/A")
+                        line_number = match.get("lineNumber", "N/A")
+                        match_content = match.get("matchContent", "N/A")
+                        expected = match.get("expected", "N/A")
+                        found = match.get("found", "N/A")
+                        file_type = match.get("fileType", "N/A")
+
+                        description = (
+                            f"**Rule ID**: {rule_id}\n"
+                            f"**Rule Name**: {rule_name}\n"
+                            f"**Resource Name**: {resource_name}\n"
+                            f"**File Name**: {file_name}\n"
+                            f"**Line Number**: {line_number}\n"
+                            f"**Match Content**: {match_content}\n"
+                            f"**Expected**: {expected}\n"
+                            f"**Found**: {found}\n"
+                            f"**File Type**: {file_type}\n"
+                        )
+
+                        finding = Finding(
+                            title=f"{rule_name} - {resource_name}",
+                            description=description,
+                            severity=severity,
+                            file_path=file_name,
+                            line=line_number,
+                            static_finding=True,
+                            dynamic_finding=False,
+                            mitigation=None,
+                            test=test,
+                        )
+                        findings.append(finding)
+        return findings
+
+    def parse_secrets(self, secrets, test):
+        findings = []
+        if secrets:
+            for secret in secrets:
+                secret_id = secret.get("id", "N/A")
+                contains = secret.get("contains", [])
+                secret_name = contains[0].get("name", "N/A") if contains else "N/A"
+                severity = "High"
+                file_name = secret.get("path", "N/A")
+                line_number = secret.get("lineNumber", "N/A")
+                match_content = secret.get("type", "N/A")
 
                 description = (
-                    f"**Rule ID**: {rule_id}\n"
-                    f"**Rule Name**: {rule_name}\n"
-                    f"**Resource Name**: {resource_name}\n"
+                    f"**Secret ID**: {secret_id}\n"
+                    f"**Secret Name**: {secret_name}\n"
                     f"**File Name**: {file_name}\n"
                     f"**Line Number**: {line_number}\n"
                     f"**Match Content**: {match_content}\n"
-                    f"**Expected**: {expected}\n"
-                    f"**Found**: {found}\n"
-                    f"**File Type**: {file_type}\n"
                 )
 
                 finding = Finding(
-                    title=f"{rule_name} - {resource_name}",
+                    title=f"Secret: {secret_name}",
                     description=description,
                     severity=severity,
                     file_path=file_name,
@@ -54,52 +91,21 @@ class WizcliIaCParser:
                 findings.append(finding)
         return findings
 
-    def parse_secrets(self, secrets, test):
-        findings = []
-        for secret in secrets:
-            secret_id = secret["id"]
-            secret_name = secret["contains"][0]["name"]
-            severity = "high".lower().capitalize()
-            file_name = secret["path"]
-            line_number = secret.get("lineNumber", "N/A")
-            match_content = secret["type"]
-
-            description = (
-                f"**Secret ID**: {secret_id}\n"
-                f"**Secret Name**: {secret_name}\n"
-                f"**File Name**: {file_name}\n"
-                f"**Line Number**: {line_number}\n"
-                f"**Match Content**: {match_content}\n"
-            )
-
-            finding = Finding(
-                title=f"Secret: {secret_name}",
-                description=description,
-                severity=severity,
-                file_path=file_name,
-                line=line_number,
-                static_finding=True,
-                dynamic_finding=False,
-                mitigation=None,
-                test=test,
-            )
-            findings.append(finding)
-        return findings
-
     def get_findings(self, filename, test):
         scan_data = filename.read()
         try:
-            data = json.loads(str(scan_data, "utf-8"))
+            data = json.loads(scan_data.decode("utf-8"))
         except Exception:
             data = json.loads(scan_data)
         findings = []
         results = data.get("result", {})
-        
-        if "ruleMatches" in results:
-            findings.extend(self.parse_rule_matches(results["ruleMatches"], test))
-        
-        if "secrets" in results:
-            findings.extend(self.parse_secrets(results["secrets"], test))
+
+        rule_matches = results.get("ruleMatches", None)
+        if rule_matches:
+            findings.extend(self.parse_rule_matches(rule_matches, test))
+
+        secrets = results.get("secrets", None)
+        if secrets:
+            findings.extend(self.parse_secrets(secrets, test))
 
         return findings
-
