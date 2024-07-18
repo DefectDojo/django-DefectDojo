@@ -87,6 +87,11 @@ class WizcliIaCParser:
         return findings
 
     def get_findings(self, filename, test):
+        scan_data = filename.read()
+        try:
+            data = json.loads(str(scan_data, "utf-8"))
+        except Exception:
+            data = json.loads(scan_data)
         findings = []
         results = data.get("result", {})
         
