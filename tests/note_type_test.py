@@ -19,7 +19,7 @@ class NoteTypeTest(BaseTestCase):
         driver.find_element(By.ID, "id_is_single").click()
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text='Note Type added successfully.'))
+        self.assertTrue(self.is_success_message_present(text="Note Type added successfully."))
 
     def test_edit_note_type(self):
         driver = self.driver
@@ -29,7 +29,7 @@ class NoteTypeTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").send_keys("Edited test note type")
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text='Note type updated successfully.'))
+        self.assertTrue(self.is_success_message_present(text="Note type updated successfully."))
 
     def test_disable_note_type(self):
         driver = self.driver
@@ -37,7 +37,7 @@ class NoteTypeTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Disable Note Type").click()
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
 
-        self.assertTrue(self.is_success_message_present(text='Note type Disabled successfully.'))
+        self.assertTrue(self.is_success_message_present(text="Note type Disabled successfully."))
 
     def test_enable_note_type(self):
         driver = self.driver
@@ -45,17 +45,17 @@ class NoteTypeTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Enable Note Type").click()
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-success").click()
 
-        self.assertTrue(self.is_success_message_present(text='Note type Enabled successfully.'))
+        self.assertTrue(self.is_success_message_present(text="Note type Enabled successfully."))
 
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(BaseTestCase('disable_block_execution'))
-    suite.addTest(NoteTypeTest('test_create_note_type'))
-    suite.addTest(NoteTypeTest('test_edit_note_type'))
-    suite.addTest(NoteTypeTest('test_disable_note_type'))
-    suite.addTest(NoteTypeTest('test_enable_note_type'))
+    suite.addTest(BaseTestCase("test_login"))
+    suite.addTest(BaseTestCase("disable_block_execution"))
+    suite.addTest(NoteTypeTest("test_create_note_type"))
+    suite.addTest(NoteTypeTest("test_edit_note_type"))
+    suite.addTest(NoteTypeTest("test_disable_note_type"))
+    suite.addTest(NoteTypeTest("test_enable_note_type"))
     return suite
 
 

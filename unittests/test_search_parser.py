@@ -58,7 +58,7 @@ class TestSearch(DojoTestCase):
         self.assertEqual(keywords[1], "space inside")
 
         operators, keywords = parse_search_query(
-            "tags:anchore cve:CVE-2020-1234 jquery tags:beer"
+            "tags:anchore cve:CVE-2020-1234 jquery tags:beer",
         )
         self.assertEqual(len(operators), 2)
         self.assertEqual(len(operators["tags"]), 2)

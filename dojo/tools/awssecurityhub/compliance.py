@@ -23,7 +23,7 @@ class Compliance:
         description += f"**AWS Finding ARN:** {finding_id}\n"
         description += f"**Resource IDs:** {', '.join(set(resource_arns))}\n"
         description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
-        if finding.get('Region'):
+        if finding.get("Region"):
             description += f"**Region:** {finding.get('Region', '')}\n"
         description += f"**Generator ID:** {finding.get('GeneratorId', '')}\n"
         if finding.get("Compliance", {}).get("Status", "PASSED") == "PASSED":

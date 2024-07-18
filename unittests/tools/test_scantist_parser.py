@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.scantist.parser import ScantistParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestScantistParser(DojoTestCase):
@@ -27,7 +26,7 @@ class TestScantistParser(DojoTestCase):
                 "attack against hashes associated with the maximum exponent.",
             )
             self.assertEqual(
-                findings.severity, "Medium"
+                findings.severity, "Medium",
             )  # Negligible is translated to Informational
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):

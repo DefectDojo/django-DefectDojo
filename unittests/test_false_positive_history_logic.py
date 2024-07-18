@@ -111,10 +111,10 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class TestFalsePositiveHistoryLogic(DojoTestCase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def run(self, result=None):
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         testuser.usercontactinfo.block_execution = True
         testuser.save()
 
@@ -125,9 +125,9 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
             super().run(result)
 
     def setUp(self):
-        logger.debug('disabling dedupe')
+        logger.debug("disabling dedupe")
         self.disable_dedupe()
-        logger.debug('enabling false positive history')
+        logger.debug("enabling false positive history")
         self.enable_false_positive_history()
         self.enable_retroactive_false_positive_history()
         self.log_summary()
@@ -582,7 +582,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         find_124.save()
         # Copy finding 124 and store it at Product 2, Engagement 5, Test 66
         find_created_after_mark, find_124 = self.copy_and_reset_finding(id=124)
-        find_created_after_mark.unique_id_from_tool = 'somefakeid123'
+        find_created_after_mark.unique_id_from_tool = "somefakeid123"
         find_created_after_mark.test = Test.objects.get(id=66)
         find_created_after_mark.save()
         # Assert that both findings belongs to the same engagement but in a different test and are NOT marked as fp
@@ -726,7 +726,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         test_new, _eng_new, _product_new = self.create_new_test_and_engagment_and_product_from_finding(find_124)
         # Copy finding 124 and store it at Product 2, New Engagement, New Test (to test retroactive replication)
         find_created_before_mark, find_124 = self.copy_and_reset_finding(id=124)
-        find_created_before_mark.unique_id_from_tool = 'somefakeid123'
+        find_created_before_mark.unique_id_from_tool = "somefakeid123"
         find_created_before_mark.test = test_new
         find_created_before_mark.save()
         # Makes sure that the copy is not a false positive
@@ -736,7 +736,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         find_124.save()
         # Copy finding 124 and store it at Product 2, New Engagement, New Test
         find_created_after_mark, find_124 = self.copy_and_reset_finding(id=124)
-        find_created_after_mark.unique_id_from_tool = 'somefakeid123'
+        find_created_after_mark.unique_id_from_tool = "somefakeid123"
         find_created_after_mark.test = test_new
         find_created_after_mark.save()
         # Assert that both findings belongs to the same product but in a different engagement and are NOT marked as fp
@@ -1649,7 +1649,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         if isinstance(product, int):
             product = Product.objects.get(pk=product)
 
-        logger.debug('product %i: %s', product.id, product.name)
+        logger.debug("product %i: %s", product.id, product.name)
         for eng in product.engagement_set.all():
             self.log_engagement(eng)
             for test in eng.test_set.all():
@@ -1659,13 +1659,13 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         if isinstance(eng, int):
             eng = Engagement.objects.get(pk=eng)
 
-        logger.debug('\t' + 'engagement %i: %s (dedupe_inside: %s)', eng.id, eng.name, eng.deduplication_on_engagement)
+        logger.debug("\t" + "engagement %i: %s (dedupe_inside: %s)", eng.id, eng.name, eng.deduplication_on_engagement)
 
     def log_test(self, test):
         if isinstance(test, int):
             test = Test.objects.get(pk=test)
 
-        logger.debug('\t\t' + 'test %i: %s (algo=%s, dynamic=%s)', test.id, test, test.deduplication_algorithm, test.test_type.dynamic_tool)
+        logger.debug("\t\t" + "test %i: %s (algo=%s, dynamic=%s)", test.id, test, test.deduplication_algorithm, test.test_type.dynamic_tool)
         self.log_findings(test.finding_set.all())
 
     def log_all_products(self):
@@ -1674,25 +1674,25 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def log_findings(self, findings):
         if not findings:
-            logger.debug('\t\t' + 'no findings')
+            logger.debug("\t\t" + "no findings")
         else:
-            logger.debug('\t\t' + 'findings:')
+            logger.debug("\t\t" + "findings:")
             for finding in findings:
-                logger.debug(f'\t\t\t{str(finding.id):4.4}' + ': "' + f'{finding.title:20.20}' + '": ' + f'{finding.severity:5.5}' + ': act: ' + f'{str(finding.active):5.5}'
-                        + ': ver: ' + f'{str(finding.verified):5.5}' + ': mit: ' + f'{str(finding.is_mitigated):5.5}'
-                        + ': dup: ' + f'{str(finding.duplicate):5.5}' + ': dup_id: '
-                        + (f'{str(finding.duplicate_finding.id):4.4}' if finding.duplicate_finding else 'None') + ': hash_code: ' + str(finding.hash_code)
-                        + ': eps: ' + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()])
-                        + ': uid: ' + f'{str(finding.unique_id_from_tool):5.5}' + (' fp' if finding.false_p else '')
+                logger.debug(f"\t\t\t{str(finding.id):4.4}" + ': "' + f"{finding.title:20.20}" + '": ' + f"{finding.severity:5.5}" + ": act: " + f"{str(finding.active):5.5}"
+                        + ": ver: " + f"{str(finding.verified):5.5}" + ": mit: " + f"{str(finding.is_mitigated):5.5}"
+                        + ": dup: " + f"{str(finding.duplicate):5.5}" + ": dup_id: "
+                        + (f"{str(finding.duplicate_finding.id):4.4}" if finding.duplicate_finding else "None") + ": hash_code: " + str(finding.hash_code)
+                        + ": eps: " + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()])
+                        + ": uid: " + f"{str(finding.unique_id_from_tool):5.5}" + (" fp" if finding.false_p else ""),
                         )
 
-        logger.debug('\t\tendpoints')
+        logger.debug("\t\tendpoints")
         for ep in Endpoint.objects.all():
-            logger.debug('\t\t\t' + str(ep.id) + ': ' + str(ep))
+            logger.debug("\t\t\t" + str(ep.id) + ": " + str(ep))
 
-        logger.debug('\t\t' + 'endpoint statuses')
+        logger.debug("\t\t" + "endpoint statuses")
         for eps in Endpoint_Status.objects.all():
-            logger.debug('\t\t\t' + str(eps.id) + ': ' + str(eps))
+            logger.debug("\t\t\t" + str(eps.id) + ": " + str(eps))
 
     def log_summary(self, product=None, engagement=None, test=None):
         if product:
@@ -1737,7 +1737,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         org = Product.objects.get(id=id)
         new = org
         new.pk = None
-        new.name = f'{org.name} (Copy {datetime.now()})'
+        new.name = f"{org.name} (Copy {datetime.now()})"
         # return unsaved new product and reloaded existing product
         return new, Product.objects.get(id=id)
 
@@ -1749,12 +1749,12 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         return finding
 
     def change_finding_title(self, finding):
-        finding.title = f'{finding.title} (Copy {datetime.now()})'
+        finding.title = f"{finding.title} (Copy {datetime.now()})"
         return finding
 
     def change_finding_severity(self, finding):
         # Get list of severities without the current finding severity
-        severities = [sev for sev in ['Info', 'Low', 'Medium', 'High', 'Critical'] if sev != finding.severity]
+        severities = [sev for sev in ["Info", "Low", "Medium", "High", "Critical"] if sev != finding.severity]
         # Return the finding with the highest severity from list
         finding.severity = severities[-1]
         return finding
@@ -1819,7 +1819,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def set_dedupe_inside_engagement(self, deduplication_on_engagement):
         for eng in Engagement.objects.all():
-            logger.debug('setting deduplication_on_engagment to %s for %i', str(deduplication_on_engagement), eng.id)
+            logger.debug("setting deduplication_on_engagment to %s for %i", str(deduplication_on_engagement), eng.id)
             eng.deduplication_on_engagement = deduplication_on_engagement
             eng.save()
 

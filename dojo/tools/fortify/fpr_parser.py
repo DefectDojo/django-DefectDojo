@@ -9,11 +9,11 @@ from dojo.models import Finding
 class FortifyFPRParser:
     def parse_fpr(self, filename, test):
         if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
-            input_zip = zipfile.ZipFile(filename.name, 'r')
+            input_zip = zipfile.ZipFile(filename.name, "r")
         else:
-            input_zip = zipfile.ZipFile(filename, 'r')
+            input_zip = zipfile.ZipFile(filename, "r")
         zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
-        root = ElementTree.fromstring(zipdata["audit.fvdl"].decode('utf-8'))
+        root = ElementTree.fromstring(zipdata["audit.fvdl"].decode("utf-8"))
         regex = r"{.*}"
         matches = re.match(regex, root.tag)
         try:
@@ -63,7 +63,7 @@ class FortifyFPRParser:
                               unique_id_from_tool=ClassID,
                               file_path=SourceLocationpath,
                               line=SourceLocationline,
-                        )
+                        ),
                     )
         return items
 

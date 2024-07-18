@@ -55,7 +55,7 @@ class EndpointManager:
             Endpoint_Status.objects.get_or_create(
                 finding=finding,
                 endpoint=ep,
-                defaults={'date': finding.date})
+                defaults={"date": finding.date})
         logger.debug(f"IMPORT_SCAN: {len(endpoints)} imported")
         return None
 
@@ -147,7 +147,7 @@ class EndpointManager:
 
     def clean_unsaved_endpoints(
         self,
-        endpoints: List[Endpoint]
+        endpoints: List[Endpoint],
     ) -> None:
         """
         Clean endpoints that are supplied. For any endpoints that fail this validation
@@ -232,13 +232,13 @@ class EndpointManager:
             endpoint_status_to_mitigate = list(
                 filter(
                     lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint not in new_finding_endpoints_list,
-                    existing_finding_endpoint_status_list)
+                    existing_finding_endpoint_status_list),
             )
             # Re-activate any endpoints in the old finding that are in the new finding
             endpoint_status_to_reactivate = list(
                 filter(
                     lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint in new_finding_endpoints_list,
-                    existing_finding_endpoint_status_list)
+                    existing_finding_endpoint_status_list),
             )
             self.chunk_endpoints_and_reactivate(endpoint_status_to_reactivate)
         self.chunk_endpoints_and_mitigate(endpoint_status_to_mitigate, user)

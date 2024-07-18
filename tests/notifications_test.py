@@ -58,7 +58,7 @@ class NotificationTest(BaseTestCase):
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
             assert True
         except NoSuchElementException:
-            if self.type == 'msteams':
+            if self.type == "msteams":
                 # msteam should be not in personal notifications
                 assert True
             else:
@@ -116,7 +116,7 @@ class NotificationTest(BaseTestCase):
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
             assert True
         except NoSuchElementException:
-            if self.type == 'msteams':
+            if self.type == "msteams":
                 # msteam should be not in personal notifications
                 assert True
             else:
@@ -129,14 +129,14 @@ class NotificationTest(BaseTestCase):
 
         wait = WebDriverWait(driver, 5)
         actions = ActionChains(driver)
-        configuration_menu = driver.find_element(By.ID, 'menu_configuration')
+        configuration_menu = driver.find_element(By.ID, "menu_configuration")
         actions.move_to_element(configuration_menu).perform()
         wait.until(EC.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
 
         originally_selected = {
-            'product_added': driver.find_element(By.XPATH,
+            "product_added": driver.find_element(By.XPATH,
                                                  "//input[@name='product_added' and @value='mail']").is_selected(),
-            'scan_added': driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected()
+            "scan_added": driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected(),
         }
 
         driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").click()
@@ -144,10 +144,10 @@ class NotificationTest(BaseTestCase):
 
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text='Settings saved'))
-        self.assertNotEqual(originally_selected['product_added'],
+        self.assertTrue(self.is_success_message_present(text="Settings saved"))
+        self.assertNotEqual(originally_selected["product_added"],
                             driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").is_selected())
-        self.assertNotEqual(originally_selected['scan_added'],
+        self.assertNotEqual(originally_selected["scan_added"],
                             driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected())
 
 
@@ -155,28 +155,28 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
-    suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(NotificationTest('test_disable_personal_notification', 'mail'))
-    suite.addTest(NotificationTest('test_disable_personal_notification', 'slack'))
-    suite.addTest(NotificationTest('test_disable_personal_notification', 'msteams'))
+    suite.addTest(BaseTestCase("test_login"))
+    suite.addTest(NotificationTest("test_disable_personal_notification", "mail"))
+    suite.addTest(NotificationTest("test_disable_personal_notification", "slack"))
+    suite.addTest(NotificationTest("test_disable_personal_notification", "msteams"))
     # now test when enabled
-    suite.addTest(NotificationTest('test_enable_personal_notification', 'mail'))
-    suite.addTest(NotificationTest('test_enable_personal_notification', 'slack'))
-    suite.addTest(NotificationTest('test_enable_personal_notification', 'msteams'))
+    suite.addTest(NotificationTest("test_enable_personal_notification", "mail"))
+    suite.addTest(NotificationTest("test_enable_personal_notification", "slack"))
+    suite.addTest(NotificationTest("test_enable_personal_notification", "msteams"))
     # Now switch to system notifications
-    suite.addTest(NotificationTest('test_disable_system_notification', 'mail'))
-    suite.addTest(NotificationTest('test_disable_system_notification', 'slack'))
-    suite.addTest(NotificationTest('test_disable_system_notification', 'msteams'))
+    suite.addTest(NotificationTest("test_disable_system_notification", "mail"))
+    suite.addTest(NotificationTest("test_disable_system_notification", "slack"))
+    suite.addTest(NotificationTest("test_disable_system_notification", "msteams"))
     # now test when enabled
-    suite.addTest(NotificationTest('test_enable_system_notification', 'mail'))
-    suite.addTest(NotificationTest('test_enable_system_notification', 'slack'))
-    suite.addTest(NotificationTest('test_enable_system_notification', 'msteams'))
+    suite.addTest(NotificationTest("test_enable_system_notification", "mail"))
+    suite.addTest(NotificationTest("test_enable_system_notification", "slack"))
+    suite.addTest(NotificationTest("test_enable_system_notification", "msteams"))
     # not really for the user we created, but still related to user settings
-    suite.addTest(NotificationTest('test_user_mail_notifications_change', 'mail'))
+    suite.addTest(NotificationTest("test_user_mail_notifications_change", "mail"))
     # now do short test for the template
-    suite.addTest(NotificationTest('test_enable_template_notification', 'mail'))
-    suite.addTest(NotificationTest('test_enable_template_notification', 'slack'))
-    suite.addTest(NotificationTest('test_enable_template_notification', 'msteams'))
+    suite.addTest(NotificationTest("test_enable_template_notification", "mail"))
+    suite.addTest(NotificationTest("test_enable_template_notification", "slack"))
+    suite.addTest(NotificationTest("test_enable_template_notification", "msteams"))
 
     return suite
 

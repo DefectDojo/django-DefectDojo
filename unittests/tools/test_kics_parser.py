@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.kics.parser import KICSParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestKICSParser(DojoTestCase):
@@ -27,12 +26,12 @@ class TestKICSParser(DojoTestCase):
                 self.assertEqual("test/charts/example/terraform/main.tf", finding.file_path)
                 self.assertEqual(25, finding.line)
                 self.assertEqual("Common", finding.component_name)
-                description = '''Query to find passwords and secrets in infrastructure code.
+                description = """Query to find passwords and secrets in infrastructure code.
 **Platform:** Common
 **Category:** Secret Management
-**Issue type:** RedundantAttribute'''
+**Issue type:** RedundantAttribute"""
                 self.assertEqual(description, finding.description)
-                self.assertEqual('https://kics.io/', finding.references)
+                self.assertEqual("https://kics.io/", finding.references)
                 self.assertEqual(1, finding.nb_occurences)
 
             with self.subTest(i=1):
@@ -45,13 +44,13 @@ class TestKICSParser(DojoTestCase):
                 self.assertEqual("test/charts/example/terraform/s3.tf", finding.file_path)
                 self.assertEqual(36, finding.line)
                 self.assertEqual("Terraform", finding.component_name)
-                description = '''S3 Buckets must not allow Actions From All Principals, as to prevent leaking private information to the entire internet or allow unauthorized data tampering / deletion. This means the 'Effect' must not be 'Allow' when there are All Principals
+                description = """S3 Buckets must not allow Actions From All Principals, as to prevent leaking private information to the entire internet or allow unauthorized data tampering / deletion. This means the 'Effect' must not be 'Allow' when there are All Principals
 **Platform:** Terraform
 **Category:** Access Control
 **Issue type:** IncorrectValue
-**Actual value:** aws_s3_bucket_policy[this].policy.Principal is equal to or contains \'*\''''
+**Actual value:** aws_s3_bucket_policy[this].policy.Principal is equal to or contains \'*\'"""
                 self.assertEqual(description, finding.description)
-                self.assertEqual('https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy', finding.references)
+                self.assertEqual("https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy", finding.references)
                 self.assertEqual(1, finding.nb_occurences)
 
             with self.subTest(i=2):

@@ -41,7 +41,7 @@ class TestHydraParser(DojoTestCase):
                 "127.0.0.1",
                 "9999",
                 "bill@example.com",
-                "bill"
+                "bill",
             )
 
     def test_hydra_parser_with_one_finding_and_missing_date_has_one_finding(self):
@@ -59,7 +59,7 @@ class TestHydraParser(DojoTestCase):
                 "127.0.0.1",
                 "9999",
                 "bill@example.com",
-                "bill"
+                "bill",
             )
 
     def test_hydra_parser_with_two_findings_with_one_incomplete_has_one_finding(self):
@@ -77,7 +77,7 @@ class TestHydraParser(DojoTestCase):
                 "127.0.0.1",
                 "9999",
                 "bill@example.com",
-                "bill"
+                "bill",
             )
 
     def test_hydra_parser_with_many_findings_has_many_findings(self):
@@ -93,7 +93,7 @@ class TestHydraParser(DojoTestCase):
                 "127.0.0.1",
                 "9999",
                 "bill@example.com",
-                "bill"
+                "bill",
             )
             self.__assertFindingEquals(
                 findings[1],
@@ -101,7 +101,7 @@ class TestHydraParser(DojoTestCase):
                 "192.168.0.1",
                 "1234",
                 "joe@example.com",
-                "joe"
+                "joe",
             )
             self.__assertFindingEquals(
                 findings[2],
@@ -109,7 +109,7 @@ class TestHydraParser(DojoTestCase):
                 "something.bad.com",
                 "4321",
                 "jimmy@bad.com",
-                "somesimplepassword"
+                "somesimplepassword",
             )
 
     def __assertFindingEquals(
@@ -119,7 +119,7 @@ class TestHydraParser(DojoTestCase):
             finding_url,
             finding_port,
             finding_username,
-            finding_password
+            finding_password,
     ):
         self.assertEqual("Weak username / password combination found for " + finding_url, actual_finding.title)
         self.assertEqual(date, actual_finding.date)

@@ -2,8 +2,7 @@ from os import path
 
 from dojo.models import Test
 from dojo.tools.anchore_enterprise.parser import AnchoreEnterpriseParser, extract_vulnerability_id, search_filepath
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAnchoreEnterpriseParser(DojoTestCase):
@@ -46,22 +45,22 @@ class TestAnchoreEnterpriseParser(DojoTestCase):
 
     def test_anchore_policy_check_parser_search_filepath(self):
         file_path = search_filepath(
-            "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2014-4616 - https://nvd.nist.gov/vuln/detail/CVE-2014-4616)"
+            "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2014-4616 - https://nvd.nist.gov/vuln/detail/CVE-2014-4616)",
         )
         self.assertEqual("/usr/lib64/python2.7/lib-dynload/Python", file_path)
         file_path = search_filepath(
-            "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)"
+            "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)",
         )
         self.assertEqual(
             "/root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar",
             file_path,
         )
         file_path = search_filepath(
-            "test /usr/local/bin/ag package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)"
+            "test /usr/local/bin/ag package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)",
         )
         self.assertEqual("/usr/local/bin/ag", file_path)
         file_path = search_filepath(
-            "HIGH Vulnerability found in os package type (rpm) - kernel-headers (RHSA-2017:0372 - https://access.redhat.com/errata/RHSA-2017:0372)"
+            "HIGH Vulnerability found in os package type (rpm) - kernel-headers (RHSA-2017:0372 - https://access.redhat.com/errata/RHSA-2017:0372)",
         )
         self.assertEqual("", file_path)
         file_path = search_filepath("test")

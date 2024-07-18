@@ -3,8 +3,7 @@ from os import path
 
 from dojo.models import Finding, Test
 from dojo.tools.sarif.parser import SarifParser, get_fingerprints_hashes
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestSarifParser(DojoTestCase):
@@ -19,8 +18,8 @@ class TestSarifParser(DojoTestCase):
     def test_example_report(self):
         with open(
             path.join(
-                get_unit_tests_path() + "/scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif"
-            )
+                get_unit_tests_path() + "/scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif",
+            ),
         )as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
@@ -110,7 +109,7 @@ add_core(ptr, offset, val);
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual(
-                    'Variable "ptr" was used without being initialized. It was declared [here](0).', finding.title
+                    'Variable "ptr" was used without being initialized. It was declared [here](0).', finding.title,
                 )
                 self.assertEqual("C2001", finding.vuln_id_from_tool)
                 self.assertEqual("collections/list.h", finding.file_path)
@@ -277,7 +276,7 @@ add_core(ptr, offset, val);
 **Rule short description:** Do not store credential in ENVIRONMENT vars/files"""
                 self.assertEqual(description, finding.description)
                 self.assertEqual(
-                    "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0010", finding.references
+                    "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0010", finding.references,
                 )
             with self.subTest(i=1):
                 finding = findings[1]
@@ -287,7 +286,7 @@ add_core(ptr, offset, val);
 **Rule short description:** Enable Content trust for Docker"""
                 self.assertEqual(description, finding.description)
                 self.assertEqual(
-                    "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0005", finding.references
+                    "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0005", finding.references,
                 )
             with self.subTest(i=2):
                 finding = findings[2]
@@ -297,7 +296,7 @@ add_core(ptr, offset, val);
 **Rule short description:** Add HEALTHCHECK instruction to the container image"""
                 self.assertEqual(description, finding.description)
                 self.assertEqual(
-                    "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0006", finding.references
+                    "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0006", finding.references,
                 )
             with self.subTest(i=3):
                 finding = findings[3]
@@ -307,7 +306,7 @@ add_core(ptr, offset, val);
 **Rule short description:** Confirm safety of setuid/setgid files"""
                 self.assertEqual(description, finding.description)
                 self.assertEqual(
-                    "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0008", finding.references
+                    "https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0008", finding.references,
                 )
 
     def test_mobsfscan(self):
@@ -395,7 +394,7 @@ add_core(ptr, offset, val);
                 self.assertEqual(327, finding.cwe)
                 self.assertEqual("FF1048", finding.vuln_id_from_tool)
                 self.assertEqual(
-                    "e6c1ad2b1d96ffc4035ed8df070600566ad240b8ded025dac30620f3fd4aa9fd", finding.unique_id_from_tool
+                    "e6c1ad2b1d96ffc4035ed8df070600566ad240b8ded025dac30620f3fd4aa9fd", finding.unique_id_from_tool,
                 )
                 self.assertEqual("https://cwe.mitre.org/data/definitions/327.html", finding.references)
             with self.subTest(i=20):
@@ -418,7 +417,7 @@ add_core(ptr, offset, val);
                 self.assertEqual(120, finding.cwe)
                 self.assertEqual("FF1004", finding.vuln_id_from_tool)
                 self.assertEqual(
-                    "327fc54b75ab37bbbb31a1b71431aaefa8137ff755acc103685ad5adf88f5dda", finding.unique_id_from_tool
+                    "327fc54b75ab37bbbb31a1b71431aaefa8137ff755acc103685ad5adf88f5dda", finding.unique_id_from_tool,
                 )
                 self.assertEqual("https://cwe.mitre.org/data/definitions/120.html", finding.references)
             with self.subTest(i=52):
@@ -440,7 +439,7 @@ add_core(ptr, offset, val);
                 self.assertEqual(482, finding.line)
                 self.assertEqual("FF1021", finding.vuln_id_from_tool)
                 self.assertEqual(
-                    "ad8408027235170e870e7662751a01386beb2d2ed8beb75dd4ba8e4a70e91d65", finding.unique_id_from_tool
+                    "ad8408027235170e870e7662751a01386beb2d2ed8beb75dd4ba8e4a70e91d65", finding.unique_id_from_tool,
                 )
                 self.assertEqual("https://cwe.mitre.org/data/definitions/120.html", finding.references)
 
