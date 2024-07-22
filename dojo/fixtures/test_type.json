@@ -54,5 +54,12 @@
         },
         "model": "dojo.test_type",
         "pk": 8
+    },
+    {
+        "fields": {
+            "name": "Wizcli Dir"
+        },
+        "model": "dojo.test_type",
+        "pk": 9
     }
 ]
