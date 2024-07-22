@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.openscap.parser import OpenscapParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestOpenscapParser(DojoTestCase):

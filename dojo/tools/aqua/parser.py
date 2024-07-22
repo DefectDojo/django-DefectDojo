@@ -84,7 +84,7 @@ def get_item(resource, vuln, test):
                 f"NVD score v3 ({score}) used for classification.\n"
             )
             severity_justification += "\nNVD v3 vectors: {}".format(
-                vuln.get("nvd_vectors_v3")
+                vuln.get("nvd_vectors_v3"),
             )
             # Add the CVSS3 to Finding
             cvssv3 = vuln.get("nvd_vectors_v3")
@@ -94,7 +94,7 @@ def get_item(resource, vuln, test):
                 f"NVD score v2 ({score}) used for classification.\n"
             )
             severity_justification += "\nNVD v2 vectors: {}".format(
-                vuln.get("nvd_vectors")
+                vuln.get("nvd_vectors"),
             )
         severity = severity_of(score)
         severity_justification += f"\n{used_for_classification}"

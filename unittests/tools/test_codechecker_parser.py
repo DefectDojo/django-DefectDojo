@@ -1,14 +1,13 @@
 from dojo.models import Test
 from dojo.tools.codechecker.parser import CodeCheckerParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestCodeCheckerParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/codechecker/cc-report-0-vuln.json"
+            get_unit_tests_path() + "/scans/codechecker/cc-report-0-vuln.json",
         ) as testfile:
             parser = CodeCheckerParser()
             findings = parser.get_findings(testfile, Test())
@@ -16,7 +15,7 @@ class TestCodeCheckerParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
         with open(
-            get_unit_tests_path() + "/scans/codechecker/cc-report-1-vuln.json"
+            get_unit_tests_path() + "/scans/codechecker/cc-report-1-vuln.json",
         ) as testfile:
             parser = CodeCheckerParser()
             findings = parser.get_findings(testfile, Test())
@@ -34,18 +33,18 @@ class TestCodeCheckerParser(DojoTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/codechecker/cc-report-many-vuln.json"
+            get_unit_tests_path() + "/scans/codechecker/cc-report-many-vuln.json",
         ) as testfile:
             parser = CodeCheckerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(94, len(findings), str(len(findings)))
 
             self.assertEqual(sum(1 for f in findings if f.duplicate), 0)
-            self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'HIGH'), 20)
-            self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'INFO'), 6)
-            self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'CRITICAL'), 0)
-            self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'LOW'), 5)
-            self.assertEqual(sum(1 for f in findings if f.severity.upper() == 'MEDIUM'), 63)
+            self.assertEqual(sum(1 for f in findings if f.severity.upper() == "HIGH"), 20)
+            self.assertEqual(sum(1 for f in findings if f.severity.upper() == "INFO"), 6)
+            self.assertEqual(sum(1 for f in findings if f.severity.upper() == "CRITICAL"), 0)
+            self.assertEqual(sum(1 for f in findings if f.severity.upper() == "LOW"), 5)
+            self.assertEqual(sum(1 for f in findings if f.severity.upper() == "MEDIUM"), 63)
 
             finding = findings[0]
             self.assertEqual("clang-diagnostic-sign-compare", finding.title)
@@ -61,7 +60,7 @@ class TestCodeCheckerParser(DojoTestCase):
 
     def test_parse_file_with_various_review_statuses(self):
         with open(
-            get_unit_tests_path() + "/scans/codechecker/cc-report-review-status.json"
+            get_unit_tests_path() + "/scans/codechecker/cc-report-review-status.json",
         ) as testfile:
             parser = CodeCheckerParser()
             findings = parser.get_findings(testfile, Test())

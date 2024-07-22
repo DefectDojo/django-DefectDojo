@@ -2,8 +2,7 @@ from os import path
 
 from dojo.models import Test
 from dojo.tools.neuvector_compliance.parser import NeuVectorComplianceParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNeuVectorComplianceParser(DojoTestCase):

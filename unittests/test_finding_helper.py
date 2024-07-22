@@ -20,17 +20,17 @@ frozen_datetime = timezone.now()
 
 
 class TestUpdateFindingStatusSignal(DojoTestCase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
-        self.user_1 = User.objects.get(id='1')
-        self.user_2 = User.objects.get(id='2')
+        self.user_1 = User.objects.get(id="1")
+        self.user_2 = User.objects.get(id="2")
 
     def get_status_fields(self, finding):
-        logger.debug('%s, %s, %s, %s, %s, %s, %s, %s', finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update)
+        logger.debug("%s, %s, %s, %s, %s, %s, %s, %s", finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update)
         return finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update
 
-    @mock.patch('dojo.finding.helper.timezone.now')
+    @mock.patch("dojo.finding.helper.timezone.now")
     def test_new_finding(self, mock_tz):
         mock_tz.return_value = frozen_datetime
         with impersonate(self.user_1):
@@ -40,10 +40,10 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (True, False, False, False, False, None, None, frozen_datetime)
+                (True, False, False, False, False, None, None, frozen_datetime),
             )
 
-    @mock.patch('dojo.finding.helper.timezone.now')
+    @mock.patch("dojo.finding.helper.timezone.now")
     def test_no_status_change(self, mock_tz):
         mock_tz.return_value = frozen_datetime
         with impersonate(self.user_1):
@@ -53,15 +53,15 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             status_fields = self.get_status_fields(finding)
 
-            finding.title = finding.title + '!!!'
+            finding.title = finding.title + "!!!"
             finding.save()
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                status_fields
+                status_fields,
             )
 
-    @mock.patch('dojo.finding.helper.timezone.now')
+    @mock.patch("dojo.finding.helper.timezone.now")
     def test_mark_fresh_as_mitigated(self, mock_dt):
         mock_dt.return_value = frozen_datetime
         with impersonate(self.user_1):
@@ -70,11 +70,11 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
             finding.save()
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, False, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
+                (False, False, False, False, True, frozen_datetime, self.user_1, frozen_datetime),
             )
 
-    @mock.patch('dojo.finding.helper.timezone.now')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
+    @mock.patch("dojo.finding.helper.timezone.now")
+    @mock.patch("dojo.finding.helper.can_edit_mitigated_data", return_value=False)
     def test_mark_old_active_as_mitigated(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
@@ -88,11 +88,11 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, False, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
+                (False, False, False, False, True, frozen_datetime, self.user_1, frozen_datetime),
             )
 
-    @mock.patch('dojo.finding.helper.timezone.now')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
+    @mock.patch("dojo.finding.helper.timezone.now")
+    @mock.patch("dojo.finding.helper.can_edit_mitigated_data", return_value=True)
     def test_mark_old_active_as_mitigated_custom_edit(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
@@ -110,11 +110,11 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, False, False, False, True, custom_mitigated, self.user_2, frozen_datetime)
+                (False, False, False, False, True, custom_mitigated, self.user_2, frozen_datetime),
             )
 
-    @mock.patch('dojo.finding.helper.timezone.now')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
+    @mock.patch("dojo.finding.helper.timezone.now")
+    @mock.patch("dojo.finding.helper.can_edit_mitigated_data", return_value=True)
     def test_update_old_mitigated_with_custom_edit(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
@@ -132,11 +132,11 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, False, False, False, True, custom_mitigated, self.user_2, frozen_datetime)
+                (False, False, False, False, True, custom_mitigated, self.user_2, frozen_datetime),
             )
 
-    @mock.patch('dojo.finding.helper.timezone.now')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
+    @mock.patch("dojo.finding.helper.timezone.now")
+    @mock.patch("dojo.finding.helper.can_edit_mitigated_data", return_value=True)
     def test_update_old_mitigated_with_missing_data(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
@@ -155,30 +155,30 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (False, False, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
+                (False, False, False, False, True, frozen_datetime, self.user_1, frozen_datetime),
             )
 
-    @mock.patch('dojo.finding.helper.timezone.now')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
+    @mock.patch("dojo.finding.helper.timezone.now")
+    @mock.patch("dojo.finding.helper.can_edit_mitigated_data", return_value=True)
     def test_set_old_mitigated_as_active(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
         with impersonate(self.user_1):
             test = Test.objects.last()
             finding = Finding(test=test, is_mitigated=True, active=False, mitigated=frozen_datetime, mitigated_by=self.user_2)
-            logger.debug('save1')
+            logger.debug("save1")
             finding.save()
             finding.active = True
-            logger.debug('save2')
+            logger.debug("save2")
             finding.save()
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                (True, False, False, False, False, None, None, frozen_datetime)
+                (True, False, False, False, False, None, None, frozen_datetime),
             )
 
-    @mock.patch('dojo.finding.helper.timezone.now')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
+    @mock.patch("dojo.finding.helper.timezone.now")
+    @mock.patch("dojo.finding.helper.can_edit_mitigated_data", return_value=False)
     def test_set_active_as_false_p(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
@@ -192,11 +192,11 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
             self.assertEqual(
                 self.get_status_fields(finding),
                 # TODO marking as false positive resets verified to False, possible bug / undesired behaviour?
-                (False, False, True, False, True, frozen_datetime, self.user_1, frozen_datetime)
+                (False, False, True, False, True, frozen_datetime, self.user_1, frozen_datetime),
             )
 
-    @mock.patch('dojo.finding.helper.timezone.now')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
+    @mock.patch("dojo.finding.helper.timezone.now")
+    @mock.patch("dojo.finding.helper.can_edit_mitigated_data", return_value=False)
     def test_set_active_as_out_of_scope(self, mock_can_edit, mock_tz):
         mock_tz.return_value = frozen_datetime
 
@@ -210,18 +210,18 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
             self.assertEqual(
                 self.get_status_fields(finding),
                 # TODO marking as false positive resets verified to False, possible bug / undesired behaviour?
-                (False, False, False, True, True, frozen_datetime, self.user_1, frozen_datetime)
+                (False, False, False, True, True, frozen_datetime, self.user_1, frozen_datetime),
             )
 
 
 class TestSaveVulnerabilityIds(DojoTestCase):
 
-    @patch('dojo.finding.helper.Vulnerability_Id.objects.filter')
-    @patch('django.db.models.query.QuerySet.delete')
-    @patch('dojo.finding.helper.Vulnerability_Id.save')
+    @patch("dojo.finding.helper.Vulnerability_Id.objects.filter")
+    @patch("django.db.models.query.QuerySet.delete")
+    @patch("dojo.finding.helper.Vulnerability_Id.save")
     def test_save_vulnerability_ids(self, save_mock, delete_mock, filter_mock):
         finding = Finding()
-        new_vulnerability_ids = ['REF-1', 'REF-2', 'REF-2']
+        new_vulnerability_ids = ["REF-1", "REF-2", "REF-2"]
         filter_mock.return_value = Vulnerability_Id.objects.none()
 
         save_vulnerability_ids(finding, new_vulnerability_ids)
@@ -229,14 +229,14 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         filter_mock.assert_called_with(finding=finding)
         delete_mock.assert_called_once()
         self.assertEqual(save_mock.call_count, 2)
-        self.assertEqual('REF-1', finding.cve)
+        self.assertEqual("REF-1", finding.cve)
 
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.objects.filter')
-    @patch('django.db.models.query.QuerySet.delete')
-    @patch('dojo.finding.helper.Vulnerability_Id_Template.save')
+    @patch("dojo.finding.helper.Vulnerability_Id_Template.objects.filter")
+    @patch("django.db.models.query.QuerySet.delete")
+    @patch("dojo.finding.helper.Vulnerability_Id_Template.save")
     def test_save_vulnerability_id_templates(self, save_mock, delete_mock, filter_mock):
         finding_template = Finding_Template()
-        new_vulnerability_ids = ['REF-1', 'REF-2', 'REF-2']
+        new_vulnerability_ids = ["REF-1", "REF-2", "REF-2"]
         filter_mock.return_value = Vulnerability_Id_Template.objects.none()
 
         save_vulnerability_ids_template(finding_template, new_vulnerability_ids)
@@ -244,4 +244,4 @@ class TestSaveVulnerabilityIds(DojoTestCase):
         filter_mock.assert_called_with(finding_template=finding_template)
         delete_mock.assert_called_once()
         self.assertEqual(save_mock.call_count, 2)
-        self.assertEqual('REF-1', finding_template.cve)
+        self.assertEqual("REF-1", finding_template.cve)
