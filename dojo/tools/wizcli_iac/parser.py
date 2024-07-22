@@ -70,7 +70,7 @@ class WizcliIaCParser:
 
                 description = (
                     f"**Secret ID**: {secret_id}\n"
-                    f"**Description**: {description}\n"
+                    f"**Description**: {desc}\n"
                     f"**File Name**: {file_name}\n"
                     f"**Line Number**: {line_number}\n"
                     f"**Match Content**: {match_content}\n"
