@@ -1,1 +1,1 @@
-__author__ = "OsamaMahmood"
+__author__ = "https://github.com/OsamaMahmood"
