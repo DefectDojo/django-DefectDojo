@@ -24,8 +24,9 @@ class AquaParser:
 
             for node in vulnerabilityTree:
                 resource = node.get("resource")
-                vulnerabilities = node.get("vulnerabilities")
-
+                vulnerabilities = node.get("vulnerabilities", [])
+                if vulnerabilities is None:
+                    vulnerabilities = []
                 for vuln in vulnerabilities:
                     item = get_item(resource, vuln, test)
                     unique_key = resource.get("cpe") + vuln.get("name", "None")
