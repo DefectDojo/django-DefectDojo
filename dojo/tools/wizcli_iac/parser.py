@@ -62,7 +62,7 @@ class WizcliIaCParser:
         if secrets:
             for secret in secrets:
                 secret_id = secret.get("id", "N/A")
-                description = secret.get("description", "N/A")
+                desc = secret.get("description", "N/A")
                 severity = "High"
                 file_name = secret.get("path", "N/A")
                 line_number = secret.get("lineNumber", "N/A")
@@ -77,7 +77,7 @@ class WizcliIaCParser:
                 )
 
                 finding = Finding(
-                    title=f"Secret: {description}",
+                    title=f"Secret: {desc}",
                     description=description,
                     severity=severity,
                     file_path=file_name,

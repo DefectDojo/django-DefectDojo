@@ -1,7 +1,6 @@
 from dojo.models import Test
-from dojo.tools.wiz.parser import WizcliIaCParser
-
-from ..dojo_test_case import DojoTestCase
+from dojo.tools.wizcli_iac.parser import WizcliIaCParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestWizcliIaCParser(DojoTestCase):
@@ -17,6 +16,7 @@ class TestWizcliIaCParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
+            self.assertEqual("Apk Add Using Local Cache Path", finding.title)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual("docker-compose.yaml", finding.file_path)
             self.assertEqual(64, finding.line)
@@ -37,6 +37,7 @@ class TestWizcliIaCParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
             finding = findings[0]
+            self.assertEqual("Apk Add Using Local Cache Path", finding.title)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual("docker-compose.yaml", finding.file_path)
             self.assertEqual(64, finding.line)
@@ -52,6 +53,7 @@ class TestWizcliIaCParser(DojoTestCase):
                 f"**File Type**: DOCKERFILE\n", finding.description)
 
             finding = findings[1]
+            self.assertEqual("Passwords And Secrets - Certificate for evilorg.com", finding.title)
             self.assertEqual("LOW", finding.severity)
             self.assertEqual("Dockerfile", finding.file_path)
             self.assertEqual(64, finding.line)

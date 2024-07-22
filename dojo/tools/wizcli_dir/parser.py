@@ -1,15 +1,15 @@
 import json
 from dojo.models import Finding
 
-class WizcliDirScanParser:
+class WizcliDirParser:
     def get_scan_types(self):
-        return ["Wizcli Directory Scan"]
+        return ["Wizcli Dir Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Wizcli Directory Scan"
+        return "Wizcli Dir Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Wizcli Directory Scan results in JSON file format."
+        return "Wizcli Dir Scan results in JSON file format."
 
     def parse_libraries(self, libraries, test):
         findings = []
@@ -63,7 +63,7 @@ class WizcliDirScanParser:
         if secrets:
             for secret in secrets:
                 secret_id = secret.get("id", "N/A")
-                description = secret.get("description", "N/A")
+                desc = secret.get("description", "N/A")
                 severity = "High"
                 file_name = secret.get("path", "N/A")
                 line_number = secret.get("lineNumber", "N/A")
@@ -78,7 +78,7 @@ class WizcliDirScanParser:
                 )
 
                 finding = Finding(
-                    title=f"Secret: {description}",
+                    title=f"Secret: {desc}",
                     description=description,
                     severity=severity,
                     file_path=file_name,
