@@ -1,7 +1,7 @@
 {
-    "id": "80019f59-f4a4-4d29-a4da-b0b15b898aa3",
+    "id": "80013635-9dd5-4842-9591-5ec69b58b0d2",
     "projects": null,
-    "createdAt": "2024-07-22T09:03:01.610132857Z",
+    "createdAt": "2024-07-22T14:52:13.235118911Z",
     "startedAt": "0001-01-01T00:00:00Z",
     "createdBy": {
       "serviceAccount": {
@@ -61,6 +61,28 @@
           "dataFindingSeverityThreshold": "",
           "countThreshold": 0
         }
+      },
+      {
+        "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+        "name": "Default secrets policy",
+        "description": "Default built-in policy for secret scanning",
+        "type": "SECRETS",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "AUDIT",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamssecrets",
+          "countThreshold": 1,
+          "pathAllowList": []
+        }
       }
     ],
     "extraInfo": null,
@@ -68,8 +90,10 @@
     "outdatedPolicies": [],
     "taggedResource": null,
     "scanOriginResource": {
-      "__typename": "CICDScanOriginDirectory",
-      "name": "/Users/osama/Documents/testing"
+      "__typename": "CICDScanOriginContainerImage",
+      "name": "wizcli-imagescan",
+      "id": null,
+      "digest": null
     },
     "result": {
       "__typename": "CICDDiskScanResult",
@@ -106,10 +130,10 @@
           "totalCount": 0
         },
         "hostConfiguration": null,
-        "filesScannedCount": 0,
-        "directoriesScannedCount": 1
+        "filesScannedCount": 121,
+        "directoriesScannedCount": 116
       }
     },
-    "reportUrl": "https://app.wiz.io/findings/cicd-scans#%7E%28cicd_scan%7E%2780019f59-f4a4-4d29-a4da-b0b15b898aa3%29"
+    "reportUrl": "https://app.wiz.io/findings/cicd-scans"
   }
   
