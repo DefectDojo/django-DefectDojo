@@ -2064,7 +2064,7 @@ class ImportScanSerializer(serializers.Serializer):
         queryset=Endpoint.objects.all(),
         required=False,
         default=None,
-        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint."
+        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
     )
     file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
@@ -2334,7 +2334,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         queryset=Endpoint.objects.all(),
         required=False,
         default=None,
-        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint."
+        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
     )
     file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
