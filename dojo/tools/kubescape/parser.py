@@ -54,19 +54,19 @@ class KubescapeParser:
         for resource in data["resources"]:
             resourceid = resource["resourceID"]
             resource_type, resource_name = self.parse_resource_id(resourceid)
-            results = ([each for each in data["results"] if each.get('resourceID') == resourceid])
+            results = ([each for each in data["results"] if each.get("resourceID") == resourceid])
             controls = results[0].get("controls", [])
 
             for control in controls:
                 # This condition is true if the result doesn't contain the status for each control (old format)
-                retrocompatibility_condition = 'status' not in control or 'status' not in control['status']
+                retrocompatibility_condition = "status" not in control or "status" not in control["status"]
                 if retrocompatibility_condition or control["status"]["status"] == "failed":
                     control_name = control["name"]
                     if resource_type and resource_name and control_name:
                         title = f"{control_name} - {resource_type} {resource_name}"
                     else:
                         title = f"{control_name} - {resourceid}"
-                    controlID = control['controlID']
+                    controlID = control["controlID"]
 
                     # Find control details
                     controlSummary = self.find_control_summary_by_id(data, controlID)
@@ -116,7 +116,7 @@ class KubescapeParser:
                         severity=severity,
                         component_name=resourceid,
                         static_finding=True,
-                        dynamic_finding=False
+                        dynamic_finding=False,
                     )
                     findings.append(find)
         return findings

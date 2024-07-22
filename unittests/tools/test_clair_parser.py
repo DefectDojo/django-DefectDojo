@@ -1,6 +1,5 @@
 from dojo.tools.clair.parser import ClairParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestClairParser(DojoTestCase):

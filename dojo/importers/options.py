@@ -83,7 +83,6 @@ class ImporterOptions:
         An added hook for loading additional options
         to be used by children classes for the BaseImporter
         """
-        pass
 
     def log_translation(
         self,

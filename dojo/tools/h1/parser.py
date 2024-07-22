@@ -38,7 +38,7 @@ class H1Parser:
             # Get all relevant data
             date = content["attributes"]["created_at"]
             date = datetime.strftime(
-                datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ"), "%Y-%m-%d"
+                datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ"), "%Y-%m-%d",
             )
             # Build the title of the Dojo finding
             title = "#" + content["id"] + " " + content["attributes"]["title"]
@@ -68,7 +68,7 @@ class H1Parser:
                 severity = "Info"
             # Build the references of the Dojo finding
             ref_link = "https://hackerone.com/reports/{}".format(
-                content.get("id")
+                content.get("id"),
             )
             references += f"[{ref_link}]({ref_link})"
 
@@ -83,13 +83,13 @@ class H1Parser:
                 cwe = int(
                     content["relationships"]["weakness"]["data"]["attributes"][
                         "external_id"
-                    ][4:]
+                    ][4:],
                 )
             except Exception:
                 cwe = 0
 
             dupe_key = hashlib.md5(
-                str(references + title).encode("utf-8")
+                str(references + title).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -112,7 +112,7 @@ class H1Parser:
                     impact="No impact provided",
                     references=references,
                     cwe=cwe,
-                    dynamic_finding=False
+                    dynamic_finding=False,
                 )
                 finding.unsaved_endpoints = []
                 dupes[dupe_key] = finding
@@ -121,7 +121,7 @@ class H1Parser:
     def build_description(self, content):
         date = content["attributes"]["created_at"]
         date = datetime.strftime(
-            datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ"), "%Y-%m-%d"
+            datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ"), "%Y-%m-%d",
         )
         reporter = content["relationships"]["reporter"]["data"]["attributes"][
             "username"
@@ -151,7 +151,7 @@ class H1Parser:
 
         # Build rest of description meat
         description += "##Report: \n{}\n".format(
-            content["attributes"]["vulnerability_information"]
+            content["attributes"]["vulnerability_information"],
         )
 
         # Try to grab weakness if it's there

@@ -5,8 +5,7 @@ from django.test import override_settings
 
 from dojo.models import Test
 from dojo.tools.veracode_sca.parser import VeracodeScaParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestVeracodeScaScannerParser(DojoTestCase):

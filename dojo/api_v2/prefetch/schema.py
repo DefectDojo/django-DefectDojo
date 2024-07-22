@@ -26,14 +26,14 @@ def get_serializer_ref_name(serializer):
     :return: Serializer's ``ref_name`` or ``None`` for inline serializer
     :rtype: str or None
     """
-    serializer_meta = getattr(serializer, 'Meta', None)
+    serializer_meta = getattr(serializer, "Meta", None)
     serializer_name = type(serializer).__name__
-    if hasattr(serializer_meta, 'ref_name'):
+    if hasattr(serializer_meta, "ref_name"):
         ref_name = serializer_meta.ref_name
     else:
         ref_name = serializer_name
-        if ref_name.endswith('Serializer'):
-            ref_name = ref_name[:-len('Serializer')]
+        if ref_name.endswith("Serializer"):
+            ref_name = ref_name[:-len("Serializer")]
     return ref_name
 
 
@@ -56,7 +56,7 @@ def prefetch_postprocessing_hook(result, generator, request, public):
                     prefetcher = _Prefetcher()
 
                     fields = _get_prefetchable_fields(
-                        serializer_classes[path]()
+                        serializer_classes[path](),
                     )
 
                     field_names = [
@@ -87,8 +87,8 @@ def prefetch_postprocessing_hook(result, generator, request, public):
                             "type": "object",
                             "readOnly": True,
                             "additionalProperties": {
-                                "$ref": f"#/components/schemas/{fields_to_refname[name]}"
-                            }
+                                "$ref": f"#/components/schemas/{fields_to_refname[name]}",
+                            },
                         }
                         for name in field_names
                     }

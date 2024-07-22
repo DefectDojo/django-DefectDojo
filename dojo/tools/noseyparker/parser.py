@@ -42,21 +42,21 @@ class NoseyParkerParser:
             for line in data:
                 # Set rule to the current secret type (e.g. AWS S3 Bucket)
                 try:
-                    rule_name = line['rule_name']
-                    secret = line['match_content']
+                    rule_name = line["rule_name"]
+                    secret = line["match_content"]
                 except Exception:
                     msg = "Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0"
                     raise ValueError(msg)
 
                 # Set Finding details
-                for match in line['matches']:
+                for match in line["matches"]:
                     # The following path is to account for the variability in the JSON lines output
-                    num_elements = len(match['provenance']) - 1
-                    json_path = match['provenance'][num_elements]
+                    num_elements = len(match["provenance"]) - 1
+                    json_path = match["provenance"][num_elements]
 
                     title = f"Secret(s) Found in Repository with Commit ID {json_path['commit_provenance']['commit_metadata']['commit_id']}"
-                    filepath = json_path['commit_provenance']['blob_path']
-                    line_num = match['location']['source_span']['start']['line']
+                    filepath = json_path["commit_provenance"]["blob_path"]
+                    line_num = match["location"]["source_span"]["start"]["line"]
                     description = f"Secret found of type:   {rule_name} \n" \
                                   f"SECRET starts with:  '{secret[:3]}' \n" \
                                   f"Committer Name: {json_path['commit_provenance']['commit_metadata']['committer_name']}  \n" \
@@ -81,7 +81,7 @@ class NoseyParkerParser:
                             cwe=798,
                             title=title,
                             description=description,
-                            severity='High',
+                            severity="High",
                             mitigation="Reset the account/token and remove from source code. Store secrets/tokens/passwords in secret managers or secure vaults.",
                             date=datetime.today().strftime("%Y-%m-%d"),
                             verified=False,
@@ -91,7 +91,7 @@ class NoseyParkerParser:
                             line=line_num,
                             static_finding=True,
                             nb_occurences=1,
-                            dynamic_finding=False
+                            dynamic_finding=False,
 
                         )
                         dupes[key] = finding

@@ -85,12 +85,12 @@ def webhook(request, secret=None):
     try:
         parsed = json.loads(request.body.decode("utf-8"))
         # Check if the events supplied are supported
-        if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
+        if parsed.get("webhookEvent") not in ["comment_created", "jira:issue_updated"]:
             return webhook_responser_handler("info", f"Unrecognized JIRA webhook event received: {parsed.get('webhookEvent')}")
 
-        if parsed.get('webhookEvent') == 'jira:issue_updated':
+        if parsed.get("webhookEvent") == "jira:issue_updated":
             # xml examples at the end of file
-            jid = parsed['issue']['id']
+            jid = parsed["issue"]["id"]
             # This may raise a 404, but it will be handled in the exception response
             try:
                 jissue = JIRA_Issue.objects.get(jira_id=jid)
@@ -109,11 +109,11 @@ def webhook(request, secret=None):
             else:
                 return webhook_responser_handler("info", f"Received issue update for {jissue.jira_key} for unknown object")
             # Process the assignee if present
-            assignee = parsed['issue']['fields'].get('assignee')
-            assignee_name = 'Jira User'
+            assignee = parsed["issue"]["fields"].get("assignee")
+            assignee_name = "Jira User"
             if assignee is not None:
                 # First look for the 'name' field. If not present, try 'displayName'. Else put None
-                assignee_name = assignee.get('name', assignee.get('displayName'))
+                assignee_name = assignee.get("name", assignee.get("displayName"))
 
             #         "resolution":{
             #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
@@ -128,11 +128,11 @@ def webhook(request, secret=None):
             # or
             #         "resolution": "None"
 
-            resolution = parsed['issue']['fields']['resolution']
+            resolution = parsed["issue"]["fields"]["resolution"]
             resolution = resolution if resolution and resolution != "None" else None
-            resolution_id = resolution['id'] if resolution else None
-            resolution_name = resolution['name'] if resolution else None
-            jira_now = parse_datetime(parsed['issue']['fields']['updated'])
+            resolution_id = resolution["id"] if resolution else None
+            resolution_name = resolution["name"] if resolution else None
+            jira_now = parse_datetime(parsed["issue"]["fields"]["updated"])
 
             if findings:
                 for finding in findings:
@@ -141,7 +141,7 @@ def webhook(request, secret=None):
             if (error_response := check_for_and_create_comment(parsed)) is not None:
                 return error_response
 
-        if parsed.get('webhookEvent') == 'comment_created':
+        if parsed.get("webhookEvent") == "comment_created":
             if (error_response := check_for_and_create_comment(parsed)) is not None:
                 return error_response
 
@@ -212,25 +212,25 @@ def check_for_and_create_comment(parsed_json):
     if comment is None:
         return
 
-    comment_text = comment.get('body')
-    commenter = ''
-    if 'name' in comment.get('updateAuthor'):
-        commenter = comment.get('updateAuthor', {}).get('name')
-    elif 'emailAddress' in comment.get('updateAuthor'):
-        commenter = comment.get('updateAuthor', {}).get('emailAddress')
+    comment_text = comment.get("body")
+    commenter = ""
+    if "name" in comment.get("updateAuthor"):
+        commenter = comment.get("updateAuthor", {}).get("name")
+    elif "emailAddress" in comment.get("updateAuthor"):
+        commenter = comment.get("updateAuthor", {}).get("emailAddress")
     else:
-        logger.debug('Could not find the author of this jira comment!')
-    commenter_display_name = comment.get('updateAuthor', {}).get('displayName')
+        logger.debug("Could not find the author of this jira comment!")
+    commenter_display_name = comment.get("updateAuthor", {}).get("displayName")
     # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
-    jid = comment.get('self', '').split('/')[-3]
+    jid = comment.get("self", "").split("/")[-3]
     try:
         jissue = JIRA_Issue.objects.get(jira_id=jid)
     except JIRA_Instance.DoesNotExist:
         return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
     logging.debug(f"Received issue comment for {jissue.jira_key}")
-    logger.debug('jissue: %s', vars(jissue))
+    logger.debug("jissue: %s", vars(jissue))
 
-    jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
+    jira_usernames = JIRA_Instance.objects.values_list("username", flat=True)
     for jira_user_id in jira_usernames:
         # logger.debug('incoming username: %s jira config username: %s', commenter.lower(), jira_user_id.lower())
         if jira_user_id.lower() == commenter.lower():
@@ -239,19 +239,19 @@ def check_for_and_create_comment(parsed_json):
     findings = None
     if jissue.finding:
         findings = [jissue.finding]
-        create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding}', finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon='check')
+        create_notification(event="jira_comment", title=f"JIRA incoming comment - {jissue.finding}", finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id,)), icon="check")
     elif jissue.finding_group:
         findings = jissue.finding_group.findings.all()
         first_finding_group = findings.first()
         if first_finding_group:
-            create_notification(event='jira_comment', title=f'JIRA incoming comment - {jissue.finding_group}', finding=first_finding_group, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon='check')
+            create_notification(event="jira_comment", title=f"JIRA incoming comment - {jissue.finding_group}", finding=first_finding_group, url=reverse("view_finding_group", args=(jissue.finding_group.id,)), icon="check")
     elif jissue.engagement:
         return webhook_responser_handler("debug", "Comment for engagement ignored")
     else:
         return webhook_responser_handler("info", f"Received issue update for {jissue.jira_key} for unknown object")
     # Set the fields for the notes
-    author, _ = User.objects.get_or_create(username='JIRA')
-    entry = f'({commenter_display_name} ({commenter})): {comment_text}'
+    author, _ = User.objects.get_or_create(username="JIRA")
+    entry = f"({commenter_display_name} ({commenter})): {comment_text}"
     # Iterate (potentially) over each of the findings the note should be added to
     for finding in findings:
         # Determine if this exact note was created within the last 30 seconds to avoid duplicate notes
@@ -273,11 +273,11 @@ def check_for_and_create_comment(parsed_json):
 
 
 def get_custom_field(jira, label):
-    url = jira._options["server"].strip('/') + '/rest/api/2/field'
+    url = jira._options["server"].strip("/") + "/rest/api/2/field"
     response = jira._session.get(url).json()
     for node in response:
-        if label in node['clauseNames']:
-            field = int(node['schema']['customId'])
+        if label in node["clauseNames"]:
+            field = int(node["schema"]["customId"])
             break
 
     return field
@@ -285,10 +285,10 @@ def get_custom_field(jira, label):
 
 class ExpressJiraView(View):
     def get_template(self):
-        return 'dojo/express_new_jira.html'
+        return "dojo/express_new_jira.html"
 
     def get_fallback_template(self):
-        return 'dojo/new_jira.html'
+        return "dojo/new_jira.html"
 
     def get_form_class(self):
         return ExpressJIRAForm
@@ -297,20 +297,20 @@ class ExpressJiraView(View):
         return JIRAForm
 
     def get(self, request):
-        if not user_has_configuration_permission(request.user, 'dojo.add_jira_instance'):
+        if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
         add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
-        return render(request, self.get_template(), {'jform': jform})
+        return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
-        if not user_has_configuration_permission(request.user, 'dojo.add_jira_instance'):
+        if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
-            jira_server = jform.cleaned_data.get('url').rstrip('/')
-            jira_username = jform.cleaned_data.get('username')
-            jira_password = jform.cleaned_data.get('password')
+            jira_server = jform.cleaned_data.get("url").rstrip("/")
+            jira_username = jform.cleaned_data.get("username")
+            jira_password = jform.cleaned_data.get("password")
 
             try:
                 jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
@@ -319,100 +319,100 @@ class ExpressJiraView(View):
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    'Unable to authenticate. Please check credentials.',
-                    extra_tags='alert-danger')
-                return render(request, self.get_template(), {'jform': jform})
+                    "Unable to authenticate. Please check credentials.",
+                    extra_tags="alert-danger")
+                return render(request, self.get_template(), {"jform": jform})
             # authentication successful
             # Get the open and close keys
             try:
-                issue_id = jform.cleaned_data.get('issue_key')
-                key_url = jira_server.strip('/') + '/rest/api/latest/issue/' + issue_id + '/transitions?expand=transitions.fields'
+                issue_id = jform.cleaned_data.get("issue_key")
+                key_url = jira_server.strip("/") + "/rest/api/latest/issue/" + issue_id + "/transitions?expand=transitions.fields"
                 response = jira._session.get(key_url).json()
-                logger.debug('Retrieved JIRA issue successfully')
+                logger.debug("Retrieved JIRA issue successfully")
                 open_key = close_key = None
-                for node in response['transitions']:
-                    if node['to']['statusCategory']['name'] == 'To Do':
-                        open_key = open_key or int(node['id'])
-                    if node['to']['statusCategory']['name'] == 'Done':
-                        close_key = close_key or int(node['id'])
+                for node in response["transitions"]:
+                    if node["to"]["statusCategory"]["name"] == "To Do":
+                        open_key = open_key or int(node["id"])
+                    if node["to"]["statusCategory"]["name"] == "Done":
+                        close_key = close_key or int(node["id"])
             except Exception as e:
                 logger.exception(e)  # already logged in jira_helper
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    'Unable to find Open/Close ID\'s (invalid issue key specified?). They will need to be found manually',
-                    extra_tags='alert-danger')
+                    "Unable to find Open/Close ID's (invalid issue key specified?). They will need to be found manually",
+                    extra_tags="alert-danger")
                 fallback_form = self.get_fallback_form_class()(request.POST, instance=JIRA_Instance())
-                return render(request, self.get_fallback_template(), {'jform': fallback_form})
+                return render(request, self.get_fallback_template(), {"jform": fallback_form})
             # Get the epic id name
             try:
-                epic_name = get_custom_field(jira, 'Epic Name')
+                epic_name = get_custom_field(jira, "Epic Name")
             except Exception as e:
                 logger.exception(e)  # already logged in jira_helper
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    'Unable to find Epic Name. It will need to be found manually',
-                    extra_tags='alert-danger')
+                    "Unable to find Epic Name. It will need to be found manually",
+                    extra_tags="alert-danger")
                 fallback_form = self.get_fallback_form_class()(request.POST, instance=JIRA_Instance())
-                return render(request, self.get_fallback_template(), {'jform': fallback_form})
+                return render(request, self.get_fallback_template(), {"jform": fallback_form})
 
             jira_instance = JIRA_Instance(
                 username=jira_username,
                 password=jira_password,
                 url=jira_server,
-                configuration_name=jform.cleaned_data.get('configuration_name'),
-                info_mapping_severity='Lowest',
-                low_mapping_severity='Low',
-                medium_mapping_severity='Medium',
-                high_mapping_severity='High',
-                critical_mapping_severity='Highest',
+                configuration_name=jform.cleaned_data.get("configuration_name"),
+                info_mapping_severity="Lowest",
+                low_mapping_severity="Low",
+                medium_mapping_severity="Medium",
+                high_mapping_severity="High",
+                critical_mapping_severity="Highest",
                 epic_name_id=epic_name,
                 open_status_key=open_key,
                 close_status_key=close_key,
-                finding_text='',
-                default_issue_type=jform.cleaned_data.get('default_issue_type'),
-                finding_jira_sync=jform.cleaned_data.get('finding_jira_sync'))
+                finding_text="",
+                default_issue_type=jform.cleaned_data.get("default_issue_type"),
+                finding_jira_sync=jform.cleaned_data.get("finding_jira_sync"))
             jira_instance.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'JIRA Configuration Successfully Created.',
-                extra_tags='alert-success')
+                "JIRA Configuration Successfully Created.",
+                extra_tags="alert-success")
             create_notification(
-                event='jira_config_added',
+                event="jira_config_added",
                 title=f"New addition of JIRA: {jform.cleaned_data.get('configuration_name')}",
                 description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was added by {request.user}",
-                url=request.build_absolute_uri(reverse('jira')))
+                url=request.build_absolute_uri(reverse("jira")))
 
-            return HttpResponseRedirect(reverse('jira', ))
-        return render(request, self.get_template(), {'jform': jform})
+            return HttpResponseRedirect(reverse("jira"))
+        return render(request, self.get_template(), {"jform": jform})
 
 
 class NewJiraView(View):
     def get_template(self):
-        return 'dojo/new_jira.html'
+        return "dojo/new_jira.html"
 
     def get_form_class(self):
         return JIRAForm
 
     def get(self, request):
-        if not user_has_configuration_permission(request.user, 'dojo.add_jira_instance'):
+        if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
         add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
-        return render(request, self.get_template(), {'jform': jform})
+        return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
-        if not user_has_configuration_permission(request.user, 'dojo.add_jira_instance'):
+        if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
-            jira_server = jform.cleaned_data.get('url').rstrip('/')
-            jira_username = jform.cleaned_data.get('username')
-            jira_password = jform.cleaned_data.get('password')
+            jira_server = jform.cleaned_data.get("url").rstrip("/")
+            jira_username = jform.cleaned_data.get("username")
+            jira_password = jform.cleaned_data.get("password")
 
-            logger.debug('calling get_jira_connection_raw')
+            logger.debug("calling get_jira_connection_raw")
             # Make sure the connection can be completed
             jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
 
@@ -422,47 +422,47 @@ class NewJiraView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'JIRA Configuration Successfully Created.',
-                extra_tags='alert-success')
+                "JIRA Configuration Successfully Created.",
+                extra_tags="alert-success")
             create_notification(
-                event='jira_config_added',
+                event="jira_config_added",
                 title=f"New addition of JIRA: {jform.cleaned_data.get('configuration_name')}",
                 description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was added by {request.user}",
-                url=request.build_absolute_uri(reverse('jira')))
+                url=request.build_absolute_uri(reverse("jira")))
 
-            return HttpResponseRedirect(reverse('jira', ))
+            return HttpResponseRedirect(reverse("jira"))
         else:
-            logger.error('jform.errors: %s', jform.errors)
-        return render(request, self.get_template(), {'jform': jform})
+            logger.error("jform.errors: %s", jform.errors)
+        return render(request, self.get_template(), {"jform": jform})
 
 
 class EditJiraView(View):
     def get_template(self):
-        return 'dojo/edit_jira.html'
+        return "dojo/edit_jira.html"
 
     def get_form_class(self):
         return JIRAForm
 
     def get(self, request, jid=None):
-        if not user_has_configuration_permission(request.user, 'dojo.change_jira_instance'):
+        if not user_has_configuration_permission(request.user, "dojo.change_jira_instance"):
             raise PermissionDenied
         jira = JIRA_Instance.objects.get(pk=jid)
         jform = self.get_form_class()(instance=jira)
         add_breadcrumb(title="Edit JIRA Configuration", top_level=False, request=request)
-        return render(request, self.get_template(), {'jform': jform})
+        return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request, jid=None):
-        if not user_has_configuration_permission(request.user, 'dojo.change_jira_instance'):
+        if not user_has_configuration_permission(request.user, "dojo.change_jira_instance"):
             raise PermissionDenied
         jira = JIRA_Instance.objects.get(pk=jid)
         jira_password_from_db = jira.password
         jform = self.get_form_class()(request.POST, instance=jira)
         if jform.is_valid():
-            jira_server = jform.cleaned_data.get('url').rstrip('/')
-            jira_username = jform.cleaned_data.get('username')
+            jira_server = jform.cleaned_data.get("url").rstrip("/")
+            jira_username = jform.cleaned_data.get("username")
 
-            if jform.cleaned_data.get('password'):
-                jira_password = jform.cleaned_data.get('password')
+            if jform.cleaned_data.get("password"):
+                jira_password = jform.cleaned_data.get("password")
             else:
                 # on edit the password is optional
                 jira_password = jira_password_from_db
@@ -477,41 +477,41 @@ class EditJiraView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'JIRA Configuration Successfully Saved.',
-                extra_tags='alert-success')
+                "JIRA Configuration Successfully Saved.",
+                extra_tags="alert-success")
             create_notification(
-                event='jira_config_edited',
+                event="jira_config_edited",
                 title=f"Edit of JIRA: {jform.cleaned_data.get('configuration_name')}",
                 description=f"JIRA \"{jform.cleaned_data.get('configuration_name')}\" was edited by {request.user}",
-                url=request.build_absolute_uri(reverse('jira')))
+                url=request.build_absolute_uri(reverse("jira")))
 
-            return HttpResponseRedirect(reverse('jira', ))
+            return HttpResponseRedirect(reverse("jira"))
 
-        return render(request, self.get_template(), {'jform': jform})
+        return render(request, self.get_template(), {"jform": jform})
 
 
 class ListJiraView(View):
     def get_template(self):
-        return 'dojo/jira.html'
+        return "dojo/jira.html"
 
     def get(self, request):
-        if not user_has_configuration_permission(request.user, 'dojo.view_jira_instance'):
+        if not user_has_configuration_permission(request.user, "dojo.view_jira_instance"):
             raise PermissionDenied
         jira_instances = JIRA_Instance.objects.all()
-        context = {'jira_instances': jira_instances}
+        context = {"jira_instances": jira_instances}
         add_breadcrumb(title="JIRA List", top_level=not len(request.GET), request=request)
         return render(request, self.get_template(), context)
 
 
 class DeleteJiraView(View):
     def get_template(self):
-        return 'dojo/delete_jira.html'
+        return "dojo/delete_jira.html"
 
     def get_form_class(self):
         return DeleteJIRAInstanceForm
 
     def get(self, request, tid=None):
-        if not user_has_configuration_permission(request.user, 'dojo.delete_jira_instance'):
+        if not user_has_configuration_permission(request.user, "dojo.delete_jira_instance"):
             raise PermissionDenied
         jira_instance = get_object_or_404(JIRA_Instance, pk=tid)
         form = self.get_form_class()(instance=jira_instance)
@@ -524,17 +524,17 @@ class DeleteJiraView(View):
 
         add_breadcrumb(title="Delete", top_level=False, request=request)
         return render(request, self.get_template(), {
-            'inst': jira_instance,
-            'form': form,
-            'rels': rels,
-            'deletable_objects': rels,
+            "inst": jira_instance,
+            "form": form,
+            "rels": rels,
+            "deletable_objects": rels,
         })
 
     def post(self, request, tid=None):
-        if not user_has_configuration_permission(request.user, 'dojo.delete_jira_instance'):
+        if not user_has_configuration_permission(request.user, "dojo.delete_jira_instance"):
             raise PermissionDenied
         jira_instance = get_object_or_404(JIRA_Instance, pk=tid)
-        if 'id' in request.POST and str(jira_instance.id) == request.POST['id']:
+        if "id" in request.POST and str(jira_instance.id) == request.POST["id"]:
             form = self.get_form_class()(request.POST, instance=jira_instance)
             if form.is_valid():
                 try:
@@ -542,16 +542,16 @@ class DeleteJiraView(View):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        'JIRA Conf and relationships removed.',
-                        extra_tags='alert-success')
+                        "JIRA Conf and relationships removed.",
+                        extra_tags="alert-success")
                     create_notification(
-                        event='jira_config_deleted',
-                        title=_('Deletion of JIRA: %s') % jira_instance.configuration_name,
-                        description=f"JIRA \"{jira_instance.configuration_name}\" was deleted by {request.user}",
-                        url=request.build_absolute_uri(reverse('jira')))
-                    return HttpResponseRedirect(reverse('jira'))
+                        event="jira_config_deleted",
+                        title=_("Deletion of JIRA: %s") % jira_instance.configuration_name,
+                        description=f'JIRA "{jira_instance.configuration_name}" was deleted by {request.user}',
+                        url=request.build_absolute_uri(reverse("jira")))
+                    return HttpResponseRedirect(reverse("jira"))
                 except Exception as e:
-                    add_error_message_to_response(f'Unable to delete JIRA Instance, probably because it is used by JIRA Issues: {str(e)}')
+                    add_error_message_to_response(f"Unable to delete JIRA Instance, probably because it is used by JIRA Issues: {str(e)}")
 
         rels = ["Previewing the relationships has been disabled.", ""]
         display_preview = get_setting("DELETE_PREVIEW")
@@ -562,8 +562,8 @@ class DeleteJiraView(View):
 
         add_breadcrumb(title="Delete", top_level=False, request=request)
         return render(request, self.get_template(), {
-            'inst': jira_instance,
-            'form': form,
-            'rels': rels,
-            'deletable_objects': rels,
+            "inst": jira_instance,
+            "form": form,
+            "rels": rels,
+            "deletable_objects": rels,
         })

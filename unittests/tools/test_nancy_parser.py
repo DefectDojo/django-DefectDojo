@@ -2,8 +2,7 @@ from os import path
 
 from dojo.models import Test
 from dojo.tools.nancy.parser import NancyParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNancyParser(DojoTestCase):
@@ -20,7 +19,7 @@ class TestNancyParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual('Info', finding.severity)
+                self.assertEqual("Info", finding.severity)
                 self.assertIsNotNone(finding.description)
                 self.assertGreater(len(finding.description), 0)
                 self.assertEqual(None, finding.cve)

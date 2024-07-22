@@ -31,10 +31,10 @@ class ClairParser:
                 tree = json.loads(str(data, "utf-8"))
             except BaseException:
                 tree = json.loads(data)
-            if tree.get('image'):
+            if tree.get("image"):
                 self.scanner = "clair"
                 subtree = tree.get("vulnerabilities")
-            elif tree.get('LayerCount'):
+            elif tree.get("LayerCount"):
                 self.scanner = "clairklar"
                 subtree = tree.get("Vulnerabilities")
         except BaseException:

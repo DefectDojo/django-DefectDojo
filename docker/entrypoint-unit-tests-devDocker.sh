@@ -53,6 +53,7 @@ EOF
 
 echo "Unit Tests"
 echo "------------------------------------------------------------"
+
 python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
 python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
 
