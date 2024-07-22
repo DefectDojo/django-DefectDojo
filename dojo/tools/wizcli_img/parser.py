@@ -19,9 +19,9 @@ class WizcliImgParser(object):
         findings = []
         if osPackages:
             for osPackage in osPackages:
-                pkg_name = library.get("name", "N/A")
-                pkg_version = library.get("version", "N/A")
-                vulnerabilities = library.get("vulnerabilities", [])
+                pkg_name = osPackage.get("name", "N/A")
+                pkg_version = osPackage.get("version", "N/A")
+                vulnerabilities = osPackage.get("vulnerabilities", [])
 
                 for vulnerability in vulnerabilities:
                     vuln_name = vulnerability.get("name", "N/A")
@@ -35,8 +35,8 @@ class WizcliImgParser(object):
                     has_cisa_kev_exploit = vulnerability.get("hasCisaKevExploit", False)
 
                     finding_description = (
-                        f"**OS Package Name**: {lib_name}\n"
-                        f"**OS Package Version**: {lib_version}\n"
+                        f"**OS Package Name**: {pkg_name}\n"
+                        f"**OS Package Version**: {pkg_version}\n"
                         f"**Vulnerability Name**: {vuln_name}\n"
                         f"**Fixed Version**: {fixed_version}\n"
                         f"**Source**: {source}\n"
@@ -48,9 +48,8 @@ class WizcliImgParser(object):
                     )
 
                     finding = Finding(
-                        title=f"{lib_name} - {vuln_name}",
+                        title=f"{pkg_name} - {vuln_name}",
                         description=finding_description,
-                        file_path=lib_path,
                         severity=severity,
                         static_finding=True,
                         dynamic_finding=False,
