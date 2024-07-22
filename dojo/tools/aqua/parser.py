@@ -29,7 +29,7 @@ class AquaParser:
                     vulnerabilities = []
                 for vuln in vulnerabilities:
                     item = get_item(resource, vuln, test)
-                    unique_key = resource.get("cpe") + vuln.get("name", "None")
+                    unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
                     items[unique_key] = item
         elif "cves" in tree:
             for cve in tree["cves"]:
