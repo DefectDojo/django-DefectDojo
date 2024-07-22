@@ -62,8 +62,7 @@ class WizcliIaCParser:
         if secrets:
             for secret in secrets:
                 secret_id = secret.get("id", "N/A")
-                contains = secret.get("contains", [])
-                secret_name = contains[0].get("name", "N/A") if contains else "N/A"
+                description = secret.get("description", "N/A")
                 severity = "High"
                 file_name = secret.get("path", "N/A")
                 line_number = secret.get("lineNumber", "N/A")
@@ -71,14 +70,14 @@ class WizcliIaCParser:
 
                 description = (
                     f"**Secret ID**: {secret_id}\n"
-                    f"**Secret Name**: {secret_name}\n"
+                    f"**Description**: {description}\n"
                     f"**File Name**: {file_name}\n"
                     f"**Line Number**: {line_number}\n"
                     f"**Match Content**: {match_content}\n"
                 )
 
                 finding = Finding(
-                    title=f"Secret: {secret_name}",
+                    title=f"Secret: {description}",
                     description=description,
                     severity=severity,
                     file_path=file_name,
