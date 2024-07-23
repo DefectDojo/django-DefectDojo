@@ -19,9 +19,19 @@ class AquaParser:
 
     def get_items(self, tree, test):
         items = {}
-        if "resources" in tree:
+        if isinstance(tree, list):
+            vulnerabilityTree = tree[0]["results"]["resources"]
+            for node in vulnerabilityTree:
+                resource = node.get("resource")
+                vulnerabilities = node.get("vulnerabilities", [])
+                if vulnerabilities is None:
+                    vulnerabilities = []
+                for vuln in vulnerabilities:
+                    item = get_item(resource, vuln, test)
+                    unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
+                    items[unique_key] = item
+        elif "resources" in tree:
             vulnerabilityTree = tree["resources"]
-
             for node in vulnerabilityTree:
                 resource = node.get("resource")
                 vulnerabilities = node.get("vulnerabilities", [])
