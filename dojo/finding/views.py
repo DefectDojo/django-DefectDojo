@@ -376,6 +376,7 @@ class ListFindings(View, BaseListFindings):
             "jira_project": None,
             "github_config": None,
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "title_words": get_words_for_field(Finding, "title"),
             "component_words": get_words_for_field(Finding, "component_name"),
         }
@@ -742,6 +743,7 @@ class ViewFinding(View):
             "files": finding.files.all(),
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "product_tab": Product_Tab(
                 finding.test.engagement.product, title="View Finding", tab="findings"
             )
@@ -1730,7 +1732,7 @@ def request_finding_review(request, fid):
     return render(
         request,
         "dojo/review_finding.html",
-        {"finding": finding, "product_tab": product_tab, "user": user, "form": form},
+        {"finding": finding, "product_tab": product_tab, "user": user, "form": form, "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),},
     )
 
 

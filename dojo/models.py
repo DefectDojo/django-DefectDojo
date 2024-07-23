@@ -514,6 +514,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_('Enable Finding Groups'),
         help_text=_("With this setting turned off, the Finding Groups will be disabled."))
+    enable_ui_table_based_searching = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_('Enable UI Table Based Filtering/Sorting'),
+        help_text=_("With this setting turned off, table based filtering and sorting via javascript will be disabled."))
     enable_calendar = models.BooleanField(
         default=True,
         blank=False,
