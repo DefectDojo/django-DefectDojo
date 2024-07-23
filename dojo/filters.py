@@ -1427,9 +1427,9 @@ class ApiFindingFilter(DojoFilter):
     jira_change = DateRangeFilter(field_name="jira_issue__jira_change")
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
-    mitigated_on = DateFilter(field_name="mitigated", lookup_expr='exact')
-    mitigated_before = DateFilter(field_name="mitigated", lookup_expr='lt')
-    mitigated_after = DateFilter(field_name="mitigated", lookup_expr='gt')
+    mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact")
+    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt")
+    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt")
     # NumberInFilter
     cwe = NumberInFilter(field_name="cwe", lookup_expr="in")
     defect_review_requested_by = NumberInFilter(field_name="defect_review_requested_by", lookup_expr="in")
