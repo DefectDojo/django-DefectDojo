@@ -1490,6 +1490,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Nosey Parker Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Bearer CLI": DEDUPE_ALGO_HASH_CODE,
     "Wiz Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wizcli IaC Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wizcli Img Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wizcli Dir Scan": DEDUPE_ALGO_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
 }
