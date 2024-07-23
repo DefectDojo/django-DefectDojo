@@ -232,7 +232,7 @@ django:
       processes: 2
       threads: 2
       # maxFd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
-    enable_debug: false  # this also requires DD_DEBUG to be set to True
+    enableDebug: false  # this also requires DD_DEBUG to be set to True
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
     # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
