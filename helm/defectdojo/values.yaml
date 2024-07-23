@@ -139,15 +139,15 @@ celery:
         cpu: 2000m
         memory: 512Mi
     tolerations: []
-    app_settings:
-      pool_type: solo
+    appSettings:
+      poolType: solo
       # Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
       # Comment out the "solo" line, and uncomment the following lines.
-      # pool_type: prefork
-      # autoscale_min: 2
-      # autoscale_max: 8
+      # poolType: prefork
+      # autoscaleMin: 2
+      # autoscaleMax: 8
       # concurrency: 8
-      # prefetch_multiplier: 128
+      # prefetchMultiplier: 128
 
   # A list of extra volumes to mount. This
   # is useful for bringing in extra data that can be referenced by other configurations
@@ -228,10 +228,10 @@ django:
       limits:
         cpu: 2000m
         memory: 512Mi
-    app_settings:
+    appSettings:
       processes: 2
       threads: 2
-      # max_fd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
+      # maxFd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
     enable_debug: false  # this also requires DD_DEBUG to be set to True
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
