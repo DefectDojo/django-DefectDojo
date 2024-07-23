@@ -191,7 +191,7 @@ user, such as 'superuser'.
     button on the login page which should *magically* work
 
 ### Automatic Import of User-Groups
-To import groups from Azure AD users, the following environment variable needs to be set:  
+To import groups from Azure AD users, the following environment variable needs to be set:
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=True
@@ -200,16 +200,16 @@ To import groups from Azure AD users, the following environment variable needs t
 This will ensure the user is added to all the groups found in the Azure AD Token. Any missing groups will be created in DefectDojo (unless filtered). This group synchronization allows for product access via groups to limit the products a user can interact with.
 
 The Azure AD token returned by Azure will also need to be configured to include group IDs. Without this step, the
-token will not contain any notion of a group, and the mapping process will report that the current user is not a member of any 
+token will not contain any notion of a group, and the mapping process will report that the current user is not a member of any
 groups. To update the the format of the token, add a group claim that applies to whatever group type you are using.
-If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD 
+If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD
 "Token configuration" page.
 
 Application API permissions need to be updated with the `Group.Read.All` permission so that groups can be read on behalf
 of the user that has successfully signed in.
 
 To limit the amount of groups imported from Azure AD, a regular expression can be used as the following:
-    
+
     {{< highlight python >}}
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER='^team-.*' # or 'teamA|teamB|groupC'
     {{< /highlight >}}
@@ -262,7 +262,7 @@ Follow along below.
     {{< /highlight >}}
 
     **Important:** if you enable this setting on already working instance with gitlab integrations, it will require new grant "read_repository" by user
- 
+
 5. Restart DefectDojo, and you should now see a **Login with Gitlab**
     button on the login page.
 
@@ -270,7 +270,7 @@ Follow along below.
 There is also an option to use Keycloak as OAuth2 provider in order to authenticate users to Defect Dojo, also by using
 the social-auth plugin.
 
-Here are suggestion on how to configure Keycloak and DefectDojo: 
+Here are suggestion on how to configure Keycloak and DefectDojo:
 
 ### Configure Keycloak
 (assuming you already have an existing realm, otherwise create one)
@@ -283,7 +283,7 @@ Here are suggestion on how to configure Keycloak and DefectDojo:
    * Under `Fine grained openID connect configuration` -> `request object signature algorithm`: set to `RS256`
    * -> save these settings in keycloak (hit save button)
 3. Under `Scope` -> `Full Scope Allowed` set to `off`
-4. Under `mappers` -> add a custom mapper here: 
+4. Under `mappers` -> add a custom mapper here:
    * Name: `aud`
    * Mapper type: `audience`
    * Included audience: select your client/client-id here
@@ -293,6 +293,35 @@ Here are suggestion on how to configure Keycloak and DefectDojo:
 6. In your realm settings -> keys: copy the "Public key" (signing key) (use for DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY below)
 7. In your realm settings -> general -> endpoints: look into openId endpoint configuration
    and look up your authorization and token endpoint (use them below)
+
+### Configure OIDC
+Provides the option to authenticate users using a generic OIDC provider.
+
+The minimum configuration requires:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=True,
+    DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=(str, 'https://example.com'),
+    DD_SOCIAL_AUTH_OIDC_KEY=(str, 'YOUR_CLIENT_ID'),
+    DD_SOCIAL_AUTH_OIDC_SECRET=(str, 'YOUR_CLIENT_SECRET')
+    {{< /highlight >}}
+
+The rest of the OIDC configuration will be auto-detected by fetching data from:
+ - <DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT>/.well-known/open-id-configuration/
+
+You can also optionally set the following:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_OIDC_ID_KEY=(str, ''),                           #the key associated with the OIDC user IDs
+    DD_SOCIAL_AUTH_OIDC_USERNAME_KEY=(str, ''),                     #the key associated with the OIDC usernames
+    DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS=(list, ['']),           #list of domains allowed for login
+    DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS=(list, ["RS256","HS256"]),
+    DD_SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_USERINFO_URL=(str, ''),
+    DD_SOCIAL_AUTH_OIDC_JWKS_URI=(str, ''),
+    {{< /highlight >}}
 
 ### Configure Defect Dojo
 Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
@@ -304,13 +333,13 @@ Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" 
    DD_SECURE_SSL_REDIRECT=True,
    DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=True,
    DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY=(str, '<your realm public key>'),
-   DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, '<your client id>'), 
-   DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, '<your keycloak client credentials secret>'), 
+   DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, '<your client id>'),
+   DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, '<your keycloak client credentials secret>'),
    DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL=(str, '<your authorization endpoint>'),
-   DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL=(str, '<your token endpoint>')         
+   DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL=(str, '<your token endpoint>')
    {{< /highlight >}}
- 
-or, alternatively, for helm configuration, add this to the `extraConfig` section: 
+
+or, alternatively, for helm configuration, add this to the `extraConfig` section:
 
 ```yaml
 DD_SESSION_COOKIE_SECURE: 'True'
@@ -324,7 +353,7 @@ DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL: '<your authorization endpoint>'
 DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL: '<your token endpoint>'
 ```
 
-Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order to customize the login button's text caption. 
+Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order to customize the login button's text caption.
 
 ## GitHub Enterprise
 1.  Navigate to your GitHub Enterprise Server and follow instructions to create a new OAuth App [https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app](https://docs.github.com/en/enterprise-server/developers/apps/building-oauth-apps/creating-an-oauth-app)
@@ -334,20 +363,20 @@ Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order t
     -   **https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github-enterprise/**
 4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
-    {{< highlight python >}}  
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, 'GitHub Enterprise OAuth App Client ID'),  
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, 'GitHub Enterprise OAuth App Client Secret'),  
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL=(str, 'https://github.<your_company>.com/'),  
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, 'https://github.<your_company>.com/api/v3/'),  
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED = True,  
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, 'GitHub Enterprise OAuth App Client ID'),
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, 'GitHub Enterprise OAuth App Client Secret'),
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL=(str, 'https://github.<your_company>.com/'),
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, 'https://github.<your_company>.com/api/v3/'),
+    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED = True,
     {{< /highlight >}}
 5. Restart DefectDojo, and you should now see a **Login with GitHub Enterprise**
-    button on the login page.  
+    button on the login page.
 
 ## SAML 2.0
 In a similar direction to OAuth, this SAML addition provides a more secure
 perogative to SSO. For definitions of terms used and more information,
-see the plugin [plugin homepage](https://github.com/IdentityPython/djangosaml2). 
+see the plugin [plugin homepage](https://github.com/IdentityPython/djangosaml2).
 
 1.  Navigate to your SAML IdP and find your metadata
 2.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following

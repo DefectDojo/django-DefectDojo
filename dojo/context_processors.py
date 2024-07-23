@@ -9,6 +9,7 @@ def globalize_vars(request):
         "FORGOT_PASSWORD": settings.FORGOT_PASSWORD,
         "FORGOT_USERNAME": settings.FORGOT_USERNAME,
         "CLASSIC_AUTH_ENABLED": settings.CLASSIC_AUTH_ENABLED,
+        "OIDC_ENABLED": settings.OIDC_AUTH_ENABLED,
         "AUTH0_ENABLED": settings.AUTH0_OAUTH2_ENABLED,
         "GOOGLE_ENABLED": settings.GOOGLE_OAUTH_ENABLED,
         "OKTA_ENABLED": settings.OKTA_OAUTH_ENABLED,
