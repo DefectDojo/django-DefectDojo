@@ -23,6 +23,7 @@ from dojo.models import (
     Vulnerability_Id,
     Vulnerability_Id_Template,
 )
+from dojo.notes.helper import delete_related_notes
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed
 
 logger = logging.getLogger(__name__)
@@ -402,8 +403,8 @@ def finding_pre_delete(sender, instance, **kwargs):
     logger.debug('finding pre_delete: %d', instance.id)
     # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
     # https://code.djangoproject.com/ticket/154
-
     instance.found_by.clear()
+    delete_related_notes(instance)
 
 
 def finding_delete(instance, **kwargs):
