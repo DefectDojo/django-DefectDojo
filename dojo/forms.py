@@ -1811,7 +1811,7 @@ class ClearFindingReviewForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = ["active", "verified", "false_p", "out_of_scope", "duplicate"]
+        fields = ["active", "verified", "false_p", "out_of_scope", "duplicate", "is_mitigated"]
 
 
 class ReviewFindingForm(forms.Form):
