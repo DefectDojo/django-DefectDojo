@@ -4,8 +4,7 @@ from django.test import override_settings
 
 from dojo.models import Endpoint, Engagement, Product, Product_Type, Test
 from dojo.tools.veracode.parser import VeracodeParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestVeracodeScannerParser(DojoTestCase):
@@ -82,12 +81,12 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual("sourcefilepathMyApp.java", finding.file_path)
             self.assertEqual(2, finding.line)
             self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
-            self.assertIn('sast', finding.unsaved_tags)
+            self.assertIn("sast", finding.unsaved_tags)
             finding = findings[1]
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(456, finding.cwe)
             self.assertTrue(finding.dynamic_finding)
-            self.assertIn('dast', finding.unsaved_tags)
+            self.assertIn("dast", finding.unsaved_tags)
             finding = findings[2]
             self.assertEqual("High", finding.severity)
             self.assertIsNone(finding.cwe)
@@ -95,14 +94,14 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual("CVE-1234-1234", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("Vulnerable component: library:1234", finding.title)
             self.assertFalse(finding.is_mitigated)
-            self.assertIn('sca', finding.unsaved_tags)
+            self.assertIn("sca", finding.unsaved_tags)
             finding = findings[3]
             self.assertEqual("High", finding.severity)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-5678-5678", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("Vulnerable component: library1:1234", finding.title)
             self.assertFalse(finding.is_mitigated)
-            self.assertIn('sca', finding.unsaved_tags)
+            self.assertIn("sca", finding.unsaved_tags)
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_with_multiple_finding2_first_seen(self):
@@ -214,12 +213,12 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual("catname", finding.title)
             self.assertEqual("Description", finding.description)
             self.assertFalse(finding.is_mitigated)
-            self.assertIn('dast', finding.unsaved_tags)
+            self.assertIn("dast", finding.unsaved_tags)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual('https', endpoint.protocol)
-            self.assertEqual('www.example.com', endpoint.host)
-            self.assertEqual('index.html', endpoint.path)
+            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual("www.example.com", endpoint.host)
+            self.assertEqual("index.html", endpoint.path)
 
             return finding
 
@@ -276,41 +275,41 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual(finding.severity, "Medium")
             self.assertEqual(finding.cwe, 80)
             self.assertEqual(finding.description, (
-                '### Meta Information\n'
-                '**Exploitability Predication**: Likely\n'
-                '**Attack Vector**: page.html\n'
-                '**Module**: CoolProduct.jsa\n'
-                '### Details\n'
-                'This call to page.html() contains a cross-site scripting '
-                '(XSS) flaw.  The application populates the HTTP response with '
-                'untrusted input, allowing an attacker to embed malicious '
-                'content, such as Javascript code, which will be executed in '
+                "### Meta Information\n"
+                "**Exploitability Predication**: Likely\n"
+                "**Attack Vector**: page.html\n"
+                "**Module**: CoolProduct.jsa\n"
+                "### Details\n"
+                "This call to page.html() contains a cross-site scripting "
+                "(XSS) flaw.  The application populates the HTTP response with "
+                "untrusted input, allowing an attacker to embed malicious "
+                "content, such as Javascript code, which will be executed in "
                 "the context of the victim's browser.  XSS vulnerabilities are "
-                'commonly exploited to steal or manipulate cookies, modify '
-                'presentation of content, and compromise confidential '
-                'information, with new attack vectors being discovered on a '
-                'regular basis.'
+                "commonly exploited to steal or manipulate cookies, modify "
+                "presentation of content, and compromise confidential "
+                "information, with new attack vectors being discovered on a "
+                "regular basis."
             ))
             self.assertEqual(finding.mitigation, (
-                'Use contextual escaping on all untrusted data before using it '
-                'to construct any portion of an HTTP response.  The escaping '
-                'method should be chosen based on the specific use case of the '
-                'untrusted data, otherwise it may not protect fully against the '
-                'attack. For example, if the data is being written to the body '
-                'of an HTML page, use HTML entity escaping; if the data is '
-                'being written to an attribute, use attribute escaping; etc.  '
-                'Both the OWASP Java Encoder library and the Microsoft AntiXSS '
-                'library provide contextual escaping methods. For more details '
-                'on contextual escaping, see '
-                'https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md. '
-                'In addition, as a best practice, always validate untrusted '
-                'input to ensure that it conforms to the expected format, using '
-                'centralized data validation routines when possible.'
+                "Use contextual escaping on all untrusted data before using it "
+                "to construct any portion of an HTTP response.  The escaping "
+                "method should be chosen based on the specific use case of the "
+                "untrusted data, otherwise it may not protect fully against the "
+                "attack. For example, if the data is being written to the body "
+                "of an HTML page, use HTML entity escaping; if the data is "
+                "being written to an attribute, use attribute escaping; etc.  "
+                "Both the OWASP Java Encoder library and the Microsoft AntiXSS "
+                "library provide contextual escaping methods. For more details "
+                "on contextual escaping, see "
+                "https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md. "
+                "In addition, as a best practice, always validate untrusted "
+                "input to ensure that it conforms to the expected format, using "
+                "centralized data validation routines when possible."
             ))
             self.assertEqual(finding.references, (
-                '- [CWE](https://cwe.mitre.org/data/definitions/79.html)\n'
-                '- [OWASP](https://owasp.org/www-community/attacks/xss/)\n'
-                '- [Supported Cleansers](https://docs.veracode.com/r/review_cleansers)\n'
+                "- [CWE](https://cwe.mitre.org/data/definitions/79.html)\n"
+                "- [OWASP](https://owasp.org/www-community/attacks/xss/)\n"
+                "- [Supported Cleansers](https://docs.veracode.com/r/review_cleansers)\n"
             ))
             self.assertEqual(finding.line, 50)
             self.assertEqual(finding.sast_source_line, 50)
@@ -352,38 +351,38 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual(finding.severity, "High")
             self.assertEqual(finding.cwe, 74)
             self.assertEqual(finding.description, (
-                '### Meta Information\n'
-                '**Plugin**: Code Injection\n'
-                '**Attack Vector**: Improper Neutralization of Special '
-                'Elements in Output Used by a Downstream Component '
+                "### Meta Information\n"
+                "**Plugin**: Code Injection\n"
+                "**Attack Vector**: Improper Neutralization of Special "
+                "Elements in Output Used by a Downstream Component "
                 "('Injection')\n"
-                '**Vulnerable Parameter**: api\n'
-                '### Details\n'
-                'Injections happen when untrusted data is inserted into an '
-                'interpreted syntax and subsequently evaluated on the server '
-                'side. This syntax may be a SQL query, a parsed JSON or XML '
-                'document, an executed script or other syntax that may be in '
-                'use within the application. Although the target syntax has '
-                'not been identified, the application behavior demonstrates '
-                'that the input HTTP parameter may be inserted without proper '
-                'escaping. It was observed by sending valid and invalid '
-                'payloads that should throw or should not throw errors. By '
-                'inserting a proper and improper comments such as ``, `*/_/*`, '
-                '`/*_*/` into the `api` parameter, the scanner was able to '
-                'spot a difference in the responses, which is a good indicator '
-                'of a potential vulnerability. Confidence: medium. Response '
-                'codes: `404`, `404`, `404`. Similarities: `` vs `*/_/*`: 0.0; '
-                '`*/_/*` vs `/*_*/`: 0.0; `` vs `/*_*/`: 1.0.'
+                "**Vulnerable Parameter**: api\n"
+                "### Details\n"
+                "Injections happen when untrusted data is inserted into an "
+                "interpreted syntax and subsequently evaluated on the server "
+                "side. This syntax may be a SQL query, a parsed JSON or XML "
+                "document, an executed script or other syntax that may be in "
+                "use within the application. Although the target syntax has "
+                "not been identified, the application behavior demonstrates "
+                "that the input HTTP parameter may be inserted without proper "
+                "escaping. It was observed by sending valid and invalid "
+                "payloads that should throw or should not throw errors. By "
+                "inserting a proper and improper comments such as ``, `*/_/*`, "
+                "`/*_*/` into the `api` parameter, the scanner was able to "
+                "spot a difference in the responses, which is a good indicator "
+                "of a potential vulnerability. Confidence: medium. Response "
+                "codes: `404`, `404`, `404`. Similarities: `` vs `*/_/*`: 0.0; "
+                "`*/_/*` vs `/*_*/`: 0.0; `` vs `/*_*/`: 1.0."
             ))
             self.assertEqual(finding.mitigation, (
-                'It is recommended to identify how the current parameter is '
-                'used in the application source code, and make sure it is '
-                'escaped before inserting into any syntax or query. You can add '
-                'valid values to an allowlist and invalid values to a '
-                'blocklist.'
+                "It is recommended to identify how the current parameter is "
+                "used in the application source code, and make sure it is "
+                "escaped before inserting into any syntax or query. You can add "
+                "valid values to an allowlist and invalid values to a "
+                "blocklist."
             ))
             self.assertEqual(finding.references, (
-                '- [CWE](http://cwe.mitre.org/cgi-bin/jumpmenu.cgi?id=74)\n'
+                "- [CWE](http://cwe.mitre.org/cgi-bin/jumpmenu.cgi?id=74)\n"
             ))
             self.assertEqual(finding.unsaved_tags, ["policy-violation"])
             self.assertEqual(finding.unsaved_endpoints[0], Endpoint(
@@ -391,7 +390,7 @@ class TestVeracodeScannerParser(DojoTestCase):
                 host="application.insecure-company-alliance.com",
                 port=443,
                 path="api/*_*//new_user_sign_up",
-                query="param=wild-things"
+                query="param=wild-things",
             ))
 
     @override_settings(USE_FIRST_SEEN=True)
@@ -424,30 +423,30 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual(finding.severity, "High")
             self.assertEqual(finding.cwe, 400)
             self.assertEqual(finding.description, (
-                '### Meta Information\n'
-                '**Product ID**: abc123-bca321\n'
-                '**Component ID**: efg456-gfe654\n'
-                '**Language**: JAVA\n'
-                '#### Component Locations\n'
-                '- path/to/alpha/spring-boot-autoconfigure-2.5.14.jar\n'
-                '- path/to/beta/spring-boot-autoconfigure-2.5.14.jar\n'
-                '- path/to/charlie/spring-boot-autoconfigure-2.5.14.jar\n'
-                '- path/to/delta/spring-boot-autoconfigure-2.5.14.jar\n'
-                '#### Licenses\n'
-                '- apache-2.0: Low\n'
-                '    - Low-risk licenses are typically permissive licenses '
-                'that require you to preserve the copyright and license '
-                'notices, but allow distribution under different terms without '
-                'disclosing source code.\n'
-                '### Details\n'
-                'spring-boot-autoconfigure is vulnerable to Denial Of Service '
-                '(DoS). The vulnerability is applicable when the application '
-                'has Spring MVC auto-configuration enabled and uses the Spring '
-                'Boot welcome page, which can be either static or templated, '
-                'and the application is deployed behind a proxy which caches '
-                'the 404 responses. An attacker can cause the application to '
-                'crash by submitting a request to the welcome page which the '
-                'server is unable to properly respond to.'
+                "### Meta Information\n"
+                "**Product ID**: abc123-bca321\n"
+                "**Component ID**: efg456-gfe654\n"
+                "**Language**: JAVA\n"
+                "#### Component Locations\n"
+                "- path/to/alpha/spring-boot-autoconfigure-2.5.14.jar\n"
+                "- path/to/beta/spring-boot-autoconfigure-2.5.14.jar\n"
+                "- path/to/charlie/spring-boot-autoconfigure-2.5.14.jar\n"
+                "- path/to/delta/spring-boot-autoconfigure-2.5.14.jar\n"
+                "#### Licenses\n"
+                "- apache-2.0: Low\n"
+                "    - Low-risk licenses are typically permissive licenses "
+                "that require you to preserve the copyright and license "
+                "notices, but allow distribution under different terms without "
+                "disclosing source code.\n"
+                "### Details\n"
+                "spring-boot-autoconfigure is vulnerable to Denial Of Service "
+                "(DoS). The vulnerability is applicable when the application "
+                "has Spring MVC auto-configuration enabled and uses the Spring "
+                "Boot welcome page, which can be either static or templated, "
+                "and the application is deployed behind a proxy which caches "
+                "the 404 responses. An attacker can cause the application to "
+                "crash by submitting a request to the welcome page which the "
+                "server is unable to properly respond to."
             ))
             self.assertEqual(finding.cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H")
             self.assertEqual(finding.component_name, "spring-boot-autoconfigure.jar")
@@ -459,23 +458,23 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual(finding.severity, "Medium")
             self.assertEqual(finding.cwe, 0)
             self.assertEqual(finding.description, (
-                '### Meta Information\n'
-                '**Product ID**: abc123-bca321\n'
-                '**Component ID**: efg456-gfe654\n'
-                '**Language**: JAVASCRIPT\n'
-                '#### Component Locations\n'
-                '- path/to/alpha/node_modules:inflight\n'
-                '#### Licenses\n'
-                '- isc: Low\n'
-                '    - Low-risk licenses are typically permissive licenses '
-                'that require you to preserve the copyright and license '
-                'notices, but allow distribution under different terms without '
-                'disclosing source code.\n'
-                '### Details\n'
-                'inflight is vulnerable to a Memory Leak. The vulnerability is '
-                'caused by improper memory management due to a lack of '
-                'resource freeing, which can result in Denial of Service '
-                'conditions.'
+                "### Meta Information\n"
+                "**Product ID**: abc123-bca321\n"
+                "**Component ID**: efg456-gfe654\n"
+                "**Language**: JAVASCRIPT\n"
+                "#### Component Locations\n"
+                "- path/to/alpha/node_modules:inflight\n"
+                "#### Licenses\n"
+                "- isc: Low\n"
+                "    - Low-risk licenses are typically permissive licenses "
+                "that require you to preserve the copyright and license "
+                "notices, but allow distribution under different terms without "
+                "disclosing source code.\n"
+                "### Details\n"
+                "inflight is vulnerable to a Memory Leak. The vulnerability is "
+                "caused by improper memory management due to a lack of "
+                "resource freeing, which can result in Denial of Service "
+                "conditions."
             ))
             self.assertEqual(finding.cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H")
             self.assertEqual(finding.component_name, "inflight")

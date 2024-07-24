@@ -142,7 +142,7 @@ class TruffleHog3Parser:
             description = description[:-1]
 
         dupe_key = hashlib.md5(
-            (title + secret + severity + str(line)).encode("utf-8")
+            (title + secret + severity + str(line)).encode("utf-8"),
         ).hexdigest()
 
         if dupe_key in dupes:

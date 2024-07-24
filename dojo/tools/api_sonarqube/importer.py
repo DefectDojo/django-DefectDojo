@@ -128,7 +128,7 @@ class SonarQubeApiImporter:
                 branch=test.branch_tag,
             )
             logging.info(
-                f'Found {len(issues)} issues for component {component["key"]}'
+                f'Found {len(issues)} issues for component {component["key"]}',
             )
 
             sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL
@@ -158,7 +158,7 @@ class SonarQubeApiImporter:
                 # custom (user defined) SQ rules may not have 'htmlDesc'
                 if "htmlDesc" in rule:
                     description = self.clean_rule_description_html(
-                        rule["htmlDesc"]
+                        rule["htmlDesc"],
                     )
                     cwe = self.clean_cwe(rule["htmlDesc"])
                     references = sonarqube_permalink + self.get_references(rule["htmlDesc"])
@@ -178,7 +178,7 @@ class SonarQubeApiImporter:
                 # Only assign the SonarQube_issue to the first finding related
                 # to the issue
                 if Finding.objects.filter(
-                    sonarqube_issue=sonarqube_issue
+                    sonarqube_issue=sonarqube_issue,
                 ).exists():
                     sonarqube_issue = None
 
@@ -247,7 +247,7 @@ class SonarQubeApiImporter:
                 branch=test.branch_tag,
             )
             logging.info(
-                f'Found {len(hotspots)} hotspots for project {component["key"]}'
+                f'Found {len(hotspots)} hotspots for project {component["key"]}',
             )
             sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL
 
@@ -269,19 +269,19 @@ class SonarQubeApiImporter:
                 else:
                     severity = "Info"
                 title = textwrap.shorten(
-                    text=hotspot.get("message", ""), width=500
+                    text=hotspot.get("message", ""), width=500,
                 )
                 component_key = hotspot.get("component")
                 line = hotspot.get("line")
                 rule_id = hotspot.get("key", "")
                 rule = client.get_hotspot_rule(rule_id)
                 scanner_confidence = self.convert_scanner_confidence(
-                    hotspot.get("vulnerabilityProbability", "")
+                    hotspot.get("vulnerabilityProbability", ""),
                 )
                 description = self.clean_rule_description_html(
                     rule.get(
-                        "vulnerabilityDescription", "No description provided."
-                    )
+                        "vulnerabilityDescription", "No description provided.",
+                    ),
                 )
                 cwe = self.clean_cwe(rule.get("fixRecommendations", ""))
                 try:
@@ -289,7 +289,7 @@ class SonarQubeApiImporter:
                 except KeyError:
                     sonarqube_permalink = "No permalink \n"
                 references = sonarqube_permalink + self.get_references(
-                    rule.get("riskDescription", "")
+                    rule.get("riskDescription", ""),
                 ) + self.get_references(rule.get("fixRecommendations", ""))
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
@@ -300,7 +300,7 @@ class SonarQubeApiImporter:
                 # Only assign the SonarQube_issue to the first finding related
                 # to the issue
                 if Finding.objects.filter(
-                    sonarqube_issue=sonarqube_issue
+                    sonarqube_issue=sonarqube_issue,
                 ).exists():
                     sonarqube_issue = None
 

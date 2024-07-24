@@ -169,7 +169,7 @@ def skipIfNotSubclass(baseclass):
     def decorate(f):
         def wrapper(self, *args, **kwargs):
             if not issubclass(self.viewset, baseclass):
-                self.skipTest(f'This view does not inherit from {baseclass}')
+                self.skipTest(f"This view does not inherit from {baseclass}")
             else:
                 f(self, *args, **kwargs)
         return wrapper
@@ -197,7 +197,7 @@ class SchemaChecker:
             # print(message)
 
     def _get_prefix(self):
-        return '#'.join(self._prefix)
+        return "#".join(self._prefix)
 
     def _push_prefix(self, prefix):
         self._prefix += [prefix]
@@ -206,12 +206,12 @@ class SchemaChecker:
         self._prefix = self._prefix if len(self._prefix) == 0 else self._prefix[:-1]
 
     def _resolve_if_ref(self, schema):
-        if '$ref' not in schema:
+        if "$ref" not in schema:
             return schema
 
         ref_name = schema["$ref"]
         ref_name = ref_name[ref_name.rfind("/") + 1:]
-        return self._components['schemas'][ref_name]
+        return self._components["schemas"][ref_name]
 
     def _check_has_required_fields(self, required_fields, obj):
         # if not required_fields:
@@ -220,13 +220,13 @@ class SchemaChecker:
         for required_field in required_fields:
             # passwords are writeOnly, but this is not supported by Swagger / OpenAPIv2
             # TODO check this for OpenAPI3
-            if required_field != 'password':
+            if required_field != "password":
                 # print('checking field: ', required_field)
                 field = f"{self._get_prefix()}#{required_field}"
                 self._check_or_fail(obj is not None and required_field in obj, f"{field} is required but was not returned")
 
     def _check_type(self, schema, obj):
-        if 'type' not in schema:
+        if "type" not in schema:
             # TODO implement OneOf / AllOff  (enums)
             # Engagement
             # "status": {
@@ -288,7 +288,7 @@ class SchemaChecker:
     def check(self, schema, obj):
         def _check(schema, obj):
             # Convert sets to lists to streamline checks
-            if 'type' in schema and schema["type"] is TYPE_ARRAY and isinstance(obj, set):
+            if "type" in schema and schema["type"] is TYPE_ARRAY and isinstance(obj, set):
                 obj = list(obj)
 
             schema = self._resolve_if_ref(schema)
@@ -312,7 +312,7 @@ class SchemaChecker:
 
                 for child_name in obj.keys():
                     # TODO prefetch mixins not picked up by spectcular?
-                    if child_name not in ['prefetch']:
+                    if child_name not in ["prefetch"]:
                         if not properties or child_name not in properties.keys():
                             self._has_failed = True
                             self._register_error(f'unexpected property "{child_name}" found')
@@ -323,7 +323,7 @@ class SchemaChecker:
                     self._with_prefix(f"additionalProp<{name}>", _check, additional_properties, obj_child)
 
             # TODO implement support for enum / OneOff / AllOff
-            if 'type' in schema and schema["type"] is TYPE_ARRAY:
+            if "type" in schema and schema["type"] is TYPE_ARRAY:
                 items_schema = schema["items"]
                 for index in range(len(obj)):
                     self._with_prefix(f"item{index}", _check, items_schema, obj[index])
@@ -332,7 +332,7 @@ class SchemaChecker:
         self._errors = []
         self._prefix = []
         _check(schema, obj)
-        assert not self._has_failed, "\n" + '\n'.join(self._errors) + "\nFailed with " + str(len(self._errors)) + " errors"
+        assert not self._has_failed, "\n" + "\n".join(self._errors) + "\nFailed with " + str(len(self._errors)) + " errors"
 
 
 class TestType(Enum):
@@ -347,30 +347,30 @@ class BaseClass:
             DojoAPITestCase.__init__(self, *args, **kwargs)
 
         def setUp(self):
-            testuser = User.objects.get(username='admin')
+            testuser = User.objects.get(username="admin")
             token = Token.objects.get(user=testuser)
             self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-            self.url = reverse(self.viewname + '-list')
+            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+            self.url = reverse(self.viewname + "-list")
             self.schema = open_api3_json_schema
 
         def setUp_not_authorized(self):
             testuser = User.objects.get(id=3)
             token = Token.objects.get(user=testuser)
             self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
         def setUp_global_reader(self):
             testuser = User.objects.get(id=5)
             token = Token.objects.get(user=testuser)
             self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
         def setUp_global_owner(self):
             testuser = User.objects.get(id=6)
             token = Token.objects.get(user=testuser)
             self.client = APIClient()
-            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+            self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
         def check_schema(self, schema, obj):
             schema_checker = SchemaChecker(self.schema["components"])
@@ -378,36 +378,36 @@ class BaseClass:
             schema_checker.check(self.schema, obj)
 
         def check_schema_response(self, method, status_code, response, detail=False):
-            detail_path = '{id}/' if detail else ''
+            detail_path = "{id}/" if detail else ""
             endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/{detail_path}")]
-            schema = endpoints_schema[method]['responses'][status_code]['content']['application/json']['schema']
+            schema = endpoints_schema[method]["responses"][status_code]["content"]["application/json"]["schema"]
             obj = response.data
             self.check_schema(schema, obj)
 
     class RetrieveRequestTest(RESTEndpointTest):
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail(self):
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code, response.content[:1000])
             # sensitive data must be set to write_only so those are not returned in the response
             # https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-8q8j-7wc4-vjg5
-            self.assertNotIn('password', response.data)
-            self.assertNotIn('ssh', response.data)
-            self.assertNotIn('api_key', response.data)
+            self.assertNotIn("password", response.data)
+            self.assertNotIn("ssh", response.data)
+            self.assertNotIn("api_key", response.data)
 
-            self.check_schema_response('get', '200', response, detail=True)
+            self.check_schema_response("get", "200", response, detail=True)
 
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
             # print("=======================================================")
             prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
 
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
             response = self.client.get(relative_url, data={
-                "prefetch": ','.join(prefetchable_fields)
+                "prefetch": ",".join(prefetchable_fields),
             })
 
             self.assertEqual(200, response.status_code)
@@ -430,24 +430,24 @@ class BaseClass:
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_object_not_authorized(self):
             if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
+                self.skipTest("Authorization is not object based")
 
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + f'{current_objects[0].id}/'
+            relative_url = self.url + f"{current_objects[0].id}/"
             response = self.client.get(relative_url)
             self.assertEqual(404, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_configuration_not_authorized(self):
             if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
+                self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + f'{current_objects[0].id}/'
+            relative_url = self.url + f"{current_objects[0].id}/"
             response = self.client.get(relative_url)
             self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -458,18 +458,18 @@ class BaseClass:
             # validator = ResponseValidator(spec)
 
             check_for_tags = False
-            if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
+            if hasattr(self.endpoint_model, "tags") and self.payload and self.payload.get("tags", None):
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
-                logger.debug('creating model with endpoints: %s', self.payload)
+                logger.debug("creating model with endpoints: %s", self.payload)
                 response = self.client.post(self.url, self.payload)
                 self.assertEqual(201, response.status_code, response.content[:1000])
 
                 # print('response:', response.content[:1000])
-                check_for_id = response.data['id']
+                check_for_id = response.data["id"]
                 # print('id: ', check_for_id)
-                check_for_tags = self.payload.get('tags', None)
+                check_for_tags = self.payload.get("tags", None)
 
-            response = self.client.get(self.url, format='json')
+            response = self.client.get(self.url, format="json")
             # print('response')
             # print(vars(response))
 
@@ -478,26 +478,26 @@ class BaseClass:
             # tags must be present in last entry, the one we created
             if check_for_tags:
                 tags_found = False
-                for result in response.data['results']:
-                    if result['id'] == check_for_id:
+                for result in response.data["results"]:
+                    if result["id"] == check_for_id:
                         # logger.debug('result.tags: %s', result.get('tags', ''))
-                        self.assertEqual(len(check_for_tags), len(result.get('tags', None)))
+                        self.assertEqual(len(check_for_tags), len(result.get("tags", None)))
                         for tag in check_for_tags:
                             # logger.debug('looking for tag %s in tag list %s', tag, result['tags'])
-                            self.assertIn(tag, result['tags'])
+                            self.assertIn(tag, result["tags"])
                         tags_found = True
                 self.assertTrue(tags_found)
 
             self.assertEqual(200, response.status_code, response.content[:1000])
 
-            self.check_schema_response('get', '200', response)
+            self.check_schema_response("get", "200", response)
 
         @skipIfNotSubclass(PrefetchListMixin)
         def test_list_prefetch(self):
             prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
 
             response = self.client.get(self.url, data={
-                "prefetch": ','.join(prefetchable_fields)
+                "prefetch": ",".join(prefetchable_fields),
             })
 
             self.assertEqual(200, response.status_code)
@@ -516,7 +516,7 @@ class BaseClass:
 
                     for value in values:
                         if not isinstance(value, int):
-                            value = value['id']
+                            value = value["id"]
                         self.assertIn(value, objs["prefetch"][field])
 
             # TODO add schema check
@@ -524,22 +524,22 @@ class BaseClass:
         @skipIfNotSubclass(ListModelMixin)
         def test_list_object_not_authorized(self):
             if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
+                self.skipTest("Authorization is not object based")
 
             self.setUp_not_authorized()
 
-            response = self.client.get(self.url, format='json')
-            self.assertFalse(response.data['results'])
+            response = self.client.get(self.url, format="json")
+            self.assertFalse(response.data["results"])
             self.assertEqual(200, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list_configuration_not_authorized(self):
             if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
+                self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
 
-            response = self.client.get(self.url, format='json')
+            response = self.client.get(self.url, format="json")
             self.assertEqual(403, response.status_code, response.content[:1000])
 
     class CreateRequestTest(RESTEndpointTest):
@@ -547,38 +547,38 @@ class BaseClass:
         def test_create(self):
             length = self.endpoint_model.objects.count()
             response = self.client.post(self.url, self.payload)
-            logger.debug('test_create_response:')
+            logger.debug("test_create_response:")
             logger.debug(response)
             logger.debug(response.data)
             self.assertEqual(201, response.status_code, response.content[:1000])
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
 
-            if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
-                self.assertEqual(len(self.payload.get('tags')), len(response.data.get('tags', None)))
-                for tag in self.payload.get('tags'):
+            if hasattr(self.endpoint_model, "tags") and self.payload and self.payload.get("tags", None):
+                self.assertEqual(len(self.payload.get("tags")), len(response.data.get("tags", None)))
+                for tag in self.payload.get("tags"):
                     # logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
-                    self.assertIn(tag, response.data['tags'])
+                    self.assertIn(tag, response.data["tags"])
 
-            self.check_schema_response('post', '201', response)
+            self.check_schema_response("post", "201", response)
 
         @skipIfNotSubclass(CreateModelMixin)
-        @patch('dojo.api_v2.permissions.user_has_permission')
+        @patch("dojo.api_v2.permissions.user_has_permission")
         def test_create_object_not_authorized(self, mock):
             if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
+                self.skipTest("Authorization is not object based")
 
             mock.return_value = False
 
             response = self.client.post(self.url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 ANY,
                 self.permission_create)
 
         @skipIfNotSubclass(CreateModelMixin)
         def test_create_configuration_not_authorized(self):
             if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
+                self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
 
@@ -588,16 +588,16 @@ class BaseClass:
     class UpdateRequestTest(RESTEndpointTest):
         @skipIfNotSubclass(UpdateModelMixin)
         def test_update(self):
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(200, response.status_code, response.content[:1000])
 
-            self.check_schema_response('patch', '200', response, detail=True)
+            self.check_schema_response("patch", "200", response, detail=True)
 
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
-                if key not in ['push_to_jira', 'ssh', 'password', 'api_key']:
+                if key not in ["push_to_jira", "ssh", "password", "api_key"]:
                     # Convert data to sets to avoid problems with lists
                     if isinstance(value, list):
                         value = set(value)
@@ -607,62 +607,62 @@ class BaseClass:
                         response_data = response.data[key]
                     self.assertEqual(value, response_data)
 
-            self.assertNotIn('push_to_jira', response.data)
-            self.assertNotIn('ssh', response.data)
-            self.assertNotIn('password', response.data)
-            self.assertNotIn('api_key', response.data)
+            self.assertNotIn("push_to_jira", response.data)
+            self.assertNotIn("ssh", response.data)
+            self.assertNotIn("password", response.data)
+            self.assertNotIn("api_key", response.data)
 
-            if hasattr(self.endpoint_model, 'tags') and self.update_fields and self.update_fields.get('tags', None):
-                self.assertEqual(len(self.update_fields.get('tags')), len(response.data.get('tags', None)))
-                for tag in self.update_fields.get('tags'):
-                    logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
-                    self.assertIn(tag, response.data['tags'])
+            if hasattr(self.endpoint_model, "tags") and self.update_fields and self.update_fields.get("tags", None):
+                self.assertEqual(len(self.update_fields.get("tags")), len(response.data.get("tags", None)))
+                for tag in self.update_fields.get("tags"):
+                    logger.debug("looking for tag %s in tag list %s", tag, response.data["tags"])
+                    self.assertIn(tag, response.data["tags"])
 
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code, response.content[:1000])
 
-            self.check_schema_response('put', '200', response, detail=True)
+            self.check_schema_response("put", "200", response, detail=True)
 
         @skipIfNotSubclass(UpdateModelMixin)
-        @patch('dojo.api_v2.permissions.user_has_permission')
+        @patch("dojo.api_v2.permissions.user_has_permission")
         def test_update_object_not_authorized(self, mock):
             if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
+                self.skipTest("Authorization is not object based")
 
             mock.return_value = False
 
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
 
             if self.endpoint_model == Endpoint_Status:
-                permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
+                permission_object = Endpoint.objects.get(id=current_objects["results"][0]["endpoint"])
             elif self.endpoint_model == JIRA_Issue:
-                permission_object = Finding.objects.get(id=current_objects['results'][0]['finding'])
+                permission_object = Finding.objects.get(id=current_objects["results"][0]["finding"])
             else:
-                permission_object = self.permission_check_class.objects.get(id=current_objects['results'][0]['id'])
+                permission_object = self.permission_check_class.objects.get(id=current_objects["results"][0]["id"])
 
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 permission_object,
                 self.permission_update)
 
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 permission_object,
                 self.permission_update)
 
         @skipIfNotSubclass(UpdateModelMixin)
         def test_update_configuration_not_authorized(self):
             if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
+                self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + f'{current_objects[0].id}/'
+            relative_url = self.url + f"{current_objects[0].id}/"
 
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(403, response.status_code, response.content[:1000])
@@ -676,7 +676,7 @@ class BaseClass:
             if delete_id := getattr(self, "delete_id", None):
                 relative_url = f"{self.url}{delete_id}/"
             else:
-                current_objects = self.client.get(self.url, format='json').data
+                current_objects = self.client.get(self.url, format="json").data
                 relative_url = f"{self.url}{current_objects['results'][-1]['id']}/"
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code, response.content[:1000])
@@ -686,68 +686,68 @@ class BaseClass:
             if delete_id := getattr(self, "delete_id", None):
                 relative_url = f"{self.url}{delete_id}/delete_preview/"
             else:
-                current_objects = self.client.get(self.url, format='json').data
+                current_objects = self.client.get(self.url, format="json").data
                 relative_url = f"{self.url}{current_objects['results'][0]['id']}/delete_preview/"
 
             response = self.client.get(relative_url)
             # print('delete_preview response.data')
             self.assertEqual(200, response.status_code, response.content[:1000])
 
-            self.check_schema_response('get', '200', response, detail=True)
+            self.check_schema_response("get", "200", response, detail=True)
 
-            self.assertNotIn('push_to_jira', response.data)
-            self.assertNotIn('password', response.data)
-            self.assertNotIn('ssh', response.data)
-            self.assertNotIn('api_key', response.data)
+            self.assertNotIn("push_to_jira", response.data)
+            self.assertNotIn("password", response.data)
+            self.assertNotIn("ssh", response.data)
+            self.assertNotIn("api_key", response.data)
 
-            self.assertIsInstance(response.data['results'], list)
-            self.assertGreater(len(response.data['results']), 0, "Length: {}".format(len(response.data['results'])))
+            self.assertIsInstance(response.data["results"], list)
+            self.assertGreater(len(response.data["results"]), 0, "Length: {}".format(len(response.data["results"])))
 
-            for obj in response.data['results']:
+            for obj in response.data["results"]:
                 self.assertIsInstance(obj, dict)
                 self.assertEqual(len(obj), 3)
-                self.assertIsInstance(obj['model'], str)
-                if obj['id']:  # It needs to be None or int
-                    self.assertIsInstance(obj['id'], int)
-                self.assertIsInstance(obj['name'], str)
+                self.assertIsInstance(obj["model"], str)
+                if obj["id"]:  # It needs to be None or int
+                    self.assertIsInstance(obj["id"], int)
+                self.assertIsInstance(obj["name"], str)
 
-            self.assertEqual(self.deleted_objects, len(response.data['results']), response.content)
+            self.assertEqual(self.deleted_objects, len(response.data["results"]), response.content)
 
         @skipIfNotSubclass(DestroyModelMixin)
-        @patch('dojo.api_v2.permissions.user_has_permission')
+        @patch("dojo.api_v2.permissions.user_has_permission")
         def test_delete_object_not_authorized(self, mock):
             if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
+                self.skipTest("Authorization is not object based")
 
             mock.return_value = False
 
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
             self.client.delete(relative_url)
 
             if self.endpoint_model == Endpoint_Status:
-                permission_object = Endpoint.objects.get(id=current_objects['results'][0]['endpoint'])
+                permission_object = Endpoint.objects.get(id=current_objects["results"][0]["endpoint"])
             elif self.endpoint_model == JIRA_Issue:
-                permission_object = Finding.objects.get(id=current_objects['results'][0]['finding'])
+                permission_object = Finding.objects.get(id=current_objects["results"][0]["finding"])
             else:
-                permission_object = self.permission_check_class.objects.get(id=current_objects['results'][0]['id'])
+                permission_object = self.permission_check_class.objects.get(id=current_objects["results"][0]["id"])
 
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 permission_object,
                 self.permission_delete)
 
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete_configuration_not_authorized(self):
             if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
+                self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
 
             if delete_id := getattr(self, "delete_id", None):
-                relative_url = self.url + f'{delete_id}/'
+                relative_url = self.url + f"{delete_id}/"
             else:
                 current_objects = self.endpoint_model.objects.all()
-                relative_url = self.url + f'{current_objects[0].id}/'
+                relative_url = self.url + f"{current_objects[0].id}/"
             response = self.client.delete(relative_url)
             self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -762,77 +762,77 @@ class BaseClass:
 
     class MemberEndpointTest(BaseClassTest):
         def test_update(self):
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
             response = self.client.patch(relative_url, self.update_fields)
             self.assertEqual(405, response.status_code, response.content[:1000])
 
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code, response.content[:1000])
-            self.check_schema_response('put', '200', response, detail=True)
+            self.check_schema_response("put", "200", response, detail=True)
 
         @skipIfNotSubclass(UpdateModelMixin)
-        @patch('dojo.api_v2.permissions.user_has_permission')
+        @patch("dojo.api_v2.permissions.user_has_permission")
         def test_update_object_not_authorized(self, mock):
             if not self.test_type == TestType.OBJECT_PERMISSIONS:
-                self.skipTest('Authorization is not object based')
+                self.skipTest("Authorization is not object based")
 
             mock.return_value = False
 
-            current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+            current_objects = self.client.get(self.url, format="json").data
+            relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
 
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
-                self.permission_check_class.objects.get(id=current_objects['results'][0]['id']),
+            mock.assert_called_with(User.objects.get(username="admin"),
+                self.permission_check_class.objects.get(id=current_objects["results"][0]["id"]),
                 self.permission_update)
 
     class AuthenticatedViewTest(BaseClassTest):
         @skipIfNotSubclass(ListModelMixin)
         def test_list_configuration_not_authorized(self):
             if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
+                self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
 
-            response = self.client.get(self.url, format='json')
+            response = self.client.get(self.url, format="json")
             self.assertEqual(200, response.status_code, response.content[:1000])
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_configuration_not_authorized(self):
             if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
-                self.skipTest('Authorization is not configuration based')
+                self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
 
             current_objects = self.endpoint_model.objects.all()
-            relative_url = self.url + f'{current_objects[0].id}/'
+            relative_url = self.url + f"{current_objects[0].id}/"
             response = self.client.get(relative_url)
             self.assertEqual(200, response.status_code, response.content[:1000])
 
 
 class AppAnalysisTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = App_Analysis
-        self.endpoint_path = 'technologies'
-        self.viewname = 'app_analysis'
+        self.endpoint_path = "technologies"
+        self.viewname = "app_analysis"
         self.viewset = AppAnalysisViewSet
         self.payload = {
-            'product': 1,
-            'name': 'Tomcat',
-            'user': 1,
-            'confidence': 100,
-            'version': '8.5.1',
-            'icon': '',
-            'website': '',
-            'website_found': '',
-            'created': '2018-08-16T16:58:23.908Z'
+            "product": 1,
+            "name": "Tomcat",
+            "user": 1,
+            "confidence": 100,
+            "version": "8.5.1",
+            "icon": "",
+            "website": "",
+            "website_found": "",
+            "created": "2018-08-16T16:58:23.908Z",
         }
-        self.update_fields = {'version': '9.0'}
+        self.update_fields = {"version": "9.0"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
         self.permission_create = Permissions.Technology_Add
@@ -843,23 +843,23 @@ class AppAnalysisTest(BaseClass.BaseClassTest):
 
 
 class EndpointStatusTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Endpoint_Status
-        self.endpoint_path = 'endpoint_status'
-        self.viewname = 'endpoint_status'
+        self.endpoint_path = "endpoint_status"
+        self.viewname = "endpoint_status"
         self.viewset = EndpointStatusViewSet
         self.payload = {
-            'endpoint': 2,
-            'finding': 3,
-            'mitigated': False,
-            'false_positive': False,
-            'risk_accepted': False,
-            'out_of_scope': False,
+            "endpoint": 2,
+            "finding": 3,
+            "mitigated": False,
+            "false_positive": False,
+            "risk_accepted": False,
+            "out_of_scope": False,
             "date": "2017-01-12",
         }
-        self.update_fields = {'mitigated': True}
+        self.update_fields = {"mitigated": True}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
         self.permission_create = Permissions.Endpoint_Edit
@@ -870,87 +870,87 @@ class EndpointStatusTest(BaseClass.BaseClassTest):
 
     def test_create_unsuccessful(self):
         unsucessful_payload = self.payload.copy()
-        unsucessful_payload['finding'] = 2
+        unsucessful_payload["finding"] = 2
         response = self.client.post(self.url, unsucessful_payload)
-        logger.debug('test_create_response:')
+        logger.debug("test_create_response:")
         logger.debug(response)
         logger.debug(response.data)
         self.assertEqual(400, response.status_code, response.content[:1000])
-        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
+        self.assertIn("This endpoint-finding relation already exists", response.content.decode("utf-8"))
 
     def test_create_minimal(self):
         # This call should not fail even if there is not date defined
         minimal_payload = {
-            'endpoint': 1,
-            'finding': 3,
+            "endpoint": 1,
+            "finding": 3,
         }
         response = self.client.post(self.url, minimal_payload)
-        logger.debug('test_create_response:')
+        logger.debug("test_create_response:")
         logger.debug(response)
         logger.debug(response.data)
         self.assertEqual(201, response.status_code, response.content[:1000])
 
     def test_update_patch_unsuccessful(self):
         anoher_finding_payload = self.payload.copy()
-        anoher_finding_payload['finding'] = 3
+        anoher_finding_payload["finding"] = 3
         response = self.client.post(self.url, anoher_finding_payload)
 
-        current_objects = self.client.get(self.url, format='json').data
+        current_objects = self.client.get(self.url, format="json").data
 
-        object1 = current_objects['results'][0]
-        object2 = current_objects['results'][1]
+        object1 = current_objects["results"][0]
+        object2 = current_objects["results"][1]
 
         unsucessful_payload = {
-            'endpoint': object2['endpoint'],
-            'finding': object2['finding']
+            "endpoint": object2["endpoint"],
+            "finding": object2["finding"],
         }
 
-        relative_url = self.url + '{}/'.format(object1['id'])
+        relative_url = self.url + "{}/".format(object1["id"])
 
         response = self.client.patch(relative_url, unsucessful_payload)
         self.assertEqual(400, response.status_code, response.content[:1000])
-        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
+        self.assertIn("This endpoint-finding relation already exists", response.content.decode("utf-8"))
 
     def test_update_put_unsuccessful(self):
         anoher_finding_payload = self.payload.copy()
-        anoher_finding_payload['finding'] = 3
+        anoher_finding_payload["finding"] = 3
         response = self.client.post(self.url, anoher_finding_payload)
 
-        current_objects = self.client.get(self.url, format='json').data
+        current_objects = self.client.get(self.url, format="json").data
 
-        object1 = current_objects['results'][0]
-        object2 = current_objects['results'][1]
+        object1 = current_objects["results"][0]
+        object2 = current_objects["results"][1]
 
         unsucessful_payload = {
-            'endpoint': object2['endpoint'],
-            'finding': object2['finding']
+            "endpoint": object2["endpoint"],
+            "finding": object2["finding"],
         }
 
-        relative_url = self.url + '{}/'.format(object1['id'])
+        relative_url = self.url + "{}/".format(object1["id"])
 
         response = self.client.put(relative_url, unsucessful_payload)
         self.assertEqual(400, response.status_code, response.content[:1000])
-        self.assertIn('This endpoint-finding relation already exists', response.content.decode("utf-8"))
+        self.assertIn("This endpoint-finding relation already exists", response.content.decode("utf-8"))
 
 
 class EndpointTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Endpoint
-        self.endpoint_path = 'endpoints'
-        self.viewname = 'endpoint'
+        self.endpoint_path = "endpoints"
+        self.viewname = "endpoint"
         self.viewset = EndPointViewSet
         self.payload = {
-            'protocol': 'http',
-            'host': '127.0.0.1',
-            'path': '/',
-            'query': 'test=true',
-            'fragment': 'test-1',
-            'product': 1,
-            "tags": ["mytag", "yourtag"]
+            "protocol": "http",
+            "host": "127.0.0.1",
+            "path": "/",
+            "query": "test=true",
+            "fragment": "test-1",
+            "product": 1,
+            "tags": ["mytag", "yourtag"],
         }
-        self.update_fields = {'protocol': 'ftp', 'tags': ['one_new_tag']}
+        self.update_fields = {"protocol": "ftp", "tags": ["one_new_tag"]}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Endpoint
         self.permission_create = Permissions.Endpoint_Add
@@ -962,27 +962,27 @@ class EndpointTest(BaseClass.BaseClassTest):
 
 
 class EngagementTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Engagement
-        self.endpoint_path = 'engagements'
-        self.viewname = 'engagement'
+        self.endpoint_path = "engagements"
+        self.viewname = "engagement"
         self.viewset = EngagementViewSet
         self.payload = {
-            "engagement_type": 'Interactive',
+            "engagement_type": "Interactive",
             "report_type": 1,
             "name": "",
             "description": "",
             "version": "",
-            "target_start": '1937-01-01',
-            "target_end": '1937-01-01',
+            "target_start": "1937-01-01",
+            "target_end": "1937-01-01",
             "reason": "",
             "test_strategy": "",
             "product": "1",
-            "tags": ["mytag"]
+            "tags": ["mytag"],
         }
-        self.update_fields = {'version': 'latest'}
+        self.update_fields = {"version": "latest"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Engagement
         self.permission_create = Permissions.Engagement_Add
@@ -993,12 +993,12 @@ class EngagementTest(BaseClass.BaseClassTest):
 
 
 class RiskAcceptanceTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Risk_Acceptance
-        self.endpoint_path = 'risk_acceptance'
-        self.viewname = 'risk_acceptance'
+        self.endpoint_path = "risk_acceptance"
+        self.viewname = "risk_acceptance"
         self.viewset = RiskAcceptanceViewSet
         self.payload = {
             "id": 2,
@@ -1018,11 +1018,11 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
             "updated": "2023-09-15T17:17:39.462854Z",
             "owner": 1,
             "accepted_findings": [
-                226
+                226,
             ],
-            "notes": []
+            "notes": [],
         }
-        self.update_fields = {'name': 'newName'}
+        self.update_fields = {"name": "newName"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Risk_Acceptance
         self.permission_create = Permissions.Risk_Acceptance
@@ -1055,94 +1055,94 @@ class RiskAcceptanceTest(BaseClass.BaseClassTest):
             "updated": "2023-09-15T17:17:39.462854Z",
             "owner": 1,
             "accepted_findings": [
-                4
+                4,
             ],
-            "notes": []
+            "notes": [],
         }
-        current_objects = self.client.get(self.url, format='json').data
-        relative_url = self.url + '{}/'.format(current_objects['results'][0]['id'])
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
         response = self.client.put(relative_url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
 
 class FindingRequestResponseTest(DojoAPITestCase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
     def test_request_response_post(self):
         length = BurpRawRequestResponse.objects.count()
         payload = {
-            "req_resp": [{"request": "POST", "response": "200"}]
+            "req_resp": [{"request": "POST", "response": "200"}],
         }
-        response = self.client.post('/api/v2/findings/7/request_response/', dumps(payload), content_type='application/json')
+        response = self.client.post("/api/v2/findings/7/request_response/", dumps(payload), content_type="application/json")
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertEqual(BurpRawRequestResponse.objects.count(), length + 1)
 
     def test_request_response_get(self):
-        response = self.client.get('/api/v2/findings/7/request_response/', format='json')
+        response = self.client.get("/api/v2/findings/7/request_response/", format="json")
         # print('response.data:')
         # print(response.data)
         self.assertEqual(200, response.status_code, response.content[:1000])
 
 
 class FilesTest(DojoAPITestCase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token.key}')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
         self.path = pathlib.Path(__file__).parent.absolute()
         # model: file_id
         self.url_levels = {
-            'findings/7': 0,
-            'tests/3': 0,
-            'engagements/1': 0
+            "findings/7": 0,
+            "tests/3": 0,
+            "engagements/1": 0,
         }
 
     def test_request_response_post_and_download(self):
         # Test the creation
         for level in self.url_levels.keys():
             length = FileUpload.objects.count()
-            with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as testfile:
+            with open(f"{str(self.path)}/scans/acunetix/one_finding.xml") as testfile:
                 payload = {
                     "title": level,
-                    "file": testfile
+                    "file": testfile,
                 }
-                response = self.client.post(f'/api/v2/{level}/files/', payload)
+                response = self.client.post(f"/api/v2/{level}/files/", payload)
                 self.assertEqual(201, response.status_code, response.data)
                 self.assertEqual(FileUpload.objects.count(), length + 1)
                 # Save the ID of the newly created file object
-                self.url_levels[level] = response.data.get('id')
+                self.url_levels[level] = response.data.get("id")
 
         #  Test the download
-        with open(f'{str(self.path)}/scans/acunetix/one_finding.xml') as file:
+        with open(f"{str(self.path)}/scans/acunetix/one_finding.xml") as file:
             file_data = file.read()
         for level, file_id in self.url_levels.items():
-            response = self.client.get(f'/api/v2/{level}/files/download/{file_id}/')
+            response = self.client.get(f"/api/v2/{level}/files/download/{file_id}/")
             self.assertEqual(200, response.status_code)
-            downloaded_file = b''.join(response.streaming_content).decode().replace('\\n', '\n')
+            downloaded_file = b"".join(response.streaming_content).decode().replace("\\n", "\n")
             self.assertEqual(file_data, downloaded_file)
 
     def test_request_response_get(self):
         for level in self.url_levels.keys():
-            response = self.client.get(f'/api/v2/{level}/files/')
+            response = self.client.get(f"/api/v2/{level}/files/")
             self.assertEqual(200, response.status_code)
 
 
 class FindingsTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Finding
-        self.endpoint_path = 'findings'
-        self.viewname = 'finding'
+        self.endpoint_path = "findings"
+        self.viewname = "finding"
         self.viewset = FindingViewSet
         self.payload = {
             "review_requested_by": 2,
@@ -1175,9 +1175,9 @@ class FindingsTest(BaseClass.BaseClassTest):
             "dynamic_finding": False,
             "endpoints": [1, 2],
             "files": [],
-            "tags": ['tag1', 'tag_2'],
+            "tags": ["tag1", "tag_2"],
         }
-        self.update_fields = {'duplicate': False, 'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
+        self.update_fields = {"duplicate": False, "active": True, "push_to_jira": "True", "tags": ["finding_tag_new"]}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Finding
         self.permission_create = Permissions.Finding_Add
@@ -1215,7 +1215,7 @@ class FindingsTest(BaseClass.BaseClassTest):
 
     def test_filter_steps_to_reproduce(self):
         # Confirm initial data
-        result = self.client.get(self.url + '?steps_to_reproduce=lorem')
+        result = self.client.get(self.url + "?steps_to_reproduce=lorem")
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not filter on steps_to_reproduce")
         result_json = result.json()
         assert result_json["count"] == 0
@@ -1251,12 +1251,12 @@ class FindingsTest(BaseClass.BaseClassTest):
 
 
 class FindingMetadataTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Finding
-        self.endpoint_path = 'findings'
-        self.viewname = 'finding'
+        self.endpoint_path = "findings"
+        self.viewname = "finding"
         self.viewset = FindingViewSet
         self.payload = {}
         self.test_type = TestType.STANDARD
@@ -1265,11 +1265,11 @@ class FindingMetadataTest(BaseClass.BaseClassTest):
 
     def setUp(self):
         super().setUp()
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.url = reverse(self.viewname + '-list')
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.url = reverse(self.viewname + "-list")
         self.finding_id = 3
         self.delete_id = self.finding_id
         finding = Finding.objects.get(id=self.finding_id)
@@ -1312,12 +1312,12 @@ class FindingMetadataTest(BaseClass.BaseClassTest):
 
 
 class FindingTemplatesTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Finding_Template
-        self.endpoint_path = 'finding_templates'
-        self.viewname = 'finding_template'
+        self.endpoint_path = "finding_templates"
+        self.viewname = "finding_template"
         self.viewset = FindingTemplatesViewSet
         self.payload = {
             "title": "Test template",
@@ -1328,19 +1328,19 @@ class FindingTemplatesTest(BaseClass.BaseClassTest):
             "impact": "MEDIUM",
             "references": "",
         }
-        self.update_fields = {'references': 'some reference'}
+        self.update_fields = {"references": "some reference"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class JiraInstancesTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = JIRA_Instance
-        self.endpoint_path = 'jira_instances'
-        self.viewname = 'jira_instance'
+        self.endpoint_path = "jira_instances"
+        self.viewname = "jira_instance"
         self.viewset = JiraInstanceViewSet
         self.payload = {
             "url": "http://www.example.com",
@@ -1356,28 +1356,28 @@ class JiraInstancesTest(BaseClass.BaseClassTest):
             "high_mapping_severity": "LOW",
             "critical_mapping_severity": "LOW",
             "finding_text": "",
-            "global_jira_sla_notification": False
+            "global_jira_sla_notification": False,
         }
-        self.update_fields = {'epic_name_id': 1}
+        self.update_fields = {"epic_name_id": 1}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class JiraIssuesTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = JIRA_Issue
-        self.endpoint_path = 'jira_finding_mappings'
-        self.viewname = 'jira_issue'
+        self.endpoint_path = "jira_finding_mappings"
+        self.viewname = "jira_issue"
         self.viewset = JiraIssuesViewSet
         self.payload = {
             "jira_id": "JIRA 1",
             "jira_key": "SOME KEY",
             "finding": 2,
         }
-        self.update_fields = {'jira_change': '2022-01-02T13:47:38.021481Z'}
+        self.update_fields = {"jira_change": "2022-01-02T13:47:38.021481Z"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Finding
         self.permission_create = Permissions.Finding_Edit
@@ -1388,12 +1388,12 @@ class JiraIssuesTest(BaseClass.BaseClassTest):
 
 
 class JiraProjectTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = JIRA_Project
-        self.endpoint_path = 'jira_projects'
-        self.viewname = 'jira_project'
+        self.endpoint_path = "jira_projects"
+        self.viewname = "jira_project"
         self.viewset = JiraProjectViewSet
         self.payload = {
             "project_key": "TEST KEY",
@@ -1404,7 +1404,7 @@ class JiraProjectTest(BaseClass.BaseClassTest):
             "product": 1,
             "jira_instance": 2,
         }
-        self.update_fields = {'jira_instance': 3}
+        self.update_fields = {"jira_instance": 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
         self.permission_create = Permissions.Product_Edit
@@ -1415,57 +1415,57 @@ class JiraProjectTest(BaseClass.BaseClassTest):
 
 
 class SonarqubeIssueTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Sonarqube_Issue
-        self.endpoint_path = 'sonarqube_issues'
-        self.viewname = 'sonarqube_issue'
+        self.endpoint_path = "sonarqube_issues"
+        self.viewname = "sonarqube_issue"
         self.viewset = SonarqubeIssueViewSet
         self.payload = {
             "key": "AREwS5n5TxsFUNm31CxP",
             "status": "OPEN",
-            "type": "VULNERABILITY"
+            "type": "VULNERABILITY",
         }
-        self.update_fields = {'key': 'AREwS5n5TxsFUNm31CxP'}
+        self.update_fields = {"key": "AREwS5n5TxsFUNm31CxP"}
         self.test_type = TestType.STANDARD
         self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class SonarqubeIssuesTransitionTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Sonarqube_Issue_Transition
-        self.endpoint_path = 'sonarqube_transitions'
-        self.viewname = 'sonarqube_issue_transition'
+        self.endpoint_path = "sonarqube_transitions"
+        self.viewname = "sonarqube_issue_transition"
         self.viewset = SonarqubeIssuesTransitionTest
         self.payload = {
             "sonarqube_issue": 1,
             "finding_status": "Active, Verified",
             "sonarqube_status": "OPEN",
-            "transitions": "confirm"
+            "transitions": "confirm",
         }
-        self.update_fields = {'sonarqube_status': 'CLOSED'}
+        self.update_fields = {"sonarqube_status": "CLOSED"}
         self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Product_API_Scan_Configuration
-        self.endpoint_path = 'product_api_scan_configurations'
-        self.viewname = 'product_api_scan_configuration'
+        self.endpoint_path = "product_api_scan_configurations"
+        self.viewname = "product_api_scan_configuration"
         self.viewset = ProductAPIScanConfigurationViewSet
         self.payload = {
             "product": 2,
             "service_key_1": "dojo_sonar_key",
-            "tool_configuration": 3
+            "tool_configuration": 3,
         }
-        self.update_fields = {'tool_configuration': 2}
+        self.update_fields = {"tool_configuration": 2}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_API_Scan_Configuration
         self.permission_create = Permissions.Product_API_Scan_Configuration_Add
@@ -1476,12 +1476,12 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
 
 
 class ProductTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Product
-        self.endpoint_path = 'products'
-        self.viewname = 'product'
+        self.endpoint_path = "products"
+        self.viewname = "product"
         self.viewset = ProductViewSet
         self.payload = {
             "product_manager": 2,
@@ -1490,9 +1490,9 @@ class ProductTest(BaseClass.BaseClassTest):
             "prod_type": 1,
             "name": "Test Product",
             "description": "test product",
-            "tags": ["mytag", "yourtag"]
+            "tags": ["mytag", "yourtag"],
         }
-        self.update_fields = {'prod_type': 2}
+        self.update_fields = {"prod_type": 2}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
         self.permission_create = Permissions.Product_Type_Add_Product
@@ -1503,12 +1503,12 @@ class ProductTest(BaseClass.BaseClassTest):
 
 
 class StubFindingsTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Stub_Finding
-        self.endpoint_path = 'stub_findings'
-        self.viewname = 'stub_finding'
+        self.endpoint_path = "stub_findings"
+        self.viewname = "stub_finding"
         self.viewset = StubFindingsViewSet
         self.payload = {
             "title": "Stub Finding 1",
@@ -1518,7 +1518,7 @@ class StubFindingsTest(BaseClass.BaseClassTest):
             "reporter": 3,
             "test": 3,
         }
-        self.update_fields = {'severity': 'Low'}
+        self.update_fields = {"severity": "Low"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Stub_Finding
         self.permission_create = Permissions.Finding_Add
@@ -1534,12 +1534,12 @@ class StubFindingsTest(BaseClass.BaseClassTest):
 
 
 class TestsTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Test
-        self.endpoint_path = 'tests'
-        self.viewname = 'test'
+        self.endpoint_path = "tests"
+        self.viewname = "test"
         self.viewset = TestsViewSet
         self.payload = {
             "test_type": 1,
@@ -1557,7 +1557,7 @@ class TestsTest(BaseClass.BaseClassTest):
             "branch_tag": "master",
             "commit_hash": "1234567890abcdefghijkl",
         }
-        self.update_fields = {'percent_complete': 100}
+        self.update_fields = {"percent_complete": 100}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Test
         self.permission_create = Permissions.Test_Add
@@ -1569,12 +1569,12 @@ class TestsTest(BaseClass.BaseClassTest):
 
 
 class ToolConfigurationsTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Tool_Configuration
-        self.viewname = 'tool_configuration'
-        self.endpoint_path = 'tool_configurations'
+        self.viewname = "tool_configuration"
+        self.endpoint_path = "tool_configurations"
         self.viewset = ToolConfigurationsViewSet
         self.payload = {
             "url": "http://www.example.com",
@@ -1588,19 +1588,19 @@ class ToolConfigurationsTest(BaseClass.BaseClassTest):
             "api_key": "test key",
             "tool_type": 1,
         }
-        self.update_fields = {'ssh': 'test string'}
+        self.update_fields = {"ssh": "test string"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class ToolProductSettingsTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Tool_Product_Settings
-        self.endpoint_path = 'tool_product_settings'
-        self.viewname = 'tool_product_settings'
+        self.endpoint_path = "tool_product_settings"
+        self.viewname = "tool_product_settings"
         self.viewset = ToolProductSettingsViewSet
         self.payload = {
             "setting_url": "http://www.example.com",
@@ -1610,7 +1610,7 @@ class ToolProductSettingsTest(BaseClass.BaseClassTest):
             "tool_configuration": 3,
             "product": 2,
         }
-        self.update_fields = {'tool_project_id': '2'}
+        self.update_fields = {"tool_project_id": "2"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
         self.permission_create = Permissions.Product_Edit
@@ -1621,70 +1621,70 @@ class ToolProductSettingsTest(BaseClass.BaseClassTest):
 
 
 class ToolTypesTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Tool_Type
-        self.endpoint_path = 'tool_types'
-        self.viewname = 'tool_type'
+        self.endpoint_path = "tool_types"
+        self.viewname = "tool_type"
         self.viewset = ToolTypesViewSet
         self.payload = {
             "name": "Tool Type",
-            "description": "test tool type"
+            "description": "test tool type",
         }
-        self.update_fields = {'description': 'changed description'}
+        self.update_fields = {"description": "changed description"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class NoteTypesTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Note_Type
-        self.endpoint_path = 'note_type'
-        self.viewname = 'note_type'
+        self.endpoint_path = "note_type"
+        self.viewname = "note_type"
         self.viewset = NoteTypeViewSet
         self.payload = {
             "name": "Test Note",
             "description": "not that much",
             "is_single": False,
             "is_active": True,
-            "is_mandatory": False
+            "is_mandatory": False,
         }
-        self.update_fields = {'description': 'changed description'}
+        self.update_fields = {"description": "changed description"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class NotesTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Notes
-        self.endpoint_path = 'notes'
-        self.viewname = 'notes'
+        self.endpoint_path = "notes"
+        self.viewname = "notes"
         self.viewset = NotesViewSet
         self.payload = {
             "id": 1,
             "entry": "updated_entry",
             "author": '{"username": "admin"}',
-            "editor": '{"username": "user1"}'
+            "editor": '{"username": "user1"}',
         }
-        self.update_fields = {'entry': 'changed entry'}
+        self.update_fields = {"entry": "changed entry"}
         self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class UsersTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = User
-        self.endpoint_path = 'users'
-        self.viewname = 'user'
+        self.endpoint_path = "users"
+        self.viewname = "user"
         self.viewset = UsersViewSet
         self.payload = {
             "username": "test_user",
@@ -1692,7 +1692,7 @@ class UsersTest(BaseClass.BaseClassTest):
             "last_name": "user",
             "email": "example@email.com",
             "is_active": True,
-            "configuration_permissions": [217, 218]
+            "configuration_permissions": [217, 218],
         }
         self.update_fields = {"first_name": "test changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
@@ -1701,35 +1701,35 @@ class UsersTest(BaseClass.BaseClassTest):
 
     def test_create_user_with_non_configuration_permissions(self):
         payload = self.payload.copy()
-        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, 400)
-        self.assertIn('object does not exist', response.data['message'])
+        self.assertIn("object does not exist", response.data["message"])
 
     def test_update_user_with_non_configuration_permissions(self):
         payload = {}
-        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
-        response = self.client.patch(self.url + '3/', payload)
+        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.patch(self.url + "3/", payload)
         self.assertEqual(response.status_code, 400)
-        self.assertIn('object does not exist', response.data['message'])
+        self.assertIn("object does not exist", response.data["message"])
 
     def test_update_user_other_permissions_will_not_leak_and_stay_untouched(self):
         payload = {}
-        payload['configuration_permissions'] = [217, 218, 219]
-        response = self.client.patch(self.url + '6/', payload)
+        payload["configuration_permissions"] = [217, 218, 219]
+        response = self.client.patch(self.url + "6/", payload)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['configuration_permissions'], payload['configuration_permissions'])
-        user_permissions = User.objects.get(username='user5').user_permissions.all().values_list('id', flat=True)
-        self.assertEqual(set(user_permissions), set(payload['configuration_permissions'] + [26, 28]))
+        self.assertEqual(response.data["configuration_permissions"], payload["configuration_permissions"])
+        user_permissions = User.objects.get(username="user5").user_permissions.all().values_list("id", flat=True)
+        self.assertEqual(set(user_permissions), set(payload["configuration_permissions"] + [26, 28]))
 
 
 class UserContactInfoTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = UserContactInfo
-        self.endpoint_path = 'user_contact_infos'
-        self.viewname = 'usercontactinfo'
+        self.endpoint_path = "user_contact_infos"
+        self.viewname = "usercontactinfo"
         self.viewset = UserContactInfoViewSet
         self.payload = {
             "user": 4,
@@ -1745,41 +1745,41 @@ class UserContactInfoTest(BaseClass.BaseClassTest):
 
 
 class ProductPermissionTest(DojoAPITestCase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
-        testuser = User.objects.get(username='user1')
+        testuser = User.objects.get(username="user1")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
     def test_user_should_not_have_access_to_product_3_in_list(self):
         response = self.client.get(
-            reverse('product-list'), format='json')
-        for obj in response.data['results']:
-            self.assertNotEqual(obj['id'], 3)
+            reverse("product-list"), format="json")
+        for obj in response.data["results"]:
+            self.assertNotEqual(obj["id"], 3)
 
     def test_user_should_not_have_access_to_product_3_in_detail(self):
-        response = self.client.get('http://testserver/api/v2/products/3/')
+        response = self.client.get("http://testserver/api/v2/products/3/")
         self.assertEqual(response.status_code, 404)
 
 
 @test_tag("non-parallel")
 class ImportScanTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Test
-        self.endpoint_path = 'import-scan'
-        self.viewname = 'importscan'
+        self.endpoint_path = "import-scan"
+        self.viewname = "importscan"
         self.viewset = ImportScanView
 
-        testfile = open('tests/zap_sample.xml')
+        testfile = open("tests/zap_sample.xml")
         self.payload = {
-            "minimum_severity": 'Low',
+            "minimum_severity": "Low",
             "active": False,
             "verified": True,
-            "scan_type": 'ZAP Scan',
+            "scan_type": "ZAP Scan",
             "file": testfile,
             "engagement": 1,
             "lead": 2,
@@ -1791,25 +1791,25 @@ class ImportScanTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def __del__(self: object):
-        self.payload['file'].close()
+        self.payload["file"].close()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
-                "product_name": 'Python How-to',
-                "engagement_name": 'April monthly engagement',
+                "product_name": "Python How-to",
+                "engagement_name": "April monthly engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
@@ -1817,109 +1817,109 @@ class ImportScanTest(BaseClass.BaseClassTest):
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Engagement.objects.get(id=2),  # engagement id found via product name and engagement name
                 Permissions.Import_Scan_Result)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
-                "product_name": 'Python How-to',
-                "engagement_name": 'New engagement',
+                "product_name": "Python How-to",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Product.objects.get(id=1),
                 Permissions.Engagement_Add)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
                 "product_type_name": "books",
-                "product_name": 'New Product',
-                "engagement_name": 'New engagement',
+                "product_name": "New Product",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Product_Type.objects.get(id=1),
                 Permissions.Product_Type_Add_Product)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_global_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_global_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
                 "product_type_name": "more books",
-                "product_name": 'New Product',
-                "engagement_name": 'New engagement',
+                "product_name": "New Product",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Permissions.Product_Type_Add)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """
         Test creating a new engagement should also check for import scan permission in the product
@@ -1928,123 +1928,123 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
-                "product_name": 'Python How-to',
-                "engagement_name": 'New engagement',
+                "product_name": "Python How-to",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(201, response.status_code, response.content[:1000])
             mock.assert_has_calls([
-                call(User.objects.get(username='admin'),
+                call(User.objects.get(username="admin"),
                     Product.objects.get(id=1),
                     Permissions.Engagement_Add),
-                call(User.objects.get(username='admin'),
+                call(User.objects.get(username="admin"),
                     Product.objects.get(id=1),
-                    Permissions.Import_Scan_Result)
+                    Permissions.Import_Scan_Result),
             ])
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
                 "product_type_name": "books",
-                "product_name": 'New Product',
-                "engagement_name": 'New engagement',
+                "product_name": "New Product",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(201, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Product_Type.objects.get(id=1),
                 Permissions.Product_Type_Add_Product)
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_global_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_global_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
                 "product_type_name": "more books",
-                "product_name": 'New Product',
-                "engagement_name": 'New engagement',
+                "product_name": "New Product",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(201, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Permissions.Product_Type_Add)
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
 
 class ReimportScanTest(DojoAPITestCase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.url = reverse('reimportscan' + '-list')
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.url = reverse("reimportscan" + "-list")
 
     # Specific tests for reimport
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
     def test_reimport_zap_xml(self, importer_mock, reimporter_mock):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             length = Test.objects.all().count()
             response = self.client.post(
-                reverse('reimportscan-list'), {
-                    "minimum_severity": 'Low',
+                reverse("reimportscan-list"), {
+                    "minimum_severity": "Low",
                     "active": True,
                     "verified": True,
-                    "scan_type": 'ZAP Scan',
+                    "scan_type": "ZAP Scan",
                     "file": testfile,
                     "test": 3,
                     "version": "1.0.1",
@@ -2055,23 +2055,23 @@ class ReimportScanTest(DojoAPITestCase):
             importer_mock.assert_not_called()
             reimporter_mock.assert_called_once()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
-                "product_name": 'Security How-to',
-                "engagement_name": 'April monthly engagement',
+                "product_name": "Security How-to",
+                "engagement_name": "April monthly engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
@@ -2079,45 +2079,45 @@ class ReimportScanTest(DojoAPITestCase):
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Test.objects.get(id=4),  # test id found via product name and engagement name and scan_type
                 Permissions.Import_Scan_Result)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_scan_type_title_auto_create(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
-                "product_name": 'Security How-to',
-                "engagement_name": 'April monthly engagement',
-                "test_title": 'My ZAP Scan NEW',
+                "product_name": "Security How-to",
+                "engagement_name": "April monthly engagement",
+                "test_title": "My ZAP Scan NEW",
                 "version": "1.0.0",
                 "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(201, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Engagement.objects.get(id=4),
                 Permissions.Import_Scan_Result)
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """
         Test creating a new engagement should also check for import scan permission in the product
@@ -2126,118 +2126,118 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
-                "product_name": 'Python How-to',
-                "engagement_name": 'New engagement',
+                "product_name": "Python How-to",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(201, response.status_code, response.content[:1000])
             mock.assert_has_calls([
-                call(User.objects.get(username='admin'),
+                call(User.objects.get(username="admin"),
                     Product.objects.get(id=1),
                     Permissions.Engagement_Add),
-                call(User.objects.get(username='admin'),
+                call(User.objects.get(username="admin"),
                     Product.objects.get(id=1),
-                    Permissions.Import_Scan_Result)
+                    Permissions.Import_Scan_Result),
             ])
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
                 "product_type_name": "books",
-                "product_name": 'New Product',
-                "engagement_name": 'New engagement',
+                "product_name": "New Product",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(201, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Product_Type.objects.get(id=1),
                 Permissions.Product_Type_Add_Product)
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_global_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_global_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
                 "product_type_name": "more books",
-                "product_name": 'New Product',
-                "engagement_name": 'New engagement',
+                "product_name": "New Product",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(201, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Permissions.Product_Type_Add)
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_not_authorized_test_id(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                    "minimum_severity": 'Low',
+                    "minimum_severity": "Low",
                     "active": True,
                     "verified": True,
-                    "scan_type": 'ZAP Scan',
+                    "scan_type": "ZAP Scan",
                     "file": testfile,
                     "test": 3,
-                    "version": "1.0.1"
+                    "version": "1.0.1",
             }
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Test.objects.get(id=3),
                 Permissions.Import_Scan_Result)
             importer_mock.assert_not_called()
@@ -2245,152 +2245,152 @@ class ReimportScanTest(DojoAPITestCase):
 
     # copied tests from import, unsure how to use inheritance/mixins with test_ methods
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
-                "product_name": 'Python How-to',
-                "engagement_name": 'New engagement',
+                "product_name": "Python How-to",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Product.objects.get(id=1),
                 Permissions.Engagement_Add)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
                 "product_type_name": "books",
-                "product_name": 'New Product',
-                "engagement_name": 'New engagement',
+                "product_name": "New Product",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Product_Type.objects.get(id=1),
                 Permissions.Product_Type_Add_Product)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_global_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_global_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
                 "product_type_name": "more books",
-                "product_name": 'New Product',
-                "engagement_name": 'New engagement',
+                "product_name": "New Product",
+                "engagement_name": "New engagement",
                 "lead": 2,
                 "tags": ["ci/cd", "api"],
                 "version": "1.0.0",
-                "auto_create_context": True
+                "auto_create_context": True,
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Permissions.Product_Type_Add)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_scan_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
-                "product_name": 'Security How-to',
-                "engagement_name": 'April monthly engagement',
+                "product_name": "Security How-to",
+                "engagement_name": "April monthly engagement",
                 "version": "1.0.0",
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Test.objects.get(id=4),  # engagement id found via product name and engagement name
                 Permissions.Import_Scan_Result)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
-    @patch('dojo.importers.default_reimporter.DefaultReImporter.process_scan')
-    @patch('dojo.importers.default_importer.DefaultImporter.process_scan')
-    @patch('dojo.api_v2.permissions.user_has_permission')
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_scan_type_title(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open('tests/zap_sample.xml') as testfile:
+        with open("tests/zap_sample.xml") as testfile:
             payload = {
-                "minimum_severity": 'Low',
+                "minimum_severity": "Low",
                 "active": False,
                 "verified": True,
-                "scan_type": 'ZAP Scan',
+                "scan_type": "ZAP Scan",
                 "file": testfile,
-                "product_name": 'Security How-to',
-                "engagement_name": 'April monthly engagement',
-                "test_title": 'My ZAP Scan',
+                "product_name": "Security How-to",
+                "engagement_name": "April monthly engagement",
+                "test_title": "My ZAP Scan",
                 "version": "1.0.0",
             }
 
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
-            mock.assert_called_with(User.objects.get(username='admin'),
+            mock.assert_called_with(User.objects.get(username="admin"),
                 Test.objects.get(id=4),  # test id found via product name and engagement name and scan_type and test_title
                 Permissions.Import_Scan_Result)
             importer_mock.assert_not_called()
@@ -2398,20 +2398,20 @@ class ReimportScanTest(DojoAPITestCase):
 
 
 class ProductTypeTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Product_Type
-        self.endpoint_path = 'product_types'
-        self.viewname = 'product_type'
+        self.endpoint_path = "product_types"
+        self.viewname = "product_type"
         self.viewset = ProductTypeViewSet
         self.payload = {
             "name": "Test Product Type",
             "description": "Test",
             "key_product": True,
-            "critical_product": False
+            "critical_product": False,
         }
-        self.update_fields = {'description': "changed"}
+        self.update_fields = {"description": "changed"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Type
         self.permission_update = Permissions.Product_Type_Edit
@@ -2439,19 +2439,19 @@ class ProductTypeTest(BaseClass.BaseClassTest):
 
 
 class DojoGroupsTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Dojo_Group
-        self.endpoint_path = 'dojo_groups'
-        self.viewname = 'dojo_group'
+        self.endpoint_path = "dojo_groups"
+        self.viewname = "dojo_group"
         self.viewset = DojoGroupViewSet
         self.payload = {
             "name": "Test Group",
             "description": "Test",
             "configuration_permissions": [217, 218],
         }
-        self.update_fields = {'description': "changed", "configuration_permissions": [219, 220]}
+        self.update_fields = {"description": "changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Dojo_Group
         self.permission_update = Permissions.Group_Edit
@@ -2462,14 +2462,14 @@ class DojoGroupsTest(BaseClass.BaseClassTest):
     def test_list_object_not_authorized(self):
         self.setUp_not_authorized()
 
-        response = self.client.get(self.url, format='json')
+        response = self.client.get(self.url, format="json")
         self.assertEqual(403, response.status_code, response.content[:1000])
 
     def test_detail_object_not_authorized(self):
         self.setUp_not_authorized()
 
         current_objects = self.endpoint_model.objects.all()
-        relative_url = self.url + f'{current_objects[0].id}/'
+        relative_url = self.url + f"{current_objects[0].id}/"
         response = self.client.get(relative_url)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
@@ -2481,44 +2481,44 @@ class DojoGroupsTest(BaseClass.BaseClassTest):
 
     def test_create_group_with_non_configuration_permissions(self):
         payload = self.payload.copy()
-        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, 400)
-        self.assertIn('object does not exist', response.data['message'])
+        self.assertIn("object does not exist", response.data["message"])
 
     def test_update_group_with_non_configuration_permissions(self):
         payload = {}
-        payload['configuration_permissions'] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
-        response = self.client.patch(self.url + '2/', payload)
+        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
+        response = self.client.patch(self.url + "2/", payload)
         self.assertEqual(response.status_code, 400)
-        self.assertIn('object does not exist', response.data['message'])
+        self.assertIn("object does not exist", response.data["message"])
 
     def test_update_group_other_permissions_will_not_leak_and_stay_untouched(self):
-        Dojo_Group.objects.get(name='Group 1 Testdata').auth_group.permissions.set([218, 220, 26, 28])  # I was trying to set this in 'dojo_testdata.json' but it hasn't sucessful
+        Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.set([218, 220, 26, 28])  # I was trying to set this in 'dojo_testdata.json' but it hasn't sucessful
         payload = {}
-        payload['configuration_permissions'] = [217, 218, 219]
-        response = self.client.patch(self.url + '1/', payload)
+        payload["configuration_permissions"] = [217, 218, 219]
+        response = self.client.patch(self.url + "1/", payload)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['configuration_permissions'], payload['configuration_permissions'])
-        permissions = Dojo_Group.objects.get(name='Group 1 Testdata').auth_group.permissions.all().values_list('id', flat=True)
-        self.assertEqual(set(permissions), set(payload['configuration_permissions'] + [26, 28]))
-        Dojo_Group.objects.get(name='Group 1 Testdata').auth_group.permissions.clear()
+        self.assertEqual(response.data["configuration_permissions"], payload["configuration_permissions"])
+        permissions = Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.all().values_list("id", flat=True)
+        self.assertEqual(set(permissions), set(payload["configuration_permissions"] + [26, 28]))
+        Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.clear()
 
 
 class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Dojo_Group_Member
-        self.endpoint_path = 'dojo_group_members'
-        self.viewname = 'dojo_group_member'
+        self.endpoint_path = "dojo_group_members"
+        self.viewname = "dojo_group_member"
         self.viewset = DojoGroupMemberViewSet
         self.payload = {
             "group": 1,
             "user": 3,
-            "role": 4
+            "role": 4,
         }
-        self.update_fields = {'role': 3}
+        self.update_fields = {"role": 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Dojo_Group_Member
         self.permission_create = Permissions.Group_Manage_Members
@@ -2529,49 +2529,49 @@ class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
 
 
 class RolesTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Role
-        self.endpoint_path = 'roles'
-        self.viewname = 'role'
+        self.endpoint_path = "roles"
+        self.viewname = "role"
         self.viewset = RoleViewSet
         self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class GlobalRolesTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Global_Role
-        self.endpoint_path = 'global_roles'
-        self.viewname = 'global_role'
+        self.endpoint_path = "global_roles"
+        self.viewname = "global_role"
         self.viewset = GlobalRoleViewSet
         self.payload = {
             "user": 2,
-            "role": 2
+            "role": 2,
         }
-        self.update_fields = {'role': 3}
+        self.update_fields = {"role": 3}
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Product_Type_Member
-        self.endpoint_path = 'product_type_members'
-        self.viewname = 'product_type_member'
+        self.endpoint_path = "product_type_members"
+        self.viewname = "product_type_member"
         self.viewset = ProductTypeMemberViewSet
         self.payload = {
             "product_type": 1,
             "user": 3,
-            "role": 2
+            "role": 2,
         }
-        self.update_fields = {'role': 3}
+        self.update_fields = {"role": 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Type_Member
         self.permission_create = Permissions.Product_Type_Manage_Members
@@ -2582,19 +2582,19 @@ class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
 
 
 class ProductMemberTest(BaseClass.MemberEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Product_Member
-        self.endpoint_path = 'product_members'
-        self.viewname = 'product_member'
+        self.endpoint_path = "product_members"
+        self.viewname = "product_member"
         self.viewset = ProductMemberViewSet
         self.payload = {
             "product": 3,
             "user": 2,
-            "role": 2
+            "role": 2,
         }
-        self.update_fields = {'role': 3}
+        self.update_fields = {"role": 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Member
         self.permission_create = Permissions.Product_Manage_Members
@@ -2605,19 +2605,19 @@ class ProductMemberTest(BaseClass.MemberEndpointTest):
 
 
 class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Product_Type_Group
-        self.endpoint_path = 'product_type_groups'
-        self.viewname = 'product_type_group'
+        self.endpoint_path = "product_type_groups"
+        self.viewname = "product_type_group"
         self.viewset = ProductTypeGroupViewSet
         self.payload = {
             "product_type": 1,
             "group": 2,
-            "role": 2
+            "role": 2,
         }
-        self.update_fields = {'role': 3}
+        self.update_fields = {"role": 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Type_Group
         self.permission_create = Permissions.Product_Type_Group_Add
@@ -2628,19 +2628,19 @@ class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
 
 
 class ProductGroupTest(BaseClass.MemberEndpointTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Product_Group
-        self.endpoint_path = 'product_groups'
-        self.viewname = 'product_group'
+        self.endpoint_path = "product_groups"
+        self.viewname = "product_group"
         self.viewset = ProductGroupViewSet
         self.payload = {
             "product": 1,
             "group": 2,
-            "role": 2
+            "role": 2,
         }
-        self.update_fields = {'role': 3}
+        self.update_fields = {"role": 3}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product_Group
         self.permission_create = Permissions.Product_Group_Add
@@ -2651,19 +2651,19 @@ class ProductGroupTest(BaseClass.MemberEndpointTest):
 
 
 class LanguageTypeTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Language_Type
-        self.endpoint_path = 'language_types'
-        self.viewname = 'language_type'
+        self.endpoint_path = "language_types"
+        self.viewname = "language_type"
         self.viewset = LanguageTypeViewSet
         self.payload = {
-            'language': 'Test',
-            'color': 'red',
-            'created': '2018-08-16T16:58:23.908Z'
+            "language": "Test",
+            "color": "red",
+            "created": "2018-08-16T16:58:23.908Z",
         }
-        self.update_fields = {'color': 'blue'}
+        self.update_fields = {"color": "blue"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
         self.delete_id = 3
@@ -2671,24 +2671,24 @@ class LanguageTypeTest(BaseClass.BaseClassTest):
 
 
 class LanguageTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Languages
-        self.endpoint_path = 'languages'
-        self.viewname = 'languages'
+        self.endpoint_path = "languages"
+        self.viewname = "languages"
         self.viewset = LanguageViewSet
         self.payload = {
-            'product': 1,
-            'language': 2,
-            'user': 1,
-            'files': 2,
-            'blank': 3,
-            'comment': 4,
-            'code': 5,
-            'created': '2018-08-16T16:58:23.908Z'
+            "product": 1,
+            "language": 2,
+            "user": 1,
+            "files": 2,
+            "blank": 3,
+            "comment": 4,
+            "code": 5,
+            "created": "2018-08-16T16:58:23.908Z",
         }
-        self.update_fields = {'code': 10}
+        self.update_fields = {"code": 10}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages
         self.permission_create = Permissions.Language_Add
@@ -2700,16 +2700,16 @@ class LanguageTest(BaseClass.BaseClassTest):
 
 @test_tag("non-parallel")
 class ImportLanguagesTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Languages
-        self.endpoint_path = 'import-languages'
-        self.viewname = 'importlanguages'
+        self.endpoint_path = "import-languages"
+        self.viewname = "importlanguages"
         self.viewset = ImportLanguagesView
         self.payload = {
-            'product': 1,
-            'file': open("unittests/files/defectdojo_cloc.json")
+            "product": 1,
+            "file": open("unittests/files/defectdojo_cloc.json"),
         }
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages
@@ -2717,12 +2717,12 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def __del__(self: object):
-        self.payload['file'].close()
+        self.payload["file"].close()
 
     def test_create(self):
         BaseClass.CreateRequestTest.test_create(self)
 
-        languages = Languages.objects.filter(product=1).order_by('language')
+        languages = Languages.objects.filter(product=1).order_by("language")
 
         self.assertEqual(2, len(languages))
 
@@ -2742,119 +2742,119 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
 
 
 class NotificationsTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Notifications
-        self.endpoint_path = 'notifications'
-        self.viewname = 'notifications'
+        self.endpoint_path = "notifications"
+        self.viewname = "notifications"
         self.viewset = NotificationsViewSet
         self.payload = {
-            'product': 1,
-            'user': 3,
-            'product_type_added': ["alert", "msteams"]
+            "product": 1,
+            "user": 3,
+            "product_type_added": ["alert", "msteams"],
         }
-        self.update_fields = {'product_added': ["alert", "msteams"]}
+        self.update_fields = {"product_added": ["alert", "msteams"]}
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class UserProfileTest(DojoAPITestCase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.url = reverse('user_profile')
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.url = reverse("user_profile")
 
     def test_profile(self):
-        response = self.client.get(reverse('user_profile'))
+        response = self.client.get(reverse("user_profile"))
         data = json.loads(response.content)
 
-        self.assertEqual(1, data['user']['id'])
-        self.assertEqual('admin', data['user']['username'])
-        self.assertTrue(data['user']['is_superuser'])
-        self.assertEqual(1, data['user_contact_info']['user'])
-        self.assertEqual('#admin', data['user_contact_info']['twitter_username'])
-        self.assertEqual(1, data['global_role']['user'])
-        self.assertEqual(4, data['global_role']['role'])
-        self.assertEqual(1, data['dojo_group_member'][0]['user'])
-        self.assertEqual(1, data['dojo_group_member'][0]['group'])
-        self.assertEqual(1, data['product_type_member'][0]['user'])
-        self.assertEqual(1, data['product_type_member'][0]['product_type'])
-        self.assertEqual(1, data['product_member'][1]['user'])
-        self.assertEqual(3, data['product_member'][1]['product'])
+        self.assertEqual(1, data["user"]["id"])
+        self.assertEqual("admin", data["user"]["username"])
+        self.assertTrue(data["user"]["is_superuser"])
+        self.assertEqual(1, data["user_contact_info"]["user"])
+        self.assertEqual("#admin", data["user_contact_info"]["twitter_username"])
+        self.assertEqual(1, data["global_role"]["user"])
+        self.assertEqual(4, data["global_role"]["role"])
+        self.assertEqual(1, data["dojo_group_member"][0]["user"])
+        self.assertEqual(1, data["dojo_group_member"][0]["group"])
+        self.assertEqual(1, data["product_type_member"][0]["user"])
+        self.assertEqual(1, data["product_type_member"][0]["product_type"])
+        self.assertEqual(1, data["product_member"][1]["user"])
+        self.assertEqual(3, data["product_member"][1]["product"])
 
 
 class DevelopmentEnvironmentTest(BaseClass.AuthenticatedViewTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Development_Environment
-        self.endpoint_path = 'development_environments'
-        self.viewname = 'development_environment'
+        self.endpoint_path = "development_environments"
+        self.viewname = "development_environment"
         self.viewset = DevelopmentEnvironmentViewSet
         self.payload = {
-            'name': 'Test_1'
+            "name": "Test_1",
         }
-        self.update_fields = {'name': 'Test_2'}
+        self.update_fields = {"name": "Test_2"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_delete(self):
-        current_objects = self.client.get(self.url, format='json').data
-        relative_url = self.url + '{}/'.format(current_objects['results'][-1]['id'])
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][-1]["id"])
         response = self.client.delete(relative_url)
         self.assertEqual(409, response.status_code, response.content[:1000])
 
 
 class TestTypeTest(BaseClass.AuthenticatedViewTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Test_Type
-        self.endpoint_path = 'test_types'
-        self.viewname = 'test_type'
+        self.endpoint_path = "test_types"
+        self.viewname = "test_type"
         self.viewset = TestTypesViewSet
         self.payload = {
-            'name': 'Test_1'
+            "name": "Test_1",
         }
-        self.update_fields = {'name': 'Test_2'}
+        self.update_fields = {"name": "Test_2"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class ConfigurationPermissionTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Permission
-        self.endpoint_path = 'configuration_permissions'
-        self.viewname = 'permission'
+        self.endpoint_path = "configuration_permissions"
+        self.viewname = "permission"
         self.viewset = ConfigurationPermissionViewSet
         self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class CredentialMappingTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Cred_Mapping
-        self.endpoint_path = 'credential_mappings'
-        self.viewname = 'cred_mapping'
+        self.endpoint_path = "credential_mappings"
+        self.viewname = "cred_mapping"
         self.viewset = CredentialsMappingViewSet
         self.payload = {
-            'cred_id': 1,
-            'product': 1,
-            'url': 'https://google.com'
+            "cred_id": 1,
+            "product": 1,
+            "url": "https://google.com",
         }
-        self.update_fields = {'url': 'https://bing.com'}
+        self.update_fields = {"url": "https://bing.com"}
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Product
         self.permission_create = Permissions.Credential_Add
@@ -2865,34 +2865,34 @@ class CredentialMappingTest(BaseClass.BaseClassTest):
 
 
 class CredentialTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Cred_User
-        self.endpoint_path = 'credentials'
-        self.viewname = 'cred_user'
+        self.endpoint_path = "credentials"
+        self.viewname = "cred_user"
         self.viewset = CredentialsViewSet
         self.payload = {
-            'name': 'name',
-            'username': 'usernmae',
-            'password': 'password',
-            'role': 'role',
-            'url': 'https://some-url.com',
-            'environment': 1,
+            "name": "name",
+            "username": "usernmae",
+            "password": "password",
+            "role": "role",
+            "url": "https://some-url.com",
+            "environment": 1,
         }
-        self.update_fields = {'name': 'newname'}
+        self.update_fields = {"name": "newname"}
         self.test_type = TestType.STANDARD
         self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
 class TextQuestionTest(BaseClass.BaseClassTest):
-    fixtures = ['questionnaire_testdata.json']
+    fixtures = ["questionnaire_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = TextQuestion
-        self.endpoint_path = 'questionnaire_questions'
-        self.viewname = 'question'
+        self.endpoint_path = "questionnaire_questions"
+        self.viewname = "question"
         self.viewset = QuestionnaireQuestionViewSet
         self.test_type = TestType.STANDARD
         self.deleted_objects = 5
@@ -2900,12 +2900,12 @@ class TextQuestionTest(BaseClass.BaseClassTest):
 
 
 class ChoiceQuestionTest(BaseClass.BaseClassTest):
-    fixtures = ['questionnaire_testdata.json']
+    fixtures = ["questionnaire_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = ChoiceQuestion
-        self.endpoint_path = 'questionnaire_questions'
-        self.viewname = 'question'
+        self.endpoint_path = "questionnaire_questions"
+        self.viewname = "question"
         self.viewset = QuestionnaireQuestionViewSet
         self.test_type = TestType.STANDARD
         self.deleted_objects = 5
@@ -2913,12 +2913,12 @@ class ChoiceQuestionTest(BaseClass.BaseClassTest):
 
 
 class TextAnswerTest(BaseClass.BaseClassTest):
-    fixtures = ['questionnaire_testdata.json']
+    fixtures = ["questionnaire_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = TextAnswer
-        self.endpoint_path = 'questionnaire_answers'
-        self.viewname = 'answer'
+        self.endpoint_path = "questionnaire_answers"
+        self.viewname = "answer"
         self.viewset = QuestionnaireAnswerViewSet
         self.test_type = TestType.STANDARD
         self.deleted_objects = 5
@@ -2926,12 +2926,12 @@ class TextAnswerTest(BaseClass.BaseClassTest):
 
 
 class ChoiceAnswerTest(BaseClass.BaseClassTest):
-    fixtures = ['questionnaire_testdata.json']
+    fixtures = ["questionnaire_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = ChoiceAnswer
-        self.endpoint_path = 'questionnaire_answers'
-        self.viewname = 'answer'
+        self.endpoint_path = "questionnaire_answers"
+        self.viewname = "answer"
         self.viewset = QuestionnaireAnswerViewSet
         self.test_type = TestType.STANDARD
         self.deleted_objects = 5
@@ -2939,12 +2939,12 @@ class ChoiceAnswerTest(BaseClass.BaseClassTest):
 
 
 class GeneralSurveyTest(BaseClass.BaseClassTest):
-    fixtures = ['questionnaire_testdata.json']
+    fixtures = ["questionnaire_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = General_Survey
-        self.endpoint_path = 'questionnaire_general_questionnaires'
-        self.viewname = 'general_survey'
+        self.endpoint_path = "questionnaire_general_questionnaires"
+        self.viewname = "general_survey"
         self.viewset = QuestionnaireGeneralSurveyViewSet
         self.test_type = TestType.STANDARD
         self.deleted_objects = 5
@@ -2952,12 +2952,12 @@ class GeneralSurveyTest(BaseClass.BaseClassTest):
 
 
 class EngagementSurveyTest(BaseClass.BaseClassTest):
-    fixtures = ['questionnaire_testdata.json']
+    fixtures = ["questionnaire_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Engagement_Survey
-        self.endpoint_path = 'questionnaire_engagement_questionnaires'
-        self.viewname = 'engagement_survey'
+        self.endpoint_path = "questionnaire_engagement_questionnaires"
+        self.viewname = "engagement_survey"
         self.viewset = QuestionnaireEngagementSurveyViewSet
         self.test_type = TestType.STANDARD
         self.deleted_objects = 5
@@ -2965,12 +2965,12 @@ class EngagementSurveyTest(BaseClass.BaseClassTest):
 
 
 class AnsweredSurveyTest(BaseClass.BaseClassTest):
-    fixtures = ['questionnaire_testdata.json']
+    fixtures = ["questionnaire_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Answered_Survey
-        self.endpoint_path = 'questionnaire_answered_questionnaires'
-        self.viewname = 'answered_survey'
+        self.endpoint_path = "questionnaire_answered_questionnaires"
+        self.viewname = "answered_survey"
         self.viewset = QuestionnaireAnsweredSurveyViewSet
         self.test_type = TestType.STANDARD
         self.deleted_objects = 5
@@ -2978,22 +2978,22 @@ class AnsweredSurveyTest(BaseClass.BaseClassTest):
 
 
 class AnnouncementTest(BaseClass.BaseClassTest):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Announcement
-        self.endpoint_path = 'announcements'
-        self.viewname = 'announcement'
+        self.endpoint_path = "announcements"
+        self.viewname = "announcement"
         self.viewset = AnnouncementViewSet
         self.payload = {
             "message": "Test template",
             "style": "info",
             "dismissable": True,
         }
-        self.update_fields = {'style': 'warning'}
+        self.update_fields = {"style": "warning"}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 7
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create(self):
-        self.skipTest('Only one Announcement can exists')
+        self.skipTest("Only one Announcement can exists")

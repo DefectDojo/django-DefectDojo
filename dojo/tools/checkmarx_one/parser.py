@@ -135,7 +135,7 @@ class CheckmarxOneParser:
                     f"**File Name**: {node.get('fileName')}\n"
                     f"**Method**: {node.get('method')}\n"
                     f"**Line**: {node.get('line')}\n"
-                    f"**Code Snippet**: {node.get('code')}\n"
+                    f"**Code Snippet**: {node.get('code')}\n",
                 )
             return "\n---\n".join(formatted_nodes)
 
@@ -148,7 +148,7 @@ class CheckmarxOneParser:
             # instance of the vulnerability
             base_finding_details = {
                 "title": result.get(
-                    "queryPath", result.get("queryName", "SAST Finding")
+                    "queryPath", result.get("queryName", "SAST Finding"),
                 ).replace("_", " "),
                 "description": (
                     f"{result.get('description')}\n\n"
@@ -193,7 +193,7 @@ class CheckmarxOneParser:
         for result in results:
             id = result.get("identifiers")[0].get("value")
             cwe = None
-            if 'vulnerabilityDetails' in result:
+            if "vulnerabilityDetails" in result:
                 cwe = result.get("vulnerabilites").get("cweId")
             severity = result.get("severity")
             locations_uri = result.get("location").get("file")

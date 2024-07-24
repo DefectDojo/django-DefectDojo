@@ -49,7 +49,7 @@ class RubocopParser:
                         f"**Message**: {offense.get('message')}",
                         f"**Is correctable?**: `{offense.get('correctable')}`",
                         f"**Location**: `{'-'.join(offense['location'])}`",
-                    ]
+                    ],
                 )
                 finding = Finding(
                     test=test,

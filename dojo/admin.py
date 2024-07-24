@@ -49,7 +49,7 @@ class QuestionParentAdmin(PolymorphicParentModelAdmin):
     base_model = Question
     child_models = (
         TextQuestion,
-        ChoiceQuestion
+        ChoiceQuestion,
     )
 
 
@@ -85,8 +85,8 @@ class AnswerParentAdmin(PolymorphicParentModelAdmin):
     """
 
     list_display = (
-        'answered_survey',
-        'question',
+        "answered_survey",
+        "question",
     )
 
     base_model = Answer
