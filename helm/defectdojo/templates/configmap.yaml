@@ -24,7 +24,7 @@ data:
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
   DD_CELERY_WORKER_POOL_TYPE: {{ .Values.celery.worker.appSettings.poolType | default "solo" }}
   DD_CELERY_WORKER_autoscaleMin: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.autoscaleMin | default "2" }}{{ end }}'
-  DD_CELERY_WORKER_AUTOSCALE_MAX: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.autoscale_max | default "8" }}{{ end }}'
+  DD_CELERY_WORKER_AUTOSCALE_MAX: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.autoscaleMax | default "8" }}{{ end }}'
   DD_CELERY_WORKER_CONCURRENCY: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.concurrency | default "8" }}{{ end }}'
   DD_CELERY_WORKER_PREFETCH_MULTIPLIER: '{{ if eq .Values.celery.worker.appSettings.poolType "prefork" }}{{ .Values.celery.worker.appSettings.prefetchMultiplier | default "128" }}{{ end }}'
   DD_DATABASE_ENGINE: django.db.backends.{{ if eq .Values.database "postgresql" }}postgresql{{ end }}{{ if eq .Values.database "postgresqlha" }}postgresql{{ end }}

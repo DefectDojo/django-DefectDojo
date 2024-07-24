@@ -103,14 +103,6 @@ helm install \
   --set createRedisSecret=true \
   --set createPostgresqlSecret=true
 ```
-<<<<<<< HEAD
-=======
-
-Note that you need only one of:
-
-- postgresql or mysql
-- rabbitmq or redis
->>>>>>> fb6b630af (replace site url variable name to match values.yaml style)
 
 It usually takes up to a minute for the services to startup and the
 status of the containers can be viewed by starting up `minikube dashboard`.
