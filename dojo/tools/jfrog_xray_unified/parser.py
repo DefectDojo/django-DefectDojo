@@ -40,7 +40,7 @@ def get_item(vulnerability, test):
     highestCvssV3Index = 0
     highestCvssV3Score = 0
 
-    for thisCveIndex in range(0, len(vulnerability["cves"]) - 1):
+    for thisCveIndex in range(len(vulnerability["cves"]) - 1):
         # not all cves have cvssv3 scores, so skip these. If no v3 scores,
         # we'll default to index 0
         if "cvss_v3_score" in vulnerability["cves"][thisCveIndex]:
@@ -106,7 +106,7 @@ def get_item(vulnerability, test):
     references = "\n".join(vulnerability["references"])
 
     scan_time = datetime.strptime(
-        vulnerability["artifact_scan_time"], "%Y-%m-%dT%H:%M:%S%z"
+        vulnerability["artifact_scan_time"], "%Y-%m-%dT%H:%M:%S%z",
     )
 
     # component has several parts separated by colons. Last part is the

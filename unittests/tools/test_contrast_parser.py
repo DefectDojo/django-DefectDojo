@@ -2,8 +2,7 @@ import datetime
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.contrast.parser import ContrastParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestContrastParser(DojoTestCase):
@@ -30,9 +29,9 @@ class TestContrastParser(DojoTestCase):
                 self.assertIsNotNone(finding.unsaved_endpoints)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual('http', endpoint.protocol)
-                self.assertEqual('0.0.0.0', endpoint.host)
-                self.assertEqual('WebGoat/login.mvc', endpoint.path)
+                self.assertEqual("http", endpoint.protocol)
+                self.assertEqual("0.0.0.0", endpoint.host)
+                self.assertEqual("WebGoat/login.mvc", endpoint.path)
             with self.subTest(i=11):
                 finding = findings[11]
                 self.assertEqual(datetime.date(2018, 4, 23), finding.date.date())
@@ -45,13 +44,13 @@ class TestContrastParser(DojoTestCase):
                 self.assertIsNotNone(finding.unsaved_endpoints)
                 self.assertEqual(4, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual('http', endpoint.protocol)
-                self.assertEqual('0.0.0.0', endpoint.host)
-                self.assertEqual('WebGoat/services/SoapRequest', endpoint.path)
+                self.assertEqual("http", endpoint.protocol)
+                self.assertEqual("0.0.0.0", endpoint.host)
+                self.assertEqual("WebGoat/services/SoapRequest", endpoint.path)
                 endpoint = finding.unsaved_endpoints[1]
-                self.assertEqual('http', endpoint.protocol)
-                self.assertEqual('0.0.0.0', endpoint.host)
-                self.assertEqual('WebGoat/attack', endpoint.path)
+                self.assertEqual("http", endpoint.protocol)
+                self.assertEqual("0.0.0.0", endpoint.host)
+                self.assertEqual("WebGoat/attack", endpoint.path)
 
     def test_example2_report(self):
         test = Test()

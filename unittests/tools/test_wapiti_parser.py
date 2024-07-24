@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.wapiti.parser import WapitiParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestWapitiParser(DojoTestCase):

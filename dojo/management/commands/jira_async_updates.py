@@ -12,13 +12,13 @@ Useful if you need to make bulk changes with JIRA:
 
 
 class Command(BaseCommand):
-    help = 'No input commands for JIRA bulk update.'
+    help = "No input commands for JIRA bulk update."
 
     def handle(self, *args, **options):
 
         findings = Finding.objects.exclude(jira_issue__isnull=True)
         findings = findings.filter(verified=True, active=True)
-        findings = findings.prefetch_related('jira_issue')
+        findings = findings.prefetch_related("jira_issue")
         # finding = Finding.objects.get(id=1)
         for finding in findings:
             #    try:
@@ -44,12 +44,12 @@ class Command(BaseCommand):
                 new_note.entry = "Please Review Jira Request: " + str(
                     issue) + ". Review status has changed to " + str(
                     issue.fields.resolution) + "."
-                new_note.author = User.objects.get(username='JIRA')
+                new_note.author = User.objects.get(username="JIRA")
                 new_note.date = now
                 new_note.save()
                 finding.notes.add(new_note)
                 finding.under_defect_review = True
-                dojo_user = Dojo_User.objects.get(username='JIRA')
+                dojo_user = Dojo_User.objects.get(username="JIRA")
                 finding.defect_review_requested_by = dojo_user
 
                 # Create alert to notify user

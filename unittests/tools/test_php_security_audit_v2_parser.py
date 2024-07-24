@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2Parser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestPhpSecurityAuditV2ParserParser(DojoTestCase):

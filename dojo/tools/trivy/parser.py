@@ -108,7 +108,7 @@ class TrivyParser:
                     if len(service_name) >= 3:
                         service_name = service_name[:-3]
                     findings += self.get_result_items(
-                        test, service.get("Results", []), service_name
+                        test, service.get("Results", []), service_name,
                     )
                 misconfigurations = data.get("Misconfigurations", [])
                 for service in misconfigurations:
@@ -125,7 +125,7 @@ class TrivyParser:
                     if len(service_name) >= 3:
                         service_name = service_name[:-3]
                     findings += self.get_result_items(
-                        test, service.get("Results", []), service_name
+                        test, service.get("Results", []), service_name,
                     )
                 resources = data.get("Resources", [])
                 for resource in resources:
@@ -141,7 +141,7 @@ class TrivyParser:
                     if len(resource_name) >= 3:
                         resource_name = resource_name[:-3]
                     findings += self.get_result_items(
-                        test, resource.get("Results", []), resource_name
+                        test, resource.get("Results", []), resource_name,
                     )
                 return findings
             else:
@@ -259,7 +259,7 @@ class TrivyParser:
                     target=target_target,
                     type=misc_type,
                     description=misc_description,
-                    message=misc_message
+                    message=misc_message,
                 )
                 severity = TRIVY_SEVERITIES[misc_severity]
                 references = None
@@ -363,7 +363,7 @@ class TrivyParser:
         # Create the table string
         table_string = f"{header_row}\n"
         for item in lines:
-            row = "\t".join(str(item.get(header, '')) for header in headers)
+            row = "\t".join(str(item.get(header, "")) for header in headers)
             table_string += f"{row}\n"
 
         return table_string
