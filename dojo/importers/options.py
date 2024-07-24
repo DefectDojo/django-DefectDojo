@@ -123,9 +123,12 @@ class ImporterOptions:
                 class_name = None
                 # Get the actual class if available
                 if len(id_list) > 0:
-                    class_name = item_type
+                    id_type = type(id_list[0])
+                    # Only define the class name if we are able to make a query on the object in decompression
+                    if isinstance(id_type, int):
+                        class_name = item_type if item_type is None else id_type
                 # Ensure we are not setting a class name as None
-                if class_name is type(None):
+                if class_name is type(None) or class_name is None:
                     compressed_fields[field] = value
                 # Add the list to the dict
                 else:
