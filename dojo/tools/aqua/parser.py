@@ -45,6 +45,7 @@ class AquaParser:
                 unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
                 self.items[unique_key] = item
 
+
 def get_item(resource, vuln, test):
     resource_name = resource.get("name", resource.get("path"))
     resource_version = resource.get("version", "No version")
