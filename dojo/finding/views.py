@@ -1251,6 +1251,7 @@ def close_finding(request, fid):
                     form.cleaned_data.get("mitigated_by") or request.user
                 )
                 finding.is_mitigated = True
+                finding.under_review = False
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.false_p = form.cleaned_data.get("false_p", False)
@@ -1265,6 +1266,8 @@ def close_finding(request, fid):
                     status.mitigated = True
                     status.last_modified = timezone.now()
                     status.save()
+                # Clear the risk acceptance, if present
+                ra_helper.risk_unaccept(finding)
 
                 # Manage the jira status changes
                 push_to_jira = False
@@ -1431,6 +1434,7 @@ def reopen_finding(request, fid):
     finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
+    finding.under_review = False
     endpoint_status = finding.status_finding.all()
     for status in endpoint_status:
         status.mitigated_by = None
@@ -1438,6 +1442,8 @@ def reopen_finding(request, fid):
         status.mitigated = False
         status.last_modified = timezone.now()
         status.save()
+    # Clear the risk acceptance, if present
+    ra_helper.risk_unaccept(finding)
 
     # Manage the jira status changes
     push_to_jira = False
@@ -1759,6 +1765,9 @@ def clear_finding_review(request, fid):
 
             finding = form.save(commit=False)
 
+            if finding.is_mitigated:
+                finding.mitigated = now
+                finding.mitigated_by = request.user
             finding.under_review = False
             finding.last_reviewed = now
             finding.last_reviewed_by = request.user
