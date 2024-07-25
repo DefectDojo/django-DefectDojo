@@ -29,7 +29,7 @@ class WizcliImgParser:
 
         osPackages = results.get("osPackages", None)
         if osPackages:
-            findings.extend(WizcliParsers.parse_osPackages(osPackages, test))
+            findings.extend(WizcliParsers.parse_os_packages(osPackages, test))
 
         libraries = results.get("libraries", None)
         if libraries:
