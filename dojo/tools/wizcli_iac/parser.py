@@ -4,6 +4,10 @@ from dojo.models import Finding
 
 
 class WizcliIaCParser:
+    """
+    Wizcli IaC Scan results in JSON file format.
+    """
+
     def get_scan_types(self):
         return ["Wizcli IaC Scan"]
 
@@ -110,4 +114,3 @@ class WizcliIaCParser:
             findings.extend(self.parse_secrets(secrets, test))
 
         return findings
-        
