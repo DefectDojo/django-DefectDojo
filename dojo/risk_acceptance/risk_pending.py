@@ -13,6 +13,7 @@ from dojo.product.queries import get_authorized_members_for_product
 from dojo.user.queries import get_user
 from dojo.authorization.roles_permissions import Permissions
 from dojo.risk_acceptance.notification import Notification
+from dojo.risk_acceptance.queries import abuse_control_min_vulnerability_closed, abuse_control_max_vulnerability_accepted
 from dojo.transfer_findings import helper as hp_transfer_finding
 import dojo.risk_acceptance.helper as ra_helper
 import crum
@@ -296,34 +297,45 @@ def limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance(**kwargs):
 
 
 def percentage_of_vulnerabilitiese_closed(**kwargs):
-    # "PVC - Percentage of Vulnerabilities Closed"
-    result = {}
-    result["status"] = True
-    result["message"] = ""
+    """ PVC - Percentage of vulnerabilitiese closed """
+    result = kwargs["result"]
+    response = abuse_control_min_vulnerability_closed(
+        product_id=kwargs["product_id"],
+        min_percentage=settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["percentage"],
+        days=settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["days"])
+    if settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["active"]:
+        result = response
     return result
 
 
 def temporaly_assumed_vulnerabilities(**kwargs):
-    # "TAV - Temporarily Assumed Vulnerabilities"
-    result = {}
-    result["status"] = True
-    result["message"] = ""
+    """ TAV - Temporarily Assumed Vulnerabilities """
+    result = kwargs["result"]
+    response = abuse_control_max_vulnerability_accepted(
+        product_id=kwargs["product_id"],
+        max_percentage=settings.TEMPORARILY_ASSUMED_VULNERABILITIES["percentage"])
+    if settings.TEMPORARILY_ASSUMED_VULNERABILITIES["active"]:
+        result = response
     return result
 
 
 def abuse_control(user, finding: Finding, product: Product, product_type: Product_Type):
+    result = {}
+    result["status"] = True
+    result["message"] = ""
+
     if is_rol_permissions_risk_acceptance(user, finding, product, product_type):
         return {"Privileged role": {"status": True, "message": "This user has risk acceptance privileges"}}
 
     rule_abuse_control = {
         "LAV": limit_assumption_of_vulnerability,
-        "LTVLT": limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance,
         "PVC": percentage_of_vulnerabilitiese_closed,
-        "TAV": temporaly_assumed_vulnerabilities
+        "TAV": temporaly_assumed_vulnerabilities,
+        "LTVLT": limit_of_tempralily_assumed_vulnerabilities_limited_to_tolerance
     }
     result_dict = {}
     for key, rule in rule_abuse_control.items():
-        result_dict[key] = rule(finding_id=finding.id)
+        result_dict[key] = rule(finding_id=finding.id, product_id=product.id, result=result)
     return result_dict
 
 
