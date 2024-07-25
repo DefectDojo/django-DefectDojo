@@ -257,6 +257,7 @@ def engagements_all(request):
             'filter_form': filtered.form,
             'name_words': sorted(set(name_words)),
             'eng_words': sorted(set(eng_words)),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         })
 
 
@@ -1435,6 +1436,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             'request': request,
             'add_findings': add_fpage,
             'return_url': get_return_url(request),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         })
 
 
