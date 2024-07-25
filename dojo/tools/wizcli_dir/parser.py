@@ -1,7 +1,13 @@
 import json
+
 from dojo.models import Finding
 
+
 class WizcliDirParser:
+    """
+    Wizcli Dir Scan results in JSON file format.
+    """
+    
     def get_scan_types(self):
         return ["Wizcli Dir Scan"]
 

@@ -1,5 +1,7 @@
 import json
+
 from dojo.models import Finding
+
 
 class WizcliIaCParser:
     def get_scan_types(self):
@@ -108,3 +110,4 @@ class WizcliIaCParser:
             findings.extend(self.parse_secrets(secrets, test))
 
         return findings
+        

@@ -1,7 +1,9 @@
 import json
+
 from dojo.models import Finding
 
-class WizcliImgParser(object):
+
+class WizcliImgParser:
     """
     Wizcli Image Scan results in JSON file format.
     """
