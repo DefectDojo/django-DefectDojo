@@ -1,6 +1,6 @@
-from django.test import TestCase
-from dojo.tools.wizcli_img.parser import WizcliImgParser
 from dojo.models import Test
+from dojo.tools.wizcli_img.parser import WizcliImgParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestWizcliImgParserParser(TestCase):

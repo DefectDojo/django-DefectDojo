@@ -21,15 +21,15 @@ class TestWizcliIaCParser(DojoTestCase):
             self.assertEqual("docker-compose.yaml", finding.file_path)
             self.assertEqual(64, finding.line)
             self.assertIn(
-                f"**Rule ID**: 4ac84116-456f-4d60-9e12-187607266faf \n"
-                f"**Rule Name**: Apk Add Using Local Cache Path\n"
-                f"**Resource Name**: FROM={{registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest as builder}}.{{RUN apk add --update make git musl-dev gcc}}\n"
-                f"**File Name**: Dockerfile\n"
-                f"**Line Number**: 32\n"
-                f"**Match Content**: RUN apk add --update make git musl-dev gcc\n"
-                f"**Expected**: 'RUN' should not contain 'apk add' command without '--no-cache' switch\n"
-                f"**Found**: 'RUN' contains 'apk add' command without '--no-cache' switch\n"
-                f"**File Type**: DOCKERFILE\n", finding.description)
+                "**Rule ID**: 4ac84116-456f-4d60-9e12-187607266faf \n"
+                "**Rule Name**: Apk Add Using Local Cache Path\n"
+                "**Resource Name**: FROM={{registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest as builder}}.{{RUN apk add --update make git musl-dev gcc}}\n"
+                "**File Name**: Dockerfile\n"
+                "**Line Number**: 32\n"
+                "**Match Content**: RUN apk add --update make git musl-dev gcc\n"
+                "**Expected**: 'RUN' should not contain 'apk add' command without '--no-cache' switch\n"
+                "**Found**: 'RUN' contains 'apk add' command without '--no-cache' switch\n"
+                "**File Type**: DOCKERFILE\n", finding.description)
 
     def test_multiple_findings(self):
         with open("unittests/scans/wizcli_iac/wizcli_iac_many_vul.json") as testfile:
@@ -42,15 +42,15 @@ class TestWizcliIaCParser(DojoTestCase):
             self.assertEqual("docker-compose.yaml", finding.file_path)
             self.assertEqual(64, finding.line)
             self.assertIn(
-                f"**Rule ID**: 4ac84116-456f-4d60-9e12-187607266faf \n"
-                f"**Rule Name**: Apk Add Using Local Cache Path\n"
-                f"**Resource Name**: FROM={{registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest as builder}}.{{RUN apk add --update make git musl-dev gcc}}\n"
-                f"**File Name**: Dockerfile\n"
-                f"**Line Number**: 32\n"
-                f"**Match Content**: RUN apk add --update make git musl-dev gcc\n"
-                f"**Expected**: 'RUN' should not contain 'apk add' command without '--no-cache' switch\n"
-                f"**Found**: 'RUN' contains 'apk add' command without '--no-cache' switch\n"
-                f"**File Type**: DOCKERFILE\n", finding.description)
+                "**Rule ID**: 4ac84116-456f-4d60-9e12-187607266faf \n"
+                "**Rule Name**: Apk Add Using Local Cache Path\n"
+                "**Resource Name**: FROM={{registry.gitlab.com/evilorg.com/infra/images/go-lang-1.18-alpine3.17:latest as builder}}.{{RUN apk add --update make git musl-dev gcc}}\n"
+                "**File Name**: Dockerfile\n"
+                "**Line Number**: 32\n"
+                "**Match Content**: RUN apk add --update make git musl-dev gcc\n"
+                "**Expected**: 'RUN' should not contain 'apk add' command without '--no-cache' switch\n"
+                "**Found**: 'RUN' contains 'apk add' command without '--no-cache' switch\n"
+                "**File Type**: DOCKERFILE\n", finding.description)
 
             finding = findings[1]
             self.assertEqual("Passwords And Secrets - Certificate for evilorg.com", finding.title)
@@ -58,8 +58,8 @@ class TestWizcliIaCParser(DojoTestCase):
             self.assertEqual("Dockerfile", finding.file_path)
             self.assertEqual(64, finding.line)
             self.assertIn(
-                f"**Secret ID**: null\n"
-                f"**Secret Name**: Passwords And Secrets - Certificate for evilorg.com\n"
-                f"**File Name**: docker-compose.yaml\n"
-                f"**Line Number**: 239\n"
-                f"**Match Secret Type**: CERTIFICATE\n", finding.description)
+                "**Secret ID**: null\n"
+                "**Secret Name**: Passwords And Secrets - Certificate for evilorg.com\n"
+                "**File Name**: docker-compose.yaml\n"
+                "**Line Number**: 239\n"
+                "**Match Secret Type**: CERTIFICATE\n", finding.description)
