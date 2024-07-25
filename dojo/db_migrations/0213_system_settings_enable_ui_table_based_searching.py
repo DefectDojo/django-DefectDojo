@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='system_settings',
             name='enable_ui_table_based_searching',
-            field=models.BooleanField(default=True, help_text='With this setting turned off, table based filtering and sorting via javascript will be disabled.', verbose_name='Enable UI Table Based Filtering/Sorting'),
+            field=models.BooleanField(default=True, help_text='With this setting enabled, table headings will contain sort buttons for the current page of data in addition to sorting buttons that consider data from _all_ pages.', verbose_name='Enable UI Table Based Filtering/Sorting'),
         ),
     ]

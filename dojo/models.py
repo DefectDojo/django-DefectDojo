@@ -518,7 +518,7 @@ class System_Settings(models.Model):
         default=True,
         blank=False,
         verbose_name=_('Enable UI Table Based Filtering/Sorting'),
-        help_text=_("With this setting turned off, table based filtering and sorting via javascript will be disabled."))
+        help_text=_("With this setting enabled, table headings will contain sort buttons for the current page of data in addition to sorting buttons that consider data from _all_ pages."))
     enable_calendar = models.BooleanField(
         default=True,
         blank=False,
