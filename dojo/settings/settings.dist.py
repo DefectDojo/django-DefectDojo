@@ -1269,9 +1269,6 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Bearer CLI": ["title", "severity"],
     "Nancy Scan": ["title", "vuln_id_from_tool"],
     "Wiz Scan": ["title", "description", "severity"],
-    "Wizcli IaC Scan": ["title", "description", "severity"],
-    "Wizcli Img Scan": ["title", "description", "severity"],
-    "Wizcli Dir Scan": ["title", "description", "severity"],
     "Kubescape JSON Importer": ["title", "component_name"],
 }
 
