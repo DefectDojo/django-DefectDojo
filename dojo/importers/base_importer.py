@@ -654,18 +654,6 @@ class BaseImporter(ImporterOptions):
         Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
         to create `Vulnerability_Id` objects with the finding associated correctly
         """
-        # Synchronize the cve field with the unsaved_vulnerability_ids
-        # We do this to be as flexible as possible to handle the fields until
-        # the cve field is not needed anymore and can be removed.
-        if finding.unsaved_vulnerability_ids and finding.cve:
-            # Make sure the first entry of the list is the value of the cve field
-            finding.unsaved_vulnerability_ids.insert(0, finding.cve)
-        elif finding.unsaved_vulnerability_ids and not finding.cve:
-            # If the cve field is not set, use the first entry of the list to set it
-            finding.cve = finding.unsaved_vulnerability_ids[0]
-        elif not finding.unsaved_vulnerability_ids and finding.cve:
-            # If there is no list, make one with the value of the cve field
-            finding.unsaved_vulnerability_ids = [finding.cve]
 
         if finding.unsaved_vulnerability_ids:
             # Remove old vulnerability ids - keeping this call only because of flake8
