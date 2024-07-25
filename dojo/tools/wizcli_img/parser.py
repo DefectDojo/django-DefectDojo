@@ -1,6 +1,5 @@
 import json
 
-from dojo.models import Finding
 from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
 
 

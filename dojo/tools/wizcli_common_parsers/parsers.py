@@ -2,7 +2,7 @@ from dojo.models import Finding
 
 
 class WizcliParsers:
-    
+
     @staticmethod
     def parse_libraries(libraries, test):
         findings = []
