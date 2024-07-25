@@ -3,7 +3,7 @@ from dojo.tools.wizcli_img.parser import WizcliImgParser
 from unittests.dojo_test_case import DojoTestCase
 
 
-class TestWizcliImgParserParser(TestCase):
+class TestWizcliImgParser(DojoTestCase):
     def test_no_findings(self):
         with open("unittests/scans/wizcli_dir/wizcli_dir_zero_vul.json") as testfile:
             parser = WizcliImgParser()
@@ -20,17 +20,17 @@ class TestWizcliImgParserParser(TestCase):
             self.assertEqual("Medium", finding.severity)
             self.assertEqual("/grpc/proto/go.mod", finding.file_path)
             self.assertIn(
-                f"**Library Name**: google.golang.org/grpc\n"
-                f"**Library Version**: 1.48.0\n"
-                f"**Library Path**: /grpc/proto/go.mod\n"
-                f"**Vulnerability Name**: CVE-2023-44487\n"
-                f"**Fixed Version**: 1.56.3\n"
-                f"**Source**: https://github.com/advisories/GHSA-qppj-fm5r-hxr3\n"
-                f"**Description**: N/A\n"
-                f"**Score**: N/A\n"
-                f"**Exploitability Score**: N/A\n"
-                f"**Has Exploit**: True\n"
-                f"**Has CISA KEV Exploit**: True\n", finding.description)
+                "**Library Name**: google.golang.org/grpc\n"
+                "**Library Version**: 1.48.0\n"
+                "**Library Path**: /grpc/proto/go.mod\n"
+                "**Vulnerability Name**: CVE-2023-44487\n"
+                "**Fixed Version**: 1.56.3\n"
+                "**Source**: https://github.com/advisories/GHSA-qppj-fm5r-hxr3\n"
+                "**Description**: N/A\n"
+                "**Score**: N/A\n"
+                "**Exploitability Score**: N/A\n"
+                "**Has Exploit**: True\n"
+                "**Has CISA KEV Exploit**: True\n", finding.description)
 
     def test_multiple_findings(self):
         with open("unittests/scans/wizcli_dir/wizcli_dir_many_vul.json") as testfile:
@@ -42,17 +42,17 @@ class TestWizcliImgParserParser(TestCase):
             self.assertEqual("Medium", finding.severity)
             self.assertEqual("/grpc/proto/go.mod", finding.file_path)
             self.assertIn(
-                f"**Library Name**: google.golang.org/grpc\n"
-                f"**Library Version**: 1.48.0\n"
-                f"**Library Path**: /grpc/proto/go.mod\n"
-                f"**Vulnerability Name**: CVE-2023-44487\n"
-                f"**Fixed Version**: 1.56.3\n"
-                f"**Source**: https://github.com/advisories/GHSA-qppj-fm5r-hxr3\n"
-                f"**Description**: N/A\n"
-                f"**Score**: N/A\n"
-                f"**Exploitability Score**: N/A\n"
-                f"**Has Exploit**: True\n"
-                f"**Has CISA KEV Exploit**: True\n", finding.description)
+                "**Library Name**: google.golang.org/grpc\n"
+                "**Library Version**: 1.48.0\n"
+                "**Library Path**: /grpc/proto/go.mod\n"
+                "**Vulnerability Name**: CVE-2023-44487\n"
+                "**Fixed Version**: 1.56.3\n"
+                "**Source**: https://github.com/advisories/GHSA-qppj-fm5r-hxr3\n"
+                "**Description**: N/A\n"
+                "**Score**: N/A\n"
+                "**Exploitability Score**: N/A\n"
+                "**Has Exploit**: True\n"
+                "**Has CISA KEV Exploit**: True\n", finding.description)
 
             finding = findings[1]
             self.assertEqual("Passwords And Secrets - Certificate for evilorg.com", finding.title)
@@ -60,8 +60,8 @@ class TestWizcliImgParserParser(TestCase):
             self.assertEqual("Dockerfile", finding.file_path)
             self.assertEqual(64, finding.line)
             self.assertIn(
-                f"**Secret ID**: null\n"
-                f"**Secret Name**: Passwords And Secrets - Certificate for evilorg.com\n"
-                f"**File Name**: docker-compose.yaml\n"
-                f"**Line Number**: 239\n"
-                f"**Match Secret Type**: CERTIFICATE\n", finding.description)
+                "**Secret ID**: null\n"
+                "**Secret Name**: Passwords And Secrets - Certificate for evilorg.com\n"
+                "**File Name**: docker-compose.yaml\n"
+                "**Line Number**: 239\n"
+                "**Match Secret Type**: CERTIFICATE\n", finding.description)
