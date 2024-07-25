@@ -1,3 +1,5 @@
+import logging
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from jira.exceptions import JIRAError
@@ -9,6 +11,8 @@ Author: Aaron Weaver
 This script will locate open, active findings and update them in JIRA.
 Useful if you need to make bulk changes with JIRA:
 """
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -28,15 +32,14 @@ class Command(BaseCommand):
             issue = jira.issue(j_issue.jira_id)
 
             # Issue Cloned
-            print(issue.fields.issuelinks[0])
+            logger.info(issue.fields.issuelinks[0])
 
-            print("Jira Issue: " + str(issue))
-            print("Resolution: " + str(issue.fields.resolution))
+            logger.info("Jira Issue: " + str(issue))
+            logger.info("Resolution: " + str(issue.fields.resolution))
 
             if issue.fields.resolution is not None \
                     and not finding.under_defect_review:
-                # print issue.fields.__dict__
-                print("Jira Issue: " + str(issue) + " changed status")
+                logger.info("Jira Issue: " + str(issue) + " changed status")
 
                 # Create Jira Note
                 now = timezone.now()
@@ -57,4 +60,4 @@ class Command(BaseCommand):
                                  finding)
                 finding.save()
             else:
-                print("No update necessary")
+                logger.info("No update necessary")

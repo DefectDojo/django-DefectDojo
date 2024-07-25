@@ -129,13 +129,11 @@ class ReportBuilderTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Endpoint Report").click()
 
         # extra dropdown click
-        # print('waiting for show-filters to appear due to the amazing javascript we have...')
         dropdown = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "show-filters")))
 
         dropdown = driver.find_element(By.ID, "show-filters")
         dropdown.click()
 
-        # print('waiting for filter section to expand...')
         my_select = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//label[@for='id_include_finding_notes']")))
 
         my_select = Select(driver.find_element(By.ID, "id_include_finding_notes"))

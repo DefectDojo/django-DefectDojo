@@ -1726,7 +1726,6 @@ class ProductViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     # def list(self, request):
-    #     print(vars(request))
     #     # Note the use of `get_queryset()` instead of `self.queryset`
     #     queryset = self.get_queryset()
     #     serializer = self.serializer_class(queryset, many=True)

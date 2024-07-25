@@ -1,3 +1,4 @@
+import logging
 import sys
 import time
 import unittest
@@ -5,6 +6,8 @@ import unittest
 from base_test_class import BaseTestCase
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
+
+logger = logging.getLogger(__name__)
 
 """
 Tests Notes functionality on all levels (Engagement, Test, and Finding)
@@ -33,7 +36,7 @@ class NoteTest(BaseTestCase):
         text = driver.find_element(By.TAG_NAME, "body").text
         pass_test = "Test public note" in text
         if not pass_test:
-            print("Public note created at the", level, "level")
+            logger.info(f"Public note created at the {level} level")
         self.assertTrue(pass_test)
 
     def create_private_note(self, driver, level):
@@ -51,7 +54,7 @@ class NoteTest(BaseTestCase):
         private_status = "(will not appear in report)" in text
         pass_test = note_present and private_status
         if not pass_test:
-            print("Private note note created at the", level, "level")
+            logger.info(f"Private note note created at the {level} level")
         self.assertTrue(pass_test)
 
     def test_finding_note(self):

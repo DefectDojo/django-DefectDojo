@@ -51,7 +51,7 @@ if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_deb
         if os.environ.get("DD_DEBUG_WAIT_FOR_CLIENT") == "True":
             logger.info(f"Waiting for the debugging client to connect on port {debugpy_port}")
             debugpy.wait_for_client()  # noqa: T100
-            print("Debugging client connected, resuming execution")
+            logger.debug("Debugging client connected, resuming execution")
     except RuntimeError as e:
         if str(e) != "Can't listen for client connections: [Errno 98] Address already in use":
             logger.exception(e)
