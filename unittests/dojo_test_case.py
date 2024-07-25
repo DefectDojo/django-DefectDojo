@@ -2,8 +2,8 @@ import copy
 import json
 import logging
 import os
-import pprint
 from itertools import chain
+from pprint import pformat
 
 from django.test import TestCase
 from django.urls import reverse
@@ -137,7 +137,7 @@ class DojoTestUtilsMixin:
         return data
 
     def log_model_instance(self, instance):
-        logger.debug("model instance: %s", pprint.pprint(self.model_to_dict(instance)))
+        logger.debug("model instance: %s", pformat(self.model_to_dict(instance)))
 
     def log_model_instances(self, instances):
         for instance in instances:
@@ -265,7 +265,6 @@ class DojoTestUtilsMixin:
             self.assertEqual(response.status_code, 200)
         elif expect_redirect_to:
             self.assertEqual(response.status_code, 302)
-            # print('url: ' + response.url)
             try:
                 product = Product.objects.get(id=response.url.split("/")[-1])
             except:
@@ -324,14 +323,11 @@ class DojoTestUtilsMixin:
 
     def edit_jira_project_for_product_with_data(self, product, data, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=None):
         jira_project_count_before = self.db_jira_project_count()
-        # print('before: ' + str(jira_project_count_before))
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = self.get_expected_redirect_product(product)
 
         response = self.edit_product_jira(product, data, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
-
-        # print('after: ' + str(self.db_jira_project_count()))
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
@@ -345,14 +341,11 @@ class DojoTestUtilsMixin:
     def empty_jira_project_for_product(self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
         logger.debug("empty jira project for product")
         jira_project_count_before = self.db_jira_project_count()
-        # print('before: ' + str(jira_project_count_before))
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = self.get_expected_redirect_product(product)
 
         response = self.edit_product_jira(product, self.get_product_with_empty_jira_project_data(product), expect_redirect_to=expect_redirect_to, expect_200=expect_200)
-
-        # print('after: ' + str(self.db_jira_project_count()))
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
@@ -468,14 +461,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def endpoint_meta_import_scan(self, payload, expected_http_status_code):
         logger.debug("endpoint_meta_import_scan payload %s", payload)
         response = self.client.post(reverse("endpointmetaimport-list"), payload)
-        # print(response.content)
+        # logger.debug(response.content)
         self.assertEqual(expected_http_status_code, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
     def get_test_api(self, test_id):
         response = self.client.get(reverse("test-list") + f"{test_id}/", format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
-        # print('test.content: ', response.content)
         return json.loads(response.content)
 
     def get_results_by_id(self, results: list, object_id: int) -> dict | None:
@@ -665,7 +657,6 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         response = self.client.get(reverse("finding-list"), payload, format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
-        # print('findings.content: ', response.content)
         return json.loads(response.content)
 
     def get_product_endpoints_api(self, product_id, host=None):
@@ -691,22 +682,17 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if tags:
             data = {"tags": tags}
 
-        # print('data:' + str(data))
-
         response = http_method(reverse("finding-tags", args=(finding_id,)), data, format="json")
-        # print(vars(response))
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response
 
     def get_finding_tags_api(self, finding_id):
         response = self.do_finding_tags_api(self.client.get, finding_id)
-        # print(response.data)
         return response.data
 
     def get_finding_api_filter_tags(self, tags):
         response = self.client.get(reverse("finding-list") + f"?tags={tags}", format="json")
         self.assertEqual(200, response.status_code, response.content[:1000])
-        # print(response.data)
         return response.data
 
     def post_finding_tags_api(self, finding_id, tags):
@@ -736,10 +722,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if note:
             data = {"entry": note}
 
-        # print('data:' + str(data))
-
         response = http_method(reverse("finding-notes", args=(finding_id,)), data, format="json")
-        # print(vars(response))
         self.assertEqual(201, response.status_code, response.content[:1000])
         return response
 

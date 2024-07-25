@@ -856,9 +856,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
-            # print(tick)
             week_data, label = get_week_data(start_of_week, tick, day_counts)
-            # print(week_data, label)
             punchcard.extend(week_data)
             ticks.append(label)
             tick += 1
@@ -1776,11 +1774,9 @@ def is_safe_url(url):
 
 def get_return_url(request):
     return_url = request.POST.get("return_url", None)
-    # print('return_url from POST: ', return_url)
     if return_url is None or not return_url.strip():
         # for some reason using request.GET.get('return_url') never works
         return_url = request.GET["return_url"] if "return_url" in request.GET else None
-        # print('return_url from GET: ', return_url)
 
     return return_url if return_url else None
 
@@ -2334,7 +2330,7 @@ class async_delete:
             logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
             chunks = self.chunk_list(model, objects_to_delete)
             for chunk in chunks:
-                print("deleting", len(chunk), self.get_object_name(model))
+                logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
                 self.delete_chunk(chunk)
         self.delete_chunk([object])
         logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(object) + ": " + str(object))

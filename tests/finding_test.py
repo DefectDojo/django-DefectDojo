@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import time
@@ -12,6 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from user_test import UserTest
 
+logger = logging.getLogger(__name__)
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -130,7 +132,6 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text="Additional Vulnerability Ids"))
 
     def test_add_image(self):
-        # print("\n\nDebug Print Log: testing 'add image' \n")
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
         # Test To Add Finding To product
         # login to site, password set to fetch from environ
@@ -371,29 +372,26 @@ class FindingTest(BaseTestCase):
     def test_apply_template_to_a_finding(self):
         driver = self.driver
         # Navigate to All Finding page
-        print("\nListing findings \n")
+        logger.info("\nListing findings \n")
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Click on the 'dropdownMenu1 button'
-        # print("\nClicking on dropdown menu \n")
         driver.find_element(By.ID, "dropdownMenu1").click()
         self.assertNoConsoleErrors()
 
         # Click on `Apply Template to Finding`
-        # print("\nClicking on apply template \n")
         driver.find_element(By.LINK_TEXT, "Apply Template to Finding").click()
         self.assertNoConsoleErrors()
         # click on the template of 'App Vulnerable to XSS'
-        print("\nClicking on the template \n")
+        logger.info("\nClicking on the template \n")
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         self.assertNoConsoleErrors()
         # Click on 'Replace all' button
-        print("\nClicking on replace all \n")
+        logger.info("\nClicking on replace all \n")
         driver.find_element(By.XPATH, "//button[@data-option='Replace']").click()
         self.assertNoConsoleErrors()
         # Click the 'finished' button to submit
-        # print("\nClicking on finished \n")
         driver.find_element(By.NAME, "_Finished").click()
         self.assertNoConsoleErrors()
         # Query the site to determine if the finding has been added
@@ -413,16 +411,15 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Pen Test").click()
 
         # Click on the 'dropdownMenu1 button'
-        # print("\nClicking on dropdown menu \n")
+        # logger.info("\nClicking on dropdown menu \n")
         driver.find_element(By.ID, "dropdownMenu_test_add").click()
         self.assertNoConsoleErrors()
 
         # Click on `Apply Template to Finding`
-        # print("\nClicking on apply template \n")
         driver.find_element(By.LINK_TEXT, "Finding From Template").click()
         self.assertNoConsoleErrors()
         # click on the template of 'App Vulnerable to XSS'
-        print("\nClicking on the template \n")
+        logger.info("\nClicking on the template \n")
         driver.find_element(By.LINK_TEXT, "Use This Template").click()
         self.assertNoConsoleErrors()
 
@@ -430,7 +427,6 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.ID, "id_title").send_keys("App Vulnerable to XSS from Template")
         self.assertNoConsoleErrors()
         # Click the 'finished' button to submit
-        # print("\nClicking on finished \n")
         driver.find_element(By.ID, "id_finished").click()
         self.assertNoConsoleErrors()
         # Query the site to determine if the finding has been added
@@ -476,8 +472,6 @@ class FindingTest(BaseTestCase):
         with WaitForPageLoad(driver, timeout=50):
             driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
-        # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
-        # print("Checking for '.*ZAP Scan processed a total of 4 findings.*'")
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="ZAP Scan processed a total of 4 findings"))
 
