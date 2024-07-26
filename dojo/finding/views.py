@@ -376,6 +376,7 @@ class ListFindings(View, BaseListFindings):
             "jira_project": None,
             "github_config": None,
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "title_words": get_words_for_field(Finding, "title"),
             "component_words": get_words_for_field(Finding, "component_name"),
         }
@@ -742,6 +743,7 @@ class ViewFinding(View):
             "files": finding.files.all(),
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "product_tab": Product_Tab(
                 finding.test.engagement.product, title="View Finding", tab="findings"
             )
@@ -1251,6 +1253,7 @@ def close_finding(request, fid):
                     form.cleaned_data.get("mitigated_by") or request.user
                 )
                 finding.is_mitigated = True
+                finding.under_review = False
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.false_p = form.cleaned_data.get("false_p", False)
@@ -1265,6 +1268,8 @@ def close_finding(request, fid):
                     status.mitigated = True
                     status.last_modified = timezone.now()
                     status.save()
+                # Clear the risk acceptance, if present
+                ra_helper.risk_unaccept(finding)
 
                 # Manage the jira status changes
                 push_to_jira = False
@@ -1431,6 +1436,7 @@ def reopen_finding(request, fid):
     finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
+    finding.under_review = False
     endpoint_status = finding.status_finding.all()
     for status in endpoint_status:
         status.mitigated_by = None
@@ -1438,6 +1444,8 @@ def reopen_finding(request, fid):
         status.mitigated = False
         status.last_modified = timezone.now()
         status.save()
+    # Clear the risk acceptance, if present
+    ra_helper.risk_unaccept(finding)
 
     # Manage the jira status changes
     push_to_jira = False
@@ -1730,7 +1738,7 @@ def request_finding_review(request, fid):
     return render(
         request,
         "dojo/review_finding.html",
-        {"finding": finding, "product_tab": product_tab, "user": user, "form": form},
+        {"finding": finding, "product_tab": product_tab, "user": user, "form": form, "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"), },
     )
 
 
@@ -1759,6 +1767,9 @@ def clear_finding_review(request, fid):
 
             finding = form.save(commit=False)
 
+            if finding.is_mitigated:
+                finding.mitigated = now
+                finding.mitigated_by = request.user
             finding.under_review = False
             finding.last_reviewed = now
             finding.last_reviewed_by = request.user
