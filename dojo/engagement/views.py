@@ -1,5 +1,6 @@
 import csv
 import logging
+import mimetypes
 import operator
 import re
 from datetime import datetime
@@ -1481,12 +1482,11 @@ def delete_risk_acceptance(request, eid, raid):
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def download_risk_acceptance(request, eid, raid):
-    import mimetypes
-
     mimetypes.init()
-
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-
+    # Ensure the risk acceptance is under the supplied engagement
+    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
+        raise PermissionDenied
     response = StreamingHttpResponse(
         FileIterWrapper(
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))
