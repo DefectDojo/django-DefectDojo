@@ -2,6 +2,7 @@ import logging
 
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+
 from dojo.models import Tool_Product_Settings
 from dojo.notes.helper import delete_related_notes
 
