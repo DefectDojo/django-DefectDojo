@@ -651,7 +651,6 @@ class EngagementViewSet(
         return generate_file_response(file_object)
 
 
-
 class RiskAcceptanceViewSet(
     PrefetchDojoModelViewSet
 ):
