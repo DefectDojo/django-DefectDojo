@@ -439,6 +439,8 @@ class ViewEngagement(View):
 
     def get(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by('test_type__name', '-updated')
         default_page_num = 10
         tests_filter = self.get_filtered_tests(request, tests, eng)
@@ -507,6 +509,8 @@ class ViewEngagement(View):
 
     def post(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by('test_type__name', '-updated')
 
         default_page_num = 10
