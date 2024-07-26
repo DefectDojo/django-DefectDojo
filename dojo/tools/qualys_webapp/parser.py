@@ -1,7 +1,8 @@
 import base64
 import re
-from defusedxml import ElementTree
 from datetime import datetime
+
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
