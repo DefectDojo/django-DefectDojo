@@ -112,7 +112,8 @@ def view_cred_details(request, ttid):
         'cred': cred,
         'form': form,
         'notes': notes,
-        'cred_products': cred_products
+        'cred_products': cred_products,
+        'person': request.user.username,
     })
 
 
@@ -650,7 +651,7 @@ def delete_cred_controller(request, destination_url, id, ttid):
     if id:
         product = None
         if destination_url == "all_cred_product":
-            product = get_object_or_404(Product, id)
+            product = get_object_or_404(Product, id=id)
         elif destination_url == "view_engagement":
             engagement = get_object_or_404(Engagement, id=id)
             product = engagement.product
@@ -669,7 +670,7 @@ def delete_cred_controller(request, destination_url, id, ttid):
 
 @user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
 def delete_cred(request, ttid):
-    return delete_cred_controller(request, "cred", 0, ttid)
+    return delete_cred_controller(request, "cred", 0, ttid=ttid)
 
 
 @user_is_authorized(Product, Permissions.Product_Edit, 'pid')

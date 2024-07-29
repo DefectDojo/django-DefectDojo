@@ -15,7 +15,7 @@ from dojo.authorization.roles_permissions import Permissions
 
 # Local application/library imports
 from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
-from dojo.models import Engagement, Finding, Note_Type, NoteHistory, Notes, Test
+from dojo.models import Cred_User, Engagement, Finding, Note_Type, NoteHistory, Notes, Test
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +37,11 @@ def delete_note(request, id, page, objid):
         object = get_object_or_404(Finding, id=objid)
         object_id = object.id
         reverse_url = "view_finding"
+    elif page == "cred":
+        object = get_object_or_404(Cred_User, id=objid)
+        object_id = object.id
+        reverse_url = "view_cred_details"
+
     form = DeleteNoteForm(request.POST, instance=note)
 
     if page is None:
@@ -53,7 +58,7 @@ def delete_note(request, id, page, objid):
     else:
         messages.add_message(request,
                              messages.SUCCESS,
-                             _('Note was not succesfully deleted.'),
+                             _('Note was not successfully deleted.'),
                              extra_tags='alert-danger')
 
     return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
