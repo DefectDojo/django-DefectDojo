@@ -2896,6 +2896,17 @@ class ReportFindingFilterHelper(FilterSet):
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
     file_path = CharFilter(lookup_expr='icontains')
 
+    o = OrderingFilter(
+        fields=(
+            ('title', 'title'),
+            ('date', 'date'),
+            ('numerical_severity', 'numerical_severity'),
+            ('epss_score', 'epss_score'),
+            ('epss_percentile', 'epss_percentile'),
+            ('test__engagement__product__name', 'test__engagement__product__name'),
+        ),
+    )
+
     class Meta:
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
