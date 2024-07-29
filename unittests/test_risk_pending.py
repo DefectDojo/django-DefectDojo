@@ -1,16 +1,23 @@
+import copy
+from django.test import TestCase
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from dojo.utils import get_system_setting
+from django.core.management import call_command
+from django.utils.datastructures import MultiValueDict
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.urls import reverse
-from .dojo_test_case import DojoTestCase
-from dojo.models import Risk_Acceptance, Finding, System_Settings
-from django.utils.datastructures import MultiValueDict
 from django.db.models import Q
-import copy
-from dojo.models import Dojo_User
-import dojo.risk_acceptance.helper as ra_helper
-from django.conf import settings
+from dojo.models import (
+    Risk_Acceptance,
+    Finding,
+    Engagement,
+    Product,
+    Product_Type,
+    User)
+from dojo.utils import get_system_setting
+from .dojo_test_case import DojoTestCase
+from dojo.risk_acceptance import queries
 
 
 class RiskAcceptancePendingTestUI(DojoTestCase):
@@ -71,7 +78,6 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
         ra_data['accepted_findings'] = [2]
         ra_data['return_url'] = reverse('view_finding', args=(2, ))
         response = self.add_risk_acceptance(1, ra_data, 2)
-        response = self.add_risk_acceptance(1, ra_data, 2)
         self.assertEqual('/finding/2', response.url)
         ra = Risk_Acceptance.objects.last()
         self.assert_all_active_not_risk_accepted(ra.accepted_findings.all())
@@ -121,7 +127,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('delete_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('delete_risk_acceptance', args=(1, ra.id, )), data)
 
         self.assert_all_active_not_risk_accepted(findings)
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(test__engagement=1))
@@ -131,7 +137,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
         ra = Risk_Acceptance.objects.last()
         findings = ra.accepted_findings.all()
         data = {'id': ra.id}
-        response = self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
         self.assert_all_active_not_risk_accepted(findings)
@@ -153,7 +159,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
         # no reactivation on expiry
@@ -176,7 +182,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
 
@@ -192,7 +198,7 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
 
         data = {'id': ra.id}
 
-        response = self.client.post(reverse('reinstate_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse('reinstate_risk_acceptance', args=(1, ra.id, )), data)
 
         ra.refresh_from_db()
         expiration_delta_days = get_system_setting('risk_acceptance_form_default_days', 90)
@@ -210,20 +216,100 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [2]
         ra_data['return_url'] = reverse('view_finding', args=(2, ))
-        response = self.add_risk_acceptance(1, ra_data, 2)
+        self.add_risk_acceptance(1, ra_data, 2)
         ra1 = Risk_Acceptance.objects.last()
 
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [7]
         ra_data['return_url'] = reverse('view_finding', args=(7, ))
-        response = self.add_risk_acceptance(1, ra_data, 7)
+        self.add_risk_acceptance(1, ra_data, 7)
         ra2 = Risk_Acceptance.objects.last()
 
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data['accepted_findings'] = [22]
         ra_data['return_url'] = reverse('view_finding', args=(22, ))
-        response = self.add_risk_acceptance(3, ra_data, 22)
+        self.add_risk_acceptance(3, ra_data, 22)
         ra3 = Risk_Acceptance.objects.last()
 
         return ra1, ra2, ra3
 
+
+class RiskPendingQuerys(TestCase):
+
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        DojoTestCase.__init__(self, *args, **kwargs)
+    
+    def setUp(self):
+        self.product_id = 1
+        self.ideal_percentage_closed = 0.80
+        self.ideal_percentage_accepted = 0.40
+        self.days = 90
+        self.queryset = Finding.objects.select_related('test__engagement').filter(test__engagement__product=self.product_id)
+    
+    def test_abuse_control_vulnerability_closed_with_days(self):
+        result = queries.abuse_control_min_vulnerability_closed(self.product_id,
+                                                                self.ideal_percentage_closed,
+                                                                days=self.days)
+
+        self.assertAlmostEqual(round(result['current_percentage'], 2), 1)
+        self.assertEqual(result['ideal_percentage'], 0.8)
+        self.assertEqual(result['ideal_close_finding'], 1)
+        self.assertEqual(result['total_finding'], 1)
+        self.assertEqual(result['total_close_finding'], 1)
+        self.assertTrue(result['status'])
+        self.assertEqual(len(result["message"]), 121)
+
+    def test_abuse_control_vulnerability_closed_without_days(self):
+        result = queries.abuse_control_min_vulnerability_closed(self.product_id, self.ideal_percentage_closed)
+        print(result)
+        self.assertAlmostEqual(round(result['current_percentage'], 2), 0.29)
+        self.assertEqual(result['ideal_percentage'], 0.8)
+        self.assertEqual(result['ideal_close_finding'], 6)
+        self.assertEqual(result['total_finding'], 7)
+        self.assertEqual(result['total_close_finding'], 2)
+        self.assertFalse(result['status'])
+        self.assertEqual(len(result["message"]), 179)
+    
+    def test_pass_abuse_control_vulnerability_accepted(self):
+        finding = self.queryset[0]
+        finding.risk_status = "Risk Accepted"
+        finding.active = False
+        finding.risk_accepted = True
+        finding.save()
+        result = queries.abuse_control_max_vulnerability_accepted(self.product_id, self.ideal_percentage_accepted)
+        self.assertEqual(result["persentage_finding_accepted"], 0.2)
+        self.assertEqual(result["total_finding_accepted"], 1)
+        self.assertEqual(result["total_finding_active"], 5)
+        self.assertTrue(result["status"])
+        self.assertEqual(len(result["message"]), 119)
+
+    def test_not_pass_abuse_control_vulnerability_accepted(self):
+        for i in range(0, 3):
+            finding = self.queryset[i]
+            finding.risk_status = "Risk Accepted"
+            finding.active = False
+            finding.risk_accepted = True
+            finding.save()
+
+        result = queries.abuse_control_max_vulnerability_accepted(self.product_id, self.ideal_percentage_accepted)
+        self.assertEqual(result["total_finding_active"], 5)
+        self.assertEqual(result["total_finding_accepted"], 3)
+        self.assertEqual(result["persentage_finding_accepted"], 0.6)
+        self.assertFalse(result["status"])
+        self.assertEqual(len(result["message"]), 172)
+
+    def test_pass_control_abuseo_vulnerability_accepted_is_mitigated(self):
+        finding = self.queryset[0]
+        finding.risk_status = "Risk Accepted"
+        finding.active = False
+        finding.risk_accepted = True
+        finding.mitigated = "2020-05-01"
+        finding.save()
+        result = queries.abuse_control_max_vulnerability_accepted(self.product_id, self.ideal_percentage_accepted)
+        self.assertEqual(result["persentage_finding_accepted"], 0.0)
+        self.assertEqual(result["total_finding_accepted"], 0)
+        self.assertEqual(result["total_finding_active"], 4)
+        self.assertTrue(result["status"])
+        self.assertEqual(len(result["message"]), 118)

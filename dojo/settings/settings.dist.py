@@ -392,10 +392,15 @@ env = environ.FileAwareEnv(
     DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE=(int, 0),
     DD_PERCENTAGE_OF_VULNERABILITIES_CLOSED=(dict,
                                              {
-                                                 "month": 3,
-                                                 "percentage": 0.82
+                                                 "days": 90,
+                                                 "percentage": 0.82,
+                                                 "active": False
                                              }),
-    DD_TEMPORARILY_ASSUMED_VULNERABILITIES=(float, 0.40),
+    DD_TEMPORARILY_ASSUMED_VULNERABILITIES=(dict,
+                                        {
+                                            "percentage": 0.40,
+                                            "active": False
+                                        }),
     
     DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
         "Low": {
