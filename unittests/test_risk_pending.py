@@ -1,13 +1,23 @@
 import copy
+from django.test import TestCase
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
+from django.core.management import call_command
 from django.utils.datastructures import MultiValueDict
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.urls import reverse
 from django.db.models import Q
-from dojo.models import Risk_Acceptance, Finding, Engagement
+from dojo.models import (
+    Risk_Acceptance,
+    Finding,
+    Engagement,
+    Product,
+    Product_Type,
+    User)
 from dojo.utils import get_system_setting
 from .dojo_test_case import DojoTestCase
+from dojo.risk_acceptance import queries
 
 
 class RiskAcceptancePendingTestUI(DojoTestCase):
@@ -37,7 +47,6 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
     def setUp(self):
         self.system_settings(enable_jira=True)
         self.client.force_login(self.get_test_admin())
-        self.inicialize_data()
 
     def add_risk_acceptance(self, eid, data_risk_accceptance, fid):
         args = (eid, fid, )
@@ -224,58 +233,83 @@ class RiskAcceptancePendingTestUI(DojoTestCase):
 
         return ra1, ra2, ra3
 
+
+class RiskPendingQuerys(TestCase):
+
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        DojoTestCase.__init__(self, *args, **kwargs)
     
-    def inicialize_data(self):
-        # Configuración inicial para las pruebas
+    def setUp(self):
         self.product_id = 1
-        self.ideal_percentage = 70
-        
-        # Crear una instancia de engagement
-        self.engagement = Engagement.objects.create(product_id=self.product_id)
-        
-        # Crear algunas instancias de Finding
-        self.finding_closed = Finding.objects.create(
-            test=self.engagement,
-            active=False,
-            mitigated=timezone.now() - timedelta(days=1)
-        )
-        self.finding_open = Finding.objects.create(
-            test=self.engagement,
-            active=True,
-            mitigated=None
-        )
+        self.ideal_percentage_closed = 0.80
+        self.ideal_percentage_accepted = 0.40
+        self.days = 90
+        self.queryset = Finding.objects.select_related('test__engagement').filter(test__engagement__product=self.product_id)
     
-    def test_abuse_control_with_days(self):
-        self.inicialize_data()
-        result = abuse_control_min_vulnerability_closed(self.product_id, self.ideal_percentage, days=30)
-        expected_percentage = 100.0 * 1 / 2  # Solo 1 de 2 hallazgos está cerrado
-        self.assertAlmostEqual(result['current_percentage'], expected_percentage)
-        self.assertTrue(result['status'])
-        self.assertIn("meets abuse control", result['message'])
+    def test_abuse_control_vulnerability_closed_with_days(self):
+        result = queries.abuse_control_min_vulnerability_closed(self.product_id,
+                                                                self.ideal_percentage_closed,
+                                                                days=self.days)
 
-    def test_abuse_control_without_days(self):
-        result = abuse_control_min_vulnerability_closed(self.product_id, self.ideal_percentage)
-        expected_percentage = 100.0 * 1 / 2  # Solo 1 de 2 hallazgos está cerrado
-        self.assertAlmostEqual(result['current_percentage'], expected_percentage)
+        self.assertAlmostEqual(round(result['current_percentage'], 2), 1)
+        self.assertEqual(result['ideal_percentage'], 0.8)
+        self.assertEqual(result['ideal_close_finding'], 1)
+        self.assertEqual(result['total_finding'], 1)
+        self.assertEqual(result['total_close_finding'], 1)
         self.assertTrue(result['status'])
-        self.assertIn("meets abuse control", result['message'])
-    
-    def test_abuse_control_below_threshold(self):
-        # Crear más hallazgos
-        Finding.objects.create(
-            test=self.engagement,
-            active=False,
-            mitigated=timezone.now() - timedelta(days=1)
-        )
-        result = abuse_control_min_vulnerability_closed(self.product_id, 50)
-        expected_percentage = 100.0 * 2 / 3  # 2 de 3 hallazgos están cerrados
-        self.assertAlmostEqual(result['current_percentage'], expected_percentage)
+        self.assertEqual(len(result["message"]), 121)
+
+    def test_abuse_control_vulnerability_closed_without_days(self):
+        result = queries.abuse_control_min_vulnerability_closed(self.product_id, self.ideal_percentage_closed)
+        print(result)
+        self.assertAlmostEqual(round(result['current_percentage'], 2), 0.29)
+        self.assertEqual(result['ideal_percentage'], 0.8)
+        self.assertEqual(result['ideal_close_finding'], 6)
+        self.assertEqual(result['total_finding'], 7)
+        self.assertEqual(result['total_close_finding'], 2)
         self.assertFalse(result['status'])
-        self.assertIn("does not meet the abuse control", result['message'])
-
-    @patch('your_module.logger')
-    def test_logging(self, mock_logger):
-        # Verifica que los mensajes de logging se llamen adecuadamente
-        abuse_control_min_vulnerability_closed(self.product_id, self.ideal_percentage, days=30)
-        mock_logger.debug.assert_called()
+        self.assertEqual(len(result["message"]), 179)
     
+    def test_pass_abuse_control_vulnerability_accepted(self):
+        finding = self.queryset[0]
+        finding.risk_status = "Risk Accepted"
+        finding.active = False
+        finding.risk_accepted = True
+        finding.save()
+        result = queries.abuse_control_max_vulnerability_accepted(self.product_id, self.ideal_percentage_accepted)
+        self.assertEqual(result["persentage_finding_accepted"], 0.2)
+        self.assertEqual(result["total_finding_accepted"], 1)
+        self.assertEqual(result["total_finding_active"], 5)
+        self.assertTrue(result["status"])
+        self.assertEqual(len(result["message"]), 119)
+
+    def test_not_pass_abuse_control_vulnerability_accepted(self):
+        for i in range(0, 3):
+            finding = self.queryset[i]
+            finding.risk_status = "Risk Accepted"
+            finding.active = False
+            finding.risk_accepted = True
+            finding.save()
+
+        result = queries.abuse_control_max_vulnerability_accepted(self.product_id, self.ideal_percentage_accepted)
+        self.assertEqual(result["total_finding_active"], 5)
+        self.assertEqual(result["total_finding_accepted"], 3)
+        self.assertEqual(result["persentage_finding_accepted"], 0.6)
+        self.assertFalse(result["status"])
+        self.assertEqual(len(result["message"]), 172)
+
+    def test_pass_control_abuseo_vulnerability_accepted_is_mitigated(self):
+        finding = self.queryset[0]
+        finding.risk_status = "Risk Accepted"
+        finding.active = False
+        finding.risk_accepted = True
+        finding.mitigated = "2020-05-01"
+        finding.save()
+        result = queries.abuse_control_max_vulnerability_accepted(self.product_id, self.ideal_percentage_accepted)
+        self.assertEqual(result["persentage_finding_accepted"], 0.0)
+        self.assertEqual(result["total_finding_accepted"], 0)
+        self.assertEqual(result["total_finding_active"], 4)
+        self.assertTrue(result["status"])
+        self.assertEqual(len(result["message"]), 118)

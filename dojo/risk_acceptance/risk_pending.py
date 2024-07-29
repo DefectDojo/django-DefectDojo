@@ -303,6 +303,7 @@ def percentage_of_vulnerabilitiese_closed(**kwargs):
         product_id=kwargs["product_id"],
         min_percentage=settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["percentage"],
         days=settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["days"])
+    logger.debug(f"Abuse Control: {response}")
     if settings.PERCENTAGE_OF_VULNERABILITIES_CLOSED["active"]:
         result = response
     return result
@@ -314,6 +315,7 @@ def temporaly_assumed_vulnerabilities(**kwargs):
     response = abuse_control_max_vulnerability_accepted(
         product_id=kwargs["product_id"],
         max_percentage=settings.TEMPORARILY_ASSUMED_VULNERABILITIES["percentage"])
+    logger.debug(f"Abuse Control: {response}")
     if settings.TEMPORARILY_ASSUMED_VULNERABILITIES["active"]:
         result = response
     return result
