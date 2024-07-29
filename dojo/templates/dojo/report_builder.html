@@ -304,18 +304,11 @@
                 retrieveReportData("{% url 'report_findings' %}", $a.closest('li.finding-list'));
             });
 
-            // Sort/order columns
-            $(document).on('click', 'li.finding-list th a', function (event) {
+            // Sort/order columns and Pagination
+            $(document).on('click', 'li.finding-list th a, div.finding-pagination a', function (event) {
                 const $a = $(this);
                 event.preventDefault();
                 retrieveReportData("{% url 'report_findings' %}" + $a.attr('href'), $a.closest('li.finding-list'));
-            });
-
-            // Pagination
-            $(document).on('click', 'div.finding-pagination a', function (event) {
-                const $a = $(this);
-                event.preventDefault();
-                retrieveReportData("{% url 'report_findings' %}" + $a.attr('href'),  $a.closest('li.finding-list'));
             });
 
             /// --------
