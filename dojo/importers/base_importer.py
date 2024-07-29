@@ -214,7 +214,7 @@ class BaseImporter(ImporterOptions):
         `get_tests` function on the parser object
         """
         # Attempt any preprocessing before generating findings
-        if len(self.parsed_findings) == 0 or self.test is None:
+        if len(self.parsed_findings) == 0 and self.test is None:
             scan = self.process_scan_file(scan)
             if hasattr(parser, 'get_tests'):
                 self.parsed_findings = self.parse_findings_dynamic_test_type(scan, parser)
