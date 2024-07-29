@@ -26,7 +26,7 @@ from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.http import HttpResponseRedirect
+from django.http import FileResponse, HttpResponseRedirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -48,6 +48,7 @@ from dojo.models import (
     Dojo_User,
     Endpoint,
     Engagement,
+    FileUpload,
     Finding,
     Finding_Group,
     Finding_Template,
@@ -2588,3 +2589,28 @@ def get_open_findings_burndown(product):
     past_90_days['y_min'] = running_min
 
     return past_90_days
+
+
+def generate_file_response(file_object: FileUpload) -> FileResponse:
+    """Serve an uploaded file in a uniformed way.
+
+    This function assumes all permissions have previously validated/verified
+    by the caller of this function.
+    """
+    # Quick check to ensure we have the right type of object
+    if not isinstance(file_object, FileUpload):
+        msg = f"FileUpload object expected but type <{type(file_object)}> received."
+        raise TypeError(msg)
+    # Determine the path of the file on disk within the MEDIA_ROOT
+    file_path = f'{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}'
+    _, file_extension = os.path.splitext(file_path)
+    # Generate the FileResponse
+    response = FileResponse(
+        open(file_path, "rb"),
+        filename=f"{file_object.title}{file_extension}",
+        content_type=f"{mimetypes.guess_type(file_path)}",
+    )
+    # Add some important headers
+    response["Content-Disposition"] = f'attachment; filename="{file_object.title}{file_extension}"'
+    response["Content-Length"] = file_object.file.size
+    return response

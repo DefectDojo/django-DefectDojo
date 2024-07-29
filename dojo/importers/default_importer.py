@@ -293,6 +293,24 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         return old_findings
 
+    def parse_findings(
+        self,
+        scan: TemporaryUploadedFile,
+        parser: Parser,
+    ) -> List[Finding]:
+        """
+        Determine how to parse the findings based on the presence of the
+        `get_tests` function on the parser object
+        """
+        # Attempt any preprocessing before generating findings
+        if len(self.parsed_findings) == 0 and self.test is None:
+            scan = self.process_scan_file(scan)
+            if hasattr(parser, 'get_tests'):
+                self.parsed_findings = self.parse_findings_dynamic_test_type(scan, parser)
+            else:
+                self.parsed_findings = self.parse_findings_static_test_type(scan, parser)
+        return self.parsed_findings
+
     def parse_findings_static_test_type(
         self,
         scan: TemporaryUploadedFile,
