@@ -394,7 +394,7 @@ env = environ.FileAwareEnv(
                                              {
                                                  "days": 90,
                                                  "percentage": 0.82,
-                                                 "active": True
+                                                 "active": False 
                                              }),
     DD_TEMPORARILY_ASSUMED_VULNERABILITIES=(dict,
                                         {
