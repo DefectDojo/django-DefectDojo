@@ -146,7 +146,7 @@ Very bad example:
 Various file formats are handled through libraries. In order to keep DefectDojo slim and also don't extend the attack surface, keep the number of libraries used minimal and take other parsers as an example.
 
 #### defusedXML in favour of lxml
-As XML is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Through an evaluation, we determined that defusedXML is the library which we will used in the future to parse xml files through parsers as this library is rated more secure. THus, we will only accept PRs with the defusedxml library. 
+As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library. 
 
 ### Not all attributes are mandatory
 
