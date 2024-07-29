@@ -92,7 +92,7 @@ class AnchoreCTLVulnsParser:
             dupe_key = "|".join(
                 [
                     item.get(
-                        "imageDigest", "None"
+                        "imageDigest", "None",
                     ),  # depending on version image_digest/imageDigest
                     item["feed"],
                     item["feedGroup"],
@@ -100,7 +100,7 @@ class AnchoreCTLVulnsParser:
                     item["packageVersion"],
                     item["packagePath"],
                     item["vuln"],
-                ]
+                ],
             )
 
             if dupe_key in dupes:

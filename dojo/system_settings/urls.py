@@ -4,8 +4,8 @@ from dojo.system_settings import views
 
 urlpatterns = [
     re_path(
-        r'^system_settings$',
+        r"^system_settings$",
         views.SystemSettingsView.as_view(),
-        name='system_settings'
-    )
+        name="system_settings",
+    ),
 ]

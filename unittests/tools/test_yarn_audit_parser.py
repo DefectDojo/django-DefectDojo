@@ -1,7 +1,6 @@
 from dojo.models import Engagement, Product, Test
 from dojo.tools.yarn_audit.parser import YarnAuditParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestYarnAuditParser(DojoTestCase):
@@ -69,7 +68,7 @@ class TestYarnAuditParser(DojoTestCase):
                 parser = YarnAuditParser()
                 parser.get_findings(testfile, self.get_test())
                 self.assertTrue(
-                    "yarn audit report contains errors:" in str(context.exception)
+                    "yarn audit report contains errors:" in str(context.exception),
                 )
                 self.assertTrue("ECONNREFUSED" in str(context.exception))
 

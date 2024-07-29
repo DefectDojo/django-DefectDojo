@@ -4,8 +4,7 @@ from dateutil.tz import tzlocal
 
 from dojo.models import Test
 from dojo.tools.detect_secrets.parser import DetectSecretsParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestDetectSecretsParser(DojoTestCase):
