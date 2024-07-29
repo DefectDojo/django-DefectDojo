@@ -150,6 +150,7 @@ def product(request):
         "prod_list": prod_list,
         "prod_filter": prod_filter,
         "name_words": sorted(set(name_words)),
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         "user": request.user})
 
 
@@ -333,6 +334,7 @@ def view_product_components(request, pid):
         "filter": comp_filter,
         "product_tab": product_tab,
         "result": result,
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         "component_words": sorted(set(component_words)),
     })
 
@@ -790,6 +792,7 @@ def view_engagements(request, pid):
         "queued_engs_filter": queued_engs_filter,
         "inactive_engs": result_inactive_engs,
         "inactive_engs_count": result_inactive_engs.paginator.count,
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         "inactive_engs_filter": inactive_engs_filter,
         "recent_test_day_count": recent_test_day_count,
         "user": request.user})
