@@ -2597,7 +2597,7 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
         msg = f"FileUpload object expected but type <{type(file_object)}> received."
         raise TypeError(msg)
     # Determine the path of the file on disk within the MEDIA_ROOT
-    file_path = f'{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}'
+    file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
     _, file_extension = os.path.splitext(file_path)
     # Generate the FileResponse
     response = FileResponse(
