@@ -205,9 +205,9 @@ class ViewTest(View):
             "cred_test": Cred_Mapping.objects.filter(test=test).select_related("cred_id").order_by("cred_id"),
             "jira_project": jira_helper.get_jira_project(test),
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "finding_groups": test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", "findings__vulnerability_id_set"),
             "finding_group_by_options": Finding_Group.GROUP_BY_OPTIONS,
-
         }
         # Set the form using the context, and then update the context
         form = self.get_form(request, context)

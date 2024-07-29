@@ -98,9 +98,6 @@ def delete(eng, risk_acceptance):
     eng.risk_acceptance.remove(risk_acceptance)
     eng.save()
 
-    for note in risk_acceptance.notes.all():
-        note.delete()
-
     risk_acceptance.path.delete()
     risk_acceptance.delete()
 
