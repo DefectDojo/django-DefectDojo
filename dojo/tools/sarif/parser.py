@@ -164,16 +164,16 @@ def get_title(result, rule):
     title = None
     if "message" in result:
         title = get_message_from_multiformatMessageString(
-            result["message"], rule
+            result["message"], rule,
         )
     if title is None and rule is not None:
         if "shortDescription" in rule:
             title = get_message_from_multiformatMessageString(
-                rule["shortDescription"], rule
+                rule["shortDescription"], rule,
             )
         elif "fullDescription" in rule:
             title = get_message_from_multiformatMessageString(
-                rule["fullDescription"], rule
+                rule["fullDescription"], rule,
             )
         elif "name" in rule:
             title = rule["name"]
@@ -221,15 +221,15 @@ def get_snippet(result):
 def get_codeFlowsDescription(codeFlows):
     description = ""
     for codeFlow in codeFlows:
-        for threadFlow in codeFlow.get('threadFlows', []):
+        for threadFlow in codeFlow.get("threadFlows", []):
             if "locations" not in threadFlow:
                 continue
 
             description = f"**{_('Code flow')}:**\n"
             line = 1
 
-            for location in threadFlow.get('locations', []):
-                physicalLocation = location.get('location', {}).get('physicalLocation', {})
+            for location in threadFlow.get("locations", []):
+                physicalLocation = location.get("location", {}).get("physicalLocation", {})
                 region = physicalLocation.get("region", {})
                 uri = physicalLocation.get("artifactLocation").get("uri")
 
@@ -248,12 +248,12 @@ def get_codeFlowsDescription(codeFlows):
 
                 description += f"{line}. {uri}{start_line}{start_column}{snippet}\n"
 
-                if 'message' in location.get('location', {}):
-                    message_field = location.get('location', {}).get('message', {})
-                    if 'markdown' in message_field:
-                        message = message_field.get('markdown', '')
+                if "message" in location.get("location", {}):
+                    message_field = location.get("location", {}).get("message", {})
+                    if "markdown" in message_field:
+                        message = message_field.get("markdown", "")
                     else:
-                        message = message_field.get('text', '')
+                        message = message_field.get("text", "")
 
                     description += f"\t{message}\n"
 
@@ -267,7 +267,7 @@ def get_description(result, rule):
     message = ""
     if "message" in result:
         message = get_message_from_multiformatMessageString(
-            result["message"], rule
+            result["message"], rule,
         )
         description += f"**Result message:** {message}\n"
     if get_snippet(result) is not None:
@@ -278,13 +278,13 @@ def get_description(result, rule):
         shortDescription = ""
         if "shortDescription" in rule:
             shortDescription = get_message_from_multiformatMessageString(
-                rule["shortDescription"], rule
+                rule["shortDescription"], rule,
             )
             if shortDescription != message:
                 description += f"**{_('Rule short description')}:** {shortDescription}\n"
         if "fullDescription" in rule:
             fullDescription = get_message_from_multiformatMessageString(
-                rule["fullDescription"], rule
+                rule["fullDescription"], rule,
             )
             if (
                 fullDescription != message
@@ -308,7 +308,7 @@ def get_references(rule):
             reference = rule["helpUri"]
         elif "help" in rule:
             helpText = get_message_from_multiformatMessageString(
-                rule["help"], rule
+                rule["help"], rule,
             )
             if helpText.startswith("http"):
                 reference = helpText
@@ -435,7 +435,7 @@ def get_item(result, rules, artifacts, run_date):
     # manage fixes provided in the report
     if "fixes" in result:
         finding.mitigation = "\n".join(
-            [fix.get("description", {}).get("text") for fix in result["fixes"]]
+            [fix.get("description", {}).get("text") for fix in result["fixes"]],
         )
 
     if run_date:
@@ -443,7 +443,7 @@ def get_item(result, rules, artifacts, run_date):
 
     # manage tags provided in the report and rule and remove duplicated
     tags = list(set(get_properties_tags(rule) + get_properties_tags(result)))
-    tags = [s.removeprefix('external/cwe/') for s in tags]
+    tags = [s.removeprefix("external/cwe/") for s in tags]
     finding.tags = tags
 
     # manage fingerprints
@@ -460,7 +460,7 @@ def get_item(result, rules, artifacts, run_date):
         hashes = get_fingerprints_hashes(result["partialFingerprints"])
         sorted_hashes = sorted(hashes.keys())
         finding.unique_id_from_tool = "|".join(
-            [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes]
+            [f'{key}:{hashes[key]["value"]}' for key in sorted_hashes],
         )
     return finding
 

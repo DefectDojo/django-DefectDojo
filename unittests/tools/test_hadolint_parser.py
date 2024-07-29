@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.hadolint.parser import HadolintParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TesthadolintParser(DojoTestCase):

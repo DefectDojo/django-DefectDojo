@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.ssl_labs.parser import SslLabsParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestSslLabsParser(DojoTestCase):

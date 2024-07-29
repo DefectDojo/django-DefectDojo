@@ -33,7 +33,7 @@ class TestApiBugcrowdParser(TestCase):
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
             self.assertEqual(
-                datetime.datetime.date(finding.date), datetime.date(2002, 4, 1)
+                datetime.datetime.date(finding.date), datetime.date(2002, 4, 1),
             )
             self.assertEqual(str(finding.unsaved_endpoints[0]), "https://example.com")
             self.assertEqual(finding.severity, "Info")
@@ -41,11 +41,11 @@ class TestApiBugcrowdParser(TestCase):
             self.assertEqual(finding.mitigation, "Properly do JWT")
             self.assertEqual(finding.active, True)
             self.assertEqual(
-                finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a"
+                finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a",
             )
             self.assertIn(
                 "/submissions/a4201d47-62e1-4287-9ff6-30807ae9d36a",
-                finding.references
+                finding.references,
             )
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -64,23 +64,23 @@ class TestApiBugcrowdParser(TestCase):
             self.assertEqual(finding_3.title, "you did something wrong (returned)")
 
             self.assertEqual(
-                datetime.datetime.date(finding_1.date), datetime.date(2000, 1, 1)
+                datetime.datetime.date(finding_1.date), datetime.date(2000, 1, 1),
             )
             self.assertEqual(
-                datetime.datetime.date(finding_2.date), datetime.date(2000, 1, 2)
+                datetime.datetime.date(finding_2.date), datetime.date(2000, 1, 2),
             )
             self.assertEqual(
-                datetime.datetime.date(finding_3.date), datetime.date(2000, 1, 3)
+                datetime.datetime.date(finding_3.date), datetime.date(2000, 1, 3),
             )
 
             self.assertEqual(
-                str(finding_1.unsaved_endpoints[0]), "https://example.com/1"
+                str(finding_1.unsaved_endpoints[0]), "https://example.com/1",
             )
             self.assertEqual(
-                str(finding_2.unsaved_endpoints[0]), "https://example.com/2"
+                str(finding_2.unsaved_endpoints[0]), "https://example.com/2",
             )
             self.assertEqual(
-                str(finding_3.unsaved_endpoints[0]), "https://example.com/3"
+                str(finding_3.unsaved_endpoints[0]), "https://example.com/3",
             )
             for endpoint in finding_1.unsaved_endpoints:
                 endpoint.clean()
@@ -106,18 +106,18 @@ class TestApiBugcrowdParser(TestCase):
             self.assertEqual(finding_3.risk_accepted, False)
 
             self.assertEqual(
-                finding_1.unique_id_from_tool, "3b0e6b2a-c21e-493e-bd19-de40f525016e"
+                finding_1.unique_id_from_tool, "3b0e6b2a-c21e-493e-bd19-de40f525016e",
             )
             self.assertEqual(
-                finding_2.unique_id_from_tool, "b2f1066a-6188-4479-bab8-39cc5434f06f"
+                finding_2.unique_id_from_tool, "b2f1066a-6188-4479-bab8-39cc5434f06f",
             )
             self.assertEqual(
-                finding_3.unique_id_from_tool, "335a7ba5-57ba-485a-b40e-2f9aa4e19786"
+                finding_3.unique_id_from_tool, "335a7ba5-57ba-485a-b40e-2f9aa4e19786",
             )
 
     def test_parse_file_with_not_reproducible_finding(self):
         with open(
-            "unittests/scans/api_bugcrowd/bugcrowd_not_reproducible.json"
+            "unittests/scans/api_bugcrowd/bugcrowd_not_reproducible.json",
         ) as testfile:
 
             #             description = """
@@ -134,7 +134,7 @@ class TestApiBugcrowdParser(TestCase):
             finding = findings[0]
             self.assertEqual(finding.title, "JWT Alg none")
             self.assertEqual(
-                datetime.datetime.date(finding.date), datetime.date(2002, 4, 1)
+                datetime.datetime.date(finding.date), datetime.date(2002, 4, 1),
             )
             self.assertEqual(str(finding.unsaved_endpoints[0]), "https://example.com")
             self.assertEqual(finding.severity, "Info")
@@ -143,7 +143,7 @@ class TestApiBugcrowdParser(TestCase):
             self.assertEqual(finding.active, False)
             self.assertEqual(finding.false_p, True)
             self.assertEqual(
-                finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a"
+                finding.unique_id_from_tool, "a4201d47-62e1-4287-9ff6-30807ae9d36a",
             )
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
@@ -151,7 +151,7 @@ class TestApiBugcrowdParser(TestCase):
     def test_parse_file_with_broken_bug_url(self):
         with open("unittests/scans/api_bugcrowd/bugcrowd_broken_bug_url.json") as testfile:
             parser = ApiBugcrowdParser()
-            with self.assertLogs('dojo.tools.api_bugcrowd.parser', level='ERROR') as cm:
+            with self.assertLogs("dojo.tools.api_bugcrowd.parser", level="ERROR") as cm:
                 parser.get_findings(testfile, Test())
-            self.assertEqual(cm.output, ['ERROR:dojo.tools.api_bugcrowd.parser:'
-                'Error parsing bugcrowd bug_url : curl https://example.com/'])
+            self.assertEqual(cm.output, ["ERROR:dojo.tools.api_bugcrowd.parser:"
+                "Error parsing bugcrowd bug_url : curl https://example.com/"])

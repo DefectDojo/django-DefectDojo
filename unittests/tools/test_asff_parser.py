@@ -4,8 +4,7 @@ from datetime import datetime
 
 from dojo.models import Endpoint, Test
 from dojo.tools.asff.parser import AsffParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def sample_path(file_name):

@@ -1,6 +1,5 @@
 from dojo.tools.hcl_appscan.parser import HCLAppScanParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestHCLAppScanParser(DojoTestCase):
