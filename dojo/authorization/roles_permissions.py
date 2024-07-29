@@ -138,6 +138,7 @@ class Permissions(IntEnum):
     Credential_Delete = 2707
     
     Metrics_Panel = 2708
+    Metrics_DevSecOps = 2709
 
     Transfer_Finding_View = 2801
     Transfer_Finding_Edit = 2802
@@ -474,6 +475,7 @@ def get_roles_with_permissions():
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
             Permissions.Metrics_Panel,
+            Permissions.Metrics_DevSecOps,
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Edit,
             Permissions.Transfer_Finding_Delete,

@@ -249,11 +249,26 @@ def metrics_panel(request):
     cookie_csrftoken = request.COOKIES.get('csrftoken', '')
     cookie_sessionid = request.COOKIES.get('sessionid', '')
     grafana_params = f"{settings.GRAFANA_PARAMS}&var-csrftoken={cookie_csrftoken}&var-sessionid={cookie_sessionid}"
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
     return render(request, 'dojo/metrics_panel.html', {
        'name': page_name,
        'grafana_url': settings.GRAFANA_URL,
-       'grafana_path': settings.GRAFANA_PATH,
+       'grafana_path': settings.GRAFANA_PATH.get("metrics_panel"),
        'grafana_params': grafana_params,
+       'role': role,
+       'user': user,
+    })
+
+def metrics_devsecops(request):
+    page_name = _('Metrics DevSecOps')
+    role = Role.objects.get(id=Roles.Maintainer)
+    user = request.user.id
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/metrics_devsecops.html', {
+       'name': page_name,
+       'grafana_url': settings.GRAFANA_URL,
+       'grafana_path': settings.GRAFANA_PATH.get("metrics_devsecops"),
+       'grafana_params': settings.GRAFANA_PARAMS,
        'role': role,
        'user': user,
     })

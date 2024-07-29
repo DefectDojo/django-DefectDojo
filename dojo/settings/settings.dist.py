@@ -361,7 +361,7 @@ env = environ.FileAwareEnv(
     DD_AWS_SES_EMAIL=(bool, True),
     # --------------- Grafana Metrics ---------------
     DD_GRAFANA_URL=(str, ""),
-    DD_GRAFANA_PATH=(str, ""),
+    DD_GRAFANA_PATH=(dict, {}),
     DD_GRAFANA_PARAMS=(str, ""),
     DD_MICROSOFT_LOGIN_URL=(str, ""),
     

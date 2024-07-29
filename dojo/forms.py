@@ -2632,6 +2632,10 @@ class ClearFindingReviewForm(forms.ModelForm):
 
 
 class ReviewFindingForm(forms.Form):
+    findings_review = forms.ModelMultipleChoiceField(
+        queryset=Finding.objects.none(), required=True,
+        widget=forms.widgets.SelectMultiple(attrs={'size': 1}),
+        help_text=('Active, verified findings listed, please select to add findings.'))
     reviewers = forms.MultipleChoiceField(
         help_text=(
             "Select all users who can review Finding. Only users with "
@@ -2668,13 +2672,12 @@ class ReviewFindingForm(forms.Form):
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
-            users = get_authorized_users_for_product_and_product_type(
-                None, finding.test.engagement.product, Permissions.Finding_Edit
-            )
+            users = get_users_for_group('Reviewers')
         else:
             users = get_authorized_users(Permissions.Finding_Edit).filter(
                 is_active=True
             )
+        self.fields['findings_review'].queryset = get_authorized_findings(Permissions.Finding_View)
         # Remove the current user
         if user is not None:
             users = users.exclude(id=user.id)
