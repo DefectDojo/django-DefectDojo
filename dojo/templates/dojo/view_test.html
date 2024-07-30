@@ -1096,6 +1096,21 @@
                                                             {% endif %}
                                                         {% endif %}
                                                     {% endif %}
+                                                    {% if finding|has_object_permission:"Transfer_Finding_Add" and system_settings.enable_transfer_finding%}
+                                                        {% if finding|enable_button:"Add Risk Acceptance"%}
+                                                            <li role="presentation">
+                                                                <a rel="noopener noreferrer" href="{% url 'add_transfer_finding' finding.test.engagement.id finding.id %}">
+                                                                    <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Transfer Finding..." %}
+                                                                </a>
+                                                            </li>
+                                                        {% else %}
+                                                            <li role="presentation">
+                                                                <a rel="noopener noreferrer" href="#">
+                                                                    <i class="fa-solid fa-circle-exclamation" style="color: grey"></i><span style="color: grey"> {% trans "Add Transfer Finding..." %} </span>
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endif %}
                                                     <li class="divider"></li>
                                                     <li role="presentation">
                                                         <a rel="noopener noreferrer" href="{% url 'action_history' finding|content_type finding.id %}">
