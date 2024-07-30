@@ -2,7 +2,7 @@ import { get_product_with_description_findings } from '../product/index.js';
 import { getSessionStorage, setSessionStorage } from '../settings/session_storage.js';
 import {MAX_RETRY, RETRY_INTERVAL} from '../settings.js';
 import { alertHide, alertShow } from '../alert/alert.js';
-import { addOption} from '../helper/helper.js';
+import { addOption, sleep} from '../helper/helper.js';
 
 var ObjFindings= {};
 export var transferId = 0;
@@ -13,30 +13,31 @@ var host = window.location.host;
 
 $(document).ready(function(){
     $(document).on('click','.cls_transfer_finding_show_modal', function(event) {
+        $('#spinnerLoading').css('display', 'flex');
         let row = $(this).closest('tr');
         transferId = $(this).data('transfer-id');
         $('.alert').alert().addClass('sr-only');
         let selectEngagement = row.find('.cls-choosen-engagement')
         let engagementId = selectEngagement.selectpicker('val');
         setSessionStorage("transferFinding", "engagementId", engagementId);
-        $('#modalTransferFinding').modal('toggle');
-            productId = $(this).data('product-id');
-            setSessionStorage("transferFinding","productId",productId);
-            productTypeId = $(this).data('product-type-id');
-            getTransferFindings(transferId)
-            $(document).on('change', '.related-finding-chosen', function(event){
-                let selectedValue = $(this);
-                let row = $(this).closest('tr');
-                let finding = row.find('.btn-success');
-                row.find('.label-primary').text("Transfer Pending").css("background", "#1371B6");
-                let finding_id = finding.attr('data-btn-success');
-                delete ObjFindings[finding_id];
-                finding.attr('data-related-finding',selectedValue.val());
-            });
-          });
+        $('#modalTransferFinding').modal('show');
+        productId = $(this).data('product-id');
+        setSessionStorage("transferFinding","productId",productId);
+        productTypeId = $(this).data('product-type-id');
+        getTransferFindings(transferId).then(function(event){
+            $('#spinnerLoading').css('display', 'none');
+        });
+        $(document).on('change', '.related-finding-chosen', function(event){
+            let selectedValue = $(this);
+            let row = $(this).closest('tr');
+            let finding = row.find('.btn-success');
+            row.find('.label-primary').text("Transfer Pending").css("background", "#1371B6");
+            let finding_id = finding.attr('data-btn-success');
+            delete ObjFindings[finding_id];
+            finding.attr('data-related-finding',selectedValue.val());
+        });
+    });
 });
-
-
 
 
 function getEngagementOptions(idProduct, engagementElement){

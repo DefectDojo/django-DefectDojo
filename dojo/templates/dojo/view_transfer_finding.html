@@ -34,11 +34,16 @@
         }
       }
       #spinnerContainer {
-        display: flex;
         align-items: center;
         justify-content: center;
         height: 100%;
     }
+
+    #spinnerLoading {
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+  }
     
     .limitar-texto {
         white-space: nowrap;
@@ -93,7 +98,10 @@
           </button>
         </div>
         <div class="modal-body">
-        {% include 'dojo/modal/loading.html' %}
+        <div id="spinnerLoading" style="display: flex;">
+            <h4>Loading...</h4>
+            <div class="spinner"></div>
+        </div>
           <table class="table table-hover">
             <thead class="thead-dark">
               <tr>

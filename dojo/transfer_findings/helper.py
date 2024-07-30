@@ -308,9 +308,10 @@ def reset_finding_related(finding):
         raise ApiError.internal_server_error(detail=e)
 
 
-def enable_flow_transfer_finding(finding_status):
+def enable_flow_transfer_finding(**kwargs):
     # add rule custom if necessary
-    if finding_status in ["Risk Active", "Risk Expired"]:
+    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
+    and kwargs["finding"].active is True):
         return True
     return False
 
