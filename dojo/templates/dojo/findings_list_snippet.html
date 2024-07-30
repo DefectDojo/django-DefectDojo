@@ -423,7 +423,7 @@
                                                         {% endif %}
                                                         {% if finding|has_object_permission:"Finding_View" %}
                                                             {% user_can_clear_peer_review finding request.user as clear_peer_review %}
-                                                            {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
+                                                            {% if finding|has_object_permission:"Finding_Code_Review" and clear_peer_review %}
                                                                 <li role="presentation">
                                                                     <a rel="noopener noreferrer" href="{% url 'clear_finding_review' finding.id %}">
                                                                         <i class="icon-user-check"></i> {% trans "Clear Review" %}

@@ -1375,7 +1375,7 @@ def close_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
+@user_is_authorized(Finding, Permissions.Finding_Code_Review, "fid")
 def defect_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -1803,7 +1803,7 @@ def request_finding_review(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
+@user_is_authorized(Finding, Permissions.Finding_Code_Review, "fid")
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)

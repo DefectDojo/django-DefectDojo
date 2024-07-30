@@ -72,6 +72,7 @@ class Permissions(IntEnum):
     Import_Scan_Result = 1404
     Finding_Edit = 1406
     Finding_Delete = 1407
+    Finding_Code_Review = 1408
 
     Endpoint_View = 1502
     Endpoint_Add = 1503
@@ -212,6 +213,7 @@ class Permissions(IntEnum):
             Permissions.Note_Edit,
             Permissions.Note_View_History,
             Permissions.Transfer_Finding_Add,
+            Permissions.Finding_Code_Review
         }.union(cls.get_finding_group_permissions())
     
     @classmethod
@@ -395,6 +397,7 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
+            Permissions.Finding_Code_Review
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -487,6 +490,7 @@ def get_roles_with_permissions():
             Permissions.Swagger_Documentation,
             Permissions.Api_v2_Key,
             Permissions.Defect_Dojo_Documentation,
+            Permissions.Finding_Code_Review
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -568,6 +572,7 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
+            Permissions.Finding_Code_Review
         },
         Roles.Developer: {
             Permissions.Product_Type_View,
@@ -649,6 +654,7 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance_Bullk,
+            Permissions.Finding_Code_Review
         },
         Roles.Risk: {
             Permissions.Product_Type_View,
