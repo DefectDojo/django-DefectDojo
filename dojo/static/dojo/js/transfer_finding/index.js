@@ -2,7 +2,7 @@ import { get_product_with_description_findings } from '../product/index.js';
 import { getSessionStorage, setSessionStorage } from '../settings/session_storage.js';
 import {MAX_RETRY, RETRY_INTERVAL} from '../settings.js';
 import { alertHide, alertShow } from '../alert/alert.js';
-import { addOption} from '../helper/helper.js';
+import { addOption, sleep} from '../helper/helper.js';
 
 var ObjFindings= {};
 export var transferId = 0;
@@ -13,30 +13,31 @@ var host = window.location.host;
 
 $(document).ready(function(){
     $(document).on('click','.cls_transfer_finding_show_modal', function(event) {
+        $('#spinnerLoading').css('display', 'flex');
         let row = $(this).closest('tr');
         transferId = $(this).data('transfer-id');
         $('.alert').alert().addClass('sr-only');
         let selectEngagement = row.find('.cls-choosen-engagement')
         let engagementId = selectEngagement.selectpicker('val');
         setSessionStorage("transferFinding", "engagementId", engagementId);
-        $('#modalTransferFinding').modal('toggle');
-            productId = $(this).data('product-id');
-            setSessionStorage("transferFinding","productId",productId);
-            productTypeId = $(this).data('product-type-id');
-            getTransferFindings(transferId)
-            $(document).on('change', '.related-finding-chosen', function(event){
-                let selectedValue = $(this);
-                let row = $(this).closest('tr');
-                let finding = row.find('.btn-success');
-                row.find('.label-primary').text("Transfer Pending").css("background", "#1371B6");
-                let finding_id = finding.attr('data-btn-success');
-                delete ObjFindings[finding_id];
-                finding.attr('data-related-finding',selectedValue.val());
-            });
-          });
+        $('#modalTransferFinding').modal('show');
+        productId = $(this).data('product-id');
+        setSessionStorage("transferFinding","productId",productId);
+        productTypeId = $(this).data('product-type-id');
+        getTransferFindings(transferId).then(function(event){
+            $('#spinnerLoading').css('display', 'none');
+        });
+        $(document).on('change', '.related-finding-chosen', function(event){
+            let selectedValue = $(this);
+            let row = $(this).closest('tr');
+            let finding = row.find('.btn-success');
+            row.find('.label-primary').text("Transfer Pending").css("background", "#1371B6");
+            let finding_id = finding.attr('data-btn-success');
+            delete ObjFindings[finding_id];
+            finding.attr('data-related-finding',selectedValue.val());
+        });
+    });
 });
-
-
 
 
 function getEngagementOptions(idProduct, engagementElement){
@@ -155,9 +156,13 @@ function innerData(data, findings_related){
             <td class="cls-transfer-finding-title">${transfer_findings_finding.findings.title}</td>
             <td>${transfer_findings_finding.findings.severity}</td>
             <td>${transfer_findings_finding.findings.cve}</td>`
-            if(transfer_findings_finding.findings.risk_status.includes("Transfer Accepted")){
+            if(["Transfer Accepted", "Transfer Expired"].includes(transfer_findings_finding.findings.risk_status)){
                 row.innerHTML += `<td><a href="http://${host}/finding/${transfer_findings_finding.finding_related}" class="table-link help help-tooltip" title="View transfered finding" target="_blank" type="button"> ${transfer_findings_finding.finding_related} <i class="fa-solid fa-magnifying-glass-plus"></i> </a></td>`
-                cell_status.innerHTML= `<span class="label label-primary" style="background: green">${transfer_findings_finding.findings.risk_status}</span>`
+                if(transfer_findings_finding.findings.risk_status.includes("Transfer Accepted")){
+                    cell_status.innerHTML= `<span class="label label-primary" style="background: green">${transfer_findings_finding.findings.risk_status}</span>`
+                }else{
+                    cell_status.innerHTML= `<span class="label label-primary" style="background: #e7a100">${transfer_findings_finding.findings.risk_status}</span>`
+                }
             }
             else if(transfer_findings_finding.findings.risk_status.includes("Transfer Reject"))
             {
@@ -168,6 +173,11 @@ function innerData(data, findings_related){
             {
                 row.innerHTML += `${findings_related}`
                 cell_status.innerHTML = `<span class="label label-primary" style="background: #1371B6">Transfer Pending</span>`
+            }
+            else if(transfer_findings_finding.findings.risk_status.includes("Transfer Expired"))
+            {
+                row.innerHTML += `${findings_related}`
+                cell_status.innerHTML = `<span class="label label-primary" style="background: #e7a100">Transfer Expired</span>`
             }
             else
             {
@@ -258,7 +268,6 @@ export async function generateRequestTransferFindingUpdate(transferFindingId, ri
                 requestFindingStatus[finding.findings.id] = {"risk_status": riskStatus};
             });
         });
-
         return requestFindingStatus;
     } catch (error) {
         console.error(error);

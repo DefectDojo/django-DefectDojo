@@ -93,6 +93,8 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.transfer_findings.notification import Notification as TransferFindingsNotification
+from dojo.transfer_findings.helper import get_sla_expiration_transfer_finding
 from dojo.product.queries import get_authorized_products
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
@@ -450,13 +452,13 @@ class ViewEngagement(View):
         eng = get_object_or_404(Engagement, id=eid)
         # Make sure the user is authorized
         user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
-        tests = eng.test_set.all().order_by('test_type__name', '-updated')
+        tests = eng.test_set.all().order_by('-created')
         default_page_num = 10
         tests_filter = self.get_filtered_tests(request, tests, eng)
         paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
         paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
         prod = eng.product
-        risks_accepted = self.get_risks_accepted(eng)
+        risks_accepted = self.get_risks_accepted(eng).order_by('-created')
         preset_test_type = None
         network = None
         if eng.preset:
@@ -1229,7 +1231,7 @@ def get_risk_acceptance_pending(request,
                         'name': risk_acceptance_title_suggestion,
                         'accepted_by': [request.user],
                         "severity": finding.severity})
-        if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
+        elif finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
             form = RiskPendingForm(
                 severity=finding.severity,
                 product_id=product.id,
@@ -1514,7 +1516,7 @@ def add_transfer_finding(request, eid, fid=None):
     if request.method == 'POST':
         request.POST._mutable = True
         data = request.POST
-        form = TransferFindingForm(request.POST, request.FILES)
+        form = TransferFindingForm(request.POST, request.FILES, product=product)
         if form.is_valid():
             try:
                 # Save
@@ -1527,6 +1529,8 @@ def add_transfer_finding(request, eid, fid=None):
                 destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
                 transfer_findings.destination_product_type = destination_product_obj.prod_type
                 transfer_findings.destination_product = destination_product_obj
+                __, expiration_date, __ = get_sla_expiration_transfer_finding()
+                transfer_findings.expiration_date = expiration_date
                 transfer_findings.save()
                 findings = request.POST.getlist('findings')
                 for finding in findings:
@@ -1541,12 +1545,7 @@ def add_transfer_finding(request, eid, fid=None):
                     transfer_finding_finding.save()
                     logger.debug("Risk Transfer created {transfer_finding_finding.name}")
                     # Create notification
-                create_notification(event="transfer_finding",
-                                    title=f"{transfer_findings.title[:30]}",
-                                    icon="check-circle",
-                                    color_icon="#096C11",
-                                    recipients=[transfer_findings.accepted_by.get_username()],
-                                    url=reverse('view_transfer_finding', args=(product.id, )))
+                TransferFindingsNotification.transfer_finding_request(transfer_findings)
                 logger.debug("Transfer Finding send notification {transfer_finding.title}")
 
             except Exception as e:
@@ -1569,7 +1568,8 @@ def add_transfer_finding(request, eid, fid=None):
                                             "owner": request.user.username,
                                             "status": "Transfer Pending",
                                             "severity": finding.severity,
-                                            "owner": request.user})
+                                            "owner": request.user},
+                                   product=product)
 
         form.fields["findings"].queryset = form.fields["findings"].queryset.filter(duplicate=False, test__engagement=origin_engagement, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
@@ -1744,6 +1744,16 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                             return redirect_to_return_url_or_else(
                                 request, reverse("view_risk_acceptance", args=(eid, raid))
                             )
+                        abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
+                        for abuse_control, result in abuse_control_result.items():
+                            if not abuse_control_result[abuse_control]["status"]:
+                                messages.add_message(
+                                    request,
+                                    messages.SUCCESS,
+                                    abuse_control_result[abuse_control]["message"],
+                                    extra_tags="alert-danger",
+                                )
+                                return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
                     ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
                 else:
                     ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
@@ -1767,7 +1777,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
     add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
 
-    accepted_findings = risk_acceptance.accepted_findings.order_by('id')
+    accepted_findings = risk_acceptance.accepted_findings.order_by('-risk_status')
     fpage = get_page_items(request, accepted_findings, 15)
     if settings.RISK_PENDING:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(),

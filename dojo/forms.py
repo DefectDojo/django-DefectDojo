@@ -1177,11 +1177,15 @@ class TransferFindingForm(forms.ModelForm):
     accepted_by = forms.ModelChoiceField(queryset=Dojo_User.objects.all(), required=True)  # Usar widget Select
 
     def __init__(self, *args, **kwags):
+        product = (kwags.pop("product") if "product" in kwags else None)
         super().__init__(*args, **kwags)
         self.fields["findings"].queryset = get_authorized_findings_by_status(
             Permissions.Transfer_Finding_Add
         )
-        self.fields["destination_product"].queryset = get_products_for_transfer_findings(Permissions.Transfer_Finding_Add)
+        self.fields["destination_product"].queryset = get_products_for_transfer_findings(
+            permission=Permissions.Transfer_Finding_Add,
+            user=None,
+            product=product)
         self.fields["owner"].queryset = get_owner_user()
     
     class Meta:
@@ -2628,6 +2632,10 @@ class ClearFindingReviewForm(forms.ModelForm):
 
 
 class ReviewFindingForm(forms.Form):
+    findings_review = forms.ModelMultipleChoiceField(
+        queryset=Finding.objects.none(), required=True,
+        widget=forms.widgets.SelectMultiple(attrs={'size': 1}),
+        help_text=('Active, verified findings listed, please select to add findings.'))
     reviewers = forms.MultipleChoiceField(
         help_text=(
             "Select all users who can review Finding. Only users with "
@@ -2664,13 +2672,12 @@ class ReviewFindingForm(forms.Form):
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
-            users = get_authorized_users_for_product_and_product_type(
-                None, finding.test.engagement.product, Permissions.Finding_Edit
-            )
+            users = get_users_for_group('Reviewers')
         else:
             users = get_authorized_users(Permissions.Finding_Edit).filter(
                 is_active=True
             )
+        self.fields['findings_review'].queryset = get_authorized_findings(Permissions.Finding_View)
         # Remove the current user
         if user is not None:
             users = users.exclude(id=user.id)

@@ -27,12 +27,20 @@ class TwistlockCSVParser:
         data_cvss = row.get("CVSS", "")
         data_description = row.get("Description", "")
         data_tag = row.get("Tag", "")
-        data_distro = row.get("Distro", "")
         data_type = row.get("Type")
         data_package_version = row.get("Package Version", "")
+        data_package_license = row.get("Package License", "")
+        data_package_name = row.get("Package Name", "")
         data_cluster = row.get("Clusters", "")
         data_namespaces = row.get("Namespaces", "")
         data_package_path = row.get("Package Path", "")
+        data_name = row.get("Name", "")
+        data_cloud_id = row.get("Id", "")
+        data_runtime = row.get("Runtime", "")
+        data_cause = row.get("Cause", "")
+        data_found_in = row.get("Found In", "")
+        data_purl = row.get("PURL", "")
+        data_risk_factors = row.get("Risk Factors", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -56,23 +64,22 @@ class TwistlockCSVParser:
             title=textwrap.shorten(title, width=255, placeholder="..."),
             test=test,
             severity=convert_severity(data_severity),
-            description="<p><strong>Description:</strong> "
-            + data_description
-            + "</p><p><strong>Type:</strong> "
-            + str(data_type)
-            + "</p><p><strong>Tag:</strong> "
-            + str(data_tag)
-            + "</p><p><strong>Cluster:</strong> "
-            + str(data_cluster)
-            + "</p><p><strong>Namespaces:</strong> "
-            + str(data_namespaces)
-            + "</p><p><strong>Vulnerable Package:</strong> "
-            + str(data_package_name)
-            + "</p><p><strong>Current Version:</strong> "
-            + str(data_package_version)
-            + "</p><p><strong>Package path:</strong> "
-            + str(data_package_path)
-            + "</p>",
+            description= self.get_description(data_description
+                                            , data_type
+                                            , data_tag
+                                            , data_cluster
+                                            , data_namespaces
+                                            , data_package_name
+                                            , data_package_license
+                                            , data_package_version
+                                            , data_package_path
+                                            , data_name
+                                            , data_cloud_id
+                                            , data_runtime
+                                            , data_cause
+                                            , data_found_in
+                                            , data_purl
+                                            , data_risk_factors),
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),
             component_name=textwrap.shorten(
@@ -94,6 +101,64 @@ class TwistlockCSVParser:
             finding.unsaved_vulnerability_ids = [data_vulnerability_id]
 
         return finding
+
+    def get_description(self,
+                        data_description,
+                        data_type,
+                        data_tag,
+                        data_cluster,
+                        data_namespaces,
+                        data_package_name,
+                        data_package_license,
+                        data_package_version,
+                        data_package_path,
+                        data_name,
+                        data_cloud_id,
+                        data_runtime,
+                        data_cause,
+                        data_found_in,
+                        data_purl,
+                        data_risk_factors):
+        return "<p><strong>Description:</strong> " \
+                + data_description \
+                + "</p><p><strong>Type:</strong> " \
+                + str(data_type) \
+                + "</p><p><strong>Tag:</strong> " \
+                + str(data_tag) \
+                + "</p><p><strong>Cluster:</strong> " \
+                + str(data_cluster) \
+                + "</p><p><strong>Namespaces:</strong> " \
+                + str(data_namespaces) \
+                + "</p><p><strong>Vulnerable Package:</strong> " \
+                + str(data_package_name) \
+                + "</p><p><strong>Vulnerable Package License:</strong> " \
+                + str(data_package_license) \
+                + "</p><p><strong>Current Version:</strong> " \
+                + str(data_package_version) \
+                + "</p><p><strong>Package path:</strong> " \
+                + str(data_package_path) \
+                + "</p>" \
+                + "</p><p><strong>Name:</strong> " \
+                + str(data_name) \
+                + "</p>" \
+                + "</p><p><strong>Cloud Id:</strong> " \
+                + str(data_cloud_id) \
+                + "</p>" \
+                + "</p><p><strong>Runtime:</strong> " \
+                + str(data_runtime) \
+                + "</p>" \
+                + "</p><p><strong>Risk Factors:</strong> " \
+                + str(data_risk_factors) \
+                + "</p>" \
+                + "</p><p><strong>Cause:</strong> " \
+                + str(data_cause) \
+                + "</p>" \
+                + "</p><p><strong>Found In:</strong> " \
+                + str(data_found_in) \
+                + "</p>" \
+                + "</p><p><strong>PURL:</strong> " \
+                + str(data_purl) \
+                + "</p>"
 
     def parse(self, filename, test):
         if filename is None:
