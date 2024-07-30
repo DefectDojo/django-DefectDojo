@@ -1,5 +1,6 @@
 import csv
 import logging
+import mimetypes
 import operator
 import re
 from datetime import datetime
@@ -265,6 +266,7 @@ def engagements_all(request):
             'filter_form': filtered.form,
             'name_words': sorted(set(name_words)),
             'eng_words': sorted(set(eng_words)),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         })
 
 
@@ -446,6 +448,8 @@ class ViewEngagement(View):
 
     def get(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by('test_type__name', '-updated')
         default_page_num = 10
         tests_filter = self.get_filtered_tests(request, tests, eng)
@@ -514,6 +518,8 @@ class ViewEngagement(View):
 
     def post(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by('test_type__name', '-updated')
 
         default_page_num = 10
@@ -1804,6 +1810,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             'request': request,
             'add_findings': add_fpage,
             'return_url': get_return_url(request),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         })
 
 
@@ -1872,12 +1879,11 @@ def risk_acceptance_pending(request, eid, raid):
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def download_risk_acceptance(request, eid, raid):
-    import mimetypes
-
     mimetypes.init()
-
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-
+    # Ensure the risk acceptance is under the supplied engagement
+    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
+        raise PermissionDenied
     response = StreamingHttpResponse(
         FileIterWrapper(
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))

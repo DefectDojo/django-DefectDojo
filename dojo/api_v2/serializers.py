@@ -2099,7 +2099,7 @@ class ImportScanSerializer(serializers.Serializer):
         queryset=Endpoint.objects.all(),
         required=False,
         default=None,
-        help_text="The IP address, host name or full URL. It must be valid",
+        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint."
     )
     file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
@@ -2379,7 +2379,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         choices=get_choices_sorted(), required=True
     )
     endpoint_to_add = serializers.PrimaryKeyRelatedField(
-        queryset=Endpoint.objects.all(), default=None, required=False
+        queryset=Endpoint.objects.all(),
+        required=False,
+        default=None,
+        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint."
     )
     file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
@@ -3005,6 +3008,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = None
         product = None
+        template = False
 
         if self.instance is not None:
             user = self.instance.user
@@ -3014,25 +3018,26 @@ class NotificationsSerializer(serializers.ModelSerializer):
             user = data.get("user")
         if "product" in data:
             product = data.get("product")
+        if "template" in data:
+            template = data.get("template")
 
+        if (
+            template
+            and Notifications.objects.filter(template=True).count() > 0
+        ):
+            msg = "Notification template already exists"
+            raise ValidationError(msg)
         if (
             self.instance is None
             or user != self.instance.user
             or product != self.instance.product
         ):
             notifications = Notifications.objects.filter(
-                user=user, product=product, template=False
+                user=user, product=product, template=template
             ).count()
             if notifications > 0:
                 msg = "Notification for user and product already exists"
                 raise ValidationError(msg)
-        if (
-            data.get("template")
-            and Notifications.objects.filter(template=True).count() > 0
-        ):
-            msg = "Notification template already exists"
-            raise ValidationError(msg)
-
         return data
 
 

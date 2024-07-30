@@ -40,7 +40,13 @@ from dojo.group.queries import (
 )
 from dojo.group.utils import get_auth_group_name
 from dojo.models import Dojo_Group, Dojo_Group_Member, Global_Role, Product_Group, Product_Type_Group
-from dojo.utils import add_breadcrumb, get_page_items, is_title_in_breadcrumbs, redirect_to_return_url_or_else
+from dojo.utils import (
+    add_breadcrumb,
+    get_page_items,
+    get_setting,
+    is_title_in_breadcrumbs,
+    redirect_to_return_url_or_else,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -239,12 +245,16 @@ class DeleteGroup(View):
 
     def get_initial_context(self, request: HttpRequest, group: Dojo_Group):
         # Add the related objects to the delete page
-        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-        collector.collect([group])
+        rels = ["Previewing the relationships has been disabled.", ""]
+        display_preview = get_setting("DELETE_PREVIEW")
+        if display_preview:
+            collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+            collector.collect([group])
+            rels = collector.nested()
         return {
             "form": self.get_group_form(request, group),
             "to_delete": group,
-            "rels": collector.nested()
+            "rels": rels,
         }
 
     def process_forms(self, request: HttpRequest, group: Dojo_Group, context: dict):

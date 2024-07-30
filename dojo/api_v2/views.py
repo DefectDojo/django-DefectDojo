@@ -172,6 +172,7 @@ from dojo.user.utils import get_configuration_permissions_codenames
 import dojo.transfer_findings.helper as helper_tf
 from dojo.utils import (
     async_delete,
+    generate_file_response,
     get_setting,
     get_system_setting,
 )
@@ -653,21 +654,8 @@ class EngagementViewSet(
                 {"error": "File ID not associated with Engagement"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Get the path of the file in media root
-        file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
-        file_handle = open(file_path, "rb")
         # send file
-        response = FileResponse(
-            file_handle,
-            content_type=f"{mimetypes.guess_type(file_path)}",
-            status=status.HTTP_200_OK,
-        )
-        response["Content-Length"] = file_object.file.size
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="{file_object.file.name}"'
-
-        return response
+        return generate_file_response(file_object)
 
 
 class RiskAcceptanceViewSet(
@@ -1170,21 +1158,8 @@ class FindingViewSet(
                 {"error": "File ID not associated with Finding"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Get the path of the file in media root
-        file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
-        file_handle = open(file_path, "rb")
         # send file
-        response = FileResponse(
-            file_handle,
-            content_type=f"{mimetypes.guess_type(file_path)}",
-            status=status.HTTP_200_OK,
-        )
-        response["Content-Length"] = file_object.file.size
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="{file_object.file.name}"'
-
-        return response
+        return generate_file_response(file_object)
 
     @extend_schema(
         request=serializers.FindingNoteSerializer,
@@ -2342,21 +2317,8 @@ class TestsViewSet(
                 {"error": "File ID not associated with Test"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Get the path of the file in media root
-        file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
-        file_handle = open(file_path, "rb")
         # send file
-        response = FileResponse(
-            file_handle,
-            content_type=f"{mimetypes.guess_type(file_path)}",
-            status=status.HTTP_200_OK,
-        )
-        response["Content-Length"] = file_object.file.size
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="{file_object.file.name}"'
-
-        return response
+        return generate_file_response(file_object)
 
 
 # Authorization: authenticated, configuration
