@@ -150,8 +150,7 @@ class JIRAConfigEngagementBase:
             self.assertEqual(response.status_code, 200)
         elif expect_redirect_to:
             self.assertEqual(response.status_code, 302)
-            # print('response: ' + response)
-            # print('url: ' + response.url)
+
             try:
                 engagement = Engagement.objects.get(id=response.url.split("/")[-1])
             except:

@@ -1,3 +1,4 @@
+import logging
 import sys
 
 from django.core.management.base import BaseCommand
@@ -9,6 +10,7 @@ from dojo.models import TextQuestion
 Author: Cody Maffucci
 This script will migrate survey data from one external app to core dojo
 """
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -56,9 +58,9 @@ class Command(BaseCommand):
                     update_string = "UPDATE `" + new_table_name + "` SET polymorphic_ctype_id = " + str(ctype_id) + ";"
                     cursor.execute(str(update_string))
                 # Drop the ddse table
-            print("All defectDojo_engagement_sruvey tables migrated to dojo tables")
+            logger.info("All defectDojo_engagement_sruvey tables migrated to dojo tables")
 
             # Delete the old tables in reverse order to drop the children first
             for table in reversed(table_list):
                 cursor.execute("DROP TABLE `" + table + "`;")
-            print("All defectDojo_engagement_sruvey tables removed")
+            logger.info("All defectDojo_engagement_sruvey tables removed")

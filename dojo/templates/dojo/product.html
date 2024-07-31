@@ -325,97 +325,99 @@
             };
 
             // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#products').DataTable({
-                drawCallback: function(){
-                    $('#products .has-popover').hover(
-                        function() { $(this).popover('show'); }, // hover
-                        function() { $(this).popover('hide'); } // unhover
-                    );
-                 },
-                 colReorder: true,
-                 "columns": [
-                    { "data": "action", "searchable": false },
-                    { "data": "product" },
-                    { "data": "tags" },
-                    { "data": "criticality" , render: function (data, type, row) {
-                      const criticals = {
-                        'Very High': 5,
-                        'High': 4,
-                        'Medium': 3,
-                        'Low': 2,
-                        'Very Low': 1,
-                        'None': 0
-                      };
-                      if (type === 'sort') {
-                        return criticals[getDojoExportValueFromTag(data, 'i', 'data-content')]
-                      } else if (type === 'export') {
-                          return getDojoExportValueFromTag(data, 'i', 'data-content')
-                      } else if (data != undefined||data != null) {
-                          return data
+            {% if enable_table_filtering %}
+              var dojoTable = $('#products').DataTable({
+                  drawCallback: function(){
+                      $('#products .has-popover').hover(
+                          function() { $(this).popover('show'); }, // hover
+                          function() { $(this).popover('hide'); } // unhover
+                      );
+                  },
+                  colReorder: true,
+                  "columns": [
+                      { "data": "action", "searchable": false },
+                      { "data": "product" },
+                      { "data": "tags" },
+                      { "data": "criticality" , render: function (data, type, row) {
+                        const criticals = {
+                          'Very High': 5,
+                          'High': 4,
+                          'Medium': 3,
+                          'Low': 2,
+                          'Very Low': 1,
+                          'None': 0
+                        };
+                        if (type === 'sort') {
+                          return criticals[getDojoExportValueFromTag(data, 'i', 'data-content')]
+                        } else if (type === 'export') {
+                            return getDojoExportValueFromTag(data, 'i', 'data-content')
+                        } else if (data != undefined||data != null) {
+                            return data
+                        }
+                        return ""
+                      }},
+                      { "data": "metadata", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      } },
+                      { "data": "engagements", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      }},
+                      {% if system_settings.enable_jira %}
+                      { "data": "jira", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      }},
+                      {% endif %}
+                      {% if system_settings.enable_github %}
+                      { "data": "github", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      }},
+                      {% endif %}
+                      { "data": "findings" },
+                      { "data": "endpoints" },
+                      { "data": "contacts" },
+                      { "data": "product_type" },
+                  ],
+                  order: [],
+                  columnDefs: [
+                      {
+                          "orderable": false,
+                          "targets": [0]
+                      },
+                      {
+                          targets: [0],
+                          className: 'noVis'
                       }
-                      return ""
-                    }},
-                    { "data": "metadata", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
-                    } },
-                    { "data": "engagements", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
-                    }},
-                    {% if system_settings.enable_jira %}
-                    { "data": "jira", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
-                    }},
-                    {% endif %}
-                    {% if system_settings.enable_github %}
-                    { "data": "github", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
-                    }},
-                    {% endif %}
-                    { "data": "findings" },
-                    { "data": "endpoints" },
-                    { "data": "contacts" },
-                    { "data": "product_type" },
-                ],
-                order: [],
-                columnDefs: [
-                    {
-                        "orderable": false,
-                        "targets": [0]
-                    },
-                    {
-                        targets: [0],
-                        className: 'noVis'
-                    }
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
+                  ],
+                  dom: 'Bfrtip',
+                  paging: false,
+                  info: false,
+                  buttons: [
+                      {
+                          extend: 'colvis',
+                          columns: ':not(.noVis)'
+                      },
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'copy'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'excel',
+                          autoFilter: true,
+                          sheetName: 'Exported data',
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'csv'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'pdf',
+                          orientation: 'landscape',
+                          pageSize: 'LETTER'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'print'
+                      }),
+                  ],
+              });
+            {% endif %}
         });
     </script>
     {% include "dojo/filter_js_snippet.html" %}

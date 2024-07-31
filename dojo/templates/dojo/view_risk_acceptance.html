@@ -398,39 +398,41 @@
                 observer.observe($table[0]);
         };
     
-        setTimeout(function() {
-            var table = $('#findings_table').DataTable({
-                "paging": false,
-                "searching": true,
-                "ordering": true,
-                "info": false,
-                scrollCollapse: true,
-                scrollY: '30vh',
-                columns: [
-                    { title: '' },
-                    { title: 'ID' },
-                    { title: 'Severity' },
-                    { title: 'Name' },
-                    { title: 'CWE' },
-                    { title: 'Vulnerability Id' },
-                    { title: 'EPSS Score' },
-                    { title: 'EPSS Precentile' },
-                    { 
-                        title: 'Date', 
-                        render: function(data) {
-                            var date = new Date(data);
-                            var year = date.getFullYear();
-                            var month = (1 + date.getMonth()).toString().padStart(2, '0');
-                            var day = date.getDate().toString().padStart(2, '0');
+        {% if enable_table_filtering %}
+            setTimeout(function() {
+                var table = $('#findings_table').DataTable({
+                    "paging": false,
+                    "searching": true,
+                    "ordering": true,
+                    "info": false,
+                    scrollCollapse: true,
+                    scrollY: '30vh',
+                    columns: [
+                        { title: '' },
+                        { title: 'ID' },
+                        { title: 'Severity' },
+                        { title: 'Name' },
+                        { title: 'CWE' },
+                        { title: 'Vulnerability Id' },
+                        { title: 'EPSS Score' },
+                        { title: 'EPSS Precentile' },
+                        { 
+                            title: 'Date', 
+                            render: function(data) {
+                                var date = new Date(data);
+                                var year = date.getFullYear();
+                                var month = (1 + date.getMonth()).toString().padStart(2, '0');
+                                var day = date.getDate().toString().padStart(2, '0');
 
-                            return year + '-' + month + '-' + day;
-                        }
-                    },
-                    { title: 'Active' }
-                ]
-            });
-            resizeHandler($('#findings_table'));
-        }, 0);
+                                return year + '-' + month + '-' + day;
+                            }
+                        },
+                        { title: 'Active' }
+                    ]
+                });
+                resizeHandler($('#findings_table'));
+            }, 0);
+        {% endif %}
     });
 </script>
 {% endblock %}

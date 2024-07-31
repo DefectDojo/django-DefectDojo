@@ -3,12 +3,13 @@ import contextlib
 from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.db.models.signals import post_delete, pre_save
+from django.db.models.signals import post_delete, pre_delete, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from dojo.models import Finding, Test
+from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
 
 
@@ -49,3 +50,8 @@ def update_found_by_for_findings(sender, instance, **kwargs):
             for find in findings:
                 find.found_by.remove(old_test_type)
                 find.found_by.add(new_test_type)
+
+
+@receiver(pre_delete, sender=Test)
+def test_pre_delete(sender, instance, **kwargs):
+    delete_related_notes(instance)
