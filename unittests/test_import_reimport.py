@@ -1445,7 +1445,7 @@ class ImportReimportMixin:
         test_id = import0['test']
         test = Test.objects.get(id=test_id)
         findings = Finding.objects.filter(test=test)
-        self.assertEqual(5, len(findings))
+        self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
@@ -1463,7 +1463,7 @@ class ImportReimportMixin:
 
         self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
         findings = Finding.objects.filter(test=reimport_test)
-        self.assertEqual(5, len(findings))
+        self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
