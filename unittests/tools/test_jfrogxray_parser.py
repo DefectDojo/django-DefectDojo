@@ -1,6 +1,6 @@
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.jfrogxray.parser import JFrogXrayParser, decode_cwe_number
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestJfrogJFrogXrayParser(DojoTestCase):
@@ -34,8 +34,8 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
 
         item = findings[0]
         self.assertEqual("No CVE - pip:9.0.1", item.title)
-        description = '''pip PyPI (Python Packaging Index) PipXmlrpcTransport._download_http_url() Function Content-Disposition Header Path Traversal Arbitrary File Write Weakness
-**Provider:** JFrog'''
+        description = """pip PyPI (Python Packaging Index) PipXmlrpcTransport._download_http_url() Function Content-Disposition Header Path Traversal Arbitrary File Write Weakness
+**Provider:** JFrog"""
         self.assertEqual(description, item.description)
         self.assertEqual("High", item.severity)
         self.assertEqual("pip", item.component_name)
@@ -46,10 +46,10 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
 
         item = findings[1]
         self.assertEqual("CVE-2020-14386 - ubuntu:bionic:linux:4.15.0-88.88", item.title)
-        description = '''A flaw was found in the Linux kernel before 5.9-rc4. Memory corruption can be exploited to gain root privileges from unprivileged processes. The highest threat from this vulnerability is to data confidentiality and integrity.
+        description = """A flaw was found in the Linux kernel before 5.9-rc4. Memory corruption can be exploited to gain root privileges from unprivileged processes. The highest threat from this vulnerability is to data confidentiality and integrity.
 **Versions that are vulnerable:**
 < 4.15.0-117.118
-**Provider:** JFrog'''
+**Provider:** JFrog"""
         self.assertEqual(description, item.description)
         self.assertEqual("High", item.severity)
         self.assertEqual("ubuntu:bionic:linux", item.component_name)

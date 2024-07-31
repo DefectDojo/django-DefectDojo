@@ -1,6 +1,7 @@
 import json
 
 from cvss.cvss3 import CVSS3
+
 from dojo.models import Finding
 
 
@@ -27,7 +28,8 @@ class NancyParser:
         if "vulnerable" in data:
             findings = self.get_items(data["vulnerable"], test)
         else:
-            raise ValueError("Invalid format, unable to parse json.")
+            msg = "Invalid format, unable to parse json."
+            raise ValueError(msg)
 
         return findings
 
@@ -35,24 +37,24 @@ class NancyParser:
         findings = []
         for vuln in vulnerable:
             finding = None
-            severity = 'Info'
+            severity = "Info"
             # the tool does not define severity, however it
             # provides CVSSv3 vector which will calculate
             # severity dynamically on save()
             references = []
-            if vuln['Vulnerabilities']:
-                comp_name = vuln['Coordinates'].split(':')[1].split('@')[0]
-                comp_version = vuln['Coordinates'].split(':')[1].split('@')[1]
+            if vuln["Vulnerabilities"]:
+                comp_name = vuln["Coordinates"].split(":")[1].split("@")[0]
+                comp_version = vuln["Coordinates"].split(":")[1].split("@")[1]
 
-                references.append(vuln['Reference'])
+                references.append(vuln["Reference"])
 
-                for associated_vuln in vuln['Vulnerabilities']:
+                for associated_vuln in vuln["Vulnerabilities"]:
                     # create the finding object(s)
-                    references.append(associated_vuln['Reference'])
-                    vulnerability_ids = [associated_vuln['Cve']]
+                    references.append(associated_vuln["Reference"])
+                    vulnerability_ids = [associated_vuln["Cve"]]
                     finding = Finding(
-                        title=associated_vuln['Title'],
-                        description=associated_vuln['Description'],
+                        title=associated_vuln["Title"],
+                        description=associated_vuln["Description"],
                         test=test,
                         severity=severity,
                         component_name=comp_name,
@@ -69,14 +71,14 @@ class NancyParser:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
 
                     # CVSSv3 vector
-                    if associated_vuln['CvssVector']:
+                    if associated_vuln["CvssVector"]:
                         finding.cvssv3 = CVSS3(
-                            associated_vuln['CvssVector']).clean_vector()
+                            associated_vuln["CvssVector"]).clean_vector()
 
                     # do we have a CWE?
-                    if associated_vuln['Title'].startswith('CWE-'):
-                        cwe = (associated_vuln['Title']
-                               .split(':')[0].split('-')[1])
+                    if associated_vuln["Title"].startswith("CWE-"):
+                        cwe = (associated_vuln["Title"]
+                               .split(":")[0].split("-")[1])
                         finding.cwe = int(cwe)
 
                     findings.append(finding)

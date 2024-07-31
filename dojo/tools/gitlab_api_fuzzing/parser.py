@@ -42,7 +42,7 @@ class GitlabAPIFuzzingParser:
                     static_finding=False,
                     dynamic_finding=True,
                     unique_id_from_tool=vulnerability["id"],
-                )
+                ),
             )
         return findings
 

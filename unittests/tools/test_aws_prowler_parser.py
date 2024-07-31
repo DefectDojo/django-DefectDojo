@@ -1,7 +1,8 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.aws_prowler.parser import AWSProwlerParser
+
 from dojo.models import Test
+from dojo.tools.aws_prowler.parser import AWSProwlerParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAwsProwlerParser(DojoTestCase):
@@ -21,7 +22,7 @@ class TestAwsProwlerParser(DojoTestCase):
             open("unittests/scans/aws_prowler/one_vuln.csv"))
         self.assertEqual(1, len(findings))
         self.assertEqual(
-            "Root user in the account wasn't accessed in the last 1 days", findings[0].title
+            "Root user in the account wasn't accessed in the last 1 days", findings[0].title,
         )
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings(self):
@@ -79,19 +80,19 @@ class TestAwsProwlerParser(DojoTestCase):
             open("unittests/scans/aws_prowler/one_vuln.json"))
         self.assertEqual(1, len(findings))
         self.assertEqual("eu-central-1: Only Virtual MFA is enabled for root", findings[0].title)
-        self.assertIn('012345678912', findings[0].description)
-        self.assertIn('Ensure hardware MFA is enabled for the root account', findings[0].description)
-        self.assertIn('check114', findings[0].description)
-        self.assertIn('1.14', findings[0].description)
-        self.assertIn('eu-central-1', findings[0].description)
-        self.assertIn('Software and Configuration Checks', findings[0].description)
-        self.assertIn('iam', findings[0].description)
-        self.assertIn('IAM', findings[0].description)
-        self.assertIn('MFA', findings[0].description)
-        self.assertEqual('Critical', findings[0].severity)
-        self.assertIn('The root account is the most privileged user in an AWS account. MFA adds an extra layer', findings[0].impact)
-        self.assertEqual('Using IAM console navigate to Dashboard and expand Activate MFA on your root account.', findings[0].mitigation)
-        self.assertEqual('https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa', findings[0].references)
+        self.assertIn("012345678912", findings[0].description)
+        self.assertIn("Ensure hardware MFA is enabled for the root account", findings[0].description)
+        self.assertIn("check114", findings[0].description)
+        self.assertIn("1.14", findings[0].description)
+        self.assertIn("eu-central-1", findings[0].description)
+        self.assertIn("Software and Configuration Checks", findings[0].description)
+        self.assertIn("iam", findings[0].description)
+        self.assertIn("IAM", findings[0].description)
+        self.assertIn("MFA", findings[0].description)
+        self.assertEqual("Critical", findings[0].severity)
+        self.assertIn("The root account is the most privileged user in an AWS account. MFA adds an extra layer", findings[0].impact)
+        self.assertEqual("Using IAM console navigate to Dashboard and expand Activate MFA on your root account.", findings[0].mitigation)
+        self.assertEqual("https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa", findings[0].references)
         self.assertEqual(datetime.date(2021, 8, 23), findings[0].date)
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings_json(self):
@@ -100,13 +101,13 @@ class TestAwsProwlerParser(DojoTestCase):
         self.assertEqual(4, len(findings))
         with self.subTest(i=0):
             self.assertEqual("eu-central-1: Only Virtual MFA is enabled for root", findings[0].title)
-            self.assertEqual('Critical', findings[0].severity)
+            self.assertEqual("Critical", findings[0].severity)
         with self.subTest(i=1):
             self.assertEqual("eu-central-1: Cluster control plane access is not restricted for EKS cluster prod", findings[1].title)
-            self.assertEqual('High', findings[1].severity)
+            self.assertEqual("High", findings[1].severity)
         with self.subTest(i=2):
             self.assertEqual("eu-central-1: Control plane logging is not enabled for EKS cluster prod", findings[2].title)
-            self.assertEqual('Medium', findings[2].severity)
+            self.assertEqual("Medium", findings[2].severity)
         with self.subTest(i=3):
             self.assertEqual("eu-central-1: prod.config_read.iam has inline policy directly attached", findings[3].title)
-            self.assertEqual('Low', findings[3].severity)
+            self.assertEqual("Low", findings[3].severity)

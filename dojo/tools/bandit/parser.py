@@ -1,4 +1,5 @@
 import json
+
 import dateutil.parser
 
 from dojo.models import Finding
@@ -17,7 +18,7 @@ class BanditParser:
     def get_findings(self, filename, test):
         data = json.load(filename)
 
-        results = list()
+        results = []
         if "generated_at" in data:
             find_date = dateutil.parser.parse(data["generated_at"])
 
@@ -33,7 +34,7 @@ class BanditParser:
                     "```",
                     str(item.get("code")).replace("```", "\\`\\`\\`"),
                     "```",
-                ]
+                ],
             )
 
             finding = Finding(
@@ -47,7 +48,7 @@ class BanditParser:
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=":".join(
-                    [item["test_name"], item["test_id"]]
+                    [item["test_name"], item["test_id"]],
                 ),
                 nb_occurences=1,
             )

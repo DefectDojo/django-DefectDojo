@@ -16,9 +16,8 @@ class BlackduckAPI:
                 timeout=120,
             )
         else:
-            raise ValueError(
-                f"Authentication type {tool_config.authentication_type} not supported"
-            )
+            msg = f"Authentication type {tool_config.authentication_type} not supported"
+            raise ValueError(msg)
 
     # TODO
     # def test_connection(self):
@@ -48,5 +47,5 @@ class BlackduckAPI:
 
     def get_vulnerabilities(self, component):
         return self.client.get_json(
-            f'/api/vulnerabilities/{component["vulnerabilityWithRemediation"]["vulnerabilityName"]}'
+            f'/api/vulnerabilities/{component["vulnerabilityWithRemediation"]["vulnerabilityName"]}',
         )

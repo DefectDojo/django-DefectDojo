@@ -23,10 +23,9 @@ class SslscanParser:
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:
-            raise NamespaceErr(
-                "This doesn't seem to be a valid sslscan xml file."
-            )
-        dupes = dict()
+            msg = "This doesn't seem to be a valid sslscan xml file."
+            raise NamespaceErr(msg)
+        dupes = {}
         for ssltest in root:
             for target in ssltest:
                 title = ""
@@ -68,7 +67,7 @@ class SslscanParser:
 
                 if title and description is not None:
                     dupe_key = hashlib.sha256(
-                        str(description + title).encode("utf-8")
+                        str(description + title).encode("utf-8"),
                     ).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]
@@ -85,7 +84,7 @@ class SslscanParser:
                             severity=severity,
                             dynamic_finding=True,
                         )
-                        finding.unsaved_endpoints = list()
+                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         if host:

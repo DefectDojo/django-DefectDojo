@@ -1,16 +1,15 @@
 import logging
 
 from django.contrib import messages
-from django.shortcuts import render
+from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest
+from django.shortcuts import render
 from django.utils.translation import gettext as _
 from django.views import View
-from django.core.exceptions import PermissionDenied
 
-from dojo.models import Notifications
-from dojo.utils import get_enabled_notifications_list
-from dojo.utils import add_breadcrumb
 from dojo.forms import NotificationsForm
+from dojo.models import Notifications
+from dojo.utils import add_breadcrumb, get_enabled_notifications_list
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ class SystemNotificationsView(View):
 
     def check_user_permissions(self, request: HttpRequest):
         if not request.user.is_superuser:
-            raise PermissionDenied()
+            raise PermissionDenied
 
     def get_form(self, request: HttpRequest, notifications: Notifications):
         # Set up the args for the form
@@ -43,10 +42,10 @@ class SystemNotificationsView(View):
 
     def get_initial_context(self, request: HttpRequest, notifications: Notifications, scope: str):
         return {
-            'form': self.get_form(request, notifications),
-            'scope': scope,
-            'enabled_notifications': self.get_enabled_notifications(),
-            'admin': request.user.is_superuser
+            "form": self.get_form(request, notifications),
+            "scope": scope,
+            "enabled_notifications": self.get_enabled_notifications(),
+            "admin": request.user.is_superuser,
         }
 
     def set_breadcrumbs(self, request: HttpRequest):
@@ -59,8 +58,8 @@ class SystemNotificationsView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Settings saved.'),
-                extra_tags='alert-success')
+                _("Settings saved."),
+                extra_tags="alert-success")
             return request, True
         return request, False
 

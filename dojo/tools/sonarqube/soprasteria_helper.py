@@ -1,8 +1,11 @@
 import logging
 import re
+
 from django.utils.html import strip_tags
 from lxml import etree
+
 from dojo.models import Finding
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,12 +20,14 @@ class SonarQubeSoprasteriaHelper:
             return "Medium"
         elif sev == "minor":
             return "Low"
+        elif sev in ["high", "medium", "low"]:
+            return sev.capitalize()
         else:
             return "Info"
 
     def get_description(self, vuln_details):
         rule_description = etree.tostring(
-            vuln_details, pretty_print=True
+            vuln_details, pretty_print=True,
         ).decode("utf-8", errors="replace")
         rule_description = rule_description.split("<h2>See", 1)[0]
         rule_description = (str(rule_description)).replace("<h2>", "**")

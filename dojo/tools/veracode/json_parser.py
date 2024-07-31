@@ -1,10 +1,11 @@
 import json
 import re
+
 from cvss import CVSS3
 from dateutil import parser
 from django.conf import settings
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
 class VeracodeJSONParser:
@@ -123,7 +124,7 @@ class VeracodeJSONParser:
         # Attempt to get the CVSS score
         if uncleaned_cvss := finding_details.get("cvss"):
             if isinstance(uncleaned_cvss, str):
-                if uncleaned_cvss.startswith("CVSS:3.1/") or uncleaned_cvss.startswith("CVSS:3.0/"):
+                if uncleaned_cvss.startswith(("CVSS:3.1/", "CVSS:3.0/")):
                     finding.cvssv3 = CVSS3(str(uncleaned_cvss)).clean_vector(output_prefix=True)
                 elif not uncleaned_cvss.startswith("CVSS"):
                     finding.cvssv3 = CVSS3(f"CVSS:3.1/{str(uncleaned_cvss)}").clean_vector(output_prefix=True)
@@ -196,7 +197,7 @@ class VeracodeJSONParser:
         if url := finding_details.get("url"):
             # Create the Endpoint object from the url
             finding.unsaved_endpoints.append(
-                Endpoint.from_uri(url)
+                Endpoint.from_uri(url),
             )
         else:
             # build it from the other attributes
@@ -209,7 +210,7 @@ class VeracodeJSONParser:
                     host=host,
                     port=port,
                     path=path,
-                )
+                ),
             )
         # Add the plugin if available
         if plugin := finding_details.get("plugin"):

@@ -1,6 +1,6 @@
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.ibm_app.parser import IbmAppParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestIbmAppParser(DojoTestCase):
@@ -16,10 +16,10 @@ class TestIbmAppParser(DojoTestCase):
         self.assertEqual(27, len(findings))
 
         finding = findings[15]
-        self.assertEqual('High', finding.severity)
+        self.assertEqual("High", finding.severity)
         self.assertEqual(79, finding.cwe)
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
-        self.assertEqual('CVE-2022-00001', finding.unsaved_vulnerability_ids[0])
+        self.assertEqual("CVE-2022-00001", finding.unsaved_vulnerability_ids[0])
 
         finding = findings[1]
-        self.assertEqual('Info', finding.severity)
+        self.assertEqual("Info", finding.severity)

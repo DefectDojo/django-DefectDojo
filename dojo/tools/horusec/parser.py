@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from dateutil.parser import parse
+
 from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
 
@@ -28,7 +29,7 @@ class HorusecParser:
     def get_findings(self, filename, test):
         data = json.load(filename)
         report_date = datetime.strptime(
-            data.get("createdAt")[0:10], "%Y-%m-%d"
+            data.get("createdAt")[0:10], "%Y-%m-%d",
         )
         return [
             self._get_finding(node, report_date)
@@ -39,7 +40,7 @@ class HorusecParser:
         data = json.load(scan)
         report_date = parse(data.get("createdAt"))
         test = ParserTest(
-            name=self.ID, type=self.ID, version=data.get("version").lstrip("v")
+            name=self.ID, type=self.ID, version=data.get("version").lstrip("v"),
         )  # remove the v in vX.Y.Z
         test.description = "\n".join(
             [
@@ -48,7 +49,7 @@ class HorusecParser:
                 "```",
                 data.get("errors").replace("```", "``````"),
                 "```",
-            ]
+            ],
         )
         test.findings = [
             self._get_finding(node, report_date)
@@ -64,7 +65,7 @@ class HorusecParser:
                 f"```{data['vulnerabilities']['language']}",
                 data["vulnerabilities"]["code"].replace("```", "``````").replace("\x00", ""),
                 "```",
-            ]
+            ],
         )
         finding = Finding(
             title=data["vulnerabilities"]["details"].split("\n")[0],

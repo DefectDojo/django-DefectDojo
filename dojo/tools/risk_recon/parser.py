@@ -1,6 +1,7 @@
 import json
 
 import dateutil
+
 from dojo.models import Finding
 from dojo.tools.risk_recon.api import RiskReconAPI
 
@@ -37,7 +38,7 @@ class RiskReconParser:
             return self._get_findings_internal(findings, test)
 
     def _get_findings_internal(self, findings, test):
-        dupes = dict()
+        dupes = {}
         for item in findings:
             findingdetail = ""
             title = (
@@ -103,7 +104,7 @@ class RiskReconParser:
             finding.unsaved_tags = tags
 
             dupe_key = item.get(
-                "finding_id", title + "|" + tags + "|" + findingdetail
+                "finding_id", title + "|" + tags + "|" + findingdetail,
             )
 
             if dupe_key in dupes:

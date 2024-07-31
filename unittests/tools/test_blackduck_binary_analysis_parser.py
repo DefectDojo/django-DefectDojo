@@ -1,7 +1,8 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.blackduck_binary_analysis.parser import BlackduckBinaryAnalysisParser
-from dojo.models import Test
 from pathlib import Path
+
+from dojo.models import Test
+from dojo.tools.blackduck_binary_analysis.parser import BlackduckBinaryAnalysisParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestBlackduckBinaryAnalysisParser(DojoTestCase):
@@ -20,7 +21,7 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
             self.assertIsNotNone(finding.title)
             self.assertEqual(
                 "instrument.dll: zlib 1.2.13 Vulnerable to CVE-2023-45853",
-                finding.title
+                finding.title,
             )
 
             self.assertIsNotNone(finding.description)
@@ -36,7 +37,7 @@ class TestBlackduckBinaryAnalysisParser(DojoTestCase):
             self.assertIsNotNone(finding.file_path)
             self.assertEqual(
                 "JRE.msi:JRE.msi-30276-90876123.cab:instrument.dll",
-                finding.file_path
+                finding.file_path,
             )
 
             self.assertIsNotNone(finding.vuln_id_from_tool)

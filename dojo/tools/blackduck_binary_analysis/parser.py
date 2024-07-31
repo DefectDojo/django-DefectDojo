@@ -1,8 +1,10 @@
 import hashlib
 
-from dojo.models import Finding
-from .importer import BlackduckBinaryAnalysisImporter
 from cvss import CVSS2, CVSS3
+
+from dojo.models import Finding
+
+from .importer import BlackduckBinaryAnalysisImporter
 
 
 class BlackduckBinaryAnalysisParser:
@@ -33,7 +35,7 @@ class BlackduckBinaryAnalysisParser:
         return findings
 
     def ingest_findings(self, sorted_findings, test):
-        findings = dict()
+        findings = {}
         for i in sorted_findings:
             file_path = str(i.object_full_path)
             object_sha1 = i.object_sha1
@@ -45,14 +47,14 @@ class BlackduckBinaryAnalysisParser:
             if str(i.cvss_vector_v3) != "":
                 cvss_vectors = "{}{}".format(
                     "CVSS:3.1/",
-                    i.cvss_vector_v3
+                    i.cvss_vector_v3,
                 )
                 cvss_obj = CVSS3(cvss_vectors)
             elif str(i.cvss_vector_v2) != "":
                 # Some of the CVSSv2 vectors have a trailing
                 # colon that needs to be removed
                 cvss_v3 = False
-                cvss_vectors = i.cvss_vector_v2.replace(':/', '/')
+                cvss_vectors = i.cvss_vector_v2.replace(":/", "/")
                 cvss_obj = CVSS2(cvss_vectors)
             else:
                 cvss_vectors = "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
@@ -66,7 +68,7 @@ class BlackduckBinaryAnalysisParser:
             references = self.format_references(i)
 
             unique_finding_key = hashlib.sha256(
-                f"{file_path + object_sha1 + title}".encode()
+                f"{file_path + object_sha1 + title}".encode(),
             ).hexdigest()
 
             if unique_finding_key in findings:

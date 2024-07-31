@@ -1,6 +1,7 @@
 import csv
 import io
 import sys
+
 from dojo.models import Finding
 
 
@@ -85,6 +86,6 @@ class WizParser:
                         dynamic_finding=True,
                         mitigation=row.get("Remediation Recommendation"),
                         test=test,
-                    )
+                    ),
                 )
         return findings

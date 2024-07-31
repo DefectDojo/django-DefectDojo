@@ -2,6 +2,7 @@ import json
 import re
 
 from dateutil import parser
+
 from dojo.models import Finding
 
 
@@ -44,7 +45,7 @@ class DawnScannerParser:
 
             if self.CVE_REGEX.match(item["name"]):
                 finding.unsaved_vulnerability_ids = [
-                    self.CVE_REGEX.findall(item["name"])[0]
+                    self.CVE_REGEX.findall(item["name"])[0],
                 ]
 
             items.append(finding)

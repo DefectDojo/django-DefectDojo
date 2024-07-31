@@ -50,12 +50,9 @@ class ScoutSuiteParser:
 
         # Summary of Services
         test_description = (
-            "%s\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count"
-            % (test_description)
+            f"{test_description}\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count"
         )
-        test_description = "%s\n:---|---:|---:|---:|---:|---:" % (
-            test_description
-        )
+        test_description = f"{test_description}\n:---|---:|---:|---:|---:|---:"
         for service, items in list(last_run["summary"].items()):
             test_description += "\n"
             test_description += "|".join(
@@ -66,10 +63,10 @@ class ScoutSuiteParser:
                     str(items["max_level"]),
                     str(items["resources_count"]),
                     str(items["rules_count"]),
-                ]
+                ],
             )
 
-        tests = list()
+        tests = []
         test = ParserTest(
             name=self.ID,
             type=data["provider_name"],
@@ -95,7 +92,7 @@ class ScoutSuiteParser:
         last_run_date = None
         if "time" in data.get("last_run", {}):
             last_run_date = datetime.strptime(
-                data["last_run"]["time"][0:10], "%Y-%m-%d"
+                data["last_run"]["time"][0:10], "%Y-%m-%d",
             ).date()
 
         # Configured Services
@@ -141,7 +138,7 @@ class ScoutSuiteParser:
                         dynamic_finding=False,
                         static_finding=True,
                         vuln_id_from_tool=":".join(
-                            [data["provider_code"], finding_name]
+                            [data["provider_code"], finding_name],
                         ),
                     )
                     if finding.get("references"):
@@ -178,7 +175,7 @@ class ScoutSuiteParser:
                 )
             else:
                 self.item_data = (
-                    self.item_data + self.formatview(depth) + "%s\n" % src
+                    self.item_data + self.formatview(depth) + f"{src}\n"
                 )
             self.pdepth = depth
 

@@ -1,9 +1,10 @@
-import json
-import html2text
 import datetime
+import json
 
+import html2text
 from cvss import parser as cvss_parser
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
 class NetsparkerParser:
@@ -22,14 +23,14 @@ class NetsparkerParser:
             data = json.loads(str(tree, "utf-8-sig"))
         except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
         if "UTC" in data["Generated"]:
             scan_date = datetime.datetime.strptime(
-                data["Generated"].split(" ")[0], "%d/%m/%Y"
+                data["Generated"].split(" ")[0], "%d/%m/%Y",
             ).date()
         else:
             scan_date = datetime.datetime.strptime(
-                data["Generated"], "%d/%m/%Y %H:%M %p"
+                data["Generated"], "%d/%m/%Y %H:%M %p",
             ).date()
 
         for item in data["Vulnerabilities"]:
@@ -50,8 +51,8 @@ class NetsparkerParser:
             url = item["Url"]
             impact = html2text.html2text(item.get("Impact", ""))
             dupe_key = title
-            request = item["HttpRequest"]["Content"]
-            response = item["HttpResponse"]["Content"]
+            request = item["HttpRequest"].get("Content", None)
+            response = item["HttpResponse"].get("Content", None)
 
             finding = Finding(
                 title=title,
@@ -78,17 +79,17 @@ class NetsparkerParser:
             if item["Classification"] is not None:
                 if item["Classification"].get("Cvss") is not None and item["Classification"].get("Cvss").get("Vector") is not None:
                     cvss_objects = cvss_parser.parse_cvss_from_text(
-                        item["Classification"]["Cvss"]["Vector"]
+                        item["Classification"]["Cvss"]["Vector"],
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
                 elif item["Classification"].get("Cvss31") is not None and item["Classification"].get("Cvss31").get("Vector") is not None:
                     cvss_objects = cvss_parser.parse_cvss_from_text(
-                        item["Classification"]["Cvss31"]["Vector"]
+                        item["Classification"]["Cvss31"]["Vector"],
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
-            finding.unsaved_req_resp = [{"req": request, "resp": response}]
+            finding.unsaved_req_resp = [{"req": str(request), "resp": str(response)}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
             if dupe_key in dupes:

@@ -32,7 +32,7 @@ class TalismanParser:
         Converts a Talisman JSON report to DefectDojo findings
         """
         if filename is None:
-            return list()
+            return []
 
         json_data = json.load(filename)
         results = json_data.get("results")
@@ -76,7 +76,7 @@ class TalismanParser:
                             + file_path
                             + description
                             + severity
-                        ).encode("utf-8")
+                        ).encode("utf-8"),
                     ).hexdigest()
 
                     if key not in dupes:

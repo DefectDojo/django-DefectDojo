@@ -2,10 +2,10 @@ import hashlib
 import re
 
 from defusedxml.ElementTree import parse
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_ipv46_address
 
 from dojo.models import Endpoint, Finding
-from django.core.validators import validate_ipv46_address
-from django.core.exceptions import ValidationError
 
 
 class OpenscapParser:
@@ -26,19 +26,17 @@ class OpenscapParser:
 
         # check if xml file hash correct root or not.
         if "Benchmark" not in root.tag:
-            raise ValueError(
-                "This doesn't seem to be a valid Openscap vulnerability scan xml file."
-            )
+            msg = "This doesn't seem to be a valid Openscap vulnerability scan xml file."
+            raise ValueError(msg)
         if "http://checklists.nist.gov/xccdf/" not in namespace:
-            raise ValueError(
-                "This doesn't seem to be a valid Openscap vulnerability scan xml file."
-            )
+            msg = "This doesn't seem to be a valid Openscap vulnerability scan xml file."
+            raise ValueError(msg)
 
         # read rules
         rules = {}
         for rule in root.findall(f".//{namespace}Rule"):
             rules[rule.attrib["id"]] = {
-                "title": rule.findtext(f"./{namespace}title")
+                "title": rule.findtext(f"./{namespace}title"),
             }
         # go to test result
         test_result = tree.find(f"./{namespace}TestResult")
@@ -49,11 +47,11 @@ class OpenscapParser:
         for ip in test_result.findall(f"./{namespace}target-address"):
             ips.append(ip.text)
 
-        dupes = dict()
+        dupes = {}
         # run both rule, and rule-result in parallel so that we can get title
         # for failed test from rule.
         for rule_result in test_result.findall(
-            f"./{namespace}rule-result"
+            f"./{namespace}rule-result",
         ):
             result = rule_result.findtext(f"./{namespace}result")
             # find only failed report.
@@ -65,11 +63,11 @@ class OpenscapParser:
                     [
                         "**IdRef:** `" + rule_result.attrib["idref"] + "`",
                         "**Title:** `" + title + "`",
-                    ]
+                    ],
                 )
                 vulnerability_ids = []
                 for vulnerability_id in rule_result.findall(
-                    f"./{namespace}ident[@system='http://cve.mitre.org']"
+                    f"./{namespace}ident[@system='http://cve.mitre.org']",
                 ):
                     vulnerability_ids.append(vulnerability_id.text)
                 # get severity.
@@ -84,7 +82,7 @@ class OpenscapParser:
                 references = ""
                 # get references.
                 for check_content in rule_result.findall(
-                    f"./{namespace}check/{namespace}check-content-ref"
+                    f"./{namespace}check/{namespace}check-content-ref",
                 ):
                     references += (
                         "**name:** : " + check_content.attrib["name"] + "\n"
@@ -117,7 +115,7 @@ class OpenscapParser:
                     finding.unsaved_endpoints.append(endpoint)
 
                 dupe_key = hashlib.sha256(
-                    references.encode("utf-8")
+                    references.encode("utf-8"),
                 ).hexdigest()
                 if dupe_key in dupes:
                     find = dupes[dupe_key]

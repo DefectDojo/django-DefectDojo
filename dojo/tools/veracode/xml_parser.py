@@ -1,11 +1,11 @@
 import re
 import uuid
 from datetime import datetime
-from django.conf import settings
 
 from defusedxml import ElementTree
+from django.conf import settings
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
 
@@ -30,40 +30,35 @@ class VeracodeXMLParser:
 
         app_id = root.attrib["app_id"]
         report_date = datetime.strptime(
-            root.attrib["last_update_time"], "%Y-%m-%d %H:%M:%S %Z"
+            root.attrib["last_update_time"], "%Y-%m-%d %H:%M:%S %Z",
         )
 
-        dupes = dict()
+        dupes = {}
 
         # Get SAST findings
         # This assumes `<category/>` only exists within the `<severity/>`
         # nodes.
         for category_node in root.findall(
-            "x:severity/x:category", namespaces=XML_NAMESPACE
+            "x:severity/x:category", namespaces=XML_NAMESPACE,
         ):
             # Mitigation text.
             mitigation_text = ""
             mitigation_text += (
                 category_node.find(
-                    "x:recommendations/x:para", namespaces=XML_NAMESPACE
+                    "x:recommendations/x:para", namespaces=XML_NAMESPACE,
                 ).get("text")
                 + "\n\n"
             )
             # Bullet list of recommendations:
             mitigation_text += "".join(
-                list(
-                    map(
-                        lambda x: "    * " + x.get("text") + "\n",
-                        category_node.findall(
+                ["    * " + x.get("text") + "\n" for x in category_node.findall(
                             "x:recommendations/x:para/x:bulletitem",
                             namespaces=XML_NAMESPACE,
-                        ),
-                    )
-                )
+                        )],
             )
 
             for flaw_node in category_node.findall(
-                "x:cwe/x:staticflaws/x:flaw", namespaces=XML_NAMESPACE
+                "x:cwe/x:staticflaws/x:flaw", namespaces=XML_NAMESPACE,
             ):
                 dupe_key = flaw_node.attrib["issueid"]
 
@@ -71,17 +66,17 @@ class VeracodeXMLParser:
                 if dupe_key not in dupes:
                     # Add to list.
                     dupes[dupe_key] = self.__xml_static_flaw_to_finding(
-                        app_id, flaw_node, mitigation_text, test
+                        app_id, flaw_node, mitigation_text, test,
                     )
 
             for flaw_node in category_node.findall(
-                "x:cwe/x:dynamicflaws/x:flaw", namespaces=XML_NAMESPACE
+                "x:cwe/x:dynamicflaws/x:flaw", namespaces=XML_NAMESPACE,
             ):
                 dupe_key = flaw_node.attrib["issueid"]
 
                 if dupe_key not in dupes:
                     dupes[dupe_key] = self.__xml_dynamic_flaw_to_finding(
-                        app_id, flaw_node, mitigation_text, test
+                        app_id, flaw_node, mitigation_text, test,
                     )
 
         # Get SCA findings
@@ -103,7 +98,7 @@ class VeracodeXMLParser:
             _version = component.attrib["version"]
 
             for vulnerability in component.findall(
-                "x:vulnerabilities/x:vulnerability", namespaces=XML_NAMESPACE
+                "x:vulnerabilities/x:vulnerability", namespaces=XML_NAMESPACE,
             ):
                 # We don't have a Id for SCA findings so just generate a random
                 # one
@@ -126,7 +121,7 @@ class VeracodeXMLParser:
     @classmethod
     def __xml_flaw_to_severity(cls, xml_node):
         return cls.vc_severity_mapping.get(
-            int(xml_node.attrib["severity"]), "Info"
+            int(xml_node.attrib["severity"]), "Info",
         )
 
     @classmethod
@@ -138,7 +133,7 @@ class VeracodeXMLParser:
         finding.static_finding = True
         finding.dynamic_finding = False
         finding.unique_id_from_tool = cls.__xml_flaw_to_unique_id(
-            app_id, xml_node
+            app_id, xml_node,
         )
 
         # Report values
@@ -194,11 +189,11 @@ class VeracodeXMLParser:
                 # This happens if any mitigation (including 'Potential false positive')
                 # was accepted in VC.
                 for mitigation in xml_node.findall(
-                    "x:mitigations/x:mitigation", namespaces=XML_NAMESPACE
+                    "x:mitigations/x:mitigation", namespaces=XML_NAMESPACE,
                 ):
                     _is_mitigated = True
                     _mitigated_date = datetime.strptime(
-                        mitigation.attrib["date"], "%Y-%m-%d %H:%M:%S %Z"
+                        mitigation.attrib["date"], "%Y-%m-%d %H:%M:%S %Z",
                     )
         finding.is_mitigated = _is_mitigated
         finding.mitigated = _mitigated_date
@@ -222,10 +217,10 @@ class VeracodeXMLParser:
 
     @classmethod
     def __xml_static_flaw_to_finding(
-        cls, app_id, xml_node, mitigation_text, test
+        cls, app_id, xml_node, mitigation_text, test,
     ):
         finding = cls.__xml_flaw_to_finding(
-            app_id, xml_node, mitigation_text, test
+            app_id, xml_node, mitigation_text, test,
         )
         finding.static_finding = True
         finding.dynamic_finding = False
@@ -258,10 +253,10 @@ class VeracodeXMLParser:
 
     @classmethod
     def __xml_dynamic_flaw_to_finding(
-        cls, app_id, xml_node, mitigation_text, test
+        cls, app_id, xml_node, mitigation_text, test,
     ):
         finding = cls.__xml_flaw_to_finding(
-            app_id, xml_node, mitigation_text, test
+            app_id, xml_node, mitigation_text, test,
         )
         finding.static_finding = False
         finding.dynamic_finding = True
@@ -284,7 +279,7 @@ class VeracodeXMLParser:
 
     @classmethod
     def __xml_sca_flaw_to_finding(
-        cls, test, report_date, vendor, library, version, xml_node
+        cls, test, report_date, vendor, library, version, xml_node,
     ):
         # Defaults
         finding = Finding()
@@ -316,7 +311,7 @@ class VeracodeXMLParser:
                 xml_node.attrib.get("first_found_date"),
                 xml_node.attrib["cvss_score"],
                 cls.vc_severity_mapping.get(
-                    int(xml_node.attrib["severity"]), "Info"
+                    int(xml_node.attrib["severity"]), "Info",
                 ),
                 xml_node.attrib["cve_summary"],
             )
@@ -334,11 +329,11 @@ class VeracodeXMLParser:
             # This happens if any mitigation (including 'Potential false positive')
             # was accepted in VC.
             for mitigation in xml_node.findall(
-                "x:mitigations/x:mitigation", namespaces=XML_NAMESPACE
+                "x:mitigations/x:mitigation", namespaces=XML_NAMESPACE,
             ):
                 _is_mitigated = True
                 _mitigated_date = datetime.strptime(
-                    mitigation.attrib["date"], "%Y-%m-%d %H:%M:%S %Z"
+                    mitigation.attrib["date"], "%Y-%m-%d %H:%M:%S %Z",
                 )
         finding.is_mitigated = _is_mitigated
         finding.mitigated = _mitigated_date

@@ -49,7 +49,7 @@ class TwistlockCSVParser:
             + "</p>",
             mitigation=data_fix_status,
             component_name=textwrap.shorten(
-                data_package_name, width=200, placeholder="..."
+                data_package_name, width=200, placeholder="...",
             ),
             component_version=data_package_version,
             false_p=False,
@@ -69,11 +69,11 @@ class TwistlockCSVParser:
         if filename is None:
             return
         content = filename.read()
-        dupes = dict()
+        dupes = {}
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         for row in reader:
             finding = self.parse_issue(row, test)
@@ -85,7 +85,7 @@ class TwistlockCSVParser:
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
                 if key not in dupes:
                     dupes[key] = finding
@@ -97,7 +97,7 @@ class TwistlockJsonParser:
         tree = self.parse_json(json_output)
         items = []
         if tree:
-            items = [data for data in self.get_items(tree, test)]
+            items = list(self.get_items(tree, test))
         return items
 
     def parse_json(self, json_output):
@@ -108,7 +108,8 @@ class TwistlockJsonParser:
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -121,7 +122,7 @@ class TwistlockJsonParser:
                 unique_key = node["id"] + str(
                     node["packageName"]
                     + str(node["packageVersion"])
-                    + str(node["severity"])
+                    + str(node["severity"]),
                 )
                 items[unique_key] = item
         return list(items.values())
@@ -213,11 +214,12 @@ class TwistlockParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".json"):
             return TwistlockJsonParser().parse(filename, test)
         elif filename.name.lower().endswith(".csv"):
             return TwistlockCSVParser().parse(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

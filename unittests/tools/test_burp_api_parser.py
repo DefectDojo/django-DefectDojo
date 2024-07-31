@@ -1,7 +1,6 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
 from dojo.models import Test
-from dojo.tools.burp_api.parser import BurpApiParser
-from dojo.tools.burp_api.parser import convert_severity, convert_confidence
+from dojo.tools.burp_api.parser import BurpApiParser, convert_confidence, convert_severity
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestParser(DojoTestCase):

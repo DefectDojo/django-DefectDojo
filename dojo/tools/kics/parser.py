@@ -1,5 +1,6 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
@@ -64,7 +65,7 @@ class KICSParser:
                         + file_name
                         + expected_value
                         + str(line_number)
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
 
                 if dupe_key in dupes:

@@ -34,7 +34,8 @@ class HuskyCIParser:
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -52,7 +53,7 @@ class HuskyCIParser:
                         if vuln["severity"] not in ("High", "Medium", "Low"):
                             continue
                         unique_key = hashlib.md5(
-                            str(vuln).encode("utf-8")
+                            str(vuln).encode("utf-8"),
                         ).hexdigest()
                         item = get_item(vuln, test)
                         items[unique_key] = item
@@ -85,7 +86,7 @@ def get_item(item_node, test):
         line=item_node.get("line"),
         static_finding=True,
         dynamic_finding=False,
-        impact="No impact provided"
+        impact="No impact provided",
     )
 
     return finding

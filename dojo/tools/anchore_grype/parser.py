@@ -1,4 +1,5 @@
 import json
+
 from cvss import parser as cvss_parser
 from cvss.cvss3 import CVSS3
 
@@ -25,7 +26,7 @@ class AnchoreGrypeParser:
 
     def get_findings(self, file, test):
         data = json.load(file)
-        dupes = dict()
+        dupes = {}
         for item in data.get("matches", []):
             vulnerability = item["vulnerability"]
             vuln_id = vulnerability["id"]
@@ -52,7 +53,7 @@ class AnchoreGrypeParser:
                 rel_description = related_vulnerability.get("description")
                 rel_cvss = related_vulnerability.get("cvss")
             vulnerability_ids = self.get_vulnerability_ids(
-                vuln_id, related_vulnerabilities
+                vuln_id, related_vulnerabilities,
             )
 
             matches = item["matchDetails"]
@@ -95,7 +96,7 @@ class AnchoreGrypeParser:
                         f"\n**Matcher:** {matches[0]['matcher']}"
                     )
                     finding_tags = [
-                        matches[0]["matcher"].replace("-matcher", "")
+                        matches[0]["matcher"].replace("-matcher", ""),
                     ]
                 else:
                     finding_description += "\n**Matchers:**"
@@ -197,13 +198,13 @@ class AnchoreGrypeParser:
                 vector = cvss_item["vector"]
                 cvss_objects = cvss_parser.parse_cvss_from_text(vector)
                 if len(cvss_objects) > 0 and isinstance(
-                    cvss_objects[0], CVSS3
+                    cvss_objects[0], CVSS3,
                 ):
                     return vector
         return None
 
     def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
-        vulnerability_ids = list()
+        vulnerability_ids = []
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         if related_vulnerabilities:

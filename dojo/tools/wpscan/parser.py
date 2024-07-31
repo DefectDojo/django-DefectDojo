@@ -46,7 +46,7 @@ class WpscanParser:
                 dynamic_finding=True,
                 static_finding=False,
                 scanner_confidence=self._get_scanner_confidence(
-                    detection_confidence
+                    detection_confidence,
                 ),
                 unique_id_from_tool=vul["references"]["wpvulndb"][0],
                 nb_occurences=1,
@@ -65,15 +65,15 @@ class WpscanParser:
                 finding.mitigation = "fixed in : " + vul["fixed_in"]
             # manage CVE
             if "cve" in vul["references"]:
-                finding.unsaved_vulnerability_ids = list()
+                finding.unsaved_vulnerability_ids = []
                 for vulnerability_id in vul["references"]["cve"]:
                     finding.unsaved_vulnerability_ids.append(
-                        f"CVE-{vulnerability_id}"
+                        f"CVE-{vulnerability_id}",
                     )
 
             # internal de-duplication
             dupe_key = hashlib.sha256(
-                str(finding.unique_id_from_tool).encode("utf-8")
+                str(finding.unique_id_from_tool).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -90,7 +90,7 @@ class WpscanParser:
         if "start_time" in tree:
             report_date = datetime.utcfromtimestamp(tree.get("start_time"))
 
-        dupes = dict()
+        dupes = {}
         # manage plugin findings
         for plugin in tree.get("plugins", []):
             node = tree["plugins"][plugin]
@@ -121,13 +121,13 @@ class WpscanParser:
         # manage interesting interesting_findings
         for interesting_finding in tree.get("interesting_findings", []):
             references = self.generate_references(
-                interesting_finding["references"]
+                interesting_finding["references"],
             )
             description = "\n".join(
                 [
                     "**Type:** `" + interesting_finding.get("type") + "`\n",
                     "**Url:** `" + interesting_finding["url"] + "`\n",
-                ]
+                ],
             )
             if interesting_finding["interesting_entries"]:
                 description += (
@@ -143,7 +143,7 @@ class WpscanParser:
                 dynamic_finding=True,
                 static_finding=False,
                 scanner_confidence=self._get_scanner_confidence(
-                    interesting_finding.get("confidence")
+                    interesting_finding.get("confidence"),
                 ),
             )
             # manage endpoint
@@ -159,8 +159,8 @@ class WpscanParser:
                 str(
                     "interesting_findings"
                     + finding.title
-                    + interesting_finding["url"]
-                ).encode("utf-8")
+                    + interesting_finding["url"],
+                ).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]

@@ -1,4 +1,5 @@
 import logging
+
 from dojo.models import Finding
 from dojo.tools.intsights.csv_handler import IntSightsCSVParser
 from dojo.tools.intsights.json_handler import IntSightsJSONParser
@@ -37,13 +38,13 @@ class IntSightsParser:
                 f'**Source Date**: ` {alert.get("source_date", "None provided")} `',
                 f'**Source Network Type**: `{alert.get("network_type", "None provided")} `',
                 f'**Assets Affected**: `{alert.get("assets", "None provided")} `',
-                f'**Alert Link**: {alert.get("alert_link", "None provided")}'
-            ]
+                f'**Alert Link**: {alert.get("alert_link", "None provided")}',
+            ],
         )
         return description
 
     def get_findings(self, file, test):
-        duplicates = dict()
+        duplicates = {}
         if file.name.lower().endswith(".json"):
             alerts = IntSightsJSONParser()._parse_json(
                 file,
@@ -51,9 +52,8 @@ class IntSightsParser:
         elif file.name.lower().endswith(".csv"):
             alerts = IntSightsCSVParser()._parse_csv(file)
         else:
-            raise ValueError(
-                "Filename extension not recognized. Use .json or .csv"
-            )
+            msg = "Filename extension not recognized. Use .json or .csv"
+            raise ValueError(msg)
         for alert in alerts:
             dupe_key = alert["alert_id"]
             alert = Finding(
@@ -66,7 +66,7 @@ class IntSightsParser:
                 references=alert["alert_link"],
                 static_finding=False,
                 dynamic_finding=True,
-                unique_id_from_tool=alert["alert_id"]
+                unique_id_from_tool=alert["alert_id"],
             )
             duplicates[dupe_key] = alert
             if dupe_key not in duplicates:

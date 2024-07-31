@@ -1,10 +1,11 @@
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.keys import Keys
-import unittest
 import sys
+import unittest
+
 from base_test_class import BaseTestCase, on_exception_html_source_logger
 from product_test import ProductTest, WaitForPageLoad
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 
 
 class TestUnitTest(BaseTestCase):
@@ -52,7 +53,7 @@ class TestUnitTest(BaseTestCase):
         # Navigate to the Product page to select the product we created earlier
         self.goto_product_overview(driver)
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
-        driver.find_element(By.ID, 'products_wrapper')
+        driver.find_element(By.ID, "products_wrapper")
         # Select and click on the particular product to create test for
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # # "Click" the dropdown option
@@ -74,7 +75,7 @@ class TestUnitTest(BaseTestCase):
         # engagement target start and target end already have defaults
         # we can safely skip
         # Testing Lead: This can be the logged in user
-        Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text('Admin User (admin)')
+        Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text("Admin User (admin)")
         # engagement status
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
         # "Click" the 'Add Test' button to Add Test to engagement
@@ -93,7 +94,7 @@ class TestUnitTest(BaseTestCase):
         # Query the site to determine if the Test has been added
 
         # Assert on the query to determine success or failure
-        self.assertTrue(self.is_success_message_present(text='Test added successfully'))
+        self.assertTrue(self.is_success_message_present(text="Test added successfully"))
 
     def test_edit_test(self):
         # Login to the site.
@@ -114,7 +115,7 @@ class TestUnitTest(BaseTestCase):
         # Query the site to determine if the Test has been updated
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Test saved.'))
+        self.assertTrue(self.is_success_message_present(text="Test saved."))
 
     def test_add_note(self):
         # Login to the site.
@@ -134,7 +135,7 @@ class TestUnitTest(BaseTestCase):
         # Query the site to determine if the Test has been updated
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Note added successfully.'))
+        self.assertTrue(self.is_success_message_present(text="Note added successfully."))
 
     def test_add_test_finding(self):
         # Test To Add Finding To Test
@@ -180,10 +181,10 @@ class TestUnitTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert to the query to dtermine status of failure
-        self.assertTrue(self.is_text_present_on_page(text='App Vulnerable to XSS2'))
+        self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS2"))
         # Select and click on the finding to check if endpoint has been added
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS2").click()
-        self.assertTrue(self.is_text_present_on_page(text='product2.finding.com'))
+        self.assertTrue(self.is_text_present_on_page(text="product2.finding.com"))
 
     def test_add_stub_finding(self):
         # Login to the site.
@@ -215,14 +216,14 @@ class TestUnitTest(BaseTestCase):
         # Click on link of finding name to promote to finding
         driver.find_elements(By.NAME, "stub_finding_name")[0].click()
         # Check we have the correct stub finding
-        self.assertEqual(driver.find_element(By.ID, "id_title").get_attribute('value'), 'App Vulnerable to XSS3')
+        self.assertEqual(driver.find_element(By.ID, "id_title").get_attribute("value"), "App Vulnerable to XSS3")
         # Edit finding Description
         driver.find_element(By.ID, "id_cvssv3_score").send_keys(Keys.TAB, Keys.TAB, "This is a promoted stub finding")
         # "Click" the Done button to Edit the finding
         driver.find_element(By.ID, "submit").click()
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Finding promoted successfully'))
+        self.assertTrue(self.is_success_message_present(text="Finding promoted successfully"))
 
     @on_exception_html_source_logger
     def test_add_and_delete_stub_finding(self):
@@ -258,9 +259,9 @@ class TestUnitTest(BaseTestCase):
 
         driver.find_element(By.ID, "merge_findings").click()
 
-        Select(driver.find_element(By.ID, "id_finding_action")).select_by_visible_text('Inactive')
+        Select(driver.find_element(By.ID, "id_finding_action")).select_by_visible_text("Inactive")
 
-        Select(driver.find_element(By.ID, "id_findings_to_merge")).select_by_visible_text('App Vulnerable to XSS3')
+        Select(driver.find_element(By.ID, "id_findings_to_merge")).select_by_visible_text("App Vulnerable to XSS3")
 
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
@@ -280,26 +281,26 @@ class TestUnitTest(BaseTestCase):
         # "Click" the delete button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "button.btn.btn-danger").click()
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Test and relationships removed.'))
+        self.assertTrue(self.is_success_message_present(text="Test and relationships removed."))
 
 
 def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
-    suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(ProductTest('test_create_product'))
-    suite.addTest(ProductTest('test_add_product_finding'))
-    suite.addTest(TestUnitTest('test_view_test'))
-    suite.addTest(TestUnitTest('test_create_test'))
-    suite.addTest(TestUnitTest('test_edit_test'))
-    suite.addTest(TestUnitTest('test_add_test_finding'))
-    suite.addTest(TestUnitTest('test_add_and_promote_stub_finding'))
-    suite.addTest(TestUnitTest('test_merge_findings'))
-    suite.addTest(TestUnitTest('test_add_and_delete_stub_finding'))
-    suite.addTest(TestUnitTest('test_add_note'))
-    suite.addTest(TestUnitTest('test_delete_test'))
-    suite.addTest(ProductTest('test_delete_product'))
+    suite.addTest(BaseTestCase("test_login"))
+    suite.addTest(ProductTest("test_create_product"))
+    suite.addTest(ProductTest("test_add_product_finding"))
+    suite.addTest(TestUnitTest("test_view_test"))
+    suite.addTest(TestUnitTest("test_create_test"))
+    suite.addTest(TestUnitTest("test_edit_test"))
+    suite.addTest(TestUnitTest("test_add_test_finding"))
+    suite.addTest(TestUnitTest("test_add_and_promote_stub_finding"))
+    suite.addTest(TestUnitTest("test_merge_findings"))
+    suite.addTest(TestUnitTest("test_add_and_delete_stub_finding"))
+    suite.addTest(TestUnitTest("test_add_note"))
+    suite.addTest(TestUnitTest("test_delete_test"))
+    suite.addTest(ProductTest("test_delete_product"))
     return suite
 
 

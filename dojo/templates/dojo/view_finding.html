@@ -729,6 +729,7 @@
         </div>
     {% endif %}
 
+    {% if similar_findings_enabled %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="has-filters">Similar Findings ({{ similar_findings.paginator.count }})
@@ -759,8 +760,8 @@
                     </div>
                 {% endif %}
             </span>
-        </div>
-
+        </div>  
+    {% endif %}
     {% comment %} Add a form to (ab)use to submit any actions related to similar/duplicates as POST requests {% endcomment %}
     <form method="post" style="display: none" id="related_action">
         {% csrf_token %}
@@ -785,7 +786,7 @@
                                 <span>Active</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_false_p" label="false_positive name="false_positive" type="checkbox"/>
+                                <input id="id_bulk_false_p" label="false_positive" name="false_positive" type="checkbox"/>
                                 <span>False Positive</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
@@ -942,7 +943,7 @@
                             <div class="col-md-2" style="text-align: center">
                                 <div class="row">
                                     {% url 'access_file' fid=file.id oid=finding.id obj_type='Finding' as image_url %}
-                                    <a href="{{ image_url }}" target="_blank">
+                                    <a href="{{ image_url }}" target="_blank" download>
                                         {% if file|get_thumbnail %}
                                             <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
                                         {% else %}
@@ -1532,55 +1533,57 @@
             };
 
             // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#similar_findings_table').DataTable({
-                drawCallback: function(){
-                    $('#similar_findings_table .has-popover').hover(
-                        function() { $(this).popover('show'); }, // hover
-                        function() { $(this).popover('hide'); } // unhover
-                    );
-                },
-                colReorder: true,
-                "columns": columns,
-                order: [],
-                columnDefs: [
-                    {
-                        "orderable": false,
-                        "targets": [0, 1]
+            {% if enable_table_filtering %}
+                var dojoTable = $('#similar_findings_table').DataTable({
+                    drawCallback: function(){
+                        $('#similar_findings_table .has-popover').hover(
+                            function() { $(this).popover('show'); }, // hover
+                            function() { $(this).popover('hide'); } // unhover
+                        );
                     },
-                    {
-                        targets: [0, 1],
-                        className: 'noVis'
-                    }
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
+                    colReorder: true,
+                    "columns": columns,
+                    order: [],
+                    columnDefs: [
+                        {
+                            "orderable": false,
+                            "targets": [0, 1]
+                        },
+                        {
+                            targets: [0, 1],
+                            className: 'noVis'
+                        }
+                    ],
+                    dom: 'Bfrtip',
+                    paging: false,
+                    info: false,
+                    buttons: [
+                        {
+                            extend: 'colvis',
+                            columns: ':not(.noVis)'
+                        },
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'copy'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'excel',
+                            autoFilter: true,
+                            sheetName: 'Exported data',
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'csv'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'pdf',
+                            orientation: 'landscape',
+                            pageSize: 'LETTER'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'print'
+                        }),
+                    ],
+                });
+            {% endif %}
         });
     </script>
 

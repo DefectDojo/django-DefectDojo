@@ -1,11 +1,12 @@
 """Parser for NPM Audit v7+ Scan."""
 import json
 import logging
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-'''
+"""
 the npm audit json output depends on the params used. this parser
 accepts the formats for any of:
 
@@ -17,7 +18,7 @@ In order for this parser to import the same number of findings
 as the report's meta block indicates, all top level keys
 are consiered a vulnerability and as much information as provided
 is added to each
-'''
+"""
 
 
 class NpmAudit7PlusParser:
@@ -51,25 +52,28 @@ class NpmAudit7PlusParser:
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format, unable to parse json.")
+            msg = "Invalid format, unable to parse json."
+            raise ValueError(msg)
 
         # output from npm audit fix --dry-run --json
         if tree.get("audit"):
             if not tree.get("audit").get("auditReportVersion"):
-                raise ValueError(
+                msg = (
                     "This parser only supports output from npm audit version"
                     " 7 and above."
                 )
+                raise ValueError(msg)
             subtree = tree.get("audit").get("vulnerabilities")
         # output from npm audit --dry-run --json
         # or
         # output from npm audit --json
         else:
             if not tree.get("auditReportVersion"):
-                raise ValueError(
+                msg = (
                     "This parser only supports output from npm audit version"
                     " 7 and above."
                 )
+                raise ValueError(msg)
             subtree = tree.get("vulnerabilities")
 
         return subtree

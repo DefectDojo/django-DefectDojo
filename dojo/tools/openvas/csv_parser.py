@@ -2,8 +2,10 @@ import csv
 import hashlib
 import io
 import re
+
 from dateutil.parser import parse
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
 class ColumnMappingStrategy:
@@ -93,7 +95,7 @@ class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
         super().__init__()
 
     def map_column_value(self, finding, column_value):
-        cve_pattern = r'CVE-\d{4}-\d{4,7}'
+        cve_pattern = r"CVE-\d{4}-\d{4,7}"
         cves = re.findall(cve_pattern, column_value)
         for cve in cves:
             finding.unsaved_vulnerability_ids.append(cve)
@@ -260,7 +262,7 @@ class OpenVASCSVParser:
         return date_column_strategy
 
     def read_column_names(self, row):
-        column_names = dict()
+        column_names = {}
         index = 0
         for column in row:
             column_names[index] = column
@@ -268,8 +270,8 @@ class OpenVASCSVParser:
         return column_names
 
     def get_findings(self, filename, test):
-        column_names = dict()
-        dupes = dict()
+        column_names = {}
+        dupes = {}
         chain = self.create_chain()
         content = filename.read()
         if isinstance(content, bytes):
@@ -278,7 +280,7 @@ class OpenVASCSVParser:
         row_number = 0
         for row in reader:
             finding = Finding(test=test)
-            finding.unsaved_vulnerability_ids = list()
+            finding.unsaved_vulnerability_ids = []
             finding.unsaved_endpoints = [Endpoint()]
             if row_number == 0:
                 column_names = self.read_column_names(row)
@@ -287,7 +289,7 @@ class OpenVASCSVParser:
             column_number = 0
             for column in row:
                 chain.process_column(
-                    column_names[column_number], column, finding
+                    column_names[column_number], column, finding,
                 )
                 column_number += 1
             if finding is not None and row_number > 0:
@@ -304,7 +306,7 @@ class OpenVASCSVParser:
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
                 if key not in dupes:
                     dupes[key] = finding

@@ -20,7 +20,7 @@ class PhpSecurityAuditV2Parser:
             data = json.loads(str(tree, "utf-8"))
         except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
 
         for filepath, report in list(data["files"].items()):
             errors = report.get("errors") or 0
@@ -36,7 +36,7 @@ class PhpSecurityAuditV2Parser:
                     findingdetail += "Details: " + issue["message"] + "\n"
 
                     sev = PhpSecurityAuditV2Parser.get_severity_word(
-                        issue["severity"]
+                        issue["severity"],
                     )
 
                     dupe_key = (

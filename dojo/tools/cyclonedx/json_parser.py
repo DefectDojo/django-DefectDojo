@@ -1,8 +1,11 @@
 import json
 import logging
+
 import dateutil
+
 from dojo.models import Finding
 from dojo.tools.cyclonedx.helpers import Cyclonedxhelper
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -14,7 +17,7 @@ class CycloneDXJSONParser:
         report_date = None
         if data.get("metadata") and data.get("metadata").get("timestamp"):
             report_date = dateutil.parser.parse(
-                data.get("metadata").get("timestamp")
+                data.get("metadata").get("timestamp"),
             )
         # for each component we keep data
         components = {}
@@ -52,7 +55,7 @@ class CycloneDXJSONParser:
             for affect in vulnerability.get("affects", []):
                 reference = affect["ref"]  # required by the specification
                 component_name, component_version = Cyclonedxhelper()._get_component(
-                    components, reference
+                    components, reference,
                 )
                 if not description:
                     description = "Description was not provided."
@@ -86,7 +89,7 @@ class CycloneDXJSONParser:
                                 finding.severity = Cyclonedxhelper().fix_severity(severity)
                             else:
                                 finding.severity = cvssv3.severities()[0]
-                vulnerability_ids = list()
+                vulnerability_ids = []
                 # set id as first vulnerability id
                 if vulnerability.get("id"):
                     vulnerability_ids.append(vulnerability.get("id"))
@@ -102,7 +105,7 @@ class CycloneDXJSONParser:
                 if cwes and len(cwes) > 1:
                     # FIXME support more than one CWE
                     LOGGER.debug(
-                        f"more than one CWE for a finding {cwes}. NOT supported by parser API"
+                        f"more than one CWE for a finding {cwes}. NOT supported by parser API",
                     )
                 if cwes and len(cwes) > 0:
                     finding.cwe = cwes[0]
@@ -135,7 +138,7 @@ class CycloneDXJSONParser:
         for component in components:
             if "components" in component:
                 self._flatten_components(
-                    component.get("components", []), flatted_components
+                    component.get("components", []), flatted_components,
                 )
             # according to specification 1.4, 'bom-ref' is mandatory but some
             # tools don't provide it

@@ -1,5 +1,6 @@
 import csv
 import io
+
 from dojo.models import Finding
 
 
@@ -25,14 +26,14 @@ class SolarAppscreenerParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         csvarray = []
 
         for row in reader:
             csvarray.append(row)
 
-        items = list()
+        items = []
         for row in csvarray:
             finding = Finding(test=test)
             finding.title = row.get("Vulnerability", "")

@@ -1,15 +1,18 @@
-import re
 import hashlib
 import logging
-from dojo.models import Endpoint, Finding
+import re
+
 from defusedxml import ElementTree as ET
 from django.core.exceptions import ValidationError
+
+from dojo.models import Endpoint, Finding
+
 logger = logging.getLogger(__name__)
 
 
 class NiktoXMLParser:
     def process_xml(self, file, test):
-        dupes = dict()
+        dupes = {}
         tree = ET.parse(file)
         root = tree.getroot()
         scan = root.find("scandetails")
@@ -30,7 +33,7 @@ class NiktoXMLParser:
             description = item.findtext("description")
             # Cut the title down to the first sentence
             sentences = re.split(
-                r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s", description
+                r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s", description,
             )
             if len(sentences) > 0:
                 titleText = sentences[0][:900]
@@ -42,7 +45,7 @@ class NiktoXMLParser:
                     f"**Host:** `{item.findtext('iplink')}`",
                     f"**Description:** `{item.findtext('description')}`",
                     f"**HTTP Method:** `{item.attrib.get('method')}`",
-                ]
+                ],
             )
             # Manage severity the same way with JSON
             severity = "Info"  # Nikto doesn't assign severity, default to Info

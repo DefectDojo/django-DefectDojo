@@ -1,9 +1,10 @@
 from datetime import datetime
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+
+from dojo.models import Test
 from dojo.tools.gitlab_secret_detection_report.parser import (
     GitlabSecretDetectionReportParser,
 )
-from dojo.models import Test
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestGitlabSecretDetectionReportParser(DojoTestCase):

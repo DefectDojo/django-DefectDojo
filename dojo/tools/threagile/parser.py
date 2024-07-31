@@ -44,7 +44,7 @@ RISK_TO_CWE_MAP = {
     "untrusted-deserialization": 502,
     "wrong-communication-link": 1008,
     "wrong-trust-boudnary-content": 1008,
-    "xml-external-entity": 611
+    "xml-external-entity": 611,
 }
 
 
@@ -73,15 +73,16 @@ class ThreagileParser:
 
     def get_items(self, tree, test):
         if not isinstance(tree, list):
-            raise TypeError("Invalid ThreAgile risks file")
+            msg = "Invalid ThreAgile risks file"
+            raise TypeError(msg)
         if not tree:
-            return list()
+            return []
         findings = []
         for item in tree:
             for field in self.REQUIRED_FIELDS:
                 if field not in item.keys():
-                    raise ValueError(
-                        f"Invalid ThreAgile risks file, missing field {field}")
+                    msg = f"Invalid ThreAgile risks file, missing field {field}"
+                    raise ValueError(msg)
             severity = item.get("severity", "info").capitalize()
             severity = severity if severity != "Elevated" else "High"
             finding = Finding(
@@ -91,7 +92,7 @@ class ThreagileParser:
                 impact=item.get("exploitation_impact"),
                 severity=severity,
                 test=test,
-                unique_id_from_tool=item.get("synthetic_id")
+                unique_id_from_tool=item.get("synthetic_id"),
             )
             self.determine_mitigated(finding, item)
             self.determine_accepted(finding, item)

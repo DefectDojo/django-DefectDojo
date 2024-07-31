@@ -13,11 +13,11 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
+import logging
 import os
 import socket
-import logging
-from django.core.wsgi import get_wsgi_application
 
+from django.core.wsgi import get_wsgi_application
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 # Shouldn't apply to docker-compose dev mode (1 process, 1 thread), but may be needed when enabling debugging in other contexts
 def is_debugger_listening(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    return s.connect_ex(('127.0.0.1', port))
+    return s.connect_ex(("127.0.0.1", port))
 
 
 debugpy_port = os.environ.get("DD_DEBUG_PORT") if os.environ.get("DD_DEBUG_PORT") else 3000
@@ -40,18 +40,18 @@ debugpy_port = os.environ.get("DD_DEBUG_PORT") if os.environ.get("DD_DEBUG_PORT"
 if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_debugger_listening(debugpy_port) != 0:
     logger.info(f"DD_DEBUG is set to True, setting remote debugging on port {debugpy_port}")
     try:
-        import debugpy
+        import debugpy  # noqa: T100
 
         # Required, otherwise debugpy will try to use the uwsgi binary as the python interpreter - https://github.com/microsoft/debugpy/issues/262
         debugpy.configure({
                             "python": "python",
-                            "subProcess": True
+                            "subProcess": True,
                         })
-        debugpy.listen(("0.0.0.0", debugpy_port))
+        debugpy.listen(("0.0.0.0", debugpy_port))  # noqa: T100
         if os.environ.get("DD_DEBUG_WAIT_FOR_CLIENT") == "True":
             logger.info(f"Waiting for the debugging client to connect on port {debugpy_port}")
-            debugpy.wait_for_client()
-            print("Debugging client connected, resuming execution")
+            debugpy.wait_for_client()  # noqa: T100
+            logger.debug("Debugging client connected, resuming execution")
     except RuntimeError as e:
         if str(e) != "Can't listen for client connections: [Errno 98] Address already in use":
             logger.exception(e)

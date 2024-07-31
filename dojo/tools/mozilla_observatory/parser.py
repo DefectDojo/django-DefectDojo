@@ -30,7 +30,7 @@ class MozillaObservatoryParser:
         else:
             nodes = data
 
-        findings = list()
+        findings = []
         for key in nodes:
             node = nodes[key]
 
@@ -41,7 +41,7 @@ class MozillaObservatoryParser:
                     + "`",
                     "**Result** : `" + node["result"] + "`"
                     "**expectation** : " + str(node.get("expectation")) + "`",
-                ]
+                ],
             )
 
             finding = Finding(

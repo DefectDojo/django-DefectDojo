@@ -55,12 +55,11 @@ class SSLyzeXMLParser:
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:
-            raise NamespaceErr(
-                "This doesn't seem to be a valid sslyze xml file."
-            )
+            msg = "This doesn't seem to be a valid sslyze xml file."
+            raise NamespaceErr(msg)
 
         results = root.find("results")
-        dupes = dict()
+        dupes = {}
         for target in results:
             host = target.attrib["host"]
             port = target.attrib["port"]
@@ -121,7 +120,7 @@ class SSLyzeXMLParser:
                                 if cipher.attrib["name"] in WEAK_CIPHER_LIST:
                                     if cipher.attrib["name"] not in weak_cipher[element.tag]:
                                         weak_cipher[element.tag].append(
-                                            cipher.attrib["name"]
+                                            cipher.attrib["name"],
                                         )
                     if len(weak_cipher[element.tag]) > 0:
                         title = (
@@ -136,7 +135,7 @@ class SSLyzeXMLParser:
                         )
                 if title and description is not None:
                     dupe_key = hashlib.md5(
-                        str(description + title).encode("utf-8")
+                        str(description + title).encode("utf-8"),
                     ).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]
@@ -153,13 +152,13 @@ class SSLyzeXMLParser:
                             severity=severity,
                             dynamic_finding=True,
                         )
-                        finding.unsaved_endpoints = list()
+                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         if host is not None:
                             finding.unsaved_endpoints.append(
                                 Endpoint(
-                                    host=host, port=port, protocol=protocol
-                                )
+                                    host=host, port=port, protocol=protocol,
+                                ),
                             )
         return dupes.values()

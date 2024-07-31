@@ -1,6 +1,7 @@
 import hashlib
 import json
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
 class WazuhParser:
@@ -25,7 +26,7 @@ class WazuhParser:
             return []
 
         # Detect duplications
-        dupes = dict()
+        dupes = {}
 
         # Loop through each element in the list
         vulnerabilities = data.get("data", {}).get("affected_items", [])
@@ -60,7 +61,7 @@ class WazuhParser:
                     dupe_key = title + cve + agent_name + package_name + package_version
                 else:
                     dupe_key = title + cve + package_name + package_version
-                dupe_key = hashlib.sha256(dupe_key.encode('utf-8')).hexdigest()
+                dupe_key = hashlib.sha256(dupe_key.encode("utf-8")).hexdigest()
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]

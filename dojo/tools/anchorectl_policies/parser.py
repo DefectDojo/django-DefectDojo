@@ -27,10 +27,10 @@ class AnchoreCTLPoliciesParser:
             data = json.loads(content)
 
         find_date = datetime.now()
-        items = list()
+        items = []
         try:
             for image in data:
-                if image['detail'] is not None:
+                if image["detail"] is not None:
                     for result in image["detail"]:
                         try:
                             gate = result["gate"]
@@ -66,14 +66,13 @@ class AnchoreCTLPoliciesParser:
                                 find.unsaved_vulnerability_ids = [vulnerability_id]
                             items.append(find)
                         except (KeyError, IndexError) as err:
-                            raise ValueError(
-                                f"Invalid format: {err} key not found"
-                            )
+                            msg = f"Invalid format: {err} key not found"
+                            raise ValueError(msg)
         except AttributeError as err:
             # import empty policies without error (e.g. policies or images
             # objects are not a dictionary)
             logger.warning(
-                "Exception at %s", "parsing anchore policy", exc_info=err
+                "Exception at %s", "parsing anchore policy", exc_info=err,
             )
         return items
 

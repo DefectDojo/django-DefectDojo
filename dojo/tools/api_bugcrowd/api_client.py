@@ -1,5 +1,6 @@
-import requests
 from urllib.parse import urlencode
+
+import requests
 
 
 class BugcrowdAPI:
@@ -19,13 +20,12 @@ class BugcrowdAPI:
         if tool_config.authentication_type == "API":
             self.api_token = tool_config.api_key
             self.session.headers.update(
-                {"Authorization": f"Token {self.api_token}"}
+                {"Authorization": f"Token {self.api_token}"},
             )
             self.session.headers.update(self.default_headers)
         else:
-            raise Exception(
-                f"bugcrowd Authentication type {tool_config.authentication_type} not supported"
-            )
+            msg = f"bugcrowd Authentication type {tool_config.authentication_type} not supported"
+            raise Exception(msg)
 
     def get_findings(self, program, target):
         """
@@ -67,7 +67,7 @@ class BugcrowdAPI:
 
                 # Otherwise, keep updating next link
                 next = "{}{}".format(
-                    self.bugcrowd_api_url, data["links"]["next"]
+                    self.bugcrowd_api_url, data["links"]["next"],
                 )
             else:
                 next = "over"
@@ -75,13 +75,13 @@ class BugcrowdAPI:
     def test_connection(self):
         # Request programs
         response_programs = self.session.get(
-            url=f"{self.bugcrowd_api_url}/programs"
+            url=f"{self.bugcrowd_api_url}/programs",
         )
         response_programs.raise_for_status()
 
         # Request submissions to validate the org token
         response_subs = self.session.get(
-            url=f"{self.bugcrowd_api_url}/submissions"
+            url=f"{self.bugcrowd_api_url}/submissions",
         )
         response_subs.raise_for_status()
         if response_programs.ok and response_subs.ok:
@@ -91,20 +91,20 @@ class BugcrowdAPI:
 
             progs = list(filter(lambda prog: prog["type"] == "program", data))
             program_names = ", ".join(
-                list(map(lambda p: p["attributes"]["code"], progs))
+                [p["attributes"]["code"] for p in progs],
             )
             # Request targets to validate the org token
             response_targets = self.session.get(
-                url=f"{self.bugcrowd_api_url}/targets"
+                url=f"{self.bugcrowd_api_url}/targets",
             )
             response_targets.raise_for_status()
             if response_targets.ok:
                 data_targets = response_targets.json().get("data")
                 targets = list(
-                    filter(lambda prog: prog["type"] == "target", data_targets)
+                    filter(lambda prog: prog["type"] == "target", data_targets),
                 )
                 target_names = ", ".join(
-                    list(map(lambda p: p["attributes"]["name"], targets))
+                    [p["attributes"]["name"] for p in targets],
                 )
                 return (
                     f'With {total_subs} submissions, you have access to the "{program_names}" '
@@ -113,15 +113,17 @@ class BugcrowdAPI:
                     f'You also have targets "{target_names}" that can be used in Service key 2'
                 )
             else:
-                raise Exception(
+                msg = (
                     "Bugcrowd API test not successful, no targets were defined in Bugcrowd which is used for "
                     f"filtering, check your configuration, HTTP response was: {response_targets.text}"
                 )
+                raise Exception(msg)
         else:
-            raise Exception(
+            msg = (
                 "Bugcrowd API test not successful, could not retrieve the programs or submissions, check your "
                 f"configuration, HTTP response for programs was: {response_programs.text}, HTTP response for submissions was: {response_subs.text}"
             )
+            raise Exception(msg)
 
     def test_product_connection(self, api_scan_configuration):
         submissions = []

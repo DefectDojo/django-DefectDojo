@@ -18,24 +18,32 @@ class AquaParser:
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
-        items = {}
-        if "resources" in tree:
-            vulnerabilityTree = tree["resources"]
-
-            for node in vulnerabilityTree:
-                resource = node.get("resource")
-                vulnerabilities = node.get("vulnerabilities")
-
-                for vuln in vulnerabilities:
-                    item = get_item(resource, vuln, test)
-                    unique_key = resource.get("cpe") + vuln.get("name", "None")
-                    items[unique_key] = item
-        elif "cves" in tree:
+        self.items = {}
+        if isinstance(tree, list):  # Aqua Scan Report coming from Azure Devops jobs.
+            if tree:
+                vulnerabilitytree = tree[0]["results"]["resources"]
+            else:
+                vulnerabilitytree = []
+            self.vulnerability_tree(vulnerabilitytree, test)
+        elif "resources" in tree:  # Aqua Scan Report not from Azure Devops jobs.
+            vulnerabilitytree = tree["resources"]
+            self.vulnerability_tree(vulnerabilitytree, test)
+        elif "cves" in tree:       # Aqua Scan Report not from Azure Devops jobs.
             for cve in tree["cves"]:
                 unique_key = cve.get("file") + cve.get("name")
-                items[unique_key] = get_item_v2(cve, test)
+                self.items[unique_key] = get_item_v2(cve, test)
+        return list(self.items.values())
 
-        return list(items.values())
+    def vulnerability_tree(self, vulnerabilitytree, test):
+        for node in vulnerabilitytree:
+            resource = node.get("resource")
+            vulnerabilities = node.get("vulnerabilities", [])
+            if vulnerabilities is None:
+                vulnerabilities = []
+            for vuln in vulnerabilities:
+                item = get_item(resource, vuln, test)
+                unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
+                self.items[unique_key] = item
 
 
 def get_item(resource, vuln, test):
@@ -83,7 +91,7 @@ def get_item(resource, vuln, test):
                 f"NVD score v3 ({score}) used for classification.\n"
             )
             severity_justification += "\nNVD v3 vectors: {}".format(
-                vuln.get("nvd_vectors_v3")
+                vuln.get("nvd_vectors_v3"),
             )
             # Add the CVSS3 to Finding
             cvssv3 = vuln.get("nvd_vectors_v3")
@@ -93,7 +101,7 @@ def get_item(resource, vuln, test):
                 f"NVD score v2 ({score}) used for classification.\n"
             )
             severity_justification += "\nNVD v2 vectors: {}".format(
-                vuln.get("nvd_vectors")
+                vuln.get("nvd_vectors"),
             )
         severity = severity_of(score)
         severity_justification += f"\n{used_for_classification}"

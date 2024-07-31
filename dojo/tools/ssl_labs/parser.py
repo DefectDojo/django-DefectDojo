@@ -60,7 +60,7 @@ class SslLabsParser:
                 title = f"TLS Grade '{grade}' for {hostName}"
 
                 sev = self.getCriticalityRating(grade)
-                description = "%s \n\n" % title
+                description = f"{title} \n\n"
                 cert = ""
                 if "cert" in endpoints["details"]:
                     cert = endpoints["details"]["cert"]
@@ -113,7 +113,7 @@ class SslLabsParser:
                         for item in endpoints["details"]["suites"]:
                             for suites in item["list"]:
                                 suite_info = suite_info + self.suite_data(
-                                    suites
+                                    suites,
                                 )
                 except Exception:
                     suite_info = "Not provided." + "\n\n"
@@ -333,19 +333,19 @@ class SslLabsParser:
                         dynamic_finding=True,
                     )
                     dupes[dupe_key] = find
-                    find.unsaved_endpoints = list()
+                    find.unsaved_endpoints = []
 
                 find.unsaved_endpoints.append(
-                    Endpoint(host=hostName, port=port, protocol=protocol)
+                    Endpoint(host=hostName, port=port, protocol=protocol),
                 )
                 if ipAddress:
                     find.unsaved_endpoints.append(
-                        Endpoint(host=ipAddress, port=port, protocol=protocol)
+                        Endpoint(host=ipAddress, port=port, protocol=protocol),
                     )
                 if endpoints["details"]["httpTransactions"]:
                     for url in endpoints["details"]["httpTransactions"]:
                         find.unsaved_endpoints.append(
-                            Endpoint.from_uri(url["requestUrl"])
+                            Endpoint.from_uri(url["requestUrl"]),
                         )
 
         return list(dupes.values())

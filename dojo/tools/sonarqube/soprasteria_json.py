@@ -1,12 +1,15 @@
 import logging
-from dojo.tools.sonarqube.soprasteria_helper import SonarQubeSoprasteriaHelper
+
 from lxml import etree
+
+from dojo.tools.sonarqube.soprasteria_helper import SonarQubeSoprasteriaHelper
+
 logger = logging.getLogger(__name__)
 
 
 class SonarQubeSoprasteriaJSON:
     def get_json_items(self, json_content, test, mode):
-        dupes = dict()
+        dupes = {}
         rules = json_content["rules"]
         issues = json_content["issues"]
         for issue in issues:
@@ -21,7 +24,7 @@ class SonarQubeSoprasteriaJSON:
             if title is None or mitigation is None:
                 raise ValueError(
                     "Parser ValueError: can't find a title or a mitigation for vulnerability of name "
-                    + rule_id
+                    + rule_id,
                 )
 
             try:
@@ -31,7 +34,7 @@ class SonarQubeSoprasteriaJSON:
                 issue_description = SonarQubeSoprasteriaHelper().get_description(html_desc_as_e_tree)
                 logger.debug(issue_description)
                 issue_references = SonarQubeSoprasteriaHelper().get_references(
-                    rule_id, html_desc_as_e_tree
+                    rule_id, html_desc_as_e_tree,
                 )
                 issue_cwe = SonarQubeSoprasteriaHelper().get_cwe(issue_references)
             except KeyError:

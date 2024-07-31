@@ -1,6 +1,6 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.ort.parser import OrtParser
 from dojo.models import Test
+from dojo.tools.ort.parser import OrtParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestOrtParser(DojoTestCase):
@@ -11,7 +11,7 @@ class TestOrtParser(DojoTestCase):
 
     def test_parse_file_has_many_finding_one_tool(self):
         testfile = open(
-            get_unit_tests_path() + "/scans/ort/evaluated-model-reporter-test-output.json"
+            get_unit_tests_path() + "/scans/ort/evaluated-model-reporter-test-output.json",
         )
         parser = OrtParser()
         findings = parser.get_findings(testfile, Test())
