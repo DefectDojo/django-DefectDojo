@@ -91,8 +91,8 @@ env = environ.FileAwareEnv(
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
-    DD_DATABASE_ENGINE=(str, "django.db.backends.mysql"),
-    DD_DATABASE_HOST=(str, "mysql"),
+    DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
+    DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
     # default django database name for testing is test_<dbname>
     DD_TEST_DATABASE_NAME=(str, "test_defectdojo"),
