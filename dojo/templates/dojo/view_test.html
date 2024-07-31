@@ -1681,58 +1681,60 @@
             };
 
             // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#test_findings').DataTable({
-                drawCallback: function(){
-                    $('#test_findings .has-popover').hover(
-                        function() { $(this).popover('show'); }, // hover
-                        function() { $(this).popover('hide'); } // unhover
-                    );
-                },
-                colReorder: true,
-                "columns": columns,
-                columnDefs: [
-                    {
-                        "orderable": false,
-                        "targets": [0]
+            {% if enable_table_filtering %}
+                var dojoTable = $('#test_findings').DataTable({
+                    drawCallback: function(){
+                        $('#test_findings .has-popover').hover(
+                            function() { $(this).popover('show'); }, // hover
+                            function() { $(this).popover('hide'); } // unhover
+                        );
                     },
-                    {
-                        targets: [0, 1],
-                        className: 'noVis'
-                    },
-                    {
-                        targets: 'severity-sort',
-                        orderDataType: 'severity-asc'
-                    },
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
+                    colReorder: true,
+                    "columns": columns,
+                    columnDefs: [
+                        {
+                            "orderable": false,
+                            "targets": [0]
+                        },
+                        {
+                            targets: [0, 1],
+                            className: 'noVis'
+                        },
+                        {
+                            targets: 'severity-sort',
+                            orderDataType: 'severity-asc'
+                        },
+                    ],
+                    dom: 'Bfrtip',
+                    paging: false,
+                    info: false,
+                    buttons: [
+                        {
+                            extend: 'colvis',
+                            columns: ':not(.noVis)'
+                        },
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'copy'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'excel',
+                            autoFilter: true,
+                            sheetName: 'Exported data',
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'csv'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'pdf',
+                            orientation: 'landscape',
+                            pageSize: 'LETTER'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'print'
+                        }),
+                    ],
+                });
+            {% endif %}
         });
 
         $(function () {
