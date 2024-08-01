@@ -55,11 +55,9 @@ echo "Unit Tests"
 echo "------------------------------------------------------------"
 
 python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel" || {
-    echo -e "\nTHIS TEST FAILED\n"
     exit 1; 
 }
 python3 manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel" || {
-    echo -e "\nTHIS TEST FAILED\n"
     exit 1; 
 }
 
