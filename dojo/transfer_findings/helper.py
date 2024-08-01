@@ -185,6 +185,13 @@ def transfer_finding(
             raise ApiError.bad_request("You must select an engagement")
 
 
+def create_note(author, message):
+    note = Notes(author=author,
+                entry=message)
+    note.save()
+    return note
+
+
 def add_finding_related(
     transfer_finding_findings: TransferFindingFinding,
     origin_finding: Finding,
@@ -224,16 +231,15 @@ def add_finding_related(
                 transferfinding_finding.finding_related = finding_related
                 transferfinding_finding.save()
                 flag_result_proccess = True
-                break
             else:
                 transferfinding_finding.finding_related = finding_related
                 transferfinding_finding.save()
                 flag_result_proccess = True
 
             if system_user and flag_result_proccess:
-                note = Notes(author=system_user,
-                            entry=f"This finding has been related to the finding with ID {origin_finding.id}.")
-                note.save()
+                note = create_note(
+                    author=system_user,
+                    message=f"This finding has been related to the finding with ID {origin_finding.id}. in Transfer Finding ID {transferfinding_finding.transfer_findings.id}")
                 finding_related.notes.add(note)
                 break
             else:
