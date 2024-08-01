@@ -122,55 +122,57 @@
         };
 
         // Mapping of table columns to objects for proper cleanup and data formatting
-        var dojoTable = $('#components').DataTable({
-            drawCallback: function(){
-                $('#components .has-popover').hover(
-                    function() { $(this).popover('show'); }, // hover
-                    function() { $(this).popover('hide'); } // unhover
-                );
-             },
-             "columns": [
-                    { "data": "Component_name" },
-                    { "data": "Version" },
-                    { "data": "Active" },
-                    { "data": "Duplicate" },
-                    { "data": "Total" },
-            ],
-            order: [],
-            columnDefs: [
-                {
-                    "orderable": false,
+        {% if enable_table_filtering %}
+            var dojoTable = $('#components').DataTable({
+                drawCallback: function(){
+                    $('#components .has-popover').hover(
+                        function() { $(this).popover('show'); }, // hover
+                        function() { $(this).popover('hide'); } // unhover
+                    );
                 },
-            ],
-            dom: 'Bfrtip',
-            paging: false,
-            info: false,
-            buttons: [
-                {
-                    extend: 'colvis',
-                    columns: ':not(.noVis)'
-                },
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'copy'
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'excel',
-                    autoFilter: true,
-                    sheetName: 'Exported data',
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'csv'
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'pdf',
-                    orientation: 'landscape',
-                    pageSize: 'LETTER'
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'print'
-                }),
-            ],
-        });
+                "columns": [
+                        { "data": "Component_name" },
+                        { "data": "Version" },
+                        { "data": "Active" },
+                        { "data": "Duplicate" },
+                        { "data": "Total" },
+                ],
+                order: [],
+                columnDefs: [
+                    {
+                        "orderable": false,
+                    },
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                info: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        {% endif %}
     });
 </script>
 {% include "dojo/filter_js_snippet.html" %}

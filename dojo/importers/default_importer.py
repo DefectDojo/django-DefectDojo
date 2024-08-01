@@ -161,7 +161,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # make sure the severity is something is digestible
             unsaved_finding = self.sanitize_severity(unsaved_finding)
             # Filter on minimum severity if applicable
-            if (minimum_severity := kwargs.get("minimum_severity")) and (Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[minimum_severity]):
+            if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
 
@@ -307,6 +307,24 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     send_notification=False)
 
         return old_findings
+
+    def parse_findings(
+        self,
+        scan: TemporaryUploadedFile,
+        parser: Parser,
+    ) -> List[Finding]:
+        """
+        Determine how to parse the findings based on the presence of the
+        `get_tests` function on the parser object
+        """
+        # Attempt any preprocessing before generating findings
+        if len(self.parsed_findings) == 0 and self.test is None:
+            scan = self.process_scan_file(scan)
+            if hasattr(parser, 'get_tests'):
+                self.parsed_findings = self.parse_findings_dynamic_test_type(scan, parser)
+            else:
+                self.parsed_findings = self.parse_findings_static_test_type(scan, parser)
+        return self.parsed_findings
 
     def parse_findings_static_test_type(
         self,

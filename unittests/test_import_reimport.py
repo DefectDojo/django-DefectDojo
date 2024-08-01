@@ -513,6 +513,29 @@ class ImportReimportMixin:
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
 
+    # Test the minimum severity flag
+    def test_import_sonar1_measure_minimum_severity_counts(self):
+        # Critical
+        response_json = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, minimum_severity="Critical")
+        test_id = response_json['test']
+        # Count all findings
+        self.assert_finding_count_json(3, self.get_test_findings_api(test_id))
+        self.assert_finding_count_json(3, self.get_test_findings_api(test_id, severity="Critical"))
+
+        # High
+        response_json = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, minimum_severity="High")
+        test_id = response_json['test']
+        # Count all findings
+        self.assert_finding_count_json(4, self.get_test_findings_api(test_id))
+        self.assert_finding_count_json(1, self.get_test_findings_api(test_id, severity="High"))
+
+        # Low
+        response_json = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, minimum_severity="Low")
+        test_id = response_json['test']
+        # Count all findings
+        self.assert_finding_count_json(6, self.get_test_findings_api(test_id))
+        self.assert_finding_count_json(2, self.get_test_findings_api(test_id, severity="Low"))
+
     # Test re-import with unique_id_from_tool_or_hash_code algorithm
     # import veracode_many_findings and then reimport veracode_many_findings again with verified is false
     # - reimport, findings stay the same, stay active
@@ -1422,7 +1445,7 @@ class ImportReimportMixin:
         test_id = import0['test']
         test = Test.objects.get(id=test_id)
         findings = Finding.objects.filter(test=test)
-        self.assertEqual(5, len(findings))
+        self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
@@ -1440,7 +1463,7 @@ class ImportReimportMixin:
 
         self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
         findings = Finding.objects.filter(test=reimport_test)
-        self.assertEqual(5, len(findings))
+        self.assertEqual(4, len(findings))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])

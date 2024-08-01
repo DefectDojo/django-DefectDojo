@@ -51,7 +51,6 @@ class CoverPageForm(forms.Form):
 
 class TableOfContentsForm(forms.Form):
     heading = forms.CharField(max_length=200, required=False, initial="Table of Contents")
-    depth = forms.IntegerField(min_value=1, required=False, max_value=6, initial=4)
 
     class Meta:
         exclude = []
@@ -106,9 +105,10 @@ class Div(form_widget):
 
 
 class WYSIWYGContentForm(forms.Form):
-    heading = forms.CharField(max_length=200, required=False, initial="WYSIWYG Content")
+    heading = forms.CharField(max_length=200, required=False, initial="Custom Content")
     content = forms.CharField(required=False, widget=Div(attrs={'class': 'editor'}))
     hidden_content = forms.CharField(widget=forms.HiddenInput(), required=True)
+    page_break_after = forms.BooleanField(required=False, help_text='Include a page break after the custom content.')
 
     class Meta:
         exclude = []
@@ -120,13 +120,10 @@ class Widget:
         self.title = 'Base Widget'
         self.form = None
         self.multiple = "false"
+        self.widget_class = 'widget'
 
     @abc.abstractmethod
     def get_html(self, request):
-        return
-
-    @abc.abstractmethod
-    def get_asciidoc(self):
         return
 
     @abc.abstractmethod
@@ -138,14 +135,12 @@ class PageBreak(Widget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title = 'Page Break'
+        self.widget_class = 'page-break'
         self.form = None
         self.multiple = "true"
 
     def get_html(self):
-        return mark_safe('<hr title="Page Break" class="report-page-break"/>')
-
-    def get_asciidoc(self):
-        return mark_safe('<br/><<<<br/>')
+        return mark_safe('<div class="report-page-break">Page Break</div>')
 
     def get_option_form(self):
         return mark_safe(
@@ -160,10 +155,8 @@ class ReportOptions(Widget):
         super().__init__(*args, **kwargs)
         self.title = 'Report Options'
         self.form = CustomReportOptionsForm()
-        self.extra_help = "Choose additional report options.  These will apply to the overall report."
-
-    def get_asciidoc(self):
-        return mark_safe('')
+        self.extra_help = "Choose additional report options. These will apply to the overall report."
+        self.widget_class = 'report-options'
 
     def get_html(self):
         return mark_safe('')
@@ -182,16 +175,12 @@ class CoverPage(Widget):
         self.title = 'Cover Page'
         self.form = CoverPageForm()
         self.help_text = "The cover page includes a page break after its content."
+        self.widget_class = 'cover-page'
 
     def get_html(self):
-        return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.title,
-                                                                                "sub_heading": self.sub_heading,
-                                                                                "meta_info": self.meta_info})
-
-    def get_asciidoc(self):
-        return render_to_string("dojo/custom_asciidoc_report_cover_page.html", {"heading": self.title,
-                                                                                "sub_heading": self.sub_heading,
-                                                                                "meta_info": self.meta_info})
+        return render_to_string("dojo/custom_html_report_cover_page.html", {"heading": self.heading,
+                                                                            "sub_heading": self.sub_heading,
+                                                                            "meta_info": self.meta_info})
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -205,16 +194,12 @@ class TableOfContents(Widget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.title = 'Table Of Contents'
+        self.widget_class = 'table-of-contents'
         self.form = TableOfContentsForm()
         self.help_text = "The table of contents includes a page break after its content."
 
     def get_html(self):
-        return render_to_string("dojo/custom_html_toc.html", {"title": self.title,
-                                                                  "depth": self.depth})
-
-    def get_asciidoc(self):
-        return render_to_string("dojo/custom_asciidoc_toc.html", {"title": self.title,
-                                                                  "depth": self.depth})
+        return render_to_string("dojo/custom_html_toc.html", {"heading": self.heading})
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -227,19 +212,20 @@ class TableOfContents(Widget):
 class WYSIWYGContent(Widget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.title = 'WYSIWYG Content'
+        self.title = 'Custom Content'
+        self.widget_class = 'wysiwyg-content'
         self.form = WYSIWYGContentForm()
         self.multiple = 'true'
 
     def get_html(self):
-        html = render_to_string("dojo/custom_html_report_wysiwyg_content.html", {"title": self.title,
-                                                                                "content": self.content})
+        html = render_to_string(
+            "dojo/custom_html_report_wysiwyg_content.html",
+            {
+                "heading": self.heading,
+                "content": self.content,
+                "page_break_after": self.page_break_after,
+            })
         return mark_safe(html)
-
-    def get_asciidoc(self):
-        asciidoc = render_to_string("dojo/custom_asciidoc_report_wysiwyg_content.html", {"title": self.title,
-                                                                                         "content": self.content})
-        return mark_safe(asciidoc)
 
     def get_option_form(self):
         html = render_to_string("dojo/report_widget.html", {"form": self.form,
@@ -282,6 +268,7 @@ class FindingList(Widget):
         else:
             self.form = None
         self.multiple = 'true'
+        self.widget_class = 'finding-list'
         self.extra_help = "You can use this form to filter findings and select only the ones to be included in the " \
                           "report."
         self.title_words = get_words_for_field(Finding, 'title')
@@ -291,15 +278,6 @@ class FindingList(Widget):
             self.paged_findings = get_page_items(self.request, self.findings.qs, 25)
         else:
             self.paged_findings = self.findings
-
-    def get_asciidoc(self):
-        asciidoc = render_to_string("dojo/custom_asciidoc_report_findings.html",
-                                    {"findings": self.findings.qs,
-                                     "host": self.host,
-                                     "include_finding_notes": self.finding_notes,
-                                     "include_finding_images": self.finding_images,
-                                     "user_id": self.user_id})
-        return mark_safe(asciidoc)
 
     def get_html(self):
         html = render_to_string("dojo/custom_html_report_finding_list.html",
@@ -355,6 +333,7 @@ class EndpointList(Widget):
         self.title = 'Endpoint List'
         self.form = self.endpoints.form
         self.multiple = 'false'
+        self.widget_class = 'endpoint-list'
         if self.request is not None:
             self.paged_endpoints = get_page_items(self.request, self.endpoints.qs, 25)
         else:
@@ -372,15 +351,6 @@ class EndpointList(Widget):
                                  "host": self.host,
                                  "user_id": self.user_id})
         return mark_safe(html)
-
-    def get_asciidoc(self):
-        asciidoc = render_to_string("dojo/custom_asciidoc_report_endpoints.html",
-                                    {"endpoints": self.endpoints.qs,
-                                     "host": self.host,
-                                     "include_finding_notes": self.finding_notes,
-                                     "include_finding_images": self.finding_images,
-                                     "user_id": self.user_id})
-        return mark_safe(asciidoc)
 
     def get_option_form(self):
         html = render_to_string('dojo/report_endpoints.html',
@@ -441,12 +411,15 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                                                                               finding_images=finding_images,
                                                                               host=host, user_id=user_id)
 
-        if list(widget.keys())[0] == 'wysiwyg-content':
+        if list(widget.keys())[0] == 'custom-content':
             wysiwyg_content = WYSIWYGContent(request=request)
-            wysiwyg_content.title = \
+            wysiwyg_content.heading = \
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)['value']
             wysiwyg_content.content = \
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'hidden_content'), None)['value']
+            wysiwyg_content.page_break_after = \
+                next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'page_break_after'),
+                     {'value': False})['value']
             selected_widgets[list(widget.keys())[0] + '-' + str(idx)] = wysiwyg_content
         if list(widget.keys())[0] == 'report-options':
             options = ReportOptions(request=request)
@@ -463,14 +436,12 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             selected_widgets[list(widget.keys())[0]] = options
         if list(widget.keys())[0] == 'table-of-contents':
             toc = TableOfContents(request=request)
-            toc.title = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)[
+            toc.heading = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)[
                 'value']
-            toc.depth = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'depth'), None)['value']
-            toc.depth = int(toc.depth) + 1
             selected_widgets[list(widget.keys())[0]] = toc
         if list(widget.keys())[0] == 'cover-page':
             cover_page = CoverPage(request=request)
-            cover_page.title = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)[
+            cover_page.heading = next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'heading'), None)[
                 'value']
             cover_page.sub_heading = \
                 next((item for item in widget.get(list(widget.keys())[0]) if item["name"] == 'sub_heading'), None)['value']
