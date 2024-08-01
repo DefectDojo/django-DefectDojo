@@ -99,11 +99,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <div class="clearfix">
-              <div class="panel-heading">
-                  <h4>Associated Products</h4>
-              </div>
-            </div>
+            <h4>Associated Products</h4>
         </div>
         <div class="table-responsive">
             {% if cred_products %}
@@ -142,56 +138,58 @@
         <div class="panel-heading">
             <h3>Notes</h3>
         </div>
-        {% if notes %}
-            <table id="notes" class="table-striped table table-condensed table-hover">
-                <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Date</th>
-                    <th>Note</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for note in notes %}
+        <div class="panel-body">
+            {% if notes %}
+                <table id="notes" class="table-striped table table-condensed table-hover">
+                    <thead>
                     <tr>
-                        <td>
-                            {{ note.author.username }}
-                        </td>
-                        <td>
-                            {{ note.date }}
-                        </td>
-                        <td>
-                            {{ note }}
-                            {% if person == note.author.username %}
-                                <a href="{% url 'delete_test_note' test.id note.id %}" class="btn btn-danger btn-xs"
-                                   title="Delete">
-                                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                                </a>
-                            {% endif %}
-                        </td>
+                        <th>User</th>
+                        <th>Date</th>
+                        <th>Note</th>
                     </tr>
-                {% endfor %}
-
-                </tbody>
-            </table>
-        {% else %}
-
-            <p class="text-center">No notes found.</p>
-        {% endif %}
-        <hr/>
-
-        <form class="form-horizontal" id="add_notes" action="{% url 'view_cred_details' cred.id %}"
-              method="post">{% csrf_token %}
-            {% include "dojo/form_fields.html" with form=form %}
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <input class="btn btn-primary" type="submit" value="Add Note"/>
-
+                    </thead>
+                    <tbody>
+                    {% for note in notes %}
+                        <tr>
+                            <td>
+                                {{ note.author.username }}
+                            </td>
+                            <td>
+                                {{ note.date }}
+                            </td>
+                            <td>
+                                {{ note }}
+                                {% if person == note.author.username %}
+                                    <div class="pull-right">
+                                        <form method="post" action="{% url 'delete_note' note.id 'cred' cred.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" aria-label="id" name="id" value="{{note.id}}"
+                                                   id="id_id" />
+                                            <button type="submit" aria-label="Delete Note" class="btn-delete">
+                                              <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-center">No notes found.</p>
+            {% endif %}
+            <hr/>
+            <form class="form-horizontal" id="add_notes" action="{% url 'view_cred_details' cred.id %}"
+                  method="post">{% csrf_token %}
+                {% include "dojo/form_fields.html" with form=form %}
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input class="btn btn-secondary" type="submit" value="Add Note"/>
+                    </div>
                 </div>
-            </div>
-        </form>
-        <br/>
-        <br/>
+            </form>
+        </div>
     </div>
 {% endblock %}
 

@@ -1,7 +1,8 @@
 import base64
 import re
-import xml.etree.ElementTree
 from datetime import datetime
+
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
@@ -418,7 +419,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
 
     # supposed to be safe against XEE:
     # https://docs.python.org/3/library/xml.html#xml-vulnerabilities
-    tree = xml.etree.ElementTree.parse(qualys_xml_file)
+    tree = ElementTree.parse(qualys_xml_file)
     is_app_report = tree.getroot().tag == "WAS_WEBAPP_REPORT"
 
     if is_app_report:
