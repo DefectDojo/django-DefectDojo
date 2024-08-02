@@ -178,7 +178,7 @@ def view_endpoint_host(request, eid):
     return process_endpoint_view(request, eid, host_view=True)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid')
+@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, 'eid')
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
