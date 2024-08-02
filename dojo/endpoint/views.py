@@ -6,6 +6,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
+from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q, QuerySet
 from django.http import HttpResponseRedirect
@@ -468,6 +469,9 @@ def prefetch_for_endpoints(endpoints):
 
 def migrate_endpoints_view(request):
 
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    
     view_name = 'Migrate endpoints'
 
     html_log = clean_hosts_run(apps=apps, change=(request.method == 'POST'))
