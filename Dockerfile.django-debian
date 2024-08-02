@@ -14,7 +14,6 @@ RUN \
     gcc \
     build-essential \
     dnsutils \
-    libmariadb-dev-compat \
     libpq-dev \
     postgresql-client \
     xmlsec1 \
@@ -47,7 +46,6 @@ RUN \
     libjpeg62 \
     libtiff6 \
     dnsutils \
-    libmariadb3 \
     xmlsec1 \
     git \
     uuid-runtime \

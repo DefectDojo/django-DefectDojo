@@ -115,7 +115,6 @@ services:
     volumes:
       - defectdojo_redis:/data
 volumes:
-  defectdojo_data: {}
   defectdojo_postgres: {}
   defectdojo_media: {}
   defectdojo_redis: {}
