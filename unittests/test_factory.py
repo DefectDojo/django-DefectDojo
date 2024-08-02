@@ -1,3 +1,8 @@
+import os
+from importlib import import_module
+from importlib.util import find_spec
+from inspect import isclass
+
 from dojo.models import Test, Test_Type
 from dojo.tools.factory import get_parser
 
@@ -53,3 +58,23 @@ class TestFactory(DojoTestCase):
         )
         parser = get_parser(scan_type)
         self.assertIsNotNone(parser)
+
+    def test_parser_name_matches_module(self):
+        """Test to ensure that parsers' class names match their module names"""
+        package_dir = "dojo/tools"
+        module_names = os.listdir(package_dir)
+        missing_parsers = []
+        for module_name in module_names:
+            if os.path.isdir(os.path.join(package_dir, module_name)):
+                found = False
+                if find_spec(f"dojo.tools.{module_name}.parser"):
+                    module = import_module(f"dojo.tools.{module_name}.parser")
+                    for attribute_name in dir(module):
+                        attribute = getattr(module, attribute_name)
+                        if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + "parser":
+                            found = True
+                if not found and module_name != "__pycache__":
+                    missing_parsers.append(module_name)
+        if len(missing_parsers) > 0:
+            print(f"Parsers with invalid names: {missing_parsers}")
+        self.assertEqual(0, len(missing_parsers))
