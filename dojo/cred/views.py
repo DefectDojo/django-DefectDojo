@@ -18,53 +18,53 @@ logger = logging.getLogger(__name__)
 
 @user_is_configuration_authorized(Permissions.Credential_Add)
 def new_cred(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = CredUserForm(request.POST)
         if tform.is_valid():
             form_copy = tform.save(commit=False)
             form_copy.password = dojo_crypto_encrypt(
-                tform.cleaned_data['password'])
+                tform.cleaned_data["password"])
             form_copy.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Credential Successfully Created.',
-                extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('cred', ))
+                "Credential Successfully Created.",
+                extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("cred"))
     else:
         tform = CredUserForm()
         add_breadcrumb(
             title="New Credential", top_level=False, request=request)
-    return render(request, 'dojo/new_cred.html', {'tform': tform})
+    return render(request, "dojo/new_cred.html", {"tform": tform})
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, "pid")
 def all_cred_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
-    creds = Cred_Mapping.objects.filter(product=prod).order_by('cred_id__name')
+    creds = Cred_Mapping.objects.filter(product=prod).order_by("cred_id__name")
 
     product_tab = Product_Tab(prod, title="Credentials", tab="settings")
-    return render(request, 'dojo/view_cred_prod.html', {'product_tab': product_tab, 'creds': creds, 'prod': prod})
+    return render(request, "dojo/view_cred_prod.html", {"product_tab": product_tab, "creds": creds, "prod": prod})
 
 
-@user_is_authorized(Cred_User, Permissions.Credential_Edit, 'ttid')
+@user_is_authorized(Cred_User, Permissions.Credential_Edit, "ttid")
 def edit_cred(request, ttid):
     tool_config = Cred_User.objects.get(pk=ttid)
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = CredUserForm(request.POST, request.FILES, instance=tool_config)
         if tform.is_valid():
             form_copy = tform.save(commit=False)
             form_copy.password = dojo_crypto_encrypt(
-                tform.cleaned_data['password'])
+                tform.cleaned_data["password"])
             # handle_uploaded_selenium(request.FILES['selenium_script'], tool_config)
             form_copy.save()
 
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Credential Successfully Updated.',
-                extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('cred', ))
+                "Credential Successfully Updated.",
+                extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("cred"))
     else:
         tool_config.password = prepare_for_view(tool_config.password)
 
@@ -74,20 +74,20 @@ def edit_cred(request, ttid):
         top_level=False,
         request=request)
 
-    return render(request, 'dojo/edit_cred.html', {
-        'tform': tform,
+    return render(request, "dojo/edit_cred.html", {
+        "tform": tform,
     })
 
 
-@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
+@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
 def view_cred_details(request, ttid):
     cred = Cred_User.objects.get(pk=ttid)
     notes = cred.notes.all()
-    cred_products = Cred_Mapping.objects.select_related('product').filter(
-        product_id__isnull=False, cred_id=ttid).order_by('product__name')
+    cred_products = Cred_Mapping.objects.select_related("product").filter(
+        product_id__isnull=False, cred_id=ttid).order_by("product__name")
     cred_products = get_authorized_cred_mappings(Permissions.Product_View, cred_products)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = NoteForm(request.POST)
 
         if form.is_valid():
@@ -101,38 +101,39 @@ def view_cred_details(request, ttid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Note added successfully.',
-                extra_tags='alert-success')
+                "Note added successfully.",
+                extra_tags="alert-success")
     else:
         form = NoteForm()
 
     add_breadcrumb(title="View", top_level=False, request=request)
 
-    return render(request, 'dojo/view_cred_details.html', {
-        'cred': cred,
-        'form': form,
-        'notes': notes,
-        'cred_products': cred_products
+    return render(request, "dojo/view_cred_details.html", {
+        "cred": cred,
+        "form": form,
+        "notes": notes,
+        "cred_products": cred_products,
+        "person": request.user.username,
     })
 
 
 @user_is_configuration_authorized(Permissions.Credential_View)
 def cred(request):
-    confs = Cred_User.objects.all().order_by('name', 'environment', 'username')
+    confs = Cred_User.objects.all().order_by("name", "environment", "username")
     add_breadcrumb(title="Credential Manager", top_level=True, request=request)
-    return render(request, 'dojo/view_cred.html', {
-        'confs': confs,
+    return render(request, "dojo/view_cred.html", {
+        "confs": confs,
     })
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
-@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
+@user_is_authorized(Product, Permissions.Product_View, "pid")
+@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
 def view_cred_product(request, pid, ttid):
     cred = get_object_or_404(
-        Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+        Cred_Mapping.objects.select_related("cred_id"), id=ttid)
     notes = cred.cred_id.notes.all()
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = NoteForm(request.POST)
 
         if form.is_valid():
@@ -145,8 +146,8 @@ def view_cred_product(request, pid, ttid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Note added successfully.',
-                extra_tags='alert-success')
+                "Note added successfully.",
+                extra_tags="alert-success")
     else:
         form = NoteForm()
 
@@ -154,43 +155,43 @@ def view_cred_product(request, pid, ttid):
         title="Credential Manager", top_level=False, request=request)
     cred_type = "Product"
     view_link = reverse(
-        'view_cred_product', args=(
+        "view_cred_product", args=(
             cred.product.id,
             cred.id,
         ))
     edit_link = reverse(
-        'edit_cred_product', args=(
+        "edit_cred_product", args=(
             cred.product.id,
             cred.id,
         ))
     delete_link = reverse(
-        'delete_cred_product', args=(
+        "delete_cred_product", args=(
             cred.product.id,
             cred.id,
         ))
 
     return render(
-        request, 'dojo/view_cred_all_details.html', {
-            'cred': cred,
-            'form': form,
-            'notes': notes,
-            'cred_type': cred_type,
-            'edit_link': edit_link,
-            'delete_link': delete_link,
-            'view_link': view_link
+        request, "dojo/view_cred_all_details.html", {
+            "cred": cred,
+            "form": form,
+            "notes": notes,
+            "cred_type": cred_type,
+            "edit_link": edit_link,
+            "delete_link": delete_link,
+            "view_link": view_link,
         })
 
 
-@user_is_authorized(Product, Permissions.Engagement_View, 'eid')
-@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
+@user_is_authorized(Product, Permissions.Engagement_View, "eid")
+@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
 def view_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
-        Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+        Cred_Mapping.objects.select_related("cred_id"), id=ttid)
     cred_product = Cred_Mapping.objects.filter(
         cred_id=cred.cred_id.id, product=cred.engagement.product.id).first()
     notes = cred.cred_id.notes.all()
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = NoteForm(request.POST)
 
         if form.is_valid():
@@ -203,8 +204,8 @@ def view_cred_product_engagement(request, eid, ttid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Note added successfully.',
-                extra_tags='alert-success')
+                "Note added successfully.",
+                extra_tags="alert-success")
     else:
         form = NoteForm()
 
@@ -213,35 +214,35 @@ def view_cred_product_engagement(request, eid, ttid):
     cred_type = "Engagement"
     edit_link = ""
     delete_link = reverse(
-        'delete_cred_engagement', args=(
+        "delete_cred_engagement", args=(
             eid,
             cred.id,
         ))
 
     return render(
-        request, 'dojo/view_cred_all_details.html', {
-            'cred': cred,
-            'form': form,
-            'notes': notes,
-            'cred_type': cred_type,
-            'edit_link': edit_link,
-            'delete_link': delete_link,
-            'cred_product': cred_product
+        request, "dojo/view_cred_all_details.html", {
+            "cred": cred,
+            "form": form,
+            "notes": notes,
+            "cred_type": cred_type,
+            "edit_link": edit_link,
+            "delete_link": delete_link,
+            "cred_product": cred_product,
         })
 
 
-@user_is_authorized(Product, Permissions.Test_View, 'tid')
-@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
+@user_is_authorized(Product, Permissions.Test_View, "tid")
+@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
 def view_cred_engagement_test(request, tid, ttid):
     cred = get_object_or_404(
-        Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+        Cred_Mapping.objects.select_related("cred_id"), id=ttid)
     cred_product = Cred_Mapping.objects.filter(
         cred_id=cred.cred_id.id,
         product=cred.test.engagement.product.id).first()
 
     notes = cred.cred_id.notes.all()
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = NoteForm(request.POST)
 
         if form.is_valid():
@@ -254,8 +255,8 @@ def view_cred_engagement_test(request, tid, ttid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Note added successfully.',
-                extra_tags='alert-success')
+                "Note added successfully.",
+                extra_tags="alert-success")
     else:
         form = NoteForm()
 
@@ -264,35 +265,35 @@ def view_cred_engagement_test(request, tid, ttid):
     cred_type = "Test"
     edit_link = None
     delete_link = reverse(
-        'delete_cred_test', args=(
+        "delete_cred_test", args=(
             tid,
             cred.id,
         ))
 
     return render(
-        request, 'dojo/view_cred_all_details.html', {
-            'cred': cred,
-            'form': form,
-            'notes': notes,
-            'cred_type': cred_type,
-            'edit_link': edit_link,
-            'delete_link': delete_link,
-            'cred_product': cred_product
+        request, "dojo/view_cred_all_details.html", {
+            "cred": cred,
+            "form": form,
+            "notes": notes,
+            "cred_type": cred_type,
+            "edit_link": edit_link,
+            "delete_link": delete_link,
+            "cred_product": cred_product,
         })
 
 
-@user_is_authorized(Product, Permissions.Finding_View, 'fid')
-@user_is_authorized(Cred_User, Permissions.Credential_View, 'ttid')
+@user_is_authorized(Product, Permissions.Finding_View, "fid")
+@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
 def view_cred_finding(request, fid, ttid):
     cred = get_object_or_404(
-        Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+        Cred_Mapping.objects.select_related("cred_id"), id=ttid)
     cred_product = Cred_Mapping.objects.filter(
         cred_id=cred.cred_id.id,
         product=cred.finding.test.engagement.product.id).first()
 
     notes = cred.cred_id.notes.all()
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = NoteForm(request.POST)
 
         if form.is_valid():
@@ -305,8 +306,8 @@ def view_cred_finding(request, fid, ttid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Note added successfully.',
-                extra_tags='alert-success')
+                "Note added successfully.",
+                extra_tags="alert-success")
     else:
         form = NoteForm()
 
@@ -315,139 +316,139 @@ def view_cred_finding(request, fid, ttid):
     cred_type = "Finding"
     edit_link = None
     delete_link = reverse(
-        'delete_cred_finding', args=(
+        "delete_cred_finding", args=(
             fid,
             cred.id,
         ))
 
     return render(
-        request, 'dojo/view_cred_all_details.html', {
-            'cred': cred,
-            'form': form,
-            'notes': notes,
-            'cred_type': cred_type,
-            'edit_link': edit_link,
-            'delete_link': delete_link,
-            'cred_product': cred_product
+        request, "dojo/view_cred_all_details.html", {
+            "cred": cred,
+            "form": form,
+            "notes": notes,
+            "cred_type": cred_type,
+            "edit_link": edit_link,
+            "delete_link": delete_link,
+            "cred_product": cred_product,
         })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
-@user_is_authorized(Cred_User, Permissions.Credential_Edit, 'ttid')
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
+@user_is_authorized(Cred_User, Permissions.Credential_Edit, "ttid")
 def edit_cred_product(request, pid, ttid):
     cred = get_object_or_404(
-        Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+        Cred_Mapping.objects.select_related("cred_id"), id=ttid)
 
     prod = get_object_or_404(Product, pk=pid)
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = CredMappingFormProd(request.POST, instance=cred)
         if tform.is_valid():
             tform.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Credential Successfully Updated.',
-                extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('all_cred_product', args=(pid, )))
+                "Credential Successfully Updated.",
+                extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("all_cred_product", args=(pid, )))
     else:
         tform = CredMappingFormProd(instance=cred)
 
     product_tab = Product_Tab(prod, title="Edit Product Credential", tab="settings")
-    return render(request, 'dojo/edit_cred_all.html', {
-        'tform': tform,
-        'product_tab': product_tab,
-        'cred_type': "Product"
+    return render(request, "dojo/edit_cred_all.html", {
+        "tform": tform,
+        "product_tab": product_tab,
+        "cred_type": "Product",
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
-@user_is_authorized(Cred_User, Permissions.Credential_Edit, 'ttid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
+@user_is_authorized(Cred_User, Permissions.Credential_Edit, "ttid")
 def edit_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
-        Cred_Mapping.objects.select_related('cred_id'), id=ttid)
+        Cred_Mapping.objects.select_related("cred_id"), id=ttid)
     eng = get_object_or_404(Engagement, pk=eid)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = CredMappingForm(request.POST, instance=cred)
         if tform.is_valid():
             tform.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                'Credential Successfully Updated.',
-                extra_tags='alert-success')
+                "Credential Successfully Updated.",
+                extra_tags="alert-success")
             return HttpResponseRedirect(
-                reverse('view_engagement', args=(eid, )))
+                reverse("view_engagement", args=(eid, )))
     else:
         tform = CredMappingFormProd(instance=cred)
         tform.fields["cred_id"].queryset = Cred_Mapping.objects.filter(
-            product=eng.product).order_by('cred_id')
+            product=eng.product).order_by("cred_id")
 
     add_breadcrumb(
         title="Edit Credential Configuration",
         top_level=False,
         request=request)
 
-    return render(request, 'dojo/edit_cred_all.html', {
-        'tform': tform,
-        'cred_type': "Engagement"
+    return render(request, "dojo/edit_cred_all.html", {
+        "tform": tform,
+        "cred_type": "Engagement",
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def new_cred_product(request, pid):
     prod = get_object_or_404(Product, pk=pid)
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = CredMappingFormProd(request.POST)
         if tform.is_valid():
             # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
             cred_user = Cred_Mapping.objects.filter(
-                cred_id=tform.cleaned_data['cred_id'].id, product=pid).first()
+                cred_id=tform.cleaned_data["cred_id"].id, product=pid).first()
             message = "Credential already associated."
-            status_tag = 'alert-danger'
+            status_tag = "alert-danger"
 
             if cred_user is None:
                 prod = Product.objects.get(id=pid)
                 new_f = tform.save(commit=False)
                 new_f.product = prod
                 new_f.save()
-                message = 'Credential Successfully Updated.'
-                status_tag = 'alert-success'
+                message = "Credential Successfully Updated."
+                status_tag = "alert-success"
 
             messages.add_message(
                 request, messages.SUCCESS, message, extra_tags=status_tag)
-            return HttpResponseRedirect(reverse('all_cred_product', args=(pid, )))
+            return HttpResponseRedirect(reverse("all_cred_product", args=(pid, )))
     else:
         tform = CredMappingFormProd()
 
     product_tab = Product_Tab(prod, title="Add Credential Configuration", tab="settings")
 
-    return render(request, 'dojo/new_cred_product.html', {
-        'tform': tform,
-        'pid': pid,
-        'product_tab': product_tab
+    return render(request, "dojo/new_cred_product.html", {
+        "tform": tform,
+        "pid": pid,
+        "product_tab": product_tab,
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def new_cred_product_engagement(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = CredMappingForm(request.POST)
         tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-            product=eng.product).order_by('cred_id')
-        if tform.is_valid() and tform.cleaned_data['cred_user']:
+            product=eng.product).order_by("cred_id")
+        if tform.is_valid() and tform.cleaned_data["cred_user"]:
             # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
             cred_user = Cred_Mapping.objects.filter(
-                pk=tform.cleaned_data['cred_user'].id,
-                product=eng.product.id).order_by('cred_id').first()
+                pk=tform.cleaned_data["cred_user"].id,
+                product=eng.product.id).order_by("cred_id").first()
             # search for cred_user and engagement id
             cred_lookup = Cred_Mapping.objects.filter(
                 cred_id=cred_user.cred_id, engagement=eng.id)
 
             message = "Credential already associated."
-            status_tag = 'alert-danger'
+            status_tag = "alert-danger"
 
             if not cred_user:
                 message = "Credential must first be associated with this product."
@@ -457,48 +458,48 @@ def new_cred_product_engagement(request, eid):
                 new_f.engagement = eng
                 new_f.cred_id = cred_user.cred_id
                 new_f.save()
-                message = 'Credential Successfully Updated.'
-                status_tag = 'alert-success'
+                message = "Credential Successfully Updated."
+                status_tag = "alert-success"
 
             messages.add_message(
                 request, messages.SUCCESS, message, extra_tags=status_tag)
             return HttpResponseRedirect(
-                reverse('view_engagement', args=(eid, )))
+                reverse("view_engagement", args=(eid, )))
     else:
         tform = CredMappingForm()
         tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-            product=eng.product).order_by('cred_id')
+            product=eng.product).order_by("cred_id")
 
     add_breadcrumb(
         title="Add Credential Configuration", top_level=False, request=request)
 
     return render(
-        request, 'dojo/new_cred_mapping.html', {
-            'tform': tform,
-            'eid': eid,
-            'formlink': reverse('new_cred_product_engagement', args=(eid, ))
+        request, "dojo/new_cred_mapping.html", {
+            "tform": tform,
+            "eid": eid,
+            "formlink": reverse("new_cred_product_engagement", args=(eid, )),
         })
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, 'tid')
+@user_is_authorized(Test, Permissions.Test_Edit, "tid")
 def new_cred_engagement_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = CredMappingForm(request.POST)
         tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-            engagement=test.engagement).order_by('cred_id')
-        if tform.is_valid() and tform.cleaned_data['cred_user']:
+            engagement=test.engagement).order_by("cred_id")
+        if tform.is_valid() and tform.cleaned_data["cred_user"]:
             # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
             cred_user = Cred_Mapping.objects.filter(
-                pk=tform.cleaned_data['cred_user'].id,
+                pk=tform.cleaned_data["cred_user"].id,
                 engagement=test.engagement.id).first()
             # search for cred_user and test id
             cred_lookup = Cred_Mapping.objects.filter(
                 cred_id=cred_user.cred_id, test=test.id)
 
             message = "Credential already associated."
-            status_tag = 'alert-danger'
+            status_tag = "alert-danger"
 
             if not cred_user:
                 message = "Credential must first be associated with this product."
@@ -508,48 +509,48 @@ def new_cred_engagement_test(request, tid):
                 new_f.test = test
                 new_f.cred_id = cred_user.cred_id
                 new_f.save()
-                message = 'Credential Successfully Updated.'
-                status_tag = 'alert-success'
+                message = "Credential Successfully Updated."
+                status_tag = "alert-success"
 
             messages.add_message(
                 request, messages.SUCCESS, message, extra_tags=status_tag)
-            return HttpResponseRedirect(reverse('view_test', args=(tid, )))
+            return HttpResponseRedirect(reverse("view_test", args=(tid, )))
     else:
         tform = CredMappingForm()
         tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-            engagement=test.engagement).order_by('cred_id')
+            engagement=test.engagement).order_by("cred_id")
 
     add_breadcrumb(
         title="Add Credential Configuration", top_level=False, request=request)
 
     return render(
-        request, 'dojo/new_cred_mapping.html', {
-            'tform': tform,
-            'eid': tid,
-            'formlink': reverse('new_cred_engagement_test', args=(tid, ))
+        request, "dojo/new_cred_mapping.html", {
+            "tform": tform,
+            "eid": tid,
+            "formlink": reverse("new_cred_engagement_test", args=(tid, )),
         })
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def new_cred_finding(request, fid):
     finding = get_object_or_404(Finding, pk=fid)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = CredMappingForm(request.POST)
         tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-            engagement=finding.test.engagement).order_by('cred_id')
+            engagement=finding.test.engagement).order_by("cred_id")
 
-        if tform.is_valid() and tform.cleaned_data['cred_user']:
+        if tform.is_valid() and tform.cleaned_data["cred_user"]:
             # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
             cred_user = Cred_Mapping.objects.filter(
-                pk=tform.cleaned_data['cred_user'].id,
+                pk=tform.cleaned_data["cred_user"].id,
                 engagement=finding.test.engagement.id).first()
             # search for cred_user and test id
             cred_lookup = Cred_Mapping.objects.filter(
                 cred_id=cred_user.cred_id, finding=finding.id)
 
             message = "Credential already associated."
-            status_tag = 'alert-danger'
+            status_tag = "alert-danger"
 
             if not cred_user:
                 message = "Credential must first be associated with this product."
@@ -559,36 +560,36 @@ def new_cred_finding(request, fid):
                 new_f.finding = finding
                 new_f.cred_id = cred_user.cred_id
                 new_f.save()
-                message = 'Credential Successfully Updated.'
-                status_tag = 'alert-success'
+                message = "Credential Successfully Updated."
+                status_tag = "alert-success"
 
             messages.add_message(
                 request, messages.SUCCESS, message, extra_tags=status_tag)
-            return HttpResponseRedirect(reverse('view_finding', args=(fid, )))
+            return HttpResponseRedirect(reverse("view_finding", args=(fid, )))
     else:
         tform = CredMappingForm()
         tform.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-            engagement=finding.test.engagement).order_by('cred_id')
+            engagement=finding.test.engagement).order_by("cred_id")
 
     add_breadcrumb(
         title="Add Credential Configuration", top_level=False, request=request)
 
     return render(
-        request, 'dojo/new_cred_mapping.html', {
-            'tform': tform,
-            'eid': fid,
-            'formlink': reverse('new_cred_finding', args=(fid, ))
+        request, "dojo/new_cred_mapping.html", {
+            "tform": tform,
+            "eid": fid,
+            "formlink": reverse("new_cred_finding", args=(fid, )),
         })
 
 
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
 def delete_cred_controller(request, destination_url, id, ttid):
     cred = None
     try:
         cred = Cred_Mapping.objects.get(pk=ttid)
     except:
         pass
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = CredMappingForm(request.POST, instance=cred)
         message = ""
         status_tag = ""
@@ -633,7 +634,7 @@ def delete_cred_controller(request, destination_url, id, ttid):
             else:
                 cred.delete()
         else:
-            status_tag = 'alert-danger'
+            status_tag = "alert-danger"
 
         messages.add_message(
             request, messages.SUCCESS, message, extra_tags=status_tag)
@@ -650,7 +651,7 @@ def delete_cred_controller(request, destination_url, id, ttid):
     if id:
         product = None
         if destination_url == "all_cred_product":
-            product = get_object_or_404(Product, id)
+            product = get_object_or_404(Product, id=id)
         elif destination_url == "view_engagement":
             engagement = get_object_or_404(Engagement, id=id)
             product = engagement.product
@@ -661,36 +662,36 @@ def delete_cred_controller(request, destination_url, id, ttid):
             finding = get_object_or_404(Finding, id=id)
             product = finding.test.engagement.product
         product_tab = Product_Tab(product, title="Delete Credential Mapping", tab="settings")
-    return render(request, 'dojo/delete_cred_all.html', {
-        'tform': tform,
-        'product_tab': product_tab
+    return render(request, "dojo/delete_cred_all.html", {
+        "tform": tform,
+        "product_tab": product_tab,
     })
 
 
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
 def delete_cred(request, ttid):
-    return delete_cred_controller(request, "cred", 0, ttid)
+    return delete_cred_controller(request, "cred", 0, ttid=ttid)
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
 def delete_cred_product(request, pid, ttid):
     return delete_cred_controller(request, "all_cred_product", pid, ttid)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
 def delete_cred_engagement(request, eid, ttid):
     return delete_cred_controller(request, "view_engagement", eid, ttid)
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, 'tid')
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
+@user_is_authorized(Test, Permissions.Test_Edit, "tid")
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
 def delete_cred_test(request, tid, ttid):
     return delete_cred_controller(request, "view_test", tid, ttid)
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, 'ttid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
+@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
 def delete_cred_finding(request, fid, ttid):
     return delete_cred_controller(request, "view_finding", fid, ttid)

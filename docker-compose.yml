@@ -54,6 +54,7 @@ services:
       DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
+      DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -75,6 +76,7 @@ services:
       DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
+      DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -95,6 +97,7 @@ services:
       DD_CELERY_BROKER_URL: ${DD_CELERY_BROKER_URL}
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
+      DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -119,6 +122,7 @@ services:
       DD_INITIALIZE: "${DD_INITIALIZE:-true}"
       DD_SECRET_KEY: "${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}"
       DD_CREDENTIAL_AES_256_KEY: "${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}"
+      DD_DATABASE_READINESS_TIMEOUT: "${DD_DATABASE_READINESS_TIMEOUT:-30}"
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -137,7 +141,7 @@ services:
     volumes:
       - defectdojo_data:/var/lib/mysql
   postgres:
-    image: postgres:16.3-alpine@sha256:7f7832dfb7770c7256fe3f8c4cb57617caee45e2494cc0a736594135237ed9bf
+    image: postgres:16.3-alpine@sha256:36ed71227ae36305d26382657c0b96cbaf298427b3f1eaeb10d77a6dea3eec41
     profiles: 
       - postgres-rabbitmq
       - postgres-redis
@@ -155,7 +159,7 @@ services:
     volumes:
        - defectdojo_rabbitmq:/var/lib/rabbitmq
   redis:
-    image: redis:7.2.4-alpine@sha256:a40e29800d387e3cf9431902e1e7a362e4d819233d68ae39380532c3310091ac
+    image: redis:7.2.5-alpine@sha256:0bc09d9f486508aa42ecc2f18012bb1e3a1b2744ef3a6ad30942fa12579f0b03
     profiles: 
       - mysql-redis
       - postgres-redis

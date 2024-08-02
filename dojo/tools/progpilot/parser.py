@@ -15,9 +15,9 @@ class ProgpilotParser:
 
     def get_findings(self, filename, test):
         findings = []
-        description = ""
         results = json.load(filename)
         for result in results:
+            description = ""
             source_name = result.get("source_name", None)
             source_line = result.get("source_line", None)
             source_column = result.get("source_column", None)
@@ -64,7 +64,7 @@ class ProgpilotParser:
                 severity="Medium",
                 dynamic_finding=False,
                 static_finding=True,
-                unique_id_from_tool=vuln_id
+                unique_id_from_tool=vuln_id,
             )
             if sink_line is not None:
                 find.line = sink_line

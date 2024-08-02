@@ -51,7 +51,7 @@ class TenableCSVParser:
         if val is None or val == "":
             return None
         cve_match = re.findall(
-            r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE
+            r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE,
         )
         if cve_match:
             return cve_match
@@ -67,11 +67,11 @@ class TenableCSVParser:
         """Detect the delimiter of the CSV file"""
         if isinstance(content, bytes):
             content = content.decode("utf-8")
-        first_line = content.split('\n')[0]
-        if ';' in first_line:
-            return ';'
+        first_line = content.split("\n")[0]
+        if ";" in first_line:
+            return ";"
         else:
-            return ','  # default to comma if no semicolon found
+            return ","  # default to comma if no semicolon found
 
     def get_findings(self, filename: str, test: Test):
         # Read the CSV
@@ -130,7 +130,7 @@ class TenableCSVParser:
                 cvss_vector = row.get("CVSS V3 Vector", "")
                 if cvss_vector != "":
                     find.cvssv3 = CVSS3(
-                        "CVSS:3.0/" + str(cvss_vector)
+                        "CVSS:3.0/" + str(cvss_vector),
                     ).clean_vector(output_prefix=True)
 
                 # Add CVSS score if present
@@ -143,7 +143,7 @@ class TenableCSVParser:
                     # FIXME support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
                         LOGGER.debug(
-                            "more than one CPE for a finding. NOT supported by Nessus CSV parser"
+                            "more than one CPE for a finding. NOT supported by Nessus CSV parser",
                         )
                     cpe_decoded = CPE(detected_cpe[0])
                     find.component_name = (

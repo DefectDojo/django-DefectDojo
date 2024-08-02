@@ -20,6 +20,6 @@ per category. To get all issues, copy the [DefaultReportDefinitionAllIssues.xml]
 
 Once this is complete, you can run the following command on your .fpr file to generate the
 required XML:
-```
+```bash
 ./path/to/ReportGenerator -format xml -f /path/to/output.xml -source /path/to/downloaded/artifact.fpr -template DefaultReportDefinitionAllIssues.xml
 ```

@@ -1,7 +1,6 @@
 from dojo.models import Engagement, Product, Test
 from dojo.tools.nikto.parser import NiktoParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNiktoParser(DojoTestCase):
@@ -166,7 +165,7 @@ class TestNiktoParser(DojoTestCase):
                 self.assertIsNone(endpoint.path)
             with self.subTest(i=5):
                 finding = findings[5]
-                self.assertEqual("The Content-Encoding header is set to \"deflate\" this may mean that the server is vulnerable to the BREACH attack.", finding.title)
+                self.assertEqual('The Content-Encoding header is set to "deflate" this may mean that the server is vulnerable to the BREACH attack.', finding.title)
                 self.assertEqual("999966", finding.vuln_id_from_tool)
                 self.assertEqual(1, finding.nb_occurences)
                 self.assertEqual("Info", finding.severity)

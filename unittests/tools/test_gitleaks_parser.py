@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.gitleaks.parser import GitleaksParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestGitleaksParser(DojoTestCase):
@@ -101,16 +100,16 @@ class TestGitleaksParser(DojoTestCase):
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("Hard coded RSA private key found in conf/rsa.pk", finding.title)
-                description = '''**Secret:** -----BEGIN RSA PRIVATE KEY-----
+                description = """**Secret:** -----BEGIN RSA PRIVATE KEY-----
 **Match:** -----BEGIN RSA PRIVATE KEY-----
-**Rule Id:** RSA-PK'''
+**Rule Id:** RSA-PK"""
                 self.assertEqual(description, finding.description)
                 self.assertIn("tag1", finding.unsaved_tags)
                 self.assertIn("tag2", finding.unsaved_tags)
             with self.subTest(i=2):
                 finding = findings[2]
                 self.assertEqual("Hard coded Generic API Key found in tests/api.py", finding.title)
-                description = '''**Secret:** dfjksdjfs3294dfjlsdaf213
+                description = """**Secret:** dfjksdjfs3294dfjlsdaf213
 **Match:** apikey = "dfjksdjfs3294dfjlsdaf213"
 **Commit message:**
 ```
@@ -121,5 +120,5 @@ sed diam voluptua.
 ```
 **Commit hash:** 69235ea9ea4d59e18e2cc3c295526de46aa1365c1f0c7a95a22ff1537acdf517
 **Commit date:** 2016-09-16T18:17:59Z
-**Rule Id:** generic-api-key'''
+**Rule Id:** generic-api-key"""
                 self.assertEqual(description, finding.description)

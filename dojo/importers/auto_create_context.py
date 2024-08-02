@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from crum import get_current_user
+from django.db import transaction
 from django.http.request import QueryDict
 from django.utils import timezone
 
@@ -177,7 +178,7 @@ class AutoCreateContextManager:
         If a match is not found, and a product is not supplied, return None
         """
         if engagement := get_object_or_none(Engagement, pk=engagement_id):
-            logger.debug('Using existing engagement by id: %s', engagement_id)
+            logger.debug("Using existing engagement by id: %s", engagement_id)
             return engagement
         # if there's no product, then for sure there's no engagement either
         if product is None:
@@ -199,7 +200,7 @@ class AutoCreateContextManager:
         the provided scan_type and test_title.
         """
         if test := get_object_or_none(Test, pk=test_id):
-            logger.debug('Using existing Test by id: %s', test_id)
+            logger.debug("Using existing Test by id: %s", test_id)
             return test
         # If the engagement is not supplied, we cannot do anything
         if not engagement:
@@ -229,14 +230,15 @@ class AutoCreateContextManager:
         if product_type := self.get_target_product_type_if_exists(product_type_name=product_type_name):
             return product_type
         else:
-            product_type, created = Product_Type.objects.get_or_create(name=product_type_name)
-            if created:
-                Product_Type_Member.objects.create(
-                    user=get_current_user(),
-                    product_type=product_type,
-                    role=Role.objects.get(is_owner=True),
-                )
-            return product_type
+            with transaction.atomic():
+                product_type, created = Product_Type.objects.select_for_update().get_or_create(name=product_type_name)
+                if created:
+                    Product_Type_Member.objects.create(
+                        user=get_current_user(),
+                        product_type=product_type,
+                        role=Role.objects.get(is_owner=True),
+                    )
+                return product_type
 
     def get_or_create_product(
         self,
@@ -260,13 +262,14 @@ class AutoCreateContextManager:
         # Look for a product type first
         product_type = self.get_or_create_product_type(product_type_name=product_type_name)
         # Create the product
-        product, created = Product.objects.get_or_create(name=product_name, prod_type=product_type, description=product_name)
-        if created:
-            Product_Member.objects.create(
-                user=get_current_user(),
-                product=product,
-                role=Role.objects.get(is_owner=True),
-            )
+        with transaction.atomic():
+            product, created = Product.objects.select_for_update().get_or_create(name=product_name, prod_type=product_type, description=product_name)
+            if created:
+                Product_Member.objects.create(
+                    user=get_current_user(),
+                    product=product,
+                    role=Role.objects.get(is_owner=True),
+                )
 
         return product
 
@@ -293,7 +296,7 @@ class AutoCreateContextManager:
         engagement = self.get_target_engagement_if_exists(
             engagement_id=engagement_id,
             engagement_name=engagement_name,
-            product=product
+            product=product,
         )
         # If we have an engagement, we cna just return it
         if engagement:
@@ -313,17 +316,18 @@ class AutoCreateContextManager:
         if (target_end is None) or (target_start > target_end):
             target_end = (timezone.now() + timedelta(days=365)).date()
         # Create the engagement
-        return Engagement.objects.create(
-            engagement_type="CI/CD",
-            name=engagement_name,
-            product=product,
-            lead=get_current_user(),
-            target_start=target_start,
-            target_end=target_end,
-            status="In Progress",
-            deduplication_on_engagement=deduplication_on_engagement,
-            source_code_management_uri=source_code_management_uri,
-        )
+        with transaction.atomic():
+            return Engagement.objects.select_for_update().create(
+                engagement_type="CI/CD",
+                name=engagement_name,
+                product=product,
+                lead=get_current_user(),
+                target_start=target_start,
+                target_end=target_end,
+                status="In Progress",
+                deduplication_on_engagement=deduplication_on_engagement,
+                source_code_management_uri=source_code_management_uri,
+            )
 
     """
     ===================================

@@ -62,7 +62,7 @@ def check_object_permission(
 class UserHasAppAnalysisPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Technology_Add
+            request, Product, "product", Permissions.Technology_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -79,22 +79,22 @@ class UserHasCredentialPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.data.get("product") is not None:
             return check_post_permission(
-                request, Cred_Mapping, "product", Permissions.Credential_Add
+                request, Cred_Mapping, "product", Permissions.Credential_Add,
             )
         if request.data.get("engagement") is not None:
             return check_post_permission(
-                request, Cred_Mapping, "engagement", Permissions.Credential_Add
+                request, Cred_Mapping, "engagement", Permissions.Credential_Add,
             )
         if request.data.get("test") is not None:
             return check_post_permission(
-                request, Cred_Mapping, "test", Permissions.Credential_Add
+                request, Cred_Mapping, "test", Permissions.Credential_Add,
             )
         if request.data.get("finding") is not None:
             return check_post_permission(
-                request, Cred_Mapping, "finding", Permissions.Credential_Add
+                request, Cred_Mapping, "finding", Permissions.Credential_Add,
             )
         return check_post_permission(
-            request, Cred_Mapping, "product", Permissions.Credential_Add
+            request, Cred_Mapping, "product", Permissions.Credential_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -111,11 +111,11 @@ class UserHasDojoGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "GET":
             return user_has_configuration_permission(
-                request.user, "auth.view_group"
+                request.user, "auth.view_group",
             )
         elif request.method == "POST":
             return user_has_configuration_permission(
-                request.user, "auth.add_group"
+                request.user, "auth.add_group",
             )
         else:
             return True
@@ -126,9 +126,9 @@ class UserHasDojoGroupPermission(permissions.BasePermission):
             # because with the group they can see user information that might
             # be considered as confidential
             return user_has_configuration_permission(
-                request.user, "auth.view_group"
+                request.user, "auth.view_group",
             ) and user_has_permission(
-                request.user, obj, Permissions.Group_View
+                request.user, obj, Permissions.Group_View,
             )
         else:
             return check_object_permission(
@@ -143,7 +143,7 @@ class UserHasDojoGroupPermission(permissions.BasePermission):
 class UserHasDojoGroupMemberPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Dojo_Group, "group", Permissions.Group_Manage_Members
+            request, Dojo_Group, "group", Permissions.Group_Manage_Members,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -166,7 +166,7 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, object, Permissions.Product_Edit
+                        request.user, object, Permissions.Product_Edit,
                     )
                 )
             finding_id = request.data.get("finding", None)
@@ -175,7 +175,7 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, object, Permissions.Finding_Edit
+                        request.user, object, Permissions.Finding_Edit,
                     )
                 )
             endpoint_id = request.data.get("endpoint", None)
@@ -184,7 +184,7 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, object, Permissions.Endpoint_Edit
+                        request.user, object, Permissions.Endpoint_Edit,
                     )
                 )
             return has_permission_result
@@ -235,7 +235,7 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
 class UserHasToolProductSettingsPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Product_Edit
+            request, Product, "product", Permissions.Product_Edit,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -251,7 +251,7 @@ class UserHasToolProductSettingsPermission(permissions.BasePermission):
 class UserHasEndpointPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Endpoint_Add
+            request, Product, "product", Permissions.Endpoint_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -267,7 +267,7 @@ class UserHasEndpointPermission(permissions.BasePermission):
 class UserHasEndpointStatusPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Endpoint, "endpoint", Permissions.Endpoint_Edit
+            request, Endpoint, "endpoint", Permissions.Endpoint_Edit,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -288,10 +288,10 @@ class UserHasEngagementPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if UserHasEngagementPermission.path_engagement_post.match(
-            request.path
+            request.path,
         ) or UserHasEngagementPermission.path_engagement.match(request.path):
             return check_post_permission(
-                request, Product, "product", Permissions.Engagement_Add
+                request, Product, "product", Permissions.Engagement_Add,
             )
         else:
             # related object only need object permission
@@ -299,7 +299,7 @@ class UserHasEngagementPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if UserHasEngagementPermission.path_engagement_post.match(
-            request.path
+            request.path,
         ) or UserHasEngagementPermission.path_engagement.match(request.path):
             return check_object_permission(
                 request,
@@ -327,12 +327,12 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
-            request.path
+            request.path,
         ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
-            request.path
+            request.path,
         ):
             return check_post_permission(
-                request, Product, "product", Permissions.Risk_Acceptance
+                request, Product, "product", Permissions.Risk_Acceptance,
             )
         else:
             # related object only need object permission
@@ -340,9 +340,9 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if UserHasRiskAcceptancePermission.path_risk_acceptance_post.match(
-            request.path
+            request.path,
         ) or UserHasRiskAcceptancePermission.path_risk_acceptance.match(
-            request.path
+            request.path,
         ):
             return check_object_permission(
                 request,
@@ -375,12 +375,12 @@ class UserHasFindingPermission(permissions.BasePermission):
             UserHasFindingPermission.path_finding_post.match(request.path)
             or UserHasFindingPermission.path_finding.match(request.path)
             or UserHasFindingPermission.path_stub_finding_post.match(
-                request.path
+                request.path,
             )
             or UserHasFindingPermission.path_stub_finding.match(request.path)
         ):
             return check_post_permission(
-                request, Test, "test", Permissions.Finding_Add
+                request, Test, "test", Permissions.Finding_Add,
             )
         else:
             # related object only need object permission
@@ -391,7 +391,7 @@ class UserHasFindingPermission(permissions.BasePermission):
             UserHasFindingPermission.path_finding_post.match(request.path)
             or UserHasFindingPermission.path_finding.match(request.path)
             or UserHasFindingPermission.path_stub_finding_post.match(
-                request.path
+                request.path,
             )
             or UserHasFindingPermission.path_stub_finding.match(request.path)
         ):
@@ -433,11 +433,11 @@ class UserHasImportPermission(permissions.BasePermission):
         if engagement := converted_dict.get("engagement"):
             # existing engagement, nothing special to check
             return user_has_permission(
-                request.user, engagement, Permissions.Import_Scan_Result
+                request.user, engagement, Permissions.Import_Scan_Result,
             )
         elif engagement_id := converted_dict.get("engagement_id"):
             # engagement_id doesn't exist
-            msg = f"Engagement \"{engagement_id}\" does not exist"
+            msg = f'Engagement "{engagement_id}" does not exist'
             raise serializers.ValidationError(msg)
 
         if not converted_dict.get("auto_create_context"):
@@ -488,11 +488,11 @@ class UserHasMetaImportPermission(permissions.BasePermission):
         if product:
             # existing product, nothing special to check
             return user_has_permission(
-                request.user, product, Permissions.Import_Scan_Result
+                request.user, product, Permissions.Import_Scan_Result,
             )
         elif product_id := converted_dict.get("product_id"):
             # product_id doesn't exist
-            msg = f"Product \"{product_id}\" does not exist"
+            msg = f'Product "{product_id}" does not exist'
             raise serializers.ValidationError(msg)
         else:
             msg = "Need product_id or product_name to perform import"
@@ -521,7 +521,7 @@ class UserHasProductPermission(permissions.BasePermission):
 class UserHasProductMemberPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Product_Manage_Members
+            request, Product, "product", Permissions.Product_Manage_Members,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -537,7 +537,7 @@ class UserHasProductMemberPermission(permissions.BasePermission):
 class UserHasProductGroupPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Product_Group_Add
+            request, Product, "product", Permissions.Product_Group_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -554,7 +554,7 @@ class UserHasProductTypePermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == "POST":
             return user_has_global_permission(
-                request.user, Permissions.Product_Type_Add
+                request.user, Permissions.Product_Type_Add,
             )
         else:
             return True
@@ -629,11 +629,11 @@ class UserHasReimportPermission(permissions.BasePermission):
         if test := converted_dict.get("test"):
             # existing test, nothing special to check
             return user_has_permission(
-                request.user, test, Permissions.Import_Scan_Result
+                request.user, test, Permissions.Import_Scan_Result,
             )
         elif test_id := converted_dict.get("test_id"):
             # test_id doesn't exist
-            msg = f"Test \"{test_id}\" does not exist"
+            msg = f'Test "{test_id}" does not exist'
             raise serializers.ValidationError(msg)
 
         if not converted_dict.get("auto_create_context"):
@@ -671,10 +671,10 @@ class UserHasTestPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if UserHasTestPermission.path_tests_post.match(
-            request.path
+            request.path,
         ) or UserHasTestPermission.path_tests.match(request.path):
             return check_post_permission(
-                request, Engagement, "engagement", Permissions.Test_Add
+                request, Engagement, "engagement", Permissions.Test_Add,
             )
         else:
             # related object only need object permission
@@ -682,7 +682,7 @@ class UserHasTestPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if UserHasTestPermission.path_tests_post.match(
-            request.path
+            request.path,
         ) or UserHasTestPermission.path_tests.match(request.path):
             return check_object_permission(
                 request,
@@ -705,7 +705,7 @@ class UserHasTestPermission(permissions.BasePermission):
 class UserHasTestImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Test, "test", Permissions.Test_Edit
+            request, Test, "test", Permissions.Test_Edit,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -721,7 +721,7 @@ class UserHasTestImportPermission(permissions.BasePermission):
 class UserHasLanguagePermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Language_Add
+            request, Product, "product", Permissions.Language_Add,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -763,7 +763,7 @@ class UserHasJiraProductPermission(permissions.BasePermission):
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, object, Permissions.Engagement_Edit
+                        request.user, object, Permissions.Engagement_Edit,
                     )
                 )
             product_id = request.data.get("product", None)
@@ -772,7 +772,7 @@ class UserHasJiraProductPermission(permissions.BasePermission):
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, object, Permissions.Product_Edit
+                        request.user, object, Permissions.Product_Edit,
                     )
                 )
             return has_permission_result
@@ -818,7 +818,7 @@ class UserHasJiraIssuePermission(permissions.BasePermission):
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, object, Permissions.Engagement_Edit
+                        request.user, object, Permissions.Engagement_Edit,
                     )
                 )
             finding_id = request.data.get("finding", None)
@@ -827,7 +827,7 @@ class UserHasJiraIssuePermission(permissions.BasePermission):
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, object, Permissions.Finding_Edit
+                        request.user, object, Permissions.Finding_Edit,
                     )
                 )
             finding_group_id = request.data.get("finding_group", None)
@@ -836,7 +836,7 @@ class UserHasJiraIssuePermission(permissions.BasePermission):
                 has_permission_result = (
                     has_permission_result
                     and user_has_permission(
-                        request.user, object, Permissions.Finding_Group_Edit
+                        request.user, object, Permissions.Finding_Group_Edit,
                     )
                 )
             return has_permission_result
@@ -892,7 +892,7 @@ class IsSuperUser(permissions.BasePermission):
 class UserHasEngagementPresetPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(
-            request, Product, "product", Permissions.Product_Edit
+            request, Product, "product", Permissions.Product_Edit,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -927,28 +927,28 @@ def raise_no_auto_create_import_validation_error(
         raise ValidationError(msg)
 
     if product_type_name and not product_type:
-        msg = f"Product Type \"{product_type_name}\" does not exist"
+        msg = f'Product Type "{product_type_name}" does not exist'
         raise serializers.ValidationError(msg)
 
     if product_name and not product:
         if product_type_name:
-            msg = f"Product \"{product_name}\" does not exist in Product_Type \"{product_type_name}\""
+            msg = f'Product "{product_name}" does not exist in Product_Type "{product_type_name}"'
             raise serializers.ValidationError(msg)
         else:
-            msg = f"Product \"{product_name}\" does not exist"
+            msg = f'Product "{product_name}" does not exist'
             raise serializers.ValidationError(msg)
 
     if engagement_name and not engagement:
-        msg = f"Engagement \"{engagement_name}\" does not exist in Product \"{product_name}\""
+        msg = f'Engagement "{engagement_name}" does not exist in Product "{product_name}"'
         raise serializers.ValidationError(msg)
 
     # these are only set for reimport
     if test_title:
-        msg = f"Test \"{test_title}\" with scan_type \"{scan_type}\" does not exist in Engagement \"{engagement_name}\""
+        msg = f'Test "{test_title}" with scan_type "{scan_type}" does not exist in Engagement "{engagement_name}"'
         raise serializers.ValidationError(msg)
 
     if scan_type:
-        msg = f"Test with scan_type \"{scan_type}\" does not exist in Engagement \"{engagement_name}\""
+        msg = f'Test with scan_type "{scan_type}" does not exist in Engagement "{engagement_name}"'
         raise serializers.ValidationError(msg)
 
     raise ValidationError(error_message)
@@ -990,18 +990,18 @@ def check_auto_create_permission(
     if engagement:
         # existing engagement, nothing special to check
         return user_has_permission(
-            user, engagement, Permissions.Import_Scan_Result
+            user, engagement, Permissions.Import_Scan_Result,
         )
 
     if product and product_name and engagement_name:
         if not user_has_permission(user, product, Permissions.Engagement_Add):
-            msg = f"No permission to create engagements in product \"{product_name}\""
+            msg = f'No permission to create engagements in product "{product_name}"'
             raise PermissionDenied(msg)
 
         if not user_has_permission(
-            user, product, Permissions.Import_Scan_Result
+            user, product, Permissions.Import_Scan_Result,
         ):
-            msg = f"No permission to import scans into product \"{product_name}\""
+            msg = f'No permission to import scans into product "{product_name}"'
             raise PermissionDenied(msg)
 
         # all good
@@ -1009,23 +1009,23 @@ def check_auto_create_permission(
 
     if not product and product_name:
         if not product_type_name:
-            msg = f"Product \"{product_name}\" does not exist and no product_type_name provided to create the new product in"
+            msg = f'Product "{product_name}" does not exist and no product_type_name provided to create the new product in'
             raise serializers.ValidationError(msg)
 
         if not product_type:
             if not user_has_global_permission(
-                user, Permissions.Product_Type_Add
+                user, Permissions.Product_Type_Add,
             ):
-                msg = f"No permission to create product_type \"{product_type_name}\""
+                msg = f'No permission to create product_type "{product_type_name}"'
                 raise PermissionDenied(msg)
             # new product type can be created with current user as owner, so
             # all objects in it can be created as well
             return True
         else:
             if not user_has_permission(
-                user, product_type, Permissions.Product_Type_Add_Product
+                user, product_type, Permissions.Product_Type_Add_Product,
             ):
-                msg = f"No permission to create products in product_type \"{product_type}\""
+                msg = f'No permission to create products in product_type "{product_type}"'
                 raise PermissionDenied(msg)
 
         # product can be created, so objects in it can be created as well
@@ -1051,7 +1051,7 @@ class UserHasConfigurationPermissionStaff(permissions.DjangoModelPermissions):
 
 
 class UserHasConfigurationPermissionSuperuser(
-    permissions.DjangoModelPermissions
+    permissions.DjangoModelPermissions,
 ):
     # Override map to also provide 'view' permissions
     perms_map = {

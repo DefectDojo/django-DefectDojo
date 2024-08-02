@@ -43,7 +43,7 @@ $ docker-compose build --build-arg uid=1000
 
 ## Factory contract
 
-Parser are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
+Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
 
 1. your parser **MUST** be in a sub-module of module `dojo.tools`
    - ex: `dojo.tools.my_tool.parser` module
@@ -141,6 +141,12 @@ Very bad example:
     endpoint = Endpoint(host=u.host)
     finding.unsaved_endpoints = [endpoint]
 ```
+
+### Use the right libraries to parse information
+Various file formats are handled through libraries. In order to keep DefectDojo slim and also don't extend the attack surface, keep the number of libraries used minimal and take other parsers as an example.
+
+#### defusedXML in favour of lxml
+As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library. 
 
 ### Not all attributes are mandatory
 
@@ -252,6 +258,24 @@ For ex:
             self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
             self.assertEqual("TEST1", finding.vuln_id_from_tool)
 ```
+
+### Use with to open example files
+
+In order to make certain that file handles are closed properly, please use the with pattern to open files.
+Instead of:
+```python
+    testfile = open("path_to_file.json")
+    ...
+    testfile.close()
+```
+
+use:
+```python
+    with open("path_to_file.json") as testfile:
+        ...
+```
+
+This ensures the file is closed at the end of the with statement, even if an exception occurs somewhere in the block.
 
 ### Test database
 

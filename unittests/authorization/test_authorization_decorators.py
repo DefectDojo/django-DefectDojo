@@ -8,20 +8,19 @@ from django.test import RequestFactory
 from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Product_Type
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAuthorizationDecorators(DojoTestCase):
 
     def setUp(self):
-        self.request = RequestFactory().get('/dummy')
+        self.request = RequestFactory().get("/dummy")
         self.user = User()
         self.request.user = self.user
         self.product_type = Product_Type()
-        self.decorated_func = user_is_authorized(Product_Type, Permissions.Product_Type_View, 'id', 'pk', Mock())
+        self.decorated_func = user_is_authorized(Product_Type, Permissions.Product_Type_View, "id", "pk", Mock())
 
-    @patch('dojo.authorization.authorization_decorators.get_object_or_404', side_effect=Http404())
+    @patch("dojo.authorization.authorization_decorators.get_object_or_404", side_effect=Http404())
     def test_object_does_not_exist(self, shortcuts_get_mock):
 
         with self.assertRaises(Http404):
@@ -29,8 +28,8 @@ class TestAuthorizationDecorators(DojoTestCase):
 
         shortcuts_get_mock.assert_called_once()
 
-    @patch('dojo.authorization.authorization_decorators.get_object_or_404')
-    @patch('dojo.authorization.authorization_decorators.user_has_permission_or_403', side_effect=PermissionDenied())
+    @patch("dojo.authorization.authorization_decorators.get_object_or_404")
+    @patch("dojo.authorization.authorization_decorators.user_has_permission_or_403", side_effect=PermissionDenied())
     def test_authorization_permission_denied(self, mock_user_has_permission, mock_shortcuts_get):
         mock_shortcuts_get.return_value = self.product_type
 
@@ -42,7 +41,7 @@ class TestAuthorizationDecorators(DojoTestCase):
         mock_shortcuts_get.assert_called_once()
         mock_user_has_permission.assert_called_with(self.user, self.product_type, Permissions.Product_Type_View)
 
-    @patch('dojo.authorization.authorization_decorators.get_object_or_404')
+    @patch("dojo.authorization.authorization_decorators.get_object_or_404")
     def test_authorization_superuser(self, mock_shortcuts_get):
         mock_shortcuts_get.return_value = self.product_type
 
@@ -52,8 +51,8 @@ class TestAuthorizationDecorators(DojoTestCase):
 
         mock_shortcuts_get.assert_called_once()
 
-    @patch('dojo.authorization.authorization_decorators.get_object_or_404')
-    @patch('dojo.authorization.authorization_decorators.user_has_permission_or_403')
+    @patch("dojo.authorization.authorization_decorators.get_object_or_404")
+    @patch("dojo.authorization.authorization_decorators.user_has_permission_or_403")
     def test_authorization_user_has_permission(self, mock_user_has_permission, mock_shortcuts_get):
         mock_shortcuts_get.return_value = self.product_type
 
@@ -68,24 +67,24 @@ class TestAuthorizationDecorators(DojoTestCase):
 class TestConfigurationAuthorizationDecorators(DojoTestCase):
 
     def setUp(self):
-        self.request = RequestFactory().get('/dummy')
+        self.request = RequestFactory().get("/dummy")
         self.user = User()
         self.request.user = self.user
-        self.decorated_func = user_is_configuration_authorized('test', Mock())
+        self.decorated_func = user_is_configuration_authorized("test", Mock())
 
-    @patch('dojo.authorization.authorization_decorators.user_has_configuration_permission')
+    @patch("dojo.authorization.authorization_decorators.user_has_configuration_permission")
     def test_authorization_user_has_configuration_permission_ok(self, mock):
         mock.return_value = True
 
         self.decorated_func(self.request)
 
-        mock.assert_called_with(self.user, 'test')
+        mock.assert_called_with(self.user, "test")
 
-    @patch('dojo.authorization.authorization_decorators.user_has_configuration_permission')
+    @patch("dojo.authorization.authorization_decorators.user_has_configuration_permission")
     def test_authorization_user_has_configuration_permission_denied(self, mock):
         mock.return_value = False
 
         with self.assertRaises(PermissionDenied):
             self.decorated_func(self.request)
 
-        mock.assert_called_with(self.user, 'test')
+        mock.assert_called_with(self.user, "test")

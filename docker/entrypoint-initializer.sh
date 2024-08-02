@@ -1,6 +1,7 @@
 #!/bin/bash
 
 . /secret-file-loader.sh
+. /reach_database.sh
 
 initialize_data()
 {
@@ -60,12 +61,7 @@ then
 fi
 echo "Initializing."
 
-echo -n "Waiting for database to be reachable "
-until echo "select 1;" | python3 manage.py dbshell > /dev/null
-do
-  echo -n "."
-  sleep 1
-done
+wait_for_database_to_be_reachable
 echo
 
 echo "Checking ENABLE_AUDITLOG"

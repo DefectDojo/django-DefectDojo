@@ -2,8 +2,7 @@ from os import path
 
 from dojo.models import Test
 from dojo.tools.burp.parser import BurpParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestBurpParser(DojoTestCase):
