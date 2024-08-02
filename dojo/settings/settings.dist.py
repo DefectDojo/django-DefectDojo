@@ -1270,6 +1270,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Nancy Scan": ["title", "vuln_id_from_tool"],
     "Wiz Scan": ["title", "description", "severity"],
     "Kubescape JSON Importer": ["title", "component_name"],
+    "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1489,6 +1490,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Wiz Scan": DEDUPE_ALGO_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
+    "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
