@@ -2,8 +2,7 @@ from os import path
 
 from dojo.models import Test
 from dojo.tools.rapplex.parser import RapplexParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestRapplexParser(DojoTestCase):
