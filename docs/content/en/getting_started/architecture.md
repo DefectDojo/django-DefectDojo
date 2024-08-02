@@ -43,4 +43,4 @@ itself down after all tasks are performed.
 
 ## Database
 
-The Database stores all the application data of DefectDojo. Currently [PostgreSQL](https://www.postgresql.org/) is supported, with PostgreSQL being the recommended option.
+The Database stores all the application data of DefectDojo. Currently only [PostgreSQL](https://www.postgresql.org/) is supported.

@@ -55,6 +55,7 @@ then
   exit 1
 fi
 
+echo "Running docker compose unit tests with test case $TEST_CASE ..."
 # Compose V2 integrates compose functions into the Docker platform, continuing to support 
 # most of the  previous docker-compose features and flags. You can run Compose V2 by 
 # replacing the hyphen (-) with a space, using docker compose, instead of docker-compose.
