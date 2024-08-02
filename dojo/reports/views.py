@@ -175,7 +175,7 @@ def report_findings(request):
     title_words = get_words_for_field(Finding, 'title')
     component_words = get_words_for_field(Finding, 'component_name')
 
-    paged_findings = get_page_items(request, findings.qs.distinct().order_by('numerical_severity'), 25)
+    paged_findings = get_page_items(request, findings.qs.distinct(), 25)
 
     return render(request,
                   'dojo/report_findings.html',
