@@ -89,14 +89,9 @@ helm install \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set createSecret=true \
-  --set createRabbitMqSecret=true \
   --set createRedisSecret=true \
-  --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 ```
-Note that you need only one of:
-- postgresql or mysql
-- rabbitmq or redis
 
 It usually takes up to a minute for the services to startup and the
 status of the containers can be viewed by starting up ```minikube dashboard```.
@@ -190,7 +185,7 @@ helm upgrade  defectdojo ./helm/defectdojo/ \
 ### Re-install the chart
 In case of issue or in any other situation where you need to re-install the chart, you can do it and re-use the same secrets.
 
-**Note that when using mysql, this will create a new database, while with postgresql you'll keep the same database (more information below)**
+**Note: With postgresql you'll keep the same database (more information below)**
 
 ```zsh
 # helm 3
@@ -277,12 +272,10 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
-  --set createRabbitMqSecret=true \
   --set createRedisSecret=true \
-  --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 
-# For high availability deploy multiple instances of Django, Celery and RabbitMQ
+# For high availability deploy multiple instances of Django, Celery and Redis
 helm install \
   defectdojo \
   ./helm/defectdojo \
@@ -291,14 +284,12 @@ helm install \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
-  --set rabbitmq.replicas=3 \
+  --set redis.replicas=3 \
   --set createSecret=true \
-  --set createRabbitMqSecret=true \
   --set createRedisSecret=true \
-  --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 
-# Run highly available PostgreSQL cluster instead of MySQL - recommended setup
+# Run highly available PostgreSQL cluster
 # for production environment.
 helm install \
   defectdojo \
@@ -307,17 +298,14 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
-  --set rabbitmq.replicas=3 \
+  --set redis.replicas=3 \
   --set django.ingress.secretName="minikube-tls" \
-  --set mysql.enabled=false \
   --set database=postgresql \
   --set postgresql.enabled=true \
   --set postgresql.replication.enabled=true \
   --set postgresql.replication.slaveReplicas=3 \
   --set createSecret=true \
-  --set createRabbitMqSecret=true \
   --set createRedisSecret=true \
-  --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 
 # Note: If you run `helm install defectdojo before, you will get an error
@@ -331,22 +319,6 @@ helm test defectdojo
 
 # Navigate to <https://defectdojo.default.minikube.local>.
 ```
-
-TODO: The MySQL volumes aren't persistent across `helm uninstall` operations. To
-make them persistent, you need to add an annotation to the persistent volume
-claim:
-
-```zsh
-kubectl --namespace "${K8S_NAMESPACE}" patch pvc defectdojo-mysql -p \
-  '{"metadata": {"annotations": {"\"helm.sh/resource-policy\"": "keep"}}}'
-```
-
-See also
-<https://github.com/helm/charts/blob/master/stable/mysql/templates/pvc.yaml>.
-
-However, that doesn't work and I haven't found out why. In a production
-environment, a redundant PostgreSQL cluster is the better option. As it uses
-statefulsets that are kept by default, the problem doesn't exist there.
 
 ### Prometheus metrics
 
@@ -423,7 +395,7 @@ helm uninstall defectdojo
 
 To remove persistent objects not removed by uninstall (this will remove any database):
 ```
-kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-rabbitmq-specific defectdojo-postgresql-specific defectdojo-mysql-specific
+kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-postgresql-specific
 kubectl delete serviceAccount defectdojo
-kubectl delete pvc data-defectdojo-rabbitmq-0 data-defectdojo-postgresql-0 data-defectdojo-mysql-0
+kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 ```

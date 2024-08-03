@@ -5,63 +5,69 @@ from unittests.dojo_test_case import DojoTestCase
 
 class TestWizcliImgParser(DojoTestCase):
     def test_no_findings(self):
-        with open("unittests/scans/wizcli_dir/wizcli_dir_zero_vul.json") as testfile:
+        with open("unittests/scans/wizcli_img/wizcli_img_zero_vul.json") as testfile:
             parser = WizcliImgParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(len(findings), 0)
 
     def test_one_findings(self):
-        with open("unittests/scans/wizcli_dir/wizcli_dir_one_vul.json") as testfile:
+        with open("unittests/scans/wizcli_img/wizcli_img_one_vul.json") as testfile:
             parser = WizcliImgParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual("google.golang.org/protobuf - CVE-2024-24786", finding.title)
-            self.assertEqual("Medium", finding.severity)
-            self.assertEqual("/grpc/proto/go.mod", finding.file_path)
+            self.assertEqual(
+                "Secret: Password in URL (postgresql://postgres:---REDACTED---@localhost:5432/postgres?)", finding.title,
+            )
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("/app/testing.go", finding.file_path)
             self.assertIn(
-                "**Library Name**: google.golang.org/grpc\n"
-                "**Library Version**: 1.48.0\n"
-                "**Library Path**: /grpc/proto/go.mod\n"
-                "**Vulnerability Name**: CVE-2023-44487\n"
-                "**Fixed Version**: 1.56.3\n"
-                "**Source**: https://github.com/advisories/GHSA-qppj-fm5r-hxr3\n"
-                "**Description**: N/A\n"
-                "**Score**: N/A\n"
-                "**Exploitability Score**: N/A\n"
-                "**Has Exploit**: True\n"
-                "**Has CISA KEV Exploit**: True\n", finding.description)
+                "**Secret ID**: None\n"
+                "**Description**: Password in URL (postgresql://postgres:---REDACTED---@localhost:5432/postgres?)\n"
+                "**File Name**: /app/testing.go\n"
+                "**Line Number**: 35\n"
+                "**Match Content**: PASSWORD\n",
+                finding.description,
+            )
 
     def test_multiple_findings(self):
-        with open("unittests/scans/wizcli_dir/wizcli_dir_many_vul.json") as testfile:
+        with open("unittests/scans/wizcli_img/wizcli_img_many_vul.json") as testfile:
             parser = WizcliImgParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(2, len(findings))
+            self.assertEqual(9, len(findings))
             finding = findings[0]
-            self.assertEqual("google.golang.org/grpc - GHSA-m425-mq94-257g", finding.title)
-            self.assertEqual("Medium", finding.severity)
-            self.assertEqual("/grpc/proto/go.mod", finding.file_path)
+            self.assertEqual("libcrypto3 - CVE-2024-5535", finding.title)
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual(None, finding.file_path)
             self.assertIn(
-                "**Library Name**: google.golang.org/grpc\n"
-                "**Library Version**: 1.48.0\n"
-                "**Library Path**: /grpc/proto/go.mod\n"
-                "**Vulnerability Name**: CVE-2023-44487\n"
-                "**Fixed Version**: 1.56.3\n"
-                "**Source**: https://github.com/advisories/GHSA-qppj-fm5r-hxr3\n"
-                "**Description**: N/A\n"
-                "**Score**: N/A\n"
-                "**Exploitability Score**: N/A\n"
-                "**Has Exploit**: True\n"
-                "**Has CISA KEV Exploit**: True\n", finding.description)
+                "**OS Package Name**: libcrypto3\n"
+                "**OS Package Version**: 3.3.1-r0\n"
+                "**Vulnerability Name**: CVE-2024-5535\n"
+                "**Fixed Version**: 3.3.1-r1\n"
+                "**Source**: https://security.alpinelinux.org/vuln/CVE-2024-5535\n"
+                "**Description**: None\n"
+                "**Score**: None\n"
+                "**Exploitability Score**: None\n"
+                "**Has Exploit**: False\n"
+                "**Has CISA KEV Exploit**: False\n",
+                finding.description,
+            )
 
             finding = findings[1]
-            self.assertEqual("Passwords And Secrets - Certificate for evilorg.com", finding.title)
-            self.assertEqual("LOW", finding.severity)
-            self.assertEqual("Dockerfile", finding.file_path)
-            self.assertEqual(64, finding.line)
+            self.assertEqual("libssl3 - CVE-2024-5535", finding.title)
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual(None, finding.file_path)
+            self.assertEqual(None, finding.line)
             self.assertIn(
-                "**Secret ID**: null\n"
-                "**Secret Name**: Passwords And Secrets - Certificate for evilorg.com\n"
-                "**File Name**: docker-compose.yaml\n"
-                "**Line Number**: 239\n"
-                "**Match Secret Type**: CERTIFICATE\n", finding.description)
+                "**OS Package Name**: libssl3\n"
+                "**OS Package Version**: 3.3.1-r0\n"
+                "**Vulnerability Name**: CVE-2024-5535\n"
+                "**Fixed Version**: 3.3.1-r1\n"
+                "**Source**: https://security.alpinelinux.org/vuln/CVE-2024-5535\n"
+                "**Description**: None\n"
+                "**Score**: None\n"
+                "**Exploitability Score**: None\n"
+                "**Has Exploit**: False\n"
+                "**Has CISA KEV Exploit**: False\n",
+                finding.description,
+            )

@@ -102,7 +102,7 @@ class TestAquaParser(DojoTestCase):
         with open("unittests/scans/aqua/aqua_devops_issue_10611.json") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(95, len(findings))
+            self.assertEqual(98, len(findings))
 
     def test_aqua_parser_aqua_devops_empty(self):
         with open("unittests/scans/aqua/empty_aquadevops.json") as testfile:
