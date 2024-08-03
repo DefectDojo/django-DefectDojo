@@ -23,4 +23,4 @@ saveFile("result.json", json.dumps(data, indent=2))
 ```
 
 ### Sample Scan Data
-Sample Kiuwan Scanner scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/kiuwan-sca).
+Sample Kiuwan Scanner scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/kiuwan_sca).
