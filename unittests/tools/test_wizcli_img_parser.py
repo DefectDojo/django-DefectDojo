@@ -17,7 +17,7 @@ class TestWizcliImgParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual(
-                "Secret: Password in URL (postgresql://postgres:---REDACTED---@localhost:5432/postgres?)", finding.title
+                "Secret: Password in URL (postgresql://postgres:---REDACTED---@localhost:5432/postgres?)", finding.title,
             )
             self.assertEqual("High", finding.severity)
             self.assertEqual("/app/testing.go", finding.file_path)
