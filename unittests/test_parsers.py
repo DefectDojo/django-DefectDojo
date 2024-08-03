@@ -22,6 +22,7 @@ class TestParsers(DojoTestCase):
 
             if doc_name not in [
                 "checkmarx_osa",  # it is documented in 'checkmarx'
+                "wizcli_common_parsers",  # common class for other wizcli parsers
             ]:
                 with self.subTest(parser=parser_dir.name, category="docs"):
                     doc_file = os.path.join(basedir, "docs", "content", "en", "integrations", "parsers", category, f"{doc_name}.md")
@@ -47,7 +48,7 @@ class TestParsers(DojoTestCase):
                                             )
 
             if parser_dir.name not in [
-                # there is not exception for now
+                "wizcli_common_parsers",  # common class for other wizcli parsers
             ]:
                 with self.subTest(parser=parser_dir.name, category="parser"):
                     parser_test_file = os.path.join(basedir, "unittests", "tools", f"test_{parser_dir.name}_parser.py")
@@ -58,6 +59,7 @@ class TestParsers(DojoTestCase):
 
             if parser_dir.name not in [
                 "vcg",  # content of the sample report is string the directly in unittest
+                "wizcli_common_parsers",  # common class for other wizcli parsers
             ]:
                 with self.subTest(parser=parser_dir.name, category="testfiles"):
                     scan_dir = os.path.join(basedir, "unittests", "scans", parser_dir.name)
