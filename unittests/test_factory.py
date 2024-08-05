@@ -1,3 +1,4 @@
+import logging
 import os
 from importlib import import_module
 from importlib.util import find_spec
@@ -5,8 +6,9 @@ from inspect import isclass
 
 from dojo.models import Test, Test_Type
 from dojo.tools.factory import get_parser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
-from .dojo_test_case import DojoTestCase, get_unit_tests_path
+logger = logging.getLogger(__name__)
 
 
 class TestFactory(DojoTestCase):
@@ -76,5 +78,5 @@ class TestFactory(DojoTestCase):
                 if not found and module_name != "__pycache__":
                     missing_parsers.append(module_name)
         if len(missing_parsers) > 0:
-            print(f"Parsers with invalid names: {missing_parsers}")
+            logger.error(f"Parsers with invalid names: {missing_parsers}")
         self.assertEqual(0, len(missing_parsers))
