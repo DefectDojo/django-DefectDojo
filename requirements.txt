@@ -46,7 +46,7 @@ titlecase==2.4.1
 social-auth-app-django==5.4.2
 social-auth-core==4.5.4
 gitpython==3.1.43
-debugpy==1.8.2
+debugpy==1.8.3
 python-gitlab==4.8.0
 cpe==1.2.1
 packageurl-python==0.15.6
