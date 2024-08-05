@@ -20,7 +20,7 @@ class BugcrowdAPI:
         if tool_config.authentication_type == "API":
             self.api_token = tool_config.api_key
             self.session.headers.update(
-                {"Authorization": f"Token {self.api_token}"}
+                {"Authorization": f"Token {self.api_token}"},
             )
             self.session.headers.update(self.default_headers)
         else:
@@ -67,7 +67,7 @@ class BugcrowdAPI:
 
                 # Otherwise, keep updating next link
                 next = "{}{}".format(
-                    self.bugcrowd_api_url, data["links"]["next"]
+                    self.bugcrowd_api_url, data["links"]["next"],
                 )
             else:
                 next = "over"
@@ -75,13 +75,13 @@ class BugcrowdAPI:
     def test_connection(self):
         # Request programs
         response_programs = self.session.get(
-            url=f"{self.bugcrowd_api_url}/programs"
+            url=f"{self.bugcrowd_api_url}/programs",
         )
         response_programs.raise_for_status()
 
         # Request submissions to validate the org token
         response_subs = self.session.get(
-            url=f"{self.bugcrowd_api_url}/submissions"
+            url=f"{self.bugcrowd_api_url}/submissions",
         )
         response_subs.raise_for_status()
         if response_programs.ok and response_subs.ok:
@@ -91,20 +91,20 @@ class BugcrowdAPI:
 
             progs = list(filter(lambda prog: prog["type"] == "program", data))
             program_names = ", ".join(
-                [p["attributes"]["code"] for p in progs]
+                [p["attributes"]["code"] for p in progs],
             )
             # Request targets to validate the org token
             response_targets = self.session.get(
-                url=f"{self.bugcrowd_api_url}/targets"
+                url=f"{self.bugcrowd_api_url}/targets",
             )
             response_targets.raise_for_status()
             if response_targets.ok:
                 data_targets = response_targets.json().get("data")
                 targets = list(
-                    filter(lambda prog: prog["type"] == "target", data_targets)
+                    filter(lambda prog: prog["type"] == "target", data_targets),
                 )
                 target_names = ", ".join(
-                    [p["attributes"]["name"] for p in targets]
+                    [p["attributes"]["name"] for p in targets],
                 )
                 return (
                     f'With {total_subs} submissions, you have access to the "{program_names}" '

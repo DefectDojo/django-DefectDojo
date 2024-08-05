@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.gitlab_dep_scan.parser import GitlabDepScanParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestGitlabDepScanParser(DojoTestCase):

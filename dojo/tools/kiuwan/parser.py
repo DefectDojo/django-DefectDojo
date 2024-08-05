@@ -40,7 +40,7 @@ class KiuwanParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         csvarray = []
 
@@ -124,7 +124,7 @@ class KiuwanParser:
                         + finding.description
                         + "|"
                         + str(finding.cwe)
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:

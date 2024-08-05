@@ -113,7 +113,7 @@ class SslLabsParser:
                         for item in endpoints["details"]["suites"]:
                             for suites in item["list"]:
                                 suite_info = suite_info + self.suite_data(
-                                    suites
+                                    suites,
                                 )
                 except Exception:
                     suite_info = "Not provided." + "\n\n"
@@ -336,16 +336,16 @@ class SslLabsParser:
                     find.unsaved_endpoints = []
 
                 find.unsaved_endpoints.append(
-                    Endpoint(host=hostName, port=port, protocol=protocol)
+                    Endpoint(host=hostName, port=port, protocol=protocol),
                 )
                 if ipAddress:
                     find.unsaved_endpoints.append(
-                        Endpoint(host=ipAddress, port=port, protocol=protocol)
+                        Endpoint(host=ipAddress, port=port, protocol=protocol),
                     )
                 if endpoints["details"]["httpTransactions"]:
                     for url in endpoints["details"]["httpTransactions"]:
                         find.unsaved_endpoints.append(
-                            Endpoint.from_uri(url["requestUrl"])
+                            Endpoint.from_uri(url["requestUrl"]),
                         )
 
         return list(dupes.values())

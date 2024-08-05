@@ -8,7 +8,7 @@ weight: 5
 ## Docker-compose
 
 When you deploy a vanilla docker-compose, it will create a persistent
-volume for your MySQL database. As long as your volume is there, you
+volume for your Postgres database. As long as your volume is there, you
 should not lose any data.
 
 ### Using docker images provided in DockerHub

@@ -8,10 +8,10 @@ class TestCopyFindingModel(DojoTestCase):
     def test_duplicate_finding_same_test(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_finding', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_finding", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         finding = Finding.objects.create(test=test, reporter=user)
         # Do the counting
         current_finding_count = Finding.objects.filter(test=test).count()
@@ -25,11 +25,11 @@ class TestCopyFindingModel(DojoTestCase):
     def test_duplicate_finding_different_test(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_finding', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test1 = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test1')
-        test2 = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test2')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_finding", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test1 = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test1")
+        test2 = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test2")
         finding = Finding.objects.create(test=test1, reporter=user)
         # Do the counting
         engagement_finding_count = Finding.objects.filter(test__engagement=engagement).count()
@@ -45,12 +45,12 @@ class TestCopyFindingModel(DojoTestCase):
     def test_duplicate_finding_with_tags(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_finding', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_finding", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         finding = Finding.objects.create(test=test, reporter=user)
-        finding.unsaved_tags = ['test_tag']
+        finding.unsaved_tags = ["test_tag"]
         finding.save()
         # Do the counting
         current_finding_count = Finding.objects.filter(test=test).count()
@@ -64,12 +64,12 @@ class TestCopyFindingModel(DojoTestCase):
     def test_duplicate_finding_with_notes(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_finding', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_finding", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         finding = Finding.objects.create(test=test, reporter=user)
-        finding.unsaved_notes = ['test_note']
+        finding.unsaved_notes = ["test_note"]
         finding.save()
         # Do the counting
         current_finding_count = Finding.objects.filter(test=test).count()
@@ -83,13 +83,13 @@ class TestCopyFindingModel(DojoTestCase):
     def test_duplicate_finding_with_tags_and_notes(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_finding', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_finding", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         finding = Finding.objects.create(test=test, reporter=user)
-        finding.unsaved_tags = ['test_tag']
-        finding.unsaved_notes = ['test_note']
+        finding.unsaved_tags = ["test_tag"]
+        finding.unsaved_notes = ["test_note"]
         finding.save()
         # Do the counting
         current_finding_count = Finding.objects.filter(test=test).count()
@@ -105,11 +105,11 @@ class TestCopyFindingModel(DojoTestCase):
     def test_duplicate_finding_with_endpoints(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_finding', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
-        endpoint = Endpoint.from_uri('0.0.0.0')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_finding", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
+        endpoint = Endpoint.from_uri("0.0.0.0")
         endpoint.save()
         finding = Finding.objects.create(test=test, reporter=user)
         endpoint_status = Endpoint_Status.objects.create(finding=finding, endpoint=endpoint)
@@ -137,10 +137,10 @@ class TestCopyTestModel(DojoTestCase):
     def test_duplicate_test_same_enagagement(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_test', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_test", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         _ = Finding.objects.create(test=test, reporter=user)
         # Do the counting
         current_test_count = Test.objects.filter(engagement=engagement).count()
@@ -158,11 +158,11 @@ class TestCopyTestModel(DojoTestCase):
     def test_duplicate_tests_different_engagements(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_test', prod_type=product_type)
-        engagement1 = self.create_engagement('eng1', product)
-        engagement2 = self.create_engagement('eng2', product)
-        test = self.create_test(engagement=engagement1, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_test", prod_type=product_type)
+        engagement1 = self.create_engagement("eng1", product)
+        engagement2 = self.create_engagement("eng2", product)
+        test = self.create_test(engagement=engagement1, scan_type="NPM Audit Scan", title="test")
         _ = Finding.objects.create(test=test, reporter=user)
         # Do the counting
         product_finding_count = Finding.objects.filter(test__engagement__product=product).count()
@@ -180,12 +180,12 @@ class TestCopyTestModel(DojoTestCase):
     def test_duplicate_test_with_tags(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_test', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_test", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         _ = Finding.objects.create(test=test, reporter=user)
-        test.unsaved_tags = ['test_tag']
+        test.unsaved_tags = ["test_tag"]
         test.save()
         # Do the counting
         current_test_count = Test.objects.filter(engagement=engagement).count()
@@ -199,12 +199,12 @@ class TestCopyTestModel(DojoTestCase):
     def test_duplicate_test_with_notes(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_test', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_test", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         _ = Finding.objects.create(test=test, reporter=user)
-        test.unsaved_notes = ['test_note']
+        test.unsaved_notes = ["test_note"]
         test.save()
         # Do the counting
         current_test_count = Test.objects.filter(engagement=engagement).count()
@@ -218,13 +218,13 @@ class TestCopyTestModel(DojoTestCase):
     def test_duplicate_test_with_tags_and_notes(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_test', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_test", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         _ = Finding.objects.create(test=test, reporter=user)
-        test.unsaved_tags = ['test_tag']
-        test.unsaved_notes = ['test_note']
+        test.unsaved_tags = ["test_tag"]
+        test.unsaved_notes = ["test_note"]
         test.save()
         # Do the counting
         current_test_count = Test.objects.filter(engagement=engagement).count()
@@ -243,10 +243,10 @@ class TestCopyEngagementModel(DojoTestCase):
     def test_duplicate_engagement(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_test', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_test", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         _ = Finding.objects.create(test=test, reporter=user)
         # Do the counting
         current_product_count = Product.objects.filter(prod_type=product_type).count()
@@ -264,12 +264,12 @@ class TestCopyEngagementModel(DojoTestCase):
     def test_duplicate_engagement_with_tags(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_test', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_test", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         _ = Finding.objects.create(test=test, reporter=user)
-        engagement.unsaved_tags = ['test_tag']
+        engagement.unsaved_tags = ["test_tag"]
         engagement.save()
         # Do the counting
         current_engagement_count = Engagement.objects.filter(product=product).count()
@@ -283,12 +283,12 @@ class TestCopyEngagementModel(DojoTestCase):
     def test_duplicate_engagement_with_notes(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_test', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_test", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         _ = Finding.objects.create(test=test, reporter=user)
-        engagement.unsaved_notes = ['test_note']
+        engagement.unsaved_notes = ["test_note"]
         engagement.save()
         # Do the counting
         current_engagement_count = Engagement.objects.filter(product=product).count()
@@ -302,13 +302,13 @@ class TestCopyEngagementModel(DojoTestCase):
     def test_duplicate_engagement_with_tags_and_notes(self):
         # Set the scene
         user, _ = User.objects.get_or_create(username="admin")
-        product_type = self.create_product_type('prod_type')
-        product = self.create_product('test_deuplicate_test', prod_type=product_type)
-        engagement = self.create_engagement('eng', product)
-        test = self.create_test(engagement=engagement, scan_type='NPM Audit Scan', title='test')
+        product_type = self.create_product_type("prod_type")
+        product = self.create_product("test_deuplicate_test", prod_type=product_type)
+        engagement = self.create_engagement("eng", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
         _ = Finding.objects.create(test=test, reporter=user)
-        engagement.unsaved_tags = ['test_tag']
-        engagement.unsaved_notes = ['test_note']
+        engagement.unsaved_tags = ["test_tag"]
+        engagement.unsaved_notes = ["test_note"]
         engagement.save()
         # Do the counting
         current_engagement_count = Engagement.objects.filter(product=product).count()

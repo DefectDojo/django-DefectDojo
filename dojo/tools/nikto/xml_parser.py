@@ -33,7 +33,7 @@ class NiktoXMLParser:
             description = item.findtext("description")
             # Cut the title down to the first sentence
             sentences = re.split(
-                r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s", description
+                r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s", description,
             )
             if len(sentences) > 0:
                 titleText = sentences[0][:900]
@@ -45,7 +45,7 @@ class NiktoXMLParser:
                     f"**Host:** `{item.findtext('iplink')}`",
                     f"**Description:** `{item.findtext('description')}`",
                     f"**HTTP Method:** `{item.attrib.get('method')}`",
-                ]
+                ],
             )
             # Manage severity the same way with JSON
             severity = "Info"  # Nikto doesn't assign severity, default to Info
