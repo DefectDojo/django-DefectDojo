@@ -153,6 +153,12 @@ def add_findings_to_risk_acceptance(risk_acceptance: Risk_Acceptance, findings):
             finding.accepted_by = user.username
             finding.risk_status = "Risk Accepted"
             finding.save(dedupe_option=False)
+            hp_transfer_finding.close_or_reactive_related_finding(
+                event="accepted",
+                parent_finding=finding,
+                notes=f"The finding was accepted by the user {user.username} and for finding parent id: {finding.id}(policies for the transfer of findings)",
+                send_notification=False
+            )
             # Update any endpoint statuses on each of the findings
             update_endpoint_statuses(finding, True)
             risk_acceptance.accepted_findings.add(finding)

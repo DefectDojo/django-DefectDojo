@@ -66,9 +66,16 @@ def expire_now(transfer_finding: TransferFinding):
 
     for transfer_finding_finding in transfer_finding_findings:
         try:
+            finding_active = True
+
             finding = transfer_finding_finding.findings
+
+            if finding.is_mitigated and finding.mitigated is not None:
+                logger.debug("The finding has already been mitigated")
+                finding_active = False
+
             finding.risk_status = 'Transfer Expired'
-            finding.active = True
+            finding.active = finding_active
             note = Notes(entry=f"Finding Expired for Transfer-finding id: {transfer_finding.id}",
                          author=system_user)
             note.save()
@@ -80,7 +87,6 @@ def expire_now(transfer_finding: TransferFinding):
                 description="Transfer finding expired",
                 transfer_finding=transfer_finding)
         except Exception as e:
-            logger.error(f"Error while updating finding for tranfer-finding {finding.id} : {e}")
             raise ApiError.internal_server_error(detail=str(e))
 
 
@@ -185,6 +191,13 @@ def transfer_finding(
             raise ApiError.bad_request("You must select an engagement")
 
 
+def create_note(author, message):
+    note = Notes(author=author,
+                entry=message)
+    note.save()
+    return note
+
+
 def add_finding_related(
     transfer_finding_findings: TransferFindingFinding,
     origin_finding: Finding,
@@ -224,16 +237,15 @@ def add_finding_related(
                 transferfinding_finding.finding_related = finding_related
                 transferfinding_finding.save()
                 flag_result_proccess = True
-                break
             else:
                 transferfinding_finding.finding_related = finding_related
                 transferfinding_finding.save()
                 flag_result_proccess = True
 
             if system_user and flag_result_proccess:
-                note = Notes(author=system_user,
-                            entry=f"This finding has been related to the finding with ID {origin_finding.id}.")
-                note.save()
+                note = create_note(
+                    author=system_user,
+                    message=f"This finding has been related to the finding with ID {origin_finding.id}. in Transfer Finding ID {transferfinding_finding.transfer_findings.id}")
                 finding_related.notes.add(note)
                 break
             else:
@@ -266,23 +278,27 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
     transfer_finding_finding_reactive = None
     system_user = get_user(settings.SYSTEM_USER)
     for transfer_finding_finding in transfer_finding_findings:
+        send_notification = True
         if event == "close":
             transfer_finding_finding.findings.active = False
             transfer_finding_finding.findings.out_of_scope = True
-            note = Notes(entry=notes, author=system_user)
-            note.save()
+            transfer_finding_finding.findings.is_mitigated = True
+            transfer_finding_finding.findings.mitigated = timezone.now()
             logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are closed")
-            transfer_finding_finding.findings.notes.add(note)
-            transfer_finding_finding.findings.save()
+        if event == "accepted":
+            transfer_finding_finding.findings.active = False
         if event == "reactive":
             transfer_finding_finding.findings.active = True
             transfer_finding_finding.findings.out_of_scope = False
-            note = Notes(entry=notes, author=system_user)
-            note.save()
+            transfer_finding_finding.findings.is_mitigated = False
+            transfer_finding_finding.findings.mitigated = None
             logger.debug(f"(Transfer Finding) finding {parent_finding.id} and related finding {transfer_finding_finding.findings.id} are reactivated")
-            transfer_finding_finding.findings.notes.add(note)
-            transfer_finding_finding.findings.save()
             transfer_finding_finding_reactive = transfer_finding_finding
+
+        note = Notes(entry=notes, author=system_user)
+        note.save()
+        transfer_finding_finding.findings.notes.add(note)
+        transfer_finding_finding.findings.save()
 
     if send_notification and transfer_finding_finding_reactive:
         NotificationTransferFinding.send_notification(

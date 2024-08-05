@@ -88,7 +88,7 @@ def risk_accepted_succesfully(
     system_settings = System_Settings.objects.get()
     if system_settings.enable_transfer_finding:
         hp_transfer_finding.close_or_reactive_related_finding(
-            event="close",
+            event="accepted",
             parent_finding=finding,
             notes=f"temporarily accepted by the parent finding {finding.id} (policies for the transfer of findings)",
             send_notification=True)

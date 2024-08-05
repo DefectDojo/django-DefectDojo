@@ -727,6 +727,10 @@ def finding_display_status(finding):
         url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
         link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Accepted"><span style="color: #096C11;">Transfer Accepted</span></a>'
         display_status = display_status.replace('Transfer Accepted', link)
+    if 'Transfer Expired' in display_status:
+        url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Expired"><span style="color: #D93E14;">Transfer Expired</span></a>'
+        display_status = display_status.replace('Transfer Expired', link)
     if 'Risk Expired' in display_status:
         ra = finding.risk_acceptance
         if ra:
@@ -931,6 +935,7 @@ def status_style_color(status: str):
         "Risk Expired": f'<span style="color:#D93E14">{status}</span>',
         "Transfer Pending": f'<span style="color:blue">{status}</span>',
         "Transfer Accepted": f'<span style="color:green">{status}</span>',
+        "Transfer Expired": f'<span style="color:#D93E14">{status}</span>',
         "Transfer Rejected": f'<span style="color:red">{status}</span>',
     }
     return mark_safe(dict_style_color.get(status, f'<span>{status}</span>'))

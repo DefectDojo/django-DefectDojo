@@ -2283,6 +2283,7 @@ class Finding(models.Model):
                       ('Risk Active', 'Risk Active'),
                       ('Transfer Pending', 'Transfer Pending'),
                       ('Transfer Rejected', 'Transfer Rejected'),
+                      ('Transfer Expired', 'Transfer Expired'),
                       ('Transfer Accepted', 'Transfer Accepted'))
 
     title = models.CharField(max_length=511,
@@ -3004,6 +3005,8 @@ class Finding(models.Model):
             status += ['Duplicate']
         if self.risk_status == "Transfer Accepted":
             status += ['Transfer Accepted']
+        if self.risk_status == "Transfer Expired":
+            status += ['Transfer Expired']
         if self.risk_status == "Transfer Pending":
             status += ['Transfer Pending']
         if self.risk_status == "Transfer Rejected":
