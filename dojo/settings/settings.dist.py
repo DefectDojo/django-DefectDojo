@@ -311,26 +311,8 @@ env = environ.FileAwareEnv(
     # for very large objects
     DD_DELETE_PREVIEW=(bool, True),
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
-    DD_FILE_UPLOAD_TYPES=(
-        list,
-        [
-            ".txt",
-            ".pdf",
-            ".json",
-            ".xml",
-            ".csv",
-            ".yml",
-            ".png",
-            ".jpeg",
-            ".sarif",
-            ".xslx",
-            ".doc",
-            ".html",
-            ".js",
-            ".nessus",
-            ".zip",
-        ],
-    ),
+    DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
+                                 '.sarif', '.xlsx', '.doc', '.html', '.js', '.nessus', '.zip']),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -361,7 +343,7 @@ env = environ.FileAwareEnv(
     DD_AWS_SES_EMAIL=(bool, True),
     # --------------- Grafana Metrics ---------------
     DD_GRAFANA_URL=(str, ""),
-    DD_GRAFANA_PATH=(str, ""),
+    DD_GRAFANA_PATH=(dict, {}),
     DD_GRAFANA_PARAMS=(str, ""),
     DD_MICROSOFT_LOGIN_URL=(str, ""),
     

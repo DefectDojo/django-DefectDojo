@@ -21,7 +21,7 @@ class NotificationsTest(DojoAPITestCase):
             scan_added=['alert', 'slack']
         )
         self.creation_id = r.json()["id"]
-        self.assertEqual(r.status_code, 201)
+        self.assertEqual(r.status_code, 201, r.data)
 
     def tearDown(self):
         self.client.delete(f"{reverse('notifications-list')}/{self.creation_id}")

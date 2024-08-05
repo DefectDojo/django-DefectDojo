@@ -423,7 +423,7 @@
                                                         {% endif %}
                                                         {% if finding|has_object_permission:"Finding_View" %}
                                                             {% user_can_clear_peer_review finding request.user as clear_peer_review %}
-                                                            {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
+                                                            {% if finding|has_object_permission:"Finding_Code_Review" and clear_peer_review %}
                                                                 <li role="presentation">
                                                                     <a rel="noopener noreferrer" href="{% url 'clear_finding_review' finding.id %}">
                                                                         <i class="icon-user-check"></i> {% trans "Clear Review" %}
@@ -859,51 +859,53 @@
             };
 
             // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#open_findings').DataTable({
-                drawCallback: function(){
-                    $('#open_findings .has-popover').hover(
-                        function() { $(this).popover('show'); }, // hover
-                        function() { $(this).popover('hide'); } // unhover
-                    );
-                },
-                colReorder: true,
-                "columns": columns,
-                order: [],
-                columnDefs: [
-                    {
-                        "orderable": false,
-                        "targets": [0, 1]
+            {% if enable_table_filtering %}
+                var dojoTable = $('#open_findings').DataTable({
+                    drawCallback: function(){
+                        $('#open_findings .has-popover').hover(
+                            function() { $(this).popover('show'); }, // hover
+                            function() { $(this).popover('hide'); } // unhover
+                        );
                     },
-                    {
-                        targets: [0, 1],
-                        className: 'noVis'
-                    },
-                    {
-                        targets: 'severity-sort',
-                        orderDataType: 'severity-asc'
-                    },
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
+                    colReorder: true,
+                    "columns": columns,
+                    order: [],
+                    columnDefs: [
+                        {
+                            "orderable": false,
+                            "targets": [0, 1]
+                        },
+                        {
+                            targets: [0, 1],
+                            className: 'noVis'
+                        },
+                        {
+                            targets: 'severity-sort',
+                            orderDataType: 'severity-asc'
+                        },
+                    ],
+                    dom: 'Bfrtip',
+                    paging: false,
+                    info: false,
+                    buttons: [
+                        {
+                            extend: 'colvis',
+                            columns: ':not(.noVis)'
+                        },
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'copy'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'pdf',
+                            orientation: 'landscape',
+                            pageSize: 'LETTER'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'print'
+                        }),
+                    ],
+                });
+            {% endif %}
         });
     </script>
     <script type="application/javascript" nonce="{{request.csp_nonce}}">

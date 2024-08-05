@@ -10,9 +10,9 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.utils import timezone
 
-import dojo.jira_link.helper as jira_helper
+from retry import retry
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
+import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
 from dojo.models import Finding, Risk_Acceptance, System_Settings
 from dojo.transfer_findings import helper as hp_transfer_finding
@@ -107,9 +107,6 @@ def delete(eng, risk_acceptance):
     risk_acceptance.accepted_findings.clear()
     eng.risk_acceptance.remove(risk_acceptance)
     eng.save()
-
-    for note in risk_acceptance.notes.all():
-        note.delete()
 
     risk_acceptance.path.delete()
     risk_acceptance.delete()
@@ -359,8 +356,7 @@ def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
         status.last_modified = timezone.now()
         status.save()
 
-@dojo_async_task
-@app.task(ignore_result=False)
+@retry(tries=100, delay=10)
 def risk_accept_provider(
         finding_id: str,
         provider: str,
@@ -373,7 +369,11 @@ def risk_accept_provider(
     formatted_url = url + f'{provider}?vulnerabilityId={finding_id}&acceptanceDays={acceptance_days}'
     headers = {}
     headers[header] = token
-    response = requests.post(url=formatted_url, headers=headers, verify=False)
+    try:
+        response = requests.post(url=formatted_url, headers=headers, verify=False)
+    except Exception as ex:
+        logger.error(ex)
+        raise(ex)
     if response.status_code == 200:
         logger.info(f"Risk accept response from provider: {provider}, response: {response.text}")
     logger.error(f"Error for provider: {provider}, response: {response.text}")

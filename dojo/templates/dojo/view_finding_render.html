@@ -74,7 +74,7 @@
                                 <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
                                 Alert: This Finding is under review and may not be 100% accurate.
                             </span>
-                            {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
+                            {% if finding|has_object_permission:"Finding_Code_Review" and clear_peer_review %}
                                 [<a rel="noopener noreferrer" title="Clear Review" class="text-primary" style="display: inline !important;"
                                     href="{% url 'clear_finding_review' finding.id %}">Clear Review</a>]
                             {% endif %}

@@ -2628,10 +2628,14 @@ class ClearFindingReviewForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = ["active", "verified", "false_p", "out_of_scope", "duplicate"]
+        fields = ['active', 'verified', 'false_p', 'out_of_scope', 'duplicate', "is_mitigated"]
 
 
 class ReviewFindingForm(forms.Form):
+    findings_review = forms.ModelMultipleChoiceField(
+        queryset=Finding.objects.none(), required=True,
+        widget=forms.widgets.SelectMultiple(attrs={'size': 1}),
+        help_text=('Active, verified findings listed, please select to add findings.'))
     reviewers = forms.MultipleChoiceField(
         help_text=(
             "Select all users who can review Finding. Only users with "
@@ -2668,13 +2672,12 @@ class ReviewFindingForm(forms.Form):
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
-            users = get_authorized_users_for_product_and_product_type(
-                None, finding.test.engagement.product, Permissions.Finding_Edit
-            )
+            users = get_users_for_group('Reviewers')
         else:
             users = get_authorized_users(Permissions.Finding_Edit).filter(
                 is_active=True
             )
+        self.fields['findings_review'].queryset = get_authorized_findings(Permissions.Finding_View)
         # Remove the current user
         if user is not None:
             users = users.exclude(id=user.id)
@@ -3187,9 +3190,7 @@ class ReportOptionsForm(forms.Form):
         choices=yes_no, label="Table of Contents"
     )
     include_disclaimer = forms.ChoiceField(choices=yes_no, label="Disclaimer")
-    report_type = forms.ChoiceField(
-        choices=(("HTML", "HTML"), ("AsciiDoc", "AsciiDoc"))
-    )
+    report_type = forms.ChoiceField(choices=(('HTML', 'HTML'),))
 
 
 class CustomReportOptionsForm(forms.Form):
@@ -3197,9 +3198,7 @@ class CustomReportOptionsForm(forms.Form):
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    report_type = forms.ChoiceField(
-        choices=(("HTML", "HTML"), ("AsciiDoc", "AsciiDoc"))
-    )
+    report_type = forms.ChoiceField(choices=(('HTML', 'HTML'),))
 
 
 class DeleteFindingForm(forms.ModelForm):

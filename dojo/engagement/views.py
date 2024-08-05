@@ -1,5 +1,6 @@
 import csv
 import logging
+import mimetypes
 import operator
 import re
 from datetime import datetime
@@ -267,6 +268,7 @@ def engagements_all(request):
             'filter_form': filtered.form,
             'name_words': sorted(set(name_words)),
             'eng_words': sorted(set(eng_words)),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         })
 
 
@@ -448,13 +450,15 @@ class ViewEngagement(View):
 
     def get(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
-        tests = eng.test_set.all().order_by('test_type__name', '-updated')
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
+        tests = eng.test_set.all().order_by('-created')
         default_page_num = 10
         tests_filter = self.get_filtered_tests(request, tests, eng)
         paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
         paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
         prod = eng.product
-        risks_accepted = self.get_risks_accepted(eng)
+        risks_accepted = self.get_risks_accepted(eng).order_by('-created')
         preset_test_type = None
         network = None
         if eng.preset:
@@ -516,6 +520,8 @@ class ViewEngagement(View):
 
     def post(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by('test_type__name', '-updated')
 
         default_page_num = 10
@@ -1738,6 +1744,16 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                             return redirect_to_return_url_or_else(
                                 request, reverse("view_risk_acceptance", args=(eid, raid))
                             )
+                        abuse_control_result = rp_helper.abuse_control(request.user, finding, product, product_type)
+                        for abuse_control, result in abuse_control_result.items():
+                            if not abuse_control_result[abuse_control]["status"]:
+                                messages.add_message(
+                                    request,
+                                    messages.SUCCESS,
+                                    abuse_control_result[abuse_control]["message"],
+                                    extra_tags="alert-danger",
+                                )
+                                return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
                     ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
                 else:
                     ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
@@ -1761,7 +1777,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
     add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
 
-    accepted_findings = risk_acceptance.accepted_findings.order_by('id')
+    accepted_findings = risk_acceptance.accepted_findings.order_by('-risk_status')
     fpage = get_page_items(request, accepted_findings, 15)
     if settings.RISK_PENDING:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(),
@@ -1804,6 +1820,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             'request': request,
             'add_findings': add_fpage,
             'return_url': get_return_url(request),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         })
 
 
@@ -1872,12 +1889,11 @@ def risk_acceptance_pending(request, eid, raid):
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid')
 def download_risk_acceptance(request, eid, raid):
-    import mimetypes
-
     mimetypes.init()
-
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-
+    # Ensure the risk acceptance is under the supplied engagement
+    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
+        raise PermissionDenied
     response = StreamingHttpResponse(
         FileIterWrapper(
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode='rb')))

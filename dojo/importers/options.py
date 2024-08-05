@@ -119,12 +119,16 @@ class ImporterOptions:
             # Accommodate lists of fields
             elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], Model):
                 id_list = [item.id for item in value]
+                item_type = type(value[0])
                 class_name = None
                 # Get the actual class if available
                 if len(id_list) > 0:
-                    class_name = type(id_list[0])
+                    id_type = type(id_list[0])
+                    # Only define the class name if we are able to make a query on the object in decompression
+                    if isinstance(id_type, int):
+                        class_name = item_type if item_type is None else id_type
                 # Ensure we are not setting a class name as None
-                if class_name is type(None):
+                if class_name is type(None) or class_name is None:
                     compressed_fields[field] = value
                 # Add the list to the dict
                 else:
@@ -149,7 +153,7 @@ class ImporterOptions:
                     if class_name is type(None):
                         model_list = model_value
                     else:
-                        model_list = [class_name.objects.get(id=model_id) for model_id in model_value]
+                        model_list = list(class_name.objects.filter(id__in=model_value))
                     decompressed_fields[field] = model_list
                 elif isinstance(model_value, int):
                     # Check for SimpleLazyObject that will be user objects

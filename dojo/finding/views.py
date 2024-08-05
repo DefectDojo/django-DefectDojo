@@ -379,6 +379,7 @@ class ListFindings(View, BaseListFindings):
             "jira_project": None,
             "github_config": None,
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "title_words": get_words_for_field(Finding, "title"),
             "component_words": get_words_for_field(Finding, "component_name"),
         }
@@ -786,6 +787,7 @@ class ViewFinding(View):
             "files": finding.files.all(),
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "product_tab": Product_Tab(
                 finding.test.engagement.product, title="View Finding", tab="findings"
             )
@@ -1295,6 +1297,7 @@ def close_finding(request, fid):
                     form.cleaned_data.get("mitigated_by") or request.user
                 )
                 finding.is_mitigated = True
+                finding.under_review = False
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.false_p = form.cleaned_data.get("false_p", False)
@@ -1309,6 +1312,8 @@ def close_finding(request, fid):
                     status.mitigated = True
                     status.last_modified = timezone.now()
                     status.save()
+                # Clear the risk acceptance, if present
+                ra_helper.risk_unaccept(finding)
 
                 # Manage the jira status changes
                 push_to_jira = False
@@ -1316,17 +1321,18 @@ def close_finding(request, fid):
                 finding_in_group = finding.has_finding_group
                 # Check if there is a jira issue that needs to be updated
                 jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+                # fetch the project
+                jira_instance = jira_helper.get_jira_instance(finding)
+                jira_project = jira_helper.get_jira_project(finding)
                 # Only push if the finding is not in a group
                 if jira_issue_exists:
                     # Determine if any automatic sync should occur
-                    push_to_jira = jira_helper.is_push_all_issues(finding) \
-                        or jira_helper.get_jira_instance(finding).finding_jira_sync
-                # Add the closing note
-                if push_to_jira and not finding_in_group:
-                    jira_helper.add_comment(finding, new_note, force_push=True)
+                    push_to_jira = jira_helper.is_push_all_issues(finding) or jira_instance.finding_jira_sync
+                    # Add the closing note
+                    if (jira_project.push_notes or push_to_jira) and not finding_in_group:
+                        jira_helper.add_comment(finding, new_note, force_push=True)
                 # Save the finding
                 finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-
                 # we only push the group after saving the finding to make sure
                 # the updated data of the finding is pushed as part of the group
                 if push_to_jira and finding_in_group:
@@ -1373,7 +1379,7 @@ def close_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
+@user_is_authorized(Finding, Permissions.Finding_Code_Review, "fid")
 def defect_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -1433,11 +1439,25 @@ def defect_finding_review(request, fid):
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
                 jira_helper.push_to_jira(finding.finding_group)
+            
+            create_notification(
+                event="code_review",
+                subject="🧐 Code Review 🔍",
+                title=f"Finding {finding.id} review completed - {finding.test.engagement.name}",
+                new_note=new_note,
+                finding=finding,
+                recipients=[finding.review_requested_by.username],
+                review=request.user.get_full_name(),
+                description=f"User <review>{request.user.get_full_name()} review completed the finding {finding.title}",
+                icon="check-circle",
+                color_icon="#096C11",
+                url=reverse("view_finding", args=(finding.id,)),
+            )
 
             messages.add_message(
-                request, messages.SUCCESS, "Defect Reviewed", extra_tags="alert-success"
+                request, messages.SUCCESS, "Finding review has been updated successfully.", extra_tags="alert-success"
             )
-            return HttpResponseRedirect(reverse("view_test", args=(finding.test.id,)))
+            return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
     else:
         form = DefectFindingForm()
@@ -1471,6 +1491,7 @@ def reopen_finding(request, fid):
     finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
+    finding.under_review = False
     endpoint_status = finding.status_finding.all()
     for status in endpoint_status:
         status.mitigated_by = None
@@ -1478,6 +1499,8 @@ def reopen_finding(request, fid):
         status.mitigated = False
         status.last_modified = timezone.now()
         status.save()
+    # Clear the risk acceptance, if present
+    ra_helper.risk_unaccept(finding)
 
     # Manage the jira status changes
     push_to_jira = False
@@ -1693,6 +1716,13 @@ def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
     form = ReviewFindingForm(finding=finding, user=user)
+    finding_choices = Finding.objects.filter(duplicate=False,
+                                                 under_review=False,
+                                                 test__engagement=finding.test.engagement,
+                                                 active=True).order_by('title')
+    form.fields['findings_review'].queryset = finding_choices
+    if fid:
+        form.fields['findings_review'].initial = {fid}
     # in order to review a finding, we need to capture why a review is needed
     # we can do this with a Note
     if request.method == "POST":
@@ -1706,66 +1736,68 @@ def request_finding_review(request, fid):
             new_note.author = request.user
             new_note.date = now
             new_note.save()
-            finding.notes.add(new_note)
-            finding.active = True
-            finding.verified = False
-            finding.is_mitigated = False
-            finding.under_review = True
-            finding.review_requested_by = user
-            finding.last_reviewed = now
-            finding.last_reviewed_by = request.user
-
-            reviewers = form.cleaned_data["reviewers"]
-            finding.reviewers.set(reviewers)
-
-            # Manage the jira status changes
-            push_to_jira = False
-            # Determine if the finding is in a group. if so, not push to jira
-            finding_in_group = finding.has_finding_group
-            # Check if there is a jira issue that needs to be updated
-            jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
-            # Only push if the finding is not in a group
-            if jira_issue_exists:
-                # Determine if any automatic sync should occur
-                push_to_jira = jira_helper.is_push_all_issues(finding) \
-                    or jira_helper.get_jira_instance(finding).finding_jira_sync
-            # Add the closing note
-            if push_to_jira and not finding_in_group:
-                jira_helper.add_comment(finding, new_note, force_push=True)
-            # Save the finding
-            finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-
-            # we only push the group after saving the finding to make sure
-            # the updated data of the finding is pushed as part of the group
-            if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
-
+            findings = form.cleaned_data['findings_review']
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
             reviewers_string = ", ".join([str(user) for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
             logger.debug(f"Asking {reviewers_string} for review")
 
-            create_notification(
-                event="review_requested",  # TODO - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
-                title="Finding review requested",
-                subject="🧐 Review Requested 🔍",
-                requested_by=user,
-                note=new_note,
-                finding=finding,
-                reviewers=reviewers,
-                recipients=reviewers_usernames,
-                description=f"User {user.get_full_name()} has requested review the finding {finding.title}",
-                icon="check",
-                url=reverse("view_finding", args=(finding.id,)),
-            )
+            for finding in findings:
+                finding.notes.add(new_note)
+                finding.active = True
+                finding.verified = False
+                finding.is_mitigated = False
+                finding.under_review = True
+                finding.review_requested_by = user
+                finding.last_reviewed = now
+                finding.last_reviewed_by = request.user
+
+                reviewers = form.cleaned_data["reviewers"]
+                finding.reviewers.set(reviewers)
+
+                # Manage the jira status changes
+                push_to_jira = False
+                # Determine if the finding is in a group. if so, not push to jira
+                finding_in_group = finding.has_finding_group
+                # Check if there is a jira issue that needs to be updated
+                jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+                # Only push if the finding is not in a group
+                if jira_issue_exists:
+                    # Determine if any automatic sync should occur
+                    push_to_jira = jira_helper.is_push_all_issues(finding) \
+                        or jira_helper.get_jira_instance(finding).finding_jira_sync
+                # Add the closing note
+                if push_to_jira and not finding_in_group:
+                    jira_helper.add_comment(finding, new_note, force_push=True)
+                # Save the finding
+                finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+
+                # we only push the group after saving the finding to make sure
+                # the updated data of the finding is pushed as part of the group
+                if push_to_jira and finding_in_group:
+                    jira_helper.push_to_jira(finding.finding_group)
+
+                create_notification(
+                    event="review_requested",  # TODO - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                    title=f"Finding {finding.id} review requested - {finding.test.engagement.name}",
+                    subject="🧐 Review Requested 🔍",
+                    requested_by=user,
+                    note=new_note,
+                    finding=finding,
+                    reviewers=reviewers,
+                    recipients=reviewers_usernames,
+                    description=f"User {user.get_full_name()} has requested review the finding {finding.title}",
+                    icon="check",
+                    url=reverse("view_finding", args=(finding.id,)),
+                )
 
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding marked for review and reviewers notified.",
+                "Findings marked for review and reviewers notified.",
                 extra_tags="alert-success",
             )
-            return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
+            return HttpResponseRedirect(reverse("engagement_open_findings", args=(finding.test.engagement.id,)))
 
     product_tab = Product_Tab(
         finding.test.engagement.product, title="Review Finding", tab="findings"
@@ -1774,11 +1806,11 @@ def request_finding_review(request, fid):
     return render(
         request,
         "dojo/review_finding.html",
-        {"finding": finding, "product_tab": product_tab, "user": user, "form": form},
+        {"finding": finding, "product_tab": product_tab, "user": user, "form": form, "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"), },
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
+@user_is_authorized(Finding, Permissions.Finding_Code_Review, "fid")
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1803,6 +1835,9 @@ def clear_finding_review(request, fid):
 
             finding = form.save(commit=False)
 
+            if finding.is_mitigated:
+                finding.mitigated = now
+                finding.mitigated_by = request.user
             finding.under_review = False
             finding.last_reviewed = now
             finding.last_reviewed_by = request.user
@@ -1835,7 +1870,7 @@ def clear_finding_review(request, fid):
             create_notification(
                 event="code_review",
                 subject="🧐 Code Review 🔍",
-                title="Finding review completed",
+                title=f"Finding {finding.id} review completed - {finding.test.engagement.name}",
                 new_note=new_note,
                 finding=finding,
                 recipients=[finding.review_requested_by.username],
@@ -2815,6 +2850,7 @@ def finding_bulk_update_all(request, pid=None):
                     )
 
                 finds = prefetch_for_findings(finds)
+                note = None
                 if form.cleaned_data["severity"] or form.cleaned_data["status"]:
                     for find in finds:
                         old_find = copy.deepcopy(find)
@@ -3142,6 +3178,8 @@ def finding_bulk_update_all(request, pid=None):
                                 "pushing to jira from finding.finding_bulk_update_all()"
                             )
                             jira_helper.push_to_jira(finding)
+                            if note is not None and isinstance(note, Notes):
+                                jira_helper.add_comment(finding, note)
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():
