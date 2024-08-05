@@ -8,7 +8,7 @@ import multiselectfield.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0212_sla_configuration_enforce_critical_and_more'),
+        ('dojo', '0213_system_settings_enable_ui_table_based_searching'),
     ]
 
     operations = [
