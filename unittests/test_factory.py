@@ -66,7 +66,12 @@ class TestFactory(DojoTestCase):
         package_dir = "dojo/tools"
         module_names = os.listdir(package_dir)
         missing_parsers = []
+        excluded_parsers = [
+            "wizcli_common_parsers",  # common class for other wizcli parsers, there is not parsing here
+        ]
         for module_name in module_names:
+            if module_name in excluded_parsers:
+                continue
             if os.path.isdir(os.path.join(package_dir, module_name)):
                 found = False
                 if find_spec(f"dojo.tools.{module_name}.parser"):
