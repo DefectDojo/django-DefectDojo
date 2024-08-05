@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class BearerParser:
+class BearerCLIParser:
     """
     Bearer CLI tool is a SAST scanner for multiple languages
     """
