@@ -21,7 +21,7 @@ dynamic content.
 ## Message Broker
 
 The application server sends tasks to a [Message Broker](https://docs.celeryproject.org/en/stable/getting-started/brokers/index.html)
-for asynchronous execution. [RabbitMQ](https://www.rabbitmq.com/) is a well established choice.
+for asynchronous execution.
 
 ## Celery Worker
 
@@ -43,5 +43,4 @@ itself down after all tasks are performed.
 
 ## Database
 
-The Database stores all the application data of DefectDojo. Currently [PostgreSQL](https://www.postgresql.org/) and [MySQL](https://dev.mysql.com/)
-are supported, with PostgreSQL being the recommended option. Please note the `django-watson` search engine require one or more MyISAM tables, so you cannot use Azure MySQL or Cloud SQL for MySQL. AWS RDS MySQL supports MyISAM tables.
+The Database stores all the application data of DefectDojo. Currently only [PostgreSQL](https://www.postgresql.org/) is supported.

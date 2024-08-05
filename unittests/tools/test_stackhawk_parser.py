@@ -46,7 +46,7 @@ class TestStackHawkParser(DojoTestCase):
                 "20012",
                 "10",
                 False,
-                False
+                False,
             )
 
     def test_stackhawk_parser_with_many_vuln_has_many_findings_and_removes_duplicates(self):
@@ -67,7 +67,7 @@ class TestStackHawkParser(DojoTestCase):
                 "90027",
                 "10",
                 False,
-                False
+                False,
             )
 
             self.__assertFindingEquals(
@@ -81,7 +81,7 @@ class TestStackHawkParser(DojoTestCase):
                 "40025",
                 "10",
                 False,
-                False
+                False,
             )
 
             self.__assertFindingEquals(
@@ -95,7 +95,7 @@ class TestStackHawkParser(DojoTestCase):
                 "20012",
                 "10",
                 False,
-                False
+                False,
             )
 
             self.__assertFindingEquals(
@@ -109,7 +109,7 @@ class TestStackHawkParser(DojoTestCase):
                 "40012",
                 "1",
                 False,
-                False
+                False,
             )
 
             self.__assertFindingEquals(
@@ -123,7 +123,7 @@ class TestStackHawkParser(DojoTestCase):
                 "10038",
                 "12",
                 False,
-                False
+                False,
             )
 
             self.__assertFindingEquals(
@@ -137,7 +137,7 @@ class TestStackHawkParser(DojoTestCase):
                 "10063",
                 "12",
                 False,
-                False
+                False,
             )
 
     def test_that_a_scan_import_updates_the_test_description(self):
@@ -147,9 +147,9 @@ class TestStackHawkParser(DojoTestCase):
             parser.get_findings(testfile, test)
             self.assertEqual(
                 test.description,
-                'View scan details here: '
-                + '[https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27]'
-                + '(https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27)'
+                "View scan details here: "
+                + "[https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27]"
+                + "(https://app.stackhawk.com/scans/e2ff5651-7eef-47e9-b743-0c2f7d861e27)",
             )
 
     def test_that_a_scan_with_all_false_positive_endpoints_on_a_finding_marks_as_false_positive(self):
@@ -169,7 +169,7 @@ class TestStackHawkParser(DojoTestCase):
                 "90027",
                 "3",
                 True,
-                False
+                False,
             )
 
     def test_that_a_scan_with_all_risk_accepted_endpoints_on_a_finding_marks_as_risk_accepted(self):
@@ -189,7 +189,7 @@ class TestStackHawkParser(DojoTestCase):
                 "90027",
                 "3",
                 False,
-                True
+                True,
             )
 
     def test_that_a_scan_with_endpoints_in_differing_statuses_does_not_mark_as_risk_accepted_or_false_positive(self):
@@ -209,7 +209,7 @@ class TestStackHawkParser(DojoTestCase):
                 "90027",
                 "3",
                 False,
-                False
+                False,
             )
 
     def __assertFindingEquals(
@@ -224,18 +224,18 @@ class TestStackHawkParser(DojoTestCase):
             finding_id,
             count,
             false_positive,
-            risk_accepted
+            risk_accepted,
     ):
         self.assertEqual(title, actual_finding.title)
         self.assertEqual(date, actual_finding.date)
         self.assertEqual(application_name, actual_finding.component_name)
         self.assertEqual(environment, actual_finding.component_version)
         self.assertEqual(severity, actual_finding.severity)
-        self.assertEqual("View this finding in the StackHawk platform at:\n[" + finding_url + '](' + finding_url + ')',
+        self.assertEqual("View this finding in the StackHawk platform at:\n[" + finding_url + "](" + finding_url + ")",
                          actual_finding.description)
         self.assertRegex(
             actual_finding.steps_to_reproduce,
-            "Use a specific message link and click 'Validate' to see the cURL!.*"
+            "Use a specific message link and click 'Validate' to see the cURL!.*",
         )
         self.assertFalse(actual_finding.static_finding)
         self.assertTrue(actual_finding.dynamic_finding)

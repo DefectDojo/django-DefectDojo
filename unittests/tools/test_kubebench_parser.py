@@ -1,14 +1,13 @@
 from dojo.models import Test
 from dojo.tools.kubebench.parser import KubeBenchParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestKubeBenchParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/kubebench/kube-bench-report-zero-vuln.json"
+            get_unit_tests_path() + "/scans/kubebench/kube-bench-report-zero-vuln.json",
         ) as testfile:
             parser = KubeBenchParser()
             findings = parser.get_findings(testfile, Test())
@@ -16,7 +15,7 @@ class TestKubeBenchParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
         with open(
-            get_unit_tests_path() + "/scans/kubebench/kube-bench-report-one-vuln.json"
+            get_unit_tests_path() + "/scans/kubebench/kube-bench-report-one-vuln.json",
         ) as testfile:
             parser = KubeBenchParser()
             findings = parser.get_findings(testfile, Test())
@@ -24,7 +23,7 @@ class TestKubeBenchParser(DojoTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/kubebench/kube-bench-report-many-vuln.json"
+            get_unit_tests_path() + "/scans/kubebench/kube-bench-report-many-vuln.json",
         ) as testfile:
             parser = KubeBenchParser()
             findings = parser.get_findings(testfile, Test())
@@ -34,7 +33,7 @@ class TestKubeBenchParser(DojoTestCase):
 
         # The testfile has been derived from https://github.com/kubernetes-sigs/wg-policy-prototypes/blob/master/policy-report/kube-bench-adapter/samples/kube-bench-output.json
         with open(
-            get_unit_tests_path() + "/scans/kubebench/kube-bench-controls.json"
+            get_unit_tests_path() + "/scans/kubebench/kube-bench-controls.json",
         ) as testfile:
             parser = KubeBenchParser()
             findings = parser.get_findings(testfile, Test())
@@ -42,9 +41,9 @@ class TestKubeBenchParser(DojoTestCase):
             medium_severities = 0
             info_severities = 0
             for finding in findings:
-                if finding.severity == 'Medium':
+                if finding.severity == "Medium":
                     medium_severities += 1
-                if finding.severity == 'Info':
+                if finding.severity == "Info":
                     info_severities += 1
 
             self.assertEqual(36, medium_severities)

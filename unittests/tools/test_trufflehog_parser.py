@@ -2,8 +2,7 @@ import os.path
 
 from dojo.models import Test
 from dojo.tools.trufflehog.parser import TruffleHogParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def sample_path(file_name):
@@ -20,7 +19,7 @@ class TestTruffleHogParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(798, finding.cwe)
-            self.assertEqual('test_all.py', finding.file_path)
+            self.assertEqual("test_all.py", finding.file_path)
 
     def test_many_vulns_git_v3(self):
         with open(sample_path("v3_git.json")) as test_file:
@@ -30,7 +29,7 @@ class TestTruffleHogParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("Critical", finding.severity)
             self.assertEqual(798, finding.cwe)
-            self.assertEqual('keys', finding.file_path)
+            self.assertEqual("keys", finding.file_path)
 
     def test_many_vulns_github_v3(self):
         with open(sample_path("v3_github.json")) as test_file:
@@ -40,4 +39,4 @@ class TestTruffleHogParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("Critical", finding.severity)
             self.assertEqual(798, finding.cwe)
-            self.assertEqual('keys', finding.file_path)
+            self.assertEqual("keys", finding.file_path)

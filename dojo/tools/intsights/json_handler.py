@@ -21,19 +21,19 @@ class IntSightsJSONParser:
             alert["severity"] = original_alert["Details"]["Severity"]
             alert["type"] = original_alert["Details"]["Type"]
             alert["source_date"] = original_alert["Details"]["Source"].get(
-                "Date", "None provided"
+                "Date", "None provided",
             )
             alert["report_date"] = original_alert.get(
-                "FoundDate", "None provided"
+                "FoundDate", "None provided",
             )
             alert["network_type"] = original_alert["Details"]["Source"].get(
-                "NetworkType"
+                "NetworkType",
             )
             alert["source_url"] = original_alert["Details"]["Source"].get(
-                "URL"
+                "URL",
             )
             alert["assets"] = ",".join(
-                [item.get("Value") for item in original_alert["Assets"]]
+                [item.get("Value") for item in original_alert["Assets"]],
             )
             alert["tags"] = original_alert["Details"].get("Tags")
             alert["status"] = (
