@@ -47,5 +47,5 @@ class BlackduckAPI:
 
     def get_vulnerabilities(self, component):
         return self.client.get_json(
-            f'/api/vulnerabilities/{component["vulnerabilityWithRemediation"]["vulnerabilityName"]}'
+            f'/api/vulnerabilities/{component["vulnerabilityWithRemediation"]["vulnerabilityName"]}',
         )

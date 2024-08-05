@@ -26,7 +26,7 @@ class _Prefetcher:
         # We process all the serializers found in the module SERIALIZER_DEFS_MODULE. We restrict the scope to avoid
         # processing all the classes in the symbol table
         available_serializers = inspect.getmembers(
-            sys.modules[SERIALIZER_DEFS_MODULE], _is_model_serializer
+            sys.modules[SERIALIZER_DEFS_MODULE], _is_model_serializer,
         )
 
         for _, serializer in available_serializers:
@@ -86,7 +86,7 @@ class _Prefetcher:
             # the serializer accordingly
             many = utils._is_many_to_many_relation(field_meta)
             field_data = extra_serializer(many=many).to_representation(
-                field_value
+                field_value,
             )
             # For convenience in processing we store the field data in a list
             field_data_list = (

@@ -265,7 +265,7 @@ class SonarQubeAPI:
             if issue["key"] == issue_key:
                 return issue
         msg = (
-            f"Expected Issue \"{issue_key}\", but it returned"
+            f'Expected Issue "{issue_key}", but it returned'
             f"{[x.get('key') for x in response.json().get('issues')]}. "
             "Full response: "
             f"{response.json()}"
@@ -281,7 +281,7 @@ class SonarQubeAPI:
         rule = self.rules_cache.get(rule_id)
         if not rule:
             request_filter = {
-                "key": rule_id
+                "key": rule_id,
             }
             if organization:
                 request_filter["organization"] = organization
@@ -424,7 +424,7 @@ class SonarQubeAPI:
     def test_product_connection(self, api_scan_configuration):
         organization = api_scan_configuration.service_key_2 or None
         project = self.get_project(
-            api_scan_configuration.service_key_1, organization=organization
+            api_scan_configuration.service_key_1, organization=organization,
         )
         project_name = project.get("name")
         message_prefix = "You have access to project"

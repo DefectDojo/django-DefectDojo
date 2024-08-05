@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from os import path
 
@@ -5,8 +6,9 @@ from dateutil.tz import tzlocal, tzoffset
 
 from dojo.models import Test
 from dojo.tools.dependency_check.parser import DependencyCheckParser
+from unittests.dojo_test_case import DojoTestCase
 
-from ..dojo_test_case import DojoTestCase
+logger = logging.getLogger(__name__)
 
 
 class TestFile:
@@ -78,10 +80,10 @@ class TestDependencyCheckParser(DojoTestCase):
                     "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
                 )
                 self.assertEqual(
-                    items[0].date, datetime(2016, 11, 5, 14, 52, 15, 748000, tzinfo=tzoffset(None, -14400))
+                    items[0].date, datetime(2016, 11, 5, 14, 52, 15, 748000, tzinfo=tzoffset(None, -14400)),
                 )  # 2016-11-05T14:52:15.748-0400
                 self.assertEqual(1, len(items[0].unsaved_vulnerability_ids))
-                self.assertEqual('CVE-0000-0001', items[0].unsaved_vulnerability_ids[0])
+                self.assertEqual("CVE-0000-0001", items[0].unsaved_vulnerability_ids[0])
 
             with self.subTest(i=1):
                 self.assertEqual(items[1].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
@@ -103,7 +105,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 )
                 self.assertEqual(items[1].tags, "related")
                 self.assertEqual(1, len(items[1].unsaved_vulnerability_ids))
-                self.assertEqual('CVE-0000-0001', items[1].unsaved_vulnerability_ids[0])
+                self.assertEqual("CVE-0000-0001", items[1].unsaved_vulnerability_ids[0])
 
             with self.subTest(i=2):
                 self.assertEqual(items[2].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
@@ -124,12 +126,12 @@ class TestDependencyCheckParser(DojoTestCase):
                     "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
                 )
                 self.assertEqual(1, len(items[2].unsaved_vulnerability_ids))
-                self.assertEqual('CVE-0000-0001', items[2].unsaved_vulnerability_ids[0])
+                self.assertEqual("CVE-0000-0001", items[2].unsaved_vulnerability_ids[0])
 
             with self.subTest(i=3):
                 # identifier -> package url javascript, no vulnerabilitids, 3 vulnerabilities, relateddependencies without filename (pre v6.0.0)
                 self.assertEqual(
-                    items[3].title, "yargs-parser:5.0.0 | 1500"
+                    items[3].title, "yargs-parser:5.0.0 | 1500",
                 )
                 self.assertEqual(items[3].component_name, "yargs-parser")
                 self.assertEqual(items[3].component_version, "5.0.0")
@@ -138,7 +140,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[3].severity, "Low")
                 self.assertEqual(items[3].file_path, "yargs-parser:5.0.0")
                 self.assertEqual(
-                    items[3].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description"
+                    items[3].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description",
                 )
                 self.assertIn(
                     "**Source:** NPM",
@@ -164,10 +166,10 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[4].severity, "High")
                 self.assertEqual(items[4].file_path, "yargs-parser:5.0.0")
                 self.assertEqual(
-                    items[4].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description"
+                    items[4].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description",
                 )
                 self.assertEqual(1, len(items[4].unsaved_vulnerability_ids))
-                self.assertEqual('CVE-2020-7608', items[4].unsaved_vulnerability_ids[0])
+                self.assertEqual("CVE-2020-7608", items[4].unsaved_vulnerability_ids[0])
 
             with self.subTest(i=5):
                 self.assertEqual(
@@ -188,7 +190,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[5].severity, "High")
                 self.assertEqual(items[5].file_path, "yargs-parser:5.0.0")
                 self.assertEqual(
-                    items[5].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description"
+                    items[5].mitigation, "Update yargs-parser:5.0.0 to at least the version recommended in the description",
                 )
                 self.assertIsNone(items[5].unsaved_vulnerability_ids)
 
@@ -204,7 +206,7 @@ class TestDependencyCheckParser(DojoTestCase):
                     "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
                 )
                 self.assertEqual(1, len(items[6].unsaved_vulnerability_ids))
-                self.assertEqual('CVE-0000-0001', items[6].unsaved_vulnerability_ids[0])
+                self.assertEqual("CVE-0000-0001", items[6].unsaved_vulnerability_ids[0])
 
             with self.subTest(i=7):
                 # identifier -> maven java
@@ -213,7 +215,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[7].component_version, "2.1.1")
                 self.assertEqual(items[7].severity, "High")
                 self.assertEqual(
-                    items[7].mitigation, "Update dom4j:2.1.1 to at least the version recommended in the description"
+                    items[7].mitigation, "Update dom4j:2.1.1 to at least the version recommended in the description",
                 )
 
             with self.subTest(i=8):
@@ -226,7 +228,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[8].component_version, "3.1.1")
                 self.assertEqual(items[8].severity, "High")
                 self.assertEqual(
-                    items[8].mitigation, "Update jquery:3.1.1 to at least the version recommended in the description"
+                    items[8].mitigation, "Update jquery:3.1.1 to at least the version recommended in the description",
                 )
 
             with self.subTest(i=9):
@@ -280,7 +282,7 @@ class TestDependencyCheckParser(DojoTestCase):
             # test also different component_name formats
 
             with self.subTest(i=0):
-                print(items[0])
+                logger.debug(items[0])
                 # identifier -> package url java + 2 relateddependencies
                 self.assertEqual(items[0].title, "org.apache.activemq:activemq-broker:5.16.5 | CVE-2015-3208")
                 self.assertEqual(items[0].component_name, "org.apache.activemq:activemq-broker")
@@ -300,7 +302,7 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[0].mitigation,
                 )
                 self.assertEqual(
-                    items[0].date, datetime(2022, 12, 14, 1, 35, 43, 684166, tzinfo=tzlocal())
+                    items[0].date, datetime(2022, 12, 14, 1, 35, 43, 684166, tzinfo=tzlocal()),
                 )  # 2016-11-05T14:52:15.748-0400
                 self.assertEqual(1, len(items[0].unsaved_vulnerability_ids))
-                self.assertEqual('CVE-2015-3208', items[0].unsaved_vulnerability_ids[0])
+                self.assertEqual("CVE-2015-3208", items[0].unsaved_vulnerability_ids[0])

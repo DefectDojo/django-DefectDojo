@@ -65,7 +65,7 @@ class RedHatSatelliteParser:
                 description += "**bugs:** " + str(bugs) + "\n"
             if module_streams != []:
                 description += "**module_streams:** " + str(module_streams) + "\n"
-            description += "**packages:** " + ', '.join(packages)
+            description += "**packages:** " + ", ".join(packages)
             find = Finding(
                 title=title,
                 test=test,

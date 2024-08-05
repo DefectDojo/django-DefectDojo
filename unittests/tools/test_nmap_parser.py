@@ -2,8 +2,7 @@ import datetime
 
 from dojo.models import Test
 from dojo.tools.nmap.parser import NmapParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNmapParser(DojoTestCase):
@@ -33,9 +32,9 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual(datetime.datetime(2014, 3, 29, 14, 46, 56), finding.date)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual('localhost.localdomain', endpoint.host)
+                self.assertEqual("localhost.localdomain", endpoint.host)
                 self.assertEqual(5432, endpoint.port)
-                self.assertEqual('tcp', endpoint.protocol)
+                self.assertEqual("tcp", endpoint.protocol)
 
     def test_parse_file_with_multiple_open_ports_has_multiple_finding(self):
         with open("unittests/scans/nmap/nmap_multiple_port.xml") as testfile:
@@ -53,9 +52,9 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual(datetime.datetime(2016, 5, 16, 17, 56, 59), finding.date)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual('mocha2005.mochahost.com', endpoint.host)
+                self.assertEqual("mocha2005.mochahost.com", endpoint.host)
                 self.assertEqual(21, endpoint.port)
-                self.assertEqual('tcp', endpoint.protocol)
+                self.assertEqual("tcp", endpoint.protocol)
 
     def test_parse_file_with_script_vulner(self):
         with open("unittests/scans/nmap/nmap_script_vulners.xml") as testfile:
@@ -119,9 +118,9 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual('ip-10-250-195-71.eu-west-1.compute.internal', endpoint.host)
+                self.assertEqual("ip-10-250-195-71.eu-west-1.compute.internal", endpoint.host)
                 self.assertEqual(9100, endpoint.port)
-                self.assertEqual('tcp', endpoint.protocol)
+                self.assertEqual("tcp", endpoint.protocol)
             with self.subTest(i=66):
                 finding = findings[66]
                 self.assertEqual("Info", finding.severity)
@@ -129,6 +128,6 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
-                self.assertEqual('ip-10-250-195-71.eu-west-1.compute.internal', endpoint.host)
+                self.assertEqual("ip-10-250-195-71.eu-west-1.compute.internal", endpoint.host)
                 self.assertEqual(31641, endpoint.port)
-                self.assertEqual('tcp', endpoint.protocol)
+                self.assertEqual("tcp", endpoint.protocol)

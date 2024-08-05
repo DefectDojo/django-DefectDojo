@@ -22,25 +22,25 @@ logger = logging.getLogger(__name__)
 
 
 class RiskAcceptanceTestUI(DojoTestCase):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     data_risk_accceptance = {
-        'name': 'Accept: Unit test',
-        'accepted_findings': [72808],
-        'recommendation': 'A',
-        'recommendation_details': 'recommendation 1',
-        'decision': 'A',
-        'decision_details': 'it has been decided!',
-        'accepted_by': 'pointy haired boss',
+        "name": "Accept: Unit test",
+        "accepted_findings": [72808],
+        "recommendation": "A",
+        "recommendation_details": "recommendation 1",
+        "decision": "A",
+        "decision_details": "it has been decided!",
+        "accepted_by": "pointy haired boss",
         # 'path: (binary)
-        'owner': 1,
-        'expiration_date': '2021-07-15',
-        'reactivate_expired': True
+        "owner": 1,
+        "expiration_date": "2021-07-15",
+        "reactivate_expired": True,
     }
 
     data_remove_finding_from_ra = {
-        'remove_finding': 'Remove',
-        'remove_finding_id': 666,
+        "remove_finding": "Remove",
+        "remove_finding_id": 666,
     }
 
     def __init__(self, *args, **kwargs):
@@ -53,11 +53,11 @@ class RiskAcceptanceTestUI(DojoTestCase):
     def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
 
         if fid:
-            args = (eid, fid, )
+            args = (eid, fid)
         else:
             args = (eid, )
 
-        response = self.client.post(reverse('add_risk_acceptance', args=args), data_risk_accceptance)
+        response = self.client.post(reverse("add_risk_acceptance", args=args), data_risk_accceptance)
         self.assertEqual(302, response.status_code, response.content[:1000])
         return response
 
@@ -81,18 +81,18 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
     def test_add_risk_acceptance_single_findings_accepted(self):
         ra_data = copy.copy(self.data_risk_accceptance)
-        ra_data['accepted_findings'] = [2]
-        ra_data['return_url'] = reverse('view_finding', args=(2, ))
+        ra_data["accepted_findings"] = [2]
+        ra_data["return_url"] = reverse("view_finding", args=(2, ))
         response = self.add_risk_acceptance(1, ra_data, 2)
-        self.assertEqual('/finding/2', response.url)
+        self.assertEqual("/finding/2", response.url)
         ra = Risk_Acceptance.objects.last()
         self.assert_all_active_not_risk_accepted(ra.accepted_findings.all())
 
     def test_add_risk_acceptance_multiple_findings_accepted(self):
         ra_data = copy.copy(self.data_risk_accceptance)
-        ra_data['accepted_findings'] = [2, 3]
+        ra_data["accepted_findings"] = [2, 3]
         response = self.add_risk_acceptance(1, ra_data)
-        self.assertEqual('/engagement/1', response.url)
+        self.assertEqual("/engagement/1", response.url)
         ra = Risk_Acceptance.objects.last()
         self.assert_all_active_not_risk_accepted(ra.accepted_findings.all())
 
@@ -102,13 +102,13 @@ class RiskAcceptanceTestUI(DojoTestCase):
         ra = Risk_Acceptance.objects.last()
 
         data_add_findings_to_ra = {
-            'add_findings': 'Add Selected Findings',
-            'accepted_findings': [4, 5]
+            "add_findings": "Add Selected Findings",
+            "accepted_findings": [4, 5],
         }
 
-        response = self.client.post(reverse('view_risk_acceptance', args=(1, ra.id)),
+        response = self.client.post(reverse("view_risk_acceptance", args=(1, ra.id)),
                     urlencode(MultiValueDict(data_add_findings_to_ra), doseq=True),
-                    content_type='application/x-www-form-urlencoded')
+                    content_type="application/x-www-form-urlencoded")
 
         self.assertEqual(302, response.status_code, response.content[:1000])
         self.assert_all_inactive_risk_accepted(Finding.objects.filter(id__in=[2, 3, 4, 5]))
@@ -118,9 +118,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
         self.test_add_risk_acceptance_multiple_findings_accepted()
 
         data = copy.copy(self.data_remove_finding_from_ra)
-        data['remove_finding_id'] = 2
+        data["remove_finding_id"] = 2
         ra = Risk_Acceptance.objects.last()
-        response = self.client.post(reverse('view_risk_acceptance', args=(1, ra.id)), data)
+        response = self.client.post(reverse("view_risk_acceptance", args=(1, ra.id)), data)
         self.assertEqual(302, response.status_code, response.content[:1000])
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(id=2))
         self.assert_all_inactive_risk_accepted(Finding.objects.filter(id=3))
@@ -131,9 +131,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         findings = ra.accepted_findings.all()
 
-        data = {'id': ra.id}
+        data = {"id": ra.id}
 
-        self.client.post(reverse('delete_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse("delete_risk_acceptance", args=(1, ra.id)), data)
 
         self.assert_all_active_not_risk_accepted(findings)
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(test__engagement=1))
@@ -146,9 +146,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         findings = ra.accepted_findings.all()
 
-        data = {'id': ra.id}
+        data = {"id": ra.id}
 
-        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), data)
 
         ra.refresh_from_db()
         self.assert_all_active_not_risk_accepted(findings)
@@ -168,9 +168,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         findings = ra.accepted_findings.all()
 
-        data = {'id': ra.id}
+        data = {"id": ra.id}
 
-        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), data)
 
         ra.refresh_from_db()
         # no reactivation on expiry
@@ -191,9 +191,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         findings = ra.accepted_findings.all()
 
-        data = {'id': ra.id}
+        data = {"id": ra.id}
 
-        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), data)
 
         ra.refresh_from_db()
 
@@ -207,9 +207,9 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         findings = ra.accepted_findings.all()
 
-        data = {'id': ra.id}
+        data = {"id": ra.id}
 
-        self.client.post(reverse('expire_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse("expire_risk_acceptance", args=(1, ra.id)), data)
 
         ra.refresh_from_db()
 
@@ -222,12 +222,12 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
         findings = ra.accepted_findings.all()
 
-        data = {'id': ra.id}
+        data = {"id": ra.id}
 
-        self.client.post(reverse('reinstate_risk_acceptance', args=(1, ra.id, )), data)
+        self.client.post(reverse("reinstate_risk_acceptance", args=(1, ra.id)), data)
 
         ra.refresh_from_db()
-        expiration_delta_days = get_system_setting('risk_acceptance_form_default_days', 90)
+        expiration_delta_days = get_system_setting("risk_acceptance_form_default_days", 90)
         risk_acceptance_expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
 
         self.assertEqual(ra.expiration_date.date(), risk_acceptance_expiration_date.date())
@@ -240,20 +240,20 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
     def create_multiple_ras(self):
         ra_data = copy.copy(self.data_risk_accceptance)
-        ra_data['accepted_findings'] = [2]
-        ra_data['return_url'] = reverse('view_finding', args=(2, ))
+        ra_data["accepted_findings"] = [2]
+        ra_data["return_url"] = reverse("view_finding", args=(2, ))
         self.add_risk_acceptance(1, ra_data, 2)
         ra1 = Risk_Acceptance.objects.last()
 
         ra_data = copy.copy(self.data_risk_accceptance)
-        ra_data['accepted_findings'] = [7]
-        ra_data['return_url'] = reverse('view_finding', args=(7, ))
+        ra_data["accepted_findings"] = [7]
+        ra_data["return_url"] = reverse("view_finding", args=(7, ))
         self.add_risk_acceptance(1, ra_data, 7)
         ra2 = Risk_Acceptance.objects.last()
 
         ra_data = copy.copy(self.data_risk_accceptance)
-        ra_data['accepted_findings'] = [22]
-        ra_data['return_url'] = reverse('view_finding', args=(22, ))
+        ra_data["accepted_findings"] = [22]
+        ra_data["return_url"] = reverse("view_finding", args=(22, ))
         self.add_risk_acceptance(3, ra_data, 22)
         ra3 = Risk_Acceptance.objects.last()
 

@@ -18,9 +18,9 @@ from .test_utils import assertTestImportModelsCreated
 logger = logging.getLogger(__name__)
 
 
-ENGAGEMENT_NAME_DEFAULT = 'Engagement 1'
-PRODUCT_NAME_DEFAULT = 'Product A'
-PRODUCT_TYPE_NAME_DEFAULT = 'Type type'
+ENGAGEMENT_NAME_DEFAULT = "Engagement 1"
+PRODUCT_NAME_DEFAULT = "Product A"
+PRODUCT_TYPE_NAME_DEFAULT = "Type type"
 
 
 # 0_zap_sample.xml: basic file with 4 out of 5 findings reported, zap4 absent
@@ -54,59 +54,59 @@ PRODUCT_TYPE_NAME_DEFAULT = 'Type type'
 # test methods to be used both by API Test and UI Test
 class ImportReimportMixin:
     def __init__(self, *args, **kwargs):
-        self.scans_path = '/scans/'
+        self.scans_path = "/scans/"
 
-        self.zap_sample0_filename = self.scans_path + 'zap/0_zap_sample.xml'
-        self.zap_sample1_filename = self.scans_path + 'zap/1_zap_sample_0_and_new_absent.xml'
-        self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'
-        self.zap_sample3_filename = self.scans_path + 'zap/3_zap_sampl_0_and_different_severities.xml'
+        self.zap_sample0_filename = self.scans_path + "zap/0_zap_sample.xml"
+        self.zap_sample1_filename = self.scans_path + "zap/1_zap_sample_0_and_new_absent.xml"
+        self.zap_sample2_filename = self.scans_path + "zap/2_zap_sample_0_and_new_endpoint.xml"
+        self.zap_sample3_filename = self.scans_path + "zap/3_zap_sampl_0_and_different_severities.xml"
 
-        self.anchore_file_name = self.scans_path + 'anchore_engine/one_vuln_many_files.json'
-        self.scan_type_anchore = 'Anchore Engine Scan'
+        self.anchore_file_name = self.scans_path + "anchore_engine/one_vuln_many_files.json"
+        self.scan_type_anchore = "Anchore Engine Scan"
 
-        self.acunetix_file_name = self.scans_path + 'acunetix/one_finding.xml'
-        self.scan_type_acunetix = 'Acunetix Scan'
+        self.acunetix_file_name = self.scans_path + "acunetix/one_finding.xml"
+        self.scan_type_acunetix = "Acunetix Scan"
 
-        self.gitlab_dep_scan_components_filename = f'{self.scans_path}gitlab_dep_scan/gl-dependency-scanning-report-many-vuln_v15.json'
-        self.scan_type_gtlab_dep_scan = 'GitLab Dependency Scanning Report'
+        self.gitlab_dep_scan_components_filename = f"{self.scans_path}gitlab_dep_scan/gl-dependency-scanning-report-many-vuln_v15.json"
+        self.scan_type_gtlab_dep_scan = "GitLab Dependency Scanning Report"
 
-        self.sonarqube_file_name1 = self.scans_path + 'sonarqube/sonar-6-findings.html'
-        self.sonarqube_file_name2 = self.scans_path + 'sonarqube/sonar-6-findings-1-unique_id_changed.html'
-        self.scan_type_sonarqube_detailed = 'SonarQube Scan detailed'
+        self.sonarqube_file_name1 = self.scans_path + "sonarqube/sonar-6-findings.html"
+        self.sonarqube_file_name2 = self.scans_path + "sonarqube/sonar-6-findings-1-unique_id_changed.html"
+        self.scan_type_sonarqube_detailed = "SonarQube Scan detailed"
 
-        self.veracode_many_findings = self.scans_path + 'veracode/many_findings.xml'
-        self.veracode_same_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_same_hash_code_different_unique_id.xml'
-        self.veracode_same_unique_id_different_hash_code = self.scans_path + 'veracode/many_findings_same_unique_id_different_hash_code.xml'
-        self.veracode_different_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_different_hash_code_different_unique_id.xml'
-        self.veracode_mitigated_findings = self.scans_path + 'veracode/mitigated_finding.xml'
-        self.scan_type_veracode = 'Veracode Scan'
+        self.veracode_many_findings = self.scans_path + "veracode/many_findings.xml"
+        self.veracode_same_hash_code_different_unique_id = self.scans_path + "veracode/many_findings_same_hash_code_different_unique_id.xml"
+        self.veracode_same_unique_id_different_hash_code = self.scans_path + "veracode/many_findings_same_unique_id_different_hash_code.xml"
+        self.veracode_different_hash_code_different_unique_id = self.scans_path + "veracode/many_findings_different_hash_code_different_unique_id.xml"
+        self.veracode_mitigated_findings = self.scans_path + "veracode/mitigated_finding.xml"
+        self.scan_type_veracode = "Veracode Scan"
 
-        self.clair_few_findings = self.scans_path + 'clair/clair_few_vuln.json'
-        self.clair_empty = self.scans_path + 'clair/clair_empty.json'
-        self.scan_type_clair = 'Clair Scan'
+        self.clair_few_findings = self.scans_path + "clair/clair_few_vuln.json"
+        self.clair_empty = self.scans_path + "clair/clair_empty.json"
+        self.scan_type_clair = "Clair Scan"
 
         self.scan_type_generic = "Generic Findings Import"
         self.generic_filename_with_file = self.scans_path + "generic/test_with_image.json"
         self.generic_import_1 = self.scans_path + "generic/test_import_report1.json"
         self.generic_import_2 = self.scans_path + "generic/test_import_report2.json"
 
-        self.aws_prowler_file_name = self.scans_path + 'aws_prowler/many_vuln.json'
-        self.aws_prowler_file_name_plus_one = self.scans_path + 'aws_prowler/many_vuln_plus_one.json'
-        self.scan_type_aws_prowler = 'AWS Prowler Scan'
+        self.aws_prowler_file_name = self.scans_path + "aws_prowler/many_vuln.json"
+        self.aws_prowler_file_name_plus_one = self.scans_path + "aws_prowler/many_vuln_plus_one.json"
+        self.scan_type_aws_prowler = "AWS Prowler Scan"
 
-        self.nuclei_empty = self.scans_path + 'nuclei/empty.jsonl'
+        self.nuclei_empty = self.scans_path + "nuclei/empty.jsonl"
 
-        self.gitlab_dast_file_name = f'{self.scans_path}gitlab_dast/gitlab_dast_one_vul_v15.json'
-        self.scan_type_gitlab_dast = 'GitLab DAST Report'
+        self.gitlab_dast_file_name = f"{self.scans_path}gitlab_dast/gitlab_dast_one_vul_v15.json"
+        self.scan_type_gitlab_dast = "GitLab DAST Report"
 
-        self.anchore_grype_file_name = self.scans_path + 'anchore_grype/check_all_fields.json'
-        self.anchore_grype_scan_type = 'Anchore Grype'
+        self.anchore_grype_file_name = self.scans_path + "anchore_grype/check_all_fields.json"
+        self.anchore_grype_scan_type = "Anchore Grype"
 
     # import zap scan, testing:
     # - import
     # - active/verifed = True
     def test_zap_scan_base_active_verified(self):
-        logger.debug('importing original zap xml report')
+        logger.debug("importing original zap xml report")
         endpoint_count_before = self.db_endpoint_count()
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
@@ -122,7 +122,7 @@ class ImportReimportMixin:
         # 4 absent
         # 5 active
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -146,7 +146,7 @@ class ImportReimportMixin:
     # - import
     # - active/verifed = False
     def test_zap_scan_base_not_active_not_verified(self):
-        logger.debug('importing original zap xml report')
+        logger.debug("importing original zap xml report")
         endpoint_count_before = self.db_endpoint_count()
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
@@ -162,7 +162,7 @@ class ImportReimportMixin:
         # 4 absent
         # 5 inactive
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
@@ -188,109 +188,109 @@ class ImportReimportMixin:
     # - import
     # - no scan_date and date not set by parser leads to today as date
     def test_import_default_scan_date_parser_not_sets_date(self):
-        logger.debug('importing zap xml report with date set by parser')
+        logger.debug("importing zap xml report with date set by parser")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
             import0 = self.import_scan_with_params(self.zap_sample0_filename, active=False, verified=False)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
         # Get the date
-        date = findings['results'][0]['date']
+        date = findings["results"][0]["date"]
         self.assertEqual(date, str(timezone.localtime(timezone.now()).date()))
 
     # import acunetix scan with dates
     # - import
     # - no scan scan_date does not overrides date set by parser
     def test_import_default_scan_date_parser_sets_date(self):
-        logger.debug('importing original acunetix xml report')
+        logger.debug("importing original acunetix xml report")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
             import0 = self.import_scan_with_params(self.acunetix_file_name, scan_type=self.scan_type_acunetix, active=False, verified=False)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
         # Get the date
-        date = findings['results'][0]['date']
-        self.assertEqual(date, '2018-09-24')
+        date = findings["results"][0]["date"]
+        self.assertEqual(date, "2018-09-24")
 
     # import zap scan without dates
     # - import
     # - set scan_date overrides date not set by parser
     def test_import_set_scan_date_parser_not_sets_date(self):
-        logger.debug('importing original zap xml report')
+        logger.debug("importing original zap xml report")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.zap_sample0_filename, active=False, verified=False, scan_date='2006-12-26')
+            import0 = self.import_scan_with_params(self.zap_sample0_filename, active=False, verified=False, scan_date="2006-12-26")
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
         # Get the date
-        date = findings['results'][0]['date']
-        self.assertEqual(date, '2006-12-26')
+        date = findings["results"][0]["date"]
+        self.assertEqual(date, "2006-12-26")
 
     # import acunetix scan with dates
     # - import
     # - set scan_date overrides date set by parser
     def test_import_set_scan_date_parser_sets_date(self):
-        logger.debug('importing acunetix xml report with date set by parser')
+        logger.debug("importing acunetix xml report with date set by parser")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
-            import0 = self.import_scan_with_params(self.acunetix_file_name, scan_type=self.scan_type_acunetix, active=False, verified=False, scan_date='2006-12-26')
+            import0 = self.import_scan_with_params(self.acunetix_file_name, scan_type=self.scan_type_acunetix, active=False, verified=False, scan_date="2006-12-26")
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
         # Get the date
-        date = findings['results'][0]['date']
-        self.assertEqual(date, '2006-12-26')
+        date = findings["results"][0]["date"]
+        self.assertEqual(date, "2006-12-26")
 
     # Test Scan_Date for reimport in UI. UI can only rupload for existing tests, non UI tests are in API class below
 
     def test_import_reimport_no_scan_date_parser_no_date(self):
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         # reimport report with 1 extra finding
         reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
 
-        test_id = reimport0['test']
+        test_id = reimport0["test"]
 
         # 1 new finding imported
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(5, findings)
         # no scan_date, so date should be today
-        self.assertEqual(findings['results'][4]['date'], str(timezone.localtime(timezone.now()).date()))
+        self.assertEqual(findings["results"][4]["date"], str(timezone.localtime(timezone.now()).date()))
 
     def test_import_reimport_scan_date_parser_no_date(self):
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         # reimport report with 1 extra finding
-        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename, scan_date='2020-02-02')
+        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename, scan_date="2020-02-02")
 
-        test_id = reimport0['test']
+        test_id = reimport0["test"]
 
         # 1 new finding imported
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(5, findings)
         # scan_date provided, so date should be equal to that
-        self.assertEqual(findings['results'][4]['date'], "2020-02-02")
+        self.assertEqual(findings["results"][4]["date"], "2020-02-02")
 
     def test_import_reimport_no_scan_date_parser_date(self):
         import0 = self.import_scan_with_params(self.aws_prowler_file_name, scan_type=self.scan_type_aws_prowler)
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         # reimport report with 1 extra finding
         reimport0 = self.reimport_scan_with_params(test_id, self.aws_prowler_file_name_plus_one, scan_type=self.scan_type_aws_prowler)
 
-        test_id = reimport0['test']
+        test_id = reimport0["test"]
 
         # 1 new finding imported
         findings = self.get_test_findings_api(test_id)
@@ -298,37 +298,37 @@ class ImportReimportMixin:
         self.log_finding_summary_json_api(findings)
         # no scan_date, so date should be date from parser
         # findings order by priority, third finding is the new one
-        self.assertEqual(findings['results'][2]['date'], "2021-08-23")
+        self.assertEqual(findings["results"][2]["date"], "2021-08-23")
 
     def test_import_reimport_scan_date_parser_date(self):
         import0 = self.import_scan_with_params(self.aws_prowler_file_name, scan_type=self.scan_type_aws_prowler)
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         # reimport report with 1 extra finding
-        reimport0 = self.reimport_scan_with_params(test_id, self.aws_prowler_file_name_plus_one, scan_type=self.scan_type_aws_prowler, scan_date='2020-02-02')
+        reimport0 = self.reimport_scan_with_params(test_id, self.aws_prowler_file_name_plus_one, scan_type=self.scan_type_aws_prowler, scan_date="2020-02-02")
 
-        test_id = reimport0['test']
+        test_id = reimport0["test"]
 
         # 1 new finding imported
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(5, findings)
         # scan_date provided, so date should be equal to that overriding that from the parser
         self.log_finding_summary_json_api(findings)
-        self.assertEqual(findings['results'][4]['date'], "2020-02-02")
+        self.assertEqual(findings["results"][4]["date"], "2020-02-02")
 
     # Test re-import with unique_id_from_tool algorithm
     # import sonar scan with detailed parser, testing:
     # - import
     # - active/verifed = True
     def test_sonar_detailed_scan_base_active_verified(self):
-        logger.debug('importing original sonar report')
+        logger.debug("importing original sonar report")
         notes_count_before = self.db_notes_count()
 
         with assertTestImportModelsCreated(self, imports=1, affected_findings=6, created=6):
             import0 = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -343,13 +343,13 @@ class ImportReimportMixin:
     # - import
     # - active/verifed = True
     def test_veracode_scan_base_active_verified(self):
-        logger.debug('importing original veracode report')
+        logger.debug("importing original veracode report")
         notes_count_before = self.db_notes_count()
 
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
             import0 = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -364,12 +364,12 @@ class ImportReimportMixin:
     # - active = True, verified = True
     # - existing findings with verified is true should stay verified
     def test_import_veracode_reimport_veracode_active_verified_mitigated(self):
-        logger.debug('reimporting exact same original veracode mitigated xml report again')
+        logger.debug("reimporting exact same original veracode mitigated xml report again")
 
         import_veracode_many_findings = self.import_scan_with_params(self.veracode_mitigated_findings, scan_type=self.scan_type_veracode,
                                                                      verified=True, forceActive=True, forceVerified=True)
 
-        test_id = import_veracode_many_findings['test']
+        test_id = import_veracode_many_findings["test"]
 
         notes_count_before = self.db_notes_count()
 
@@ -377,7 +377,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=0, closed=1, reactivated=0, untouched=0):
             reimport_veracode_mitigated_findings = self.reimport_scan_with_params(test_id, self.veracode_mitigated_findings, scan_type=self.scan_type_veracode)
 
-        test_id = reimport_veracode_mitigated_findings['test']
+        test_id = reimport_veracode_mitigated_findings["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -401,11 +401,11 @@ class ImportReimportMixin:
     # - active = True, verified = Trie
     # - existing findings with verified is true should stay verified
     def test_import_0_reimport_0_active_verified(self):
-        logger.debug('reimporting exact same original zap xml report again')
+        logger.debug("reimporting exact same original zap xml report again")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         endpoint_count_before = self.db_endpoint_count()
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
@@ -416,7 +416,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
-        test_id = reimport0['test']
+        test_id = reimport0["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -439,11 +439,11 @@ class ImportReimportMixin:
     # - active = True, verified = False
     # - existing findings with verified is true should stay verified
     def test_import_0_reimport_0_active_not_verified(self):
-        logger.debug('reimporting exact same original zap xml report again, verified=False')
+        logger.debug("reimporting exact same original zap xml report again, verified=False")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         endpoint_count_before = self.db_endpoint_count()
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
@@ -454,7 +454,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename, verified=False)
 
-        test_id = reimport0['test']
+        test_id = reimport0["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -483,11 +483,11 @@ class ImportReimportMixin:
     # - active = True, verified = False
     # - existing findings with verified is true should stay verified
     def test_import_sonar1_reimport_sonar1_active_not_verified(self):
-        logger.debug('reimporting exact same original sonar report again, verified=False')
+        logger.debug("reimporting exact same original sonar report again, verified=False")
 
         importsonar1 = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed)
 
-        test_id = importsonar1['test']
+        test_id = importsonar1["test"]
 
         notes_count_before = self.db_notes_count()
 
@@ -495,7 +495,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, untouched=6):
             reimportsonar1 = self.reimport_scan_with_params(test_id, self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, verified=False)
 
-        test_id = reimportsonar1['test']
+        test_id = reimportsonar1["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -517,21 +517,21 @@ class ImportReimportMixin:
     def test_import_sonar1_measure_minimum_severity_counts(self):
         # Critical
         response_json = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, minimum_severity="Critical")
-        test_id = response_json['test']
+        test_id = response_json["test"]
         # Count all findings
         self.assert_finding_count_json(3, self.get_test_findings_api(test_id))
         self.assert_finding_count_json(3, self.get_test_findings_api(test_id, severity="Critical"))
 
         # High
         response_json = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, minimum_severity="High")
-        test_id = response_json['test']
+        test_id = response_json["test"]
         # Count all findings
         self.assert_finding_count_json(4, self.get_test_findings_api(test_id))
         self.assert_finding_count_json(1, self.get_test_findings_api(test_id, severity="High"))
 
         # Low
         response_json = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, minimum_severity="Low")
-        test_id = response_json['test']
+        test_id = response_json["test"]
         # Count all findings
         self.assert_finding_count_json(6, self.get_test_findings_api(test_id))
         self.assert_finding_count_json(2, self.get_test_findings_api(test_id, severity="Low"))
@@ -541,11 +541,11 @@ class ImportReimportMixin:
     # - reimport, findings stay the same, stay active
     # - existing findings with verified is true should stay verified
     def test_import_veracode_reimport_veracode_active_not_verified(self):
-        logger.debug('reimporting exact same original veracode report again, verified=False')
+        logger.debug("reimporting exact same original veracode report again, verified=False")
 
         import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
 
-        test_id = import_veracode_many_findings['test']
+        test_id = import_veracode_many_findings["test"]
 
         notes_count_before = self.db_notes_count()
 
@@ -553,7 +553,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_many_findings, scan_type=self.scan_type_veracode, verified=False)
 
-        test_id = reimport_veracode_many_findings['test']
+        test_id = reimport_veracode_many_findings["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -576,11 +576,11 @@ class ImportReimportMixin:
     # - 1 finding is mitigated
     # - 1 finding is added
     def test_import_sonar1_reimport_sonar2(self):
-        logger.debug('reimporting same findings except one with a different unique_id_from_tool')
+        logger.debug("reimporting same findings except one with a different unique_id_from_tool")
 
         importsonar1 = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed)
 
-        test_id = importsonar1['test']
+        test_id = importsonar1["test"]
 
         notes_count_before = self.db_notes_count()
 
@@ -588,7 +588,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1, untouched=5):
             reimportsonar1 = self.reimport_scan_with_params(test_id, self.sonarqube_file_name2, scan_type=self.scan_type_sonarqube_detailed, verified=False)
 
-        test_id = reimportsonar1['test']
+        test_id = reimportsonar1["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -616,11 +616,11 @@ class ImportReimportMixin:
     # - reimport, all findings stay the same, stay active
     # - existing findings with verified is true should stay verified
     def test_import_veracode_reimport_veracode_same_hash_code_different_unique_id(self):
-        logger.debug('reimporting report with one finding having same hash_code but different unique_id_from_tool, verified=False')
+        logger.debug("reimporting report with one finding having same hash_code but different unique_id_from_tool, verified=False")
 
         import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
 
-        test_id = import_veracode_many_findings['test']
+        test_id = import_veracode_many_findings["test"]
 
         notes_count_before = self.db_notes_count()
 
@@ -628,7 +628,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_same_hash_code_different_unique_id, scan_type=self.scan_type_veracode, verified=False)
 
-        test_id = reimport_veracode_many_findings['test']
+        test_id = reimport_veracode_many_findings["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -650,11 +650,11 @@ class ImportReimportMixin:
     # - reimport, all findings stay the same, stay active
     # - existing findings with verified is true should stay verified
     def test_import_veracode_reimport_veracode_same_unique_id_different_hash_code(self):
-        logger.debug('reimporting report with one finding having same unique_id_from_tool but different hash_code, verified=False')
+        logger.debug("reimporting report with one finding having same unique_id_from_tool but different hash_code, verified=False")
 
         import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
 
-        test_id = import_veracode_many_findings['test']
+        test_id = import_veracode_many_findings["test"]
 
         notes_count_before = self.db_notes_count()
 
@@ -662,7 +662,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, untouched=4):
             reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_same_unique_id_different_hash_code, scan_type=self.scan_type_veracode, verified=False)
 
-        test_id = reimport_veracode_many_findings['test']
+        test_id = reimport_veracode_many_findings["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -685,11 +685,11 @@ class ImportReimportMixin:
     # - 1 added finding, 1 mitigated finding
     # - existing findings with verified is true should stay verified
     def test_import_veracode_reimport_veracode_different_hash_code_different_unique_id(self):
-        logger.debug('reimporting report with one finding having different hash_code and different unique_id_from_tool, verified=False')
+        logger.debug("reimporting report with one finding having different hash_code and different unique_id_from_tool, verified=False")
 
         import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
 
-        test_id = import_veracode_many_findings['test']
+        test_id = import_veracode_many_findings["test"]
 
         notes_count_before = self.db_notes_count()
 
@@ -697,7 +697,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1, untouched=3):
             reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_different_hash_code_different_unique_id, scan_type=self.scan_type_veracode, verified=False)
 
-        test_id = reimport_veracode_many_findings['test']
+        test_id = reimport_veracode_many_findings["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -721,11 +721,11 @@ class ImportReimportMixin:
     # - verified is false, so zap4 should not be verified.
     # - existing findings with verified is true should stay verified
     def test_import_0_reimport_1_active_not_verified(self):
-        logger.debug('reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=False')
+        logger.debug("reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=False")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -739,7 +739,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1, untouched=3):
             reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename, verified=False)
 
-        test_id = reimport1['test']
+        test_id = reimport1["test"]
         self.assertEqual(test_id, test_id)
 
         self.get_test_api(test_id)
@@ -774,11 +774,11 @@ class ImportReimportMixin:
     # - total  findings count should be 5
     # - zap1 active, zap4 inactive
     def test_import_0_reimport_1_active_verified_reimport_0_active_verified(self):
-        logger.debug('reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again')
+        logger.debug("reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -800,7 +800,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
             self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
-        test_id = reimport1['test']
+        test_id = reimport1["test"]
         self.assertEqual(test_id, test_id)
 
         self.get_test_api(test_id)
@@ -813,12 +813,12 @@ class ImportReimportMixin:
 
         zap1_ok = False
         zap4_ok = False
-        for finding in findings['results']:
-            if 'Zap1' in finding['title']:
-                self.assertTrue(finding['active'])
+        for finding in findings["results"]:
+            if "Zap1" in finding["title"]:
+                self.assertTrue(finding["active"])
                 zap1_ok = True
-            if 'Zap4' in finding['title']:
-                self.assertFalse(finding['active'])
+            if "Zap4" in finding["title"]:
+                self.assertFalse(finding["active"])
                 zap4_ok = True
 
         self.assertTrue(zap1_ok)
@@ -845,11 +845,11 @@ class ImportReimportMixin:
     # - extra endpoint should be present in db
     # - reimport doesn't look at endpoints to match against existing findings
     def test_import_0_reimport_2_extra_endpoint(self):
-        logger.debug('reimporting exact same original zap xml report again, with an extra endpoint for zap1')
+        logger.debug("reimporting exact same original zap xml report again, with an extra endpoint for zap1")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -862,7 +862,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, untouched=4):
             reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
 
-        test_id = reimport2['test']
+        test_id = reimport2["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -884,19 +884,19 @@ class ImportReimportMixin:
     # - extra endpoint should no long be present in db
     # - reimport doesn't look at endpoints to match against existing findings
     def test_import_0_reimport_2_extra_endpoint_reimport_0(self):
-        logger.debug('reimporting exact same original zap xml report again, with an extra endpoint for zap1')
+        logger.debug("reimporting exact same original zap xml report again, with an extra endpoint for zap1")
 
         # self.log_finding_summary_json_api()
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, untouched=4):
             reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
 
-        test_id = reimport2['test']
+        test_id = reimport2["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -910,7 +910,7 @@ class ImportReimportMixin:
 
         reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
-        test_id = reimport0['test']
+        test_id = reimport0["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id)
@@ -935,11 +935,11 @@ class ImportReimportMixin:
     # - so zap1 + zap2 closed
     # - 2 new findings zap1' and zap2'
     def test_import_0_reimport_3_active_verified(self):
-        logger.debug('reimporting updated zap xml report, with different severities for zap2 and zap5')
+        logger.debug("reimporting updated zap xml report, with different severities for zap2 and zap5")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
@@ -953,7 +953,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=4, created=2, closed=2, untouched=2):
             reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample3_filename)
 
-        test_id = reimport1['test']
+        test_id = reimport1["test"]
         self.assertEqual(test_id, test_id)
 
         self.get_test_api(test_id)
@@ -963,14 +963,14 @@ class ImportReimportMixin:
 
         zap2_ok = False
         zap5_ok = False
-        for finding in findings['results']:
-            if 'Zap2' in finding['title']:
-                self.assertTrue(finding['active'] or finding['severity'] == 'Low')
-                self.assertTrue(not finding['active'] or finding['severity'] == 'Medium')
+        for finding in findings["results"]:
+            if "Zap2" in finding["title"]:
+                self.assertTrue(finding["active"] or finding["severity"] == "Low")
+                self.assertTrue(not finding["active"] or finding["severity"] == "Medium")
                 zap2_ok = True
-            if 'Zap5' in finding['title']:
-                self.assertTrue(finding['active'] or finding['severity'] == 'Low')
-                self.assertTrue(not finding['active'] or finding['severity'] == 'Medium')
+            if "Zap5" in finding["title"]:
+                self.assertTrue(finding["active"] or finding["severity"] == "Low")
+                self.assertTrue(not finding["active"] or finding["severity"] == "Medium")
                 zap5_ok = True
 
         self.assertTrue(zap2_ok)
@@ -997,18 +997,18 @@ class ImportReimportMixin:
     # import 1 and then reimport 2 without closing old findings
     # - reimport should not mitigate the zap1
     def test_import_reimport_without_closing_old_findings(self):
-        logger.debug('reimporting updated zap xml report and keep old findings open')
+        logger.debug("reimporting updated zap xml report and keep old findings open")
 
         import1 = self.import_scan_with_params(self.zap_sample1_filename)
 
-        test_id = import1['test']
+        test_id = import1["test"]
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(4, findings)
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1, untouched=3):
             reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename, close_old_findings=False)
 
-        test_id = reimport1['test']
+        test_id = reimport1["test"]
         self.assertEqual(test_id, test_id)
 
         findings = self.get_test_findings_api(test_id, verified=False)
@@ -1019,9 +1019,9 @@ class ImportReimportMixin:
 
         mitigated = 0
         not_mitigated = 0
-        for finding in findings['results']:
+        for finding in findings["results"]:
             logger.debug(finding)
-            if finding['is_mitigated']:
+            if finding["is_mitigated"]:
                 mitigated += 1
             else:
                 not_mitigated += 1
@@ -1041,12 +1041,12 @@ class ImportReimportMixin:
     def test_import_0_reimport_0_anchore_file_path(self):
         import0 = self.import_scan_with_params(self.anchore_file_name, scan_type=self.scan_type_anchore)
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.log_finding_summary_json_api(active_findings_before)
 
-        active_findings_count_before = active_findings_before['count']
+        active_findings_count_before = active_findings_before["count"]
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
@@ -1068,37 +1068,37 @@ class ImportReimportMixin:
     # reimport Zap0 and only 1 finding must be active
     # the other 3 findings manually set to active=False must remain False
     def test_import_reimport_keep_false_positive_and_out_of_scope(self):
-        logger.debug('importing zap0 with 4 findings, manually setting 3 findings to active=False, reimporting zap0 must return only 1 finding active=True')
+        logger.debug("importing zap0 with 4 findings, manually setting 3 findings to active=False, reimporting zap0 must return only 1 finding active=True")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
-        test_id = import0['test']
+        test_id = import0["test"]
 
         test_api_response = self.get_test_api(test_id)
-        product_api_response = self.get_engagement_api(test_api_response['engagement'])
-        product_id = product_api_response['product']
+        product_api_response = self.get_engagement_api(test_api_response["engagement"])
+        product_id = product_api_response["product"]
 
         self.patch_product_api(product_id, {"enable_simple_risk_acceptance": True})
 
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(4, active_findings_before)
 
-        for finding in active_findings_before['results']:
-            if 'Zap1' in finding['title']:
-                self.patch_finding_api(finding['id'], {"active": False,
+        for finding in active_findings_before["results"]:
+            if "Zap1" in finding["title"]:
+                self.patch_finding_api(finding["id"], {"active": False,
                                                        "verified": False,
                                                        "false_p": True,
                                                        "out_of_scope": False,
                                                        "risk_accepted": False,
                                                        "is_mitigated": True})
-            elif 'Zap2' in finding['title']:
-                self.patch_finding_api(finding['id'], {"active": False,
+            elif "Zap2" in finding["title"]:
+                self.patch_finding_api(finding["id"], {"active": False,
                                                        "verified": False,
                                                        "false_p": False,
                                                        "out_of_scope": True,
                                                        "risk_accepted": False,
                                                        "is_mitigated": True})
-            elif 'Zap3' in finding['title']:
-                self.patch_finding_api(finding['id'], {"active": False,
+            elif "Zap3" in finding["title"]:
+                self.patch_finding_api(finding["id"], {"active": False,
                                                        "verified": False,
                                                        "false_p": False,
                                                        "out_of_scope": False,
@@ -1108,9 +1108,9 @@ class ImportReimportMixin:
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(1, active_findings_before)
 
-        for finding in active_findings_before['results']:
-            if 'Zap5' in finding['title']:
-                self.delete_finding_api(finding['id'])
+        for finding in active_findings_before["results"]:
+            if "Zap5" in finding["title"]:
+                self.delete_finding_api(finding["id"])
 
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(0, active_findings_before)
@@ -1118,7 +1118,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
-        self.assertEqual(reimport0['test'], test_id)
+        self.assertEqual(reimport0["test"], test_id)
 
         active_findings_after = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(1, active_findings_after)
@@ -1126,35 +1126,35 @@ class ImportReimportMixin:
         active_findings_after = self.get_test_findings_api(test_id, active=False)
         self.assert_finding_count_json(3, active_findings_after)
 
-        for finding in active_findings_after['results']:
-            if 'Zap1' in finding['title']:
-                self.assertFalse(finding['active'])
-                self.assertFalse(finding['verified'])
-                self.assertTrue(finding['false_p'])
-                self.assertFalse(finding['out_of_scope'])
-                self.assertFalse(finding['risk_accepted'])
-                self.assertTrue(finding['is_mitigated'])
-            elif 'Zap2' in finding['title']:
-                self.assertFalse(finding['active'])
-                self.assertFalse(finding['verified'])
-                self.assertFalse(finding['false_p'])
-                self.assertTrue(finding['out_of_scope'])
-                self.assertFalse(finding['risk_accepted'])
-                self.assertTrue(finding['is_mitigated'])
-            elif 'Zap3' in finding['title']:
-                self.assertFalse(finding['active'])
-                self.assertFalse(finding['verified'])
-                self.assertFalse(finding['false_p'])
-                self.assertFalse(finding['out_of_scope'])
-                self.assertTrue(finding['risk_accepted'])
-                self.assertTrue(finding['is_mitigated'])
-            elif 'Zap5' in finding['title']:
-                self.assertTrue(finding['active'])
-                self.assertTrue(finding['verified'])
-                self.assertFalse(finding['false_p'])
-                self.assertFalse(finding['out_of_scope'])
-                self.assertFalse(finding['risk_accepted'])
-                self.assertFalse(finding['is_mitigated'])
+        for finding in active_findings_after["results"]:
+            if "Zap1" in finding["title"]:
+                self.assertFalse(finding["active"])
+                self.assertFalse(finding["verified"])
+                self.assertTrue(finding["false_p"])
+                self.assertFalse(finding["out_of_scope"])
+                self.assertFalse(finding["risk_accepted"])
+                self.assertTrue(finding["is_mitigated"])
+            elif "Zap2" in finding["title"]:
+                self.assertFalse(finding["active"])
+                self.assertFalse(finding["verified"])
+                self.assertFalse(finding["false_p"])
+                self.assertTrue(finding["out_of_scope"])
+                self.assertFalse(finding["risk_accepted"])
+                self.assertTrue(finding["is_mitigated"])
+            elif "Zap3" in finding["title"]:
+                self.assertFalse(finding["active"])
+                self.assertFalse(finding["verified"])
+                self.assertFalse(finding["false_p"])
+                self.assertFalse(finding["out_of_scope"])
+                self.assertTrue(finding["risk_accepted"])
+                self.assertTrue(finding["is_mitigated"])
+            elif "Zap5" in finding["title"]:
+                self.assertTrue(finding["active"])
+                self.assertTrue(finding["verified"])
+                self.assertFalse(finding["false_p"])
+                self.assertFalse(finding["out_of_scope"])
+                self.assertFalse(finding["risk_accepted"])
+                self.assertFalse(finding["is_mitigated"])
 
     # import gitlab_dep_scan_components_filename with 6 findings
     # findings 1, 2 and 3 have the same component_name (golang.org/x/crypto) and the same CVE (CVE-2020-29652), but different component_version
@@ -1172,8 +1172,8 @@ class ImportReimportMixin:
 
         import0 = self.import_scan_with_params(self.gitlab_dep_scan_components_filename,
                                                scan_type=self.scan_type_gtlab_dep_scan,
-                                               minimum_severity='Info')
-        test_id = import0['test']
+                                               minimum_severity="Info")
+        test_id = import0["test"]
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(6, active_findings_before)
 
@@ -1181,37 +1181,37 @@ class ImportReimportMixin:
             self.reimport_scan_with_params(test_id,
                                                        self.gitlab_dep_scan_components_filename,
                                                        scan_type=self.scan_type_gtlab_dep_scan,
-                                                       minimum_severity='Info')
+                                                       minimum_severity="Info")
 
         active_findings_after = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(6, active_findings_after)
 
         count = 0
-        for finding in active_findings_after['results']:
-            if 'v0.0.0-20190219172222-a4c6cb3142f2' == finding['component_version']:
-                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
-                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+        for finding in active_findings_after["results"]:
+            if "v0.0.0-20190219172222-a4c6cb3142f2" == finding["component_version"]:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
+                self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
+                self.assertEqual("golang.org/x/crypto", finding["component_name"])
                 count = count + 1
-            elif 'v0.0.0-20190308221718-c2843e01d9a2' == finding['component_version']:
-                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
-                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+            elif "v0.0.0-20190308221718-c2843e01d9a2" == finding["component_version"]:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
+                self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
+                self.assertEqual("golang.org/x/crypto", finding["component_name"])
                 count = count + 1
-            elif 'v0.0.0-20200302210943-78000ba7a073' == finding['component_version']:
-                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
-                self.assertEqual("CVE-2020-29652", finding['vulnerability_ids'][0]['vulnerability_id'])
-                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+            elif "v0.0.0-20200302210943-78000ba7a073" == finding["component_version"]:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
+                self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
+                self.assertEqual("golang.org/x/crypto", finding["component_name"])
                 count = count + 1
-            elif 'v0.3.0' == finding['component_version']:
-                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
-                self.assertEqual("CVE-2020-14040", finding['vulnerability_ids'][0]['vulnerability_id'])
-                self.assertEqual("golang.org/x/text", finding['component_name'])
+            elif "v0.3.0" == finding["component_version"]:
+                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding["title"])
+                self.assertEqual("CVE-2020-14040", finding["vulnerability_ids"][0]["vulnerability_id"])
+                self.assertEqual("golang.org/x/text", finding["component_name"])
                 count = count + 1
-            elif 'v0.3.2' == finding['component_version']:
-                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
-                self.assertEqual("CVE-2020-14040", finding['vulnerability_ids'][0]['vulnerability_id'])
-                self.assertEqual("golang.org/x/text", finding['component_name'])
+            elif "v0.3.2" == finding["component_version"]:
+                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding["title"])
+                self.assertEqual("CVE-2020-14040", finding["vulnerability_ids"][0]["vulnerability_id"])
+                self.assertEqual("golang.org/x/text", finding["component_name"])
                 count = count + 1
 
         self.assertEqual(5, count)
@@ -1220,11 +1220,11 @@ class ImportReimportMixin:
     # parameter endpoint_to_add: each imported finding should be related to endpoint with id=1
     # close_old_findings functionality: secony (empty) import should close all findings from the first import
     def test_import_param_close_old_findings_with_additional_endpoint(self):
-        logger.debug('importing clair report with additional endpoint')
+        logger.debug("importing clair report with additional endpoint")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
             import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         test = self.get_test(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
@@ -1250,11 +1250,11 @@ class ImportReimportMixin:
 
     # close_old_findings functionality: second (empty) import should close all findings from the first import when setting the same service
     def test_import_param_close_old_findings_with_same_service(self):
-        logger.debug('importing clair report with same service')
+        logger.debug("importing clair report with same service")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service='service_1')
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service="service_1")
 
-        test_id = import0['test']
+        test_id = import0["test"]
         test = self.get_test(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
@@ -1267,7 +1267,7 @@ class ImportReimportMixin:
 
         # reimport empty report
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, closed=4):
-            self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service='service_1')
+            self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service="service_1")
 
         # all findings from import0 should be closed now
         engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False).count()
@@ -1275,11 +1275,11 @@ class ImportReimportMixin:
 
     # close_old_findings functionality: second (empty) import should not close findings from the first import when setting different services
     def test_import_param_close_old_findings_with_different_services(self):
-        logger.debug('importing clair report with different services')
+        logger.debug("importing clair report with different services")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service='service_1')
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service="service_1")
 
-        test_id = import0['test']
+        test_id = import0["test"]
         test = self.get_test(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
@@ -1292,7 +1292,7 @@ class ImportReimportMixin:
 
         # reimport empty report
         with assertTestImportModelsCreated(self, imports=1, affected_findings=0, closed=0):
-            self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service='service_2')
+            self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service="service_2")
 
         # no findings from import0 should be closed now
         engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False).count()
@@ -1301,9 +1301,9 @@ class ImportReimportMixin:
     # close_old_findings functionality: second (empty) import should not close findings from the first import when setting a service in the first import but none in the second import
     def test_import_param_close_old_findings_with_and_without_service_1(self):
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service='service_1')
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service="service_1")
 
-        test_id = import0['test']
+        test_id = import0["test"]
         test = self.get_test(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
@@ -1327,7 +1327,7 @@ class ImportReimportMixin:
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
             import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, service=None)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         test = self.get_test(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
@@ -1340,7 +1340,7 @@ class ImportReimportMixin:
 
         # reimport empty report
         with assertTestImportModelsCreated(self, imports=1, affected_findings=0, closed=0):
-            self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service='service_2')
+            self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, service="service_2")
 
         # no findings from import0 should be closed now
         engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False).count()
@@ -1354,13 +1354,13 @@ class ImportReimportMixin:
 
         import0 = self.import_scan_with_params(self.generic_filename_with_file, scan_type="Generic Findings Import")
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         # reimport exact same report
         with assertTestImportModelsCreated(self, reimports=1, untouched=1):
             reimport0 = self.reimport_scan_with_params(test_id, self.generic_filename_with_file, scan_type="Generic Findings Import")
 
-        test_id2 = reimport0['test']
+        test_id2 = reimport0["test"]
         self.assertEqual(test_id, test_id2)
 
         findings = self.get_test_findings_api(test_id)
@@ -1384,11 +1384,11 @@ class ImportReimportMixin:
 
         import0 = self.import_scan_with_params(self.nuclei_empty, scan_type="Nuclei Scan")
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         reimport0 = self.reimport_scan_with_params(test_id, self.nuclei_empty, scan_type="Nuclei Scan")
 
-        test_id2 = reimport0['test']
+        test_id2 = reimport0["test"]
         self.assertEqual(test_id, test_id2)
 
     def test_import_reimport_endpoint_where_eps_date_is_different(self):
@@ -1402,13 +1402,13 @@ class ImportReimportMixin:
                                                    active=True,
                                                    verified=True)
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
         self.assert_finding_count_json(1, findings)
 
-        test = self.get_test_api(test_id)['id']
+        test = self.get_test_api(test_id)["id"]
         finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
         self.assertEqual(finding.status_finding.count(), 1)
 
@@ -1421,7 +1421,7 @@ class ImportReimportMixin:
         reimport0 = self.reimport_scan_with_params(test_id,
                                                    self.gitlab_dast_file_name,
                                                    scan_type=self.scan_type_gitlab_dast)
-        test_id = reimport0['test']
+        test_id = reimport0["test"]
 
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
@@ -1442,14 +1442,14 @@ class ImportReimportMixin:
 
         import0 = self.import_scan_with_params(self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         test = Test.objects.get(id=test_id)
         findings = Finding.objects.filter(test=test)
-        self.assertEqual(5, len(findings))
-        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
+        self.assertEqual(4, len(findings))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
-        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
-        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].vulnerability_ids[0])
+        self.assertEqual("CVE-2021-44420", findings[3].vulnerability_ids[1])
 
         test_type = Test_Type.objects.get(name=self.anchore_grype_scan_type)
         reimport_test = Test(
@@ -1463,15 +1463,15 @@ class ImportReimportMixin:
 
         self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
         findings = Finding.objects.filter(test=reimport_test)
-        self.assertEqual(5, len(findings))
-        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].cve)
+        self.assertEqual(4, len(findings))
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
-        self.assertEqual('GHSA-v6rh-hp5x-86rv', findings[3].vulnerability_ids[0])
-        self.assertEqual('CVE-2021-44420', findings[3].vulnerability_ids[1])
+        self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].vulnerability_ids[0])
+        self.assertEqual("CVE-2021-44420", findings[3].vulnerability_ids[1])
 
     def test_import_history_reactivated_and_untouched_findings_do_not_mix(self):
         import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
-        test_id = import0['test']
+        test_id = import0["test"]
         # reimport the second report
         self.reimport_scan_with_params(test_id, self.generic_import_2, scan_type=self.scan_type_generic)
         # reimport the first report again
@@ -1480,7 +1480,7 @@ class ImportReimportMixin:
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         # super(ImportReimportMixin, self).__init__(*args, **kwargs)
@@ -1489,10 +1489,10 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         super().__init__(*args, **kwargs)
 
     def setUp(self):
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
         # self.url = reverse(self.viewname + '-list')
 
     # Statistics only available in API Response
@@ -1503,182 +1503,182 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     # - total  findings count should be 5
     # - zap1 active, zap4 inactive
     def test_import_0_reimport_1_active_verified_reimport_0_active_verified_statistics(self):
-        logger.debug('reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again')
+        logger.debug("reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        self.assertEqual(import0['statistics'], {
-            'after': {
-                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
-                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
-            }
+        self.assertEqual(import0["statistics"], {
+            "after": {
+                "info": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "low": {"active": 3, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 3},
+                "medium": {"active": 1, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 1},
+                "high": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "critical": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "total": {"active": 4, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 4},
+            },
         })
 
-        test_id = import0['test']
+        test_id = import0["test"]
         reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
 
-        self.assertEqual(reimport1['statistics'], {
-            'after': {
-                'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'low': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 4, 'verified': 0},
-                'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                'total': {'active': 4, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 5, 'verified': 0}},
-            'before': {
-                'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'low': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 3, 'verified': 0},
-                'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                'total': {'active': 4, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 4, 'verified': 0}},
-            'delta': {
-                'closed': {
-                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}},
-                'created': {
-                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'low': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'total': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}},
-                'left untouched': {
-                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'low': {'active': 2, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 2, 'verified': 0},
-                    'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                    'total': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 3, 'verified': 0}},
-                'reactivated': {
-                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0}}
-            }
+        self.assertEqual(reimport1["statistics"], {
+            "after": {
+                "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "low": {"active": 3, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 4, "verified": 0},
+                "medium": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                "total": {"active": 4, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 5, "verified": 0}},
+            "before": {
+                "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "low": {"active": 3, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 3, "verified": 0},
+                "medium": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                "total": {"active": 4, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 4, "verified": 0}},
+            "delta": {
+                "closed": {
+                    "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "low": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                    "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "total": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0}},
+                "created": {
+                    "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "low": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                    "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "total": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0}},
+                "left untouched": {
+                    "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "low": {"active": 2, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 2, "verified": 0},
+                    "medium": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                    "total": {"active": 3, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 3, "verified": 0}},
+                "reactivated": {
+                    "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "low": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "total": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0}},
+            },
         })
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1, untouched=3):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
-        self.assertEqual(reimport0['statistics'], {
-            'after': {
-                'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'low': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 4, 'verified': 0},
-                'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                'total': {'active': 4, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 5, 'verified': 0}},
-            'before': {
-                'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                'low': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 4, 'verified': 0},
-                'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                'total': {'active': 4, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 5, 'verified': 0}},
-            'delta': {
-                'closed': {
-                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 1, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}},
-                'created': {
-                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'low': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'total': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0}},
-                'left untouched': {
-                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'low': {'active': 2, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 2, 'verified': 0},
-                    'medium': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                    'total': {'active': 3, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 3, 'verified': 0}},
-                'reactivated': {
-                    'critical': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'high': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'info': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'low': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0},
-                    'medium': {'active': 0, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 0, 'verified': 0},
-                    'total': {'active': 1, 'duplicate': 0, 'false_p': 0, 'is_mitigated': 0, 'out_of_scope': 0, 'risk_accepted': 0, 'total': 1, 'verified': 0}}
-            }
+        self.assertEqual(reimport0["statistics"], {
+            "after": {
+                "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "low": {"active": 3, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 4, "verified": 0},
+                "medium": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                "total": {"active": 4, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 5, "verified": 0}},
+            "before": {
+                "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                "low": {"active": 3, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 4, "verified": 0},
+                "medium": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                "total": {"active": 4, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 5, "verified": 0}},
+            "delta": {
+                "closed": {
+                    "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "low": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                    "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "total": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 1, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0}},
+                "created": {
+                    "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "low": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "total": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0}},
+                "left untouched": {
+                    "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "low": {"active": 2, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 2, "verified": 0},
+                    "medium": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                    "total": {"active": 3, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 3, "verified": 0}},
+                "reactivated": {
+                    "critical": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "high": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "info": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "low": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0},
+                    "medium": {"active": 0, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 0, "verified": 0},
+                    "total": {"active": 1, "duplicate": 0, "false_p": 0, "is_mitigated": 0, "out_of_scope": 0, "risk_accepted": 0, "total": 1, "verified": 0}},
+            },
         })
 
     # without import history, there are no delta statistics
     @override_settings(TRACK_IMPORT_HISTORY=False)
     def test_import_0_reimport_1_active_verified_reimport_0_active_verified_statistics_no_history(self):
-        logger.debug('reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again')
+        logger.debug("reimporting updated zap xml report, 1 new finding and 1 no longer present, verified=True and then 0 again")
 
         import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
-        self.assertEqual(import0['statistics'], {
-            'after': {
-                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
-                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
-            }
+        self.assertEqual(import0["statistics"], {
+            "after": {
+                "info": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "low": {"active": 3, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 3},
+                "medium": {"active": 1, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 1},
+                "high": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "critical": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "total": {"active": 4, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 4},
+            },
         })
 
-        test_id = import0['test']
+        test_id = import0["test"]
 
         reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
 
-        self.assertEqual(reimport1['statistics'], {
-            'before': {
-                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 3},
-                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 4}
+        self.assertEqual(reimport1["statistics"], {
+            "before": {
+                "info": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "low": {"active": 3, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 3},
+                "medium": {"active": 1, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 1},
+                "high": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "critical": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "total": {"active": 4, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 4},
             },
-            'after': {
-                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
-                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
-            }
+            "after": {
+                "info": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "low": {"active": 3, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 1, "risk_accepted": 0, "total": 4},
+                "medium": {"active": 1, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 1},
+                "high": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "critical": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "total": {"active": 4, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 1, "risk_accepted": 0, "total": 5},
+            },
         })
 
         with assertTestImportModelsCreated(self, reimports=0, affected_findings=0, closed=0, reactivated=0, untouched=0):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
-        self.assertEqual(reimport0['statistics'], {
-            'before': {
-                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
-                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
+        self.assertEqual(reimport0["statistics"], {
+            "before": {
+                "info": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "low": {"active": 3, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 1, "risk_accepted": 0, "total": 4},
+                "medium": {"active": 1, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 1},
+                "high": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "critical": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "total": {"active": 4, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 1, "risk_accepted": 0, "total": 5},
             },
-            'after': {
-                'info': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'low': {'active': 3, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 4},
-                'medium': {'active': 1, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 1},
-                'high': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'critical': {'active': 0, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 0, 'risk_accepted': 0, 'total': 0},
-                'total': {'active': 4, 'verified': 0, 'duplicate': 0, 'false_p': 0, 'out_of_scope': 0, 'is_mitigated': 1, 'risk_accepted': 0, 'total': 5}
-            }
+            "after": {
+                "info": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "low": {"active": 3, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 1, "risk_accepted": 0, "total": 4},
+                "medium": {"active": 1, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 1},
+                "high": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "critical": {"active": 0, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 0, "risk_accepted": 0, "total": 0},
+                "total": {"active": 4, "verified": 0, "duplicate": 0, "false_p": 0, "out_of_scope": 0, "is_mitigated": 1, "risk_accepted": 0, "total": 5},
+            },
         })
     # Reimport tests to test Scan_Date logic (usecase not supported on UI)
 
@@ -1686,73 +1686,73 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     # - reimport
     # - no scan_date overrides date not set by parser
     def test_reimport_default_scan_date_parser_not_sets_date(self):
-        logger.debug('importing zap xml report with date set by parser')
+        logger.debug("importing zap xml report with date set by parser")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
             import0 = self.reimport_scan_with_params(None, self.zap_sample0_filename, active=False, verified=False,
                 product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, auto_create_context=True)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
         # Get the date
-        date = findings['results'][0]['date']
+        date = findings["results"][0]["date"]
         self.assertEqual(date, str(timezone.localtime(timezone.now()).date()))
 
     # reimport acunetix scan with dates (non existing test, so import is called inside DD)
     # - reimport
     # - deafult scan_date (today) does not overrides date set by parser
     def test_reimport_default_scan_date_parser_sets_date(self):
-        logger.debug('importing original acunetix xml report')
+        logger.debug("importing original acunetix xml report")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
             import0 = self.reimport_scan_with_params(None, self.acunetix_file_name, scan_type=self.scan_type_acunetix, active=False, verified=False,
                 product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, auto_create_context=True)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
         # Get the date
-        date = findings['results'][0]['date']
-        self.assertEqual(date, '2018-09-24')
+        date = findings["results"][0]["date"]
+        self.assertEqual(date, "2018-09-24")
 
     # reimport zap scan without dates (non existing test, so import is called inside DD)
     # - reimport
     # - set scan_date overrides date not set by parser
     def test_reimport_set_scan_date_parser_not_sets_date(self):
-        logger.debug('importing original zap xml report')
+        logger.debug("importing original zap xml report")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
-            import0 = self.reimport_scan_with_params(None, self.zap_sample0_filename, active=False, verified=False, scan_date='2006-12-26',
+            import0 = self.reimport_scan_with_params(None, self.zap_sample0_filename, active=False, verified=False, scan_date="2006-12-26",
                             product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, auto_create_context=True)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
         # Get the date
-        date = findings['results'][0]['date']
-        self.assertEqual(date, '2006-12-26')
+        date = findings["results"][0]["date"]
+        self.assertEqual(date, "2006-12-26")
 
     # reimport acunetix scan with dates (non existing test, so import is called inside DD)
     # - reimport
     # - set scan_date overrides date set by parser
     def test_reimport_set_scan_date_parser_sets_date(self):
-        logger.debug('importing acunetix xml report with date set by parser')
+        logger.debug("importing acunetix xml report with date set by parser")
         with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
-            import0 = self.reimport_scan_with_params(None, self.acunetix_file_name, scan_type=self.scan_type_acunetix, active=False, verified=False, scan_date='2006-12-26',
+            import0 = self.reimport_scan_with_params(None, self.acunetix_file_name, scan_type=self.scan_type_acunetix, active=False, verified=False, scan_date="2006-12-26",
                             product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, auto_create_context=True)
 
-        test_id = import0['test']
+        test_id = import0["test"]
         findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
         # Get the date
-        date = findings['results'][0]['date']
-        self.assertEqual(date, '2006-12-26')
+        date = findings["results"][0]["date"]
+        self.assertEqual(date, "2006-12-26")
 
 
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
     client_ui = Client()
 
     def __init__(self, *args, **kwargs):
@@ -1764,10 +1764,10 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
     def setUp(self):
         # still using the API to verify results
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
         # self.url = reverse(self.viewname + '-list')
 
         self.client_ui = Client()
@@ -1787,25 +1787,24 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         return self.reimport_scan_with_params_ui(*args, **kwargs)
 
     def import_scan_ui(self, engagement, payload):
-        logger.debug('import_scan payload %s', payload)
+        logger.debug("import_scan payload %s", payload)
         # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
-        response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), payload)
-        # print(vars(response))
-        # print('url: ' + response.url)
-        test = Test.objects.get(id=response.url.split('/')[-1])
+        response = self.client_ui.post(reverse("import_scan_results", args=(engagement, )), payload)
+
+        test = Test.objects.get(id=response.url.split("/")[-1])
         # f = open('response.html', 'w+')
         # f.write(str(response.content, 'utf-8'))
         # f.close()
         self.assertEqual(302, response.status_code, response.content[:1000])
-        return {'test': test.id}
+        return {"test": test.id}
 
     def reimport_scan_ui(self, test, payload):
-        response = self.client_ui.post(reverse('re_import_scan_results', args=(test, )), payload)
+        response = self.client_ui.post(reverse("re_import_scan_results", args=(test, )), payload)
         self.assertEqual(302, response.status_code, response.content[:1000])
-        test = Test.objects.get(id=response.url.split('/')[-1])
-        return {'test': test.id}
+        test = Test.objects.get(id=response.url.split("/")[-1])
+        return {"test": test.id}
 
-    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=False,
+    def import_scan_with_params_ui(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", active=True, verified=False,
                                    push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, scan_date=None, service=None,
                                    forceActive=False, forceVerified=False):
 
@@ -1834,25 +1833,25 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
             }
 
             if push_to_jira is not None:
-                payload['push_to_jira'] = push_to_jira
+                payload["push_to_jira"] = push_to_jira
 
             if endpoint_to_add is not None:
-                payload['endpoints'] = [endpoint_to_add]
+                payload["endpoints"] = [endpoint_to_add]
 
             if tags is not None:
-                payload['tags'] = tags
+                payload["tags"] = tags
 
             if scan_date is not None:
-                payload['scan_date'] = scan_date
+                payload["scan_date"] = scan_date
 
             if service is not None:
-                payload['service'] = service
+                payload["service"] = service
 
             result = self.import_scan_ui(engagement, payload)
 
             return result
 
-    def reimport_scan_with_params_ui(self, test_id, filename, scan_type='ZAP Scan', minimum_severity='Low', active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
+    def reimport_scan_with_params_ui(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
         # Mimic old functionality for active/verified to avoid breaking tests
         activePayload = "force_to_true"
         if not active:
@@ -1873,13 +1872,13 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
             }
 
             if push_to_jira is not None:
-                payload['push_to_jira'] = push_to_jira
+                payload["push_to_jira"] = push_to_jira
 
             if tags is not None:
-                payload['tags'] = tags
+                payload["tags"] = tags
 
             if scan_date is not None:
-                payload['scan_date'] = scan_date
+                payload["scan_date"] = scan_date
 
             result = self.reimport_scan_ui(test_id, payload)
             return result

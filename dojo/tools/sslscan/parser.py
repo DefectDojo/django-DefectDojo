@@ -67,7 +67,7 @@ class SslscanParser:
 
                 if title and description is not None:
                     dupe_key = hashlib.sha256(
-                        str(description + title).encode("utf-8")
+                        str(description + title).encode("utf-8"),
                     ).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]
