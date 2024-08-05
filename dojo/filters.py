@@ -2888,12 +2888,12 @@ class ReportFindingFilterHelper(FilterSet):
 
     o = OrderingFilter(
         fields=(
-            ('title', 'title'),
-            ('date', 'date'),
-            ('numerical_severity', 'numerical_severity'),
-            ('epss_score', 'epss_score'),
-            ('epss_percentile', 'epss_percentile'),
-            ('test__engagement__product__name', 'test__engagement__product__name'),
+            ("title", "title"),
+            ("date", "date"),
+            ("numerical_severity", "numerical_severity"),
+            ("epss_score", "epss_score"),
+            ("epss_percentile", "epss_percentile"),
+            ("test__engagement__product__name", "test__engagement__product__name"),
         ),
     )
 
