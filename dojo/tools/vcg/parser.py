@@ -81,7 +81,7 @@ class VCGXmlParser:
             data.priority = 6
         else:
             data.priority = int(
-                float(self.get_field_from_xml(issue, "Priority"))
+                float(self.get_field_from_xml(issue, "Priority")),
             )
 
         data.title = (
@@ -119,7 +119,7 @@ class VCGXmlParser:
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:
@@ -159,7 +159,7 @@ class VCGCsvParser:
             data.priority = 6
         else:
             data.priority = int(
-                float(self.get_field_from_row(row, priority_column))
+                float(self.get_field_from_row(row, priority_column)),
             )
 
         data.severity = self.get_field_from_row(row, severity_column)
@@ -187,7 +187,7 @@ class VCGCsvParser:
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:

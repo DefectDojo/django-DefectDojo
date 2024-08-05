@@ -25,7 +25,7 @@ class TestKubeHunterParser(TestCase):
             self.assertEqual(True, finding.active)
 
             self.assertEqual(False, finding.duplicate)
-            self.assertEqual(finding.severity, 'High')
+            self.assertEqual(finding.severity, "High")
 
     def test_kubehunter_parser_with_many_vuln_has_many_findings(self):
         with open("unittests/scans/kubehunter/kubehunter_many_vul.json") as testfile:
@@ -41,7 +41,7 @@ class TestKubeHunterParser(TestCase):
                 parser.get_findings(testfile, Test())
 
         self.assertEqual(
-            "Expecting value: line 1 column 1 (char 0)", str(context.exception)
+            "Expecting value: line 1 column 1 (char 0)", str(context.exception),
         )
 
     def test_kubehunter_parser_dupe(self):

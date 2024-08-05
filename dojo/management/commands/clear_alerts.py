@@ -12,17 +12,17 @@ system: Clear system alert
 
 
 class Command(BaseCommand):
-    help = 'Remove alerts from the database'
+    help = "Remove alerts from the database"
 
     def add_arguments(self, parser):
-        parser.add_argument('-a', '--all', action='store_true', help='Remove all alerts from the database')
-        parser.add_argument('-s', '--system', action='store_true', help='Remove alerts wihtout a user')
-        parser.add_argument('-u', '--users', nargs='+', type=str, help='Removes alerts from users')
+        parser.add_argument("-a", "--all", action="store_true", help="Remove all alerts from the database")
+        parser.add_argument("-s", "--system", action="store_true", help="Remove alerts wihtout a user")
+        parser.add_argument("-u", "--users", nargs="+", type=str, help="Removes alerts from users")
 
     def handle(self, *args, **options):
-        alls = options['all']
-        users = options['users']
-        system = options['system']
+        alls = options["all"]
+        users = options["users"]
+        system = options["system"]
 
         if users:
             for user_name in users:

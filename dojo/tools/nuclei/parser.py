@@ -38,7 +38,7 @@ class NucleiParser:
             for template in content:
                 data.append(template)
         elif filecontent[0] == "{":
-            file = filecontent.split('\n')
+            file = filecontent.split("\n")
             for line in file:
                 if line != "":
                     data.append(json.loads(line))
@@ -78,7 +78,7 @@ class NucleiParser:
                 finding.description = info.get("description")
             if item.get("extracted-results"):
                 finding.description += "\n**Results:**\n" + "\n".join(
-                    item.get("extracted-results")
+                    item.get("extracted-results"),
                 )
             if info.get("tags"):
                 finding.unsaved_tags = info.get("tags")
@@ -108,7 +108,7 @@ class NucleiParser:
                     and classification["cvss-metrics"]
                 ):
                     cvss_objects = cvss_parser.parse_cvss_from_text(
-                        classification["cvss-metrics"]
+                        classification["cvss-metrics"],
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
@@ -151,8 +151,8 @@ class NucleiParser:
 
             dupe_key = hashlib.sha256(
                 (template_id + item_type + matcher + endpoint.host).encode(
-                    "utf-8"
-                )
+                    "utf-8",
+                ),
             ).hexdigest()
 
             if dupe_key in dupes:

@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.snyk.parser import SnykParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestSnykParser(DojoTestCase):
@@ -64,7 +63,7 @@ class TestSnykParser(DojoTestCase):
             finding.severity_justification,
         )
         self.assertEqual(
-            "SNYK-JAVA-ORGAPACHESANTUARIO-460281", finding.vuln_id_from_tool
+            "SNYK-JAVA-ORGAPACHESANTUARIO-460281", finding.vuln_id_from_tool,
         )
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2019-12400", finding.unsaved_vulnerability_ids[0])
@@ -86,7 +85,7 @@ class TestSnykParser(DojoTestCase):
             finding.references,
         )
         self.assertEqual(
-            "com.test:myframework > org.apache.santuario:xmlsec", finding.file_path
+            "com.test:myframework > org.apache.santuario:xmlsec", finding.file_path,
         )
 
     def test_snykParser_file_path_with_ampersand_is_preserved(self):
@@ -98,7 +97,7 @@ class TestSnykParser(DojoTestCase):
         finding = findings[0]
         self.assertEqual(
             "myproject > @angular/localize > @babel/core > lodash",
-            finding.file_path
+            finding.file_path,
         )
 
     def test_snykParser_allprojects_issue4277(self):
@@ -147,7 +146,7 @@ class TestSnykParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("Low", finding.severity)
             self.assertEqual(
-                "SNYK-SLES153-PERMISSIONS-2648113", finding.vuln_id_from_tool
+                "SNYK-SLES153-PERMISSIONS-2648113", finding.vuln_id_from_tool,
             )
 
     def test_snykParser_target_file(self):
@@ -158,7 +157,7 @@ class TestSnykParser(DojoTestCase):
             # Mobile-Security-Framework-MobSF@0.0.0: SQL Injection
             finding = findings[0]
             self.assertEqual("Critical", finding.severity)
-            self.assertIn('target_file:Mobile-Security-Framework-MobSF/requirements.txt', finding.unsaved_tags)
+            self.assertIn("target_file:Mobile-Security-Framework-MobSF/requirements.txt", finding.unsaved_tags)
 
     def test_snykParser_update_libs_tag(self):
         with open("unittests/scans/snyk/single_project_upgrade_libs.json") as testfile:
@@ -168,9 +167,9 @@ class TestSnykParser(DojoTestCase):
             # acme-review@1.0.0: Remote Code Execution (RCE)
             finding = findings[227]
             self.assertEqual("High", finding.severity)
-            self.assertIn('target_file:package-lock.json', finding.unsaved_tags)
-            self.assertIn('upgrade_to:react-scripts@5.0.0', finding.unsaved_tags)
-            self.assertIn('shell-quote@1.7.2', finding.mitigation)
+            self.assertIn("target_file:package-lock.json", finding.unsaved_tags)
+            self.assertIn("upgrade_to:react-scripts@5.0.0", finding.unsaved_tags)
+            self.assertIn("shell-quote@1.7.2", finding.mitigation)
 
     def test_snykcontainer_issue_9270(self):
         with open("unittests/scans/snyk/snykcontainer_issue_9270.json") as testfile:

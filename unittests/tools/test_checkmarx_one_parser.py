@@ -1,9 +1,11 @@
 import datetime
+import logging
 
 from dojo.models import Test
 from dojo.tools.checkmarx_one.parser import CheckmarxOneParser
+from unittests.dojo_test_case import DojoTestCase
 
-from ..dojo_test_case import DojoTestCase
+logger = logging.getLogger(__name__)
 
 
 class TestCheckmarxOneParser(DojoTestCase):
@@ -126,7 +128,7 @@ class TestCheckmarxOneParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(146, len(findings))
             for index in range(len(findings)):
-                print(index, findings[index])
+                logger.debug(f"{index} {findings[index]}")
             with self.subTest(i=0):
                 for finding in findings:
                     self.assertIsNotNone(finding.title)
