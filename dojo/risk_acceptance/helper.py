@@ -157,7 +157,7 @@ def add_findings_to_risk_acceptance(risk_acceptance: Risk_Acceptance, findings):
                 event="accepted",
                 parent_finding=finding,
                 notes=f"The finding was accepted by the user {user.username} and for finding parent id: {finding.id}(policies for the transfer of findings)",
-                send_notification=True
+                send_notification=False
             )
             # Update any endpoint statuses on each of the findings
             update_endpoint_statuses(finding, True)

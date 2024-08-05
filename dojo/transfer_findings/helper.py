@@ -278,6 +278,7 @@ def close_or_reactive_related_finding(event: str, parent_finding: Finding, notes
     transfer_finding_finding_reactive = None
     system_user = get_user(settings.SYSTEM_USER)
     for transfer_finding_finding in transfer_finding_findings:
+        send_notification = True
         if event == "close":
             transfer_finding_finding.findings.active = False
             transfer_finding_finding.findings.out_of_scope = True
