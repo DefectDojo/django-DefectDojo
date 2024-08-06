@@ -76,19 +76,6 @@ function set_dev {
     fi
 }
 
-function set_debug {
-    get_current
-    if [ "${current_env}" != debug ]
-    then
-        docker compose down
-        rm -f ${override_link}
-        ln -s ${override_file_debug} ${override_link}
-        echo "Now using 'debug' configuration."
-    else
-        echo "Already using 'debug' configuration."
-    fi
-}
-
 function set_unit_tests {
     get_current
     if [ "${current_env}" != unit_tests ]
