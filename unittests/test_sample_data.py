@@ -6,9 +6,10 @@ from .dojo_test_case import DojoTestCase
 
 @test_tag("non-parallel")
 class TestSampleData(DojoTestCase):
+
+    fixtures = ["defect_dojo_sample_data"]
+
     def test_loaddata(self):
-        try:
-            call_command("loaddata", "dojo/fixtures/defect_dojo_sample_data", verbosity=0)
-        except Exception as e:
-            self.assertEqual(False, True, e)
+        # this test running at all is indicative of the test passing
+        # We will just assert True, and move on
         self.assertEqual(True, True)
