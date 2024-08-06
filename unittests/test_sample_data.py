@@ -1,8 +1,10 @@
 from django.core.management import call_command
+from django.test import tag as test_tag
 
 from .dojo_test_case import DojoTestCase
 
 
+@test_tag("non-parallel")
 class TestSampleData(DojoTestCase):
     def test_loaddata(self):
         try:
