@@ -449,19 +449,3 @@ def validate_list_findings(conf_risk, type, finding, eng):
             ),
             None,
         )
-
-
-def acceptance_findings_related(parent_finding: Finding, risk_acceptance: Risk_Acceptance):
-    transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
-    for transfer_finding_finding in transfer_finding_findings:
-
-        Risk_Acceptance(name="Transfer finding - " + transfer_finding_finding.finding_related.title,
-                        accepted_findings=[transfer_finding_finding.finding_related],
-                        severity=transfer_finding_finding.severity,
-                        accepted_by=risk_acceptance.accepted_by,
-                        owner=get_user(settings.SYSTEM_USER),
-                        expiration_date=update_expiration_risk_accepted(transfer_finding_finding),
-                        reactivate_expired=True,
-                        restart_sla_expired=False,
-                        notes=Notes(entry="Finding accepted by findings transfer policy")
-                        )
