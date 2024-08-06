@@ -14,8 +14,6 @@ RUN \
     gcc \
     build-base \
     bind-tools \
-    mysql-client \
-    mariadb-dev \
     postgresql16-client \
     xmlsec \
     git \
@@ -46,8 +44,6 @@ RUN \
     jpeg \
     tiff \
     bind-tools \
-    mysql-client \
-    mariadb-dev \
     xmlsec \
     git \
     util-linux \

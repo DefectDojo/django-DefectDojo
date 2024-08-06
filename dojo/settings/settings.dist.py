@@ -91,8 +91,8 @@ env = environ.FileAwareEnv(
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
-    DD_DATABASE_ENGINE=(str, "django.db.backends.mysql"),
-    DD_DATABASE_HOST=(str, "mysql"),
+    DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
+    DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
     # default django database name for testing is test_<dbname>
     DD_TEST_DATABASE_NAME=(str, "test_defectdojo"),
@@ -1270,6 +1270,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Nancy Scan": ["title", "vuln_id_from_tool"],
     "Wiz Scan": ["title", "description", "severity"],
     "Kubescape JSON Importer": ["title", "component_name"],
+    "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
+    "Rapplex Scan": ["title", "endpoints", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1489,6 +1491,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Wiz Scan": DEDUPE_ALGO_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
+    "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
+    "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1744,11 +1748,21 @@ NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
 warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
 
-# This setting is here to override default renderer of forms (use div-based, instred of table-based).
-# It has effect only on templates that use "{{ form }}" in the body. Only "Delete forms" now.
-# The setting is here to avoid RemovedInDjango50Warning. It is here only for transition period.
-# TODO - Remove this setting in Django 5.0 because DjangoDivFormRenderer will become deprecated and the same class will be used by default DjangoTemplates.
-# More info:
-# - https://docs.djangoproject.com/en/4.1/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
-# - https://docs.djangoproject.com/en/5.0/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
-FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
+
+# The setting is here to avoid RemovedInDjango60Warning. It is here only for transition period.
+# TODO - Remove this setting in Django 6.0
+# TODO More info:
+# Context:
+# uwsgi-1  |   File "/app/dojo/forms.py", line 515, in ImportScanForm
+# uwsgi-1  |     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
+# uwsgi-1  |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# uwsgi-1  |   File "/usr/local/lib/python3.11/site-packages/django/forms/fields.py", line 769, in __init__
+# uwsgi-1  |     warnings.warn(
+# uwsgi-1  | django.utils.deprecation.RemovedInDjango60Warning: The default scheme will be changed from 'http' to 'https' in Django 6.0. Pass the forms.URLField.assume_scheme argument to silence this warning, or set the FORMS_URLFIELD_ASSUME_HTTPS transitional setting to True to opt into using 'https' as the new default scheme.
+# +
+# uwsgi-1  |   File "/usr/local/lib/python3.11/site-packages/django/conf/__init__.py", line 214, in __init__
+# uwsgi-1  |     warnings.warn(
+# uwsgi-1  | django.utils.deprecation.RemovedInDjango60Warning: The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.
+warnings.filterwarnings("ignore", "The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.")
+FORMS_URLFIELD_ASSUME_HTTPS = True
+# Inspired by https://adamj.eu/tech/2023/12/07/django-fix-urlfield-assume-scheme-warnings/

@@ -18,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
 
 import dojo.jira_link.helper as jira_helper
@@ -1138,6 +1139,16 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         model = Endpoint_Status
         fields = "__all__"
 
+    def run_validators(self, initial_data):
+        try:
+            return super().run_validators(initial_data)
+        except RestFrameworkValidationError as exc:
+            if "finding, endpoint must make a unique set" in str(exc):
+                msg = "This endpoint-finding relation already exists"
+                raise serializers.ValidationError(msg) from exc
+            else:
+                raise
+
     def create(self, validated_data):
         endpoint = validated_data.get("endpoint")
         finding = validated_data.get("finding")
@@ -1146,7 +1157,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
                 finding=finding, endpoint=endpoint,
             )
         except IntegrityError as ie:
-            if "endpoint-finding relation" in str(ie):
+            if "finding, endpoint must make a unique set" in str(ie):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg)
             else:
@@ -1163,7 +1174,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         try:
             return super().update(instance, validated_data)
         except IntegrityError as ie:
-            if "endpoint-finding relation" in str(ie):
+            if "finding, endpoint must make a unique set" in str(ie):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg)
             else:
