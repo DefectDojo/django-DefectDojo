@@ -172,7 +172,7 @@
   },
   {
     "model": "auditlog.logentry",
-    "pk": 803,
+    "pk": 3,
     "fields": {
       "content_type": 28,
       "object_pk": "1",
@@ -188,7 +188,7 @@
     },
     {
       "model": "auditlog.logentry",
-      "pk": 804,
+      "pk": 4,
       "fields": {
         "content_type": 28,
         "object_pk": "2",
@@ -204,7 +204,7 @@
     },
     {
       "model": "auditlog.logentry",
-      "pk": 805,
+      "pk": 5,
       "fields": {
         "content_type": 28,
         "object_pk": "3",
