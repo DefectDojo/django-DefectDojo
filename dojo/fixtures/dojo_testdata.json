@@ -172,7 +172,58 @@
   },
   {
     "model": "auditlog.logentry",
-    "pk": 3,
+    "pk": 800,
+    "fields": {
+        "content_type": 22,
+        "object_pk": "1",
+        "object_id": 1,
+        "object_repr": "Research and Development",
+        "serialized_data": null,
+        "action": 0,
+        "changes": "{\"prod_type\": [\"None\", \"dojo.Product.None\"], \"id\": [\"None\", \"1\"], \"name\": [\"None\", \"Research and Development\"], \"critical_product\": [\"None\", \"False\"], \"key_product\": [\"None\", \"False\"]}",
+        "actor": null,
+        "remote_addr": null,
+        "timestamp": "2021-10-22T01:24:54.919Z",
+        "additional_data": null
+    }
+  },
+  {
+    "model": "auditlog.logentry",
+    "pk": 801,
+    "fields": {
+        "content_type": 22,
+        "object_pk": "2",
+        "object_id": 2,
+        "object_repr": "Commerce",
+        "serialized_data": null,
+        "action": 0,
+        "changes": "{\"prod_type\": [\"None\", \"dojo.Product.None\"], \"id\": [\"None\", \"2\"], \"name\": [\"None\", \"Commerce\"], \"critical_product\": [\"None\", \"True\"], \"key_product\": [\"None\", \"False\"], \"updated\": [\"None\", \"2018-08-16 17:05:29.277000\"]}",
+        "actor": null,
+        "remote_addr": null,
+        "timestamp": "2021-10-22T01:24:54.920Z",
+        "additional_data": null
+    }
+  },
+  {
+    "model": "auditlog.logentry",
+    "pk": 802,
+    "fields": {
+      "content_type": 22,
+      "object_pk": "3",
+      "object_id": 3,
+      "object_repr": "Billing",
+      "serialized_data": null,
+      "action": 0,
+      "changes": "{\"prod_type\": [\"None\", \"dojo.Product.None\"], \"id\": [\"None\", \"3\"], \"name\": [\"None\", \"Billing\"], \"critical_product\": [\"None\", \"False\"], \"key_product\": [\"None\", \"True\"], \"updated\": [\"None\", \"2018-08-16 17:05:42.193000\"]}",
+      "actor": null,
+      "remote_addr": null,
+      "timestamp": "2021-10-22T01:24:54.921Z",
+      "additional_data": null
+    }
+  },
+  {
+    "model": "auditlog.logentry",
+    "pk": 803,
     "fields": {
       "content_type": 28,
       "object_pk": "1",
@@ -188,7 +239,7 @@
     },
     {
       "model": "auditlog.logentry",
-      "pk": 4,
+      "pk": 804,
       "fields": {
         "content_type": 28,
         "object_pk": "2",
@@ -204,7 +255,7 @@
     },
     {
       "model": "auditlog.logentry",
-      "pk": 5,
+      "pk": 805,
       "fields": {
         "content_type": 28,
         "object_pk": "3",
