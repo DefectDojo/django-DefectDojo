@@ -21,6 +21,12 @@ createPostgresqlHaPgpoolSecret: false
 networkPolicy:
   enabled: false
   # if additional labels need to be allowed (e.g. prometheus scraper)
+  ingressExtend: []
+  # ingressExtend:
+  #  - podSelector:
+  #      matchLabels:
+  #      app.kubernetes.io/instance: defectdojo-prometheus
+  # For more detailed configuration with ports and peers. It will ignore ingressExtend
   ingress: []
   # ingress:
   #  - from:
