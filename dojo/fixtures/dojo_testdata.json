@@ -172,7 +172,7 @@
   },
   {
     "model": "auditlog.logentry",
-    "pk": 800,
+    "pk": 400,
     "fields": {
         "content_type": 22,
         "object_pk": "1",
@@ -189,7 +189,7 @@
   },
   {
     "model": "auditlog.logentry",
-    "pk": 801,
+    "pk": 401,
     "fields": {
         "content_type": 22,
         "object_pk": "2",
@@ -206,7 +206,7 @@
   },
   {
     "model": "auditlog.logentry",
-    "pk": 802,
+    "pk": 402,
     "fields": {
       "content_type": 22,
       "object_pk": "3",
@@ -223,7 +223,7 @@
   },
   {
     "model": "auditlog.logentry",
-    "pk": 803,
+    "pk": 403,
     "fields": {
       "content_type": 28,
       "object_pk": "1",
@@ -239,7 +239,7 @@
     },
     {
       "model": "auditlog.logentry",
-      "pk": 804,
+      "pk": 404,
       "fields": {
         "content_type": 28,
         "object_pk": "2",
@@ -255,7 +255,7 @@
     },
     {
       "model": "auditlog.logentry",
-      "pk": 805,
+      "pk": 405,
       "fields": {
         "content_type": 28,
         "object_pk": "3",
