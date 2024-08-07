@@ -59,6 +59,7 @@ select = [
    "RSE",
    "TID",
    "INT",
+   "ARG003", "ARG004", "ARG005",
    "PTH2",
    "TD001", "TD004", "TD005",
    "PD",

@@ -605,7 +605,7 @@ class FindingTagStringFilter(FilterSet):
 
 class DateRangeFilter(ChoiceFilter):
     options = {
-        None: (_("Any date"), lambda qs, name: qs.all()),
+        None: (_("Any date"), lambda qs, _: qs.all()),
         1: (_("Today"), lambda qs, name: qs.filter(**{
             f"{name}__year": now().year,
             f"{name}__month": now().month,
@@ -651,7 +651,7 @@ class DateRangeFilter(ChoiceFilter):
 
 class DateRangeOmniFilter(ChoiceFilter):
     options = {
-        None: (_("Any date"), lambda qs, name: qs.all()),
+        None: (_("Any date"), lambda qs, _: qs.all()),
         1: (_("Today"), lambda qs, name: qs.filter(**{
             f"{name}__year": now().year,
             f"{name}__month": now().month,
@@ -713,7 +713,7 @@ class DateRangeOmniFilter(ChoiceFilter):
 
 class ReportBooleanFilter(ChoiceFilter):
     options = {
-        None: (_("Either"), lambda qs, name: qs.all()),
+        None: (_("Either"), lambda qs, _: qs.all()),
         1: (_("Yes"), lambda qs, name: qs.filter(**{
             f"{name}": True,
         })),
@@ -3228,7 +3228,7 @@ class LogEntryFilter(DojoFilter):
         filter_overrides = {
             JSONField: {
                 "filter_class": CharFilter,
-                "extra": lambda f: {
+                "extra": lambda _: {
                     "lookup_expr": "icontains",
                 },
             },
