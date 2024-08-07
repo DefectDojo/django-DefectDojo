@@ -7,13 +7,13 @@ from dojo.tools.noseyparker.parser import NoseyParkerParser
 class TestNoseyParkerParser(TestCase):
 
     def test_noseyparker_parser__no_vulns(self):
-        with open("unittests/scans/noseyparker/noseyparker_zero_vul.jsonl") as testfile:
+        with open("unittests/scans/noseyparker/noseyparker_zero_vul.jsonl", encoding="utf-8") as testfile:
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_noseyparker_parser_one_vuln(self):
-        with open("unittests/scans/noseyparker/noseyparker_one_vul.jsonl") as testfile:
+        with open("unittests/scans/noseyparker/noseyparker_one_vul.jsonl", encoding="utf-8") as testfile:
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             finding = findings[0]
@@ -24,7 +24,7 @@ class TestNoseyParkerParser(TestCase):
 
     def test_noseyparker_parser_many_vulns(self):
         # Testfile contains 5 lines (Middle 2 are duplicates and line #4 has 2 of the same exact matches)
-        with open("unittests/scans/noseyparker/noseyparker_many_vul.jsonl") as testfile:
+        with open("unittests/scans/noseyparker/noseyparker_many_vul.jsonl", encoding="utf-8") as testfile:
             parser = NoseyParkerParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -34,7 +34,7 @@ class TestNoseyParkerParser(TestCase):
 
     def test_noseyparker_parser_error(self):
         with self.assertRaises(ValueError) as context:
-            with open("unittests/scans/noseyparker/empty_with_error.json") as testfile:
+            with open("unittests/scans/noseyparker/empty_with_error.json", encoding="utf-8") as testfile:
                 parser = NoseyParkerParser()
                 findings = parser.get_findings(testfile, Test())
                 testfile.close()

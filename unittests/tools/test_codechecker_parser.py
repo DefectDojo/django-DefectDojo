@@ -7,7 +7,7 @@ class TestCodeCheckerParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/codechecker/cc-report-0-vuln.json",
+            get_unit_tests_path() + "/scans/codechecker/cc-report-0-vuln.json", encoding="utf-8",
         ) as testfile:
             parser = CodeCheckerParser()
             findings = parser.get_findings(testfile, Test())
@@ -15,7 +15,7 @@ class TestCodeCheckerParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
         with open(
-            get_unit_tests_path() + "/scans/codechecker/cc-report-1-vuln.json",
+            get_unit_tests_path() + "/scans/codechecker/cc-report-1-vuln.json", encoding="utf-8",
         ) as testfile:
             parser = CodeCheckerParser()
             findings = parser.get_findings(testfile, Test())
@@ -33,7 +33,7 @@ class TestCodeCheckerParser(DojoTestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/codechecker/cc-report-many-vuln.json",
+            get_unit_tests_path() + "/scans/codechecker/cc-report-many-vuln.json", encoding="utf-8",
         ) as testfile:
             parser = CodeCheckerParser()
             findings = parser.get_findings(testfile, Test())
@@ -60,7 +60,7 @@ class TestCodeCheckerParser(DojoTestCase):
 
     def test_parse_file_with_various_review_statuses(self):
         with open(
-            get_unit_tests_path() + "/scans/codechecker/cc-report-review-status.json",
+            get_unit_tests_path() + "/scans/codechecker/cc-report-review-status.json", encoding="utf-8",
         ) as testfile:
             parser = CodeCheckerParser()
             findings = parser.get_findings(testfile, Test())

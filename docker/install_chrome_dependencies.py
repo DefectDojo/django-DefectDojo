@@ -18,7 +18,7 @@ def find_packages(library_name):
 
 
 def run_command(cmd, cwd=None, env=None):
-    result = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True)
+    result = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True, check=False)
     return result.stdout
 
 
@@ -27,7 +27,7 @@ def ldd(file_path):
     # For simplicity, I'm assuming if we get an error, the code is non-zero.
     try:
         result = subprocess.run(
-            ["ldd", file_path], capture_output=True, text=True,
+            ["ldd", file_path], capture_output=True, text=True, check=False,
         )
         stdout = result.stdout
         code = result.returncode

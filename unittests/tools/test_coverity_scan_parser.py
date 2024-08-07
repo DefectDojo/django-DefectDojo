@@ -7,14 +7,14 @@ SCANS_PATH = "unittests/scans/coverity_scan/"
 
 class TestCoverityScanParser(DojoTestCase):
     def test_parse_no_findings(self):
-        with open(f"{SCANS_PATH}/no_vuln.json") as testfile:
+        with open(f"{SCANS_PATH}/no_vuln.json", encoding="utf-8") as testfile:
             parser = CoverityScanParser()
             findings = parser.get_findings(testfile, Test())
 
         self.assertEqual(0, len(findings))
 
     def test_parse_one_finding(self):
-        with open(f"{SCANS_PATH}/one_vuln.json") as testfile:
+        with open(f"{SCANS_PATH}/one_vuln.json", encoding="utf-8") as testfile:
             parser = CoverityScanParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -31,7 +31,7 @@ class TestCoverityScanParser(DojoTestCase):
         )
 
     def test_parse_many_findings(self):
-        with open(f"{SCANS_PATH}/many_vulns.json") as testfile:
+        with open(f"{SCANS_PATH}/many_vulns.json", encoding="utf-8") as testfile:
             parser = CoverityScanParser()
             findings = parser.get_findings(testfile, Test())
 

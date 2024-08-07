@@ -7,19 +7,19 @@ from unittests.dojo_test_case import DojoTestCase
 
 class TestAnchoreEnterpriseParser(DojoTestCase):
     def test_anchore_policy_check_parser_has_no_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/no_checks.json")) as testfile:
+        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/no_checks.json"), encoding="utf-8") as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_anchore_policy_check_parser_has_one_finding(self):
-        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/one_check.json")) as testfile:
+        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/one_check.json"), encoding="utf-8") as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
 
     def test_anchore_policy_check_parser_has_multiple_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/many_checks.json")) as testfile:
+        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/many_checks.json"), encoding="utf-8") as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(57, len(findings))
@@ -28,7 +28,7 @@ class TestAnchoreEnterpriseParser(DojoTestCase):
             self.assertEqual("CVE-2015-2992", finding.unsaved_vulnerability_ids[0])
 
     def test_anchore_policy_check_parser_invalid_format(self):
-        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/invalid_checks_format.json")) as testfile:
+        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/invalid_checks_format.json"), encoding="utf-8") as testfile:
             with self.assertRaises(Exception):
                 parser = AnchoreEnterpriseParser()
                 parser.get_findings(testfile, Test())

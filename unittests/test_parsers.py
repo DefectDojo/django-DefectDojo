@@ -31,7 +31,7 @@ class TestParsers(DojoTestCase):
                         f"Documentation file '{doc_file}' is missing or using different name",
                                     )
 
-                    with open(doc_file) as file:
+                    with open(doc_file, encoding="utf-8") as file:
                         content = file.read()
                         self.assertTrue(re.search("title:", content),
                                         f"Documentation file '{doc_file}' does not contain a title",
@@ -83,7 +83,7 @@ class TestParsers(DojoTestCase):
                 if file.is_file() and file.name != "__pycache__" and file.name != "__init__.py":
                     f = os.path.join(basedir, "dojo", "tools", parser_dir.name, file.name)
                     read_true = False
-                    with open(f) as f:
+                    with open(f, encoding="utf-8") as f:
                         for line in f.readlines():
                             if read_true is True:
                                 if ('"utf-8"' in str(line) or "'utf-8'" in str(line) or '"utf-8-sig"' in str(line) or "'utf-8-sig'" in str(line)) and i <= 4:
