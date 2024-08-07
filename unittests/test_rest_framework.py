@@ -4,6 +4,7 @@ import pathlib
 from collections import OrderedDict
 from enum import Enum
 from json import dumps
+from pathlib import Path
 
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import ANY, MagicMock, call, patch
@@ -312,7 +313,7 @@ class SchemaChecker:
 
                 for child_name in obj.keys():
                     # TODO: prefetch mixins not picked up by spectcular?
-                    if child_name not in ["prefetch"]:
+                    if child_name != "prefetch":
                         if not properties or child_name not in properties.keys():
                             self._has_failed = True
                             self._register_error(f'unexpected property "{child_name}" found')
@@ -1122,8 +1123,7 @@ class FilesTest(DojoAPITestCase):
                 self.url_levels[level] = response.data.get("id")
 
         #  Test the download
-        with open(f"{str(self.path)}/scans/acunetix/one_finding.xml") as file:
-            file_data = file.read()
+        file_data = Path(f"{str(self.path)}/scans/acunetix/one_finding.xml").read_text()
         for level, file_id in self.url_levels.items():
             response = self.client.get(f"/api/v2/{level}/files/download/{file_id}/")
             self.assertEqual(200, response.status_code)

@@ -61,7 +61,7 @@ class TenableCSVParser:
         if val is None or val == "":
             return None
         cpe_match = re.findall(r"cpe:/[^\n\ ]+", val)
-        return cpe_match if cpe_match else None
+        return cpe_match or None
 
     def detect_delimiter(self, content: str):
         """Detect the delimiter of the CSV file"""

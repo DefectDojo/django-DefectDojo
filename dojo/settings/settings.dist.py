@@ -306,20 +306,17 @@ env = environ.FileAwareEnv(
 
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
     result_list = []
-    result_list.append(scheme)
-    result_list.append(":")
+    result_list.extend((scheme, ":"))
     if double_slashes:
         result_list.append("//")
     result_list.append(user)
     if len(password) > 0:
-        result_list.append(":")
-        result_list.append(password)
+        result_list.extend((":", password))
     if len(user) > 0 or len(password) > 0:
         result_list.append("@")
     result_list.append(host)
     if port >= 0:
-        result_list.append(":")
-        result_list.append(str(port))
+        result_list.extend((":", str(port)))
     if len(path) > 0 and path[0] != "/":
         result_list.append("/")
     result_list.append(path)

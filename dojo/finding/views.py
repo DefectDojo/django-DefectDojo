@@ -3500,34 +3500,32 @@ def calculate_possible_related_actions_for_similar_finding(
         else:
             # similar is not a duplicate yet
             if finding.duplicate or finding.original_finding.all():
-                actions.append(
+                actions.extend((
                     {
                         "action": "mark_finding_duplicate",
                         "reason": "Will mark this finding as duplicate of the root finding in this cluster",
-                    },
-                )
-                actions.append(
-                    {
+                    }, {
                         "action": "set_finding_as_original",
-                        "reason": ("Sets this finding as the Original for the whole cluster. "
-                                   "The existing Original will be downgraded to become a member of the cluster and, "
-                                   "together with the other members, will be marked as duplicate of the new Original."),
+                        "reason": (
+                            "Sets this finding as the Original for the whole cluster. "
+                            "The existing Original will be downgraded to become a member of the cluster and, "
+                            "together with the other members, will be marked as duplicate of the new Original."
+                        ),
                     },
-                )
+                ))
             else:
                 # similar_finding is not an original/root of a cluster as per earlier if clause
-                actions.append(
+                actions.extend((
                     {
                         "action": "mark_finding_duplicate",
                         "reason": "Will mark this finding as duplicate of the finding on this page.",
-                    },
-                )
-                actions.append(
-                    {
+                    }, {
                         "action": "set_finding_as_original",
-                        "reason": ("Sets this finding as the Original marking the finding "
-                                   "on this page as duplicate of this original."),
+                        "reason": (
+                            "Sets this finding as the Original marking the finding "
+                            "on this page as duplicate of this original."
+                        ),
                     },
-                )
+                ))
 
     return actions
