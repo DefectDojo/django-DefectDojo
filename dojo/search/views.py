@@ -154,7 +154,7 @@ def simple_search(request):
             tags = operators["tags"] if "tags" in operators else keywords
             not_tag = operators["not-tag"] if "not-tag" in operators else keywords
             not_tags = operators["not-tags"] if "not-tags" in operators else keywords
-            if search_tags and tag or tags or not_tag or not_tags:
+            if (search_tags and tag) or tags or not_tag or not_tags:
                 logger.debug("searching tags")
 
                 Q1, Q2, Q3, Q4 = Q(), Q(), Q(), Q()
