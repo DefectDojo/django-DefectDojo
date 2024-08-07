@@ -39,7 +39,7 @@ class TestTruffleHog3Parser(DojoTestCase):
             self.assertEqual("High", finding.severity)
             self.assertEqual(798, finding.cwe)
             self.assertEqual("fixtures/users.json", finding.file_path)
-            # FIXME for now the date in Finding is type datetime.date we need to switch to datetime
+            # TODO: for now the date in Finding is type datetime.date we need to switch to datetime
             # self.assertEqual(datetime.datetime, type(finding.date))
             # self.assertEqual(datetime.datetime(2018, 2, 25, 11, 35, 52), finding.date)
             self.assertEqual(datetime.date, type(finding.date))

@@ -70,8 +70,8 @@ class TestParsers(DojoTestCase):
 
             if category == "api":
                 if parser_dir.name not in [
-                    "api_blackduck",  # TODO
-                    "api_vulners",  # TODO
+                    "api_blackduck",  # TODO: tests should be implemented also for this parser
+                    "api_vulners",  # TODO: tests should be implemented also for this parser
                 ]:
                     with self.subTest(parser=parser_dir.name, category="importer"):
                         importer_test_file = os.path.join(basedir, "unittests", "tools", f"test_{parser_dir.name}_importer.py")
