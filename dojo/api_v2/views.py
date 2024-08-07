@@ -180,7 +180,7 @@ class DojoOpenApiJsonRenderer(OpenApiJsonRenderer2):
 
 
 class DojoSpectacularAPIView(SpectacularAPIView):
-    renderer_classes = [DojoOpenApiJsonRenderer] + SpectacularAPIView.renderer_classes
+    renderer_classes = [DojoOpenApiJsonRenderer, *SpectacularAPIView.renderer_classes]
 
 
 class DojoModelViewSet(
