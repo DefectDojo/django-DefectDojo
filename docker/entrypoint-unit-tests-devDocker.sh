@@ -54,7 +54,7 @@ EOF
 echo "Unit Tests"
 echo "------------------------------------------------------------"
 
-# Removing parallel and shufful for now to maintain stability
+# Removing parallel and shuffle for now to maintain stability
 python3 manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
     exit 1; 
 }
