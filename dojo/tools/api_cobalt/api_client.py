@@ -88,7 +88,7 @@ class CobaltAPI:
             orgs = filter(
                 lambda org: org["resource"]["token"] == self.org_token, data,
             )
-            org = list(orgs)[0]
+            org = next(iter(orgs))
             org_name = org["resource"]["name"]
             return f'You have access to the "{org_name}" organization'
         else:

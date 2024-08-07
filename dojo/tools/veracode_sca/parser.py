@@ -159,7 +159,7 @@ class VeracodeScaParser:
             issueId = row.get("Issue ID", None)
             if not issueId:
                 # Workaround for possible encoding issue
-                issueId = list(row.values())[0]
+                issueId = next(iter(row.values()))
             library = row.get("Library", None)
             if row.get("Package manager") == "MAVEN" and row.get(
                 "Coordinate 2",

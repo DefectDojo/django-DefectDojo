@@ -167,7 +167,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
 
     deduplicationLogger.debug(
         "Matching finding %i:%s to existing findings in %s %s using %s as deduplication algorithm.",
-        finding.id, finding.title, custom_filter_type, list(custom_filter.values())[0], deduplication_algorithm,
+        finding.id, finding.title, custom_filter_type, next(iter(custom_filter.values())), deduplication_algorithm,
     )
 
     if deduplication_algorithm == "hash_code":

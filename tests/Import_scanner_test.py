@@ -168,7 +168,7 @@ class ScannerTest(BaseTestCase):
                     found_matches[index] = matches[0]
 
             if len(found_matches) == 1:
-                index = list(found_matches.keys())[0]
+                index = found_matches.keys()[0]
                 scan_map[test] = options_text[index]
             elif len(found_matches) > 1:
                 try:

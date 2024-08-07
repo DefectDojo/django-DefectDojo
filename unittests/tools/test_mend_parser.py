@@ -16,7 +16,7 @@ class TestMendParser(DojoTestCase):
             parser = MendParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
-            finding = list(findings)[0]
+            finding = findings[0]
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2019-9658", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
