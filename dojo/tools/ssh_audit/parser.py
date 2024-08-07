@@ -42,9 +42,11 @@ class SSHAuditParser:
             title = data["banner"]["raw"]
             for cve in data["cves"]:
                 cvename = cve["name"]
-                description = [f"**CVE**: {cvename}"]
-                description.append(f"**Description**: {cve['description']}")
-                description.append(f"**Banner**: {title}")
+                description = [
+                    f"**CVE**: {cvename}",
+                    f"**Description**: {cve['description']}",
+                    f"**Banner**: {title}",
+                ]
                 severity = self.convert_cvss_score(raw_value=cve["cvssv2"])
                 finding = Finding(title=str(title) + "_" + str(cvename),
                         test=test,
