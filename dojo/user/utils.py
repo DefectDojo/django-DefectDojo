@@ -98,19 +98,19 @@ def get_configuration_permissions_fields():
     permission_fields = [
         Permission_Helper(name="cred user", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="development environment", app="dojo", add=True, change=True, delete=True),
-        Permission_Helper(name="finding template", app="dojo", view=True, add=True, change=True, delete=True)] + \
-        github_permissions + \
-        google_sheet_permissions + [
-        Permission_Helper(name="group", app="auth", view=True, add=True)] + \
-        jira_permissions + [
+        Permission_Helper(name="finding template", app="dojo", view=True, add=True, change=True, delete=True),
+        *github_permissions,
+        *google_sheet_permissions,
+        Permission_Helper(name="group", app="auth", view=True, add=True),
+        *jira_permissions,
         Permission_Helper(name="language type", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="bannerconf", app="dojo", change=True),
         Permission_Helper(name="announcement", app="dojo", change=True),
         Permission_Helper(name="note type", app="dojo", view=True, add=True, change=True, delete=True),
-        Permission_Helper(name="product type", app="dojo", add=True)] + \
-        questionnaire_permissions + [
-        Permission_Helper(name="regulation", app="dojo", add=True, change=True, delete=True)] + \
-        rules_permissions + [
+        Permission_Helper(name="product type", app="dojo", add=True),
+        *questionnaire_permissions,
+        Permission_Helper(name="regulation", app="dojo", add=True, change=True, delete=True),
+        *rules_permissions,
         Permission_Helper(name="sla configuration", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="test type", app="dojo", add=True, change=True),
         Permission_Helper(name="tool configuration", app="dojo", view=True, add=True, change=True, delete=True),
