@@ -1228,7 +1228,7 @@ def add_risk_acceptance(request, eid, fid=None):
                 risk_acceptance = form.save()
             except Exception as e:
                 logger.debug(vars(request.POST))
-                logger.error(vars(form))
+                logger.exception(vars(form))
                 logger.exception(e)
                 raise
 

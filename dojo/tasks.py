@@ -177,7 +177,7 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
             sla_compute_and_notify(*args, **kwargs)
     except Exception as e:
         logger.exception(e)
-        logger.error(f"An unexpected error was thrown calling the SLA code: {e}")
+        logger.exception(f"An unexpected error was thrown calling the SLA code: {e}")
 
 
 @app.task

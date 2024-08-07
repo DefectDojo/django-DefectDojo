@@ -106,7 +106,7 @@ class ApiBugcrowdParser:
                 except (
                     ValueError
                 ):  # We don't want to fail the whole import just for 1 error in the bug_url
-                    logger.error("Error parsing bugcrowd bug_url : %s", entry["attributes"]["bug_url"].strip())
+                    logger.exception("Error parsing bugcrowd bug_url : %s", entry["attributes"]["bug_url"].strip())
                 bug_url = entry["attributes"]["bug_url"]
 
             description = "\n".join(
@@ -155,11 +155,11 @@ class ApiBugcrowdParser:
                     try:
                         finding.unsaved_endpoints = [bug_endpoint]
                     except Exception as e:
-                        logger.error(
+                        logger.exception(
                             f"{str(bug_endpoint)} bug url from bugcrowd failed to parse to endpoint, error= {e}",
                         )
                 except ValidationError:
-                    logger.error(
+                    logger.exception(
                         f"Broken Bugcrowd endpoint {bug_endpoint.host} was skipped.",
                     )
 

@@ -38,7 +38,7 @@ def reopen_external_issue_github(find, note, prod, eng):
         issue = repo.get_issue(int(g_issue.issue_id))
     except:
         e = sys.exc_info()[0]
-        logger.error("cannot update finding in github: " + e)
+        logger.exception("cannot update finding in github: " + e)
 
     logger.info("Will close github issue " + g_issue.issue_id)
     issue.edit(state="open")
@@ -69,7 +69,7 @@ def close_external_issue_github(find, note, prod, eng):
         issue = repo.get_issue(int(g_issue.issue_id))
     except:
         e = sys.exc_info()[0]
-        logger.error("cannot update finding in github: " + e)
+        logger.exception("cannot update finding in github: " + e)
 
     logger.info("Will close github issue " + g_issue.issue_id)
     issue.edit(state="closed")
@@ -101,7 +101,7 @@ def update_external_issue_github(find, prod, eng):
         issue.edit(title=find.title, body=github_body(find), labels=["defectdojo", "security / " + find.severity])
     except:
         e = sys.exc_info()[0]
-        logger.error("cannot update finding in github: " + e)
+        logger.exception("cannot update finding in github: " + e)
 
 
 def add_external_issue_github(find, prod, eng):
@@ -142,7 +142,7 @@ def add_external_issue_github(find, prod, eng):
             g_issue.save()
         except:
             e = sys.exc_info()[0]
-            logger.error("cannot create finding in github: " + e)
+            logger.exception("cannot create finding in github: " + e)
 
 
 def github_body(find):

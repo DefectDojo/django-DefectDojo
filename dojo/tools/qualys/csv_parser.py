@@ -73,9 +73,9 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
         try:
             cvss_vector += re.search(vector_pattern, cvss_base).group(1)
         except IndexError:
-            _logger.error(f"CVSS3 Base Vector not found in {cvss_base}")
+            _logger.exception(f"CVSS3 Base Vector not found in {cvss_base}")
         except AttributeError:
-            _logger.error(f"CVSS3 Base Vector not found in {cvss_base}")
+            _logger.exception(f"CVSS3 Base Vector not found in {cvss_base}")
         if cvss_temporal:
             try:
                 cvss_temporal_vector = re.search(
@@ -84,11 +84,11 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
                 cvss_vector += "/"
                 cvss_vector += cvss_temporal_vector
             except IndexError:
-                _logger.error(
+                _logger.exception(
                     f"CVSS3 Temporal Vector not found in {cvss_base}",
                 )
             except AttributeError:
-                _logger.error(
+                _logger.exception(
                     f"CVSS3 Temporal Vector not found in {cvss_base}",
                 )
 
