@@ -1,11 +1,10 @@
 import re
+from typing import Any, Optional, Tuple, Union
 
-from typing import Any, Union, Optional, Tuple
-
-from cpe import CPE
 import cvss.parser
+from cpe import CPE
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 """
 Directly mapped:
@@ -17,14 +16,14 @@ Directly mapped:
 'cves' -> 'vulnerabiltiy_ids'
 'cpe' -> component name/version,
 
-Mapped via some tinkerin': 
+Mapped via some tinkerin':
 'status' -> active/false_p/risk_accepted (depending on value)
 'cvss_vector' -> severity (only on the ones i've seen so far, which are v2 -- looks like the new one has a v3 field)
-'details' and 'notes' -> added to 'description' (but now there will be more work done with details to parse resquest/response as necessary) 
+'details' and 'notes' -> added to 'description' (but now there will be more work done with details to parse resquest/response as necessary)
 """
 
 
-class FieldType(object):
+class FieldType:
     def __init__(self):
         pass
 
@@ -53,25 +52,25 @@ class Method(FieldType):
         getattr(engine_parser, self.method_name)(finding, value)
 
 
-class BaseEngine(object):
-    SCANNING_ENGINE = 'Unknown'
+class BaseEngine:
+    SCANNING_ENGINE = "Unknown"
 
     # Field handling common to all findings returned by AppCheck
     _COMMON_FIELDS_MAP: dict[str, FieldType] = {
-        '_id': Attribute('unique_id_from_tool'),
-        'title': Attribute('title'),
-        'description': Attribute('description'),
-        'first_detected_at': Attribute('date'),
-        'solution': Attribute('mitigation'),
-        'cvss_v3_vector': Attribute('cvssv3'),
-        'epss_base_score': Attribute('epss_score'),
-        'status': Method('parse_status'),
-        'cves': Method('parse_cves'),
-        'cpe': Method('parse_components'),
-        'cvss_vector': Method('parse_severity'),
+        "_id": Attribute("unique_id_from_tool"),
+        "title": Attribute("title"),
+        "description": Attribute("description"),
+        "first_detected_at": Attribute("date"),
+        "solution": Attribute("mitigation"),
+        "cvss_v3_vector": Attribute("cvssv3"),
+        "epss_base_score": Attribute("epss_score"),
+        "status": Method("parse_status"),
+        "cves": Method("parse_cves"),
+        "cpe": Method("parse_components"),
+        "cvss_vector": Method("parse_severity"),
         # These should be listed after the 'description' entry; they append to it
-        'notes': Method('parse_notes'),
-        'details': Method('parse_details'), }
+        "notes": Method("parse_notes"),
+        "details": Method("parse_details")}
 
     # Field handling specific to a given scanning_engine AppCheck uses
     _ENGINE_FIELDS_MAP: dict[str, FieldType] = {}
@@ -94,11 +93,11 @@ class BaseEngine(object):
         # (Supposed) values:
         # unfixed (the initial value), fixed, false_positive, and acceptable_risk
         value = value.lower()
-        if value == 'fixed':
+        if value == "fixed":
             finding.active = False
-        elif value == 'false_positive':
+        elif value == "false_positive":
             finding.false_p = True
-        elif value == 'acceptable_risk':
+        elif value == "acceptable_risk":
             finding.risk_accepted = True
 
     #####
@@ -107,7 +106,7 @@ class BaseEngine(object):
     def parse_severity(self, finding: Finding, value: str) -> None:
         if cvss_obj := cvss.parser.parse_cvss_from_text(value):
             severity = cvss_obj[0].severities()[0]
-            if severity.lower() != 'none':
+            if severity.lower() != "none":
                 finding.severity = severity
 
     #####
@@ -133,16 +132,16 @@ class BaseEngine(object):
     def append_description(self, finding: Finding, addendum: dict[str, str]) -> None:
         if addendum:
             if finding.description:
-                finding.description += '\n\n'
-            finding.description += '\n\n'.join([self.format_additional_description(k, v) for k, v in addendum.items()])
+                finding.description += "\n\n"
+            finding.description += "\n\n".join([self.format_additional_description(k, v) for k, v in addendum.items()])
 
     def parse_notes(self, finding: Finding, value: str) -> None:
-        self.append_description(finding, {'Notes': value})
+        self.append_description(finding, {"Notes": value})
 
     def extract_details(self, value: Union[str, dict[str, Union[str, dict[str, [str]]]]]) -> dict[str, str]:
         if isinstance(value, dict):
-            return {k: v for k, v in value.items() if k != '_meta'}
-        return {'Details': str(value)}
+            return {k: v for k, v in value.items() if k != "_meta"}
+        return {"Details": str(value)}
 
     def parse_details(self, finding: Finding, value: dict[str, Union[str, dict[str, [str]]]]) -> None:
         self.append_description(finding, self.extract_details(value))
@@ -151,10 +150,10 @@ class BaseEngine(object):
     # For parsing endpoints
     #####
     def get_host(self, item: dict[str, Any]) -> str:
-        return item.get('url') or item.get('host') or item.get('ipv4_address')
+        return item.get("url") or item.get("host") or item.get("ipv4_address")
 
     def get_port(self, item: dict[str, Any]) -> Optional[int]:
-        return item.get('port')
+        return item.get("port")
 
     def construct_endpoint(self, host: str, port: int) -> Endpoint:
         endpoint = Endpoint.from_uri(host)
@@ -178,7 +177,7 @@ class BaseEngine(object):
     def get_engine_fields(self) -> dict[str, FieldType]:
         return {
             **BaseEngine._COMMON_FIELDS_MAP,
-            **self._ENGINE_FIELDS_MAP, }
+            **self._ENGINE_FIELDS_MAP}
 
     def get_finding_key(self, finding: Finding) -> Tuple:
         return (
@@ -196,5 +195,5 @@ class BaseEngine(object):
                 field_handler(self, finding, value)
         self.set_endpoints(finding, item)
         # Make a note of what scanning engine was used for this Finding
-        self.append_description(finding, {'Scanning Engine': self.SCANNING_ENGINE})
+        self.append_description(finding, {"Scanning Engine": self.SCANNING_ENGINE})
         return finding, self.get_finding_key(finding)

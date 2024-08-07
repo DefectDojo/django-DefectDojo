@@ -1,10 +1,10 @@
-import logging
-
-from .engines.base import BaseEngine
 import importlib.util
 import inspect
 import json
+import logging
 import os
+
+from .engines.base import BaseEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,10 +16,10 @@ def load_scanning_engine_parsers():
     engines_dir = f"{os.path.dirname(__file__)}/engines"
 
     engine_parsers = {
-        BaseEngine.SCANNING_ENGINE: BaseEngine(), }
+        BaseEngine.SCANNING_ENGINE: BaseEngine()}
 
     for file in os.listdir(engines_dir):
-        if file in {'__init__.py', 'base.py'} or not file.endswith('.py'):
+        if file in {"__init__.py", "base.py"} or not file.endswith(".py"):
             continue
         module_name = file[:-3]
         file_path = os.path.join(engines_dir, file)
@@ -35,7 +35,7 @@ def load_scanning_engine_parsers():
 SCANNING_ENGINE_PARSERS = load_scanning_engine_parsers()
 
 
-class AppCheckWebApplicationScannerParser(object):
+class AppCheckWebApplicationScannerParser:
     """
     AppCheck Web Application Security Scanner.
     """
@@ -50,7 +50,7 @@ class AppCheckWebApplicationScannerParser(object):
         return "Parses scans from AppCheck Web Application Scanner"
 
     def get_scanning_engine_for_entry(self, item):
-        return (item.get('meta') or {}).get('scanning_engine', {}).get('name', BaseEngine.SCANNING_ENGINE)
+        return (item.get("meta") or {}).get("scanning_engine", {}).get("name", BaseEngine.SCANNING_ENGINE)
 
     def get_engine_parser(self, scanning_engine_name: str) -> BaseEngine:
         return SCANNING_ENGINE_PARSERS.get(scanning_engine_name, SCANNING_ENGINE_PARSERS[BaseEngine.SCANNING_ENGINE])
@@ -60,7 +60,7 @@ class AppCheckWebApplicationScannerParser(object):
 
         findings = {}
 
-        for item in data.get('items', []):
+        for item in data.get("items", []):
             scanning_engine = self.get_scanning_engine_for_entry(item)
             if parser := self.get_engine_parser(scanning_engine):
                 finding, dupe_key = parser.parse_finding(item)
