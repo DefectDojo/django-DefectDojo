@@ -534,13 +534,7 @@ def get_in_period_details(
         findings_by_product(findings), "annotate", "severity",
     ).order_by("product_name")
 
-    # Approach to age determination is db-engine dependent
-    if "postgresql" in connection.settings_dict["ENGINE"]:
-        age_detail = findings.annotate(age=ExtractDay(Coalesce("mitigated", Now()) - F("date")))
-    else:
-        raise ValueError
-
-    age_detail = age_detail.aggregate(
+    age_detail = findings.annotate(age=ExtractDay(Coalesce("mitigated", Now()) - F("date"))).aggregate(
         age_under_30=Sum(Case(When(age__lte=30, then=Value(1))), default=Value(0), output_field=IntegerField()),
         age_31_60=Sum(Case(When(age__range=[31, 60], then=Value(1))), default=Value(0), output_field=IntegerField()),
         age_61_90=Sum(Case(When(age__range=[61, 90], then=Value(1))), default=Value(0), output_field=IntegerField()),
