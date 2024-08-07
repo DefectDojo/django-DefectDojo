@@ -485,7 +485,7 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.save(dedupe_option=True)
         self.assert_finding(finding_new, not_pk=2, duplicate=True, duplicate_finding_id=finding_4.duplicate_finding.id, hash_code=finding_2.hash_code)
 
-    # TODO not usefile with ZAP?
+    # TODO: not usefile with ZAP?
     def test_identical_except_line_hash_code(self):
         # 4 is already a duplicate of 2, let's see what happens if we create an identical finding with different line (and reset status)
         # 2 has an endpoint ftp://localhost, 4 has no endpoint
@@ -505,7 +505,7 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.save(dedupe_option=True)
         self.assert_finding(finding_new, not_pk=2, duplicate=True, duplicate_finding_id=finding_4.duplicate_finding.id, hash_code=finding_2.hash_code)
 
-    # TODO not usefile with ZAP?
+    # TODO: not usefile with ZAP?
     def test_identical_except_filepath_hash_code(self):
         # 4 is already a duplicate of 2, let's see what happens if we create an identical finding with different file_path (and reset status)
         # expect: marked as duplicate

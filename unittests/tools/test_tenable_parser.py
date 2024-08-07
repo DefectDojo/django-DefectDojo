@@ -47,7 +47,7 @@ class TestTenableParser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             self.assertEqual("10.1.1.1", finding.unsaved_endpoints[0].host)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N/E:P/RL:O/RC:C", finding.cvssv3)
-            # TODO work on component attributes for Nessus CSV parser
+            # TODO: work on component attributes for Nessus CSV parser
             self.assertIsNotNone(finding.component_name)
             self.assertEqual("md5", finding.component_name)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))

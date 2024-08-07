@@ -140,7 +140,7 @@ class TenableCSVParser:
                 # manage CPE data
                 detected_cpe = self._format_cpe(str(row.get("CPE", row.get("definition.cpe", ""))))
                 if detected_cpe:
-                    # FIXME support more than one CPE in Nessus CSV parser
+                    # TODO: support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
                         LOGGER.debug(
                             "more than one CPE for a finding. NOT supported by Nessus CSV parser",

@@ -200,5 +200,5 @@ class JIRAConfigProductTest(DojoTestCase):
         self.assertEqual(jira_mock.call_count, 0)
 
 
-# TODO UI
+# TODO: UI
 # linking / unlinking
