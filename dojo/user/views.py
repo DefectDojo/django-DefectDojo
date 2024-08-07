@@ -118,6 +118,8 @@ def api_v2_key(request):
 @dojo_ratelimit(key="post:username")
 @dojo_ratelimit(key="post:password")
 def login_view(request):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('home'))
     if not settings.SHOW_LOGIN_FORM and settings.SOCIAL_LOGIN_AUTO_REDIRECT and sum([
         settings.GOOGLE_OAUTH_ENABLED,
         settings.OKTA_OAUTH_ENABLED,
