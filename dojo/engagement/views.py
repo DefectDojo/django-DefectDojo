@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import reduce
 from tempfile import NamedTemporaryFile
 from time import strftime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib import messages
@@ -716,8 +716,8 @@ class ImportScanResultsView(View):
     def get_engagement_or_product(
         self,
         user: Dojo_User,
-        engagement_id: int = None,
-        product_id: int = None,
+        engagement_id: Optional[int] = None,
+        product_id: Optional[int] = None,
     ) -> Tuple[Engagement, Product, Product | Engagement]:
         """
         Using the path parameters, either fetch the product or engagement
@@ -825,8 +825,8 @@ class ImportScanResultsView(View):
     def handle_request(
         self,
         request: HttpRequest,
-        engagement_id: int = None,
-        product_id: int = None,
+        engagement_id: Optional[int] = None,
+        product_id: Optional[int] = None,
     ) -> Tuple[HttpRequest, dict]:
         """
         Process the common behaviors between request types, and then return
@@ -1063,8 +1063,8 @@ class ImportScanResultsView(View):
     def get(
         self,
         request: HttpRequest,
-        engagement_id: int = None,
-        product_id: int = None,
+        engagement_id: Optional[int] = None,
+        product_id: Optional[int] = None,
     ) -> HttpResponse:
         """
         Process GET requests for the Import View
@@ -1081,8 +1081,8 @@ class ImportScanResultsView(View):
     def post(
         self,
         request: HttpRequest,
-        engagement_id: int = None,
-        product_id: int = None,
+        engagement_id: Optional[int] = None,
+        product_id: Optional[int] = None,
     ) -> HttpResponse:
         """
         Process POST requests for the Import View
