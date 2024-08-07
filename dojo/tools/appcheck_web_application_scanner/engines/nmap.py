@@ -1,10 +1,16 @@
 from typing import Any, Union
 
 from dojo.models import Endpoint
-from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngine
+from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
 
 
-class NmapScanner(BaseEngine):
+class NmapScanningEngineParser(BaseEngineParser):
+    """
+    Parser for data from the Nmap scanning engine.
+
+    Nmap engine results include a list of ports in a 'port_table' data entry that we use to generate several endpoints
+    under the same Finding.
+    """
     SCANNING_ENGINE = "NMapScanner"
 
     def is_port_table_entry(self, entry) -> bool:
@@ -13,7 +19,7 @@ class NmapScanner(BaseEngine):
     def get_ports(self, item) -> Union[list[int], list[None]]:
         if ports := item.get("meta", {}).get("port_table", []):
             return [port_entry[0] for port_entry in ports if self.is_port_table_entry(port_entry)]
-        # Want at least one endpoint reported -- no port provided
+        # Want at least one endpoint reported since we have a host -- no ports provided. This shouldn't happen, but...
         return [None]
 
     def parse_endpoints(self, item: dict[str, Any]) -> [Endpoint]:

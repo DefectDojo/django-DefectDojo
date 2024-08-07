@@ -6,22 +6,6 @@ from cpe import CPE
 
 from dojo.models import Endpoint, Finding
 
-"""
-Directly mapped:
-'_id' -> 'unique_id_from_tool'
-'title' -> 'title'
-'description' -> 'description'
-'first_detected_at' -> 'date'
-'solution' -> 'mitigation'
-'cves' -> 'vulnerabiltiy_ids'
-'cpe' -> component name/version,
-
-Mapped via some tinkerin':
-'status' -> active/false_p/risk_accepted (depending on value)
-'cvss_vector' -> severity (only on the ones i've seen so far, which are v2 -- looks like the new one has a v3 field)
-'details' and 'notes' -> added to 'description' (but now there will be more work done with details to parse resquest/response as necessary)
-"""
-
 
 class FieldType:
     def __init__(self):
@@ -52,7 +36,30 @@ class Method(FieldType):
         getattr(engine_parser, self.method_name)(finding, value)
 
 
-class BaseEngine:
+class BaseEngineParser:
+    """
+    Parser for data shared by all engines used by AppCheck, as well as data from an unknown/unspecified engine.
+
+    Directly mapped attributes, from JSON object -> Finding attribute:
+        * _id -> unique_id_from_tool
+        * title -> title
+        * description -> description
+        * first_detected_at -> date
+        * solution -> mitigation
+        * cvss_v3_vector -> cvssv3
+        * epss_base_score -> epss_score
+
+    Data mapped with a bit of tinkering, JSON object -> Finding attribute:
+        * status -> active/false_p/risk_accepted (depending on value)
+        * cves -> unsaved_vulnerability_ids (vulnerability_ids)
+        * cpe -> component name/version
+        * cvss_vector -> severity (determined using CVSS package)
+        * notes -> appended to Finding description
+        * details -> appended to Finding description
+
+    Child classes can override the _ENGINE_FIELDS_MAP dictionary to support extended/different functionality as so
+    desired, without having to change/copy the common field parsing described above.
+    """
     SCANNING_ENGINE = "Unknown"
 
     # Field handling common to all findings returned by AppCheck
@@ -176,7 +183,7 @@ class BaseEngine:
     # Returns the complete field processing map: common fields plus any engine-specific
     def get_engine_fields(self) -> dict[str, FieldType]:
         return {
-            **BaseEngine._COMMON_FIELDS_MAP,
+            **BaseEngineParser._COMMON_FIELDS_MAP,
             **self._ENGINE_FIELDS_MAP}
 
     def get_finding_key(self, finding: Finding) -> Tuple:
