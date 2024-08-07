@@ -38,7 +38,7 @@ def new_cred(request):
     return render(request, "dojo/new_cred.html", {"tform": tform})
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def all_cred_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     creds = Cred_Mapping.objects.filter(product=prod).order_by("cred_id__name")
