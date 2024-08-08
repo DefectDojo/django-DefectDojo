@@ -1,8 +1,8 @@
-import dateutil.parser
 import re
 from typing import Any, Optional, Tuple, Union
 
 import cvss.parser
+import dateutil.parser
 from cpe import CPE
 from django.core.exceptions import ImproperlyConfigured
 
