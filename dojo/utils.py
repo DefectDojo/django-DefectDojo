@@ -875,8 +875,8 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
         return punchcard, ticks
 
-    except Exception as e:
-        logger.exception("Not showing punchcard graph due to exception gathering data", e)
+    except Exception:
+        logger.exception("Not showing punchcard graph due to exception gathering data")
         return None, None
 
 
