@@ -54,7 +54,7 @@ def custom_exception_handler(exc, context):
                 # message, if it is different from the detail that is already
                 # in the response.
                 if isinstance(response.data, dict) and str(
-                    exc
+                    exc,
                 ) != response.data.get("detail", ""):
                     response.data["message"] = str(exc)
             else:

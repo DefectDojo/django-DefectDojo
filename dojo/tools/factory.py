@@ -94,14 +94,14 @@ def get_api_scan_configuration_hints():
             for scan_type in scan_types:
                 tool_type = parser.requires_tool_type(scan_type)
                 res.append({
-                    'name': name,
-                    'id': name.lower().replace(' ', '_').replace('.', ''),
-                    'tool_type_name': tool_type,
-                    'tool_types': Tool_Type.objects.filter(name=tool_type),
-                    'tool_configurations': Tool_Configuration.objects.filter(tool_type__name=tool_type),
-                    'hint': parser.api_scan_configuration_hint(),
+                    "name": name,
+                    "id": name.lower().replace(" ", "_").replace(".", ""),
+                    "tool_type_name": tool_type,
+                    "tool_types": Tool_Type.objects.filter(name=tool_type),
+                    "tool_configurations": Tool_Configuration.objects.filter(tool_type__name=tool_type),
+                    "hint": parser.api_scan_configuration_hint(),
                 })
-    return sorted(res, key=lambda x: x['name'].lower())
+    return sorted(res, key=lambda x: x["name"].lower())
 
 
 def requires_tool_type(scan_type):

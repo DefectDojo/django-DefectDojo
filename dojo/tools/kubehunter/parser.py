@@ -24,31 +24,31 @@ class KubeHunterParser:
         dupes = {}
 
         # Find any missing attribute
-        vulnerabilities = data['vulnerabilities']
+        vulnerabilities = data["vulnerabilities"]
         check_required_attributes(vulnerabilities)
 
         for item in vulnerabilities:
-            vulnerability_id = item.get('vid')
-            title = item['vulnerability']
+            vulnerability_id = item.get("vid")
+            title = item["vulnerability"]
 
             # Finding details information
-            findingdetail = '**Hunter**: ' + item.get('hunter') + '\n\n'
-            findingdetail += '**Category**: ' + item.get('category') + '\n\n'
-            findingdetail += '**Location**: ' + item.get('location') + '\n\n'
-            findingdetail += '**Description**:\n' + item.get('description') + '\n\n'
+            findingdetail = "**Hunter**: " + item.get("hunter") + "\n\n"
+            findingdetail += "**Category**: " + item.get("category") + "\n\n"
+            findingdetail += "**Location**: " + item.get("location") + "\n\n"
+            findingdetail += "**Description**:\n" + item.get("description") + "\n\n"
 
             # Finding severity
-            severity = item.get('severity', 'info')
-            allowed_severity = ['info', 'low', 'medium', 'high', "critical"]
+            severity = item.get("severity", "info")
+            allowed_severity = ["info", "low", "medium", "high", "critical"]
             if severity.lower() in allowed_severity:
                 severity = severity.capitalize()
             else:
-                severity = 'Info'
+                severity = "Info"
 
             # Finding mitigation and reference
-            avd_reference = item.get('avd_reference')
+            avd_reference = item.get("avd_reference")
 
-            if avd_reference and avd_reference != '' and vulnerability_id != 'None':
+            if avd_reference and avd_reference != "" and vulnerability_id != "None":
                 mitigation = f"Further details can be found in kube-hunter documentation available at : {avd_reference}"
                 references = "**Kube-hunter AVD reference**: " + avd_reference
             else:
@@ -56,9 +56,9 @@ class KubeHunterParser:
                 references = None
 
             # Finding evidence
-            evidence = item.get('evidence')
-            if evidence and evidence != '' and evidence != 'none':
-                steps_to_reproduce = '**Evidence**: ' + item.get('evidence')
+            evidence = item.get("evidence")
+            if evidence and evidence != "" and evidence != "none":
+                steps_to_reproduce = "**Evidence**: " + item.get("evidence")
             else:
                 steps_to_reproduce = None
 
@@ -74,13 +74,13 @@ class KubeHunterParser:
                 duplicate=False,
                 out_of_scope=False,
                 vuln_id_from_tool=vulnerability_id,
-                steps_to_reproduce=steps_to_reproduce
+                steps_to_reproduce=steps_to_reproduce,
             )
 
             # internal de-duplication
             if finding.steps_to_reproduce is None:
-                finding.steps_to_reproduce = ''
-            dupe_key = hashlib.sha256(str(finding.description + finding.title + finding.steps_to_reproduce + finding.vuln_id_from_tool).encode('utf-8')).hexdigest()
+                finding.steps_to_reproduce = ""
+            dupe_key = hashlib.sha256(str(finding.description + finding.title + finding.steps_to_reproduce + finding.vuln_id_from_tool).encode("utf-8")).hexdigest()
 
             if dupe_key not in dupes:
                 dupes[dupe_key] = finding

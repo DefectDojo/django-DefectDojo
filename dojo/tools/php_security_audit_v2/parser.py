@@ -36,7 +36,7 @@ class PhpSecurityAuditV2Parser:
                     findingdetail += "Details: " + issue["message"] + "\n"
 
                     sev = PhpSecurityAuditV2Parser.get_severity_word(
-                        issue["severity"]
+                        issue["severity"],
                     )
 
                     dupe_key = (

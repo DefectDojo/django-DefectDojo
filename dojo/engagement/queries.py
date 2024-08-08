@@ -19,19 +19,19 @@ def get_authorized_engagements(permission):
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('product__prod_type_id'),
+        product_type=OuterRef("product__prod_type_id"),
         user=user,
         role__in=roles)
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('product_id'),
+        product=OuterRef("product_id"),
         user=user,
         role__in=roles)
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('product__prod_type_id'),
+        product_type=OuterRef("product__prod_type_id"),
         group__users=user,
         role__in=roles)
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('product_id'),
+        product=OuterRef("product_id"),
         group__users=user,
         role__in=roles)
     engagements = Engagement.objects.annotate(

@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "2.37.0-dev",
+  "version": "2.38.0-dev",
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -31,7 +31,7 @@
     "jquery.flot.tooltip": "^0.9.0",
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
     "jszip": "^3.10.1",
-    "justgage": "^1.6.1",
+    "justgage": "^1.7.0",
     "metismenu": "~3.0.7",
     "moment": "^2.30.1",
     "morris.js": "morrisjs/morris.js",

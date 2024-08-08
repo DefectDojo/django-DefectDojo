@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.meterian.parser import MeterianParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestMeterianParser(DojoTestCase):

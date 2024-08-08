@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.anchore_engine.parser import AnchoreEngineParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAnchoreEngineParser(DojoTestCase):
@@ -30,8 +29,8 @@ class TestAnchoreEngineParser(DojoTestCase):
             self.assertEqual(51, len(findings))
             finding = findings[50]
             self.assertEqual("CVE-2020-13776", finding.vuln_id_from_tool)
-            self.assertEqual('systemd-pam', finding.component_name)
-            self.assertEqual('239-41.el8_3.1', finding.component_version)
+            self.assertEqual("systemd-pam", finding.component_name)
+            self.assertEqual("239-41.el8_3.1", finding.component_version)
             self.assertEqual(6.7, finding.cvssv3_score)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2020-13776", finding.unsaved_vulnerability_ids[0])

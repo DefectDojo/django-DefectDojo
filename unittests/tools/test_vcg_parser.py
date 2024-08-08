@@ -5,8 +5,7 @@ from defusedxml import ElementTree
 
 from dojo.models import Test
 from dojo.tools.vcg.parser import VCGCsvParser, VCGParser, VCGXmlParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestFile:

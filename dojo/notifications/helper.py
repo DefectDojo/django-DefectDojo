@@ -28,52 +28,52 @@ def create_notification(event=None, **kwargs):
     except Exception:
         system_notifications = Notifications()
 
-    if 'recipients' in kwargs:
+    if "recipients" in kwargs:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
-        logger.debug('creating notifications for recipients: %s', kwargs['recipients'])
-        for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
+        logger.debug("creating notifications for recipients: %s", kwargs["recipients"])
+        for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs["recipients"], user__is_active=True, product=None):
             if event in settings.NOTIFICATIONS_SYSTEM_LEVEL_TRUMP:
                 # merge the system level notifications with the personal level
                 # this allows for system to trump the personal
                 merged_notifications = Notifications.merge_notifications_list([system_notifications, recipient_notifications])
                 merged_notifications.user = recipient_notifications.user
-                logger.debug('Sent notification to %s', merged_notifications.user)
+                logger.debug("Sent notification to %s", merged_notifications.user)
                 process_notifications(event, merged_notifications, **kwargs)
             else:
                 # Do not trump user preferences and send notifications as usual
-                logger.debug('Sent notification to %s', recipient_notifications.user)
+                logger.debug("Sent notification to %s", recipient_notifications.user)
                 process_notifications(event, recipient_notifications, **kwargs)
 
     else:
-        logger.debug('creating system notifications for event: %s', event)
+        logger.debug("creating system notifications for event: %s", event)
         # send system notifications to all admin users
 
         # parse kwargs before converting them to dicts
         product_type = None
-        if 'product_type' in kwargs:
-            product_type = kwargs.get('product_type')
+        if "product_type" in kwargs:
+            product_type = kwargs.get("product_type")
             logger.debug("Defined product type %s", product_type)
 
         product = None
-        if 'product' in kwargs:
-            product = kwargs.get('product')
+        if "product" in kwargs:
+            product = kwargs.get("product")
             logger.debug("Defined product  %s", product)
 
-        elif 'engagement' in kwargs:
-            product = kwargs['engagement'].product
+        elif "engagement" in kwargs:
+            product = kwargs["engagement"].product
             logger.debug("Defined product of engagement %s", product)
 
-        elif 'test' in kwargs:
-            product = kwargs['test'].engagement.product
+        elif "test" in kwargs:
+            product = kwargs["test"].engagement.product
             logger.debug("Defined product of test %s", product)
 
-        elif 'finding' in kwargs:
-            product = kwargs['finding'].test.engagement.product
+        elif "finding" in kwargs:
+            product = kwargs["finding"].test.engagement.product
             logger.debug("Defined product of finding %s", product)
 
-        elif 'obj' in kwargs:
+        elif "obj" in kwargs:
             from dojo.utils import get_product
-            product = get_product(kwargs['obj'])
+            product = get_product(kwargs["obj"])
             logger.debug("Defined product of obj %s", product)
 
         # System notifications are sent one with user=None, which will trigger email to configured system email, to global slack channel, etc.
@@ -82,22 +82,22 @@ def create_notification(event=None, **kwargs):
         # All admins will also receive system notifications, but as part of the person global notifications section below
         # This time user is set, so will trigger email to personal email, to personal slack channel (mention), etc.
         # only retrieve users which have at least one notification type enabled for this event type.
-        logger.debug('creating personal notifications for event: %s', event)
+        logger.debug("creating personal notifications for event: %s", event)
 
         # There are notification like deleting a product type that shall not be sent to users.
         # These notifications will have the parameter no_users=True
-        if not ('no_users' in kwargs and kwargs['no_users'] is True):
+        if not ("no_users" in kwargs and kwargs["no_users"] is True):
             # get users with either global notifications, or a product specific noditiciation
             # and all admin/superuser, they will always be notified
             users = Dojo_User.objects.filter(is_active=True).prefetch_related(Prefetch(
                 "notifications_set",
                 queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
-                to_attr="applicable_notifications"
-            )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
+                to_attr="applicable_notifications",
+            )).annotate(applicable_notifications_count=Count("notifications__id", filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
                 .filter(Q(applicable_notifications_count__gt=0) | Q(is_superuser=True))
 
             # only send to authorized users or admin/superusers
-            logger.debug('Filtering users for the product %s', product)
+            logger.debug("Filtering users for the product %s", product)
 
             if product:
                 users = get_authorized_users_for_product_and_product_type(users, product, Permissions.Product_View)
@@ -106,7 +106,7 @@ def create_notification(event=None, **kwargs):
                 users = get_authorized_users_for_product_type(users, product_type, Permissions.Product_Type_View)
             else:
                 # nor product_type nor product defined, we should not make noise and send only notifications to admins
-                logger.debug('Product is not specified, making it silent')
+                logger.debug("Product is not specified, making it silent")
                 users = users.filter(is_superuser=True)
 
             for user in users:
@@ -126,26 +126,26 @@ def create_notification(event=None, **kwargs):
 
 def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
-        if event == 'product_added':
-            kwargs["description"] = _('Product %s has been created successfully.') % kwargs['title']
-        elif event == 'product_type_added':
-            kwargs["description"] = _('Product Type %s has been created successfully.') % kwargs['title']
+        if event == "product_added":
+            kwargs["description"] = _("Product %s has been created successfully.") % kwargs["title"]
+        elif event == "product_type_added":
+            kwargs["description"] = _("Product Type %s has been created successfully.") % kwargs["title"]
         else:
-            kwargs["description"] = _('Event %s has occurred.') % str(event)
+            kwargs["description"] = _("Event %s has occurred.") % str(event)
 
     return kwargs["description"]
 
 
 def create_notification_message(event, user, notification_type, *args, **kwargs):
     template = f"notifications/{notification_type}/{event.replace('/', '')}.tpl"
-    kwargs.update({'user': user})
+    kwargs.update({"user": user})
 
     notification_message = None
     try:
         notification_message = render_to_string(template, kwargs)
         logger.debug("Rendering from the template %s", template)
     except TemplateDoesNotExist:
-        logger.debug('template not found or not implemented yet: %s', template)
+        logger.debug("template not found or not implemented yet: %s", template)
     except Exception as e:
         logger.error("error during rendering of template %s exception is %s", template, e)
     finally:
@@ -153,38 +153,38 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
             kwargs["description"] = create_description(event, *args, **kwargs)
             notification_message = render_to_string(f"notifications/{notification_type}/other.tpl", kwargs)
 
-    return notification_message if notification_message else ''
+    return notification_message if notification_message else ""
 
 
 def process_notifications(event, notifications=None, **kwargs):
     from dojo.utils import get_system_setting
 
     if not notifications:
-        logger.warning('no notifications!')
+        logger.warning("no notifications!")
         return
 
-    logger.debug('sending notification ' + ('asynchronously' if we_want_async() else 'synchronously'))
-    logger.debug('process notifications for %s', notifications.user)
-    logger.debug('notifications: %s', vars(notifications))
+    logger.debug("sending notification " + ("asynchronously" if we_want_async() else "synchronously"))
+    logger.debug("process notifications for %s", notifications.user)
+    logger.debug("notifications: %s", vars(notifications))
 
-    slack_enabled = get_system_setting('enable_slack_notifications')
-    msteams_enabled = get_system_setting('enable_msteams_notifications')
-    mail_enabled = get_system_setting('enable_mail_notifications')
+    slack_enabled = get_system_setting("enable_slack_notifications")
+    msteams_enabled = get_system_setting("enable_msteams_notifications")
+    mail_enabled = get_system_setting("enable_mail_notifications")
 
-    if slack_enabled and 'slack' in getattr(notifications, event, getattr(notifications, 'other')):
-        logger.debug('Sending Slack Notification')
+    if slack_enabled and "slack" in getattr(notifications, event, getattr(notifications, "other")):
+        logger.debug("Sending Slack Notification")
         send_slack_notification(event, notifications.user, **kwargs)
 
-    if msteams_enabled and 'msteams' in getattr(notifications, event, getattr(notifications, 'other')):
-        logger.debug('Sending MSTeams Notification')
+    if msteams_enabled and "msteams" in getattr(notifications, event, getattr(notifications, "other")):
+        logger.debug("Sending MSTeams Notification")
         send_msteams_notification(event, notifications.user, **kwargs)
 
-    if mail_enabled and 'mail' in getattr(notifications, event, getattr(notifications, 'other')):
-        logger.debug('Sending Mail Notification')
+    if mail_enabled and "mail" in getattr(notifications, event, getattr(notifications, "other")):
+        logger.debug("Sending Mail Notification")
         send_mail_notification(event, notifications.user, **kwargs)
 
-    if 'alert' in getattr(notifications, event, getattr(notifications, 'other')):
-        logger.debug(f'Sending Alert to {notifications.user}')
+    if "alert" in getattr(notifications, event, getattr(notifications, "other")):
+        logger.debug(f"Sending Alert to {notifications.user}")
         send_alert_notification(event, notifications.user, **kwargs)
 
 
@@ -195,26 +195,26 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
     def _post_slack_message(channel):
         res = requests.request(
-            method='POST',
-            url='https://slack.com/api/chat.postMessage',
+            method="POST",
+            url="https://slack.com/api/chat.postMessage",
             data={
-                'token': get_system_setting('slack_token'),
-                'channel': channel,
-                'username': get_system_setting('slack_username'),
-                'text': create_notification_message(event, user, 'slack', *args, **kwargs)
+                "token": get_system_setting("slack_token"),
+                "channel": channel,
+                "username": get_system_setting("slack_username"),
+                "text": create_notification_message(event, user, "slack", *args, **kwargs),
             })
 
-        if 'error' in res.text:
+        if "error" in res.text:
             logger.error("Slack is complaining. See raw text below.")
             logger.error(res.text)
-            raise RuntimeError('Error posting message to Slack: ' + res.text)
+            raise RuntimeError("Error posting message to Slack: " + res.text)
 
     try:
         # If the user has slack information on profile and chooses to receive slack notifications
         # Will receive a DM
         if user is not None:
-            logger.debug('personal notification to slack for user %s', user)
-            if hasattr(user, 'usercontactinfo') and user.usercontactinfo.slack_username is not None:
+            logger.debug("personal notification to slack for user %s", user)
+            if hasattr(user, "usercontactinfo") and user.usercontactinfo.slack_username is not None:
                 slack_user_id = user.usercontactinfo.slack_user_id
                 if not slack_user_id:
                     # Lookup the slack userid the first time, then save it.
@@ -228,22 +228,22 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
                 # only send notification if we managed to find the slack_user_id
                 if slack_user_id:
-                    channel = f'@{slack_user_id}'
+                    channel = f"@{slack_user_id}"
                     _post_slack_message(channel)
             else:
                 logger.info("The user %s does not have a email address informed for Slack in profile.", user)
         else:
             # System scope slack notifications, and not personal would still see this go through
-            if get_system_setting('slack_channel') is not None:
-                channel = get_system_setting('slack_channel')
+            if get_system_setting("slack_channel") is not None:
+                channel = get_system_setting("slack_channel")
                 logger.info(f"Sending system notification to system channel {channel}.")
                 _post_slack_message(channel)
             else:
-                logger.debug('slack_channel not configured: skipping system notification')
+                logger.debug("slack_channel not configured: skipping system notification")
 
     except Exception as e:
         logger.exception(e)
-        log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs.get('url', None))
+        log_alert(e, "Slack Notification", title=kwargs["title"], description=str(e), url=kwargs.get("url", None))
 
 
 @dojo_async_task
@@ -254,85 +254,84 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
     try:
         # Microsoft Teams doesn't offer direct message functionality, so no MS Teams PM functionality here...
         if user is None:
-            if get_system_setting('msteams_url') is not None:
-                logger.debug('sending MSTeams message')
+            if get_system_setting("msteams_url") is not None:
+                logger.debug("sending MSTeams message")
                 res = requests.request(
-                    method='POST',
-                    url=get_system_setting('msteams_url'),
-                    data=create_notification_message(event, None, 'msteams', *args, **kwargs))
+                    method="POST",
+                    url=get_system_setting("msteams_url"),
+                    data=create_notification_message(event, None, "msteams", *args, **kwargs))
                 if res.status_code != 200:
                     logger.error("Error when sending message to Microsoft Teams")
                     logger.error(res.status_code)
                     logger.error(res.text)
-                    raise RuntimeError('Error posting message to Microsoft Teams: ' + res.text)
+                    raise RuntimeError("Error posting message to Microsoft Teams: " + res.text)
             else:
-                logger.info('Webhook URL for Microsoft Teams not configured: skipping system notification')
+                logger.info("Webhook URL for Microsoft Teams not configured: skipping system notification")
     except Exception as e:
         logger.exception(e)
-        log_alert(e, "Microsoft Teams Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
-        pass
+        log_alert(e, "Microsoft Teams Notification", title=kwargs["title"], description=str(e), url=kwargs["url"])
 
 
 @dojo_async_task
 @app.task
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
-    email_from_address = get_system_setting('email_from')
+    email_from_address = get_system_setting("email_from")
     # Attempt to get the "to" address
     if "recipient" in kwargs:
         address = kwargs.get("recipient")
     elif user:
         address = user.email
     else:
-        address = get_system_setting('mail_notifications_to')
+        address = get_system_setting("mail_notifications_to")
 
-    logger.debug('notification email for user %s to %s', user, address)
+    logger.debug("notification email for user %s to %s", user, address)
 
     try:
         subject = f"{get_system_setting('team_name')} notification"
-        if 'title' in kwargs:
+        if "title" in kwargs:
             subject += f": {kwargs['title']}"
 
         email = EmailMessage(
             subject,
-            create_notification_message(event, user, 'mail', *args, **kwargs),
+            create_notification_message(event, user, "mail", *args, **kwargs),
             email_from_address,
             [address],
             headers={"From": f"{email_from_address}"},
         )
-        email.content_subtype = 'html'
-        logger.debug('sending email alert')
+        email.content_subtype = "html"
+        logger.debug("sending email alert")
         # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
         email.send(fail_silently=False)
 
     except Exception as e:
         logger.exception(e)
-        log_alert(e, "Email Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
+        log_alert(e, "Email Notification", title=kwargs["title"], description=str(e), url=kwargs["url"])
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
-    logger.debug('sending alert notification to %s', user)
+    logger.debug("sending alert notification to %s", user)
     try:
         # no need to differentiate between user/no user
-        icon = kwargs.get('icon', 'info-circle')
+        icon = kwargs.get("icon", "info-circle")
         try:
             source = Notifications._meta.get_field(event).verbose_name.title()[:100]
         except FieldDoesNotExist:
             source = event.replace("_", " ").title()[:100]
         alert = Alerts(
             user_id=user,
-            title=kwargs.get('title')[:250],
-            description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
-            url=kwargs.get('url', reverse('alerts')),
+            title=kwargs.get("title")[:250],
+            description=create_notification_message(event, user, "alert", *args, **kwargs)[:2000],
+            url=kwargs.get("url", reverse("alerts")),
             icon=icon[:25],
             source=source,
         )
         # relative urls will fail validation
-        alert.clean_fields(exclude=['url'])
+        alert.clean_fields(exclude=["url"])
         alert.save()
     except Exception as e:
         logger.exception(e)
-        log_alert(e, "Alert Notification", title=kwargs['title'], description=str(e), url=kwargs['url'])
+        log_alert(e, "Alert Notification", title=kwargs["title"], description=str(e), url=kwargs["url"])
 
 
 def get_slack_user_id(user_email):
@@ -343,18 +342,18 @@ def get_slack_user_id(user_email):
     user_id = None
 
     res = requests.request(
-        method='POST',
-        url='https://slack.com/api/users.lookupByEmail',
-        data={'token': get_system_setting('slack_token'), 'email': user_email})
+        method="POST",
+        url="https://slack.com/api/users.lookupByEmail",
+        data={"token": get_system_setting("slack_token"), "email": user_email})
 
     user = json.loads(res.text)
 
     slack_user_is_found = False
     if user:
-        if 'error' in user:
+        if "error" in user:
             logger.error("Slack is complaining. See error message below.")
             logger.error(user)
-            raise RuntimeError('Error getting user list from Slack: ' + res.text)
+            raise RuntimeError("Error getting user list from Slack: " + res.text)
         else:
             if "email" in user["user"]["profile"]:
                 if user_email == user["user"]["profile"]["email"]:
@@ -378,20 +377,20 @@ def log_alert(e, notification_type=None, *args, **kwargs):
     for user in users:
         alert = Alerts(
             user_id=user,
-            url=kwargs.get('url', reverse('alerts')),
-            title=kwargs.get('title', 'Notification issue')[:250],
-            description=kwargs.get('description', str(e))[:2000],
+            url=kwargs.get("url", reverse("alerts")),
+            title=kwargs.get("title", "Notification issue")[:250],
+            description=kwargs.get("description", str(e))[:2000],
             icon="exclamation-triangle",
-            source=notification_type[:100] if notification_type else kwargs.get('source', 'unknown')[:100])
+            source=notification_type[:100] if notification_type else kwargs.get("source", "unknown")[:100])
         # relative urls will fail validation
-        alert.clean_fields(exclude=['url'])
+        alert.clean_fields(exclude=["url"])
         alert.save()
 
 
 def notify_test_created(test):
-    title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-    create_notification(event='test_added', title=title, test=test, engagement=test.engagement, product=test.engagement.product,
-                        url=reverse('view_test', args=(test.id,)))
+    title = "Test created for " + str(test.engagement.product) + ": " + str(test.engagement.name) + ": " + str(test)
+    create_notification(event="test_added", title=title, test=test, engagement=test.engagement, product=test.engagement.product,
+                        url=reverse("view_test", args=(test.id,)))
 
 
 def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
@@ -402,13 +401,13 @@ def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[
     findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
     findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
 
-    title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+    title = "Created/Updated " + str(updated_count) + " findings for " + str(test.engagement.product) + ": " + str(test.engagement.name) + ": " + str(test)
 
     if updated_count == 0:
-        event = 'scan_added_empty'
+        event = "scan_added_empty"
     else:
-        event = 'scan_added'
+        event = "scan_added"
 
     create_notification(event=event, title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,
-                        url=reverse('view_test', args=(test.id,)))
+                        url=reverse("view_test", args=(test.id,)))
