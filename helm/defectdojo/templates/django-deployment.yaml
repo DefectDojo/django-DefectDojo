@@ -155,7 +155,7 @@ spec:
         - name: http-uwsgi
           protocol: TCP
           containerPort: 8081
-        {{- if .Values.django.uwsgi.enable_debug }}
+        {{- if .Values.django.uwsgi.enableDebug }}
         - name: debug
           protocol: TCP
           containerPort: 3000
@@ -174,7 +174,7 @@ spec:
               name: {{ .Values.redis.auth.existingSecret | default "defectdojo-redis-specific" }}
               key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
             {{- end }}
-        {{- if .Values.django.uwsgi.enable_debug }}
+        {{- if .Values.django.uwsgi.enableDebug }}
         - name: DD_DEBUG
           value: 'True'
         {{- end }}
