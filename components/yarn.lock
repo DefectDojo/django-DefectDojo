@@ -320,10 +320,10 @@ datatables.net-dt@>=1.12.1, datatables.net-dt@^1.13.4:
     datatables.net ">=1.12.1"
     jquery ">=1.7"
 
-datatables.net@>=1.12.1, datatables.net@^1.13.4:
-  version "1.13.4"
-  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-1.13.4.tgz#9a809cee82eca0a884e10b4d47a3a3d6e65e9fe7"
-  integrity sha512-yzhArTOB6tPO2QFKm1z3hA4vabtt2hRvgw8XLsT1xqEirinfGYqWDiWXlkTPTaJv2e7gG+Kf985sXkzBFlGrGQ==
+datatables.net@>=1.12.1, datatables.net@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.1.3.tgz#e6c7d01164118b10749a4b0e55629b824eb42e37"
+  integrity sha512-emlF55eF4fhzOUuE+0dEFZCDbuhXqjvdZagW0bLXaU4nDesCWrjYXj0NdtHTKLhVYyfZhTlA8mEDL2Wa64U0ig==
   dependencies:
     jquery ">=1.7"
 
