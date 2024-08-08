@@ -111,7 +111,7 @@ def get_item(vuln, test, test_start, test_end, description):
             vuln["remediation-impact"],
         )
 
-    finding = Finding(
+    return Finding(
         title=title,
         date=datetime.fromtimestamp(int(test_end)),
         test=test,
@@ -122,5 +122,3 @@ def get_item(vuln, test, test_start, test_end, description):
         static_finding=True,
         dynamic_finding=False,
     )
-
-    return finding

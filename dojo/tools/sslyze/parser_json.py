@@ -71,12 +71,13 @@ REFERENCES = "TLS recommendations of German BSI: " + BSI_LINK
 class SSLyzeJSONParser:
     def get_findings(self, json_output, test):
         if json_output is None:
-            return
+            return None
 
         tree = self.parse_json(json_output)
 
         if tree:
             return self.get_items(tree, test)
+        return None
 
     def parse_json(self, json_output):
         try:
@@ -403,7 +404,7 @@ def get_weak_protocol(cipher, text, node, test, endpoint):
             return get_finding(
                 title, description, None, REFERENCES, test, endpoint,
             )
-        elif "result" in weak_node:
+        if "result" in weak_node:
             weak_node_result = weak_node["result"]
             if (
                 "accepted_cipher_suites" in weak_node_result
@@ -622,5 +623,4 @@ def get_endpoint(node):
             port = si_node["port"]
     if hostname is not None:
         return Endpoint(host=hostname, port=port)
-    else:
-        return None
+    return None

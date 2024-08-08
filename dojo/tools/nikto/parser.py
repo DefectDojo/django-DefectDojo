@@ -27,8 +27,7 @@ class NiktoParser:
     def get_findings(self, filename, test):
         if filename.name.lower().endswith(".xml"):
             return NiktoXMLParser().process_xml(filename, test)
-        elif filename.name.lower().endswith(".json"):
+        if filename.name.lower().endswith(".json"):
             return NiktoJSONParser().process_json(filename, test)
-        else:
-            msg = "Unknown File Format"
-            raise ValueError(msg)
+        msg = "Unknown File Format"
+        raise ValueError(msg)

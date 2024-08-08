@@ -67,7 +67,7 @@ class TwistlockCSVParser:
 
     def parse(self, filename, test):
         if filename is None:
-            return
+            return None
         content = filename.read()
         dupes = {}
         if isinstance(content, bytes):
@@ -190,16 +190,15 @@ def get_item(vulnerability, test):
 def convert_severity(severity):
     if severity.lower() == "important":
         return "High"
-    elif severity.lower() == "moderate":
+    if severity.lower() == "moderate":
         return "Medium"
-    elif severity.lower() == "information":
+    if severity.lower() == "information":
         return "Info"
-    elif severity.lower() == "informational":
+    if severity.lower() == "informational":
         return "Info"
-    elif severity == "":
+    if severity == "":
         return "Info"
-    else:
-        return severity.title()
+    return severity.title()
 
 
 class TwistlockParser:
@@ -218,8 +217,7 @@ class TwistlockParser:
 
         if filename.name.lower().endswith(".json"):
             return TwistlockJsonParser().parse(filename, test)
-        elif filename.name.lower().endswith(".csv"):
+        if filename.name.lower().endswith(".csv"):
             return TwistlockCSVParser().parse(filename, test)
-        else:
-            msg = "Unknown File Format"
-            raise ValueError(msg)
+        msg = "Unknown File Format"
+        raise ValueError(msg)

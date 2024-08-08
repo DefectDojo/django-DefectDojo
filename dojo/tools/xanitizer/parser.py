@@ -24,8 +24,7 @@ class XanitizerParser:
         root = self.parse_xml(filename)
         if root is not None:
             return self.get_findings_internal(root, test)
-        else:
-            return []
+        return []
 
     def parse_xml(self, filename):
         try:
@@ -161,7 +160,7 @@ class XanitizerParser:
             "relativePath",
         ):
             return finding.find("endNode").get("relativePath")
-        elif finding.find("node") is not None and finding.find("node").get(
+        if finding.find("node") is not None and finding.find("node").get(
             "relativePath",
         ):
             return finding.find("node").get("relativePath")

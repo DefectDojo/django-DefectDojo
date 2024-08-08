@@ -20,5 +20,4 @@ class CycloneDXParser:
     def get_findings(self, file, test):
         if file.name.strip().lower().endswith(".json"):
             return CycloneDXJSONParser()._get_findings_json(file, test)
-        else:
-            return CycloneDXXMLParser()._get_findings_xml(file, test)
+        return CycloneDXXMLParser()._get_findings_xml(file, test)

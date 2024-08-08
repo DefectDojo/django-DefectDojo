@@ -19,8 +19,7 @@ class RustyhogParser:
         return self.get_items(tree, test)
 
     def parse_json(self, json_output):
-        tree = json.load(json_output)
-        return tree
+        return json.load(json_output)
 
     def get_items(self, json_output, scanner, test):
         items = {}
@@ -79,7 +78,7 @@ class RustyhogParser:
         for vulnerability in vulnerabilities:
             if scanner == "Rusty Hog":
                 break
-            elif scanner == "Choctaw Hog":
+            if scanner == "Choctaw Hog":
                 """Choctaw Hog"""
                 found_secret_string = vulnerability.get("stringsFound")
                 description = f"**This string was found:** {found_secret_string}"

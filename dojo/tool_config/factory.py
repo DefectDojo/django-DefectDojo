@@ -19,5 +19,4 @@ def create_API(tool_configuration):
     if tool_configuration.tool_type.name in SCAN_APIS:
         api_class = SCAN_APIS.get(tool_configuration.tool_type.name)
         return api_class(tool_configuration)
-    else:
-        return None
+    return None

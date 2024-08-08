@@ -222,5 +222,4 @@ class BurpGraphQLParser:
         cweSearch = re.search("CWE-([0-9]*)", cwe_html, re.IGNORECASE)
         if cweSearch:
             return cweSearch.group(1)
-        else:
-            return 0
+        return 0

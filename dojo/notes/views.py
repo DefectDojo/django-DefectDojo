@@ -123,11 +123,10 @@ def edit_note(request, id, page, objid):
                                 _("Note edited."),
                                 extra_tags="alert-success")
             return HttpResponseRedirect(reverse(reverse_url, args=(object_id, )))
-        else:
-            messages.add_message(request,
-                                messages.SUCCESS,
-                                _("Note was not succesfully edited."),
-                                extra_tags="alert-danger")
+        messages.add_message(request,
+                            messages.SUCCESS,
+                            _("Note was not succesfully edited."),
+                            extra_tags="alert-danger")
     else:
         if note_type_activation:
             form = TypedNoteForm(available_note_types=available_note_types, instance=note)
@@ -195,5 +194,4 @@ def find_available_notetypes(finding, editing_note):
             available_note_types.append(note_type_id)
     available_note_types.append(editing_note.note_type_id)
     available_note_types = list(set(available_note_types))
-    queryset = Note_Type.objects.filter(id__in=available_note_types).order_by("-id")
-    return queryset
+    return Note_Type.objects.filter(id__in=available_note_types).order_by("-id")

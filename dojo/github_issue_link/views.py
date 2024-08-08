@@ -52,11 +52,11 @@ def new_github(request):
                                      "Unable to authenticate on GitHub.",
                                      extra_tags="alert-danger")
                 return HttpResponseRedirect(reverse("github"))
-    else:
-        gform = GITHUBForm()
-        add_breadcrumb(title="New GitHub Configuration", top_level=False, request=request)
-        return render(request, "dojo/new_github.html",
-                    {"gform": gform})
+        return None
+    gform = GITHUBForm()
+    add_breadcrumb(title="New GitHub Configuration", top_level=False, request=request)
+    return render(request, "dojo/new_github.html",
+                {"gform": gform})
 
 
 @user_is_configuration_authorized("dojo.view_github_conf")

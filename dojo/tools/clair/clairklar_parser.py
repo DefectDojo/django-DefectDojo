@@ -79,7 +79,7 @@ class ClairKlarScan:
         if "Link" in item_node:
             link = item_node["Link"]
 
-        finding = Finding(
+        return Finding(
             title=item_node["Name"]
             + " - "
             + "("
@@ -101,4 +101,3 @@ class ClairKlarScan:
             dynamic_finding=False,
             impact="No impact provided",
         )
-        return finding

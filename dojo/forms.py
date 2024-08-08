@@ -593,8 +593,7 @@ class ImportScanForm(forms.Form):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -607,8 +606,7 @@ class ImportScanForm(forms.Form):
         return date
 
     def get_scan_type(self):
-        TGT_scan = self.cleaned_data["scan_type"]
-        return TGT_scan
+        return self.cleaned_data["scan_type"]
 
 
 class ReImportScanForm(forms.Form):
@@ -1142,8 +1140,7 @@ class AddFindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1220,8 +1217,7 @@ class AdHocFindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1278,8 +1274,7 @@ class PromoteFindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1402,8 +1397,7 @@ class FindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1673,8 +1667,7 @@ class AddEndpointForm(forms.Form):
         endpoints_to_add_list, errors = validate_endpoints_to_add(endpoint)
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_process = endpoints_to_add_list
+        self.endpoints_to_process = endpoints_to_add_list
 
         return cleaned_data
 
@@ -2679,9 +2672,7 @@ class ObjectSettingsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
     def clean(self):
-        form_data = self.cleaned_data
-
-        return form_data
+        return self.cleaned_data
 
 
 class CredMappingForm(forms.ModelForm):
@@ -2942,9 +2933,9 @@ class JIRAProjectForm(forms.ModelForm):
             if self.target == "engagement":
                 msg = "JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, or choose to inherit settings from product"
                 raise ValidationError(msg)
-            else:
-                msg = "JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup"
-                raise ValidationError(msg)
+            msg = "JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup"
+            raise ValidationError(msg)
+        return None
 
 
 class GITHUBFindingForm(forms.Form):
@@ -3128,8 +3119,7 @@ class LoginBanner(forms.Form):
     )
 
     def clean(self):
-        cleaned_data = super().clean()
-        return cleaned_data
+        return super().clean()
 
 
 class AnnouncementCreateForm(forms.ModelForm):
@@ -3363,7 +3353,7 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
             if expiration < today:
                 msg = "The expiration cannot be in the past"
                 raise forms.ValidationError(msg)
-            elif expiration.day == today.day:
+            if expiration.day == today.day:
                 msg = "The expiration cannot be today"
                 raise forms.ValidationError(msg)
         else:
@@ -3453,8 +3443,7 @@ class MultiWidgetBasic(forms.widgets.MultiWidget):
     def decompress(self, value):
         if value:
             return pickle.loads(value)
-        else:
-            return [None, None, None, None, None, None]
+        return [None, None, None, None, None, None]
 
     def format_output(self, rendered_widgets):
         return "<br/>".join(rendered_widgets)

@@ -80,7 +80,6 @@ def nice_title(title):
     pat = re.compile(r"Finding [0-9][0-9][0-9]:*")
     s = pat.split(title, 2)
     try:
-        ret = s[1]
-        return ret
+        return s[1]
     except:
         return title

@@ -70,8 +70,7 @@ class TenableCSVParser:
         first_line = content.split("\n")[0]
         if ";" in first_line:
             return ";"
-        else:
-            return ","  # default to comma if no semicolon found
+        return ","  # default to comma if no semicolon found
 
     def get_findings(self, filename: str, test: Test):
         # Read the CSV

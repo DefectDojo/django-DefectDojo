@@ -108,5 +108,4 @@ class WapitiParser:
         cweSearch = re.search("CWE-(\\d+)", val, re.IGNORECASE)
         if cweSearch:
             return int(cweSearch.group(1))
-        else:
-            return None
+        return None
