@@ -4,8 +4,10 @@ from functools import wraps
 
 from django.core.management.base import BaseCommand
 
-# from dojo.utils import get_system_setting, do_dedupe_finding, dojo_async_task
 from dojo.celery import app
+
+# from dojo.utils import get_system_setting, do_dedupe_finding, dojo_async_task
+from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.models import Finding, Notes
 from dojo.utils import test_valentijn
 

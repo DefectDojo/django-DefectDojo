@@ -3,6 +3,7 @@ import collections
 import logging
 import re
 import socket
+import sys
 import time
 from urllib.parse import urlparse
 
@@ -56,7 +57,7 @@ class Main:
         loginUrl = "http://os.environ['DD_BASE_URL']/login"
         # loginUrlregex = "\Q" + loginUrl + "\E.*"
         # The above line is flake8 violation as \Q and \E are not supported by python
-        loginURLregex = re.escape(loginURL)
+        loginURLregex = re.escape(loginUrl)
         result = zap.context.exclude_from_context(contextname, ".*logout.*", apikey)
         result = zap.context.exclude_from_context(contextname, ".*/static/.*", apikey)
 

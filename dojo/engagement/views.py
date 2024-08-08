@@ -21,6 +21,7 @@ from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseRed
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie

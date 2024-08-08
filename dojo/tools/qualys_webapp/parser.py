@@ -1,6 +1,7 @@
 import base64
 import re
 from datetime import datetime
+from urllib.parse import urlparse
 
 from defusedxml import ElementTree
 
