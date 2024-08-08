@@ -53,6 +53,7 @@ select = [
    "SLOT",
    "PIE",
    "T20",
+   "PYI",
    "Q",
    "RSE",
    "TID",
