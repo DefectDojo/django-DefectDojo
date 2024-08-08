@@ -84,7 +84,7 @@ def _get_statistics_for_queryset(qs, annotation_factory):
     # add annotation for each status field
     values = values.annotate(**annotation_factory())
     # make sure sev and total are included
-    stat_fields = ["sev", "total"] + STATS_FIELDS
+    stat_fields = ["sev", "total", *STATS_FIELDS]
     # go for it
     values = values.values(*stat_fields)
 

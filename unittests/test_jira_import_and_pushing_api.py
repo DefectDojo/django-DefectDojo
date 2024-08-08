@@ -541,7 +541,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # Assert that the tags match
         self.assertEqual(issue.fields.labels, tags)
 
-        tags_new = tags + ["tag3", "tag4"]
+        tags_new = [*tags, "tag3", "tag4"]
         self.post_finding_tags_api(finding.id, tags_new)
         self.patch_finding_api(finding.id, {"push_to_jira": True})
 

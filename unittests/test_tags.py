@@ -293,7 +293,7 @@ class InheritedTagsTests(DojoAPITestCase):
         product_tags = self._convert_instance_tags_to_list(self.product)
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("engagement")))
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("endpoint")))
-        self.assertEqual(["import_tag"] + product_tags, self._convert_instance_tags_to_list(objects.get("test")))
+        self.assertEqual(["import_tag", *product_tags], self._convert_instance_tags_to_list(objects.get("test")))
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(objects.get("finding")))
         # Reimport now
         objects = self._import_and_return_objects(test_id=objects.get("test").id, reimport=True, tags=["reimport_tag"])
@@ -318,7 +318,7 @@ class InheritedTagsTests(DojoAPITestCase):
         engagement_tags_before_addition = self._convert_instance_tags_to_list(engagement)
         engagement.tags.add("engagement_only_tag")
         # Check to see that the update was successful
-        self.assertEqual(["engagement_only_tag"] + engagement_tags_before_addition, self._convert_instance_tags_to_list(engagement))
+        self.assertEqual(["engagement_only_tag", *engagement_tags_before_addition], self._convert_instance_tags_to_list(engagement))
         # Check to see that tests were not impacted
         self.assertEqual(product_tags, self._convert_instance_tags_to_list(test))
         # remove a tag on the engagement
