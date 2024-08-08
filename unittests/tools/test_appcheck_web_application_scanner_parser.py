@@ -1,10 +1,10 @@
 from django.test import TestCase
 
+from dojo.models import Finding, Test
 from dojo.tools.appcheck_web_application_scanner.engines.appcheck import AppCheckScanningEngineParser
 from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
 from dojo.tools.appcheck_web_application_scanner.engines.nmap import NmapScanningEngineParser
 from dojo.tools.appcheck_web_application_scanner.parser import AppCheckWebApplicationScannerParser
-from dojo.models import Test, Finding
 
 
 class TestAppCheckWebApplicationScannerParser(TestCase):
@@ -36,8 +36,8 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertIsNone(finding.unsaved_vulnerability_ids)
             self.assertTrue(
                 finding.description.startswith(
-                    "The remote host is running a FTP service that allows cleartext logins over\n  unencrypted connections."
-                )
+                    "The remote host is running a FTP service that allows cleartext logins over\n  unencrypted connections.",
+                ),
             )
             for section in ["**Impact**:", "**Detection**:", "**Technical Details**:"]:
                 self.assertTrue(section in finding.description)
@@ -71,12 +71,12 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertIsNone(finding.unsaved_vulnerability_ids)
             self.assertTrue(
                 finding.description.startswith(
-                    "The dedicated port scanner found open ports on this host, along with other\nhost-specific information, which can be viewed in Technical Details."
-                )
+                    "The dedicated port scanner found open ports on this host, along with other\nhost-specific information, which can be viewed in Technical Details.",
+                ),
             )
             self.assertTrue(
                 "Host: 0.0.0.1 (0.0.0.1)\nHost is up, received user-set (0.015s latency).\nScanned at 2020-01-29 15:44:46 UTC for 15763s\nNot shown: 65527 filtered ports, 4 closed ports\nReason: 65527 no-responses and 4 resets\nSome closed ports may be reported as filtered due to --defeat-rst-ratelimit\nPORT      STATE SERVICE     REASON          VERSION\n21/tcp    open  ftp         syn-ack ttl 116 Microsoft ftpd\n45000/tcp open  ssl/asmp?   syn-ack ttl 116\n45010/tcp open  unknown     syn-ack ttl 116\n60001/tcp open  ssl/unknown syn-ack ttl 116\n60011/tcp open  unknown     syn-ack ttl 116\nService Info: OS: Windows; CPE: cpe:/o:microsoft:windows"
-                in finding.description
+                in finding.description,
             )
 
             expected_ports = [21, 45000, 45010, 60001, 60011]
@@ -102,7 +102,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("8.0.32", finding.component_version)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2016-6796", finding.unsaved_vulnerability_ids[0])
-            self.assertTrue(finding.description.startswith("[[markup]]\n\n**Product Background**\n\n**Apache Tomcat** is a free and open-source Java web application server. It provides a \"pure Java\" HTTP web server environment in which Java code can also run, implementing the Jakarta Servlet, Jakarta Expression Language, and WebSocket technologies. Tomcat is released with **Catalina** (a servlet and JSP Java Server Pages container), **Coyote** (an HTTP connector), **Coyote JK** (JK protocol proxy connector) and **Jasper** (a JSP engine). Tomcat can optionally be bundled with Java Enterprise Edition (Jakarta EE) as **Apache TomEE** to deliver a complete application server with enterprise features such as distributed computing and web services.\n\n**Vulnerability Summary**\n\nA malicious web application running on Apache Tomcat 9.0.0.M1 to 9.0.0.M9, 8.5.0 to 8.5.4, 8.0.0.RC1 to 8.0.36, 7.0.0 to 7.0.70 and 6.0.0 to 6.0.45 was able to bypass a configured SecurityManager via manipulation of the configuration parameters for the JSP Servlet.\n\n**References**\n\n* [[http://www.securitytracker.com/id/1038757]]\n\n* [[http://www.securitytracker.com/id/1037141]]\n\n* [[http://www.securityfocus.com/bid/93944]]\n\n* [[http://www.debian.org/security/2016/dsa-3720]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:2247]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1552]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1550]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1549]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1548]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:0456]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:0455]]\n\n* [[http://rhn.redhat.com/errata/RHSA-2017-1551.html]]\n\n* [[http://rhn.redhat.com/errata/RHSA-2017-0457.html]]\n\n* [[https://security.netapp.com/advisory/ntap-20180605-0001/]]\n\n* [[https://usn.ubuntu.com/4557-1/]]\n\n* [[https://www.oracle.com/security-alerts/cpuoct2021.html]]\n\n"))
+            self.assertTrue(finding.description.startswith('[[markup]]\n\n**Product Background**\n\n**Apache Tomcat** is a free and open-source Java web application server. It provides a "pure Java" HTTP web server environment in which Java code can also run, implementing the Jakarta Servlet, Jakarta Expression Language, and WebSocket technologies. Tomcat is released with **Catalina** (a servlet and JSP Java Server Pages container), **Coyote** (an HTTP connector), **Coyote JK** (JK protocol proxy connector) and **Jasper** (a JSP engine). Tomcat can optionally be bundled with Java Enterprise Edition (Jakarta EE) as **Apache TomEE** to deliver a complete application server with enterprise features such as distributed computing and web services.\n\n**Vulnerability Summary**\n\nA malicious web application running on Apache Tomcat 9.0.0.M1 to 9.0.0.M9, 8.5.0 to 8.5.4, 8.0.0.RC1 to 8.0.36, 7.0.0 to 7.0.70 and 6.0.0 to 6.0.45 was able to bypass a configured SecurityManager via manipulation of the configuration parameters for the JSP Servlet.\n\n**References**\n\n* [[http://www.securitytracker.com/id/1038757]]\n\n* [[http://www.securitytracker.com/id/1037141]]\n\n* [[http://www.securityfocus.com/bid/93944]]\n\n* [[http://www.debian.org/security/2016/dsa-3720]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:2247]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1552]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1550]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1549]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1548]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:0456]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:0455]]\n\n* [[http://rhn.redhat.com/errata/RHSA-2017-1551.html]]\n\n* [[http://rhn.redhat.com/errata/RHSA-2017-0457.html]]\n\n* [[https://security.netapp.com/advisory/ntap-20180605-0001/]]\n\n* [[https://usn.ubuntu.com/4557-1/]]\n\n* [[https://www.oracle.com/security-alerts/cpuoct2021.html]]\n\n'))
             for section in ["**Technical Details**:", "**Classifications**:"]:
                 self.assertTrue(section in finding.description)
 
@@ -128,8 +128,8 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertIsNone(finding.unsaved_vulnerability_ids)
             self.assertTrue(
                 finding.description.startswith(
-                    "[[markup]]This is simply a report of HTTP request methods supported by the web application."
-                )
+                    "[[markup]]This is simply a report of HTTP request methods supported by the web application.",
+                ),
             )
             for section in ["**Permitted HTTP Methods**:"]:
                 self.assertTrue(section in finding.description)
@@ -153,7 +153,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N", finding.cvssv3)
             self.assertEqual(
                 "[[markup]]The configuration of this services should be changed so   that it does not accept the listed cipher suites anymore.\n\nPlease see the references for more resources supporting you with this task.",
-                finding.mitigation
+                finding.mitigation,
             )
             self.assertIsNone(finding.component_name)
             self.assertIsNone(finding.component_version)
@@ -161,12 +161,12 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual(3, len(finding.unsaved_vulnerability_ids))
             self.assertEqual(
                 set(finding.unsaved_vulnerability_ids),
-                {"CVE-2016-2183", "CVE-2016-6329", "CVE-2020-12872"}
+                {"CVE-2016-2183", "CVE-2016-6329", "CVE-2020-12872"},
             )
             self.assertTrue(
                 finding.description.startswith(
-                    "[[markup]]This routine reports all SSL/TLS cipher suites accepted by a service   where attack vectors exists only on HTTPS services.\n\nThese rules are applied for the evaluation of the vulnerable cipher suites:\n\n- 64-bit block cipher 3DES vulnerable to the SWEET32 attack (CVE-2016-2183)."
-                )
+                    "[[markup]]This routine reports all SSL/TLS cipher suites accepted by a service   where attack vectors exists only on HTTPS services.\n\nThese rules are applied for the evaluation of the vulnerable cipher suites:\n\n- 64-bit block cipher 3DES vulnerable to the SWEET32 attack (CVE-2016-2183).",
+                ),
             )
             for section in ["**Technical Details**:", "**External Sources**"]:
                 self.assertTrue(section in finding.description)
@@ -189,15 +189,15 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N", finding.cvssv3)
             self.assertEqual(
                 "[[markup]]Review the affected target to determine the reason it is returning a gateway error code. Reducing scan threads\nmay help alleviate the problem.",
-                finding.mitigation
+                finding.mitigation,
             )
             self.assertIsNone(finding.component_name)
             self.assertIsNone(finding.component_version)
             self.assertIsNone(finding.unsaved_vulnerability_ids)
             self.assertTrue(
                 finding.description.startswith(
-                    "[[markup]]The server responded with a HTTP status code that may indicate that the remote server is experiencing technical\ndifficulties that are likely to affect the scan and may also be affecting other application users."
-                )
+                    "[[markup]]The server responded with a HTTP status code that may indicate that the remote server is experiencing technical\ndifficulties that are likely to affect the scan and may also be affecting other application users.",
+                ),
             )
             for section in ["**Technical Details**:"]:
                 self.assertTrue(section in finding.description)
@@ -239,7 +239,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             ("", False), (None, False),
             ("CVE-2016-6329", True), ("CVE-2020-12872", True),
             (" ", False), ("CVE-XYZ-123", False), (6, False), ([], False), ("2024-1234", False),
-            ("CWE-2235-4444", False)
+            ("CWE-2235-4444", False),
         ]:
             self.assertEqual(should_be_cve, engine.is_cve(maybe_cve))
 
@@ -250,7 +250,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             "unfixed": (True, False, False),
             "fixed": (False, False, False),
             "false_positive": (True, True, False),
-            "acceptable_risk": (True, False, True)
+            "acceptable_risk": (True, False, True),
         }.items():
             f = Finding()
             engine.parse_status(f, status)
@@ -271,15 +271,15 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
         # Test component parsing
         f = Finding()
         for cpe_list, expected_values in [
-            (["cpe:2.3:a:apache:tomcat:8.0.32:*:*:*:*:*:*:*"], ('tomcat', '8.0.32')),
+            (["cpe:2.3:a:apache:tomcat:8.0.32:*:*:*:*:*:*:*"], ("tomcat", "8.0.32")),
             (
                 ["cpe:/a:ietf:transport_layer_security:1.2", "cpe:2.3:a:apache:tomcat:8.0.32:*:*:*:*:*:*:*"],
-                ('transport_layer_security', '1.2')
+                ("transport_layer_security", "1.2"),
             ),
-            (["cpe:2.3:a:apache:tomcat:*:*:*:*:*:*:*:*"], ('tomcat', '*')),
+            (["cpe:2.3:a:apache:tomcat:*:*:*:*:*:*:*:*"], ("tomcat", "*")),
             (
                 ["cpe:2.3:a:apache:tomcat:*:*:*:*:*:*:*:*", "cpe:2.3:a:apache:tomcat:8.0.32:*:*:*:*:*:*:*"],
-                ('tomcat', '*')
+                ("tomcat", "*"),
             ),
             (["", "cpe:2.3:a:apache:tomcat:8.0.32:*:*:*:*:*:*:*"], (None, None)),
             ([""], (None, None)),
@@ -291,13 +291,13 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
         # Test host extraction
         for item, expected in [
             ({}, None),
-            ({"nope": 'asdf'}, None),
+            ({"nope": "asdf"}, None),
             ({"ipv4_address": ""}, None),
             ({"ipv4_address": "10.0.1.1"}, "10.0.1.1"),
             ({"host": "foobar.baz", "ipv4_address": "10.0.1.1"}, "foobar.baz"),
             (
                 {"url": "http://foobar.baz.qux/http/local", "host": "foobar.baz", "ipv4_address": "10.0.1.1"},
-                "http://foobar.baz.qux/http/local"
+                "http://foobar.baz.qux/http/local",
             ),
             ({"url": "http://foo"}, "http://foo"),
             # Empty 'url' falls back to 'host'
@@ -312,7 +312,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             ({"not_port": 443}, None),
             ({"port": 443}, 443),
             ({"port": None}, None),
-            ({"port": ''}, None),
+            ({"port": ""}, None),
             ({"port": 636}, 636),
             ({"port": 0}, None),
             ({"port": -110}, None),
@@ -327,12 +327,12 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             ({"host": "foobar.baz", "ipv4_address": "10.0.1.1", "port": 80}, ("foobar.baz", 80, None)),
             (
                 {"url": "http://foobar.baz.qux/http/local", "ipv4_address": "10.0.1.1", "port": 443},
-                ("foobar.baz.qux", 443, "http/local")
+                ("foobar.baz.qux", 443, "http/local"),
             ),
             ({"ipv4_address": "10.0.1.1", "port": 227}, ("10.0.1.1", 227, None)),
             ({"url": "http://examplecom.com/bar", "port": 0}, ("examplecom.com", 80, "bar")),
             ({"url": "http://examplecom.com/bar", "port": 8080}, ("examplecom.com", 8080, "bar")),
-            ({"ipv4_address": "10.0.1.1", "port": ''}, ("10.0.1.1", None, None)),
+            ({"ipv4_address": "10.0.1.1", "port": ""}, ("10.0.1.1", None, None)),
         ]:
             endpoints = engine.parse_endpoints(item)
             self.assertEqual(1, len(endpoints))
@@ -350,12 +350,11 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             endpoints = engine.parse_endpoints(item)
             self.assertEqual(0, len(endpoints))
 
-
     def test_appcheck_web_application_scanner_parser_nmap_engine_parser(self):
         engine = NmapScanningEngineParser()
         item = {
-            'meta': {
-                'port_table': [
+            "meta": {
+                "port_table": [
                     [21, "tcp", "open", "ftp", "Microsoft ftpd"],
                     [45000, "tcp", "open", "ssl/asmp?", ""],
                     # Should be reported - missing entries compared to the others but otherwise valid
@@ -375,9 +374,9 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
                     [-20, "tcp", "open", "unknown"],
                     [8443, "tcp", "open", "https?", ""],
                     [1, "tcp", "open", "ftp", ""],
-                    [65535, "tcp", "open", "ldap", ""]
-                ]
-            }
+                    [65535, "tcp", "open", "ldap", ""],
+                ],
+            },
         }
         self.assertEqual([21, 45000, 443, 45010, 60001, 60011, 8443, 1, 65535], engine.get_ports(item))
         self.assertEqual([None], engine.get_ports({}))
@@ -422,8 +421,8 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
                 self.assertTrue("Messages" in no_rr)
 
         for req, res in [
-            ('some stuff', 'here'), ('some stuff  <---', '  here'), ('s--->', 'here<---'), ('  s   ', '  h  '),
-            ('some stuff... HERE\r\n\r\n', 'no, here\n\n')
+            ("some stuff", "here"), ("some stuff  <---", "  here"), ("s--->", "here<---"), ("  s   ", "  h  "),
+            ("some stuff... HERE\r\n\r\n", "no, here\n\n"),
         ]:
             rr = {"Messages": f"--->\n\n{req}\n\n<---\n\n{res}"}
             engine.extract_request_response(f, rr)
