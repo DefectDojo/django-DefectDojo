@@ -1272,6 +1272,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kubescape JSON Importer": ["title", "component_name"],
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
+    "AppCheck Web Application Scanner": ["title", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1493,6 +1494,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
+    "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
