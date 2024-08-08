@@ -24,7 +24,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.parse_file_with_one_finding()
 
     def parse_file_with_one_finding(self):
-        with open("unittests/scans/veracode/one_finding.xml") as testfile:
+        with open("unittests/scans/veracode/one_finding.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -37,7 +37,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.parse_file_many_findings_different_hash_code_different_unique_id()
 
     def parse_file_many_findings_different_hash_code_different_unique_id(self):
-        with open("unittests/scans/veracode/many_findings_different_hash_code_different_unique_id.xml") as testfile:
+        with open("unittests/scans/veracode/many_findings_different_hash_code_different_unique_id.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
@@ -68,7 +68,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.parse_file_with_multiple_finding()
 
     def parse_file_with_multiple_finding(self):
-        with open("unittests/scans/veracode/many_findings.xml") as testfile:
+        with open("unittests/scans/veracode/many_findings.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
@@ -113,7 +113,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual(datetime.datetime.today().date(), finding.date)
 
     def parse_file_with_multiple_finding2(self):
-        with open("unittests/scans/veracode/veracode_scan.xml") as testfile:
+        with open("unittests/scans/veracode/veracode_scan.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(7, len(findings))
@@ -147,7 +147,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.parse_file_with_mitigated_finding()
 
     def parse_file_with_mitigated_finding(self):
-        with open("unittests/scans/veracode/mitigated_finding.xml") as testfile:
+        with open("unittests/scans/veracode/mitigated_finding.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(1, len(findings))
@@ -166,7 +166,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.parse_file_with_mitigated_fixed_finding()
 
     def parse_file_with_mitigated_fixed_finding(self):
-        with open("unittests/scans/veracode/mitigated_fixed_finding.xml") as testfile:
+        with open("unittests/scans/veracode/mitigated_fixed_finding.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -183,7 +183,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.parse_file_with_mitigated_sca_finding()
 
     def parse_file_with_mitigated_sca_finding(self):
-        with open("unittests/scans/veracode/veracode_scan_sca_mitigated.xml") as testfile:
+        with open("unittests/scans/veracode/veracode_scan_sca_mitigated.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -202,7 +202,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.assertEqual(datetime.datetime.today().date(), finding.date)
 
     def parse_file_with_dynamic_finding(self):
-        with open("unittests/scans/veracode/dynamic_finding.xml") as testfile:
+        with open("unittests/scans/veracode/dynamic_finding.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -230,7 +230,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.parse_file_with_changed_severity()
 
     def parse_file_with_changed_severity(self):
-        with open("unittests/scans/veracode/veracode_scan_changed_severity.xml") as testfile:
+        with open("unittests/scans/veracode/veracode_scan_changed_severity.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(7, len(findings))
@@ -252,7 +252,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.maven_component_name()
 
     def maven_component_name(self):
-        with open("unittests/scans/veracode/veracode_maven.xml") as testfile:
+        with open("unittests/scans/veracode/veracode_maven.xml", encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -266,7 +266,7 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual(9.8, finding.cvssv3_score)
 
     def json_static_findings_test(self, file_name):
-        with open(file_name) as testfile:
+        with open(file_name, encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -342,7 +342,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.json_static_findings_test("unittests/scans/veracode/static_embedded_format.json")
 
     def json_dynamic_findings_test(self, file_name):
-        with open(file_name) as testfile:
+        with open(file_name, encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -414,7 +414,7 @@ class TestVeracodeScannerParser(DojoTestCase):
         self.json_dynamic_findings_test("unittests/scans/veracode/dynamic_embedded_format.json")
 
     def json_sca_findings_test(self, file_name):
-        with open(file_name) as testfile:
+        with open(file_name, encoding="utf-8") as testfile:
             parser = VeracodeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(7, len(findings))

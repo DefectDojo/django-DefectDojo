@@ -11,7 +11,7 @@ class TestContrastParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with open("unittests/scans/contrast/contrast-node-goat.csv") as testfile:
+        with open("unittests/scans/contrast/contrast-node-goat.csv", encoding="utf-8") as testfile:
             parser = ContrastParser()
             findings = parser.get_findings(testfile, test)
             for finding in findings:
@@ -56,7 +56,7 @@ class TestContrastParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with open("unittests/scans/contrast/vulnerabilities2020-09-21.csv") as testfile:
+        with open("unittests/scans/contrast/vulnerabilities2020-09-21.csv", encoding="utf-8") as testfile:
             parser = ContrastParser()
             findings = parser.get_findings(testfile, test)
             for finding in findings:

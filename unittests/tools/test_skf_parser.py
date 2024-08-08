@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase
 class TestSkfParser(DojoTestCase):
 
     def test_single_has_no_finding(self):
-        with open("unittests/scans/skf/export.csv") as testfile:
+        with open("unittests/scans/skf/export.csv", encoding="utf-8") as testfile:
             parser = SKFParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(27, len(findings))

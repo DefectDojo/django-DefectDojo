@@ -8,13 +8,13 @@ from dojo.tools.api_bugcrowd.parser import ApiBugcrowdParser
 
 class TestApiBugcrowdParser(TestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with open("unittests/scans/api_bugcrowd/bugcrowd_empty.json") as testfile:
+        with open("unittests/scans/api_bugcrowd/bugcrowd_empty.json", encoding="utf-8") as testfile:
             parser = ApiBugcrowdParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
-        with open("unittests/scans/api_bugcrowd/bugcrowd_one.json") as testfile:
+        with open("unittests/scans/api_bugcrowd/bugcrowd_one.json", encoding="utf-8") as testfile:
 
             #             description = """
             # Vulnerability Name: JWT alg none
@@ -51,7 +51,7 @@ class TestApiBugcrowdParser(TestCase):
                 endpoint.clean()
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
-        with open("unittests/scans/api_bugcrowd/bugcrowd_many.json") as testfile:
+        with open("unittests/scans/api_bugcrowd/bugcrowd_many.json", encoding="utf-8") as testfile:
             parser = ApiBugcrowdParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -117,7 +117,7 @@ class TestApiBugcrowdParser(TestCase):
 
     def test_parse_file_with_not_reproducible_finding(self):
         with open(
-            "unittests/scans/api_bugcrowd/bugcrowd_not_reproducible.json",
+            "unittests/scans/api_bugcrowd/bugcrowd_not_reproducible.json", encoding="utf-8",
         ) as testfile:
 
             #             description = """
@@ -149,7 +149,7 @@ class TestApiBugcrowdParser(TestCase):
                 endpoint.clean()
 
     def test_parse_file_with_broken_bug_url(self):
-        with open("unittests/scans/api_bugcrowd/bugcrowd_broken_bug_url.json") as testfile:
+        with open("unittests/scans/api_bugcrowd/bugcrowd_broken_bug_url.json", encoding="utf-8") as testfile:
             parser = ApiBugcrowdParser()
             with self.assertLogs("dojo.tools.api_bugcrowd.parser", level="ERROR") as cm:
                 parser.get_findings(testfile, Test())

@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase
 class TestSSHAuditParser(DojoTestCase):
 
     def test_parse_file_with_many_vuln_has_many_findings(self):
-        with open("unittests/scans/ssh_audit/many_vulns.json") as testfile:
+        with open("unittests/scans/ssh_audit/many_vulns.json", encoding="utf-8") as testfile:
             parser = SSHAuditParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -19,7 +19,7 @@ class TestSSHAuditParser(DojoTestCase):
             self.assertEqual(findings[13].severity, "Medium")
 
     def test_parse_file_with_many_vuln_has_many_findings2(self):
-        with open("unittests/scans/ssh_audit/many_vulns2.json") as testfile:
+        with open("unittests/scans/ssh_audit/many_vulns2.json", encoding="utf-8") as testfile:
             parser = SSHAuditParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -32,7 +32,7 @@ class TestSSHAuditParser(DojoTestCase):
             self.assertEqual(findings[9].severity, "Medium")
 
     def test_parse_file_with_many_vuln_bug_fix(self):
-        with open("unittests/scans/ssh_audit/bug_fix.json") as testfile:
+        with open("unittests/scans/ssh_audit/bug_fix.json", encoding="utf-8") as testfile:
             parser = SSHAuditParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

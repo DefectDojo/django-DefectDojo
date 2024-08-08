@@ -10,7 +10,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("unittests/scans/mobsf/report1.json")
+        testfile = open("unittests/scans/mobsf/report1.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -36,7 +36,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("unittests/scans/mobsf/report2.json")
+        testfile = open("unittests/scans/mobsf/report2.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -50,7 +50,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("unittests/scans/mobsf/android.json")
+        testfile = open("unittests/scans/mobsf/android.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -73,7 +73,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("unittests/scans/mobsf/ios.json")
+        testfile = open("unittests/scans/mobsf/ios.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -94,7 +94,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("unittests/scans/mobsf/mobsf_3_7_9.json")
+        testfile = open("unittests/scans/mobsf/mobsf_3_7_9.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -109,7 +109,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("unittests/scans/mobsf/issue_9132.json")
+        testfile = open("unittests/scans/mobsf/issue_9132.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -120,7 +120,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("unittests/scans/mobsf/allsafe.json")
+        testfile = open("unittests/scans/mobsf/allsafe.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -131,7 +131,7 @@ class TestMobSFParser(DojoTestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("unittests/scans/mobsf/damnvulnrablebank.json")
+        testfile = open("unittests/scans/mobsf/damnvulnrablebank.json", encoding="utf-8")
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()

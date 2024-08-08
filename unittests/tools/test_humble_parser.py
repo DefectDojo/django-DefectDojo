@@ -5,7 +5,7 @@ from unittests.dojo_test_case import DojoTestCase
 
 class TestHumbleParser(DojoTestCase):
     def test_humble_parser_with_many_findings(self):
-        with open("unittests/scans/humble/many_findings.json") as testfile:
+        with open("unittests/scans/humble/many_findings.json", encoding="utf-8") as testfile:
             parser = HumbleParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -19,7 +19,7 @@ class TestHumbleParser(DojoTestCase):
             self.assertEqual("Deprecated header: Strict-Transport-Security (Recommended Values)", finding.title)
 
     def test_humble_parser_with_many_findings2(self):
-        with open("unittests/scans/humble/many_findings2.json") as testfile:
+        with open("unittests/scans/humble/many_findings2.json", encoding="utf-8") as testfile:
             parser = HumbleParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
