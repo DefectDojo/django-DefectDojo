@@ -3,79 +3,76 @@
 {% load authorization_tags %}
 {% load humanize %}
 {% load static %}
-
 {% block add_styles %}
   {{ block.super }}
-  .cls-transfer-finding-title {
-    width: 20%;
+.cls-transfer-finding-title {
+  width: 20%;
+}
+.chosen-container {
+width: 70% !important;
+}
+.editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+width: 70% !important;
+}
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border-left-color: #09f;
+  
+    animation: spin 1s ease infinite;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-    .chosen-container {
-    width: 70% !important;
-    }
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
-    .spinner {
-        border: 4px solid rgba(0, 0, 0, 0.1);
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        border-left-color: #09f;
-      
-        animation: spin 1s ease infinite;
-      }
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-      
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-      #spinnerContainer {
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-    }
 
-    #spinnerLoading {
-      align-items: center;
-      justify-content: center;
-      height: 100%;
+  100% {
+    transform: rotate(360deg);
   }
-    
-    .limitar-texto {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+}
+#spinnerContainer {
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
 
-    .modal-tranferfindingfinding{
-      max-width: 70%;
-      width: 70%;
-      margin: 0 auto;
+#spinnerLoading {
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
 
-    }
-    h3{
-      color: white;
-    }
-    .modal-header .close {
-      margin-top: -26px;
-    }
-    .modal-header{
-      padding: 8px;
-      background-color:#20a6d8bf;
-      border-button:#20a6d8bf;
-    }
-    .confirmed-modal{
-      max-width: 30%;
-      width: 30%;
-      margin: 0 auto;
-  }
-  #miTabla th {
-    white-space: normal;
-  }
+.limitar-texto {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modal-tranferfindingfinding{
+  max-width: 70%;
+  width: 70%;
+  margin: 0 auto;
+
+}
+h3{
+  color: white;
+}
+.modal-header .close {
+  margin-top: -26px;
+}
+.modal-header{
+  padding: 8px;
+  background-color:#20a6d8bf;
+  border-button:#20a6d8bf;
+}
+.confirmed-modal{
+  max-width: 30%;
+  width: 30%;
+  margin: 0 auto;
+}
+
     
     {{ block.super }}
 {% endblock %}
@@ -141,6 +138,7 @@
             <table id="open_findings" class="table table-hover">
                 <thead>
                     <tr>
+                        <th></th>
                         <th>Id</th>
                         <th>Title</th>
                         <th>Creation Date</th>
@@ -156,6 +154,26 @@
                 <tbody>
                     {%for transfer_findings in page_obj%}
                         <tr>
+                            <td>
+                                <div class="dropdown pull-left">
+                                  <a rel="noopener noreferrer" href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
+                                  <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-labelledby="dropdownMenu1">
+                                      <li role="presentation">
+                                          <a rel="noopener noreferrer" href="#" data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product.id}}
+                                          data-product-type-id={{transfer_findings.origin_product_type.id}} class="cls_transfer_finding_show_modal">
+                                              <i class="fa-solid fa-pen-to-square"></i> View Findings
+                                          </a>
+                                      </li>
+                                    {% if "Transfer_Finding_Edit"|has_global_permission %}
+                                        <li role="presentation">
+                                            <a rel="noopener noreferrer"  href="{% url 'transferfinding_update_form' transfer_findings.id %}">
+                                                <i class="fa-solid fa-pen-to-square"></i> Edit Transfer Finding
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                  </ul>
+                              </div>
+                            </td>
                             <td>{{transfer_findings.id}}</td>
                             <td>
                               <a href="#" class="table-link cls_transfer_finding_show_modal" id="id_transfer_finding_show_modal" type="button" 
