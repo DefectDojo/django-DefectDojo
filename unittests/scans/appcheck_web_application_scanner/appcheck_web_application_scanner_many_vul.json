@@ -766,7 +766,7 @@
             "cvss_v4_impact": "1.0-info",
             "cves": [],
             "impact": "1.0-info",
-            "last_detected_at": "2024-06-27T17:52:24.118000",
+            "last_detected_at": "2024-06-27T16:28:04",
             "authenticated": false,
             "title": "Possible Scan Turbulence: Gateway Timeout/Error Detected",
             "epss_base_score": 0.0,

@@ -1,4 +1,4 @@
-import datetime
+import dateutil.parser
 import re
 from typing import Any, Optional, Tuple, Union
 
@@ -118,7 +118,10 @@ class BaseEngineParser:
     # For parsing the initial finding datetime to a date format pleasing to Finding
     #####
     def parse_initial_date(self, finding: Finding, value: str) -> None:
-        finding.date = str(datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f").date())
+        try:
+            finding.date = str(dateutil.parser.parse(value).date())
+        except dateutil.parser.ParserError:
+            pass
 
     #####
     # For parsing CVEs
