@@ -119,7 +119,7 @@ class BaseEngineParser:
     CVE_PATTERN = re.compile("CVE-[0-9]+-[0-9]+", re.IGNORECASE)
 
     def is_cve(self, c: str) -> bool:
-        return bool(c and self.CVE_PATTERN.fullmatch(c))
+        return bool(c and isinstance(c, str) and self.CVE_PATTERN.fullmatch(c))
 
     def parse_cves(self, finding: Finding, value: [str]) -> None:
         finding.unsaved_vulnerability_ids = [c.upper() for c in value if self.is_cve(c)]
@@ -140,16 +140,23 @@ class BaseEngineParser:
     #####
     # For severity (extracted from cvss vector)
     #####
-    def parse_severity(self, finding: Finding, value: str) -> None:
+    def get_severity(self, value: str) -> Optional[str]:
         if cvss_obj := cvss.parser.parse_cvss_from_text(value):
             severity = cvss_obj[0].severities()[0]
             if severity.lower() != "none":
-                finding.severity = severity
+                return severity
+        return None
+
+    def parse_severity(self, finding: Finding, value: str) -> None:
+        if severity := self.get_severity(value):
+            finding.severity = severity
 
     #####
     # For parsing component data
     #####
     def parse_cpe(self, cpe_str: str) -> (Optional[str], Optional[str]):
+        if not cpe_str:
+            return None, None
         cpe_obj = CPE(cpe_str)
         return (
             cpe_obj.get_product() and cpe_obj.get_product()[0] or None,
@@ -187,12 +194,21 @@ class BaseEngineParser:
     # For parsing endpoints
     #####
     def get_host(self, item: dict[str, Any]) -> str:
-        return item.get("url") or item.get("host") or item.get("ipv4_address")
+        return item.get("url") or item.get("host") or item.get("ipv4_address") or None
+
+    def parse_port(self, item: Any) -> Optional[int]:
+        try:
+            int_val = int(item)
+            if 0 < int_val <= 65535:
+                return int_val
+        except (ValueError, TypeError):
+            pass
+        return None
 
     def get_port(self, item: dict[str, Any]) -> Optional[int]:
-        return item.get("port")
+        return self.parse_port(item.get('port'))
 
-    def construct_endpoint(self, host: str, port: int) -> Endpoint:
+    def construct_endpoint(self, host: str, port: Optional[int]) -> Endpoint:
         endpoint = Endpoint.from_uri(host)
         if endpoint.host:
             if port:
@@ -202,9 +218,11 @@ class BaseEngineParser:
         return endpoint
 
     def parse_endpoints(self, item: dict[str, Any]) -> [Endpoint]:
-        host = self.get_host(item)
-        port = self.get_port(item)
-        return [self.construct_endpoint(host, port)]
+        # Endpoint requires a host
+        if host := self.get_host(item):
+            port = self.get_port(item)
+            return [self.construct_endpoint(host, port)]
+        return []
 
     def set_endpoints(self, finding: Finding, item: Any) -> None:
         endpoints = self.parse_endpoints(item)

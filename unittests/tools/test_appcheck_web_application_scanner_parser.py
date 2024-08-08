@@ -1,6 +1,10 @@
 from django.test import TestCase
+
+from dojo.tools.appcheck_web_application_scanner.engines.appcheck import AppCheckScanningEngineParser
+from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
+from dojo.tools.appcheck_web_application_scanner.engines.nmap import NmapScanningEngineParser
 from dojo.tools.appcheck_web_application_scanner.parser import AppCheckWebApplicationScannerParser
-from dojo.models import Test
+from dojo.models import Test, Finding
 
 
 class TestAppCheckWebApplicationScannerParser(TestCase):
@@ -48,7 +52,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
         with open("unittests/scans/appcheck_web_application_scanner/appcheck_web_application_scanner_many_vul.json") as testfile:
             parser = AppCheckWebApplicationScannerParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(5, len(findings))
+            self.assertEqual(6, len(findings))
 
             # First item is the same as the single-vuln entry (checked above); test the others here
 
@@ -90,7 +94,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("2024-06-26T09:55:43.459000", finding.date)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(True, finding.active)
-            self.assertEqual("GET Request ", finding.unsaved_request)
+            self.assertEqual("GET Request", finding.unsaved_request)
             self.assertEqual("Response", finding.unsaved_response)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
             self.assertEqual("[[markup]]\n\nUpdate to the latest version.", finding.mitigation)
@@ -105,7 +109,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertEqual("poes.ppt.services", endpoint.host)
+            self.assertEqual("poes.x73zjffz.services", endpoint.host)
             self.assertEqual(443, endpoint.port)
             self.assertEqual("https", endpoint.protocol)
 
@@ -133,7 +137,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertEqual("example.ppt.com", endpoint.host)
+            self.assertEqual("example.x73zjffz.com", endpoint.host)
             self.assertEqual(443, endpoint.port)
             self.assertEqual("https", endpoint.protocol)
 
@@ -170,9 +174,42 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertEqual("poes.ppt.services", endpoint.host)
+            self.assertEqual("poes.x73zjffz.services", endpoint.host)
             self.assertEqual(443, endpoint.port)
             self.assertIsNone(endpoint.protocol)
+
+            finding = findings[5]
+            self.assertEqual("fc0d905439bde7b9e709cb2feecdf53fe226e72043f46133", finding.unique_id_from_tool)
+            self.assertEqual("Possible Scan Turbulence: Gateway Timeout/Error Detected", finding.title)
+            self.assertEqual("2024-06-27T17:52:24.118000", finding.date)
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual(True, finding.active)
+            self.assertEqual("POST Request", finding.unsaved_request)
+            self.assertEqual("Response", finding.unsaved_response)
+            self.assertEqual("CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N", finding.cvssv3)
+            self.assertEqual(
+                "[[markup]]Review the affected target to determine the reason it is returning a gateway error code. Reducing scan threads\nmay help alleviate the problem.",
+                finding.mitigation
+            )
+            self.assertIsNone(finding.component_name)
+            self.assertIsNone(finding.component_version)
+            self.assertIsNone(finding.unsaved_vulnerability_ids)
+            self.assertTrue(
+                finding.description.startswith(
+                    "[[markup]]The server responded with a HTTP status code that may indicate that the remote server is experiencing technical\ndifficulties that are likely to affect the scan and may also be affecting other application users."
+                )
+            )
+            for section in ["**Technical Details**:"]:
+                self.assertTrue(section in finding.description)
+
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
+            self.assertEqual("example.x73zjffz.com", endpoint.host)
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual("ajax/ShelfEdgeLabel/ShelfEdgeLabelsPromotionalBatch", endpoint.path)
+
 
     def test_appcheck_web_application_scanner_parser_dupes(self):
         with open("unittests/scans/appcheck_web_application_scanner/appcheck_web_application_scanner_dupes.json") as testfile:
@@ -180,3 +217,204 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             findings = parser.get_findings(testfile, Test())
             # Test has 5 entries, but we should only return 3 findings.
             self.assertEqual(3, len(findings))
+
+    def test_appcheck_web_application_scanner_parser_base_engine_parser(self):
+        engine = BaseEngineParser()
+
+        # Test CVE checking
+        for maybe_cve, should_be_cve in [
+            ("CVE-2018-1304", True), ("CVE-2018-1305", True), ("CVE-2018-1306", True), ("CVE-2016-2183", True),
+            ("", False), (None, False),
+            ("CVE-2016-6329", True), ("CVE-2020-12872", True),
+            (" ", False), ("CVE-XYZ-123", False), (6, False), ([], False), ("2024-1234", False),
+            ("CWE-2235-4444", False)
+        ]:
+            self.assertEqual(should_be_cve, engine.is_cve(maybe_cve))
+
+        # Test Status flags determination
+
+        # values map to finding#(active, false_p, risk_accepted)
+        for status, values in {
+            "unfixed": (True, False, False),
+            "fixed": (False, False, False),
+            "false_positive": (True, True, False),
+            "acceptable_risk": (True, False, True)
+        }.items():
+            f = Finding()
+            engine.parse_status(f, status)
+            self.assertEqual(values, (f.active, f.false_p, f.risk_accepted))
+
+        # Test severity determination
+        for cvss_vector, severity in [
+            ("AV:N/AC:L/Au:N/C:P/I:N/A:N", "Medium"),
+            ("AV:N/AC:L/Au:N/C:C/I:C/A:N", "High"),
+            ("AV:N/AC:M/Au:N/C:N/I:P/A:N", "Medium"),
+            ("AV:N/AC:H/Au:N/C:P/I:N/A:N", "Low"),
+            # Invalid cvss vectors
+            ("", None),
+            ("AV:N/AC:H", None),
+        ]:
+            self.assertEqual(severity, engine.get_severity(cvss_vector))
+
+        # Test component parsing
+        f = Finding()
+        for cpe_list, expected_values in [
+            (["cpe:2.3:a:apache:tomcat:8.0.32:*:*:*:*:*:*:*"], ('tomcat', '8.0.32')),
+            (
+                ["cpe:/a:ietf:transport_layer_security:1.2", "cpe:2.3:a:apache:tomcat:8.0.32:*:*:*:*:*:*:*"],
+                ('transport_layer_security', '1.2')
+            ),
+            (["cpe:2.3:a:apache:tomcat:*:*:*:*:*:*:*:*"], ('tomcat', '*')),
+            (
+                ["cpe:2.3:a:apache:tomcat:*:*:*:*:*:*:*:*", "cpe:2.3:a:apache:tomcat:8.0.32:*:*:*:*:*:*:*"],
+                ('tomcat', '*')
+            ),
+            (["", "cpe:2.3:a:apache:tomcat:8.0.32:*:*:*:*:*:*:*"], (None, None)),
+            ([""], (None, None)),
+        ]:
+            f.component_name = f.component_version = None
+            engine.parse_components(f, cpe_list)
+            self.assertEqual(expected_values, (f.component_name, f.component_version))
+
+        # Test host extraction
+        for item, expected in [
+            ({}, None),
+            ({"nope": 'asdf'}, None),
+            ({"ipv4_address": ""}, None),
+            ({"ipv4_address": "10.0.1.1"}, "10.0.1.1"),
+            ({"host": "foobar.baz", "ipv4_address": "10.0.1.1"}, "foobar.baz"),
+            (
+                {"url": "http://foobar.baz.qux/http/local", "host": "foobar.baz", "ipv4_address": "10.0.1.1"},
+                "http://foobar.baz.qux/http/local"
+            ),
+            ({"url": "http://foo"}, "http://foo"),
+            # Empty 'url' falls back to 'host'
+            ({"url": "", "host": "foobar"}, "foobar"),
+            ({"host": "hostname.resolver.com.com"}, "hostname.resolver.com.com"),
+        ]:
+            self.assertEqual(expected, engine.get_host(item))
+
+        # Test port extraction
+        for port, expected in [
+            ({}, None),
+            ({"not_port": 443}, None),
+            ({"port": 443}, 443),
+            ({"port": None}, None),
+            ({"port": ''}, None),
+            ({"port": 636}, 636),
+            ({"port": 0}, None),
+            ({"port": -110}, None),
+            ({"port": 65536}, None),
+            ({"port": 1}, 1),
+            ({"port": 65535}, 65535),
+        ]:
+            self.assertEqual(expected, engine.get_port(port))
+
+        # Test Endpoint parsing/construction
+        for item, expected in [
+            ({"host": "foobar.baz", "ipv4_address": "10.0.1.1", "port": 80}, ("foobar.baz", 80, None)),
+            (
+                {"url": "http://foobar.baz.qux/http/local", "ipv4_address": "10.0.1.1", "port": 443},
+                ("foobar.baz.qux", 443, "http/local")
+            ),
+            ({"ipv4_address": "10.0.1.1", "port": 227}, ("10.0.1.1", 227, None)),
+            ({"url": "http://examplecom.com/bar", "port": 0}, ("examplecom.com", 80, "bar")),
+            ({"url": "http://examplecom.com/bar", "port": 8080}, ("examplecom.com", 8080, "bar")),
+            ({"ipv4_address": "10.0.1.1", "port": ''}, ("10.0.1.1", None, None)),
+        ]:
+            endpoints = engine.parse_endpoints(item)
+            self.assertEqual(1, len(endpoints))
+            endpoint = endpoints[0]
+            endpoint.clean()
+            self.assertEqual(expected, (endpoint.host, endpoint.port, endpoint.path))
+
+        for item in [
+            {"host": None, "port": 0},
+            {"url": "", "port": 3},
+            {"host": None, "port": 1},
+            {"ipv4_address": "", "port": 0},
+            {"ipv4_address": "", "url": "", "host": "", "port": 0},
+        ]:
+            endpoints = engine.parse_endpoints(item)
+            self.assertEqual(0, len(endpoints))
+
+
+    def test_appcheck_web_application_scanner_parser_nmap_engine_parser(self):
+        engine = NmapScanningEngineParser()
+        item = {
+            'meta': {
+                'port_table': [
+                    [21, "tcp", "open", "ftp", "Microsoft ftpd"],
+                    [45000, "tcp", "open", "ssl/asmp?", ""],
+                    # Should be reported - missing entries compared to the others but otherwise valid
+                    [443, "tcp", "open"],
+                    [45010, "tcp", "open", "unknown", ""],
+                    # Shouldn't be reported - empty
+                    [],
+                    [60001, "tcp", "open", "ssl/unknown", ""],
+                    # Shouldn't be reported - out of range
+                    [65536, "tcp", "open", "unknown", ""],
+                    # Shouldn't be reported - first item not an int
+                    ["bogus", 3, "open", "unknown", ""],
+                    [60011, "tcp", "open", "unknown", ""],
+                    # Shouldn't be reported - invalid port
+                    [0, "tcp", "open", "unknown"],
+                    # Shouldn't be reported - invalid port
+                    [-20, "tcp", "open", "unknown"],
+                    [8443, "tcp", "open", "https?", ""],
+                    [1, "tcp", "open", "ftp", ""],
+                    [65535, "tcp", "open", "ldap", ""]
+                ]
+            }
+        }
+        self.assertEqual([21, 45000, 443, 45010, 60001, 60011, 8443, 1, 65535], engine.get_ports(item))
+        self.assertEqual([None], engine.get_ports({}))
+        self.assertEqual([None], engine.get_ports({"meta": {}}))
+        self.assertEqual([None], engine.get_ports({"meta": []}))
+        self.assertEqual([None], engine.get_ports({"meta": None}))
+
+    def test_appcheck_web_application_scanner_parser_appcheck_engine_parser(self):
+        engine = AppCheckScanningEngineParser()
+        f = Finding()
+        # Test extraction of request/response from the details.Messages entry -- where no valid req/res exists
+        for no_rr in [
+            # Incorrect 'Messages' entry
+            {}, {"Messages": ""}, {"Messages": None}, {"NotMessages": "string"},
+            # Missing necessary newline markers
+            {"Messages": "--->some stuff here<---and here"},
+            {"Messages": "---><---here"},
+            {"Messages": "---><---"},
+            {"Messages": "--->\n\nsome stuff here<---and here"},
+            {"Messages": "--->\n\nsome stuff here\n\n<---and here"},
+            {"Messages": "--->\n\nsome stuff here<---\n\nand here"},
+            {"Messages": "--->some stuff here\n\n<---\n\nand here"},
+            {"Messages": "--->some stuff here\n\n<---and here"},
+            # No request
+            {"Messages": "--->\n\n\n\n<---\n\nhere"},
+            # No response
+            {"Messages": "--->\n\nsome stuff here\n\n<---\n\n"},
+            # No request or response
+            {"Messages": "--->\n\n\n\n<---\n\n"},
+            {"Messages": "--->\n\n<---\n\n"},
+            # Incorrect request closing-marker
+            {"Messages": "--->\n\nsome stuff\n\n<--\n\nhere"},
+            # Incorrect request starting-marker
+            {"Messages": "-->\n\nsome stuff here\n\n<---\n\nhere"},
+        ]:
+            has_messages_entry = "Messages" in no_rr
+            engine.extract_request_response(f, no_rr)
+            self.assertIsNone(f.unsaved_request)
+            self.assertIsNone(f.unsaved_response)
+            # If the dict originally has a 'Messages' entry, it should remain there since no req/res was extracted
+            if has_messages_entry:
+                self.assertTrue("Messages" in no_rr)
+
+        for req, res in [
+            ('some stuff', 'here'), ('some stuff  <---', '  here'), ('s--->', 'here<---'), ('  s   ', '  h  '),
+            ('some stuff... HERE\r\n\r\n', 'no, here\n\n')
+        ]:
+            rr = {"Messages": f"--->\n\n{req}\n\n<---\n\n{res}"}
+            engine.extract_request_response(f, rr)
+            self.assertEqual(req.strip(), f.unsaved_request)
+            self.assertEqual(res.strip(), f.unsaved_response)
+            f.unsaved_request = f.unsaved_response = None

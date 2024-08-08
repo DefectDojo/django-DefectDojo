@@ -14,11 +14,14 @@ class NmapScanningEngineParser(BaseEngineParser):
     SCANNING_ENGINE = "NMapScanner"
 
     def is_port_table_entry(self, entry) -> bool:
-        return len(entry) > 0 and isinstance(entry[0], int) and 0 < entry[0] <= 65535
+        return len(entry) > 0 and self.parse_port(entry[0])
 
     def get_ports(self, item) -> Union[list[int], list[None]]:
-        if ports := item.get("meta", {}).get("port_table", []):
-            return [port_entry[0] for port_entry in ports if self.is_port_table_entry(port_entry)]
+        meta = item.get('meta')
+        if not isinstance(meta, dict):
+            meta = {}
+        if ports := meta.get("port_table", []):
+            return [port for port_entry in ports if (port := self.is_port_table_entry(port_entry))]
         # Want at least one endpoint reported since we have a host -- no ports provided. This shouldn't happen, but...
         return [None]
 

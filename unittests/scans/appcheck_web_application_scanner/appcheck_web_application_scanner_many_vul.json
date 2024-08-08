@@ -321,7 +321,7 @@
                 "0717c5772f094dcd"
             ],
             "details": {
-                "Messages": "--->\n\nGET Request <---\n\nResponse",
+                "Messages": "--->\n\nGET Request\r\n\r\n\n\n<---\n\nResponse",
                 "Technical Details": "[[markup]]This vulnerability was detected by comparing the detected version (8.0.32) against the affected versions reported by the vendor.",
                 "Classifications": "[[markup]]**OWASP Top 10**\n\n+----------+----------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\n| Version  | Name                             | Description                                                                                                                                                                                                                                                                                     |\n+==========+==================================+=================================================================================================================================================================================================================================================================================================+\n| **2017** | A5-Broken Access Control         | Restrictions on what authenticated users are allowed to do are often not properly enforced. Attackers can exploit these flaws to access unauthorized functionality and/or data, such as access other users' accounts, view sensitive files, modify other users' data, change access rights, etc |\n+----------+----------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\n| **2021** | A01:2021 - Broken Access Control | Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification, or destruction of all data or performing a business function outside the user's limits.                          |\n+----------+----------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+\n\n",
                 "_meta": {
@@ -334,7 +334,7 @@
             },
             "cvss_score": 5.0,
             "type": "WEB_APP",
-            "web_app": "https://poes.ppt.services",
+            "web_app": "https://poes.x73zjffz.services",
             "cvss_v4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
             "mss_confirmed": false,
             "category": "web_app",
@@ -344,7 +344,7 @@
             ],
             "cvss_v4_base_score": 0.0,
             "ipv4_address": "0.0.0.1",
-            "host": "poes.ppt.services",
+            "host": "poes.x73zjffz.services",
             "cvss_v3_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
             "internal": false,
             "OWASP": {
@@ -447,7 +447,7 @@
             "_id": "a25dae3aff97a06b6923b5fc9cc32826e1fd87ab",
             "target": "/",
             "created": "2024-06-26T09:55:43.458000",
-            "url": "https://poes.ppt.services/",
+            "url": "https://poes.x73zjffz.services/",
             "latest_detected_result": true,
             "plugin": "ApacheTomcatScanner",
             "solution": "[[markup]]\n\nUpdate to the latest version.",
@@ -504,7 +504,7 @@
                 "55d9dbee1df64828"
             ],
             "details": {
-                "Permitted HTTP Methods": "https://example.ppt.com/Content/css/font-awesome-4.7.0/css permits: [TRACE]\n\nhttps://example.ppt.com/Content/SitefinityTheme permits: [TRACE]\n\nhttps://example.ppt.com/content permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/mstile-144x144.png permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/top-logo-linkedin.png permits: [TRACE]\n\nhttps://example.ppt.com/Content/SitefinityTheme/Global permits: [TRACE]\n\nhttps://example.ppt.com/Content/images/myppt/header_bg_small.png permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/favicon-160x160.png permits: [TRACE]\n\nhttps://example.ppt.com/content/images permits: [TRACE]\n\nhttps://example.ppt.com/content/images/Settings-icon.png permits: [TRACE]\n\nhttps://example.ppt.com/content/fonts permits: [TRACE]\n\nhttps://example.ppt.com/Content/css/font-awesome-4.7.0 permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/favicon.ico permits: [TRACE]\n\nhttps://example.ppt.com/content/css permits: [TRACE]\n\nhttps://example.ppt.com/content/media permits: [TRACE]\n\nhttps://example.ppt.com/Content permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/apple-touch-icon-114x114.png permits: [TRACE]\n\nhttps://example.ppt.com/api/SubmitAgentRegistration permits: [POST]\n\nhttps://example.ppt.com/Content/css/fonts/Foundry/FOUCONDM.otf permits: [TRACE]\n\nhttps://example.ppt.com/Content/js/bootstrap/modernizr-2.6.2.min.js permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/apple-touch-icon-152x152.png permits: [TRACE]\n\nhttps://example.ppt.com/content/images/PPoint_Logo_76x24.png permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/favicon-96x96.png permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/apple-touch-icon-120x120.png permits: [TRACE]\n\nhttps://example.ppt.com/Content/images/alert.png permits: [TRACE]\n\nhttps://example.ppt.com/content/css/font-awesome-4.7.0/css/font-awesome.min.css permits: [TRACE]\n\nhttps://example.ppt.com/content/fonts/glyphicons-halflings-regular.woff permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/apple-touch-icon-57x57.png permits: [TRACE]\n\nhttps://example.ppt.com/api/myStatements/GetAgentNumbers permits: [GET]\n\nhttps://example.ppt.com/content/css/font-awesome-4.7.0 permits: [TRACE]\n\nhttps://example.ppt.com/content/fonts/glyphicons-halflings-regular.svg permits: [TRACE]\n\nhttps://example.ppt.com/Content/css/fonts/Foundry/FOUCONMD.otf permits: [TRACE]\n\nhttps://example.ppt.com/content/css/font-awesome-4.7.0/css permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/apple-touch-icon-60x60.png permits: [TRACE]\n\nhttps://example.ppt.com/api/myStatements/GetDateRanges permits: [GET]\n\nhttps://example.ppt.com/content/fonts/glyphicons-halflings-regular.eot permits: [TRACE]\n\nhttps://example.ppt.com/Content/css/font-awesome-4.7.0/css/font-awesome.min.css permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/favicon-196x196.png permits: [TRACE]\n\nhttps://example.ppt.com/Content/js/bootstrap permits: [TRACE]\n\nhttps://example.ppt.com/content/fonts/glyphicons-halflings-regular.ttf permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/favicon-32x32.png permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/favicon-16x16.png permits: [TRACE]\n\nhttps://example.ppt.com/Content/css/fonts permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/apple-touch-icon-76x76.png permits: [TRACE]\n\nhttps://example.ppt.com/Content/images/Tick.png permits: [TRACE]\n\nhttps://example.ppt.com/Content/js/bootstrap/bootstrap.min.js permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/apple-touch-icon-144x144.png permits: [TRACE]\n\nhttps://example.ppt.com/content/media/PPoint%20Privacy%20Statement%20-%2016%20September%202020.pdf permits: [TRACE]\n\nhttps://example.ppt.com/Content/js permits: [TRACE]\n\nhttps://example.ppt.com/Content/css/fonts/Foundry/FOUCONRG.otf permits: [TRACE]\n\nhttps://example.ppt.com/content/fonts/glyphicons-halflings-regular.woff2 permits: [TRACE]\n\nhttps://example.ppt.com/Content/css/fonts/Foundry permits: [TRACE]\n\nhttps://example.ppt.com/content/images/PPoint_Logo_152x48.png permits: [TRACE]\n\nhttps://example.ppt.com/Content/images/myppt permits: [TRACE]\n\nhttps://example.ppt.com/content/css/quba.css permits: [TRACE]\n\nhttps://example.ppt.com/Content/images permits: [TRACE]\n\nhttps://example.ppt.com/Content/images/myppt/bg_whole.png permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons/apple-touch-icon-72x72.png permits: [TRACE]\n\nhttps://example.ppt.com/Content/SitefinityTheme/Global/menu.min.css permits: [TRACE]\n\nhttps://example.ppt.com/content/images/icons permits: [TRACE]\n\nhttps://example.ppt.com/Content/css permits: [TRACE]",
+                "Permitted HTTP Methods": "https://example.x73zjffz.com/Content/css/font-awesome-4.7.0/css permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/SitefinityTheme permits: [TRACE]\n\nhttps://example.x73zjffz.com/content permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/mstile-144x144.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/top-logo-linkedin.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/SitefinityTheme/Global permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/myx73zjffz/header_bg_small.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-160x160.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/Settings-icon.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/font-awesome-4.7.0 permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon.ico permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/media permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-114x114.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/api/SubmitAgentRegistration permits: [POST]\n\nhttps://example.x73zjffz.com/Content/css/fonts/Foundry/FOUCONDM.otf permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/js/bootstrap/modernizr-2.6.2.min.js permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-152x152.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/PPoint_Logo_76x24.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-96x96.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-120x120.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/alert.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/css/font-awesome-4.7.0/css/font-awesome.min.css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.woff permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-57x57.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/api/myStatements/GetAgentNumbers permits: [GET]\n\nhttps://example.x73zjffz.com/content/css/font-awesome-4.7.0 permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.svg permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/fonts/Foundry/FOUCONMD.otf permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/css/font-awesome-4.7.0/css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-60x60.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/api/myStatements/GetDateRanges permits: [GET]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.eot permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/font-awesome-4.7.0/css/font-awesome.min.css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-196x196.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/js/bootstrap permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.ttf permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-32x32.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/favicon-16x16.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/fonts permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-76x76.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/Tick.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/js/bootstrap/bootstrap.min.js permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-144x144.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/media/PPoint%20Privacy%20Statement%20-%2016%20September%202020.pdf permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/js permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/fonts/Foundry/FOUCONRG.otf permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/fonts/glyphicons-halflings-regular.woff2 permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css/fonts/Foundry permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/PPoint_Logo_152x48.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/myx73zjffz permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/css/quba.css permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/images/myx73zjffz/bg_whole.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons/apple-touch-icon-72x72.png permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/SitefinityTheme/Global/menu.min.css permits: [TRACE]\n\nhttps://example.x73zjffz.com/content/images/icons permits: [TRACE]\n\nhttps://example.x73zjffz.com/Content/css permits: [TRACE]",
                 "_meta": {
                     "ordered_keys": [
                         "Permitted HTTP Methods"
@@ -513,7 +513,7 @@
             },
             "cvss_score": 0.0,
             "type": "WEB_APP",
-            "web_app": "https://example.ppt.com",
+            "web_app": "https://example.x73zjffz.com",
             "cvss_v4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
             "mss_confirmed": false,
             "category": "web_app",
@@ -523,7 +523,7 @@
             ],
             "cvss_v4_base_score": 0.0,
             "ipv4_address": "0.18.4.3",
-            "host": "my.ppt.com",
+            "host": "my.x73zjffz.com",
             "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N",
             "internal": false,
             "_meta": {
@@ -597,7 +597,7 @@
             "_id": "02769aa244c456f0aad810354748faaa70d089c1129dc9c5",
             "target": "/",
             "created": "2024-06-27T19:23:24.942000",
-            "url": "https://example.ppt.com/",
+            "url": "https://example.x73zjffz.com/",
             "latest_detected_result": true,
             "plugin": "HttpChecks",
             "cpe": [],
@@ -660,7 +660,7 @@
             "description": "[[markup]]This routine reports all SSL/TLS cipher suites accepted by a service   where attack vectors exists only on HTTPS services.\n\nThese rules are applied for the evaluation of the vulnerable cipher suites:\n\n- 64-bit block cipher 3DES vulnerable to the SWEET32 attack (CVE-2016-2183).",
             "tags": [],
             "ipv4_address": "0.0.0.1",
-            "host": "poes.ppt.services",
+            "host": "poes.x73zjffz.services",
             "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N",
             "OWASP": [],
             "_meta": {
@@ -720,7 +720,7 @@
             "disabled": false,
             "cvss_vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
             "_id": "0cb109aaf647451377332c22cbe917b62304aa13",
-            "target": "poes.ppt.services:443/tcp",
+            "target": "poes.x73zjffz.services:443/tcp",
             "created": "2024-06-26T10:41:56.098000",
             "latest_detected_result": true,
             "solution": "[[markup]]The configuration of this services should be changed so   that it does not accept the listed cipher suites anymore.\n\nPlease see the references for more resources supporting you with this task.",
@@ -731,6 +731,162 @@
             "meta_migration": [],
             "trashed": false,
             "cvss_v4_base_score": 0.0,
+            "fixed": false
+        },
+        {
+            "status": "unfixed",
+            "domain": "d10b91e0ff3947b7",
+            "manually_altered": false,
+            "probability": "1.0-info",
+            "cvss_base_score": -0.0,
+            "cvss_v3_base_score": 0.0,
+            "cpe": [],
+            "cvss_v3_impact": "1.0-info",
+            "meta": {
+                "discovered_after": 34870.54912304878,
+                "scanning_engine": {
+                    "type": "web_app_scanner",
+                    "name": "NewAppCheckScannerMultiple",
+                    "_meta": {
+                        "ordered_keys": [
+                            "type",
+                            "name"
+                        ]
+                    }
+                },
+                "_meta": {
+                    "ordered_keys": [
+                        "discovered_after",
+                        "scanning_engine"
+                    ]
+                }
+            },
+            "modified": "2024-06-27T17:52:24.154000",
+            "first_detected_at": "2024-06-27T17:52:24.118000",
+            "cvss_v4_impact": "1.0-info",
+            "cves": [],
+            "impact": "1.0-info",
+            "last_detected_at": "2024-06-27T17:52:24.118000",
+            "authenticated": false,
+            "title": "Possible Scan Turbulence: Gateway Timeout/Error Detected",
+            "epss_base_score": 0.0,
+            "integration": [],
+            "port": 443,
+            "priority": "2.0-low",
+            "attack": "https://example.x73zjffz.com/error-page",
+            "results_set_id": [
+                "55d9dbee1df64828"
+            ],
+            "details": {
+                "Technical Details": "[[markup]]The server returned a **Web server is down** HTTP status indicating that the remote system is experiencing technical difficulties. However, another request to **https://example.x73zjffz.com/** did not return the same code (**200** was returned) and therefore this error may only affect a specific route and/or could becaused by a specific security check.",
+                "Messages": "--->\n\nPOST Request\r\n\r\n\n\n<---\n\nResponse",
+                "_meta": {
+                    "ordered_keys": [
+                        "Technical Details",
+                        "Messages"
+                    ]
+                }
+            },
+            "cvss_score": 0.0,
+            "type": "WEB_APP",
+            "web_app": "https://example.x73zjffz.com",
+            "cvss_v4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
+            "mss_confirmed": false,
+            "category": "web_app",
+            "description": "[[markup]]The server responded with a HTTP status code that may indicate that the remote server is experiencing technical\ndifficulties that are likely to affect the scan and may also be affecting other application users.",
+            "tags": [
+                "web_app"
+            ],
+            "cvss_v4_base_score": 0.0,
+            "ipv4_address": "0.18.5.3",
+            "host": "my.x73zjffz.com",
+            "cvss_v3_vector": "CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N",
+            "internal": false,
+            "OWASP": [],
+            "_meta": {
+                "ordered_keys": [
+                    "mss_confirmed",
+                    "domain",
+                    "manually_altered",
+                    "probability",
+                    "cvss_base_score",
+                    "results_set_id",
+                    "cvss_v3_base_score",
+                    "solution",
+                    "cvss_v3_impact",
+                    "meta",
+                    "first_detected_at",
+                    "cvss_v4_impact",
+                    "cves",
+                    "impact",
+                    "last_detected_at",
+                    "authenticated",
+                    "title",
+                    "epss_base_score",
+                    "signature",
+                    "integration",
+                    "port",
+                    "priority",
+                    "attack",
+                    "internal",
+                    "details",
+                    "cvss_score",
+                    "type",
+                    "web_app",
+                    "cvss_v4_vector",
+                    "status",
+                    "category",
+                    "description",
+                    "tags",
+                    "cpe",
+                    "ipv4_address",
+                    "host",
+                    "cvss_v3_vector",
+                    "OWASP",
+                    "appcheck",
+                    "disabled",
+                    "cvss_vector",
+                    "fixed",
+                    "target",
+                    "created",
+                    "url",
+                    "latest_detected_result",
+                    "plugin",
+                    "modified",
+                    "patch",
+                    "attachments",
+                    "suppression_days",
+                    "synopsis",
+                    "meta_migration",
+                    "trashed",
+                    "cvss_v4_base_score",
+                    "_id"
+                ]
+            },
+            "appcheck": {
+                "_meta": {
+                    "ordered_keys": [
+                        "cls"
+                    ]
+                },
+                "cls": "GatewayTimeoutDetected"
+            },
+            "disabled": false,
+            "cvss_vector": "AV:L/AC:H/Au:M/C:N/I:N/A:N",
+            "_id": "fc0d905439bde7b9e709cb2feecdf53fe226e72043f46133",
+            "target": "/ajax/ShelfEdgeLabel/ShelfEdgeLabelsPromotionalBatch",
+            "created": "2024-06-27T17:52:24.117000",
+            "url": "https://example.x73zjffz.com/ajax/ShelfEdgeLabel/ShelfEdgeLabelsPromotionalBatch",
+            "latest_detected_result": true,
+            "plugin": "ScanTurbulenceMgmt",
+            "solution": "[[markup]]Review the affected target to determine the reason it is returning a gateway error code. Reducing scan threads\nmay help alleviate the problem.",
+            "patch": [],
+            "attachments": [],
+            "suppression_days": 14,
+            "synopsis": "[[markup]]The server responded with a HTTP status code that may indicate that the remote server is experiencing technical\ndifficulties that are likely to affect the scan and may also be affecting other application users.",
+            "meta_migration": [],
+            "trashed": false,
+            "signature": 8294414594495664476,
             "fixed": false
         }
     ],
