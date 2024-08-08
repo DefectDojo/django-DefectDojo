@@ -1,0 +1,3 @@
+extends:
+  - - spectral:oas
+    - all
