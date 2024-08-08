@@ -41,7 +41,7 @@ class GovulncheckParser:
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract traces.
         trace_info_strs = []
         for elem in data:
-            if "finding" in elem.keys():
+            if "finding" in elem:
                 finding = elem["finding"]
                 if finding.get("osv") == osv_id:
                     trace_info = finding.get("trace", [])
@@ -59,12 +59,12 @@ class GovulncheckParser:
     def get_affected_version(self, data, osv_id):
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract the first affected version.
         for elem in data:
-            if "finding" in elem.keys():
+            if "finding" in elem:
                 finding = elem["finding"]
                 if finding.get("osv") == osv_id:
                     trace_info = finding.get("trace", [])
                     for trace in trace_info:
-                        if "version" in trace.keys():
+                        if "version" in trace:
                             return trace.get("version")
         return ""
 
@@ -127,7 +127,7 @@ class GovulncheckParser:
             elif isinstance(data, list):
                 # Parsing for new govulncheck output format
                 for elem in data:
-                    if "osv" in elem.keys():
+                    if "osv" in elem:
                         cve = elem["osv"]["aliases"][0]
                         osv_data = elem["osv"]
                         affected_package = osv_data["affected"][0]["package"]
@@ -179,10 +179,7 @@ class GovulncheckParser:
 
                         affected_version = self.get_affected_version(data, osv_data["id"])
 
-                        if "severity" in elem["osv"].keys():
-                            severity = elem["osv"]["severity"]
-                        else:
-                            severity = SEVERITY
+                        severity = elem["osv"].get("severity", SEVERITY)
 
                         d = {
                             "cve": cve,

@@ -135,24 +135,16 @@ def get_item(vulnerability, test):
         else "Info"
     )
     vector = (
-        vulnerability["vector"]
-        if "vector" in vulnerability
-        else "CVSS vector not provided. "
+        vulnerability.get("vector", "CVSS vector not provided. ")
     )
     status = (
-        vulnerability["status"]
-        if "status" in vulnerability
-        else "There seems to be no fix yet. Please check description field."
+        vulnerability.get("status", "There seems to be no fix yet. Please check description field.")
     )
     cvss = (
-        vulnerability["cvss"]
-        if "cvss" in vulnerability
-        else "No CVSS score yet."
+        vulnerability.get("cvss", "No CVSS score yet.")
     )
     riskFactors = (
-        vulnerability["riskFactors"]
-        if "riskFactors" in vulnerability
-        else "No risk factors."
+        vulnerability.get("riskFactors", "No risk factors.")
     )
 
     # create the finding object
@@ -192,11 +184,7 @@ def convert_severity(severity):
         return "High"
     elif severity.lower() == "moderate":
         return "Medium"
-    elif severity.lower() == "information":
-        return "Info"
-    elif severity.lower() == "informational":
-        return "Info"
-    elif severity == "":
+    elif severity.lower() == "information" or severity.lower() == "informational" or severity == "":
         return "Info"
     else:
         return severity.title()

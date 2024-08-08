@@ -8,7 +8,7 @@ register = template.Library()
 
 @register.filter(name="has_endpoints")
 def has_endpoints(finding):
-    return True if finding.endpoints.all() else False
+    return bool(finding.endpoints.all())
 
 
 @register.filter(name="get_vulnerable_endpoints")

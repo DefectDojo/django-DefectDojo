@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import os
 import re
@@ -238,10 +239,8 @@ class BaseTestCase(unittest.TestCase):
 
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         no_content = None
-        try:
+        with contextlib.suppress(Exception):
             no_content = self.driver.find_element(By.ID, no_content_id)
-        except:
-            pass
 
         if no_content is None:
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.

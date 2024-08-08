@@ -77,7 +77,7 @@ def view_finding_group(request, fgid):
                 if jira_issue.startswith(jira_instance.url + "/browse/"):
                     jira_issue = jira_issue[len(jira_instance.url + "/browse/"):]
 
-                if finding_group.has_jira_issue and not jira_issue == jira_helper.get_jira_key(finding_group):
+                if finding_group.has_jira_issue and jira_issue != jira_helper.get_jira_key(finding_group):
                     jira_helper.unlink_jira(request, finding_group)
                     jira_helper.finding_group_link_jira(request, finding_group, jira_issue)
                 elif not finding_group.has_jira_issue:
