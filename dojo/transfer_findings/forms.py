@@ -7,3 +7,10 @@ class DeleteTransferFindingForm(forms.ModelForm):
     class Meta:
         model = TransferFinding
         fields = ["id"]
+
+
+class UpdateTransferFindingForm(forms.ModelForm):
+
+    class Meta:
+        model = TransferFinding
+        fields = '__all__'

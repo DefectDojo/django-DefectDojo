@@ -1524,6 +1524,7 @@ def add_transfer_finding(request, eid, fid=None):
                 # Origin
                 transfer_findings.origin_product_type = origin_engagement.product.prod_type
                 transfer_findings.origin_product = origin_engagement.product
+                transfer_findings.origin_engagement = origin_engagement
                 # Destination
                 id_destination_product = data.get("destination_product")
                 destination_product_obj: Product = Product.objects.get(id=id_destination_product) if id_destination_product else None
