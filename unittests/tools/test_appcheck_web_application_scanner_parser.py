@@ -25,7 +25,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             finding = findings[0]
             self.assertEqual("c50f88e969225674a9a62abca23b15ac95a9cdb8", finding.unique_id_from_tool)
             self.assertEqual("FTP Unencrypted Cleartext Login", finding.title)
-            self.assertEqual("2020-01-28T14:29:10.173000", finding.date)
+            self.assertEqual("2020-01-28", finding.date)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(True, finding.active)
             self.assertEqual("[[markup]]Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see   the manual of the FTP service for more information.", finding.mitigation)
@@ -60,7 +60,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             finding = findings[1]
             self.assertEqual("443bdee209aad337f6093e18aeb1532e751171ee", finding.unique_id_from_tool)
             self.assertEqual("Port Scan Report", finding.title)
-            self.assertEqual("2020-01-28T14:20:50.887000", finding.date)
+            self.assertEqual("2020-01-28", finding.date)
             self.assertEqual("Low", finding.severity)
             self.assertEqual(True, finding.active)
             self.assertIsNone(finding.unsaved_request)
@@ -91,7 +91,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             finding = findings[2]
             self.assertEqual("a25dae3aff97a06b6923b5fc9cc32826e1fd87ab", finding.unique_id_from_tool)
             self.assertEqual("Apache Tomcat < v9.0.0.M10 - External Control of Assumed-Immutable Web Parameter in JSP Servlet (CVE-2016-6796)", finding.title)
-            self.assertEqual("2024-06-26T09:55:43.459000", finding.date)
+            self.assertEqual("2024-06-26", finding.date)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(True, finding.active)
             self.assertEqual("GET Request", finding.unsaved_request)
@@ -116,7 +116,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             finding = findings[3]
             self.assertEqual("02769aa244c456f0aad810354748faaa70d089c1129dc9c5", finding.unique_id_from_tool)
             self.assertEqual("Permitted HTTP Methods", finding.title)
-            self.assertEqual("2024-06-27T19:23:24.943000", finding.date)
+            self.assertEqual("2024-06-27", finding.date)
             self.assertEqual("Low", finding.severity)
             self.assertEqual(True, finding.active)
             self.assertIsNone(finding.unsaved_request)
@@ -145,7 +145,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             finding = findings[4]
             self.assertEqual("0cb109aaf647451377332c22cbe917b62304aa13", finding.unique_id_from_tool)
             self.assertEqual("SSL/TLS: Report Vulnerable Cipher Suites for HTTPS", finding.title)
-            self.assertEqual("2024-06-26T10:41:56.098000", finding.date)
+            self.assertEqual("2024-06-26", finding.date)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(True, finding.active)
             self.assertIsNone(finding.unsaved_request)
@@ -181,7 +181,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             finding = findings[5]
             self.assertEqual("fc0d905439bde7b9e709cb2feecdf53fe226e72043f46133", finding.unique_id_from_tool)
             self.assertEqual("Possible Scan Turbulence: Gateway Timeout/Error Detected", finding.title)
-            self.assertEqual("2024-06-27T17:52:24.118000", finding.date)
+            self.assertEqual("2024-06-27", finding.date)
             self.assertEqual("Low", finding.severity)
             self.assertEqual(True, finding.active)
             self.assertEqual("POST Request", finding.unsaved_request)

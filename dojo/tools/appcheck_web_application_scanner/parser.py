@@ -83,5 +83,4 @@ class AppCheckWebApplicationScannerParser:
                     findings[dupe_key] = finding
             else:
                 LOGGER.warning(f"Skipping entry; could not find parser for scanning engine named: {scanning_engine}")
-
         return list(findings.values())

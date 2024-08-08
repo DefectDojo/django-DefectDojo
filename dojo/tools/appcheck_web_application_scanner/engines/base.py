@@ -1,4 +1,5 @@
 import re
+import datetime
 from typing import Any, Optional, Tuple, Union
 
 import cvss.parser
@@ -93,10 +94,10 @@ class BaseEngineParser:
         "_id": Attribute("unique_id_from_tool"),
         "title": Attribute("title"),
         "description": Attribute("description"),
-        "first_detected_at": Attribute("date"),
         "solution": Attribute("mitigation"),
         "cvss_v3_vector": Attribute("cvssv3"),
         "epss_base_score": Attribute("epss_score"),
+        "first_detected_at": Method("parse_initial_date"),
         "status": Method("parse_status"),
         "cves": Method("parse_cves"),
         "cpe": Method("parse_components"),
@@ -112,6 +113,12 @@ class BaseEngineParser:
         # Do a basic check that the fields we'll process over are valid
         for field_handler in self.get_engine_fields().values():
             field_handler.check(self)
+
+    #####
+    # For parsing the initial finding datetime to a date format pleasing to Finding
+    #####
+    def parse_initial_date(self, finding: Finding, value: str) -> None:
+        finding.date = str(datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f").date())
 
     #####
     # For parsing CVEs
