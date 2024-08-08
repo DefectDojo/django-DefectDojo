@@ -110,11 +110,11 @@ class XanitizerParser:
             description = "{}\n**Starting at:** {} - **Line** {}".format(
                 description, startnode.get("classFQN"), startnode.get("lineNo"),
             )
-            description = self.add_code(startnode, False, description)
+            description = self.add_code(startnode, showline=False, description=description)
             description = "{}\n\n**Ending at:** {} - **Line** {}".format(
                 description, endnode.get("classFQN"), endnode.get("lineNo"),
             )
-            description = self.add_code(endnode, True, description)
+            description = self.add_code(endnode, showline=True, description=description)
         elif finding.find("node") is not None:
             node = finding.find("node")
             description = f"{description}\n-----\n"
@@ -126,7 +126,7 @@ class XanitizerParser:
                 description = f"{description}\n**Finding at:** {location} - **Line** {line}"
             else:
                 description = f"{description}\n**Finding at:** {location}"
-            description = self.add_code(node, True, description)
+            description = self.add_code(node, showline=True, description=description)
 
         return description
 

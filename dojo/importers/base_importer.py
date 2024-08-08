@@ -695,6 +695,7 @@ class BaseImporter(ImporterOptions):
         self,
         finding: Finding,
         note_message: str,
+        *,
         finding_groups_enabled: bool,
     ) -> None:
         """

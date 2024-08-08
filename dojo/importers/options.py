@@ -180,6 +180,7 @@ class ImporterOptions:
         self,
         field_name: str,
         expected_types: List[Callable] = [],
+        *,
         required: bool = False,
         default: Any = None,
         **kwargs: dict,

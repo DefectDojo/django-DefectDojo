@@ -27,5 +27,5 @@ class Command(BaseCommand):
 
         for finding in findings:
             logger.info("Checking issue:" + str(finding.id))
-            jira_helper.update_jira_issue(finding, True)
+            jira_helper.update_jira_issue(finding)
             logger.info("########\n")

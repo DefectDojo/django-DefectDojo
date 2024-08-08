@@ -16,7 +16,7 @@ class APILimitReqRespPairsTest(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
-    def assertReqrespValue(self: object, value: int, expect_notequal: bool = False) -> None:
+    def assertReqrespValue(self: object, value: int, *, expect_notequal: bool = False) -> None:
         settings.MAX_REQRESP_FROM_API = value
         r = self.client.get(reverse("finding-list"), format="json")
         results = r.json()["results"]
@@ -37,6 +37,6 @@ class APILimitReqRespPairsTest(APITestCase):
         self.assertReqrespValue(5)
         self.assertReqrespValue(10)
         self.assertReqrespValue(18)  # actual number of reqresp
-        self.assertReqrespValue(100, True)  # more than the number in the request
-        self.assertReqrespValue(-1, True)  # default value of MAX_REQRESP_FROM_API
-        self.assertReqrespValue(-100, True)  # crazy negative value
+        self.assertReqrespValue(100, expect_notequal=True)  # more than the number in the request
+        self.assertReqrespValue(-1, expect_notequal=True)  # default value of MAX_REQRESP_FROM_API
+        self.assertReqrespValue(-100, expect_notequal=True)  # crazy negative value
