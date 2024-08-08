@@ -89,7 +89,7 @@ def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, o
             .values("finding")
         findings = base_findings.filter(id__in=vulnerability_ids)
         if findings.exists():
-            # TODO we could use risk.vulnerability_id to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
+            # TODO: we could use risk.vulnerability_id to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
             # so for now we add some timestamp based suffix
             name = risk.vulnerability_id + " via api at " + timezone.now().strftime("%b %d, %Y, %H:%M:%S")
             acceptance = Risk_Acceptance.objects.create(owner=owner, name=name[:100],

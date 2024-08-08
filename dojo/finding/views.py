@@ -1535,7 +1535,7 @@ def copy_finding(request, fid):
                 extra_tags="alert-success",
             )
             create_notification(
-                event="finding_copied",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                event="finding_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title=_("Copying of %s") % finding.title,
                 description=f'The finding "{finding.title}" was copied by {request.user} to {test.title}',
                 product=product,
@@ -1711,7 +1711,7 @@ def request_finding_review(request, fid):
             logger.debug(f"Asking {reviewers_string} for review")
 
             create_notification(
-                event="review_requested",  # TODO - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                event="review_requested",  # TODO: - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title="Finding review requested",
                 requested_by=user,
                 note=new_note,

@@ -154,7 +154,7 @@ class CycloneDXXMLParser:
         # if there is some CWE
         cwes = self.get_cwes(vulnerability, "v", ns)
         if len(cwes) > 1:
-            # FIXME support more than one CWE
+            # TODO: support more than one CWE
             LOGGER.debug(
                 f"more than one CWE for a finding {cwes}. NOT supported by parser API",
             )
@@ -268,7 +268,7 @@ class CycloneDXXMLParser:
             if not cwes:
                 cwes = self.get_cwes(vulnerability, "b", ns)
             if len(cwes) > 1:
-                # FIXME support more than one CWE
+                # TODO: support more than one CWE
                 LOGGER.debug(
                     f"more than one CWE for a finding {cwes}. NOT supported by parser API",
                 )

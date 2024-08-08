@@ -210,7 +210,7 @@ def get_jira_project(obj, use_inheritance=True):
             return None
 
     if isinstance(obj, Product):
-        # TODO refactor relationships, but now this would brake APIv1 (and v2?)
+        # TODO: refactor relationships, but now this would brake APIv1 (and v2?)
         product = obj
         jira_projects = product.jira_project_set.all()  # first() doesn't work with prefetching
         jira_project = jira_projects[0] if len(jira_projects) > 0 else None

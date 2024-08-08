@@ -9,7 +9,7 @@ class RubocopParser:
     # possible values are:
     # `:info`, `:refactor`, `:convention`, `:warning`, `:error` or `:fatal`.
     # see https://github.com/rubocop/rubocop/blob/master/lib/rubocop/cop/severity.rb
-    # TODO change when the tool support it (not now 1.24.1, always "conventionnal")
+    # TODO: change when the tool support it (not now 1.24.1, always "conventionnal")
     # current version (1.13.0) always populate severity to "conventionnal"
     # so we force it to 'Medium'
     SEVERITY_MAPPING = {

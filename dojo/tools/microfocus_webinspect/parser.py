@@ -57,7 +57,7 @@ class MicrofocusWebinspectParser:
                 if classifications is not None:
                     for content in classifications.findall("Classification"):
                         # detect CWE number
-                        # TODO support more than one CWE number
+                        # TODO: support more than one CWE number
                         if "kind" in content.attrib and "CWE" == content.attrib["kind"]:
                             cwe = MicrofocusWebinspectParser.get_cwe(content.attrib["identifier"])
                             description += "\n\n" + content.text + "\n"

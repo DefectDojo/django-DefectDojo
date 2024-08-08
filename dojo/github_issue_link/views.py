@@ -73,7 +73,7 @@ def github(request):
 def delete_github(request, tid):
     github_instance = get_object_or_404(GITHUB_Conf, pk=tid)
     # eng = test.engagement
-    # TODO Make Form
+    # TODO: Make Form
     form = DeleteGITHUBConfForm(instance=github_instance)
 
     if request.method == "POST":

@@ -103,7 +103,7 @@ class CycloneDXJSONParser:
                 # if there is some CWE
                 cwes = vulnerability.get("cwes")
                 if cwes and len(cwes) > 1:
-                    # FIXME support more than one CWE
+                    # TODO: support more than one CWE
                     LOGGER.debug(
                         f"more than one CWE for a finding {cwes}. NOT supported by parser API",
                     )

@@ -38,7 +38,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         DojoVCRAPITestCase.__init__(self, *args, **kwargs)
 
     def assert_cassette_played(self):

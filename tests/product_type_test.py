@@ -75,7 +75,7 @@ class ProductTypeTest(BaseTestCase):
         logger.debug("\n\nDebug Print Log: testing 'delete product type' \n")
         driver = self.driver
         driver.get(self.base_url + "product/type")
-        # TODO this assumes the first product_type in the list is the one that we just created (and can safely be deleted)
+        # TODO: this assumes the first product_type in the list is the one that we just created (and can safely be deleted)
         driver.find_element(By.ID, "dropdownMenuProductType").click()
         driver.find_element(By.PARTIAL_LINK_TEXT, "Delete").click()
         driver.find_element(By.CSS_SELECTOR, "button.btn.btn-danger").click()
