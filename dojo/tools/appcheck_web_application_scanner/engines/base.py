@@ -1,5 +1,5 @@
-import re
 import datetime
+import re
 from typing import Any, Optional, Tuple, Union
 
 import cvss.parser
@@ -213,7 +213,7 @@ class BaseEngineParser:
         return None
 
     def get_port(self, item: dict[str, Any]) -> Optional[int]:
-        return self.parse_port(item.get('port'))
+        return self.parse_port(item.get("port"))
 
     def construct_endpoint(self, host: str, port: Optional[int]) -> Endpoint:
         endpoint = Endpoint.from_uri(host)

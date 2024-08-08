@@ -21,7 +21,7 @@ class AppCheckScanningEngineParser(BaseEngineParser):
             # Remove the 'Messages' entry since we've parsed it as a request/response pair; don't need to add it to the
             # Finding description
             value.pop("Messages")
-            finding.unsaved_request, finding.unsaved_response = [d.strip() for d in rr_details[0]]
+            finding.unsaved_request, finding.unsaved_response = (d.strip() for d in rr_details[0])
 
     def parse_details(self, finding: Finding, value: dict[str, Union[str, dict[str, [str]]]]) -> None:
         self.extract_request_response(finding, value)

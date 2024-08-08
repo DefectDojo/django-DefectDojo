@@ -17,7 +17,7 @@ class NmapScanningEngineParser(BaseEngineParser):
         return len(entry) > 0 and self.parse_port(entry[0])
 
     def get_ports(self, item) -> Union[list[int], list[None]]:
-        meta = item.get('meta')
+        meta = item.get("meta")
         if not isinstance(meta, dict):
             meta = {}
         if ports := meta.get("port_table", []):
