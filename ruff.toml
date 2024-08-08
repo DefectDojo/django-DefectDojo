@@ -40,6 +40,7 @@ select = [
    "YTT",
    "ASYNC",
    "S2", "S5", "S7",
+   "A003", "A006",
    "COM",
    "C4",
    "T10",
@@ -56,6 +57,7 @@ select = [
    "Q",
    "RSE",
    "TID",
+   "PTH2",
    "PD",
    "PGH",
    "TRY003",
@@ -64,6 +66,7 @@ select = [
    "TRY302",
    "FLY",
    "NPY",
+   "FAST",
    "AIR",
 ]
 ignore = ["E501", "E722", "F821"]
