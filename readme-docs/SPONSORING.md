@@ -4,7 +4,7 @@ Below is our sponsorship guidelines to provide further clarification specific to
 
 **Maintainers**
 
-As a maintainer, you invest a significant number of hours reviewing code, contributing code, validating architecture, and helping the community. With the time you contribute, maintainers are entitled to name a sponsor, whether it be your employer or yourself, as long as you have written permission to have the entity’s logo displayed on the wiki and on our github repository. Should your relationship end with the entity you have designated (i.e. change of jobs) the entity will be grandfathered for calendar year at the time of your change.
+As a maintainer, you invest a significant number of hours reviewing code, contributing code, validating architecture, and helping the community. With the time you contribute, maintainers are entitled to name a sponsor, whether it be your employer or yourself, as long as you have written permission to have the entity's logo displayed on the wiki and on our github repository. Should your relationship end with the entity you have designated (i.e. change of jobs) the entity will be grandfathered for calendar year at the time of your change.
 
 **Contributors**
 

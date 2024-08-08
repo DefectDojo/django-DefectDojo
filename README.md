@@ -144,7 +144,7 @@ Moderators can help you with pull requests or feedback on dev ideas:
 * Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) |
   [Sponsor](https://github.com/sponsors/valentijnscholten) |
   [LinkedIn](https://www.linkedin.com/in/valentijn-scholten/)) - Valentijn served as a core moderator for 3 years.
-  Valentijn’s contributions were numerous and extensive. He overhauled, improved, and optimized many parts of the
+  Valentijn's contributions were numerous and extensive. He overhauled, improved, and optimized many parts of the
   codebase. He consistently fielded questions, provided feedback on pull requests, and provided a helping hand wherever
   it was needed.
 * Fred Blaise ([@madchap](https://github.com/madchap) | [LinkedIn](https://www.linkedin.com/in/fredblaise/)) - Fred

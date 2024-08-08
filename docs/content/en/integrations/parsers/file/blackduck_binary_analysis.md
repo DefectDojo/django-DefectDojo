@@ -6,12 +6,12 @@ toc_hide: true
 #### **What** ####
 Black Duck Binary Analysis gives you visibility into open source and third-party dependencies that have been compiled into executables, libraries, containers, and firmware. You can analyze individual files using an intuitive user interface or Black Duck multifactor open source detection, which automates the scanning of binary artifacts.
 
-Using a combination of static and string analysis techniques coupled with fuzzy matching against the Black Duck KnowledgeBase, Black Duck Binary Analysis quickly and reliably identifies components, even if they’ve been modified.
+Using a combination of static and string analysis techniques coupled with fuzzy matching against the Black Duck KnowledgeBase, Black Duck Binary Analysis quickly and reliably identifies components, even if they've been modified.
 
 For more info, check out Black Duck Binary Analysis [here](https://www.synopsys.com/software-integrity/software-composition-analysis-tools/binary-analysis.html).
 
 #### **Why** ####
-Open source vulnerabilities aren’t the only security issues that might be lurking in application binaries.
+Open source vulnerabilities aren't the only security issues that might be lurking in application binaries.
 
 Black Duck Binary Analysis can also detect if sensitive information like email addresses, authorization tokens, compiler switches, and passwords are exposed, and it identifies when mobile applications request excessive permissions—all of which puts your organization and users' personal data at risk.
 

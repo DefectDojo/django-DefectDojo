@@ -1,3 +1,4 @@
+# ruff: noqa: RUF001
 import datetime
 from unittest.mock import patch
 
