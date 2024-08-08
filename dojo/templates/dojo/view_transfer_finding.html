@@ -156,10 +156,14 @@ h3{
                         <tr>
                             <td>
                                 <div class="dropdown pull-left">
-                                  <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-                                    <span class="fa-solid fa-ellipsis-vertical" style="black"></span>
-                                  </button>
+                                  <a rel="noopener noreferrer" href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                                   <ul class="dropdown-menu dropdown-menu-left" role="menu" aria-labelledby="dropdownMenu1">
+                                      <li role="presentation">
+                                          <a rel="noopener noreferrer" href="#" data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product.id}}
+                                          data-product-type-id={{transfer_findings.origin_product_type.id}} class="cls_transfer_finding_show_modal">
+                                              <i class="fa-solid fa-pen-to-square"></i> View Findings
+                                          </a>
+                                      </li>
                                     {% if "Transfer_Finding_Edit"|has_global_permission %}
                                         <li role="presentation">
                                             <a rel="noopener noreferrer"  href="{% url 'transferfinding_update_form' transfer_findings.id %}">
@@ -167,12 +171,6 @@ h3{
                                             </a>
                                         </li>
                                     {% endif %}
-                                        <li role="presentation">
-                                            <a rel="noopener noreferrer" href="#" data-transfer-id={{transfer_findings.id}} data-product-id={{transfer_findings.origin_product.id}}
-                                            data-product-type-id={{transfer_findings.origin_product_type.id}} class="cls_transfer_finding_show_modal">
-                                                <i class="fa-solid fa-pen-to-square"></i> View Findings
-                                            </a>
-                                        </li>
                                   </ul>
                               </div>
                             </td>
