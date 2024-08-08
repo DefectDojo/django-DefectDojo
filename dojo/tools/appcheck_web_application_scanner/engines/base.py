@@ -71,12 +71,12 @@ class BaseEngineParser:
         * _id -> unique_id_from_tool
         * title -> title
         * description -> description
-        * first_detected_at -> date
         * solution -> mitigation
         * cvss_v3_vector -> cvssv3
         * epss_base_score -> epss_score
 
     Data mapped with a bit of tinkering, JSON object -> Finding attribute:
+        * first_detected_at -> date (parse date)
         * status -> active/false_p/risk_accepted (depending on value)
         * cves -> unsaved_vulnerability_ids (vulnerability_ids)
         * cpe -> component name/version
