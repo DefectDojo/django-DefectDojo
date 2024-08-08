@@ -336,7 +336,7 @@ def datediff_time(date1, date2):
     date_str = ""
     diff = dateutil.relativedelta.relativedelta(date2, date1)
     attrs = ["years", "months", "days"]
-    human_date = ["%d %s" % (getattr(diff, attr), getattr(diff, attr) > 1 and attr or attr[:-1])
+    human_date = ["%d %s" % (getattr(diff, attr), (getattr(diff, attr) > 1 and attr) or attr[:-1])
                                     for attr in attrs if getattr(diff, attr)]
     for date_part in human_date:
         date_str = date_str + date_part + " "

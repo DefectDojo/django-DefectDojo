@@ -123,13 +123,13 @@ class VeracodeScaParser:
             )
             status = issue.get("issue_status")
             if (
-                issue.get("Ignored")
-                and issue.get("Ignored").capitalize() == "True"
-                or status
+                (issue.get("Ignored")
+                and issue.get("Ignored").capitalize() == "True")
+                or (status
                 and (
                     status.capitalize() == "Resolved"
                     or status.capitalize() == "Fixed"
-                )
+                ))
             ):
                 finding.is_mitigated = True
                 finding.mitigated = timezone.now()
@@ -212,10 +212,10 @@ class VeracodeScaParser:
                 finding.cvssv3_score = cvss_score
 
             if (
-                row.get("Ignored")
-                and row.get("Ignored").capitalize() == "True"
-                or row.get("Status")
-                and row.get("Status").capitalize() == "Resolved"
+                (row.get("Ignored")
+                and row.get("Ignored").capitalize() == "True")
+                or (row.get("Status")
+                and row.get("Status").capitalize() == "Resolved")
             ):
                 finding.is_mitigated = True
                 finding.mitigated = timezone.now()
