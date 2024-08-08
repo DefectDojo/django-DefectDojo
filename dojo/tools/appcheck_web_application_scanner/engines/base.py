@@ -117,11 +117,14 @@ class BaseEngineParser:
     #####
     # For parsing the initial finding datetime to a date format pleasing to Finding
     #####
-    def parse_initial_date(self, finding: Finding, value: str) -> None:
+    def get_date(self, value: str) -> Optional[str]:
         try:
-            finding.date = str(dateutil.parser.parse(value).date())
+            return str(dateutil.parser.parse(value).date())
         except dateutil.parser.ParserError:
-            pass
+            return None
+
+    def parse_initial_date(self, finding: Finding, value: str) -> None:
+        finding.date = self.get_date(value)
 
     #####
     # For parsing CVEs
@@ -152,8 +155,7 @@ class BaseEngineParser:
     #####
     def get_severity(self, value: str) -> Optional[str]:
         if cvss_obj := cvss.parser.parse_cvss_from_text(value):
-            severity = cvss_obj[0].severities()[0]
-            if severity.lower() != "none":
+            if (severity := cvss_obj[0].severities()[0].title()) in Finding.SEVERITIES:
                 return severity
         return None
 

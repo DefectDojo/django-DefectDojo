@@ -210,7 +210,6 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("https", endpoint.protocol)
             self.assertEqual("ajax/ShelfEdgeLabel/ShelfEdgeLabelsPromotionalBatch", endpoint.path)
 
-
     def test_appcheck_web_application_scanner_parser_dupes(self):
         with open("unittests/scans/appcheck_web_application_scanner/appcheck_web_application_scanner_dupes.json") as testfile:
             parser = AppCheckWebApplicationScannerParser()
@@ -220,6 +219,19 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
 
     def test_appcheck_web_application_scanner_parser_base_engine_parser(self):
         engine = BaseEngineParser()
+
+        # Test date parsing
+        for test_date, expected in [
+            ("2020-09-30", "2020-09-30"),
+            ("2024-06-27T16:28:04", "2024-06-27"),
+            ("2021-04-03T11:27:45.977000", "2021-04-03"),
+            ("2022-06-28T10:31:48.454000", "2022-06-28"),
+            ("2024-06-26T10:41:55.792000", "2024-06-26"),
+            ("2024-07-01T17:32:29.307000", "2024-07-01"),
+            ("2024-06-", None),
+            ("NotADate", None),
+        ]:
+            self.assertEqual(expected, engine.get_date(test_date))
 
         # Test CVE checking
         for maybe_cve, should_be_cve in [

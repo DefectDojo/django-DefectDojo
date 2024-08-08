@@ -80,6 +80,7 @@ class AppCheckWebApplicationScannerParser:
             if parser := self.get_engine_parser(scanning_engine):
                 finding, dupe_key = parser.parse_finding(item)
                 if dupe_key not in findings:
+                    finding.test = test
                     findings[dupe_key] = finding
             else:
                 LOGGER.warning(f"Skipping entry; could not find parser for scanning engine named: {scanning_engine}")
