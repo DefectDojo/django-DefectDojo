@@ -92,7 +92,7 @@ class DojoSytemSettingsMiddleware:
         return None
 
     @classmethod
-    def cleanup(cls, *args, **kwargs):
+    def cleanup(cls, *args, **kwargs):  # noqa: ARG003
         if hasattr(cls._thread_local, "system_settings"):
             del cls._thread_local.system_settings
 

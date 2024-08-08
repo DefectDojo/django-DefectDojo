@@ -279,7 +279,7 @@ class VeracodeXMLParser:
 
     @classmethod
     def __xml_sca_flaw_to_finding(
-        cls, test, report_date, vendor, library, version, xml_node,
+        cls, test, report_date, _vendor, library, version, xml_node,
     ):
         # Defaults
         finding = Finding()
