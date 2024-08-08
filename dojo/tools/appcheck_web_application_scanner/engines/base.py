@@ -3,13 +3,25 @@ from typing import Any, Optional, Tuple, Union
 
 import cvss.parser
 from cpe import CPE
+from django.core.exceptions import ImproperlyConfigured
 
 from dojo.models import Endpoint, Finding
 
 
+#######
+# Field parsing helper classes
+#######
 class FieldType:
-    def __init__(self):
-        pass
+    """
+    Base class for attribute handlers for parsers. Callable, and calls the .handle() method, which should be implemented
+    by subclasses.
+
+    We lose type safety by accepting strings for target names; to try to work around this, the check() method on
+    subclasses should check whether the configuration for this object makes sense (or as much sense as can be determined
+    when the method is called) and raise an ImproperlyConfigured exception if it does not.
+    """
+    def __init__(self, target_name):
+        self.target_name = target_name
 
     def handle(self, engine_class, finding, value):
         pass
@@ -17,23 +29,37 @@ class FieldType:
     def __call__(self, engine_class, finding, value):
         self.handle(engine_class, finding, value)
 
+    def check(self, engine_parser):
+        pass
+
 
 class Attribute(FieldType):
-    def __init__(self, attribute):
-        super().__init__()
-        self.attribute = attribute
-
+    """
+    Class for a field that maps directly from one in the input data to a Finding attribute. Initialized with a Finding
+    attribute name, when called sets the value of that attribute to the passed-in value.
+    """
     def handle(self, engine_class, finding, value):
-        setattr(finding, self.attribute, value)
+        setattr(finding, self.target_name, value)
+
+    def check(self, engine_parser):
+        if not hasattr(Finding, self.target_name):
+            msg = f"Finding does not have attribute '{self.target_name}.'"
+            raise ImproperlyConfigured(msg)
 
 
 class Method(FieldType):
-    def __init__(self, method_name):
-        super().__init__()
-        self.method_name = method_name
-
+    """
+    Class for a field that requires a method to process it. Initialized with a method name, when called it invokes the
+    method on the passed-in engine parser, passing in a Finding and value. It's expected that the method will update
+    the Finding as it sees fit (i.e., this class does not modify the Finding)
+    """
     def handle(self, engine_parser, finding, value):
-        getattr(engine_parser, self.method_name)(finding, value)
+        getattr(engine_parser, self.target_name)(finding, value)
+
+    def check(self, engine_parser):
+        if not callable(getattr(engine_parser, self.target_name, None)):
+            msg = f"{type(engine_parser).__name__} does not have method '{self.target_name}().'"
+            raise ImproperlyConfigured(msg)
 
 
 class BaseEngineParser:
@@ -82,6 +108,11 @@ class BaseEngineParser:
     # Field handling specific to a given scanning_engine AppCheck uses
     _ENGINE_FIELDS_MAP: dict[str, FieldType] = {}
 
+    def __init__(self):
+        # Do a basic check that the fields we'll process over are valid
+        for field_handler in self.get_engine_fields().values():
+            field_handler.check(self)
+
     #####
     # For parsing CVEs
     #####
@@ -97,8 +128,7 @@ class BaseEngineParser:
     # Handles setting various status flags on the Finding
     #####
     def parse_status(self, finding: Finding, value: str) -> None:
-        # (Supposed) values:
-        # unfixed (the initial value), fixed, false_positive, and acceptable_risk
+        # Possible values (best guess): unfixed (the initial value), fixed, false_positive, and acceptable_risk
         value = value.lower()
         if value == "fixed":
             finding.active = False
