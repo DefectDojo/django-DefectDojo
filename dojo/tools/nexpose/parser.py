@@ -335,7 +335,7 @@ class NexposeParser:
                 mitigation=html2text.html2text(vuln.get("resolution"))
                 if vuln.get("resolution")
                 else None,
-                impact=vuln.get("vector") if vuln.get("vector") else None,
+                impact=vuln.get("vector") or None,
                 false_p=False,
                 duplicate=False,
                 out_of_scope=False,

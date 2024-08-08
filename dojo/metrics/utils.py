@@ -1,4 +1,5 @@
 
+import operator
 from datetime import date, datetime, timedelta
 from enum import Enum
 from functools import partial
@@ -440,7 +441,7 @@ def get_charting_data(
                 by_date[e]["closed"] = 0
 
     # Return, sorting by date
-    return sorted(by_date.values(), key=lambda m: m["grouped_date"])
+    return sorted(by_date.values(), key=operator.itemgetter("grouped_date"))
 
 
 def period_deltas(start_date, end_date):

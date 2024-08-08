@@ -51,7 +51,7 @@ class SonarQubeApiImporter:
 
     @staticmethod
     def is_reviewed(state):
-        return state.lower() in ["reviewed"]
+        return state.lower() == "reviewed"
 
     @staticmethod
     def prepare_client(test):

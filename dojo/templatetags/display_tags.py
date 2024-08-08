@@ -674,11 +674,13 @@ def get_severity_count(id, table):
     total = critical + high + medium + low + info
     display_counts = []
 
-    display_counts.append("Critical: " + str(critical))
-    display_counts.append("High: " + str(high))
-    display_counts.append("Medium: " + str(medium))
-    display_counts.append("Low: " + str(low))
-    display_counts.append("Info: " + str(info))
+    display_counts.extend((
+        "Critical: " + str(critical),
+        "High: " + str(high),
+        "Medium: " + str(medium),
+        "Low: " + str(low),
+        "Info: " + str(info),
+    ))
 
     if table == "test":
         display_counts.append("Total: " + str(total) + " Findings")

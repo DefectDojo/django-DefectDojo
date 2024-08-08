@@ -254,11 +254,11 @@ class TenableXMLParser:
                     if fqdn is not None and "://" in fqdn:
                         endpoint = Endpoint.from_uri(fqdn)
                     elif protocol == "general":
-                        endpoint = Endpoint(host=fqdn if fqdn else ip)
+                        endpoint = Endpoint(host=fqdn or ip)
                     else:
                         endpoint = Endpoint(
                             protocol=protocol,
-                            host=fqdn if fqdn else ip,
+                            host=fqdn or ip,
                             port=port,
                         )
                     find.unsaved_endpoints.append(endpoint)
