@@ -57,7 +57,6 @@ for d in missing_deps:
             p.endswith(suffix) for suffix in ["-dbg", "-test", "tests", "-dev", "-mesa"]
         )
     ]
-    for p in packages:
-        missing_packages.append(p)
+    missing_packages += packages
 
 logger.info("missing_packages: " + (" ".join(missing_packages)))

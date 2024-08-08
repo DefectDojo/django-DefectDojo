@@ -177,14 +177,7 @@ class WhiteHatSentinelParser:
         Returns: A list of Defect Dojo Endpoints
         """
 
-        endpoints_list = []
-
-        # This should be in the Endpoint class should it not?
-        for attack_vector in attack_vectors:
-            endpoints_list.append(
-                Endpoint.from_uri(attack_vector["request"]["url"]),
-            )
-
+        endpoints_list = [Endpoint.from_uri(attack_vector["request"]["url"]) for attack_vector in attack_vectors]
         return endpoints_list
 
     def _convert_whitehat_sentinel_vulns_to_dojo_finding(

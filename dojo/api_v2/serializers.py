@@ -1059,9 +1059,7 @@ class EngagementToFilesSerializer(serializers.Serializer):
     def to_representation(self, data):
         engagement = data.get("engagement_id")
         files = data.get("files")
-        new_files = []
-        for file in files:
-            new_files.append(
+        new_files = [
                 {
                     "id": file.id,
                     "file": "{site_url}/{file_access_url}".format(
@@ -1071,8 +1069,8 @@ class EngagementToFilesSerializer(serializers.Serializer):
                         ),
                     ),
                     "title": file.title,
-                },
-            )
+                }
+            for file in files]
         new_data = {"engagement_id": engagement.id, "files": new_files}
         return new_data
 

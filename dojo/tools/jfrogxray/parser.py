@@ -83,9 +83,7 @@ def get_item(vulnerability, test):
     # CVE-2017-1000502.
     cves = vulnerability["component_versions"]["more_details"].get("cves", [])
     if len(cves) > 0:
-        for item in cves:
-            if item.get("cve"):
-                vulnerability_ids.append(item.get("cve"))
+        vulnerability_ids = [item.get("cve") for item in cves if item.get("cve")]
         # take only the first one for now, limitation of DD model.
         if len(cves[0].get("cwe", [])) > 0:
             cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
