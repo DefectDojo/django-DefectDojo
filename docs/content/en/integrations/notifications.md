@@ -18,6 +18,7 @@ The following notification methods currently exist:
  - Email
  - Slack
  - Microsoft Teams
+ - Webhooks
  - Alerts within DefectDojo (default)
 
 You can set these notifications on a global scope (if you have
@@ -125,3 +126,7 @@ However, there is a specific use-case when the user decides to disable notificat
 The scope of this setting is customizable (see environmental variable `DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP`).
 
 For more information about this behavior see the [related pull request #9699](https://github.com/DefectDojo/django-DefectDojo/pull/9699/)
+
+## Webhooks (experimental)
+
+DefectDojo also supports webhooks that follow the same events as other notifications (you can be notified in the same situations). Details about setup are described in [related page](../notification_webhooks/).
