@@ -10,9 +10,9 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.utils import timezone
 
-import dojo.jira_link.helper as jira_helper
+from retry import retry
 from dojo.celery import app
-from dojo.decorators import dojo_async_task
+import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
 from dojo.models import Finding, Risk_Acceptance, System_Settings
 from dojo.transfer_findings import helper as hp_transfer_finding
@@ -108,9 +108,6 @@ def delete(eng, risk_acceptance):
     eng.risk_acceptance.remove(risk_acceptance)
     eng.save()
 
-    for note in risk_acceptance.notes.all():
-        note.delete()
-
     risk_acceptance.path.delete()
     risk_acceptance.delete()
 
@@ -156,6 +153,12 @@ def add_findings_to_risk_acceptance(risk_acceptance: Risk_Acceptance, findings):
             finding.accepted_by = user.username
             finding.risk_status = "Risk Accepted"
             finding.save(dedupe_option=False)
+            hp_transfer_finding.close_or_reactive_related_finding(
+                event="accepted",
+                parent_finding=finding,
+                notes=f"The finding was accepted by the user {user.username} and for finding parent id: {finding.id}(policies for the transfer of findings)",
+                send_notification=False
+            )
             # Update any endpoint statuses on each of the findings
             update_endpoint_statuses(finding, True)
             risk_acceptance.accepted_findings.add(finding)
@@ -300,7 +303,7 @@ def prefetch_for_expiration(risk_acceptances):
 
 def simple_risk_accept(finding, perform_save=True):
     if not finding.test.engagement.product.enable_simple_risk_acceptance:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     logger.debug('accepting finding %i:%s', finding.id, finding)
     finding.risk_accepted = True
@@ -353,21 +356,24 @@ def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
         status.last_modified = timezone.now()
         status.save()
 
-@dojo_async_task
-@app.task(ignore_result=False)
+@retry(tries=100, delay=10)
 def risk_accept_provider(
         finding_id: str,
         provider: str,
         acceptance_days: int,
         url: str,
         header: str,
-        token: str,
+        token: str
     ):
     logger.info(f"Making risk accept for {finding_id} provider: {provider}")
     formatted_url = url + f'{provider}?vulnerabilityId={finding_id}&acceptanceDays={acceptance_days}'
     headers = {}
     headers[header] = token
-    response = requests.post(url=formatted_url, headers=headers, verify=False)
+    try:
+        response = requests.post(url=formatted_url, headers=headers, verify=False)
+    except Exception as ex:
+        logger.error(ex)
+        raise(ex)
     if response.status_code == 200:
         logger.info(f"Risk accept response from provider: {provider}, response: {response.text}")
     logger.error(f"Error for provider: {provider}, response: {response.text}")

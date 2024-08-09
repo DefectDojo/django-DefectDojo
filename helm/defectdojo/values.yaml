@@ -131,7 +131,6 @@ celery:
   worker:
     annotations: {}
     affinity: {}
-    logLevel: INFO
     nodeSelector: {}
     replicas: 1
     resources:
@@ -234,6 +233,7 @@ django:
     app_settings:
       processes: 2
       threads: 2
+      # max_fd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
     enable_debug: false  # this also requires DD_DEBUG to be set to True
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
@@ -368,8 +368,6 @@ mysql:
 
 postgresql:
   enabled: true
-  image:
-    tag: 11.22.0-debian-11-r4
   auth:
     username: defectdojo
     password: ""
@@ -457,7 +455,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.35.3
+    tag: 1.35.4
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""

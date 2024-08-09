@@ -520,6 +520,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_('Enable Finding Groups'),
         help_text=_("With this setting turned off, the Finding Groups will be disabled."))
+    enable_ui_table_based_searching = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_('Enable UI Table Based Filtering/Sorting'),
+        help_text=_("With this setting enabled, table headings will contain sort buttons for the current page of data in addition to sorting buttons that consider data from all pages."))
     enable_calendar = models.BooleanField(
         default=True,
         blank=False,
@@ -2278,6 +2283,7 @@ class Finding(models.Model):
                       ('Risk Active', 'Risk Active'),
                       ('Transfer Pending', 'Transfer Pending'),
                       ('Transfer Rejected', 'Transfer Rejected'),
+                      ('Transfer Expired', 'Transfer Expired'),
                       ('Transfer Accepted', 'Transfer Accepted'))
 
     title = models.CharField(max_length=511,
@@ -2999,6 +3005,8 @@ class Finding(models.Model):
             status += ['Duplicate']
         if self.risk_status == "Transfer Accepted":
             status += ['Transfer Accepted']
+        if self.risk_status == "Transfer Expired":
+            status += ['Transfer Expired']
         if self.risk_status == "Transfer Pending":
             status += ['Transfer Pending']
         if self.risk_status == "Transfer Rejected":
@@ -3469,6 +3477,12 @@ class TransferFinding(models.Model):
         null=True,
         on_delete=models.CASCADE,
         help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
+    
+    expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_('When the Transfer-Finding expires, the findings will be reactivated (unless disabled below).'))
+    expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) Date at which notice about the transfer-finding expiration was sent.'))
+    expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) When the transfer-finding expiration was handled (manually or by the daily job).'))
+    reactivate_expired = models.BooleanField(null=False, blank=False, default=True, verbose_name=_('Reactivate findings on expiration'), help_text=_('Reactivate findings when transfer-finding expires?'))
+    restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name=_('Restart SLA on expiration'), help_text=_("When enabled, the SLA for findings is restarted when the transfer-finding expires."))
 
     path = models.FileField(upload_to='transfer_finding/%Y/%m/%d',
                             editable=True, null=True,
@@ -3765,26 +3779,26 @@ class Risk_Acceptance(models.Model):
     TREATMENT_FIX = 'F'
     TREATMENT_TRANSFER = 'T'
 
-    TREATMENT_CHOICES = [
-        (TREATMENT_ACCEPT, 'Accept (The risk is acknowledged, yet remains)'),
-        (TREATMENT_AVOID, 'Avoid (Do not engage with whatever creates the risk)'),
-        (TREATMENT_MITIGATE, 'Mitigate (The risk still exists, yet compensating controls make it less of a threat)'),
-        (TREATMENT_FIX, 'Fix (The risk is eradicated)'),
-        (TREATMENT_TRANSFER, 'Transfer (The risk is transferred to a 3rd party)'),
-    ]
-
     SEVERITY_CHOICES = [("Critial", "Critical"),
                         ("Hight", "Hight"),
                         ("Medium", "Medium"),
                         ("Low", "Low")]
 
     TREATMENT_TRANSLATIONS = {
-        'A': 'Accept (The risk is acknowledged, yet remains)',
-        'V': 'Avoid (Do not engage with whatever creates the risk)',
-        'M': 'Mitigate (The risk still exists, yet compensating controls make it less of a threat)',
-        'F': 'Fix (The risk is eradicated)',
-        'T': 'Transfer (The risk is transferred to a 3rd party)',
+        TREATMENT_ACCEPT: _('Accept (The risk is acknowledged, yet remains)'),
+        TREATMENT_AVOID: _('Avoid (Do not engage with whatever creates the risk)'),
+        TREATMENT_MITIGATE: _('Mitigate (The risk still exists, yet compensating controls make it less of a threat)'),
+        TREATMENT_FIX: _('Fix (The risk is eradicated)'),
+        TREATMENT_TRANSFER: _('Transfer (The risk is transferred to a 3rd party)'),
     }
+
+    TREATMENT_CHOICES = [
+        (TREATMENT_ACCEPT, TREATMENT_TRANSLATIONS[TREATMENT_ACCEPT]),
+        (TREATMENT_AVOID, TREATMENT_TRANSLATIONS[TREATMENT_AVOID]),
+        (TREATMENT_MITIGATE, TREATMENT_TRANSLATIONS[TREATMENT_MITIGATE]),
+        (TREATMENT_FIX, TREATMENT_TRANSLATIONS[TREATMENT_FIX]),
+        (TREATMENT_TRANSFER, TREATMENT_TRANSLATIONS[TREATMENT_TRANSFER]),
+    ]
 
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 

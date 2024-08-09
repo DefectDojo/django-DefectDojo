@@ -311,26 +311,8 @@ env = environ.FileAwareEnv(
     # for very large objects
     DD_DELETE_PREVIEW=(bool, True),
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
-    DD_FILE_UPLOAD_TYPES=(
-        list,
-        [
-            ".txt",
-            ".pdf",
-            ".json",
-            ".xml",
-            ".csv",
-            ".yml",
-            ".png",
-            ".jpeg",
-            ".sarif",
-            ".xslx",
-            ".doc",
-            ".html",
-            ".js",
-            ".nessus",
-            ".zip",
-        ],
-    ),
+    DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
+                                 '.sarif', '.xlsx', '.doc', '.html', '.js', '.nessus', '.zip']),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -361,7 +343,7 @@ env = environ.FileAwareEnv(
     DD_AWS_SES_EMAIL=(bool, True),
     # --------------- Grafana Metrics ---------------
     DD_GRAFANA_URL=(str, ""),
-    DD_GRAFANA_PATH=(str, ""),
+    DD_GRAFANA_PATH=(dict, {}),
     DD_GRAFANA_PARAMS=(str, ""),
     DD_MICROSOFT_LOGIN_URL=(str, ""),
     
@@ -392,10 +374,15 @@ env = environ.FileAwareEnv(
     DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE=(int, 0),
     DD_PERCENTAGE_OF_VULNERABILITIES_CLOSED=(dict,
                                              {
-                                                 "month": 3,
-                                                 "percentage": 0.82
+                                                 "days": 90,
+                                                 "percentage": 0.82,
+                                                 "active": False
                                              }),
-    DD_TEMPORARILY_ASSUMED_VULNERABILITIES=(float, 0.40),
+    DD_TEMPORARILY_ASSUMED_VULNERABILITIES=(dict,
+                                        {
+                                            "percentage": 0.40,
+                                            "active": False
+                                        }),
     
     DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
         "Low": {
@@ -1429,6 +1416,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
         "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
     },
+    "transfer_finding_expiration_handler": {
+        "task": "dojo.transfer_findings.helper.expiration_handler",
+        "schedule": crontab(minute=0, hour="*/3"),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1568,9 +1559,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'MobSF Scan': ['title', 'description', 'severity'],
     'OSV Scan': ['title', 'description', 'severity'],
     'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
+    'Deepfence Threatmapper Report': ['title', 'description', 'severity'],
     'Bearer CLI': ['title', 'severity'],
     'Nancy Scan': ['title', 'vuln_id_from_tool'],
-    'Wiz Scan': ['title', 'description', 'severity']
+    'Wiz Scan': ['title', 'description', 'severity'],
+    'Kubescape JSON Importer': ['title', 'component_name']
 }
 
 # Override the hardcoded settings here via the env var
@@ -1803,6 +1796,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Bearer CLI': DEDUPE_ALGO_HASH_CODE,
     'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
+    'Deepfence Threatmapper Report': DEDUPE_ALGO_HASH_CODE,
+    'Kubescape JSON Importer': DEDUPE_ALGO_HASH_CODE
 }
 
 # Override the hardcoded settings here via the env var

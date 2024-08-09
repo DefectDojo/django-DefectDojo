@@ -16,7 +16,7 @@ from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.finding.views import prefetch_for_findings
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Product
-from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_system_setting, get_words_for_field
+from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_setting, get_system_setting, get_words_for_field
 
 logger = logging.getLogger(__name__)
 
@@ -121,9 +121,12 @@ def delete_finding_group(request, fgid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_test', args=(finding_group.test.id,)))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([finding_group])
-    rels = collector.nested()
+    rels = ["Previewing the relationships has been disabled.", ""]
+    display_preview = get_setting("DELETE_PREVIEW")
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([finding_group])
+        rels = collector.nested()
     product_tab = Product_Tab(finding_group.test.engagement.product, title="Product", tab="settings")
 
     return render(request, 'dojo/delete_finding_group.html', {

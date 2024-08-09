@@ -60,21 +60,21 @@ class TestUserQueries(DojoTestCase):
     def test_user_none(self, mock_current_user):
         mock_current_user.return_value = None
 
-        self.assertQuerysetEqual(Dojo_User.objects.none(), get_authorized_users(Permissions.Product_View))
+        self.assertQuerySetEqual(Dojo_User.objects.none(), get_authorized_users(Permissions.Product_View))
 
     @patch('dojo.user.queries.get_current_user')
     def test_user_admin(self, mock_current_user):
         mock_current_user.return_value = self.admin_user
 
         users = Dojo_User.objects.all().order_by('first_name', 'last_name', 'username')
-        self.assertQuerysetEqual(users, get_authorized_users(Permissions.Product_View))
+        self.assertQuerySetEqual(users, get_authorized_users(Permissions.Product_View))
 
     @patch('dojo.user.queries.get_current_user')
     def test_user_global_permission(self, mock_current_user):
         mock_current_user.return_value = self.global_permission_user
 
         users = Dojo_User.objects.all().order_by('first_name', 'last_name', 'username')
-        self.assertQuerysetEqual(users, get_authorized_users(Permissions.Product_View))
+        self.assertQuerySetEqual(users, get_authorized_users(Permissions.Product_View))
 
     @patch('dojo.user.queries.get_current_user')
     @patch('dojo.product.queries.get_current_user')
@@ -83,8 +83,8 @@ class TestUserQueries(DojoTestCase):
         mock_current_user_2.return_value = self.regular_user
 
         users = Dojo_User.objects.exclude(username='invisible_user').order_by('first_name', 'last_name', 'username')
-        self.assertQuerysetEqual(users, get_authorized_users(Permissions.Product_View))
-    
+        self.assertQuerySetEqual(users, get_authorized_users(Permissions.Product_View))
+
     def test_get_all_user_by_role(self):
         role = Role.objects.get(name="Leader")
         users_leader = Product_Type_Member.objects.filter(role_id=role).values("user_id").union(Product_Member.objects.filter(role_id=role).values("user_id"))
@@ -92,4 +92,3 @@ class TestUserQueries(DojoTestCase):
         user = user_model._default_manager.create_user(username="test", password="pwd")
         query_function = get_all_user_by_role(user=user, role="Leader")
         self.assertQuerysetEqual(users_leader, query_function)
-

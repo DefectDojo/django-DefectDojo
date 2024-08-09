@@ -15,8 +15,7 @@ from django.template.defaultfilters import stringfilter
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import conditional_escape, escape
-from django.utils.safestring import SafeData, mark_safe
-from django.utils.text import normalize_newlines
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
 import dojo.jira_link.helper as jira_helper
@@ -113,21 +112,6 @@ def get_pwd(value):
 @register.filter(name='checklist_status')
 def checklist_status(value):
     return Check_List.get_status(value)
-
-
-@register.filter(is_safe=True, needs_autoescape=True)
-@stringfilter
-def linebreaksasciidocbr(value, autoescape=None):
-    """
-    Converts all newlines in a piece of plain text to HTML line breaks
-    (``+ <br />``).
-    """
-    autoescape = autoescape and not isinstance(value, SafeData)
-    value = normalize_newlines(value)
-    if autoescape:
-        value = escape(value)
-
-    return mark_safe(value.replace('\n', '&nbsp;+<br />'))
 
 
 @register.simple_tag
@@ -743,6 +727,10 @@ def finding_display_status(finding):
         url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
         link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Accepted"><span style="color: #096C11;">Transfer Accepted</span></a>'
         display_status = display_status.replace('Transfer Accepted', link)
+    if 'Transfer Expired' in display_status:
+        url = reverse('view_transfer_finding', args=(finding.test.engagement.product.id, ))
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Expired"><span style="color: #D93E14;">Transfer Expired</span></a>'
+        display_status = display_status.replace('Transfer Expired', link)
     if 'Risk Expired' in display_status:
         ra = finding.risk_acceptance
         if ra:
@@ -947,6 +935,7 @@ def status_style_color(status: str):
         "Risk Expired": f'<span style="color:#D93E14">{status}</span>',
         "Transfer Pending": f'<span style="color:blue">{status}</span>',
         "Transfer Accepted": f'<span style="color:green">{status}</span>',
+        "Transfer Expired": f'<span style="color:#D93E14">{status}</span>',
         "Transfer Rejected": f'<span style="color:red">{status}</span>',
     }
     return mark_safe(dict_style_color.get(status, f'<span>{status}</span>'))

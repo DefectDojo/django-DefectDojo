@@ -154,6 +154,7 @@ def product(request):
         'prod_list': prod_list,
         'prod_filter': prod_filter,
         'name_words': sorted(set(name_words)),
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         'user': request.user})
 
 
@@ -338,6 +339,7 @@ def view_product_components(request, pid):
         'filter': comp_filter,
         'product_tab': product_tab,
         'result': result,
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         'component_words': sorted(set(component_words))
     })
 
@@ -798,6 +800,7 @@ def view_engagements(request, pid):
         'inactive_engs_count': result_inactive_engs.paginator.count,
         'inactive_engs_filter': inactive_engs_filter,
         'recent_test_day_count': recent_test_day_count,
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         'user': request.user})
 
 
@@ -842,7 +845,7 @@ def import_scan_results_prod(request, pid=None):
 
 def new_product(request, ptid=None):
     if get_authorized_product_types(Permissions.Product_Type_Add_Product).count() == 0:
-        raise PermissionDenied()
+        raise PermissionDenied
 
     jira_project_form = None
     error = False
@@ -1628,9 +1631,12 @@ def delete_engagement_presets(request, pid, eid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('engagement_presets', args=(pid,)))
 
-    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-    collector.collect([preset])
-    rels = collector.nested()
+    rels = ["Previewing the relationships has been disabled.", ""]
+    display_preview = get_setting("DELETE_PREVIEW")
+    if display_preview:
+        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+        collector.collect([preset])
+        rels = collector.nested()
 
     product_tab = Product_Tab(prod, title=_("Delete Engagement Preset"), tab="settings")
     return render(request, 'dojo/delete_presets.html',
@@ -1825,7 +1831,7 @@ def edit_api_scan_configuration(request, pid, pascid):
 
     if product_api_scan_configuration.product.pk != int(
             pid):  # user is trying to edit Tool Configuration from another product (trying to by-pass auth)
-        raise Http404()
+        raise Http404
 
     if request.method == 'POST':
         form = Product_API_Scan_ConfigurationForm(request.POST, instance=product_api_scan_configuration)
@@ -1871,7 +1877,7 @@ def delete_api_scan_configuration(request, pid, pascid):
 
     if product_api_scan_configuration.product.pk != int(
             pid):  # user is trying to delete Tool Configuration from another product (trying to by-pass auth)
-        raise Http404()
+        raise Http404
 
     if request.method == 'POST':
         form = Product_API_Scan_ConfigurationForm(request.POST)

@@ -1014,7 +1014,7 @@
                                                     {% endif %}
                                                     {% if finding|has_object_permission:"Finding_View" %}
                                                         {% user_can_clear_peer_review finding request.user as clear_peer_review %}
-                                                        {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
+                                                        {% if finding|has_object_permission:"Finding_Code_Review" and clear_peer_review %}
                                                             <li role="presentation">
                                                                 <a rel="noopener noreferrer" href="{% url 'clear_finding_review' finding.id %}">
                                                                     <i class="icon-user-check"></i> {% trans "Clear Review" %}
@@ -1094,6 +1094,21 @@
                                                                     {% endif %}
                                                                 {% endif %}
                                                             {% endif %}
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    {% if finding|has_object_permission:"Transfer_Finding_Add" and system_settings.enable_transfer_finding%}
+                                                        {% if finding|enable_button:"Add Risk Acceptance"%}
+                                                            <li role="presentation">
+                                                                <a rel="noopener noreferrer" href="{% url 'add_transfer_finding' finding.test.engagement.id finding.id %}">
+                                                                    <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Transfer Finding..." %}
+                                                                </a>
+                                                            </li>
+                                                        {% else %}
+                                                            <li role="presentation">
+                                                                <a rel="noopener noreferrer" href="#">
+                                                                    <i class="fa-solid fa-circle-exclamation" style="color: grey"></i><span style="color: grey"> {% trans "Add Transfer Finding..." %} </span>
+                                                                </a>
+                                                            </li>
                                                         {% endif %}
                                                     {% endif %}
                                                     <li class="divider"></li>
@@ -1688,58 +1703,60 @@
             };
 
             // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#test_findings').DataTable({
-                drawCallback: function(){
-                    $('#test_findings .has-popover').hover(
-                        function() { $(this).popover('show'); }, // hover
-                        function() { $(this).popover('hide'); } // unhover
-                    );
-                },
-                colReorder: true,
-                "columns": columns,
-                columnDefs: [
-                    {
-                        "orderable": false,
-                        "targets": [0]
+            {% if enable_table_filtering %}
+                var dojoTable = $('#test_findings').DataTable({
+                    drawCallback: function(){
+                        $('#test_findings .has-popover').hover(
+                            function() { $(this).popover('show'); }, // hover
+                            function() { $(this).popover('hide'); } // unhover
+                        );
                     },
-                    {
-                        targets: [0, 1],
-                        className: 'noVis'
-                    },
-                    {
-                        targets: 'severity-sort',
-                        orderDataType: 'severity-asc'
-                    },
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
+                    colReorder: true,
+                    "columns": columns,
+                    columnDefs: [
+                        {
+                            "orderable": false,
+                            "targets": [0]
+                        },
+                        {
+                            targets: [0, 1],
+                            className: 'noVis'
+                        },
+                        {
+                            targets: 'severity-sort',
+                            orderDataType: 'severity-asc'
+                        },
+                    ],
+                    dom: 'Bfrtip',
+                    paging: false,
+                    info: false,
+                    buttons: [
+                        {
+                            extend: 'colvis',
+                            columns: ':not(.noVis)'
+                        },
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'copy'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'excel',
+                            autoFilter: true,
+                            sheetName: 'Exported data',
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'csv'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'pdf',
+                            orientation: 'landscape',
+                            pageSize: 'LETTER'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'print'
+                        }),
+                    ],
+                });
+            {% endif %}
         });
 
         $(function () {

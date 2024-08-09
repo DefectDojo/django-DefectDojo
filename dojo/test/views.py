@@ -207,6 +207,7 @@ class ViewTest(View):
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
             'finding_groups': test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", "findings__vulnerability_id_set"),
             'finding_group_by_options': Finding_Group.GROUP_BY_OPTIONS,
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
 
         }
         # Set the form using the context, and then update the context
@@ -402,7 +403,7 @@ def copy_test(request, tid):
 def test_calendar(request):
 
     if not get_system_setting('enable_calendar'):
-        raise Resolver404()
+        raise Resolver404
 
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
         tests = get_authorized_tests(Permissions.Test_View)

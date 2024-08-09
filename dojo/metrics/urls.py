@@ -26,4 +26,6 @@ urlpatterns = [
         name='view_engineer'),
     re_path(r'^metrics/panel$', views.metrics_panel,
         name='metrics_panel'),
+    re_path(r'^metrics/devsecops$', views.metrics_devsecops,
+        name='metrics_devsecops'),
 ]

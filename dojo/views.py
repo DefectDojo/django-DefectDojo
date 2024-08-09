@@ -7,10 +7,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.http import FileResponse, Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.views.static import serve
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission_or_403,
@@ -21,8 +20,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import LogEntryFilter
 from dojo.forms import ManageFileFormSet
 from dojo.models import Endpoint, Engagement, FileUpload, Finding, Product, Test
-from dojo.utils import Product_Tab, get_page_items
-from dojo.api_v2 import permissions
+from dojo.utils import Product_Tab, generate_file_response, get_page_items
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +38,7 @@ def action_history(request, cid, oid):
         ct = ContentType.objects.get_for_id(cid)
         obj = ct.get_object_for_this_type(pk=oid)
     except (KeyError, ObjectDoesNotExist):
-        raise Http404()
+        raise Http404
 
     product_id = None
     active_tab = None
@@ -137,7 +135,7 @@ def manage_files(request, oid, obj_type):
         user_has_permission_or_403(request.user, obj, Permissions.Finding_Edit)
         obj_vars = ('view_finding', 'finding_set')
     else:
-        raise Http404()
+        raise Http404
 
     files_formset = ManageFileFormSet(queryset=obj.files.all())
     error = False
@@ -190,13 +188,16 @@ def manage_files(request, oid, obj_type):
         })
 
 
-# Serve the file only after verifying the user is supposed to see the file
 @login_required
 def protected_serve(request, path, document_root=None, show_indexes=False):
+    """Serve the file only after verifying the user is supposed to see the file."""
     file = FileUpload.objects.get(file=path)
     if not file:
-        raise Http404()
+        raise Http404
     object_set = list(file.engagement_set.all()) + list(file.test_set.all()) + list(file.finding_set.all())
+    # Determine if there is an object to query permission checks from
+    if len(object_set) == 0:
+        raise Http404
     # Should only one item (but not sure what type) in the list, so O(n=1)
     for obj in object_set:
         if isinstance(obj, Engagement):
@@ -205,23 +206,30 @@ def protected_serve(request, path, document_root=None, show_indexes=False):
             user_has_permission_or_403(request.user, obj, Permissions.Test_View)
         elif isinstance(obj, Finding):
             user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
-    return serve(request, path, document_root, show_indexes)
+
+    return generate_file_response(file)
 
 
 def access_file(request, fid, oid, obj_type, url=False):
+    def check_file_belongs_to_object(file, object_manager, object_id):
+        if not object_manager.filter(id=object_id).exists():
+            raise PermissionDenied
+
+    file = get_object_or_404(FileUpload, pk=fid)
     if obj_type == 'Engagement':
         obj = get_object_or_404(Engagement, pk=oid)
         user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
+        obj_manager = file.engagement_set
     elif obj_type == 'Test':
         obj = get_object_or_404(Test, pk=oid)
         user_has_permission_or_403(request.user, obj, Permissions.Test_View)
+        obj_manager = file.test_set
     elif obj_type == 'Finding':
         obj = get_object_or_404(Finding, pk=oid)
         user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
+        obj_manager = file.finding_set
     else:
-        raise Http404()
-    # If reaching this far, user must have permission to get file
-    file = get_object_or_404(FileUpload, pk=fid)
-    redirect_url = f'{settings.MEDIA_ROOT}/{file.file.url.lstrip(settings.MEDIA_URL)}'
-    logger.debug(redirect_url)
-    return FileResponse(open(redirect_url, "rb"))
+        raise Http404
+    check_file_belongs_to_object(file, obj_manager, obj.id)
+
+    return generate_file_response(file)

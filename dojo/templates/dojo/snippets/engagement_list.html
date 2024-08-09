@@ -295,68 +295,70 @@
             };
 
             // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#{{status}}').DataTable({
-                colReorder: true,
-                "columns": [
-                    { "data": "action" },
-                    { "data": "eng_name" },
-                    { "data": "engagement_type" },
-                    { "data": "lead" },
-                    null,
-                    { "data": "length", "type": "num", render: function(data, type, row) {
-                      if(type === 'sort') {
-                        data = data.split(' ')[0];
-                      }
-                      return data
-                    }},
-                    {% if system_settings.enable_jira %}
-                        { "data": "jira" },
-                    {% endif %}
-                    null, // "tests"
-                    null, // "data"
-                    { "data": "mitigated" },
-                    { "data": "accepted" },
-                    { "data": "all" },
-                    { "data": "dups" },
-                    {% if status == "paused" or status == "closed" %}
-                      { "data": "status" },
-                    {% endif %}
-                ],
-                columnDefs: [
-                    {
-                        "orderable": false,
-                        "targets": [0]
-                    },
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
+            {% if enable_table_filtering %}
+              var dojoTable = $('#{{status}}').DataTable({
+                  colReorder: true,
+                  "columns": [
+                      { "data": "action" },
+                      { "data": "eng_name" },
+                      { "data": "engagement_type" },
+                      { "data": "lead" },
+                      null,
+                      { "data": "length", "type": "num", render: function(data, type, row) {
+                        if(type === 'sort') {
+                          data = data.split(' ')[0];
+                        }
+                        return data
+                      }},
+                      {% if system_settings.enable_jira %}
+                          { "data": "jira" },
+                      {% endif %}
+                      null, // "tests"
+                      null, // "data"
+                      { "data": "mitigated" },
+                      { "data": "accepted" },
+                      { "data": "all" },
+                      { "data": "dups" },
+                      {% if status == "paused" or status == "closed" %}
+                        { "data": "status" },
+                      {% endif %}
+                  ],
+                  columnDefs: [
+                      {
+                          "orderable": false,
+                          "targets": [0]
+                      },
+                  ],
+                  dom: 'Bfrtip',
+                  paging: false,
+                  info: false,
+                  buttons: [
+                      {
+                          extend: 'colvis',
+                          columns: ':not(.noVis)'
+                      },
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'copy'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'excel',
+                          autoFilter: true,
+                          sheetName: 'Exported data',
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'csv'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'pdf',
+                          orientation: 'landscape',
+                          pageSize: 'LETTER'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'print'
+                      }),
+                  ],
+              });
+            {% endif %}
         });
     </script>
     {% endblock %}

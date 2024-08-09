@@ -1,9 +1,10 @@
 {% load static %}
 
 <div class="table_of_contents">
-    <h1 id="table_of_contents">{{ title }}</h1>
+    <h1 id="table_of_contents">{{ heading }}</h1>
     <div id="toc"></div>
 </div>
+<div class="report-page-break">Page Break</div>
 
 <script type="text/javascript">
     window.onload = function () {
@@ -39,7 +40,7 @@
 
                     level = parseInt(openLevel);
                     
-                    var anchor = titleText.trim().replace(/ /g, "_");
+                    var anchor = titleText.trim().replace(/\s/g, "_");
 
                     if(tags)
                     {

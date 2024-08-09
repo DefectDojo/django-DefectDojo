@@ -561,6 +561,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserContactInfoSerializer(serializers.ModelSerializer):
+    user_profile = UserSerializer(many=False, source="user", read_only=True)
+
     class Meta:
         model = UserContactInfo
         fields = "__all__"
@@ -1645,10 +1647,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
-    related_fields = serializers.SerializerMethodField()
+    related_fields = serializers.SerializerMethodField(allow_null=True)
     # for backwards compatibility
-    jira_creation = serializers.SerializerMethodField(read_only=True)
-    jira_change = serializers.SerializerMethodField(read_only=True)
+    jira_creation = serializers.SerializerMethodField(read_only=True, allow_null=True)
+    jira_change = serializers.SerializerMethodField(read_only=True, allow_null=True)
     display_status = serializers.SerializerMethodField()
     finding_groups = FindingGroupSerializer(
         source="finding_group_set", many=True, read_only=True
@@ -2097,7 +2099,7 @@ class ImportScanSerializer(serializers.Serializer):
         queryset=Endpoint.objects.all(),
         required=False,
         default=None,
-        help_text="The IP address, host name or full URL. It must be valid",
+        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint."
     )
     file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
@@ -2377,7 +2379,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         choices=get_choices_sorted(), required=True
     )
     endpoint_to_add = serializers.PrimaryKeyRelatedField(
-        queryset=Endpoint.objects.all(), default=None, required=False
+        queryset=Endpoint.objects.all(),
+        required=False,
+        default=None,
+        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint."
     )
     file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
@@ -3003,6 +3008,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = None
         product = None
+        template = False
 
         if self.instance is not None:
             user = self.instance.user
@@ -3012,25 +3018,26 @@ class NotificationsSerializer(serializers.ModelSerializer):
             user = data.get("user")
         if "product" in data:
             product = data.get("product")
+        if "template" in data:
+            template = data.get("template")
 
+        if (
+            template
+            and Notifications.objects.filter(template=True).count() > 0
+        ):
+            msg = "Notification template already exists"
+            raise ValidationError(msg)
         if (
             self.instance is None
             or user != self.instance.user
             or product != self.instance.product
         ):
             notifications = Notifications.objects.filter(
-                user=user, product=product, template=False
+                user=user, product=product, template=template
             ).count()
             if notifications > 0:
                 msg = "Notification for user and product already exists"
                 raise ValidationError(msg)
-        if (
-            data.get("template")
-            and Notifications.objects.filter(template=True).count() > 0
-        ):
-            msg = "Notification template already exists"
-            raise ValidationError(msg)
-
         return data
 
 
@@ -3310,6 +3317,7 @@ class TransferFindingFindingsDetailSerializer(serializers.Serializer):
 
 
 class TransferFindingFindingsUpdateSerializer(serializers.Serializer):
+    engagement_id = serializers.IntegerField(required=False)
     findings = serializers.DictField(child=TransferFindingFindingsDetailSerializer())
 
 class AnnouncementSerializer(serializers.ModelSerializer):
