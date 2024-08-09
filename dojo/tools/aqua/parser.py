@@ -58,7 +58,9 @@ def get_item(resource, vuln, test):
     resource_version = resource.get("version", "No version")
     vulnerability_id = vuln.get("name", "No CVE")
     fix_version = vuln.get("fix_version", "None")
-    description = vuln.get("description", "No description.")
+    description = vuln.get("description", "No description.") + "\n"
+    if resource.get("path"):
+        description += "**Path:** " + resource.get("path") + "\n"
     cvssv3 = None
 
     url = ""
