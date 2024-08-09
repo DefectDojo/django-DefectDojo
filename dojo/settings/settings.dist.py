@@ -100,7 +100,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
-    DD_CELERY_CRON_SCHEDULE=(str, "* * * *"),
+    DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
