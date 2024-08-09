@@ -103,6 +103,7 @@ class TestAquaParser(DojoTestCase):
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(101, len(findings))
+            self.assertEqual("server.key - server.key (/juice-shop/node_modules/node-gyp/test/fixtures/server.key) ", findings[83].title)
 
     def test_aqua_parser_aqua_devops_empty(self):
         with open("unittests/scans/aqua/empty_aquadevops.json") as testfile:

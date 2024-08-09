@@ -170,9 +170,9 @@ def get_item_sensitive_data(resource, sensitive_item, test):
     resource_name = resource.get("name", "None")
     resource_path = resource.get("path", "None")
     vulnerability_id = resource_name
-    description = "**Senstive Item:** " +sensitive_item + "\n"
-    description+= "**Layer:** " + resource.get("layer", "None") +  "\n"
-    description+= "**Layer_DIgest:** " + resource.get("layer_digest", "None") +  "\n"
+    description = "**Senstive Item:** " + sensitive_item + "\n"
+    description += "**Layer:** " + resource.get("layer", "None") + "\n"
+    description += "**Layer_Digest:** " + resource.get("layer_digest", "None") + "\n"
 
     finding = Finding(
         title=vulnerability_id
