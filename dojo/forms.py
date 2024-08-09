@@ -3556,7 +3556,7 @@ class ExistingEngagementForm(forms.Form):
         queryset=Engagement.objects.none(),
         required=True,
         widget=forms.widgets.Select(),
-        help_text="Select which Engagement to attach the Questionnaire")
+        help_text="Select which Engagement to link the Questionnaire to")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
