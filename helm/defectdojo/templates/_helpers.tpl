@@ -166,7 +166,7 @@ Create chart name and version as used by the chart label.
           key: postgresql-postgres-password
         {{- end }}
   {{- if .Values.extraEnv }}
-  {{- toYaml .Values.extraEnv | nindent 8 }}
+  {{- toYaml .Values.extraEnv | nindent 2 }}
   {{- end }}
   resources:
     {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
