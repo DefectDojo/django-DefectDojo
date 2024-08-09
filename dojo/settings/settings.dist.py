@@ -100,6 +100,7 @@ env = environ.FileAwareEnv(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
+    DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -1382,6 +1383,7 @@ CELERY_BEAT_SCHEDULE_FILENAME = env("DD_CELERY_BEAT_SCHEDULE_FILENAME")
 CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
+CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
@@ -1418,7 +1420,11 @@ CELERY_BEAT_SCHEDULE = {
     },
     "transfer_finding_expiration_handler": {
         "task": "dojo.transfer_findings.helper.expiration_handler",
-        "schedule": crontab(minute=0, hour="*/3"),
+        "schedule": crontab(minute=CELERY_CRON_SCHEDULE.split()[0],
+                            hour=CELERY_CRON_SCHEDULE.split()[1],
+                            day_of_month=CELERY_CRON_SCHEDULE.split()[2],
+                            month_of_year=CELERY_CRON_SCHEDULE.split()[3],
+                            day_of_week=CELERY_CRON_SCHEDULE.split()[4]),
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
