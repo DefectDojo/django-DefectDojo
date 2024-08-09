@@ -175,7 +175,7 @@ def get_item_sensitive_data(resource, sensitive_item, test):
     description = "**Senstive Item:** " + sensitive_item + "\n"
     description += "**Layer:** " + resource.get("layer", "None") + "\n"
     description += "**Layer_Digest:** " + resource.get("layer_digest", "None") + "\n"
-
+    description += "**Path:** " + resource.get("path", "None") + "\n"
     finding = Finding(
         title=vulnerability_id
         + " - "
