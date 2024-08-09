@@ -447,7 +447,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 
         except Exception as e:
             error = ERROR_PERMANENT
-            endpoint.note = f"Exception: {e}"
+            endpoint.note = f"Exception: {e}"[:1000]
             logger.exception(e)
             log_alert(e, "Webhooks Notification")
 
