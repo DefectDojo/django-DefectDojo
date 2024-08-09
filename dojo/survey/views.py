@@ -879,7 +879,7 @@ class ExistingEngagementEmptySurveyView(View):
 
     def add_breadcrumb(self, request):
         add_breadcrumb(
-            title="Link Questionnaire to new Engagement",
+            title="Link Questionnaire to existing Engagement",
             top_level=False,
             request=request)
 
@@ -899,8 +899,10 @@ class ExistingEngagementEmptySurveyView(View):
         survey = get_object_or_404(Answered_Survey, id=esid)
         form = self.get_form_class()(request.POST)
         if form.is_valid():
+            # Validate perms
             engagement = form.cleaned_data.get("engagement")
             user_has_permission_or_403(request.user, engagement, Permissions.Engagement_Edit)
+            # Link and save
             survey.engagement = engagement
             survey.save()
             messages.add_message(
