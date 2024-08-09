@@ -871,27 +871,21 @@ def engagement_empty_survey(request, esid):
 
 
 class ExistingEngagementEmptySurveyView(View):
-    def get_template(self):
-        return "defectDojo-engagement-survey/existing_engagement.html"
-
-    def get_form_class(self):
-        return ExistingEngagementForm
-
-    def add_breadcrumb(self, request):
-        add_breadcrumb(
-            title="Link Questionnaire to existing Engagement",
-            top_level=False,
-            request=request)
-
     def get(self, request, esid):
-        # Make sure it exists/user can access
-        _ = get_object_or_404(Answered_Survey, id=esid)
+        survey = get_object_or_404(Answered_Survey, id=esid)
+        if survey.engagement:
+            # If the questionnaire is already linked so a survey, ensure the user has permission edit it
+            user_has_permission_or_403(request.user, survey.engagement, Permissions.Engagement_Edit)
+            # Prepopulate the form with the current engagement
+            form = self.get_form_class()({'engagement': survey.engagement})
+        else:
+            form = self.get_form_class()()
         self.add_breadcrumb(request)
         return render(
             request,
             self.get_template(),
             {
-                "form": self.get_form_class()(),
+                "form": form
              },
         )
 
@@ -899,9 +893,12 @@ class ExistingEngagementEmptySurveyView(View):
         survey = get_object_or_404(Answered_Survey, id=esid)
         form = self.get_form_class()(request.POST)
         if form.is_valid():
-            # Validate perms
+            # Validate perms on the target engagement
             engagement = form.cleaned_data.get("engagement")
             user_has_permission_or_403(request.user, engagement, Permissions.Engagement_Edit)
+            # If we're moving a questionnaire, make sure the user can edit the 'source' engagement too
+            if survey.engagement:
+                user_has_permission_or_403(request.user, survey.engagement, Permissions.Engagement_Edit)
             # Link and save
             survey.engagement = engagement
             survey.save()
@@ -919,3 +916,15 @@ class ExistingEngagementEmptySurveyView(View):
             extra_tags="alert-danger")
         self.add_breadcrumb(request)
         return render(request, self.get_template(), {"form": form})
+
+    def add_breadcrumb(self, request):
+        add_breadcrumb(
+            title="Link Questionnaire to existing Engagement",
+            top_level=False,
+            request=request)
+
+    def get_form_class(self):
+        return ExistingEngagementForm
+
+    def get_template(self):
+        return "defectDojo-engagement-survey/existing_engagement.html"
