@@ -910,7 +910,7 @@ class ExistingEngagementEmptySurveyView(View):
                 messages.SUCCESS,
                 "Questionnaire successfully linked to Engagement.",
                 extra_tags="alert-success")
-            return HttpResponseRedirect(reverse("edit_engagement", args=(engagement.id,)))
+            return HttpResponseRedirect(reverse("view_engagement", args=(engagement.id,)))
 
         messages.add_message(
             request,
