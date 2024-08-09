@@ -877,7 +877,7 @@ class ExistingEngagementEmptySurveyView(View):
             # If the questionnaire is already linked so a survey, ensure the user has permission edit it
             user_has_permission_or_403(request.user, survey.engagement, Permissions.Engagement_Edit)
             # Prepopulate the form with the current engagement
-            form = self.get_form_class()({'engagement': survey.engagement})
+            form = self.get_form_class()({"engagement": survey.engagement})
         else:
             form = self.get_form_class()()
         self.add_breadcrumb(request)
@@ -885,7 +885,7 @@ class ExistingEngagementEmptySurveyView(View):
             request,
             self.get_template(),
             {
-                "form": form
+                "form": form,
              },
         )
 
