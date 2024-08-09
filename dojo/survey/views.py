@@ -881,13 +881,7 @@ class ExistingEngagementEmptySurveyView(View):
         else:
             form = self.get_form_class()()
         self.add_breadcrumb(request)
-        return render(
-            request,
-            self.get_template(),
-            {
-                "form": form,
-             },
-        )
+        return render(request, self.get_template(), {"form": form})
 
     def post(self, request, esid):
         survey = get_object_or_404(Answered_Survey, id=esid)
