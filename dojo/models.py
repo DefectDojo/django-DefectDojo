@@ -2640,14 +2640,7 @@ class Finding(models.Model):
             except Exception as ex:
                 logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
 
-        # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
-        # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
-        if dedupe_option:
-            if (self.hash_code is not None):
-                deduplicationLogger.debug("Hash_code already computed for finding")
-            else:
-                self.hash_code = self.compute_hash_code()
-                deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
+        self.set_hash_code(dedupe_option)
 
         if self.pk is None:
             # We enter here during the first call from serializers.py
@@ -3345,6 +3338,20 @@ class Finding(models.Model):
     @property
     def violates_sla(self):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
+
+    def set_hash_code(self, dedupe_option):
+        from dojo.utils import get_custom_method
+        if hash_method := get_custom_method("FINDING_HASH_METHOD"):
+            hash_method(self, dedupe_option)
+        else:
+            # Finding.save is called once from serializers.py with dedupe_option=False because the finding is not ready yet, for example the endpoints are not built
+            # It is then called a second time with dedupe_option defaulted to true; now we can compute the hash_code and run the deduplication
+            if dedupe_option:
+                if self.hash_code is not None:
+                    deduplicationLogger.debug("Hash_code already computed for finding")
+                else:
+                    self.hash_code = self.compute_hash_code()
+                    deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
 
 
 class FindingAdmin(admin.ModelAdmin):

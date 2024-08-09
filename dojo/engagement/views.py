@@ -67,6 +67,7 @@ from dojo.forms import (
     TypedNoteForm,
     UploadThreatForm,
 )
+from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.models import (
     Check_List,
@@ -921,6 +922,15 @@ class ImportScanResultsView(View):
         # Return the engagement
         return engagement
 
+    def get_importer(
+        self,
+        context: dict,
+    ) -> BaseImporter:
+        """
+        Gets the importer to use
+        """
+        return DefaultImporter(**context)
+
     def import_findings(
         self,
         context: dict,
@@ -929,7 +939,7 @@ class ImportScanResultsView(View):
         Attempt to import with all the supplied information
         """
         try:
-            importer_client = DefaultImporter(**context)
+            importer_client = self.get_importer(context)
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
                 context.pop("scan", None),
             )
