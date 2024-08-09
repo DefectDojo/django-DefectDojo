@@ -38,13 +38,19 @@ class AquaParser:
         for node in vulnerabilitytree:
             resource = node.get("resource")
             vulnerabilities = node.get("vulnerabilities", [])
+            sensitive_items = resource.get("sensitive_items", [])
             if vulnerabilities is None:
                 vulnerabilities = []
             for vuln in vulnerabilities:
                 item = get_item(resource, vuln, test)
                 unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
                 self.items[unique_key] = item
-
+            if sensitive_items is None:
+                sensitive_items = []
+            for sensitive_item in sensitive_items:
+                item = get_item_sensitive_data(resource, sensitive_item, test)
+                unique_key = resource.get("cpe") + resource.get("path", "None") + str(sensitive_item)
+                self.items[unique_key] = item
 
 def get_item(resource, vuln, test):
     resource_name = resource.get("name", resource.get("path"))
@@ -160,6 +166,30 @@ def get_item_v2(item, test):
 
     return finding
 
+def get_item_sensitive_data(resource, sensitive_item, test):
+    resource_name = resource.get("name", "None")
+    resource_path = resource.get("path", "None")
+    vulnerability_id = resource_name
+    description = "**Senstive Item:** " +sensitive_item + "\n"
+    description+= "**Layer:** " + resource.get("layer", "None") +  "\n"
+    description+= "**Layer_DIgest:** " + resource.get("layer_digest", "None") +  "\n"
+
+    finding = Finding(
+        title=vulnerability_id
+        + " - "
+        + resource_name
+        + " ("
+        + resource_path
+        + ") ",
+        test=test,
+        severity="Info",
+        description=description.strip(),
+        component_name=resource.get("name"),
+    )
+    if vulnerability_id != "No CVE":
+        finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+    return finding
 
 def aqua_severity_of(score):
     if score == "high":
