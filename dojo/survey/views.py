@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone as tz
 from django.utils.html import escape
+from django.views import View
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
@@ -866,3 +867,57 @@ def engagement_empty_survey(request, esid):
         top_level=False,
         request=request)
     return render(request, "defectDojo-engagement-survey/add_engagement.html", {"form": form})
+
+
+class ExistingEngagementEmptySurveyView(View):
+    def get_template_names(self):
+        return "defectDojo-engagement-survey/add_engagement.html"
+
+    def get_form_class(self):
+        return AddEngagementForm
+
+    def add_breadcrumb(self, request):
+        add_breadcrumb(
+            title="Link Questionnaire to new Engagement",
+            top_level=False,
+            request=request)
+
+    def get(self, request, esid):
+        # Make sure it exists/user can access
+        _ = get_object_or_404(Answered_Survey, id=esid)
+        self.add_breadcrumb(request)
+        return render(
+            request,
+            "defectDojo-engagement-survey/add_engagement.html",
+            {
+                "form": self.get_form_class()()
+             }
+        )
+
+    def post(self, request, esid):
+        survey = get_object_or_404(Answered_Survey, id=esid)
+        form = self.get_form_class()()
+        if form.is_valid():
+            product = form.cleaned_data.get("product")
+            user_has_permission_or_403(request.user, product, Permissions.Engagement_Add)
+            engagement = Engagement(
+                product_id=product.id,
+                target_start=tz.now().date(),
+                target_end=tz.now().date() + timedelta(days=7))
+            engagement.save()
+            survey.engagement = engagement
+            survey.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Engagement created and questionnaire successfully linked.",
+                extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("edit_engagement", args=(engagement.id,)))
+
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Questionnaire could not be added.",
+            extra_tags="alert-danger")
+        self.add_breadcrumb(request)
+        return render(request, "defectDojo-engagement-survey/add_engagement.html", {"form": form})
