@@ -52,6 +52,7 @@ class AquaParser:
                 unique_key = resource.get("cpe") + resource.get("path", "None") + str(sensitive_item)
                 self.items[unique_key] = item
 
+
 def get_item(resource, vuln, test):
     resource_name = resource.get("name", resource.get("path"))
     resource_version = resource.get("version", "No version")
@@ -166,6 +167,7 @@ def get_item_v2(item, test):
 
     return finding
 
+
 def get_item_sensitive_data(resource, sensitive_item, test):
     resource_name = resource.get("name", "None")
     resource_path = resource.get("path", "None")
@@ -190,6 +192,7 @@ def get_item_sensitive_data(resource, sensitive_item, test):
         finding.unsaved_vulnerability_ids = [vulnerability_id]
 
     return finding
+
 
 def aqua_severity_of(score):
     if score == "high":
