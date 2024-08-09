@@ -297,7 +297,7 @@ def do_dedupe_finding_task(new_finding, *args, **kwargs):
 
 
 def do_dedupe_finding(new_finding, *args, **kwargs):
-    if dedupe_method := get_custom_method('FINDING_DEDUPE_METHOD'):
+    if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
         return dedupe_method(new_finding, *args, **kwargs)
 
     try:
@@ -2600,7 +2600,7 @@ def get_custom_method(setting_name: str) -> Optional[Callable]:
     """
     if fq_name := getattr(settings, setting_name, None):
         try:
-            mn, _, fn = fq_name.rpartition('.')
+            mn, _, fn = fq_name.rpartition(".")
             m = importlib.import_module(mn)
             return getattr(m, fn)
         except ModuleNotFoundError:

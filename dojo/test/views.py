@@ -982,7 +982,7 @@ class ReImportScanResultsView(View):
 
     def get_reimporter(
         self,
-        context: dict
+        context: dict,
     ) -> BaseImporter:
         """
         Gets the reimporter to use

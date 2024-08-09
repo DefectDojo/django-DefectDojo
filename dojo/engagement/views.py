@@ -924,7 +924,7 @@ class ImportScanResultsView(View):
 
     def get_importer(
         self,
-        context: dict
+        context: dict,
     ) -> BaseImporter:
         """
         Gets the importer to use
