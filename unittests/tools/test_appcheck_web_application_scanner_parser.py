@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from dojo.models import Finding, Test
 from dojo.tools.appcheck_web_application_scanner.engines.appcheck import AppCheckScanningEngineParser
-from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
+from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser, strip_markup
 from dojo.tools.appcheck_web_application_scanner.engines.nmap import NmapScanningEngineParser
 from dojo.tools.appcheck_web_application_scanner.parser import AppCheckWebApplicationScannerParser
 
@@ -28,7 +28,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("2020-01-28", finding.date)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(True, finding.active)
-            self.assertEqual("[[markup]]Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see   the manual of the FTP service for more information.", finding.mitigation)
+            self.assertEqual("Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see   the manual of the FTP service for more information.", finding.mitigation)
             self.assertIsNone(finding.unsaved_request)
             self.assertIsNone(finding.unsaved_response)
             self.assertIsNone(finding.component_name)
@@ -97,12 +97,12 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("GET Request", finding.unsaved_request)
             self.assertEqual("Response", finding.unsaved_response)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
-            self.assertEqual("[[markup]]\n\nUpdate to the latest version.", finding.mitigation)
+            self.assertEqual("Update to the latest version.", finding.mitigation)
             self.assertEqual("tomcat", finding.component_name)
             self.assertEqual("8.0.32", finding.component_version)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2016-6796", finding.unsaved_vulnerability_ids[0])
-            self.assertTrue(finding.description.startswith('[[markup]]\n\n**Product Background**\n\n**Apache Tomcat** is a free and open-source Java web application server. It provides a "pure Java" HTTP web server environment in which Java code can also run, implementing the Jakarta Servlet, Jakarta Expression Language, and WebSocket technologies. Tomcat is released with **Catalina** (a servlet and JSP Java Server Pages container), **Coyote** (an HTTP connector), **Coyote JK** (JK protocol proxy connector) and **Jasper** (a JSP engine). Tomcat can optionally be bundled with Java Enterprise Edition (Jakarta EE) as **Apache TomEE** to deliver a complete application server with enterprise features such as distributed computing and web services.\n\n**Vulnerability Summary**\n\nA malicious web application running on Apache Tomcat 9.0.0.M1 to 9.0.0.M9, 8.5.0 to 8.5.4, 8.0.0.RC1 to 8.0.36, 7.0.0 to 7.0.70 and 6.0.0 to 6.0.45 was able to bypass a configured SecurityManager via manipulation of the configuration parameters for the JSP Servlet.\n\n**References**\n\n* [[http://www.securitytracker.com/id/1038757]]\n\n* [[http://www.securitytracker.com/id/1037141]]\n\n* [[http://www.securityfocus.com/bid/93944]]\n\n* [[http://www.debian.org/security/2016/dsa-3720]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:2247]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1552]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1550]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1549]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:1548]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:0456]]\n\n* [[https://access.redhat.com/errata/RHSA-2017:0455]]\n\n* [[http://rhn.redhat.com/errata/RHSA-2017-1551.html]]\n\n* [[http://rhn.redhat.com/errata/RHSA-2017-0457.html]]\n\n* [[https://security.netapp.com/advisory/ntap-20180605-0001/]]\n\n* [[https://usn.ubuntu.com/4557-1/]]\n\n* [[https://www.oracle.com/security-alerts/cpuoct2021.html]]\n\n'))
+            self.assertTrue(finding.description.startswith('**Product Background**\n\n**Apache Tomcat** is a free and open-source Java web application server. It provides a "pure Java" HTTP web server environment in which Java code can also run, implementing the Jakarta Servlet, Jakarta Expression Language, and WebSocket technologies. Tomcat is released with **Catalina** (a servlet and JSP Java Server Pages container), **Coyote** (an HTTP connector), **Coyote JK** (JK protocol proxy connector) and **Jasper** (a JSP engine). Tomcat can optionally be bundled with Java Enterprise Edition (Jakarta EE) as **Apache TomEE** to deliver a complete application server with enterprise features such as distributed computing and web services.\n\n**Vulnerability Summary**\n\nA malicious web application running on Apache Tomcat 9.0.0.M1 to 9.0.0.M9, 8.5.0 to 8.5.4, 8.0.0.RC1 to 8.0.36, 7.0.0 to 7.0.70 and 6.0.0 to 6.0.45 was able to bypass a configured SecurityManager via manipulation of the configuration parameters for the JSP Servlet.\n\n**References**\n\n* http://www.securitytracker.com/id/1038757\n\n* http://www.securitytracker.com/id/1037141\n\n* http://www.securityfocus.com/bid/93944\n\n* http://www.debian.org/security/2016/dsa-3720\n\n* https://access.redhat.com/errata/RHSA-2017:2247\n\n* https://access.redhat.com/errata/RHSA-2017:1552\n\n* https://access.redhat.com/errata/RHSA-2017:1550\n\n* https://access.redhat.com/errata/RHSA-2017:1549\n\n* https://access.redhat.com/errata/RHSA-2017:1548\n\n* https://access.redhat.com/errata/RHSA-2017:0456\n\n* https://access.redhat.com/errata/RHSA-2017:0455\n\n* http://rhn.redhat.com/errata/RHSA-2017-1551.html\n\n* http://rhn.redhat.com/errata/RHSA-2017-0457.html\n\n* https://security.netapp.com/advisory/ntap-20180605-0001/\n\n* https://usn.ubuntu.com/4557-1/\n\n* https://www.oracle.com/security-alerts/cpuoct2021.html\n\n'))
             for section in ["**Technical Details**:", "**Classifications**:"]:
                 self.assertTrue(section in finding.description)
 
@@ -128,7 +128,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertIsNone(finding.unsaved_vulnerability_ids)
             self.assertTrue(
                 finding.description.startswith(
-                    "[[markup]]This is simply a report of HTTP request methods supported by the web application.",
+                    "This is simply a report of HTTP request methods supported by the web application.",
                 ),
             )
             for section in ["**Permitted HTTP Methods**:"]:
@@ -152,7 +152,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertIsNone(finding.unsaved_response)
             self.assertEqual("CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N", finding.cvssv3)
             self.assertEqual(
-                "[[markup]]The configuration of this services should be changed so   that it does not accept the listed cipher suites anymore.\n\nPlease see the references for more resources supporting you with this task.",
+                "The configuration of this services should be changed so   that it does not accept the listed cipher suites anymore.\n\nPlease see the references for more resources supporting you with this task.",
                 finding.mitigation,
             )
             self.assertIsNone(finding.component_name)
@@ -165,7 +165,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             )
             self.assertTrue(
                 finding.description.startswith(
-                    "[[markup]]This routine reports all SSL/TLS cipher suites accepted by a service   where attack vectors exists only on HTTPS services.\n\nThese rules are applied for the evaluation of the vulnerable cipher suites:\n\n- 64-bit block cipher 3DES vulnerable to the SWEET32 attack (CVE-2016-2183).",
+                    "This routine reports all SSL/TLS cipher suites accepted by a service   where attack vectors exists only on HTTPS services.\n\nThese rules are applied for the evaluation of the vulnerable cipher suites:\n\n- 64-bit block cipher 3DES vulnerable to the SWEET32 attack (CVE-2016-2183).",
                 ),
             )
             for section in ["**Technical Details**:", "**External Sources**"]:
@@ -188,7 +188,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("Response", finding.unsaved_response)
             self.assertEqual("CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N", finding.cvssv3)
             self.assertEqual(
-                "[[markup]]Review the affected target to determine the reason it is returning a gateway error code. Reducing scan threads\nmay help alleviate the problem.",
+                "Review the affected target to determine the reason it is returning a gateway error code. Reducing scan threads\nmay help alleviate the problem.",
                 finding.mitigation,
             )
             self.assertIsNone(finding.component_name)
@@ -196,7 +196,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertIsNone(finding.unsaved_vulnerability_ids)
             self.assertTrue(
                 finding.description.startswith(
-                    "[[markup]]The server responded with a HTTP status code that may indicate that the remote server is experiencing technical\ndifficulties that are likely to affect the scan and may also be affecting other application users.",
+                    "The server responded with a HTTP status code that may indicate that the remote server is experiencing technical\ndifficulties that are likely to affect the scan and may also be affecting other application users.",
                 ),
             )
             for section in ["**Technical Details**:"]:
@@ -429,3 +429,14 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual(req.strip(), f.unsaved_request)
             self.assertEqual(res.strip(), f.unsaved_response)
             f.unsaved_request = f.unsaved_response = None
+
+    def test_appcheck_web_application_scanner_parser_markup_stripper(self):
+        for markup, expected in [
+            (None, None),
+            ("", ""),
+            ("some", "some"),
+            ("[[markup]] some", "some"),
+            ("[[other[[]]]] some", "other some"),
+            ("[[markup]] but with [[urlhere]]", "but with urlhere"),
+        ]:
+            self.assertEqual(expected, strip_markup(markup))

@@ -8,6 +8,22 @@ from django.core.exceptions import ImproperlyConfigured
 
 from dojo.models import Endpoint, Finding
 
+#######
+# Helpers/Utils
+#######
+
+# Pattern for stripping markup from entry values -- removes "[[markup]]" and "[[" and "]]"
+MARKUP_STRIPPING_PATTERN = re.compile(r"\[\[markup\]\]|\[\[|\]\]")
+
+
+def strip_markup(value: str) -> str:
+    """
+    Strips out "markup" from value
+    """
+    if value:
+        return MARKUP_STRIPPING_PATTERN.sub("", value).strip()
+    return value
+
 
 #######
 # Field parsing helper classes
@@ -48,6 +64,14 @@ class Attribute(FieldType):
             raise ImproperlyConfigured(msg)
 
 
+class DeMarkupedAttribute(Attribute):
+    """
+    Class for an Attribute (as above) but whose value is stripped of markup prior to being set.
+    """
+    def handle(self, engine_class, finding, value):
+        super().handle(engine_class, finding, strip_markup(value))
+
+
 class Method(FieldType):
     """
     Class for a field that requires a method to process it. Initialized with a method name, when called it invokes the
@@ -69,11 +93,13 @@ class BaseEngineParser:
 
     Directly mapped attributes, from JSON object -> Finding attribute:
         * _id -> unique_id_from_tool
+        * cvss_v3_vector -> cvssv3
+        * epss_base_score -> epss_score
+
+    Directly mapped attributes but value is stripped of "markup" first, JSON Object -> Finding attribute:
         * title -> title
         * description -> description
         * solution -> mitigation
-        * cvss_v3_vector -> cvssv3
-        * epss_base_score -> epss_score
 
     Data mapped with a bit of tinkering, JSON object -> Finding attribute:
         * first_detected_at -> date (parse date)
@@ -92,11 +118,11 @@ class BaseEngineParser:
     # Field handling common to all findings returned by AppCheck
     _COMMON_FIELDS_MAP: dict[str, FieldType] = {
         "_id": Attribute("unique_id_from_tool"),
-        "title": Attribute("title"),
-        "description": Attribute("description"),
-        "solution": Attribute("mitigation"),
         "cvss_v3_vector": Attribute("cvssv3"),
         "epss_base_score": Attribute("epss_score"),
+        "title": DeMarkupedAttribute("title"),
+        "description": DeMarkupedAttribute("description"),
+        "solution": DeMarkupedAttribute("mitigation"),
         "first_detected_at": Method("parse_initial_date"),
         "status": Method("parse_status"),
         "cves": Method("parse_cves"),
@@ -180,10 +206,10 @@ class BaseEngineParser:
         finding.component_name, finding.component_version = self.parse_cpe(value[0])
 
     #####
-    # For parsing additional description-related entries (notes and details)
+    # For parsing additional description-related entries (description, notes, and details)
     #####
     def format_additional_description(self, section: str, value: str) -> str:
-        return f"**{section}**: {value}"
+        return f"**{section}**: {strip_markup(value)}"
 
     def append_description(self, finding: Finding, addendum: dict[str, str]) -> None:
         if addendum:
