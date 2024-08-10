@@ -1,43 +1,20 @@
-import importlib.util
-import inspect
 import json
 import logging
-import os
 from typing import Any
 
+from dojo.tools.appcheck_web_application_scanner.engines.appcheck import AppCheckScanningEngineParser
 from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
+from dojo.tools.appcheck_web_application_scanner.engines.nmap import NmapScanningEngineParser
+from dojo.tools.appcheck_web_application_scanner.engines.openvas import OpenVASScannerEngineParser
 
 LOGGER = logging.getLogger(__name__)
 
 
-def load_scanning_engine_parsers() -> dict[str, BaseEngineParser]:
-    """
-    Loads
-    :return: A dictionary mapping engine name to an instance of BaseEngine
-    """
-    def is_engine_parser(obj):
-        return inspect.isclass(obj) and issubclass(obj, BaseEngineParser) and obj is not BaseEngineParser
-
-    engines_dir = f"{os.path.dirname(__file__)}/engines"
-
-    engine_parsers = {
-        BaseEngineParser.SCANNING_ENGINE: BaseEngineParser()}
-
-    for file in os.listdir(engines_dir):
-        if file in {"__init__.py", "base.py"} or not file.endswith(".py"):
-            continue
-        module_name = file[:-3]
-        file_path = os.path.join(engines_dir, file)
-        spec = importlib.util.spec_from_file_location(module_name, file_path)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        for _, ep in inspect.getmembers(mod, is_engine_parser):
-            engine_parsers[ep.SCANNING_ENGINE] = ep()
-
-    return engine_parsers
-
-
-SCANNING_ENGINE_PARSERS: dict[str, BaseEngineParser] = load_scanning_engine_parsers()
+SCANNING_ENGINE_PARSERS: dict[str, BaseEngineParser] = {
+    engine.SCANNING_ENGINE: engine() for engine in [
+        AppCheckScanningEngineParser, BaseEngineParser, NmapScanningEngineParser, OpenVASScannerEngineParser,
+    ]
+}
 
 
 class AppCheckWebApplicationScannerParser:
