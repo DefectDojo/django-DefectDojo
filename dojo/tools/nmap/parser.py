@@ -97,11 +97,11 @@ class NmapParser:
                             "**Extra Info:** {}\n".format(port_element.find("service").attrib["extrainfo"])
                         )
                     description += service_info
-                if port_element.find("script") is not None:
-                    if "id" in port_element.find("script").attrib:
-                        description += "**Script ID:** " + port_element.find("script").attrib["id"] + "\n"
-                    if "output" in port_element.find("script").attrib:
-                        description += "**Script Output:** " + port_element.find("script").attrib["output"] + "\n"
+                if script := port_element.find("script"):
+                    if script_id := script.attrib.get("id"):
+                        description += f"**Script ID:** {script_id}\n"
+                    if script_output := script.attrib.get("output"):
+                        description += f"**Script Output:** {script_output}\n"
                 description += "\n\n"
 
                 # manage some script like
