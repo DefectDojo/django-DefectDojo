@@ -151,7 +151,7 @@ Create chart name and version as used by the chart label.
       name: {{ .fullName }}-extrasecrets
       optional: true
   env:
-  {{- if .Values.django.uwsgi.enable_debug }}
+  {{- if .Values.django.uwsgi.enableDebug }}
   - name: DD_DEBUG
     value: 'True'
   {{- end }}
