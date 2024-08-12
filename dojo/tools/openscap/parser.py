@@ -2,13 +2,13 @@ import hashlib
 import re
 
 from defusedxml.ElementTree import parse
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_ipv46_address
 
 from dojo.models import Endpoint, Finding
-from django.core.validators import validate_ipv46_address
-from django.core.exceptions import ValidationError
 
 
-class OpenscapParser(object):
+class OpenscapParser:
     def get_scan_types(self):
         return ["Openscap Vulnerability Scan"]
 
@@ -26,36 +26,34 @@ class OpenscapParser(object):
 
         # check if xml file hash correct root or not.
         if "Benchmark" not in root.tag:
-            raise ValueError(
-                "This doesn't seem to be a valid Openscap vulnerability scan xml file."
-            )
+            msg = "This doesn't seem to be a valid Openscap vulnerability scan xml file."
+            raise ValueError(msg)
         if "http://checklists.nist.gov/xccdf/" not in namespace:
-            raise ValueError(
-                "This doesn't seem to be a valid Openscap vulnerability scan xml file."
-            )
+            msg = "This doesn't seem to be a valid Openscap vulnerability scan xml file."
+            raise ValueError(msg)
 
         # read rules
         rules = {}
-        for rule in root.findall(".//{0}Rule".format(namespace)):
+        for rule in root.findall(f".//{namespace}Rule"):
             rules[rule.attrib["id"]] = {
-                "title": rule.findtext("./{0}title".format(namespace))
+                "title": rule.findtext(f"./{namespace}title"),
             }
         # go to test result
-        test_result = tree.find("./{0}TestResult".format(namespace))
+        test_result = tree.find(f"./{namespace}TestResult")
         ips = []
         # append all target in a list.
-        for ip in test_result.findall("./{0}target".format(namespace)):
+        for ip in test_result.findall(f"./{namespace}target"):
             ips.append(ip.text)
-        for ip in test_result.findall("./{0}target-address".format(namespace)):
+        for ip in test_result.findall(f"./{namespace}target-address"):
             ips.append(ip.text)
 
-        dupes = dict()
+        dupes = {}
         # run both rule, and rule-result in parallel so that we can get title
         # for failed test from rule.
         for rule_result in test_result.findall(
-            "./{0}rule-result".format(namespace)
+            f"./{namespace}rule-result",
         ):
-            result = rule_result.findtext("./{0}result".format(namespace))
+            result = rule_result.findtext(f"./{namespace}result")
             # find only failed report.
             if "fail" in result:
                 # get rule corresponding to rule-result
@@ -65,13 +63,11 @@ class OpenscapParser(object):
                     [
                         "**IdRef:** `" + rule_result.attrib["idref"] + "`",
                         "**Title:** `" + title + "`",
-                    ]
+                    ],
                 )
                 vulnerability_ids = []
                 for vulnerability_id in rule_result.findall(
-                    "./{0}ident[@system='http://cve.mitre.org']".format(
-                        namespace
-                    )
+                    f"./{namespace}ident[@system='http://cve.mitre.org']",
                 ):
                     vulnerability_ids.append(vulnerability_id.text)
                 # get severity.
@@ -86,7 +82,7 @@ class OpenscapParser(object):
                 references = ""
                 # get references.
                 for check_content in rule_result.findall(
-                    "./{0}check/{0}check-content-ref".format(namespace)
+                    f"./{namespace}check/{namespace}check-content-ref",
                 ):
                     references += (
                         "**name:** : " + check_content.attrib["name"] + "\n"
@@ -119,7 +115,7 @@ class OpenscapParser(object):
                     finding.unsaved_endpoints.append(endpoint)
 
                 dupe_key = hashlib.sha256(
-                    references.encode("utf-8")
+                    references.encode("utf-8"),
                 ).hexdigest()
                 if dupe_key in dupes:
                     find = dupes[dupe_key]

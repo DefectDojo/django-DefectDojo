@@ -1,11 +1,12 @@
-import json
 import hashlib
+import json
+
 import hyperlink
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
-class WFuzzParser(object):
+class WFuzzParser:
     """
     A class that can be used to parse the WFuzz JSON report files
     """
@@ -42,7 +43,7 @@ class WFuzzParser(object):
                 severity = self.severity_mapper(input=return_code)
             description = f"The URL {url.to_text()} must not be exposed\n Please review your configuration\n"
             dupe_key = hashlib.sha256(
-                (url.to_text() + str(return_code)).encode("utf-8")
+                (url.to_text() + str(return_code)).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -66,10 +67,10 @@ class WFuzzParser(object):
                         host=url.host,
                         protocol=url.scheme,
                         port=url.port,
-                    )
+                    ),
                 ]
                 finding.unsaved_req_resp = [
-                    {"req": item["payload"], "resp": str(return_code)}
+                    {"req": item["payload"], "resp": str(return_code)},
                 ]
                 dupes[dupe_key] = finding
         return list(dupes.values())

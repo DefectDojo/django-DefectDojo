@@ -1,13 +1,13 @@
 import csv
+import datetime
 import hashlib
 import io
 import sys
-import datetime
 
 from dojo.models import Endpoint, Finding
 
 
-class ContrastParser(object):
+class ContrastParser:
     """Contrast Scanner CSV Report"""
 
     def get_scan_types(self):
@@ -25,7 +25,7 @@ class ContrastParser(object):
             content = content.decode("utf-8")
         csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
         reader = csv.DictReader(io.StringIO(content))
-        dupes = dict()
+        dupes = {}
 
         for row in reader:
             # Vulnerability Name,Vulnerability ID,Category,Rule
@@ -41,7 +41,7 @@ class ContrastParser(object):
             if severity == "Note":
                 severity = "Info"
             date_raw = datetime.datetime.utcfromtimestamp(
-                int(row.get("First Seen")) / 1000
+                int(row.get("First Seen")) / 1000,
             )
             finding = Finding(
                 title=title.split(" from")[0],
@@ -76,15 +76,11 @@ class ContrastParser(object):
                         + "\n"
                         + row.get("Request Body"),
                         "resp": "",
-                    }
+                    },
                 )
 
             dupe_key = hashlib.sha256(
-                "|".join(
-                    [
-                        finding.vuln_id_from_tool,
-                    ]
-                ).encode("utf-8")
+                f"{finding.vuln_id_from_tool}".encode(),
             ).digest()
 
             if dupe_key in dupes:
@@ -94,7 +90,7 @@ class ContrastParser(object):
                     + finding.description
                 )
                 dupes[dupe_key].unsaved_endpoints.extend(
-                    finding.unsaved_endpoints
+                    finding.unsaved_endpoints,
                 )
                 dupes[dupe_key].nb_occurences += finding.nb_occurences
                 dupes[

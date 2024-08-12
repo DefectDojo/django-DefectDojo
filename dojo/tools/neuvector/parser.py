@@ -10,12 +10,12 @@ NEUVECTOR_IMAGE_SCAN_ENGAGEMENT_NAME = "NV image scan"
 NEUVECTOR_CONTAINER_SCAN_ENGAGEMENT_NAME = "NV container scan"
 
 
-class NeuVectorJsonParser(object):
+class NeuVectorJsonParser:
     def parse(self, json_output, test):
         tree = self.parse_json(json_output)
         items = []
         if tree:
-            items = [data for data in self.get_items(tree, test)]
+            items = list(self.get_items(tree, test))
         return items
 
     def parse_json(self, json_output):
@@ -26,7 +26,8 @@ class NeuVectorJsonParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -42,7 +43,7 @@ class NeuVectorJsonParser(object):
                 unique_key = node.get("name") + str(
                     package_name
                     + str(node.get("package_version"))
-                    + str(node.get("severity"))
+                    + str(node.get("severity")),
                 )
                 items[unique_key] = item
         return list(items.values())
@@ -102,9 +103,7 @@ def get_item(vulnerability, test):
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
-        severity_justification="{} (CVSS v3 base score: {})\n".format(
-            vector, score_v3
-        ),
+        severity_justification=f"{vector} (CVSS v3 base score: {score_v3})\n",
         impact=severity,
     )
     finding.unsaved_vulnerability_ids = [vulnerability.get("name")]
@@ -129,7 +128,7 @@ def convert_severity(severity):
         return severity.title()
 
 
-class NeuVectorParser(object):
+class NeuVectorParser:
     def get_scan_types(self):
         return [NEUVECTOR_SCAN_NAME]
 
@@ -141,9 +140,10 @@ class NeuVectorParser(object):
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".json"):
             return NeuVectorJsonParser().parse(filename, test)
         else:
-            raise ValueError("Unknown File Format")
+            msg = "Unknown File Format"
+            raise ValueError(msg)

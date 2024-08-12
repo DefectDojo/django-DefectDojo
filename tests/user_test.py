@@ -1,10 +1,10 @@
-import unittest
 import sys
+import unittest
 
 from base_test_class import BaseTestCase
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
-from selenium.common.exceptions import NoSuchElementException
 
 
 class UserTest(BaseTestCase):
@@ -41,8 +41,8 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the user has been created
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='User added successfully.') or
-            self.is_help_message_present(text='A user with that username already exists.'))
+        self.assertTrue(self.is_success_message_present(text="User added successfully.")
+            or self.is_help_message_present(text="A user with that username already exists."))
 
     def test_create_user_with_writer_global_role(self):
         # Login to the site.
@@ -74,8 +74,8 @@ class UserTest(BaseTestCase):
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         # Query the site to determine if the user has been created
         # Assert ot the query to determine status of failure
-        self.assertTrue(self.is_success_message_present(text='User added successfully.') or
-            self.is_help_message_present(text='A user with that username already exists.'))
+        self.assertTrue(self.is_success_message_present(text="User added successfully.")
+            or self.is_help_message_present(text="A user with that username already exists."))
 
     def enable_user_profile_writing(self):
         self.login_page()
@@ -122,7 +122,7 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the User permission has been changed
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='User saved successfully.'))
+        self.assertTrue(self.is_success_message_present(text="User saved successfully."))
 
     def test_user_delete(self):
         # Login to the site. Password will have to be modified
@@ -150,7 +150,7 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the User has been deleted
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='User and relationships removed.'))
+        self.assertTrue(self.is_success_message_present(text="User and relationships removed."))
 
     def test_user_with_writer_role_delete(self):
         # Login to the site. Password will have to be modified
@@ -178,7 +178,7 @@ class UserTest(BaseTestCase):
         # Query the site to determine if the User has been deleted
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='User and relationships removed.'))
+        self.assertTrue(self.is_success_message_present(text="User and relationships removed."))
 
     def test_standard_user_login(self):
         self.login_standard_page()
@@ -187,19 +187,19 @@ class UserTest(BaseTestCase):
         self.enable_user_profile_writing()
         self.login_page()
         self.driver.get(self.base_url + "profile")
-        self.assertTrue(self.driver.find_element(By.ID, 'id_first_name').is_enabled())
+        self.assertTrue(self.driver.find_element(By.ID, "id_first_name").is_enabled())
 
     def test_user_profile_form_disabled(self):
         self.disable_user_profile_writing()
         self.login_standard_page()
         self.driver.get(self.base_url + "profile")
-        self.assertFalse(self.driver.find_element(By.ID, 'id_first_name').is_enabled())
+        self.assertFalse(self.driver.find_element(By.ID, "id_first_name").is_enabled())
 
     def test_user_profile_form_enabled(self):
         self.enable_user_profile_writing()
         self.login_standard_page()
         self.driver.get(self.base_url + "profile")
-        self.assertTrue(self.driver.find_element(By.ID, 'id_first_name').is_enabled())
+        self.assertTrue(self.driver.find_element(By.ID, "id_first_name").is_enabled())
 
     def test_forgot_password(self):
         driver = self.driver
@@ -210,7 +210,7 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "id_email").send_keys("propersam@example.com")
         driver.find_element(By.ID, "reset-password").click()
 
-        self.assertTrue(self.is_text_present_on_page(text='We’ve emailed you instructions for setting your password'))
+        self.assertTrue(self.is_text_present_on_page(text="We’ve emailed you instructions for setting your password"))
 
     def test_user_edit_configuration(self):
 
@@ -218,7 +218,7 @@ class UserTest(BaseTestCase):
         driver = self.driver
         self.login_standard_page()
         with self.assertRaises(NoSuchElementException):
-            driver.find_element(By.ID, 'id_user_menu')
+            driver.find_element(By.ID, "id_user_menu")
 
         # Login as superuser and activate view user configuration for standard user
         self.login_page()
@@ -242,7 +242,7 @@ class UserTest(BaseTestCase):
 
         # Login as standard user and check the user menu does exist now
         self.login_standard_page()
-        driver.find_element(By.ID, 'id_user_menu')
+        driver.find_element(By.ID, "id_user_menu")
         # Navigate to User Management page
         driver.get(self.base_url + "user")
         # Select the previously created user to edit
@@ -258,26 +258,26 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "dropdownMenuUser").click()
         driver.find_element(By.ID, "viewUser").click()
         # Check user cannot edit configuration permissions
-        self.assertFalse(self.driver.find_element(By.ID, 'id_add_development_environment').is_enabled())
+        self.assertFalse(self.driver.find_element(By.ID, "id_add_development_environment").is_enabled())
 
 
 def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
-    suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(UserTest('test_create_user'))
-    suite.addTest(UserTest('test_create_user_with_writer_global_role'))
-    suite.addTest(UserTest('test_admin_profile_form'))
-    suite.addTest(UserTest('test_standard_user_login'))
-    suite.addTest(UserTest('test_user_profile_form_disabled'))
-    suite.addTest(UserTest('test_user_profile_form_enabled'))
-    suite.addTest(UserTest('test_forgot_password'))
-    suite.addTest(UserTest('test_user_edit_configuration'))
-    suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(UserTest('test_user_edit_permissions'))
-    suite.addTest(UserTest('test_user_delete'))
-    suite.addTest(UserTest('test_user_with_writer_role_delete'))
+    suite.addTest(BaseTestCase("test_login"))
+    suite.addTest(UserTest("test_create_user"))
+    suite.addTest(UserTest("test_create_user_with_writer_global_role"))
+    suite.addTest(UserTest("test_admin_profile_form"))
+    suite.addTest(UserTest("test_standard_user_login"))
+    suite.addTest(UserTest("test_user_profile_form_disabled"))
+    suite.addTest(UserTest("test_user_profile_form_enabled"))
+    suite.addTest(UserTest("test_forgot_password"))
+    suite.addTest(UserTest("test_user_edit_configuration"))
+    suite.addTest(BaseTestCase("test_login"))
+    suite.addTest(UserTest("test_user_edit_permissions"))
+    suite.addTest(UserTest("test_user_delete"))
+    suite.addTest(UserTest("test_user_with_writer_role_delete"))
 
     return suite
 

@@ -1,7 +1,8 @@
 import datetime
-from ..dojo_test_case import DojoTestCase
+
 from dojo.models import Test
 from dojo.tools.jfrog_xray_unified.parser import JFrogXrayUnifiedParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestJFrogXrayUnifiedParser(DojoTestCase):
@@ -324,7 +325,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertEqual("TABLE statements.\n\nRed Hat Severity: Moderate", item.description[-45:])
         self.assertIsNone(item.mitigation)
         self.assertEqual("7:sqlite:0", item.component_name)
-        self.assertIn('packagetype_rpm', item.tags)
+        self.assertIn("packagetype_rpm", item.tags)
         self.assertEqual("3.7.17-8.el7_7.1", item.component_version)
         self.assertEqual("elastic-docker-remote/elasticsearch/elasticsearch/7.9.1-amd64/", item.file_path)
         self.assertIsNotNone(item.severity_justification)

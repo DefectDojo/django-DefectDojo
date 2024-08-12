@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class GitlabAPIFuzzingParser(object):
+class GitlabAPIFuzzingParser:
     """
     GitLab API Fuzzing Report
 
@@ -42,7 +42,7 @@ class GitlabAPIFuzzingParser(object):
                     static_finding=False,
                     dynamic_finding=True,
                     unique_id_from_tool=vulnerability["id"],
-                )
+                ),
             )
         return findings
 

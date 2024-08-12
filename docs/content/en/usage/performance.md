@@ -5,6 +5,16 @@ draft: false
 weight: 4
 ---
 
+## Filter String Matching Optimization
+
+IN the UI, many of the filters for a given object will also query related objects
+for an easy visual match of an item to filter on. For instances with many objects,
+this could lead to a considerable performance hit. To alleviate this constriction,
+enable the "Filter String Matching Optimization" setting in the System Settings to
+change many filters to only search on names, rather than the objects themselves.
+This change will save many large queries, and will improve the performance of UI
+based interactions.
+
 ## Asynchronous Import
 
 DefectDojo offers an experimental feature to aynschronously import security reports. 

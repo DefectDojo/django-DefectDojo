@@ -8,7 +8,7 @@ from dojo.models import Endpoint, Finding
 LOGGER = logging.getLogger(__name__)
 
 
-class IbmAppParser(object):
+class IbmAppParser:
     def get_scan_types(self):
         return ["IBM AppScan DAST"]
 
@@ -24,13 +24,12 @@ class IbmAppParser(object):
 
         # validate XML file
         if "xml-report" not in root.tag:
-            raise ValueError(
-                "This does not look like a valid expected Ibm AppScan DAST XML file."
-            )
+            msg = "This does not look like a valid expected Ibm AppScan DAST XML file."
+            raise ValueError(msg)
 
         # self.hosts = self.fetch_host_details()
         issue_types = self.fetch_issue_types(root)
-        dupes = dict()
+        dupes = {}
         # Now time to loop through individual issues and perform necessary
         # actions
         for issue in root.iter("issue-group"):
@@ -54,21 +53,21 @@ class IbmAppParser(object):
                     if severity == "Informational":
                         severity = "Info"
                     issue_description = self.fetch_advisory_group(
-                        root, issue_data["advisory"]
+                        root, issue_data["advisory"],
                     )
 
                     for fix_recommendation_group in root.iter(
-                        "fix-recommendation-group"
+                        "fix-recommendation-group",
                     ):
                         for recommendation in fix_recommendation_group.iter(
-                            "item"
+                            "item",
                         ):
                             if (
                                 recommendation.attrib["id"]
                                 == issue_data["fix-recommendation"]
                             ):
                                 data = recommendation.find(
-                                    "general/fixRecommendation"
+                                    "general/fixRecommendation",
                                 )
                                 for data_text in data.iter("text"):
                                     recommendation_data += (
@@ -83,8 +82,8 @@ class IbmAppParser(object):
                     # endpoints
                     dupe_key = hashlib.md5(
                         str(issue_description + name + severity).encode(
-                            "utf-8"
-                        )
+                            "utf-8",
+                        ),
                     ).hexdigest()
                     # check if finding is a duplicate
                     if dupe_key in dupes:
@@ -101,13 +100,13 @@ class IbmAppParser(object):
                             severity=severity,
                             mitigation=recommendation_data,
                             references=ref_link,
-                            dynamic_finding=True
+                            dynamic_finding=True,
                         )
                         if vulnerability_id:
                             finding.unsaved_vulnerability_ids = [
-                                vulnerability_id
+                                vulnerability_id,
                             ]
-                        finding.unsaved_endpoints = list()
+                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         # in case empty string is returned as url
@@ -116,7 +115,7 @@ class IbmAppParser(object):
                         # urls
                         if url:
                             finding.unsaved_endpoints.append(
-                                Endpoint.from_uri(url)
+                                Endpoint.from_uri(url),
                             )
 
         return list(dupes.values())
@@ -130,7 +129,7 @@ class IbmAppParser(object):
                     "name": item.find("name").text,
                     "advisory": item.find("advisory/ref").text,
                     "fix-recommendation": item.find(
-                        "fix-recommendation/ref"
+                        "fix-recommendation/ref",
                     ).text,
                 }
 
@@ -156,7 +155,7 @@ class IbmAppParser(object):
             for item in advisory_group.iter("item"):
                 if item.attrib["id"] == advisory:
                     return item.find(
-                        "advisory/testTechnicalDescription/text"
+                        "advisory/testTechnicalDescription/text",
                     ).text
         return "N/A"
 

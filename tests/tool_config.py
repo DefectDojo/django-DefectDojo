@@ -1,9 +1,10 @@
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-import unittest
 import sys
+import unittest
+
 from base_test_class import BaseTestCase, on_exception_html_source_logger
 from product_test import ProductTest
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 
 
 class ToolConfigTest(BaseTestCase):
@@ -30,11 +31,11 @@ class ToolConfigTest(BaseTestCase):
         # Follow instuctions to create ToolType
         driver.find_element(By.ID, "link_tt_edgescan_scan").click()
         # Check if form is prefieled
-        self.assertEqual(driver.find_element(By.ID, "id_name").get_attribute('value'), "Edgescan")
+        self.assertEqual(driver.find_element(By.ID, "id_name").get_attribute("value"), "Edgescan")
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text='Tool Type Configuration Successfully Created.'))
+        self.assertTrue(self.is_success_message_present(text="Tool Type Configuration Successfully Created."))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -62,7 +63,7 @@ class ToolConfigTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text='Tool Configuration successfully updated.'))
+        self.assertTrue(self.is_success_message_present(text="Tool Configuration successfully updated."))
         self.assertFalse(self.is_error_message_present())
 
     @on_exception_html_source_logger
@@ -86,24 +87,24 @@ class ToolConfigTest(BaseTestCase):
         # "Click" the submit button to complete the transaction
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
-        self.assertTrue(self.is_success_message_present(text='API Scan Configuration added successfully.'))
+        self.assertTrue(self.is_success_message_present(text="API Scan Configuration added successfully."))
         self.assertFalse(self.is_error_message_present())
 
 
 def suite():
     suite = unittest.TestSuite()
 
-    suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(BaseTestCase('disable_block_execution'))
-    suite.addTest(ProductTest('test_create_product'))
+    suite.addTest(BaseTestCase("test_login"))
+    suite.addTest(BaseTestCase("disable_block_execution"))
+    suite.addTest(ProductTest("test_create_product"))
     # Usable if instance doesn't autocreate all TTs
     # suite.addTest(ToolConfigTest('test_list_api_scan_configuration_tt_and_tc_missing'))
     # suite.addTest(ToolConfigTest('test_setup_tt_via_api_scan_configuration'))
-    suite.addTest(ToolConfigTest('test_list_api_scan_configuration_tt_ready_tc_missing'))
-    suite.addTest(ToolConfigTest('test_setup_tc_via_api_scan_configuration'))
-    suite.addTest(ToolConfigTest('test_list_api_scan_configuration_tt_and_tc_ready'))
-    suite.addTest(ToolConfigTest('test_setup_api_scan_configuration'))
-    suite.addTest(ProductTest('test_delete_product'))
+    suite.addTest(ToolConfigTest("test_list_api_scan_configuration_tt_ready_tc_missing"))
+    suite.addTest(ToolConfigTest("test_setup_tc_via_api_scan_configuration"))
+    suite.addTest(ToolConfigTest("test_list_api_scan_configuration_tt_and_tc_ready"))
+    suite.addTest(ToolConfigTest("test_setup_api_scan_configuration"))
+    suite.addTest(ProductTest("test_delete_product"))
 
     return suite
 

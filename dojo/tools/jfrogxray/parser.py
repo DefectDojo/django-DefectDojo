@@ -6,7 +6,7 @@ from cvss import CVSS3
 from dojo.models import Finding
 
 
-class JFrogXrayParser(object):
+class JFrogXrayParser:
     """JFrog Xray JSON reports"""
 
     def get_scan_types(self):
@@ -32,7 +32,7 @@ class JFrogXrayParser(object):
 
                 title_cve = "No CVE"
                 more_details = node.get("component_versions").get(
-                    "more_details"
+                    "more_details",
                 )
                 if "cves" in more_details:
                     if "cve" in more_details.get("cves")[0]:
@@ -73,7 +73,7 @@ def get_item(vulnerability, test):
     else:
         severity = "Info"
 
-    vulnerability_ids = list()
+    vulnerability_ids = []
     cwe = None
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score."
@@ -97,13 +97,13 @@ def get_item(vulnerability, test):
     if "fixed_versions" in vulnerability["component_versions"]:
         mitigation = "**Versions containing a fix:**\n"
         mitigation = mitigation + "\n".join(
-            vulnerability["component_versions"]["fixed_versions"]
+            vulnerability["component_versions"]["fixed_versions"],
         )
 
     if "vulnerable_versions" in vulnerability["component_versions"]:
         extra_desc = "\n**Versions that are vulnerable:**\n"
         extra_desc += "\n".join(
-            vulnerability["component_versions"]["vulnerable_versions"]
+            vulnerability["component_versions"]["vulnerable_versions"],
         )
 
     provider = (

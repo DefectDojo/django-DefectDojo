@@ -1,15 +1,16 @@
-import json
 import hashlib
+import json
 import logging
+
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
-from dojo.models import Finding, Endpoint
 
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
 
-class NucleiParser(object):
+class NucleiParser:
     """
     A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
     """
@@ -37,7 +38,7 @@ class NucleiParser(object):
             for template in content:
                 data.append(template)
         elif filecontent[0] == "{":
-            file = filecontent.split('\n')
+            file = filecontent.split("\n")
             for line in file:
                 if line != "":
                     data.append(json.loads(line))
@@ -77,7 +78,7 @@ class NucleiParser(object):
                 finding.description = info.get("description")
             if item.get("extracted-results"):
                 finding.description += "\n**Results:**\n" + "\n".join(
-                    item.get("extracted-results")
+                    item.get("extracted-results"),
                 )
             if info.get("tags"):
                 finding.unsaved_tags = info.get("tags")
@@ -94,9 +95,7 @@ class NucleiParser(object):
             if classification:
                 if "cve-id" in classification and classification["cve-id"]:
                     cve_ids = classification["cve-id"]
-                    finding.unsaved_vulnerability_ids = list(
-                        map(lambda x: x.upper(), cve_ids)
-                    )
+                    finding.unsaved_vulnerability_ids = [x.upper() for x in cve_ids]
                 if (
                     "cwe-id" in classification
                     and classification["cwe-id"]
@@ -109,7 +108,7 @@ class NucleiParser(object):
                     and classification["cvss-metrics"]
                 ):
                     cvss_objects = cvss_parser.parse_cvss_from_text(
-                        classification["cvss-metrics"]
+                        classification["cvss-metrics"],
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
@@ -152,8 +151,8 @@ class NucleiParser(object):
 
             dupe_key = hashlib.sha256(
                 (template_id + item_type + matcher + endpoint.host).encode(
-                    "utf-8"
-                )
+                    "utf-8",
+                ),
             ).hexdigest()
 
             if dupe_key in dupes:

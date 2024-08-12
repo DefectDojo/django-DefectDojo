@@ -1,7 +1,8 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.bundler_audit.parser import BundlerAuditParser
+
 from dojo.models import Test
+from dojo.tools.bundler_audit.parser import BundlerAuditParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestBundlerAuditParser(DojoTestCase):
@@ -38,7 +39,6 @@ class TestBundlerAuditParser(DojoTestCase):
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("CVE-2020-8161", finding.unsaved_vulnerability_ids[0])
-                self.assertEqual("CVE-2020-8161", finding.cve)
                 self.assertEqual("rack", finding.component_name)
                 self.assertEqual("1.6.13", finding.component_version)
             with self.subTest(i=1):
@@ -47,7 +47,6 @@ class TestBundlerAuditParser(DojoTestCase):
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("CVE-2020-8184", finding.unsaved_vulnerability_ids[0])
-                self.assertEqual("CVE-2020-8184", finding.cve)
                 self.assertEqual("rack", finding.component_name)
                 self.assertEqual("1.6.13", finding.component_version)
             with self.subTest(i=2):
@@ -56,7 +55,6 @@ class TestBundlerAuditParser(DojoTestCase):
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("CVE-2018-3760", finding.unsaved_vulnerability_ids[0])
-                self.assertEqual("CVE-2018-3760", finding.cve)
                 self.assertEqual("sprockets", finding.component_name)
                 self.assertEqual("2.2.3", finding.component_version)
             with self.subTest(i=3):
@@ -65,6 +63,5 @@ class TestBundlerAuditParser(DojoTestCase):
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("GHSA-xc9x-jj77-9p9j", finding.unsaved_vulnerability_ids[0])
-                self.assertEqual("GHSA-xc9x-jj77-9p9j", finding.cve)
                 self.assertEqual("nokogiri", finding.component_name)
                 self.assertEqual("1.15.2", finding.component_version)

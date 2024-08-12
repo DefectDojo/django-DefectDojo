@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class HadolintParser(object):
+class HadolintParser:
     def get_scan_types(self):
         return ["Hadolint Dockerfile check"]
 
@@ -55,7 +55,7 @@ def get_item(vulnerability, test):
         file_path=vulnerability["file"],
         line=vulnerability["line"],
         description="Vulnerability ID: {}\nDetails: {}\n".format(
-            vulnerability["code"], vulnerability["message"]
+            vulnerability["code"], vulnerability["message"],
         ),
         static_finding=True,
         dynamic_finding=False,

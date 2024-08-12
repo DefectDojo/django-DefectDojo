@@ -1,9 +1,10 @@
 # Author: apipia, wheelsvt
-from .importer import BlackduckCRImporter
 from dojo.models import Finding
 
+from .importer import BlackduckCRImporter
 
-class BlackduckComponentRiskParser(object):
+
+class BlackduckComponentRiskParser:
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv
@@ -148,23 +149,23 @@ class BlackduckComponentRiskParser(object):
         :return:
         """
         desc = "**License Name:** {}  \n".format(
-            component.get("License names")
+            component.get("License names"),
         )
         desc += "**License Families:** {}  \n".format(
-            component.get("License families")
+            component.get("License families"),
         )
         desc += "**License Usage:** {}  \n".format(component.get("Usage"))
         desc += "**License Origin name:** {} \n".format(
-            component.get("Origin name")
+            component.get("Origin name"),
         )
         desc += "**License Origin id:** {} \n".format(
-            component.get("Origin id")
+            component.get("Origin id"),
         )
         desc += "**Match type:** {}\n".format(component.get("Match type"))
         try:
             desc += "**Path:** {}\n".format(source.get("Path"))
             desc += "**Archive context:** {}\n".format(
-                source.get("Archive context")
+                source.get("Archive context"),
             )
             desc += "**Scan:** {}\n".format(source.get("Scan"))
         except KeyError:
@@ -206,7 +207,7 @@ class BlackduckComponentRiskParser(object):
         :return:
         """
         title = "Security Risk: {}:{}".format(
-            vulns[0]["Component name"], vulns[0]["Component version name"]
+            vulns[0]["Component name"], vulns[0]["Component version name"],
         )
         return title
 
@@ -224,12 +225,12 @@ class BlackduckComponentRiskParser(object):
         for vuln in vulns:
             desc += "###{}  \n".format(vuln["Vulnerability id"])
             desc += "**Base Score:** {} \n**Exploitability:** {} \n**Impact:** {}\n".format(
-                vuln["Base score"], vuln["Exploitability"], vuln["Impact"]
+                vuln["Base score"], vuln["Exploitability"], vuln["Impact"],
             )
             # Not all have a URL
             if vuln["URL"] != "":
                 desc += "**URL:** [{}]({})\n".format(
-                    vuln["Vulnerability id"], vuln["URL"]
+                    vuln["Vulnerability id"], vuln["URL"],
                 )
             desc += "**Description:** {}\n".format(vuln["Description"])
         return desc
@@ -289,7 +290,7 @@ class BlackduckComponentRiskParser(object):
         :return:
         """
         mit = "Update component {}:{} to a secure version".format(
-            vulns[0]["Component name"], vulns[0]["Component version name"]
+            vulns[0]["Component name"], vulns[0]["Component version name"],
         )
         return mit
 
@@ -317,7 +318,7 @@ class BlackduckComponentRiskParser(object):
         for vuln in vulns:
             if vuln["URL"] != "":
                 references += "{}: [{}]({})\n".format(
-                    vuln["Vulnerability id"], vuln["URL"], vuln["URL"]
+                    vuln["Vulnerability id"], vuln["URL"], vuln["URL"],
                 )
         return references
 
@@ -333,7 +334,7 @@ class BlackduckComponentRiskParser(object):
         """
         if vulns[0]["Component origin id"] == "":
             component_key = "{}/{}".format(
-                vulns[0]["Component name"], vulns[0]["Component version name"]
+                vulns[0]["Component name"], vulns[0]["Component version name"],
             )
         else:
             component_key = vulns[0]["Component origin id"]

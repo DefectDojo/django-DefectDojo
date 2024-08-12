@@ -1,0 +1,43 @@
+{
+    "high": [
+      {
+        "cwe_ids": [
+          "79"
+        ],
+        "id": "javascript_lang_dangerous_insert_html",
+        "title": "Unsanitized user input in dynamic HTML insertion (XSS)",
+        "description": "## Description\nThere are XSS vulnerabilities when dynamically inserting HTML that contains unsanitized data.\n\n## Remediations\nMake sure you use HTML sanitization library before inserting html\n\n```javascript\nimport sanitizeHtml from 'sanitize-html';\n\nconst html = `<strong>${user.Input}</strong>`;\ndocument.body.innerHTML = sanitizeHtml(html)\n```\n\n## Resources\n- [OWASP XSS explained](https://owasp.org/www-community/attacks/xss/)\n",
+        "documentation_url": "https://docs.bearer.com/reference/rules/javascript_lang_dangerous_insert_html",
+        "line_number": 581,
+        "full_filename": "js/adminer/editing.js",
+        "filename": "js/adminer/editing.js",
+        "category_groups": [
+          "PII",
+          "Personal Data",
+          "Personal Data (Sensitive)"
+        ],
+        "source": {
+          "start": 581,
+          "end": 581,
+          "column": {
+            "start": 3,
+            "end": 24
+          }
+        },
+        "sink": {
+          "start": 581,
+          "end": 581,
+          "column": {
+            "start": 3,
+            "end": 24
+          },
+          "content": "help.innerHTML = text"
+        },
+        "parent_line_number": 581,
+        "snippet": "help.innerHTML = text",
+        "fingerprint": "804174abc284c6bc747d886b3e9ba757_0",
+        "old_fingerprint": "2051ee8ff784df0881cb7bfdaefe6cb9_16",
+        "code_extract": "\t\thelp.innerHTML = text;"
+      }
+    ]
+}

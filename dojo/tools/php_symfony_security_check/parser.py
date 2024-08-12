@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class PhpSymfonySecurityCheckParser(object):
+class PhpSymfonySecurityCheckParser:
     def get_scan_types(self):
         return ["PHP Symfony Security Check"]
 
@@ -27,7 +27,8 @@ class PhpSymfonySecurityCheckParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise Exception("Invalid format")
+            msg = "Invalid format"
+            raise Exception(msg)
 
         return tree
 
@@ -42,10 +43,10 @@ class PhpSymfonySecurityCheckParser(object):
 
             for advisory in advisories:
                 item = get_item(
-                    dependency_name, dependency_version, advisory, test
+                    dependency_name, dependency_version, advisory, test,
                 )
                 unique_key = str(dependency_name) + str(
-                    dependency_data["version"] + str(advisory["cve"])
+                    dependency_data["version"] + str(advisory["cve"]),
                 )
                 items[unique_key] = item
 

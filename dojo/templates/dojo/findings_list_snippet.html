@@ -536,7 +536,7 @@
                                             {% if finding.file_path %}
                                                 <i class="fa-solid fa-folder has-popover dojo-sup"
                                                 data-trigger="hover"
-                                                data-content="{{ finding.file_path }}"
+                                                data-content="{{ finding.file_path }}{% if finding.line %}:{{finding.line}}{% endif %}"
                                                 data-placement="right"
                                                 data-container="body"
                                                 data-original-title="Files"
@@ -605,12 +605,13 @@
                                         <td class="nowrap">
                                             {{ finding.epss_percentile|format_epss }}
                                         </td>
-                                        <td class="nowrap">
-                                            {% if filter_name == 'Closed' %}
-                                                {{ finding.mitigated|date }}
-                                            {% else %}
-                                                {{ finding.date }}
-                                            {% endif %}
+                                        {% if filter_name == 'Closed' %}
+                                        <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">
+                                            {{ finding.mitigated|date }}
+                                        {% else %}
+                                        <td class="nowrap" data-order="{{ finding.date|date:"U" }}">
+                                            {{ finding.date }}
+                                        {% endif %}
                                         </td>
                                         <td>
                                             {{ finding.age }}
@@ -741,10 +742,24 @@
                     { "data": "cve" },
                     { "data": "epss_score", "type": "num", "render": percentSort },
                     { "data": "epss_percentile", "type": "num", "render": percentSort },
-                    { "data": "found_date" },
+                    { "data": "found_date", render: function (data, type, row, meta) {
+                        if(type === 'sort') {
+                            var api = new $.fn.dataTable.Api(meta.settings);
+                            var td = api.cell({row: meta.row, column: meta.col}).node();
+                            var data = $(td).attr("data-order");
+                        }
+                        return data;
+                    }},
                     { "data": "finding_age" },
-                {% if system_settings.enable_finding_sla %}
-                    { "data": "finding_sla" },
+                {% if system_settings.enable_finding_sla %}                
+                    { "data": "finding_sla", "type": "num", render: function (data, type, row, meta) {
+                        if(type === 'sort') {
+                            var api = new $.fn.dataTable.Api(meta.settings);
+                            var td = api.cell({row: meta.row, column: meta.col}).node();
+                            var data = $(td).find("a").text();
+                        }
+                        return data;
+                    }},
                 {% endif %}
                 { "data": "reported_by" },
                 { "data": "found_by_test" },
@@ -822,51 +837,53 @@
             };
 
             // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#open_findings').DataTable({
-                drawCallback: function(){
-                    $('#open_findings .has-popover').hover(
-                        function() { $(this).popover('show'); }, // hover
-                        function() { $(this).popover('hide'); } // unhover
-                    );
-                },
-                colReorder: true,
-                "columns": columns,
-                order: [],
-                columnDefs: [
-                    {
-                        "orderable": false,
-                        "targets": [0, 1]
+            {% if enable_table_filtering %}
+                var dojoTable = $('#open_findings').DataTable({
+                    drawCallback: function(){
+                        $('#open_findings .has-popover').hover(
+                            function() { $(this).popover('show'); }, // hover
+                            function() { $(this).popover('hide'); } // unhover
+                        );
                     },
-                    {
-                        targets: [0, 1],
-                        className: 'noVis'
-                    },
-                    {
-                        targets: 'severity-sort',
-                        orderDataType: 'severity-asc'
-                    },
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
+                    colReorder: true,
+                    "columns": columns,
+                    order: [],
+                    columnDefs: [
+                        {
+                            "orderable": false,
+                            "targets": [0, 1]
+                        },
+                        {
+                            targets: [0, 1],
+                            className: 'noVis'
+                        },
+                        {
+                            targets: 'severity-sort',
+                            orderDataType: 'severity-asc'
+                        },
+                    ],
+                    dom: 'Bfrtip',
+                    paging: false,
+                    info: false,
+                    buttons: [
+                        {
+                            extend: 'colvis',
+                            columns: ':not(.noVis)'
+                        },
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'copy'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'pdf',
+                            orientation: 'landscape',
+                            pageSize: 'LETTER'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'print'
+                        }),
+                    ],
+                });
+            {% endif %}
         });
     </script>
     <script type="application/javascript">

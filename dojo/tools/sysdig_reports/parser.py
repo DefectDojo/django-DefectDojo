@@ -1,12 +1,13 @@
+import json
+
+import cvss.parser
+from cvss.cvss3 import CVSS3
+
 from dojo.models import Finding
 from dojo.tools.sysdig_reports.sysdig_csv_parser import CSVParser
 
-from cvss.cvss3 import CVSS3
-import cvss.parser
-import json
 
-
-class SysdigReportsParser(object):
+class SysdigReportsParser:
     """
     Sysdig Report Importer - Runtime CSV
     """
@@ -23,10 +24,10 @@ class SysdigReportsParser(object):
     def get_findings(self, filename, test):
         if filename is None:
             return ()
-        if filename.name.lower().endswith('.csv'):
+        if filename.name.lower().endswith(".csv"):
             arr_data = CSVParser().parse(filename=filename)
             return self.parse_csv(arr_data=arr_data, test=test)
-        elif filename.name.lower().endswith('.json'):
+        elif filename.name.lower().endswith(".json"):
             scan_data = filename.read()
             try:
                 data = json.loads(str(scan_data, "utf-8"))
@@ -39,34 +40,34 @@ class SysdigReportsParser(object):
     def parse_json(self, data, test):
         vulnerability = data.get("data", None)
         if not vulnerability:
-            return list()
-        findings = list()
+            return []
+        findings = []
         for item in vulnerability:
-            imageId = item.get('imageId', '')
-            imagePullString = item.get('imagePullString', '')
-            osName = item.get('osName', '')
-            k8sClusterName = item.get('k8sClusterName', '')
-            k8sNamespaceName = item.get('k8sNamespaceName', '')
-            k8sWorkloadType = item.get('k8sWorkloadType', '')
-            k8sWorkloadName = item.get('k8sWorkloadName', '')
-            k8sPodContainerName = item.get('k8sPodContainerName', '')
-            vulnName = item.get('vulnName', '')
-            vulnSeverity = item.get('vulnSeverity', '')
-            vulnLink = item.get('vulnLink', '')
-            vulnCvssVersion = item.get('vulnCvssVersion', '')
-            vulnCvssScore = item.get('vulnCvssScore', '')
-            vulnCvssVector = item.get('vulnCvssVector', '')
-            vulnDisclosureDate = item.get('vulnDisclosureDate', '')
-            vulnSolutionDate = item.get('vulnSolutionDate', '')
-            vulnExploitable = item.get('vulnExploitable', '')
-            vulnFixAvailable = item.get('vulnFixAvailable', '')
-            vulnFixVersion = item.get('vulnFixVersion', '')
-            packageName = item.get('packageName', '')
-            packageType = item.get('packageType', '')
-            packagePath = item.get('packagePath', '')
-            packageVersion = item.get('packageVersion', '')
-            packageSuggestedFix = item.get('packageSuggestedFix', '')
-            k8sPodCount = item.get('k8sPodCount', '')
+            imageId = item.get("imageId", "")
+            imagePullString = item.get("imagePullString", "")
+            osName = item.get("osName", "")
+            k8sClusterName = item.get("k8sClusterName", "")
+            k8sNamespaceName = item.get("k8sNamespaceName", "")
+            k8sWorkloadType = item.get("k8sWorkloadType", "")
+            k8sWorkloadName = item.get("k8sWorkloadName", "")
+            k8sPodContainerName = item.get("k8sPodContainerName", "")
+            vulnName = item.get("vulnName", "")
+            vulnSeverity = item.get("vulnSeverity", "")
+            vulnLink = item.get("vulnLink", "")
+            vulnCvssVersion = item.get("vulnCvssVersion", "")
+            vulnCvssScore = item.get("vulnCvssScore", "")
+            vulnCvssVector = item.get("vulnCvssVector", "")
+            vulnDisclosureDate = item.get("vulnDisclosureDate", "")
+            vulnSolutionDate = item.get("vulnSolutionDate", "")
+            vulnExploitable = item.get("vulnExploitable", "")
+            vulnFixAvailable = item.get("vulnFixAvailable", "")
+            vulnFixVersion = item.get("vulnFixVersion", "")
+            packageName = item.get("packageName", "")
+            packageType = item.get("packageType", "")
+            packagePath = item.get("packagePath", "")
+            packageVersion = item.get("packageVersion", "")
+            packageSuggestedFix = item.get("packageSuggestedFix", "")
+            k8sPodCount = item.get("k8sPodCount", "")
             description = ""
             description += "imageId: " + imageId + "\n"
             description += "imagePullString: " + imagePullString + "\n"
@@ -76,7 +77,6 @@ class SysdigReportsParser(object):
             description += "k8sWorkloadType: " + k8sWorkloadType + "\n"
             description += "k8sWorkloadName: " + k8sWorkloadName + "\n"
             description += "k8sPodContainerName: " + k8sPodContainerName + "\n"
-            description += "vulnName: " + vulnName + "\n"
             description += "vulnCvssVersion: " + vulnCvssVersion + "\n"
             description += "vulnCvssScore: " + str(vulnCvssScore) + "\n"
             description += "vulnCvssVector: " + vulnCvssVector + "\n"
@@ -98,12 +98,14 @@ class SysdigReportsParser(object):
                 description=description,
                 severity=vulnSeverity,
                 mitigation=mitigation,
-                cve=vulnName,
                 static_finding=True,
                 references=vulnLink,
                 component_name=packageName,
                 component_version=packageVersion,
             )
+            if vulnName != "":
+                find.unsaved_vulnerability_ids = []
+                find.unsaved_vulnerability_ids.append(vulnName)
             findings.append(find)
         return findings
 
@@ -119,7 +121,8 @@ class SysdigReportsParser(object):
             else:
                 finding.title = f"{row.vulnerability_id} - {row.package_name}"
             finding.vuln_id_from_tool = row.vulnerability_id
-            finding.cve = row.vulnerability_id
+            finding.unsaved_vulnerability_ids = []
+            finding.unsaved_vulnerability_ids.append(row.vulnerability_id)
             finding.severity = row.severity
             # Set Component Version
             finding.component_name = row.package_name
@@ -175,7 +178,7 @@ class SysdigReportsParser(object):
             finding.description += f"\n - **Publish Date:** {row.vuln_publish_date}"
             finding.description += f"\n - **CVSS Version:** {row.cvss_version}"
             finding.description += f"\n - **CVSS Vector:** {row.cvss_vector}"
-            if row.public_exploit != '':
+            if row.public_exploit != "":
                 finding.description += f"\n - **Public Exploit:** {row.public_exploit}"
             finding.description += "\n\n###Package Details"
             if row.package_type == "os":
@@ -185,10 +188,10 @@ class SysdigReportsParser(object):
             finding.description += f"\n - **Package Name:** {row.package_name}"
             finding.description += f"\n - **Package Version:** {row.package_version}"
             finding.description += f"\n - **In-Use:** {row.in_use}"
-            if row.package_path != '':
+            if row.package_path != "":
                 finding.description += f"\n - **Package Path:** {row.package_path}"
                 finding.file_path = row.package_path
-            if row.package_suggested_fix != '':
+            if row.package_suggested_fix != "":
                 finding.mitigation = f"Package suggested fix version: {row.package_suggested_fix}"
                 finding.description += f"\n - **Package suggested fix version:** {row.package_suggested_fix}"
                 if row.package_type == "os":

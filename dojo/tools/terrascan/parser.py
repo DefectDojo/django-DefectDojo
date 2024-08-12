@@ -1,9 +1,10 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
-class TerrascanParser(object):
+class TerrascanParser:
     """
     A class that can be used to parse the terrascan JSON report file
     """
@@ -28,9 +29,10 @@ class TerrascanParser(object):
         data = json.load(filename)
         dupes = {}
         if "results" not in data and "violations" not in data.get("results"):
-            raise ValueError("missing mandatory attribute 'results'")
+            msg = "missing mandatory attribute 'results'"
+            raise ValueError(msg)
         if data.get("results").get("violations") is None:
-            return list()
+            return []
         for item in data.get("results").get("violations"):
             rule_name = item.get("rule_name")
             description = item.get("description")
@@ -53,7 +55,7 @@ class TerrascanParser(object):
                     + resource_type
                     + file
                     + str(line)
-                ).encode("utf-8")
+                ).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:

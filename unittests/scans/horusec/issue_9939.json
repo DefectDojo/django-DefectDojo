@@ -1,0 +1,45 @@
+{
+    "version": "v2.8.0",
+    "id": "8505726a-6fae-45f7-b587-bbabe26fb661",
+    "repositoryID": "00000000-0000-0000-0000-000000000000",
+    "repositoryName": "",
+    "workspaceID": "00000000-0000-0000-0000-000000000000",
+    "workspaceName": "",
+    "status": "success",
+    "errors": "",
+    "createdAt": "2024-04-15T02:55:29.659237399Z",
+    "finishedAt": "2024-04-15T03:03:05.007770555Z",
+    "analysisVulnerabilities": [
+      {
+        "vulnerabilityID": "00000000-0000-0000-0000-000000000000",
+        "analysisID": "8505726a-6fae-45f7-b587-bbabe26fb661",
+        "createdAt": "2024-04-15T03:03:05.031128804Z",
+        "vulnerabilities": {
+          "vulnerabilityID": "e7a07e44-85bc-46fa-a2b7-71e128b36656",
+          "line": "762",
+          "column": "200",
+          "confidence": "MEDIUM",
+          "file": "file_name",
+          "code": "AAAAtw\u003e\u0000\u0001\u0000\\\ufffdV\u0005\u001f\u0005\ufffd\u0000\u0015\u0000\ufffd@\u000c\u000f\u0014\u0011\u0012B\u000b\u0008\u0015\u0006\u0011\r\u0016\u0010\ufffdK\ufffd\tTK\ufffd",
+          "details": "(1/1) * Possible vulnerability detected: AWS Secret Key\nWhen use AWS Secret Key is recommended use vault or environment variable encrypted for the best security. For more information checkout the CWE-798 (https://cwe.mitre.org/data/definitions/798.html) advisory.",
+          "securityTool": "HorusecEngine",
+          "language": "Leaks",
+          "severity": "CRITICAL",
+          "type": "Vulnerability",
+          "commitAuthor": "-",
+          "commitEmail": "-",
+          "commitHash": "-",
+          "commitMessage": "-",
+          "commitDate": "-",
+          "rule_id": "HS-LEAKS-2",
+          "vulnHash": "e8f8b781ddd0cb64f2abba9979666804018dbe974c2f4e0c1f1a8a3e4b1a0424",
+          "deprecatedHashes": [
+            "69b370c997cab683666f5809db93afa5126d28d6ec6614b87565acc45b5f3e68",
+            "e501d297afe1c359b03ca401170de8cbe1866def1cf0d6bc80d932e5ba924707"
+          ],
+          "securityToolVersion": "",
+          "securityToolInfoUri": ""
+        }
+      }
+    ]
+  }

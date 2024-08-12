@@ -1,10 +1,12 @@
-import json
 import hashlib
+import json
+
 import dateutil.parser
+
 from dojo.models import Finding
 
 
-class DetectSecretsParser(object):
+class DetectSecretsParser:
     """
     A class that can be used to parse the detect-secrets JSON report file
     """
@@ -36,7 +38,7 @@ class DetectSecretsParser(object):
                 description += "**Type:** " + type + "\n"
 
                 dupe_key = hashlib.sha256(
-                    (type + file + str(line) + hashed_secret).encode("utf-8")
+                    (type + file + str(line) + hashed_secret).encode("utf-8"),
                 ).hexdigest()
 
                 if dupe_key in dupes:

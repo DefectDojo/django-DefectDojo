@@ -7,7 +7,7 @@ from defusedxml import ElementTree as ET
 from dojo.models import Finding
 
 
-class XanitizerParser(object):
+class XanitizerParser:
     def get_scan_types(self):
         return ["Xanitizer Scan"]
 
@@ -19,13 +19,13 @@ class XanitizerParser(object):
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         root = self.parse_xml(filename)
         if root is not None:
             return self.get_findings_internal(root, test)
         else:
-            return list()
+            return []
 
     def parse_xml(self, filename):
         try:
@@ -35,16 +35,13 @@ class XanitizerParser(object):
 
         root = tree.getroot()
         if "XanitizerFindingsList" not in root.tag:
-            raise ValueError(
-                "'{}' is not a valid Xanitizer findings list report XML file.".format(
-                    filename
-                )
-            )
+            msg = f"'{filename}' is not a valid Xanitizer findings list report XML file."
+            raise ValueError(msg)
 
         return root
 
     def get_findings_internal(self, root, test):
-        items = list()
+        items = []
 
         globalDate = root.get("timeStamp", default=None)
         if globalDate is not None:
@@ -90,49 +87,45 @@ class XanitizerParser(object):
         file = finding.find("file")
         if pckg is not None and cl is not None:
             if line:
-                title = "{} ({}.{}:{})".format(title, pckg.text, cl.text, line)
+                title = f"{title} ({pckg.text}.{cl.text}:{line})"
             else:
-                title = "{} ({}.{})".format(title, pckg.text, cl.text)
+                title = f"{title} ({pckg.text}.{cl.text})"
         else:
             if line:
-                title = "{} ({}:{})".format(title, file.text, line)
+                title = f"{title} ({file.text}:{line})"
             else:
-                title = "{} ({})".format(title, file.text)
+                title = f"{title} ({file.text})"
 
         return title
 
     def generate_description(self, finding):
         description = "**Description:**\n{}".format(
-            finding.find("description").text
+            finding.find("description").text,
         )
 
         if finding.find("startNode") is not None:
             startnode = finding.find("startNode")
             endnode = finding.find("endNode")
-            description = "{}\n-----\n".format(description)
+            description = f"{description}\n-----\n"
             description = "{}\n**Starting at:** {} - **Line** {}".format(
-                description, startnode.get("classFQN"), startnode.get("lineNo")
+                description, startnode.get("classFQN"), startnode.get("lineNo"),
             )
             description = self.add_code(startnode, False, description)
             description = "{}\n\n**Ending at:** {} - **Line** {}".format(
-                description, endnode.get("classFQN"), endnode.get("lineNo")
+                description, endnode.get("classFQN"), endnode.get("lineNo"),
             )
             description = self.add_code(endnode, True, description)
         elif finding.find("node") is not None:
             node = finding.find("node")
-            description = "{}\n-----\n".format(description)
+            description = f"{description}\n-----\n"
             line = node.get("lineNo")
             location = node.get("classFQN")
             if location is None:
                 location = node.get("relativePath")
             if line is not None and int(line) > 0:
-                description = "{}\n**Finding at:** {} - **Line** {}".format(
-                    description, location, line
-                )
+                description = f"{description}\n**Finding at:** {location} - **Line** {line}"
             else:
-                description = "{}\n**Finding at:** {}".format(
-                    description, location
-                )
+                description = f"{description}\n**Finding at:** {location}"
             description = self.add_code(node, True, description)
 
         return description
@@ -146,33 +139,30 @@ class XanitizerParser(object):
         if showline or len(codelines) == 1:
             for code in codelines:
                 if code.get("finding") == "true":
-                    description = "{}\n**Finding Line:** {}".format(
-                        description, code.text
-                    )
+                    description = f"{description}\n**Finding Line:** {code.text}"
 
         if len(codelines) > 1:
-            description = "{}\n**Code Excerpt:** ".format(description)
+            description = f"{description}\n**Code Excerpt:** "
             for code in codelines:
                 if code.text:
                     description = "{}\n{}: {}".format(
-                        description, code.get("lineNo"), code.text
+                        description, code.get("lineNo"), code.text,
                     )
                 else:
                     description = "{}\n{}: ".format(
-                        description, code.get("lineNo")
+                        description, code.get("lineNo"),
                     )
 
         return description
 
     def generate_file_path(self, finding):
-        pass
 
         if finding.find("endNode") is not None and finding.find("endNode").get(
-            "relativePath"
+            "relativePath",
         ):
             return finding.find("endNode").get("relativePath")
         elif finding.find("node") is not None and finding.find("node").get(
-            "relativePath"
+            "relativePath",
         ):
             return finding.find("node").get("relativePath")
 

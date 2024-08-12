@@ -1,15 +1,15 @@
-import logging
 import json
+import logging
 import re
-import html2text
 
+import html2text
 
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
 
-class BurpGraphQLParser(object):
+class BurpGraphQLParser:
     def get_scan_types(self):
         return ["Burp GraphQL API"]
 
@@ -23,14 +23,15 @@ class BurpGraphQLParser(object):
         data = json.load(filename)
 
         if "Issues" not in data:
-            raise ValueError("No Issues found")
+            msg = "No Issues found"
+            raise ValueError(msg)
 
         return self.create_findings(data.get("Issues"), test)
 
     def create_findings(self, scan_data, test):
         finding_data = self.parse_findings(scan_data)
 
-        items = list()
+        items = []
 
         for issue in finding_data:
             find = Finding(
@@ -58,13 +59,14 @@ class BurpGraphQLParser(object):
         return items
 
     def parse_findings(self, scan_data):
-        issue_dict = dict()
+        issue_dict = {}
 
         for issue in scan_data:
             if not issue.get("issue_type") or not issue["issue_type"].get(
-                "name"
+                "name",
             ):
-                raise ValueError("Issue does not have a name")
+                msg = "Issue does not have a name"
+                raise ValueError(msg)
 
             issue_name = issue["issue_type"]["name"]
 
@@ -87,15 +89,15 @@ class BurpGraphQLParser(object):
 
         if issue.get("evidence"):
             finding["Evidence"] = finding["Evidence"] + self.parse_evidence(
-                issue.get("evidence")
+                issue.get("evidence"),
             )
 
         finding["Endpoints"].append(
-            Endpoint.from_uri(issue["origin"] + issue["path"])
+            Endpoint.from_uri(issue["origin"] + issue["path"]),
         )
 
     def create_finding(self, issue):
-        finding = dict()
+        finding = {}
         finding["Impact"] = ""
         finding["Description"] = ""
         finding["Mitigation"] = ""
@@ -105,18 +107,18 @@ class BurpGraphQLParser(object):
         if issue.get("description_html"):
             finding["Description"] += "**Issue Detail**\n"
             finding["Description"] += html2text.html2text(
-                issue.get("description_html")
+                issue.get("description_html"),
             )
 
             if issue["issue_type"].get("description_html"):
                 finding["Impact"] += "**Issue Background**\n"
                 finding["Impact"] += html2text.html2text(
-                    issue["issue_type"].get("description_html")
+                    issue["issue_type"].get("description_html"),
                 )
         elif issue["issue_type"].get("description_html"):
             finding["Description"] += "**Issue Background**\n"
             finding["Description"] += html2text.html2text(
-                issue["issue_type"].get("description_html")
+                issue["issue_type"].get("description_html"),
             )
 
         if issue.get("remediation_html"):
@@ -126,12 +128,12 @@ class BurpGraphQLParser(object):
             if issue["issue_type"].get("remediation_html"):
                 finding["Mitigation"] += "**Remediation Background**\n"
                 finding["Mitigation"] += html2text.html2text(
-                    issue["issue_type"].get("remediation_html")
+                    issue["issue_type"].get("remediation_html"),
                 )
         elif issue["issue_type"].get("remediation_html"):
             finding["Impact"] += "**Remediation Background**\n"
             finding["Impact"] += html2text.html2text(
-                issue["issue_type"].get("remediation_html")
+                issue["issue_type"].get("remediation_html"),
             )
 
         if issue.get("severity"):
@@ -140,7 +142,7 @@ class BurpGraphQLParser(object):
             finding["Severity"] = "Info"
 
         finding["Endpoints"] = [
-            Endpoint.from_uri(issue["origin"] + issue["path"])
+            Endpoint.from_uri(issue["origin"] + issue["path"]),
         ]
 
         if issue.get("evidence"):
@@ -151,16 +153,16 @@ class BurpGraphQLParser(object):
         if issue["issue_type"].get("references_html"):
             finding["References"] += "**References**\n"
             finding["References"] += html2text.html2text(
-                issue["issue_type"].get("references_html")
+                issue["issue_type"].get("references_html"),
             )
 
         if issue["issue_type"].get("vulnerability_classifications_html"):
             finding["References"] += "**CWE Information**\n"
             finding["References"] += html2text.html2text(
-                issue["issue_type"].get("vulnerability_classifications_html")
+                issue["issue_type"].get("vulnerability_classifications_html"),
             )
             finding["CWE"] = self.get_cwe(
-                issue["issue_type"].get("vulnerability_classifications_html")
+                issue["issue_type"].get("vulnerability_classifications_html"),
             )
         else:
             finding["CWE"] = 0
@@ -169,7 +171,7 @@ class BurpGraphQLParser(object):
 
     def parse_evidence(self, evidence):
         evidence_len = len(evidence)
-        req_resp_list = list()
+        req_resp_list = []
 
         i = 0
         while i < evidence_len:
@@ -180,11 +182,11 @@ class BurpGraphQLParser(object):
                 for data in request_dict.get("request_segments"):
                     if data.get("data_html"):
                         request += html2text.html2text(
-                            data.get("data_html")
+                            data.get("data_html"),
                         ).strip()
                     elif data.get("highlight_html"):
                         request += html2text.html2text(
-                            data.get("highlight_html")
+                            data.get("highlight_html"),
                         ).strip()
 
             if (
@@ -199,11 +201,11 @@ class BurpGraphQLParser(object):
                 for data in response_dict.get("response_segments"):
                     if data.get("data_html"):
                         response += html2text.html2text(
-                            data.get("data_html")
+                            data.get("data_html"),
                         ).strip()
                     elif data.get("highlight_html"):
                         response += html2text.html2text(
-                            data.get("highlight_html")
+                            data.get("highlight_html"),
                         ).strip()
 
                 i += 2

@@ -7,7 +7,7 @@ from .importer import BlackduckApiImporter
 SCAN_TYPE_ID = "BlackDuck API"
 
 
-class ApiBlackduckParser(object):
+class ApiBlackduckParser:
     """
     Import from Synopsys BlackDuck API /findings
     """
@@ -52,7 +52,7 @@ class ApiBlackduckParser(object):
                 test=test,
                 title=f"{vulnerability_id} in {component_name}:{component_version}",
                 description=entry["vulnerabilityWithRemediation"].get(
-                    "description"
+                    "description",
                 ),
                 severity=entry["vulnerabilityWithRemediation"][
                     "severity"
@@ -62,13 +62,13 @@ class ApiBlackduckParser(object):
                 static_finding=True,
                 dynamic_finding=False,
                 unique_id_from_tool=entry["vulnerabilityWithRemediation"].get(
-                    "vulnerabilityName"
+                    "vulnerabilityName",
                 ),
             )
             # get CWE
             if entry["vulnerabilityWithRemediation"].get("cweId"):
                 cwe_raw = entry["vulnerabilityWithRemediation"]["cweId"].split(
-                    "-"
+                    "-",
                 )
                 if len(cwe_raw) == 2 and cwe_raw[1].isdigit():
                     finding.cwe = int(cwe_raw[1])

@@ -1,12 +1,15 @@
 import logging
+
 from django.core.exceptions import ValidationError
+
 from dojo.models import Product_API_Scan_Configuration
+
 from .api_client import BugcrowdAPI
 
 logger = logging.getLogger(__name__)
 
 
-class BugcrowdApiImporter(object):
+class BugcrowdApiImporter:
     """
     Import from Bugcrowd API
     """
@@ -14,9 +17,7 @@ class BugcrowdApiImporter(object):
     def get_findings(self, test):
         client, config = self.prepare_client(test)
         logger.debug(
-            "Fetching submissions program {} and target {}".format(
-                str(config.service_key_1), str(config.service_key_2)
-            )
+            f"Fetching submissions program {str(config.service_key_1)} and target {str(config.service_key_2)}",
         )
 
         submissions_paged = client.get_findings(
@@ -29,7 +30,7 @@ class BugcrowdApiImporter(object):
         for page in submissions_paged:
             submissions += page
             counter += 1
-        logger.debug("{} Bugcrowd submissions pages fetched".format(counter))
+        logger.debug(f"{counter} Bugcrowd submissions pages fetched")
 
         return submissions, config
 
@@ -39,10 +40,11 @@ class BugcrowdApiImporter(object):
             config = test.api_scan_configuration
             # Double check of config
             if config.product != product:
-                raise ValidationError(
+                msg = (
                     "API Scan Configuration for Bugcrowd API and Product do not match. "
                     f'Product: "{product.name}" ({product.id}), config.product: "{config.product.name}" ({config.product.id})'
                 )
+                raise ValidationError(msg)
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
                 product=product,
@@ -51,17 +53,19 @@ class BugcrowdApiImporter(object):
             if configs.count() == 1:
                 config = configs.first()
             elif configs.count() > 1:
-                raise ValidationError(
+                msg = (
                     "More than one Product API Scan Configuration has been configured, but none of them has been "
                     "chosen. Please specify at Test which one should be used. "
                     f'Product: "{product.name}" ({product.id})'
                 )
+                raise ValidationError(msg)
             else:
-                raise ValidationError(
+                msg = (
                     "There are no API Scan Configurations for this Product. "
                     "Please add at least one API Scan Configuration for bugcrowd to this Product. "
                     f'Product: "{product.name}" ({product.id})'
                 )
+                raise ValidationError(msg)
 
         tool_config = config.tool_configuration
         return BugcrowdAPI(tool_config), config

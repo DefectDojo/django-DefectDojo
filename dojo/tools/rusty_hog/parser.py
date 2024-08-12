@@ -1,9 +1,10 @@
 import json
-from dojo.tools.parser_test import ParserTest
+
 from dojo.models import Finding
+from dojo.tools.parser_test import ParserTest
 
 
-class RustyhogParser(object):
+class RustyhogParser:
     def get_scan_types(self):
         return ["Rusty Hog Scan"]
 
@@ -24,16 +25,16 @@ class RustyhogParser(object):
     def get_items(self, json_output, scanner, test):
         items = {}
         findings = self.__getitem(
-            vulnerabilities=self.parse_json(json_output), scanner=scanner
+            vulnerabilities=self.parse_json(json_output), scanner=scanner,
         )
         for finding in findings:
-            unique_key = "Finding {}".format(finding)
+            unique_key = f"Finding {finding}"
             items[unique_key] = finding
         return list(items.values())
 
     def get_tests(self, scan_type, handle):
         tree = self.parse_json(handle)
-        tests = list()
+        tests = []
         parsername = "Rusty Hog"
         for node in tree:
             if (
@@ -66,7 +67,7 @@ class RustyhogParser(object):
         else:
             test.description = parsername
         test.findings = self.__getitem(
-            vulnerabilities=tree, scanner=parsername
+            vulnerabilities=tree, scanner=parsername,
         )
         tests.append(test)
         return tests
@@ -81,20 +82,18 @@ class RustyhogParser(object):
             elif scanner == "Choctaw Hog":
                 """Choctaw Hog"""
                 found_secret_string = vulnerability.get("stringsFound")
-                description = "**This string was found:** {}".format(
-                    found_secret_string
-                )
+                description = f"**This string was found:** {found_secret_string}"
                 if vulnerability.get("commit") is not None:
                     description += "\n**Commit message:** {}".format(
-                        vulnerability.get("commit")
+                        vulnerability.get("commit"),
                     )
                 if vulnerability.get("commitHash") is not None:
                     description += "\n**Commit hash:** {}".format(
-                        vulnerability.get("commitHash")
+                        vulnerability.get("commitHash"),
                     )
                 if vulnerability.get("parent_commit_hash") is not None:
                     description += "\n**Parent commit hash:** {}".format(
-                        vulnerability.get("parent_commit_hash")
+                        vulnerability.get("parent_commit_hash"),
                     )
                 if (
                     vulnerability.get("old_file_id") is not None
@@ -119,56 +118,50 @@ class RustyhogParser(object):
             elif scanner == "Duroc Hog":
                 """Duroc Hog"""
                 found_secret_string = vulnerability.get("stringsFound")
-                description = "**This string was found:** {}".format(
-                    found_secret_string
-                )
+                description = f"**This string was found:** {found_secret_string}"
                 if vulnerability.get("path") is not None:
                     description += "\n**Path of Issue:** {}".format(
-                        vulnerability.get("path")
+                        vulnerability.get("path"),
                     )
                 if vulnerability.get("linenum") is not None:
                     description += "\n**Linenum of Issue:** {}".format(
-                        vulnerability.get("linenum")
+                        vulnerability.get("linenum"),
                     )
                 if vulnerability.get("diff") is not None:
                     description += "\n**Diff:** {}".format(
-                        vulnerability.get("diff")
+                        vulnerability.get("diff"),
                     )
             elif scanner == "Gottingen Hog":
                 """Gottingen Hog"""
                 found_secret_string = vulnerability.get("stringsFound")
-                description = "**This string was found:** {}".format(
-                    found_secret_string
-                )
+                description = f"**This string was found:** {found_secret_string}"
                 if vulnerability.get("issue_id") is not None:
                     description += "\n**JIRA Issue ID:** {}".format(
-                        vulnerability.get("issue_id")
+                        vulnerability.get("issue_id"),
                     )
                 if vulnerability.get("location") is not None:
                     description += "\n**JIRA location:** {}".format(
-                        vulnerability.get("location")
+                        vulnerability.get("location"),
                     )
                 if vulnerability.get("url") is not None:
                     description += "\n**JIRA url:** [{}]({})".format(
-                        vulnerability.get("url"), vulnerability.get("url")
+                        vulnerability.get("url"), vulnerability.get("url"),
                     )
             elif scanner == "Essex Hog":
                 found_secret_string = vulnerability.get("stringsFound")
-                description = "**This string was found:** {}".format(
-                    found_secret_string
-                )
+                description = f"**This string was found:** {found_secret_string}"
                 if vulnerability.get("page_id") is not None:
                     description += "\n**Confluence URL:** [{}]({})".format(
-                        vulnerability.get("url"), vulnerability.get("url")
+                        vulnerability.get("url"), vulnerability.get("url"),
                     )
                     description += "\n**Confluence Page ID:** {}".format(
-                        vulnerability.get("page_id")
+                        vulnerability.get("page_id"),
                     )
             """General - for all Rusty Hogs"""
             file_path = vulnerability.get("path")
             if vulnerability.get("date") is not None:
                 description += "\n**Date:** {}".format(
-                    vulnerability.get("date")
+                    vulnerability.get("date"),
                 )
             """Finding Title"""
             if scanner == "Choctaw Hog":
@@ -179,7 +172,7 @@ class RustyhogParser(object):
                 )
             elif scanner == "Duroc Hog":
                 title = "{} found in path {}".format(
-                    vulnerability.get("reason"), vulnerability.get("path")
+                    vulnerability.get("reason"), vulnerability.get("path"),
                 )
             elif scanner == "Gottingen Hog":
                 title = "{} found in Jira ID {} ({})".format(
@@ -189,7 +182,7 @@ class RustyhogParser(object):
                 )
             elif scanner == "Essex Hog":
                 title = "{} found in Confluence Page ID {}".format(
-                    vulnerability.get("reason"), vulnerability.get("page_id")
+                    vulnerability.get("reason"), vulnerability.get("page_id"),
                 )
             # create the finding object
             finding = Finding(

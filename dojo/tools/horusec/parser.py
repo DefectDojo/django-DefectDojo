@@ -2,11 +2,12 @@ import json
 from datetime import datetime
 
 from dateutil.parser import parse
+
 from dojo.models import Finding
 from dojo.tools.parser_test import ParserTest
 
 
-class HorusecParser(object):
+class HorusecParser:
     """Horusec (https://github.com/ZupIT/horusec)"""
 
     ID = "Horusec"
@@ -28,7 +29,7 @@ class HorusecParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         report_date = datetime.strptime(
-            data.get("createdAt")[0:10], "%Y-%m-%d"
+            data.get("createdAt")[0:10], "%Y-%m-%d",
         )
         return [
             self._get_finding(node, report_date)
@@ -39,7 +40,7 @@ class HorusecParser(object):
         data = json.load(scan)
         report_date = parse(data.get("createdAt"))
         test = ParserTest(
-            name=self.ID, type=self.ID, version=data.get("version").lstrip("v")
+            name=self.ID, type=self.ID, version=data.get("version").lstrip("v"),
         )  # remove the v in vX.Y.Z
         test.description = "\n".join(
             [
@@ -48,7 +49,7 @@ class HorusecParser(object):
                 "```",
                 data.get("errors").replace("```", "``````"),
                 "```",
-            ]
+            ],
         )
         test.findings = [
             self._get_finding(node, report_date)
@@ -62,9 +63,9 @@ class HorusecParser(object):
                 data["vulnerabilities"]["details"].split("\n")[-1],
                 "**Code:**",
                 f"```{data['vulnerabilities']['language']}",
-                data["vulnerabilities"]["code"].replace("```", "``````"),
+                data["vulnerabilities"]["code"].replace("```", "``````").replace("\x00", ""),
                 "```",
-            ]
+            ],
         )
         finding = Finding(
             title=data["vulnerabilities"]["details"].split("\n")[0],

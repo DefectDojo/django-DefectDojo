@@ -1,10 +1,11 @@
 import json
 
 from cvss.cvss3 import CVSS3
+
 from dojo.models import Finding
 
 
-class SnykCodeParser(object):
+class SnykCodeParser:
     def get_scan_types(self):
         return ["Snyk Code Scan"]
 
@@ -36,7 +37,8 @@ class SnykCodeParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -49,7 +51,7 @@ class SnykCodeParser(object):
             vulnerabilityTree = tree["vulnerabilities"]
             for node in vulnerabilityTree:
                 item = self.get_item(
-                    node, test, target_file=target_file, upgrades=upgrades
+                    node, test, target_file=target_file, upgrades=upgrades,
                 )
                 items[iterator] = item
                 iterator += 1
@@ -57,7 +59,7 @@ class SnykCodeParser(object):
             results = tree["runs"][0]["results"]
             for node in results:
                 item = self.get_code_item(
-                    node, test
+                    node, test,
                 )
                 items[iterator] = item
                 iterator += 1
@@ -68,7 +70,7 @@ class SnykCodeParser(object):
         # or an array for multiple versions depending on the language.
         if isinstance(vulnerability["semver"]["vulnerable"], list):
             vulnerable_versions = ", ".join(
-                vulnerability["semver"]["vulnerable"]
+                vulnerability["semver"]["vulnerable"],
             )
         else:
             vulnerable_versions = vulnerability["semver"]["vulnerable"]
@@ -158,7 +160,7 @@ class SnykCodeParser(object):
                     # Per the current json format, if several CWEs, take the
                     # first one.
                     finding.cwe = int(cwes[0].split("-")[1])
-                    if len(vulnerability["identifiers"]["CVE"]) > 1:
+                    if len(vulnerability["identifiers"]["CWE"]) > 1:
                         cwe_references = ", ".join(cwes)
                 else:
                     finding.cwe = 1035
@@ -166,13 +168,11 @@ class SnykCodeParser(object):
         references = ""
         if "id" in vulnerability:
             references = "**SNYK ID**: https://app.snyk.io/vuln/{}\n\n".format(
-                vulnerability["id"]
+                vulnerability["id"],
             )
 
         if cwe_references:
-            references += "Several CWEs were reported: \n\n{}\n".format(
-                cwe_references
-            )
+            references += f"Several CWEs were reported: \n\n{cwe_references}\n"
 
         # Append vuln references to references section
         for item in vulnerability.get("references", []):
@@ -194,8 +194,8 @@ class SnykCodeParser(object):
 
         # Add Target file if supplied
         if target_file:
-            finding.unsaved_tags.append("target_file:{}".format(target_file))
-            finding.mitigation += "\nUpgrade Location: {}".format(target_file)
+            finding.unsaved_tags.append(f"target_file:{target_file}")
+            finding.mitigation += f"\nUpgrade Location: {target_file}"
 
         # Add the upgrade libs list to the mitigation section
         if upgrades:
@@ -207,11 +207,9 @@ class SnykCodeParser(object):
                     for lib in tertiary_upgrade_list
                 ):
                     finding.unsaved_tags.append(
-                        "upgrade_to:{}".format(upgraded_pack)
+                        f"upgrade_to:{upgraded_pack}",
                     )
-                    finding.mitigation += "\nUpgrade from {} to {} to fix this issue, as well as updating the following:\n - ".format(
-                        current_pack_version, upgraded_pack
-                    )
+                    finding.mitigation += f"\nUpgrade from {current_pack_version} to {upgraded_pack} to fix this issue, as well as updating the following:\n - "
                     finding.mitigation += "\n - ".join(tertiary_upgrade_list)
         return finding
 

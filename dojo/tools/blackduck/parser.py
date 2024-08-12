@@ -1,10 +1,11 @@
 import hashlib
 
 from dojo.models import Finding
+
 from .importer import BlackduckImporter
 
 
-class BlackduckParser(object):
+class BlackduckParser:
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv and files.csv
@@ -28,12 +29,12 @@ class BlackduckParser(object):
         importer = BlackduckImporter()
 
         findings = sorted(
-            importer.parse_findings(filename), key=lambda f: f.vuln_id
+            importer.parse_findings(filename), key=lambda f: f.vuln_id,
         )
         return findings
 
     def ingest_findings(self, normalized_findings, test):
-        dupes = dict()
+        dupes = {}
         for i in normalized_findings:
             vulnerability_id = i.vuln_id
             cwe = 0  # need a way to automaticall retrieve that see #1119
@@ -45,16 +46,14 @@ class BlackduckParser(object):
             references = self.format_reference(i)
 
             dupe_key = hashlib.md5(
-                "{} | {}".format(title, i.vuln_source).encode("utf-8")
+                f"{title} | {i.vuln_source}".encode(),
             ).hexdigest()
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
                 if finding.description:
                     finding.description += (
-                        "Vulnerability ID: {}\n {}\n".format(
-                            vulnerability_id, i.vuln_source
-                        )
+                        f"Vulnerability ID: {vulnerability_id}\n {i.vuln_source}\n"
                     )
                 dupes[dupe_key] = finding
             else:
@@ -87,31 +86,27 @@ class BlackduckParser(object):
         else:
             component_title = i.component_origin_id
 
-        return "{} - {}".format(i.vuln_id, component_title)
+        return f"{i.vuln_id} - {component_title}"
 
     def format_description(self, i):
-        description = "Published on: {}\n\n".format(str(i.published_date))
-        description += "Updated on: {}\n\n".format(str(i.updated_date))
-        description += "Base score: {}\n\n".format(str(i.base_score))
-        description += "Exploitability: {}\n\n".format(str(i.exploitability))
-        description += "Description: {}\n".format(i.description)
+        description = f"Published on: {str(i.published_date)}\n\n"
+        description += f"Updated on: {str(i.updated_date)}\n\n"
+        description += f"Base score: {str(i.base_score)}\n\n"
+        description += f"Exploitability: {str(i.exploitability)}\n\n"
+        description += f"Description: {i.description}\n"
 
         return description
 
     def format_mitigation(self, i):
-        mitigation = "Remediation status: {}\n".format(i.remediation_status)
-        mitigation += "Remediation target date: {}\n".format(
-            i.remediation_target_date
-        )
-        mitigation += "Remediation actual date: {}\n".format(
-            i.remediation_actual_date
-        )
-        mitigation += "Remediation comment: {}\n".format(i.remediation_comment)
+        mitigation = f"Remediation status: {i.remediation_status}\n"
+        mitigation += f"Remediation target date: {i.remediation_target_date}\n"
+        mitigation += f"Remediation actual date: {i.remediation_actual_date}\n"
+        mitigation += f"Remediation comment: {i.remediation_comment}\n"
 
         return mitigation
 
     def format_reference(self, i):
-        reference = "Source: {}\n".format(i.vuln_source)
-        reference += "URL: {}\n".format(i.url)
+        reference = f"Source: {i.vuln_source}\n"
+        reference += f"URL: {i.url}\n"
 
         return reference

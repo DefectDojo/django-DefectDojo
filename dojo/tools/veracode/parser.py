@@ -2,7 +2,7 @@ from dojo.tools.veracode.json_parser import VeracodeJSONParser
 from dojo.tools.veracode.xml_parser import VeracodeXMLParser
 
 
-class VeracodeParser(object):
+class VeracodeParser:
     def get_scan_types(self):
         return ["Veracode Scan"]
 
@@ -20,6 +20,5 @@ class VeracodeParser(object):
         elif filename.name.lower().endswith(".json"):
             return VeracodeJSONParser().get_findings(filename, test)
         else:
-            raise ValueError(
-                "Filename extension not recognized. Use .xml or .json"
-            )
+            msg = "Filename extension not recognized. Use .xml or .json"
+            raise ValueError(msg)

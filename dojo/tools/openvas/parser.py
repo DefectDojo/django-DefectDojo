@@ -2,7 +2,7 @@ from dojo.tools.openvas.csv_parser import OpenVASCSVParser
 from dojo.tools.openvas.xml_parser import OpenVASXMLParser
 
 
-class OpenVASParser(object):
+class OpenVASParser:
     def get_scan_types(self):
         return ["OpenVAS Parser"]
 
@@ -13,7 +13,7 @@ class OpenVASParser(object):
         return "Import CSV or XML output of Greenbone OpenVAS report."
 
     def get_findings(self, filename, test):
-        if str(filename.name).endswith('.csv'):
+        if str(filename.name).endswith(".csv"):
             return OpenVASCSVParser().get_findings(filename, test)
-        elif str(filename.name).endswith('.xml'):
+        elif str(filename.name).endswith(".xml"):
             return OpenVASXMLParser().get_findings(filename, test)

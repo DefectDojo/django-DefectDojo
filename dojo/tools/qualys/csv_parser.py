@@ -3,6 +3,7 @@ import io
 import logging
 import re
 from datetime import datetime
+
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
@@ -22,7 +23,7 @@ def parse_csv(csv_file) -> [Finding]:
     if isinstance(content, bytes):
         content = content.decode("utf-8")
     csv_reader = csv.DictReader(
-        io.StringIO(content), delimiter=",", quotechar='"'
+        io.StringIO(content), delimiter=",", quotechar='"',
     )
 
     report_findings = get_report_findings(csv_reader)
@@ -77,17 +78,17 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
         if cvss_temporal:
             try:
                 cvss_temporal_vector = re.search(
-                    vector_pattern, cvss_temporal
+                    vector_pattern, cvss_temporal,
                 ).group(1)
                 cvss_vector += "/"
                 cvss_vector += cvss_temporal_vector
             except IndexError:
                 _logger.error(
-                    f"CVSS3 Temporal Vector not found in {cvss_base}"
+                    f"CVSS3 Temporal Vector not found in {cvss_base}",
                 )
             except AttributeError:
                 _logger.error(
-                    f"CVSS3 Temporal Vector not found in {cvss_base}"
+                    f"CVSS3 Temporal Vector not found in {cvss_base}",
                 )
 
         return cvss_vector
@@ -109,6 +110,30 @@ def _clean_cve_data(cve_string: str) -> list:
     return cve_list
 
 
+def get_severity(value: str) -> str:
+    legacy_severity_lookup = {
+        "1": "Info",
+        "2": "Low",
+        "3": "Medium",
+        "4": "High",
+        "5": "Critical",
+    }
+    # Severity mapping taken from
+    # https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/severity_levels.htm
+    qualys_severity_lookup = {
+        "1": "Low",
+        "2": "Low",
+        "3": "Medium",
+        "4": "High",
+        "5": "High",
+    }
+
+    if settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
+        return legacy_severity_lookup.get(value, "Info")
+    else:
+        return qualys_severity_lookup.get(value, "Info")
+
+
 def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
     """
     Takes a list of Dictionaries built from CSV and creates a Finding object
@@ -117,13 +142,6 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
     Returns:
 
     """
-    severity_lookup = {
-        "1": "Info",
-        "2": "Low",
-        "3": "Medium",
-        "4": "High",
-        "5": "Critical",
-    }
     dojo_findings = []
     for report_finding in report_findings:
         # Get endpoint meta
@@ -141,11 +159,11 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
 
         if "CVSS3 Base" in report_finding:
             cvssv3 = _extract_cvss_vectors(
-                        report_finding["CVSS3 Base"], report_finding["CVSS3 Temporal"]
+                        report_finding["CVSS3 Base"], report_finding["CVSS3 Temporal"],
                     )
         elif "CVSS3.1 Base" in report_finding:
             cvssv3 = _extract_cvss_vectors(
-                        report_finding["CVSS3.1 Base"], report_finding["CVSS3.1 Temporal"]
+                        report_finding["CVSS3.1 Base"], report_finding["CVSS3.1 Temporal"],
                     )
         # Get the date based on the first_seen setting
         try:
@@ -167,17 +185,17 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
                     mitigation=report_finding["Solution"],
                     description=f"{report_finding['Threat']}\nResult Evidence: \n{report_finding.get('Threat', 'Not available')}",
-                    severity=severity_lookup.get(report_finding["Severity"], "Info"),
+                    severity=get_severity(report_finding["Severity"]),
                     impact=report_finding["Impact"],
                     date=date,
                     vuln_id_from_tool=report_finding["QID"],
-                    cvssv3=cvssv3
+                    cvssv3=cvssv3,
                 )
                 # Qualys reports regression findings as active, but with a Date Last
                 # Fixed.
                 if report_finding["Date Last Fixed"]:
                     finding.mitigated = datetime.strptime(
-                        report_finding["Date Last Fixed"], "%m/%d/%Y %H:%M:%S"
+                        report_finding["Date Last Fixed"], "%m/%d/%Y %H:%M:%S",
                     )
                     finding.is_mitigated = True
                 else:
@@ -211,7 +229,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     severity=report_finding["SEVERITY"],
                     impact=report_finding["IMPACT"],
                     date=date,
-                    vuln_id_from_tool=report_finding["QID"]
+                    vuln_id_from_tool=report_finding["QID"],
                 )
         # Make sure we have something to append to
         if isinstance(finding.unsaved_vulnerability_ids, list):

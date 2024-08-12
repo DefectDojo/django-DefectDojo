@@ -1,16 +1,16 @@
 import logging
 
-from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
-from django.urls import reverse
 from django.http import HttpResponseRedirect
-from dojo.utils import add_breadcrumb
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
-from dojo.forms import LoginBanner
-from dojo.models import BannerConf
 from dojo.authorization.authorization_decorators import (
     user_is_configuration_authorized,
 )
+from dojo.forms import LoginBanner
+from dojo.models import BannerConf
+from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +37,11 @@ def configure_banner(request):
             initial={
                 "banner_enable": banner_config.banner_enable,
                 "banner_message": banner_config.banner_message,
-            }
+            },
         )
 
     add_breadcrumb(
-        title="Banner Configuration", top_level=True, request=request
+        title="Banner Configuration", top_level=True, request=request,
     )
     return render(
         request,

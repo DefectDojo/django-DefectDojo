@@ -1,10 +1,10 @@
 import json
-
 from datetime import datetime
+
 from dojo.models import Finding
 
 
-class MeterianParser(object):
+class MeterianParser:
     def get_scan_types(self):
         return ["Meterian Scan"]
 
@@ -20,11 +20,11 @@ class MeterianParser(object):
         report_json = json.load(report)
         security_reports = self.get_security_reports(report_json)
         scan_date = str(
-            datetime.fromisoformat(report_json["timestamp"]).date()
+            datetime.fromisoformat(report_json["timestamp"]).date(),
         )
         for single_security_report in security_reports:
             findings += self.do_get_findings(
-                single_security_report, scan_date, test
+                single_security_report, scan_date, test,
             )
 
         return findings
@@ -35,7 +35,8 @@ class MeterianParser(object):
                 if "reports" in report_json["reports"]["security"]:
                     return report_json["reports"]["security"]["reports"]
 
-        raise ValueError("Malformed report: the security reports are missing.")
+        msg = "Malformed report: the security reports are missing."
+        raise ValueError(msg)
 
     def do_get_findings(self, single_security_report, scan_date, test):
         findings = []

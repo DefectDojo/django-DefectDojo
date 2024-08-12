@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from dojo.tools.api_edgescan.parser import ApiEdgescanParser
 from dojo.models import Test
+from dojo.tools.api_edgescan.parser import ApiEdgescanParser
 
 
 class TestApiEdgescanParser(TestCase):
@@ -20,7 +20,7 @@ class TestApiEdgescanParser(TestCase):
         parser = ApiEdgescanParser()
         self.assertEqual(
             parser.get_description_for_scan_types(scan_type),
-            "Edgescan findings can be imported by API or JSON file."
+            "Edgescan findings can be imported by API or JSON file.",
         )
 
     def test_requires_file(self):

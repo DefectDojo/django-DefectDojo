@@ -1,8 +1,8 @@
 
 # code: language=Dockerfile
 
-FROM openapitools/openapi-generator-cli:v7.4.0@sha256:579832bed49ea6c275ce2fb5f2d515f5b03d2b6243f3c80fa8430e4f5a770e9a as openapitools
-FROM python:3.11.4-slim-bullseye@sha256:40319d0a897896e746edf877783ef39685d44e90e1e6de8d964d0382df0d4952 as build
+FROM openapitools/openapi-generator-cli:v7.7.0@sha256:99924315933d49e7b33a7d2074bb2b64fc8def8f74519939036e24eb48f00336 AS openapitools
+FROM python:3.11.9-slim-bookworm@sha256:8c1036ec919826052306dfb5286e4753ffd9d5f6c24fbc352a5399c3b405b57e AS build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -62,6 +62,7 @@ COPY --from=openapitools /opt/openapi-generator/modules/openapi-generator-cli/ta
 
 COPY docker/wait-for-it.sh \
   docker/secret-file-loader.sh \
+  docker/reach_database.sh \
   docker/entrypoint-integration-tests.sh \
   /
 

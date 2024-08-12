@@ -1,10 +1,12 @@
-import json
 import hashlib
-from dojo.models import Finding
+import json
+
 from dateutil import parser
 
+from dojo.models import Finding
 
-class GgshieldParser(object):
+
+class GgshieldParser:
     """
     A class that can be used to parse the Gitleaks JSON report files
     """
@@ -24,7 +26,7 @@ class GgshieldParser(object):
         """
         json_data = json.load(filename)
         issues = json_data.get("scans")
-        dupes = dict()
+        dupes = {}
 
         for issue in issues:
             if issue.get("total_incidents") > 0:
@@ -108,7 +110,7 @@ class GgshieldParser(object):
                 + findings["match"]
                 + str(findings["line_start"])
                 + str(findings["line_end"])
-            ).encode("utf-8")
+            ).encode("utf-8"),
         ).hexdigest()
 
         if key not in dupes:

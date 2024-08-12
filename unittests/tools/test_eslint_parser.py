@@ -1,6 +1,6 @@
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.eslint.parser import ESLintParser
 from dojo.models import Test
+from dojo.tools.eslint.parser import ESLintParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestESLintParser(DojoTestCase):

@@ -1,5 +1,5 @@
 from django.core.exceptions import PermissionDenied
-from dojo.request_cache import cache_for_request
+
 from dojo.authorization.roles_permissions import (
     Permissions,
     Roles,
@@ -7,25 +7,26 @@ from dojo.authorization.roles_permissions import (
     get_roles_with_permissions,
 )
 from dojo.models import (
-    Product_Type,
-    Product_Type_Member,
-    Product,
-    Product_Member,
-    Engagement,
-    Test,
-    Finding,
-    Endpoint,
-    Finding_Group,
-    Product_Group,
-    Product_Type_Group,
+    App_Analysis,
+    Cred_Mapping,
     Dojo_Group,
     Dojo_Group_Member,
+    Endpoint,
+    Engagement,
+    Finding,
+    Finding_Group,
     Languages,
-    App_Analysis,
-    Stub_Finding,
+    Product,
     Product_API_Scan_Configuration,
-    Cred_Mapping,
+    Product_Group,
+    Product_Member,
+    Product_Type,
+    Product_Type_Group,
+    Product_Type_Member,
+    Stub_Finding,
+    Test,
 )
+from dojo.request_cache import cache_for_request
 
 
 def user_has_configuration_permission(user, permission):
@@ -56,7 +57,7 @@ def user_has_permission(user, obj, permission):
         # permissions
         member = get_product_type_member(user, obj)
         if member is not None and role_has_permission(
-            member.role.id, permission
+            member.role.id, permission,
         ):
             return True
         # Check if the user is in a group with a role for the product type with
@@ -77,7 +78,7 @@ def user_has_permission(user, obj, permission):
         # permissions
         member = get_product_member(user, obj)
         if member is not None and role_has_permission(
-            member.role.id, permission
+            member.role.id, permission,
         ):
             return True
         # Check if the user is in a group with a role for the product with the
@@ -100,14 +101,14 @@ def user_has_permission(user, obj, permission):
         isinstance(obj, Finding) or isinstance(obj, Stub_Finding)
     ) and permission in Permissions.get_finding_permissions():
         return user_has_permission(
-            user, obj.test.engagement.product, permission
+            user, obj.test.engagement.product, permission,
         )
     elif (
         isinstance(obj, Finding_Group)
         and permission in Permissions.get_finding_group_permissions()
     ):
         return user_has_permission(
-            user, obj.test.engagement.product, permission
+            user, obj.test.engagement.product, permission,
         )
     elif (
         isinstance(obj, Endpoint)
@@ -137,7 +138,7 @@ def user_has_permission(user, obj, permission):
         if permission == Permissions.Product_Type_Member_Delete:
             # Every member is allowed to remove himself
             return obj.user == user or user_has_permission(
-                user, obj.product_type, permission
+                user, obj.product_type, permission,
             )
         else:
             return user_has_permission(user, obj.product_type, permission)
@@ -148,7 +149,7 @@ def user_has_permission(user, obj, permission):
         if permission == Permissions.Product_Member_Delete:
             # Every member is allowed to remove himself
             return obj.user == user or user_has_permission(
-                user, obj.product, permission
+                user, obj.product, permission,
             )
         else:
             return user_has_permission(user, obj.product, permission)
@@ -170,7 +171,7 @@ def user_has_permission(user, obj, permission):
         # permissions
         group_member = get_group_member(user, obj)
         return group_member is not None and role_has_permission(
-            group_member.role.id, permission
+            group_member.role.id, permission,
         )
     elif (
         isinstance(obj, Dojo_Group_Member)
@@ -179,7 +180,7 @@ def user_has_permission(user, obj, permission):
         if permission == Permissions.Group_Member_Delete:
             # Every user is allowed to remove himself
             return obj.user == user or user_has_permission(
-                user, obj.group, permission
+                user, obj.group, permission,
             )
         else:
             return user_has_permission(user, obj.group, permission)
@@ -191,20 +192,19 @@ def user_has_permission(user, obj, permission):
             return user_has_permission(user, obj.product, permission)
         if obj.engagement:
             return user_has_permission(
-                user, obj.engagement.product, permission
+                user, obj.engagement.product, permission,
             )
         if obj.test:
             return user_has_permission(
-                user, obj.test.engagement.product, permission
+                user, obj.test.engagement.product, permission,
             )
         if obj.finding:
             return user_has_permission(
-                user, obj.finding.test.engagement.product, permission
+                user, obj.finding.test.engagement.product, permission,
             )
     else:
-        raise NoAuthorizationImplementedError(
-            f"No authorization implemented for class {type(obj).__name__} and permission {permission}"
-        )
+        msg = f"No authorization implemented for class {type(obj).__name__} and permission {permission}"
+        raise NoAuthorizationImplementedError(msg)
 
 
 def user_has_global_permission(user, permission):
@@ -233,7 +233,7 @@ def user_has_global_permission(user, permission):
             hasattr(group, "global_role")
             and group.global_role.role is not None
             and role_has_global_permission(
-                group.global_role.role.id, permission
+                group.global_role.role.id, permission,
             )
         ):
             return True
@@ -243,24 +243,23 @@ def user_has_global_permission(user, permission):
 
 def user_has_configuration_permission_or_403(user, permission):
     if not user_has_configuration_permission(user, permission):
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def user_has_permission_or_403(user, obj, permission):
     if not user_has_permission(user, obj, permission):
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def user_has_global_permission_or_403(user, permission):
     if not user_has_global_permission(user, permission):
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def get_roles_for_permission(permission):
     if not Permissions.has_value(permission):
-        raise PermissionDoesNotExistError(
-            "Permission {} does not exist".format(permission)
-        )
+        msg = f"Permission {permission} does not exist"
+        raise PermissionDoesNotExistError(msg)
     roles_for_permissions = set()
     roles = get_roles_with_permissions()
     for role in roles:
@@ -274,7 +273,8 @@ def role_has_permission(role, permission):
     if role is None:
         return False
     if not Roles.has_value(role):
-        raise RoleDoesNotExistError("Role {} does not exist".format(role))
+        msg = f"Role {role} does not exist"
+        raise RoleDoesNotExistError(msg)
     roles = get_roles_with_permissions()
     permissions = roles.get(role)
     if not permissions:
@@ -286,7 +286,8 @@ def role_has_global_permission(role, permission):
     if role is None:
         return False
     if not Roles.has_value(role):
-        raise RoleDoesNotExistError("Role {} does not exist".format(role))
+        msg = f"Role {role} does not exist"
+        raise RoleDoesNotExistError(msg)
     roles = get_global_roles_with_permissions()
     permissions = roles.get(role)
     if permissions and permission in permissions:

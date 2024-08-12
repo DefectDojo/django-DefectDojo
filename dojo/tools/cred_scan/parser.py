@@ -1,10 +1,12 @@
 import csv
 import io
+
 from dateutil import parser
+
 from dojo.models import Finding
 
 
-class CredScanParser(object):
+class CredScanParser:
     """
     Credential Scanner (aka CredScan) is a tool developed and maintained by
     Microsoft to identify credential leaks such as those in source code and
@@ -27,10 +29,10 @@ class CredScanParser(object):
         if isinstance(content, bytes):
             content = content.decode("utf-8-sig")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
 
-        dupes = dict()
+        dupes = {}
         for row in reader:
             # Create the description
             description = row.get("Description", "Description not provided")
@@ -39,11 +41,11 @@ class CredScanParser(object):
                 description += "\n Is Supressed: " + str(row["IsSuppressed"])
             if "SuppressJustification" in row:
                 description += "\n Supress Justifcation: " + str(
-                    row["SuppressJustification"]
+                    row["SuppressJustification"],
                 )
             if "MatchingScore" in row:
                 description += "\n Matching Score: " + str(
-                    row["MatchingScore"]
+                    row["MatchingScore"],
                 )
 
             finding = Finding(
@@ -57,7 +59,7 @@ class CredScanParser(object):
             # Update the finding date if it specified
             if "TimeofDiscovery" in row:
                 finding.date = parser.parse(
-                    row["TimeofDiscovery"].replace("Z", "")
+                    row["TimeofDiscovery"].replace("Z", ""),
                 )
 
             # internal de-duplication

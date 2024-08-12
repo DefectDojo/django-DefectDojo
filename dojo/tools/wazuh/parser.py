@@ -1,9 +1,10 @@
 import hashlib
 import json
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
-class WazuhParser(object):
+class WazuhParser:
     """
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
     https://github.com/wazuh/wazuh/issues/14560
@@ -25,7 +26,7 @@ class WazuhParser(object):
             return []
 
         # Detect duplications
-        dupes = dict()
+        dupes = {}
 
         # Loop through each element in the list
         vulnerabilities = data.get("data", {}).get("affected_items", [])
@@ -45,7 +46,7 @@ class WazuhParser(object):
                 publish_date = item.get("published")
                 agent_name = item.get("agent_name")
                 agent_ip = item.get("agent_ip")
-                detection_time = item.get("detection_time")
+                detection_time = item.get("detection_time").split("T")[0]
 
                 if links:
                     references = "\n".join(links)
@@ -60,7 +61,7 @@ class WazuhParser(object):
                     dupe_key = title + cve + agent_name + package_name + package_version
                 else:
                     dupe_key = title + cve + package_name + package_version
-                dupe_key = hashlib.sha256(dupe_key.encode('utf-8')).hexdigest()
+                dupe_key = hashlib.sha256(dupe_key.encode("utf-8")).hexdigest()
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]

@@ -4,7 +4,7 @@ from defusedxml import ElementTree
 from dojo.models import Endpoint, Finding
 
 
-class AppSpiderParser(object):
+class AppSpiderParser:
     """Parser for Rapid7 AppSpider reports"""
 
     def get_scan_types(self):
@@ -24,12 +24,13 @@ class AppSpiderParser(object):
         root = vscan.getroot()
 
         if "VulnSummary" not in str(root.tag):
-            raise ValueError(
+            msg = (
                 "Please ensure that you are uploading AppSpider's VulnerabilitiesSummary.xml file."
                 "At this time it is the only file that is consumable by DefectDojo."
             )
+            raise ValueError(msg)
 
-        dupes = dict()
+        dupes = {}
 
         for finding in root.iter("Vuln"):
             severity = self.convert_severity(finding.find("AttackScore").text)
@@ -41,8 +42,8 @@ class AppSpiderParser(object):
             cwe = int(finding.find("CweId").text)
 
             dupe_key = severity + title
-            unsaved_endpoints = list()
-            unsaved_req_resp = list()
+            unsaved_endpoints = []
+            unsaved_req_resp = []
 
             if title is None:
                 title = ""

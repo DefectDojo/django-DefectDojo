@@ -59,7 +59,7 @@ def issue_r(raw_row, vuln, scan_date):
             _description = str(vuln_details.findtext("DIAGNOSIS"))
             # Solution Strips Heading Workaround(s)
             _temp["solution"] = htmltext(
-                str(vuln_details.findtext("SOLUTION"))
+                str(vuln_details.findtext("SOLUTION")),
             )
 
             # Vuln_description
@@ -70,11 +70,11 @@ def issue_r(raw_row, vuln, scan_date):
                     htmltext("**QID:** " + str(_gid)),
                     htmltext("**Port:** " + str(_port)),
                     htmltext("**Result Evidence:** " + _result),
-                ]
+                ],
             )
             # Impact description
             _temp["IMPACT"] = htmltext(
-                str(vuln_details.findtext("CONSEQUENCE"))
+                str(vuln_details.findtext("CONSEQUENCE")),
             )
 
             # CVE and LINKS
@@ -104,7 +104,7 @@ def issue_r(raw_row, vuln, scan_date):
                 vuln_id_from_tool=_gid,
                 date=scan_date,
             )
-            finding.unsaved_endpoints = list()
+            finding.unsaved_endpoints = []
             finding.unsaved_endpoints.append(ep)
             ret_rows.append(finding)
     return ret_rows
@@ -126,7 +126,7 @@ def qualys_convert_severity(raw_val):
         return "Info"
 
 
-class QualysInfrascanWebguiParser(object):
+class QualysInfrascanWebguiParser:
     def get_scan_types(self):
         return ["Qualys Infrastructure Scan (WebGUI XML)"]
 

@@ -7,7 +7,7 @@ from defusedxml.ElementTree import parse
 from dojo.models import Endpoint, Finding
 
 
-class MicrofocusWebinspectParser(object):
+class MicrofocusWebinspectParser:
     """Micro Focus Webinspect XML report parser"""
 
     def get_scan_types(self):
@@ -24,11 +24,10 @@ class MicrofocusWebinspectParser(object):
         # get root of tree.
         root = tree.getroot()
         if "Sessions" not in root.tag:
-            raise ValueError(
-                "This doesn't seem to be a valid Webinspect xml file."
-            )
+            msg = "This doesn't seem to be a valid Webinspect xml file."
+            raise ValueError(msg)
 
-        dupes = dict()
+        dupes = {}
         for session in root:
             url = session.find("URL").text
             endpoint = Endpoint.from_uri(url)
@@ -37,7 +36,7 @@ class MicrofocusWebinspectParser(object):
                 mitigation = None
                 reference = None
                 severity = MicrofocusWebinspectParser.convert_severity(
-                    issue.find("Severity").text
+                    issue.find("Severity").text,
                 )
                 for content in issue.findall("ReportSection"):
                     name = content.find("Name").text
@@ -50,17 +49,17 @@ class MicrofocusWebinspectParser(object):
                     if "Reference" in name:
                         if name and content.find("SectionText").text:
                             reference = html2text.html2text(
-                                content.find("SectionText").text
+                                content.find("SectionText").text,
                             )
                 cwe = 0
                 description = ""
                 classifications = issue.find("Classifications")
                 if classifications is not None:
-                    for content in classifications.findall('Classification'):
+                    for content in classifications.findall("Classification"):
                         # detect CWE number
                         # TODO support more than one CWE number
                         if "kind" in content.attrib and "CWE" == content.attrib["kind"]:
-                            cwe = MicrofocusWebinspectParser.get_cwe(content.attrib['identifier'])
+                            cwe = MicrofocusWebinspectParser.get_cwe(content.attrib["identifier"])
                             description += "\n\n" + content.text + "\n"
 
                 finding = Finding(
@@ -82,13 +81,7 @@ class MicrofocusWebinspectParser(object):
 
                 # make dupe hash key
                 dupe_key = hashlib.sha256(
-                    "|".join(
-                        [
-                            finding.description,
-                            finding.title,
-                            finding.severity,
-                        ]
-                    ).encode("utf-8")
+                    f"{finding.description}|{finding.title}|{finding.severity}".encode(),
                 ).hexdigest()
                 # check if dupes are present.
                 if dupe_key in dupes:

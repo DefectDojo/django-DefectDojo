@@ -1,11 +1,15 @@
+import logging
+
 from django.core.management.base import BaseCommand
 from pytz import timezone
 
+import dojo.jira_link.helper as jira_helper
 from dojo.models import Finding
 from dojo.utils import get_system_setting
-import dojo.jira_link.helper as jira_helper
 
-locale = timezone(get_system_setting('time_zone'))
+logger = logging.getLogger(__name__)
+
+locale = timezone(get_system_setting("time_zone"))
 
 """
 Author: Aaron Weaver
@@ -14,7 +18,7 @@ This script will locate open, active findings and update them in Jira. Useful if
 
 
 class Command(BaseCommand):
-    help = 'No input commands for Jira bulk update.'
+    help = "No input commands for Jira bulk update."
 
     def handle(self, *args, **options):
 
@@ -22,6 +26,6 @@ class Command(BaseCommand):
         findings = findings.filter(verified=True, active=True)
 
         for finding in findings:
-            print("Checking issue:" + str(finding.id))
+            logger.info("Checking issue:" + str(finding.id))
             jira_helper.update_jira_issue(finding, True)
-            print("########\n")
+            logger.info("########\n")

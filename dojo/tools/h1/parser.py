@@ -7,7 +7,7 @@ from dojo.models import Finding
 __author__ = "Kirill Gotsman"
 
 
-class H1Parser(object):
+class H1Parser:
     """
     A class that can be used to parse the Get All Reports JSON export from HackerOne API.
     """
@@ -33,12 +33,12 @@ class H1Parser(object):
         except Exception:
             tree = json.loads(data)
         # Convert JSON  report to DefectDojo format
-        dupes = dict()
+        dupes = {}
         for content in tree["data"]:
             # Get all relevant data
             date = content["attributes"]["created_at"]
             date = datetime.strftime(
-                datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ"), "%Y-%m-%d"
+                datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ"), "%Y-%m-%d",
             )
             # Build the title of the Dojo finding
             title = "#" + content["id"] + " " + content["attributes"]["title"]
@@ -53,9 +53,7 @@ class H1Parser(object):
                 issue_tracker_url = content["attributes"][
                     "issue_tracker_reference_url"
                 ]
-                references = "[{}]({})\n".format(
-                    issue_tracker_id, issue_tracker_url
-                )
+                references = f"[{issue_tracker_id}]({issue_tracker_url})\n"
             except Exception:
                 references = ""
 
@@ -70,9 +68,9 @@ class H1Parser(object):
                 severity = "Info"
             # Build the references of the Dojo finding
             ref_link = "https://hackerone.com/reports/{}".format(
-                content.get("id")
+                content.get("id"),
             )
-            references += "[{}]({})".format(ref_link, ref_link)
+            references += f"[{ref_link}]({ref_link})"
 
             # Set active state of the Dojo finding
             if content["attributes"]["state"] in ["triaged", "new"]:
@@ -85,13 +83,13 @@ class H1Parser(object):
                 cwe = int(
                     content["relationships"]["weakness"]["data"]["attributes"][
                         "external_id"
-                    ][4:]
+                    ][4:],
                 )
             except Exception:
                 cwe = 0
 
             dupe_key = hashlib.md5(
-                str(references + title).encode("utf-8")
+                str(references + title).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -114,16 +112,16 @@ class H1Parser(object):
                     impact="No impact provided",
                     references=references,
                     cwe=cwe,
-                    dynamic_finding=False
+                    dynamic_finding=False,
                 )
-                finding.unsaved_endpoints = list()
+                finding.unsaved_endpoints = []
                 dupes[dupe_key] = finding
         return dupes.values()
 
     def build_description(self, content):
         date = content["attributes"]["created_at"]
         date = datetime.strftime(
-            datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ"), "%Y-%m-%d"
+            datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ"), "%Y-%m-%d",
         )
         reporter = content["relationships"]["reporter"]["data"]["attributes"][
             "username"
@@ -132,7 +130,7 @@ class H1Parser(object):
 
         # Build the description of the Dojo finding
         description = "#" + content["attributes"]["title"]
-        description += "\nSubmitted: {}\nBy: {}\n".format(date, reporter)
+        description += f"\nSubmitted: {date}\nBy: {reporter}\n"
 
         # Add triaged date
         if triaged_date is not None:
@@ -140,20 +138,20 @@ class H1Parser(object):
                 datetime.strptime(triaged_date, "%Y-%m-%dT%H:%M:%S.%fZ"),
                 "%Y-%m-%d",
             )
-            description += "Triaged: {}\n".format(triaged_date)
+            description += f"Triaged: {triaged_date}\n"
 
         # Try to grab CVSS
         try:
             cvss = content["relationships"]["severity"]["data"]["attributes"][
                 "score"
             ]
-            description += "CVSS: {}\n".format(cvss)
+            description += f"CVSS: {cvss}\n"
         except Exception:
             pass
 
         # Build rest of description meat
         description += "##Report: \n{}\n".format(
-            content["attributes"]["vulnerability_information"]
+            content["attributes"]["vulnerability_information"],
         )
 
         # Try to grab weakness if it's there
@@ -164,9 +162,7 @@ class H1Parser(object):
             weakness_desc = content["relationships"]["weakness"]["data"][
                 "attributes"
             ]["description"]
-            description += "\n##Weakness: {}\n{}".format(
-                weakness_title, weakness_desc
-            )
+            description += f"\n##Weakness: {weakness_title}\n{weakness_desc}"
         except Exception:
             pass
 

@@ -1,11 +1,12 @@
 """Parser for NPM Audit v7+ Scan."""
 import json
 import logging
+
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-'''
+"""
 the npm audit json output depends on the params used. this parser
 accepts the formats for any of:
 
@@ -17,10 +18,10 @@ In order for this parser to import the same number of findings
 as the report's meta block indicates, all top level keys
 are consiered a vulnerability and as much information as provided
 is added to each
-'''
+"""
 
 
-class NpmAudit7PlusParser(object):
+class NpmAudit7PlusParser:
     """Represents the parser class."""
 
     def get_scan_types(self):
@@ -51,25 +52,28 @@ class NpmAudit7PlusParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format, unable to parse json.")
+            msg = "Invalid format, unable to parse json."
+            raise ValueError(msg)
 
         # output from npm audit fix --dry-run --json
         if tree.get("audit"):
             if not tree.get("audit").get("auditReportVersion"):
-                raise ValueError(
-                    ("This parser only supports output from npm audit version"
-                        " 7 and above.")
+                msg = (
+                    "This parser only supports output from npm audit version"
+                    " 7 and above."
                 )
+                raise ValueError(msg)
             subtree = tree.get("audit").get("vulnerabilities")
         # output from npm audit --dry-run --json
         # or
         # output from npm audit --json
         else:
             if not tree.get("auditReportVersion"):
-                raise ValueError(
-                    ("This parser only supports output from npm audit version"
-                        " 7 and above.")
+                msg = (
+                    "This parser only supports output from npm audit version"
+                    " 7 and above."
                 )
+                raise ValueError(msg)
             subtree = tree.get("vulnerabilities")
 
         return subtree
@@ -125,15 +129,15 @@ def get_item(item_node, tree, test):
     if isinstance(item_node["fixAvailable"], dict):
         fix_name = item_node["fixAvailable"]["name"]
         fix_version = item_node["fixAvailable"]["version"]
-        mitigation = "Update {0} to version {1}".format(fix_name, fix_version)
+        mitigation = f"Update {fix_name} to version {fix_version}"
     else:
         mitigation = "No specific mitigation provided by tool."
 
     description = get_vuln_description(item_node, tree)
 
-    if (item_node["via"] and
-        isinstance(item_node["via"][0], dict) and
-            len(item_node["via"]) > 1):
+    if (item_node["via"]
+        and isinstance(item_node["via"][0], dict)
+            and len(item_node["via"]) > 1):
         # we have a multiple CWE vuln which we will capture in the
         # vulnerability_ids and references
         for vuln in item_node["via"][1:]:  # have to decide if str or object
@@ -173,22 +177,21 @@ def get_vuln_description(item_node, tree):
     effects_handled = []
     description = ""
 
-    description += (item_node["name"] + " " +
-                    item_node["range"] + "\n")
+    description += (item_node["name"] + " "
+                    + item_node["range"] + "\n")
     description += "Severity: " + item_node["severity"] + "\n"
 
     for via in item_node["via"]:
         if isinstance(via, str):
-            description += ("Depends on vulnerable versions of " +
-                            via + "\n")
+            description += ("Depends on vulnerable versions of "
+                            + via + "\n")
         else:
             description += (via["title"] + " - " + via["url"] + "\n")
 
     if isinstance(item_node["fixAvailable"], dict):
         fix_name = item_node["fixAvailable"]["name"]
         fix_version = item_node["fixAvailable"]["version"]
-        mitigation = "Fix Available: Update {0} to version {1}".format(
-            fix_name, fix_version)
+        mitigation = f"Fix Available: Update {fix_name} to version {fix_version}"
     else:
         mitigation = "No specific mitigation provided by tool."
 
@@ -199,26 +202,26 @@ def get_vuln_description(item_node, tree):
 
     for effect in item_node["effects"]:
         # look up info in the main tree
-        description += ("  " + tree[effect]["name"] + " " +
-                        tree[effect]["range"] + "\n")
+        description += ("  " + tree[effect]["name"] + " "
+                        + tree[effect]["range"] + "\n")
         effects_handled.append(tree[effect]["name"])
         for ev in tree[effect]["via"]:
             if isinstance(ev, dict):
                 if tree[effect]["name"] != ev["name"]:
-                    description += ("  Depends on vulnerable versions of " +
-                                    ev["name"] + "\n")
+                    description += ("  Depends on vulnerable versions of "
+                                    + ev["name"] + "\n")
             else:
                 if tree[effect]["name"] != ev:
-                    description += ("  Depends on vulnerable versions of " +
-                                    ev + "\n")
+                    description += ("  Depends on vulnerable versions of "
+                                    + ev + "\n")
         for en in tree[effect]["nodes"]:
             description += "  " + en + "\n"
 
         for ee in tree[effect]["effects"]:
             if ee in effects_handled:
                 continue  # already added to description
-            description += ("    " + tree[ee]["name"] + " " +
-                            tree[ee]["range"] + "\n")
+            description += ("    " + tree[ee]["name"] + " "
+                            + tree[ee]["range"] + "\n")
             for en in tree[effect]["nodes"]:
                 description += "    " + en + "\n"
 

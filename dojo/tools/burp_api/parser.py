@@ -1,6 +1,6 @@
+import base64
 import json
 import logging
-import base64
 
 from dojo.models import Endpoint, Finding
 
@@ -15,7 +15,7 @@ DESCRIPTION_TEMPLATE = """**{title}**
 """
 
 
-class BurpApiParser(object):
+class BurpApiParser:
     """Parser that can load data from Burp API"""
 
     def get_scan_types(self):
@@ -33,7 +33,7 @@ class BurpApiParser(object):
 
         items = []
         # for each issue found
-        for issue_event in tree.get("issue_events", list()):
+        for issue_event in tree.get("issue_events", []):
             if (
                 "issue_found" == issue_event.get("type")
                 and "issue" in issue_event
@@ -65,10 +65,10 @@ class BurpApiParser(object):
                     static_finding=False,  # by definition
                     dynamic_finding=True,  # by definition
                     unique_id_from_tool=str(
-                        issue.get("serial_number", "")
+                        issue.get("serial_number", ""),
                     ),  # the serial number is a good candidate for this attribute
                     vuln_id_from_tool=str(
-                        issue.get("type_index", "")
+                        issue.get("type_index", ""),
                     ),  # the type index is a good candidate for this attribute
                 )
                 # manage confidence
@@ -78,24 +78,24 @@ class BurpApiParser(object):
                 if "origin" in issue and "path" in issue:
                     finding.unsaved_endpoints = [
                         Endpoint.from_uri(
-                            issue.get("origin") + issue.get("path")
-                        )
+                            issue.get("origin") + issue.get("path"),
+                        ),
                     ]
                 finding.unsaved_req_resp = []
                 for evidence in issue.get("evidence", []):
-                    if not evidence.get("type") in [
+                    if evidence.get("type") not in [
                         "InformationListEvidence",
                         "FirstOrderEvidence",
                     ]:
                         continue
                     request = self.get_clean_base64(
-                        evidence.get("request_response").get("request")
+                        evidence.get("request_response").get("request"),
                     )
                     response = self.get_clean_base64(
-                        evidence.get("request_response").get("response")
+                        evidence.get("request_response").get("response"),
                     )
                     finding.unsaved_req_resp.append(
-                        {"req": request, "resp": response}
+                        {"req": request, "resp": response},
                     )
 
                 items.append(finding)
@@ -111,15 +111,14 @@ class BurpApiParser(object):
                         output += data.decode()
                     except UnicodeDecodeError:
                         output += "Decoding of the DataSegment failed. Thus, decoded with `latin1`. The result is the following one:\n"
-                        output += data.decode('latin1')
+                        output += data.decode("latin1")
                 elif segment["type"] == "SnipSegment":
                     output += f"\n<...> ({segment['length']} bytes)"
                 elif segment["type"] == "HighlightSegment":
                     output += "\n\n------------------------------------------------------------------\n\n"
                 else:
-                    raise ValueError(
-                        f"unknown segment type in Burp data {segment['type']}"
-                    )
+                    msg = f"unknown segment type in Burp data {segment['type']}"
+                    raise ValueError(msg)
         return output
 
 

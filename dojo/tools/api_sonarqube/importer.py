@@ -1,20 +1,21 @@
 import logging
 import re
+import textwrap
 
 import html2text
-from lxml import etree
-import textwrap
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from lxml import etree
 
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
+
 from .api_client import SonarQubeAPI
 
 logger = logging.getLogger(__name__)
 
 
-class SonarQubeApiImporter(object):
+class SonarQubeApiImporter:
     """
     This class imports from SonarQube (SQ) all open/confirmed SQ issues related to the project related to the test as
      findings.
@@ -61,10 +62,11 @@ class SonarQubeApiImporter(object):
             )  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
             # Double check of config
             if config.product != product:
-                raise ValidationError(
+                msg = (
                     "Product API Scan Configuration and Product do not match. "
                     f'Product: "{product.name}" ({product.id}), config.product: "{config.product.name}" ({config.product.id})'
                 )
+                raise ValidationError(msg)
         else:
             sqqs = product.product_api_scan_configuration_set.filter(
                 product=product,
@@ -77,19 +79,21 @@ class SonarQubeApiImporter(object):
             elif (
                 sqqs.count() > 1
             ):  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6
-                raise ValidationError(
+                msg = (
                     "More than one Product API Scan Configuration has been configured, but none of them has been "
                     "chosen. Please specify which one should be used. "
                     f'Product: "{product.name}" ({product.id})'
                 )
+                raise ValidationError(msg)
             else:
                 # We are not handling cases no. 1-3 anymore -
                 # https://github.com/DefectDojo/django-DefectDojo/pull/4676
-                raise ValidationError(
+                msg = (
                     "There are no API Scan Configurations for this Product.\n"
                     "Please add at least one API Scan Configuration for SonarQube to this Product. "
                     f'Product: "{product.name}" ({product.id})'
                 )
+                raise ValidationError(msg)
 
         return SonarQubeAPI(tool_config=config.tool_configuration), config
 
@@ -124,7 +128,7 @@ class SonarQubeApiImporter(object):
                 branch=test.branch_tag,
             )
             logging.info(
-                f'Found {len(issues)} issues for component {component["key"]}'
+                f'Found {len(issues)} issues for component {component["key"]}',
             )
 
             sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL
@@ -154,7 +158,7 @@ class SonarQubeApiImporter(object):
                 # custom (user defined) SQ rules may not have 'htmlDesc'
                 if "htmlDesc" in rule:
                     description = self.clean_rule_description_html(
-                        rule["htmlDesc"]
+                        rule["htmlDesc"],
                     )
                     cwe = self.clean_cwe(rule["htmlDesc"])
                     references = sonarqube_permalink + self.get_references(rule["htmlDesc"])
@@ -174,7 +178,7 @@ class SonarQubeApiImporter(object):
                 # Only assign the SonarQube_issue to the first finding related
                 # to the issue
                 if Finding.objects.filter(
-                    sonarqube_issue=sonarqube_issue
+                    sonarqube_issue=sonarqube_issue,
                 ).exists():
                     sonarqube_issue = None
 
@@ -203,7 +207,7 @@ class SonarQubeApiImporter(object):
         except Exception as e:
             logger.exception(e)
             create_notification(
-                event="other",
+                event="sonarqube_failed",
                 title="SonarQube API import issue",
                 description=e,
                 icon="exclamation-triangle",
@@ -243,7 +247,7 @@ class SonarQubeApiImporter(object):
                 branch=test.branch_tag,
             )
             logging.info(
-                f'Found {len(hotspots)} hotspots for project {component["key"]}'
+                f'Found {len(hotspots)} hotspots for project {component["key"]}',
             )
             sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL
 
@@ -265,19 +269,19 @@ class SonarQubeApiImporter(object):
                 else:
                     severity = "Info"
                 title = textwrap.shorten(
-                    text=hotspot.get("message", ""), width=500
+                    text=hotspot.get("message", ""), width=500,
                 )
                 component_key = hotspot.get("component")
                 line = hotspot.get("line")
                 rule_id = hotspot.get("key", "")
                 rule = client.get_hotspot_rule(rule_id)
                 scanner_confidence = self.convert_scanner_confidence(
-                    hotspot.get("vulnerabilityProbability", "")
+                    hotspot.get("vulnerabilityProbability", ""),
                 )
                 description = self.clean_rule_description_html(
                     rule.get(
-                        "vulnerabilityDescription", "No description provided."
-                    )
+                        "vulnerabilityDescription", "No description provided.",
+                    ),
                 )
                 cwe = self.clean_cwe(rule.get("fixRecommendations", ""))
                 try:
@@ -285,7 +289,7 @@ class SonarQubeApiImporter(object):
                 except KeyError:
                     sonarqube_permalink = "No permalink \n"
                 references = sonarqube_permalink + self.get_references(
-                    rule.get("riskDescription", "")
+                    rule.get("riskDescription", ""),
                 ) + self.get_references(rule.get("fixRecommendations", ""))
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
@@ -296,7 +300,7 @@ class SonarQubeApiImporter(object):
                 # Only assign the SonarQube_issue to the first finding related
                 # to the issue
                 if Finding.objects.filter(
-                    sonarqube_issue=sonarqube_issue
+                    sonarqube_issue=sonarqube_issue,
                 ).exists():
                     sonarqube_issue = None
 
@@ -326,7 +330,7 @@ class SonarQubeApiImporter(object):
         except Exception as e:
             logger.exception(e)
             create_notification(
-                event="other",
+                event="sonarqube_failed",
                 title="SonarQube API import issue",
                 description=e,
                 icon="exclamation-triangle",

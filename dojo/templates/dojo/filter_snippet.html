@@ -19,7 +19,13 @@
             {% for field in form.visible_fields %}
                 <div class="filter-form-input">
                     {{ field.errors }}
-                    <label for="{{ field.auto_id }}" style="display: block;">{{ field.label }}</label>
+                    <label for="{{ field.auto_id }}" style="display: block;">
+                        {{ field.label }}
+                        {% if field.help_text %}
+                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
+                            </i>
+                        {% endif %}
+                    </label>
                     {% with placeholder="placeholder:"|add:field.label %}
                         {{ field|addcss:"class: form-control filter-form-control"|addcss:placeholder }}
                     {% endwith %}

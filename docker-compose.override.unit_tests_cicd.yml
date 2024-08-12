@@ -1,5 +1,4 @@
 ---
-version: '3.8'
 services:
   nginx:
     image: busybox:1.36.1-musl
@@ -9,17 +8,19 @@ services:
   uwsgi:
     build:
       target: django-unittests
-    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/app/docker/entrypoint-unit-tests.sh']
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/app/docker/entrypoint-unit-tests.sh']
     volumes:
       - '.:/app:z'
       - "defectdojo_media_unit_tests:${DD_MEDIA_ROOT:-/app/media}"
     environment:
+      PYTHONWARNINGS: error  # We are strict about Warnings during testing
       DD_DEBUG: 'True'
-      DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME}
-      DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME}
-      DD_DATABASE_ENGINE: ${DD_DATABASE_ENGINE}
-      DD_DATABASE_HOST: ${DD_DATABASE_HOST}
-      DD_DATABASE_PORT: ${DD_DATABASE_PORT}
+      DD_LOG_LEVEL: 'ERROR'
+      DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+      DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
+      DD_DATABASE_ENGINE: ${DD_DATABASE_ENGINE:-django.db.backends.postgresql}
+      DD_DATABASE_HOST: ${DD_DATABASE_HOST:-postgres}
+      DD_DATABASE_PORT: ${DD_DATABASE_PORT:-5432}
       DD_CELERY_BROKER_SCHEME: 'sqla+sqlite'
       DD_CELERY_BROKER_USER: ''
       DD_CELERY_BROKER_PASSWORD: ''
@@ -36,33 +37,19 @@ services:
   initializer:
     image: busybox:1.36.1-musl
     entrypoint: ['echo', 'skipping', 'initializer']
-  mysql:
-    ports:
-      - target: ${DD_DATABASE_PORT}
-        published: ${DD_DATABASE_PORT}
-        protocol: tcp
-        mode: host
-    environment:
-      MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME}
-    volumes:
-      - defectdojo_data_unit_tests:/var/lib/mysql
   postgres:
     ports:
-      - target: ${DD_DATABASE_PORT}
-        published: ${DD_DATABASE_PORT}
+      - target: ${DD_DATABASE_PORT:-5432}
+        published: ${DD_DATABASE_PORT:-5432}
         protocol: tcp
         mode: host
     environment:
-      POSTGRES_DB: ${DD_TEST_DATABASE_NAME}
+      POSTGRES_DB: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
     volumes:
       - defectdojo_postgres_unit_tests:/var/lib/postgresql/data
-  rabbitmq:
-    image: busybox:1.36.1-musl
-    entrypoint: ['echo', 'skipping', 'rabbitmq']
   redis:
     image: busybox:1.36.1-musl
     entrypoint: ['echo', 'skipping', 'redis']
 volumes:
-  defectdojo_data_unit_tests: {}
   defectdojo_postgres_unit_tests: {}
   defectdojo_media_unit_tests: {}

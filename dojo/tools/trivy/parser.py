@@ -80,7 +80,7 @@ class TrivyParser:
 
         # Legacy format is empty
         if data is None:
-            return list()
+            return []
         # Legacy format with results
         elif isinstance(data, list):
             return self.get_result_items(test, data)
@@ -92,7 +92,7 @@ class TrivyParser:
                 results = data.get("Results", [])
                 return self.get_result_items(test, results, artifact_name=artifact_name)
             elif cluster_name:
-                findings = list()
+                findings = []
                 vulnerabilities = data.get("Vulnerabilities", [])
                 for service in vulnerabilities:
                     namespace = service.get("Namespace")
@@ -108,7 +108,7 @@ class TrivyParser:
                     if len(service_name) >= 3:
                         service_name = service_name[:-3]
                     findings += self.get_result_items(
-                        test, service.get("Results", []), service_name
+                        test, service.get("Results", []), service_name,
                     )
                 misconfigurations = data.get("Misconfigurations", [])
                 for service in misconfigurations:
@@ -125,7 +125,7 @@ class TrivyParser:
                     if len(service_name) >= 3:
                         service_name = service_name[:-3]
                     findings += self.get_result_items(
-                        test, service.get("Results", []), service_name
+                        test, service.get("Results", []), service_name,
                     )
                 resources = data.get("Resources", [])
                 for resource in resources:
@@ -141,16 +141,15 @@ class TrivyParser:
                     if len(resource_name) >= 3:
                         resource_name = resource_name[:-3]
                     findings += self.get_result_items(
-                        test, resource.get("Results", []), resource_name
+                        test, resource.get("Results", []), resource_name,
                     )
                 return findings
             else:
-                raise ValueError(
-                    "Schema of Trivy json report is not supported"
-                )
+                msg = "Schema of Trivy json report is not supported"
+                raise ValueError(msg)
 
     def get_result_items(self, test, results, service_name=None, artifact_name=""):
-        items = list()
+        items = []
         for target_data in results:
             if (
                 not isinstance(target_data, dict)
@@ -206,13 +205,7 @@ class TrivyParser:
                 else:
                     cwe = 0
                 type = target_data.get("Type", "")
-                title = " ".join(
-                    [
-                        vuln_id,
-                        package_name,
-                        package_version,
-                    ]
-                )
+                title = f"{vuln_id} {package_name} {package_version}"
                 description = DESCRIPTION_TEMPLATE.format(
                     title=vuln.get("Title", ""),
                     target=target,
@@ -266,7 +259,7 @@ class TrivyParser:
                     target=target_target,
                     type=misc_type,
                     description=misc_description,
-                    message=misc_message
+                    message=misc_message,
                 )
                 severity = TRIVY_SEVERITIES[misc_severity]
                 references = None
@@ -370,7 +363,7 @@ class TrivyParser:
         # Create the table string
         table_string = f"{header_row}\n"
         for item in lines:
-            row = "\t".join(str(item.get(header, '')) for header in headers)
+            row = "\t".join(str(item.get(header, "")) for header in headers)
             table_string += f"{row}\n"
 
         return table_string

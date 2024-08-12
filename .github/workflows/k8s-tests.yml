@@ -5,28 +5,14 @@ on:
 
 env:
   DD_HOSTNAME: defectdojo.default.minikube.local
-  HELM_RABBIT_BROKER_SETTINGS: " \
-    --set redis.enabled=false \
-    --set rabbitmq.enabled=true \
-    --set celery.broker=rabbitmq \
-    --set createRabbitMqSecret=true \
-    "
   HELM_REDIS_BROKER_SETTINGS: " \
-    --set redis.enabled=false \
-    --set rabbitmq.enabled=true \
-    --set celery.broker=rabbitmq \
-    --set createRabbitMqSecret=true \
-    "
-  HELM_MYSQL_DATABASE_SETTINGS: " \
-    --set database=mysql \
-    --set postgresql.enabled=false \
-    --set mysql.enabled=true \
-    --set createMysqlSecret=true \
+    --set redis.enabled=true \
+    --set celery.broker=redis \
+    --set createRedisSecret=true \
     "
   HELM_PG_DATABASE_SETTINGS: " \
     --set database=postgresql \
     --set postgresql.enabled=true \
-    --set mysql.enabled=false \
     --set createPostgresqlSecret=true \
    "
 jobs:
@@ -42,33 +28,16 @@ jobs:
           # are tested (https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions)
           - databases: pgsql
             brokers: redis
-            k8s: 'v1.22.0'
+            k8s: 'v1.26.11'
             os: debian
-          - databases: mysql
-            brokers: rabbit
-            k8s: 'v1.22.0'
-            os: debian
-          - databases: pgsql
-            brokers: rabbit
-            k8s: 'v1.23.9'
-            os: debian
-          - databases: mysql
-            brokers: redis
-            k8s: 'v1.23.9'
-            os: debian
-          - databases: pgsql
-            brokers: rabbit
-            k8s: 'v1.23.9'
-            os: alpine
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.10.0
+        uses: manusa/actions-setup-minikube@v2.11.0
         with:
-          minikube version: 'v1.24.0'
+          minikube version: 'v1.31.2'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
@@ -82,6 +51,7 @@ jobs:
         uses: actions/download-artifact@v3
 
       - name: Load docker images
+        timeout-minutes: 10
         run: |-
              eval $(minikube docker-env)
              docker load -i nginx/nginx-${{ matrix.os }}_img
@@ -98,12 +68,10 @@ jobs:
         id: set
         run: |-
               echo "pgsql=${{ env.HELM_PG_DATABASE_SETTINGS }}" >> $GITHUB_ENV
-              echo "pgsqlha=${{ env.HELM_PGHA_DATABASE_SETTINGS }}" >> $GITHUB_ENV
-              echo "mysql=${{ env.HELM_MYSQL_DATABASE_SETTINGS }}" >> $GITHUB_ENV
               echo "redis=${{ env.HELM_REDIS_BROKER_SETTINGS }}" >> $GITHUB_ENV
-              echo "rabbit=${{ env.HELM_RABBIT_BROKER_SETTINGS }}" >> $GITHUB_ENV
 
       - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
+        timeout-minutes: 10 
         run: |-
              helm install \
                --timeout 800s \
@@ -124,6 +92,7 @@ jobs:
              kubectl get services
 
       - name: Check Application
+        timeout-minutes: 10
         run: |-
              to_complete () {
                kubectl wait --for=$1 $2 --timeout=500s --selector=$3 2>/tmp/test || true

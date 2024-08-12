@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class MozillaObservatoryParser(object):
+class MozillaObservatoryParser:
     """Mozilla Observatory
 
     See: https://observatory.mozilla.org
@@ -30,7 +30,7 @@ class MozillaObservatoryParser(object):
         else:
             nodes = data
 
-        findings = list()
+        findings = []
         for key in nodes:
             node = nodes[key]
 
@@ -41,7 +41,7 @@ class MozillaObservatoryParser(object):
                     + "`",
                     "**Result** : `" + node["result"] + "`"
                     "**expectation** : " + str(node.get("expectation")) + "`",
-                ]
+                ],
             )
 
             finding = Finding(

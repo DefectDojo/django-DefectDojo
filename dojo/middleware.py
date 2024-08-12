@@ -1,17 +1,20 @@
-from django.http import HttpResponseRedirect
-from django.conf import settings
-from urllib.parse import quote
-from re import compile
 import logging
+from re import compile
 from threading import local
-from django.db import models
-from django.urls import reverse
+from urllib.parse import quote
 
+from auditlog.context import set_actor
+from auditlog.middleware import AuditlogMiddleware as _AuditlogMiddleware
+from django.conf import settings
+from django.db import models
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.utils.functional import SimpleLazyObject
 
 logger = logging.getLogger(__name__)
 
-EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
-if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
+EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip("/"))]
+if hasattr(settings, "LOGIN_EXEMPT_URLS"):
     EXEMPT_URLS += [compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
 
 
@@ -31,16 +34,16 @@ class LoginRequiredMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        assert hasattr(request, 'user'), "The Login Required middleware\
+        assert hasattr(request, "user"), "The Login Required middleware\
  requires authentication middleware to be installed. Edit your\
  MIDDLEWARE_CLASSES setting to insert\
  'django.contrib.auth.middleware.AuthenticationMiddleware'. If that doesn't\
  work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes\
  'django.core.context_processors.auth'."
         if not request.user.is_authenticated:
-            path = request.path_info.lstrip('/')
+            path = request.path_info.lstrip("/")
             if not any(m.match(path) for m in EXEMPT_URLS):
-                if path == 'logout':
+                if path == "logout":
                     fullURL = f"{settings.LOGIN_URL}?next=/"
                 else:
                     fullURL = f"{settings.LOGIN_URL}?next={quote(request.get_full_path())}"
@@ -49,21 +52,21 @@ class LoginRequiredMiddleware:
         if request.user.is_authenticated:
             logger.debug("Authenticated user: %s", str(request.user))
             try:
-                uwsgi = __import__('uwsgi', globals(), locals(), ['set_logvar'], 0)
+                uwsgi = __import__("uwsgi", globals(), locals(), ["set_logvar"], 0)
                 # this populates dd_user log var, so can appear in the uwsgi logs
-                uwsgi.set_logvar('dd_user', str(request.user))
+                uwsgi.set_logvar("dd_user", str(request.user))
             except:
                 # to avoid unittests to fail
                 pass
-            path = request.path_info.lstrip('/')
+            path = request.path_info.lstrip("/")
             from dojo.models import Dojo_User
-            if Dojo_User.force_password_reset(request.user) and path != 'change_password':
-                return HttpResponseRedirect(reverse('change_password'))
+            if Dojo_User.force_password_reset(request.user) and path != "change_password":
+                return HttpResponseRedirect(reverse("change_password"))
 
         return self.get_response(request)
 
 
-class DojoSytemSettingsMiddleware(object):
+class DojoSytemSettingsMiddleware:
     _thread_local = local()
 
     def __init__(self, get_response):
@@ -83,14 +86,14 @@ class DojoSytemSettingsMiddleware(object):
 
     @classmethod
     def get_system_settings(cls):
-        if hasattr(cls._thread_local, 'system_settings'):
+        if hasattr(cls._thread_local, "system_settings"):
             return cls._thread_local.system_settings
 
         return None
 
     @classmethod
     def cleanup(cls, *args, **kwargs):
-        if hasattr(cls._thread_local, 'system_settings'):
+        if hasattr(cls._thread_local, "system_settings"):
             del cls._thread_local.system_settings
 
     @classmethod
@@ -106,7 +109,7 @@ class System_Settings_Manager(models.Manager):
     def get_from_db(self, *args, **kwargs):
         # logger.debug('refreshing system_settings from db')
         try:
-            from_db = super(System_Settings_Manager, self).get(*args, **kwargs)
+            from_db = super().get(*args, **kwargs)
         except:
             from dojo.models import System_Settings
             # this mimics the existing code that was in filters.py and utils.py.
@@ -142,9 +145,9 @@ class APITrailingSlashMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        path = request.path_info.lstrip('/')
-        if request.method == 'POST' and 'api/v2/' in path and path[-1] != '/' and response.status_code == 400:
-            response.data = {'message': 'Please add a trailing slash to your request.'}
+        path = request.path_info.lstrip("/")
+        if request.method == "POST" and "api/v2/" in path and path[-1] != "/" and response.status_code == 400:
+            response.data = {"message": "Please add a trailing slash to your request."}
             # you need to change private attribute `_is_render`
             # to call render second time
             response._is_rendered = False
@@ -164,3 +167,17 @@ class AdditionalHeaderMiddleware:
     def __call__(self, request):
         request.META.update(settings.ADDITIONAL_HEADERS)
         return self.get_response(request)
+
+
+# This solution comes from https://github.com/jazzband/django-auditlog/issues/115#issuecomment-1539262735
+# It fix situation when TokenAuthentication is used in API. Otherwise, actor in AuditLog would be set to None
+class AuditlogMiddleware(_AuditlogMiddleware):
+    def __call__(self, request):
+        remote_addr = self._get_remote_addr(request)
+
+        user = SimpleLazyObject(lambda: getattr(request, "user", None))
+
+        context = set_actor(actor=user, remote_addr=remote_addr)
+
+        with context:
+            return self.get_response(request)

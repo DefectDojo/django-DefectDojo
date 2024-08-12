@@ -4,7 +4,7 @@ import json
 from dojo.models import Finding
 
 
-class RetireJsParser(object):
+class RetireJsParser:
     def get_scan_types(self):
         return ["Retire.js Scan"]
 
@@ -35,7 +35,7 @@ class RetireJsParser(object):
                             + ")"
                         )
                         item.description += "\n\n Raw Result: " + str(
-                            json.dumps(vulnerability, indent=4, sort_keys=True)
+                            json.dumps(vulnerability, indent=4, sort_keys=True),
                         )
                         item.references = item.references
 
@@ -47,7 +47,7 @@ class RetireJsParser(object):
                         unique_key = hashlib.md5(
                             (
                                 item.title + item.references + encrypted_file
-                            ).encode()
+                            ).encode(),
                         ).hexdigest()
                         items[unique_key] = item
         return list(items.values())

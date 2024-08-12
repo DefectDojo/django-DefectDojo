@@ -1,9 +1,9 @@
 import datetime
 from os import path
 
-from ..dojo_test_case import DojoTestCase
 from dojo.models import Test
 from dojo.tools.horusec.parser import HorusecParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestHorusecParser(DojoTestCase):
@@ -13,7 +13,7 @@ class TestHorusecParser(DojoTestCase):
             parser = HorusecParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(267, len(findings))
-            self.assertEqual('2021-10-19', findings[0].date.strftime("%Y-%m-%d"))
+            self.assertEqual("2021-10-19", findings[0].date.strftime("%Y-%m-%d"))
 
     def test_get_tests(self):
         """Version 2.6.3 with big project in Python"""
@@ -22,7 +22,7 @@ class TestHorusecParser(DojoTestCase):
             tests = parser.get_tests("Horusec Scan", testfile)
             self.assertEqual(1, len(tests))
             test = tests[0]
-            self.assertEqual('2.6.3', test.version)
+            self.assertEqual("2.6.3", test.version)
             self.assertEqual(267, len(test.findings))
             findings = test.findings
             with self.subTest(i=0):
@@ -133,3 +133,12 @@ class TestHorusecParser(DojoTestCase):
                 self.assertGreaterEqual(finding.scanner_confidence, 3)  # "Firm"
                 self.assertLessEqual(finding.scanner_confidence, 5)  # "Firm"
                 self.assertEqual(datetime.date(2022, 5, 6), finding.date.date())
+
+    def test_issue_9939(self):
+        """"""
+        with open(path.join(path.dirname(__file__), "../scans/horusec/issue_9939.json")) as testfile:
+            parser = HorusecParser()
+            tests = parser.get_tests("Horusec Scan", testfile)
+            self.assertEqual(1, len(tests))
+            test = tests[0]
+            self.assertEqual(1, len(test.findings))

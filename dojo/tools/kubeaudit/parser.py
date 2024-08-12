@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Finding
 
 
-class KubeAuditParser(object):
+class KubeAuditParser:
     def get_scan_types(self):
         return ["Kubeaudit Scan"]
 
@@ -25,25 +26,25 @@ class KubeAuditParser(object):
 
     def get_findings(self, filename, test):
         lines = filename.readlines()
-        findings = list()
+        findings = []
         for line in lines:
             try:
                 tree = json.loads(str(line, "utf-8"))
             except BaseException:
                 tree = json.loads(line)
-            AuditResultName = tree.get('AuditResultName', None)
-            DeprecatedMajor = tree.get('DeprecatedMajor', None)
-            DeprecatedMinor = tree.get('DeprecatedMinor', None)
-            IntroducedMajor = tree.get('IntroducedMajor', None)
-            IntroducedMinor = tree.get('IntroducedMinor', None)
-            ResourceApiVersion = tree.get('ResourceApiVersion', None)
-            ResourceKind = tree.get('ResourceKind', None)
-            ResourceName = tree.get('ResourceName', None)
-            level = tree.get('level', None)
-            msg = tree.get('msg', None)
-            Container = tree.get('Container', None)
-            MissingAnnotation = tree.get('MissingAnnotation', None)
-            ResourceNamespace = tree.get('ResourceNamespace', None)
+            AuditResultName = tree.get("AuditResultName", None)
+            DeprecatedMajor = tree.get("DeprecatedMajor", None)
+            DeprecatedMinor = tree.get("DeprecatedMinor", None)
+            IntroducedMajor = tree.get("IntroducedMajor", None)
+            IntroducedMinor = tree.get("IntroducedMinor", None)
+            ResourceApiVersion = tree.get("ResourceApiVersion", None)
+            ResourceKind = tree.get("ResourceKind", None)
+            ResourceName = tree.get("ResourceName", None)
+            level = tree.get("level", None)
+            msg = tree.get("msg", None)
+            Container = tree.get("Container", None)
+            MissingAnnotation = tree.get("MissingAnnotation", None)
+            ResourceNamespace = tree.get("ResourceNamespace", None)
             description = ""
             if AuditResultName:
                 description += "AuditResultName: " + AuditResultName + "\n"

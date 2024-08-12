@@ -1,7 +1,8 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.blackduck.parser import BlackduckParser
-from dojo.models import Test
 from pathlib import Path
+
+from dojo.models import Test
+from dojo.tools.blackduck.parser import BlackduckParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestBlackduckHubParser(DojoTestCase):
@@ -43,7 +44,7 @@ class TestBlackduckHubParser(DojoTestCase):
 
     def test_blackduck_enhanced_has_many_findings(self):
         testfile = Path(
-            get_unit_tests_path() + "/scans/blackduck/blackduck_enhanced_py3_unittest.zip"
+            get_unit_tests_path() + "/scans/blackduck/blackduck_enhanced_py3_unittest.zip",
         )
         parser = BlackduckParser()
         findings = parser.get_findings(testfile, Test())
@@ -51,7 +52,7 @@ class TestBlackduckHubParser(DojoTestCase):
 
     def test_blackduck_enhanced_zip_upload(self):
         testfile = Path(
-            get_unit_tests_path() + "/scans/blackduck/blackduck_enhanced_py3_unittest_v2.zip"
+            get_unit_tests_path() + "/scans/blackduck/blackduck_enhanced_py3_unittest_v2.zip",
         )
         parser = BlackduckParser()
         findings = parser.get_findings(testfile, Test())

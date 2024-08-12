@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class KubeBenchParser(object):
+class KubeBenchParser:
     def get_scan_types(self):
         return ["kube-bench Scan"]
 

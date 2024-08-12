@@ -2,14 +2,15 @@ import logging
 
 from django.utils import timezone
 
-from dojo.models import Finding, Risk_Acceptance
-from .importer import SonarQubeApiImporter
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.models import Finding, Risk_Acceptance
+
+from .importer import SonarQubeApiImporter
 
 logger = logging.getLogger(__name__)
 
 
-class SonarQubeApiUpdaterFromSource(object):
+class SonarQubeApiUpdaterFromSource:
     """
     The responsibility of this class is to update the Finding status if current SonarQube issue status doesn't match.
 
@@ -40,9 +41,7 @@ class SonarQubeApiUpdaterFromSource(object):
             current_status = issue.get("resolution") or issue.get("status")
             current_finding_status = self.get_sonarqube_status_for(finding)
             logger.debug(
-                "--> SQ Current status: {}. Finding status: {}".format(
-                    current_status, current_finding_status
-                )
+                f"--> SQ Current status: {current_status}. Finding status: {current_finding_status}",
             )
 
             if (
@@ -50,9 +49,7 @@ class SonarQubeApiUpdaterFromSource(object):
                 and current_finding_status != current_status
             ):
                 logger.info(
-                    "Original SonarQube issue '{}' has changed. Updating DefectDojo finding '{}'...".format(
-                        sonarqube_issue, finding
-                    )
+                    f"Original SonarQube issue '{sonarqube_issue}' has changed. Updating DefectDojo finding '{finding}'...",
                 )
                 self.update_finding_status(finding, current_status)
 

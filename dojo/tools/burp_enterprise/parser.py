@@ -8,7 +8,7 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class BurpEnterpriseParser(object):
+class BurpEnterpriseParser:
     def get_scan_types(self):
         return ["Burp Enterprise Scan"]
 
@@ -70,12 +70,12 @@ class BurpEnterpriseParser(object):
 
     # Get the endpoints and severities associated with each vulnerability
     def pre_allocate_items(self, tree):
-        items = list()
+        items = []
         endpoint_text = tree.xpath(
-            "/html/body/div/div[contains(@class, 'section')]/h1"
+            "/html/body/div/div[contains(@class, 'section')]/h1",
         )
         severities = tree.xpath(
-            "/html/body/div/div[contains(@class, 'section')]/table[contains(@class, 'issue-table')]/tbody"
+            "/html/body/div/div[contains(@class, 'section')]/table[contains(@class, 'issue-table')]/tbody",
         )
         endpoint_text = [
             endpoint
@@ -83,7 +83,7 @@ class BurpEnterpriseParser(object):
             if ("Issues found" in "".join(endpoint.itertext()).strip())
         ]
 
-        for index in range(0, len(severities)):
+        for index in range(len(severities)):
             url = endpoint_text[index].text[16:]
             sev_table = list(severities[index].iter("tr"))
 
@@ -97,7 +97,7 @@ class BurpEnterpriseParser(object):
                 else:
                     endpoint = item_list[0].text.strip()
                     severity = item_list[1].text.strip()
-                    vuln = dict()
+                    vuln = {}
                     vuln["Severity"] = severity
                     vuln["Title"] = title
                     vuln["Description"] = ""
@@ -116,10 +116,10 @@ class BurpEnterpriseParser(object):
         # Check that there is at least one vulnerability (the vulnerabilities
         # table is absent when no vuln are found)
         vulns = tree.xpath(
-            "/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]"
+            "/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]",
         )
         if len(vulns) == 0:
-            return list()
+            return []
 
         dict_index = 0
         description = ["Issue detail:", "Issue description"]
@@ -200,7 +200,7 @@ class BurpEnterpriseParser(object):
         # Dictonary to hold the aggregated findings with:
         #  - key: the concatenated aggregate keys
         #  - value: the finding
-        dupes = dict()
+        dupes = {}
         for details in items:
             if details.get("Description") == "":
                 continue
@@ -234,14 +234,14 @@ class BurpEnterpriseParser(object):
             if len(details.get("Request")) > 0:
                 requests = details.get("Request").split("SPLITTER")[:-1]
                 responses = details.get("Response").split("SPLITTER")[:-1]
-                unsaved_req_resp = list()
-                for index in range(0, len(requests)):
+                unsaved_req_resp = []
+                for index in range(len(requests)):
                     unsaved_req_resp.append(
-                        {"req": requests[index], "resp": responses[index]}
+                        {"req": requests[index], "resp": responses[index]},
                     )
                 find.unsaved_req_resp = unsaved_req_resp
 
-            find.unsaved_endpoints = list()
+            find.unsaved_endpoints = []
             dupes[aggregateKeys] = find
 
             for url in details.get("Endpoint"):

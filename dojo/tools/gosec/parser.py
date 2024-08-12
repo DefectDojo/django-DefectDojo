@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class GosecParser(object):
+class GosecParser:
     def get_scan_types(self):
         return ["Gosec Scanner"]
 
@@ -19,7 +19,7 @@ class GosecParser(object):
             data = json.loads(str(tree, "utf-8"))
         except Exception:
             data = json.loads(tree)
-        dupes = dict()
+        dupes = {}
 
         for item in data["Issues"]:
             impact = ""
@@ -33,11 +33,9 @@ class GosecParser(object):
             title = item["details"] + " - rule " + item["rule_id"]
 
             #           Finding details information
-            findingdetail += "Filename: {}\n\n".format(filename)
-            findingdetail += "Line number: {}\n\n".format(str(line))
-            findingdetail += "Issue Confidence: {}\n\n".format(
-                scanner_confidence
-            )
+            findingdetail += f"Filename: {filename}\n\n"
+            findingdetail += f"Line number: {str(line)}\n\n"
+            findingdetail += f"Issue Confidence: {scanner_confidence}\n\n"
             findingdetail += "Code:\n\n"
             findingdetail += "```{}```".format(item["code"])
 
@@ -45,7 +43,7 @@ class GosecParser(object):
             # Best attempt at ongoing documentation provided by gosec, based on
             # rule id
             references = "https://securego.io/docs/rules/{}.html".format(
-                item["rule_id"]
+                item["rule_id"],
             ).lower()
 
             if scanner_confidence:
@@ -82,7 +80,7 @@ class GosecParser(object):
                     file_path=filename,
                     line=line,
                     scanner_confidence=scanner_confidence,
-                    static_finding=True
+                    static_finding=True,
                 )
 
                 dupes[dupe_key] = find

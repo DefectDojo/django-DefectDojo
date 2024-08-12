@@ -1,10 +1,11 @@
 import hashlib
 import json
 import re
+
 from dojo.models import Finding
 
 
-class PopeyeParser(object):
+class PopeyeParser:
     """
     Popeye is a kubernetes cluster resource analyzer.
     """
@@ -21,7 +22,7 @@ class PopeyeParser(object):
     def get_findings(self, file, test):
         data = json.load(file)
 
-        dupes = dict()
+        dupes = {}
         for sanitizer in data["popeye"]["sanitizers"]:
             issues = sanitizer.get("issues")
             if issues:
@@ -36,7 +37,7 @@ class PopeyeParser(object):
                                 + issue["message"]
                             )
                             severity = self.get_defect_dojo_severity(
-                                issue["level"]
+                                issue["level"],
                             )
                             description = (
                                 "**Sanitizer** : "
@@ -55,7 +56,7 @@ class PopeyeParser(object):
                                 + issue["message"]
                             )
                             vuln_id_from_tool = re.search(
-                                r"\[(POP-\d+)\].+", issue["message"]
+                                r"\[(POP-\d+)\].+", issue["message"],
                             ).group(1)
                             finding = Finding(
                                 title=title,
@@ -68,7 +69,7 @@ class PopeyeParser(object):
                             )
                             # internal de-duplication
                             dupe_key = hashlib.sha256(
-                                str(description + title).encode("utf-8")
+                                str(description + title).encode("utf-8"),
                             ).hexdigest()
                             if dupe_key not in dupes:
                                 dupes[dupe_key] = finding

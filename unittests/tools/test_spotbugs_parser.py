@@ -1,10 +1,9 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.spotbugs.parser import SpotbugsParser
 from dojo.models import Test
+from dojo.tools.spotbugs.parser import SpotbugsParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestSpotbugsParser(DojoTestCase):
-
     def test_no_findings(self):
         parser = SpotbugsParser()
         findings = parser.get_findings(get_unit_tests_path() + "/scans/spotbugs/no_finding.xml", Test())
@@ -76,19 +75,15 @@ class TestSpotbugsParser(DojoTestCase):
         test_finding = findings[0]
         # Test if line 13 is correct
         self.assertEqual(
-            "At IdentityFunctionCommandInjection.kt:[lines 20-170]",
-            test_finding.description.splitlines()[12]
+            "At IdentityFunctionCommandInjection.kt:[lines 20-170]", test_finding.description.splitlines()[12],
         )
 
     def test_mitigation(self):
         parser = SpotbugsParser()
         findings = parser.get_findings(get_unit_tests_path() + "/scans/spotbugs/many_findings.xml", Test())
         test_finding = findings[0]
-        # Test if line 10 is correct
-        self.assertEqual(
-            "#### Example",
-            test_finding.mitigation.splitlines()[9]
-        )
+        # Test if line 8 is correct
+        self.assertEqual("#### Example", test_finding.mitigation.splitlines()[7])
 
     def test_references(self):
         parser = SpotbugsParser()
@@ -97,7 +92,7 @@ class TestSpotbugsParser(DojoTestCase):
         # Test if line 2 is correct
         self.assertEqual(
             "[OWASP: Top 10 2013-A1-Injection](https://www.owasp.org/index.php/Top_10_2013-A1-Injection)",
-            test_finding.references.splitlines()[1]
+            test_finding.references.splitlines()[1],
         )
 
     def test_version_4_4(self):

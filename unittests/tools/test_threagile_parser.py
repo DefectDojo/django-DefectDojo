@@ -7,7 +7,7 @@ class TestThreAgileParser(DojoTestCase):
     def test_non_threagile_file_raises_error(self):
         with open("unittests/scans/threagile/bad_formatted_risks_file.json") as testfile:
             parser = ThreagileParser()
-            with self.assertRaises(ValueError) as exc_context:
+            with self.assertRaises(TypeError) as exc_context:
                 parser.get_findings(testfile, Test())
         exc = exc_context.exception
         self.assertEqual("Invalid ThreAgile risks file", str(exc))

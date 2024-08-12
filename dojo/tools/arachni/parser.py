@@ -7,7 +7,7 @@ from django.utils.encoding import force_str
 from dojo.models import Endpoint, Finding
 
 
-class ArachniParser(object):
+class ArachniParser:
     """Arachni Web Scanner (http://arachni-scanner.com/wiki)
 
     Reports are generated with arachni_reporter tool:
@@ -32,7 +32,7 @@ class ArachniParser(object):
         report_date = None
         if "finish_datetime" in tree:
             report_date = datetime.strptime(
-                tree.get("finish_datetime"), "%Y-%m-%d %H:%M:%S %z"
+                tree.get("finish_datetime"), "%Y-%m-%d %H:%M:%S %z",
             )
         for node in tree["issues"]:
             item = self.get_item(node, report_date)
@@ -74,7 +74,7 @@ class ArachniParser(object):
                 resp += str(key) + ": " + str(value) + "\n\n"
 
         resp += "\n\n\n" + force_str(respz["body"])
-        unsaved_req_resp = list()
+        unsaved_req_resp = []
 
         if request is not None and respz is not None:
             unsaved_req_resp.append({"req": req, "resp": resp})

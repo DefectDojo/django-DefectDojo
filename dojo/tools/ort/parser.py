@@ -5,7 +5,7 @@ from collections import namedtuple
 from dojo.models import Finding
 
 
-class OrtParser(object):
+class OrtParser:
     """Oss Review Toolkit Parser"""
 
     def get_scan_types(self):
@@ -19,13 +19,13 @@ class OrtParser(object):
 
     def get_findings(self, json_output, test):
         if json_output is None:
-            return list()
+            return []
 
         evaluated_model = self.parse_json(json_output)
         if evaluated_model:
             return self.get_items(evaluated_model, test)
         else:
-            return list()
+            return []
 
     def parse_json(self, json_output):
         try:
@@ -35,7 +35,8 @@ class OrtParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -46,16 +47,16 @@ class OrtParser(object):
         rule_violations = evaluatedModel["rule_violations"]
         licenses = evaluatedModel["licenses"]
         rule_violations_unresolved = get_unresolved_rule_violations(
-            rule_violations
+            rule_violations,
         )
         rule_violations_models = get_rule_violation_models(
-            rule_violations_unresolved, packages, licenses, dependency_trees
+            rule_violations_unresolved, packages, licenses, dependency_trees,
         )
 
         for model in rule_violations_models:
             item = get_item(model, test)
             unique_key = hashlib.md5(
-                (item.title + item.references).encode()
+                (item.title + item.references).encode(),
             ).hexdigest()
             items[unique_key] = item
 
@@ -108,23 +109,23 @@ def get_name_id_for_package(packages, package__id):
 
 
 def get_rule_violation_models(
-    rule_violations_unresolved, packages, licenses, dependency_trees
+    rule_violations_unresolved, packages, licenses, dependency_trees,
 ):
     models = []
     for violation in rule_violations_unresolved:
         models.append(
             get_rule_violation_model(
-                violation, packages, licenses, dependency_trees
-            )
+                violation, packages, licenses, dependency_trees,
+            ),
         )
     return models
 
 
 def get_rule_violation_model(
-    rule_violation_unresolved, packages, licenses, dependency_trees
+    rule_violation_unresolved, packages, licenses, dependency_trees,
 ):
     project_ids = get_project_ids_for_package(
-        dependency_trees, rule_violation_unresolved["pkg"]
+        dependency_trees, rule_violation_unresolved["pkg"],
     )
     project_names = []
     for id in project_ids:
@@ -139,7 +140,7 @@ def get_rule_violation_model(
     license_id = find_license_id(licenses, license_tmp)
 
     return RuleViolationModel(
-        package, license_id, project_names, rule_violation_unresolved
+        package, license_id, project_names, rule_violation_unresolved,
     )
 
 
@@ -192,7 +193,7 @@ how to fix : {model.rule_violation['how_to_fix']}"""
 #     rule_violation: dict
 
 RuleViolationModel = namedtuple(
-    "RuleViolationModel", ["pkg", "license_id", "projects", "rule_violation"]
+    "RuleViolationModel", ["pkg", "license_id", "projects", "rule_violation"],
 )
 
 

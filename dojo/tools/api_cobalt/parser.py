@@ -1,14 +1,15 @@
 import json
 import textwrap
 from datetime import datetime
-from dojo.models import Endpoint, Finding
-from .importer import CobaltApiImporter
 
+from dojo.models import Endpoint, Finding
+
+from .importer import CobaltApiImporter
 
 SCAN_COBALTIO_API = "Cobalt.io API Import"
 
 
-class ApiCobaltParser(object):
+class ApiCobaltParser:
     """
     Import from Cobalt.io API /findings
     """
@@ -66,7 +67,7 @@ class ApiCobaltParser(object):
                     "",
                     "Cobalt.io link:",
                     links["ui"]["url"],
-                ]
+                ],
             )
             mitigation = resource["suggested_fix"]
             steps_to_reproduce = resource["proof_of_concept"]

@@ -10,7 +10,7 @@ from datetime import date
 from dojo.models import Finding
 
 
-class AWSProwlerParser(object):
+class AWSProwlerParser:
     def get_scan_types(self):
         return ["AWS Prowler Scan"]
 
@@ -26,7 +26,8 @@ class AWSProwlerParser(object):
         elif file.name.lower().endswith(".json"):
             return self.process_json(file, test)
         else:
-            raise ValueError("Unknown file format")
+            msg = "Unknown file format"
+            raise ValueError(msg)
 
     def process_csv(self, file, test):
         content = file.read()
@@ -34,7 +35,7 @@ class AWSProwlerParser(object):
             content = content.decode("utf-8")
         csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
         reader = csv.DictReader(io.StringIO(content))
-        dupes = dict()
+        dupes = {}
 
         account = None
 
@@ -103,7 +104,7 @@ class AWSProwlerParser(object):
 
             # improving key to get duplicates
             dupe_key = hashlib.sha256(
-                (sev + "|" + region + "|" + result_extended).encode("utf-8")
+                (sev + "|" + region + "|" + result_extended).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -130,7 +131,7 @@ class AWSProwlerParser(object):
         return list(dupes.values())
 
     def process_json(self, file, test):
-        dupes = dict()
+        dupes = {}
 
         data = file.readlines()
         for issue in data:
@@ -188,7 +189,7 @@ class AWSProwlerParser(object):
 
             # improving key to get duplicates
             dupe_key = hashlib.sha256(
-                (sev + "|" + region + "|" + result_extended).encode("utf-8")
+                (sev + "|" + region + "|" + result_extended).encode("utf-8"),
             ).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]

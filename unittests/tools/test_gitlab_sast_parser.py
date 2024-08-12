@@ -1,6 +1,6 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from dojo.models import Test
+from dojo.tools.gitlab_sast.parser import GitlabSastParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestGitlabSastParser(DojoTestCase):

@@ -1,6 +1,6 @@
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-from dojo.tools.solar_appscreener.parser import SolarAppscreenerParser
 from dojo.models import Test
+from dojo.tools.solar_appscreener.parser import SolarAppscreenerParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestSolarAppscreenerParser(DojoTestCase):
@@ -59,6 +59,6 @@ class TestSolarAppscreenerParser(DojoTestCase):
         self.assertEqual("Trust boundary violation", finding.title)
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("index.php", finding.sast_source_file_path)
-        self.assertEqual(51, finding.sast_source_line),
+        self.assertEqual(51, finding.sast_source_line)
         self.assertEqual("index.php", finding.file_path)
         self.assertEqual(51, finding.line)

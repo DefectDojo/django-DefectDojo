@@ -7,7 +7,7 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class Outpost24Parser(object):
+class Outpost24Parser:
     def get_scan_types(self):
         return ["Outpost24 Scan"]
 
@@ -19,20 +19,20 @@ class Outpost24Parser(object):
 
     def get_findings(self, file, test):
         tree = ElementTree.parse(file)
-        items = list()
+        items = []
         for detail in tree.iterfind(".//detaillist/detail"):
             # finding details
             title = detail.findtext("name")
             # date = detail.findtext('date') # can be used for Finding.date?
             vulnerability_id = detail.findtext("./cve/id")
             url = detail.findtext(
-                "./referencelist/reference/[type='solution']/../url"
+                "./referencelist/reference/[type='solution']/../url",
             )
             description = detail.findtext("description")
             mitigation = detail.findtext("solution")
             impact = detail.findtext("information")
             cvss_score = detail.findtext("cvss_v3_score") or detail.findtext(
-                "cvss_score"
+                "cvss_score",
             )
             if not cvss_score:
                 cvss_score = 0
@@ -57,9 +57,7 @@ class Outpost24Parser(object):
                 else:
                     severity = "Critical"
             cvss_description = detail.findtext("cvss_vector_description")
-            severity_justification = "{}\n{}".format(
-                cvss_score, cvss_description
-            )
+            severity_justification = f"{cvss_score}\n{cvss_description}"
             finding = Finding(
                 title=title,
                 test=test,
@@ -82,7 +80,7 @@ class Outpost24Parser(object):
                     logger.debug("General port given. Assigning 0 as default.")
                     port = 0
                 finding.unsaved_endpoints.append(
-                    Endpoint(protocol=protocol, host=host, port=port)
+                    Endpoint(protocol=protocol, host=host, port=port),
                 )
             items.append(finding)
         return items

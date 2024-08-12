@@ -1,10 +1,10 @@
 import json
-
-from dojo.models import Finding
 from datetime import datetime
 
+from dojo.models import Finding
 
-class DockerBenchParser(object):
+
+class DockerBenchParser:
     def get_scan_types(self):
         return ["docker-bench-security Scan"]
 
@@ -34,7 +34,7 @@ def get_tests(tree, test):
 
     for node in tree["tests"]:
         items_from_results = get_results(
-            node, test, test_start, test_end, description
+            node, test, test_start, test_end, description,
         )
         items_from_tests += items_from_results
 
@@ -90,7 +90,7 @@ def get_item(vuln, test, test_start, test_end, description):
         description += unique_id_from_tool
     if reason:
         description += "\n"
-        description += "desc: {}\n".format(reason)
+        description += f"desc: {reason}\n"
     if vuln.get("details"):
         description += "\n"
         description += vuln["details"]
@@ -108,7 +108,7 @@ def get_item(vuln, test, test_start, test_end, description):
     if vuln.get("remediation-impact"):
         mitigation += "\n"
         mitigation += "mitigation impact: {}\n".format(
-            vuln["remediation-impact"]
+            vuln["remediation-impact"],
         )
 
     finding = Finding(

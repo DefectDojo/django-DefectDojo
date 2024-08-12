@@ -49,18 +49,17 @@ WEAK_CIPHER_LIST = [
 PROTOCOLS = ["sslv2", "sslv3", "tlsv1", "tlsv1_1", "tlsv1_2", "tlsv1_3"]
 
 
-class SSLyzeXMLParser(object):
+class SSLyzeXMLParser:
     def get_findings(self, file, test):
         tree = ET.parse(file)
         # get root of tree.
         root = tree.getroot()
         if "document" not in root.tag:
-            raise NamespaceErr(
-                "This doesn't seem to be a valid sslyze xml file."
-            )
+            msg = "This doesn't seem to be a valid sslyze xml file."
+            raise NamespaceErr(msg)
 
         results = root.find("results")
-        dupes = dict()
+        dupes = {}
         for target in results:
             host = target.attrib["host"]
             port = target.attrib["port"]
@@ -119,12 +118,9 @@ class SSLyzeXMLParser(object):
                         ):
                             for cipher in ciphers:
                                 if cipher.attrib["name"] in WEAK_CIPHER_LIST:
-                                    if (
-                                        not cipher.attrib["name"]
-                                        in weak_cipher[element.tag]
-                                    ):
+                                    if cipher.attrib["name"] not in weak_cipher[element.tag]:
                                         weak_cipher[element.tag].append(
-                                            cipher.attrib["name"]
+                                            cipher.attrib["name"],
                                         )
                     if len(weak_cipher[element.tag]) > 0:
                         title = (
@@ -139,7 +135,7 @@ class SSLyzeXMLParser(object):
                         )
                 if title and description is not None:
                     dupe_key = hashlib.md5(
-                        str(description + title).encode("utf-8")
+                        str(description + title).encode("utf-8"),
                     ).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]
@@ -156,13 +152,13 @@ class SSLyzeXMLParser(object):
                             severity=severity,
                             dynamic_finding=True,
                         )
-                        finding.unsaved_endpoints = list()
+                        finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
 
                         if host is not None:
                             finding.unsaved_endpoints.append(
                                 Endpoint(
-                                    host=host, port=port, protocol=protocol
-                                )
+                                    host=host, port=port, protocol=protocol,
+                                ),
                             )
         return dupes.values()

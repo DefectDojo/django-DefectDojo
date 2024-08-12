@@ -1,8 +1,9 @@
 import datetime
 import logging
+
 import html2text
-from defusedxml import ElementTree as etree
 from cvss import CVSS3
+from defusedxml import ElementTree as etree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
@@ -55,6 +56,43 @@ TYPE_MAP = {
     "Vuln": "CONFIRMED",
 }
 
+# Severity mapping taken from
+# https://qualysguard.qg2.apps.qualys.com/portal-help/en/malware/knowledgebase/severity_levels.htm
+LEGACY_SEVERITY_LOOKUP = {
+    1: "Informational",
+    2: "Low",
+    3: "Medium",
+    4: "High",
+    5: "Critical",
+}
+NON_LEGACY_SEVERITY_LOOKUP = {
+    "Informational": "Low",
+    "Low": "Low",
+    "Medium": "Medium",
+    "High": "High",
+    "Critical": "High",
+}
+
+
+def get_severity(severity_value_str: str | None) -> str:
+    severity_value: int = int(severity_value_str or -1)
+
+    sev: str = LEGACY_SEVERITY_LOOKUP.get(severity_value, "Unknown")
+
+    # Non legacy severity is a subset of legacy severity, retrieve it from lookup
+    if not settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
+        sev: str = NON_LEGACY_SEVERITY_LOOKUP.get(sev, "Unknown")
+
+    # If we still don't have a severity, default to Informational
+    if sev == "Unknown":
+        logger.warning(
+            "Could not determine severity from severity_value_str: %s",
+            severity_value_str,
+        )
+        sev = "Informational"
+
+    return sev
+
 
 def htmltext(blob):
     h = html2text.HTML2Text()
@@ -73,7 +111,7 @@ def split_cvss(value, _temp):
             # remove ")" at the end
         if _temp.get("CVSS_vector") is None:
             _temp["CVSS_vector"] = CVSS3(
-                "CVSS:3.0/" + split[1][:-1]
+                "CVSS:3.0/" + split[1][:-1],
             ).clean_vector()
     else:
         if _temp.get("CVSS_value") is None:
@@ -101,7 +139,7 @@ def parse_finding(host, tree):
 
     # Scan details
     for vuln_details in host.iterfind("VULN_INFO_LIST/VULN_INFO"):
-        _temp = issue_row
+        _temp = issue_row.copy()
         # Port
         _gid = vuln_details.find("QID").attrib["id"]
         _port = vuln_details.findtext("PORT")
@@ -136,8 +174,8 @@ def parse_finding(host, tree):
             last_fixed = vuln_details.findtext("LAST_FIXED")
             if last_fixed is not None:
                 _temp["mitigation_date"] = datetime.datetime.strptime(
-                    last_fixed, "%Y-%m-%dT%H:%M:%SZ"
-                ).date()
+                    last_fixed, "%Y-%m-%dT%H:%M:%SZ",
+                )
             else:
                 _temp["mitigation_date"] = None
         # read cvss value if present
@@ -151,9 +189,7 @@ def parse_finding(host, tree):
                 # DefectDojo does not support cvssv2
                 _temp["CVSS_vector"] = None
 
-        search = ".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{}']".format(
-            _gid
-        )
+        search = f".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{_gid}']"
         vuln_item = tree.find(search)
         if vuln_item is not None:
             finding = Finding()
@@ -181,7 +217,7 @@ def parse_finding(host, tree):
                     htmltext("First Found: " + _first_found),
                     htmltext("Last Found: " + _last_found),
                     htmltext("Times Found: " + _times_found),
-                ]
+                ],
             )
             # Impact description
             _temp["IMPACT"] = htmltext(vuln_item.findtext("IMPACT"))
@@ -208,33 +244,9 @@ def parse_finding(host, tree):
                 }
                 _temp["cve"] = "\n".join(list(_cl.keys()))
                 _temp["links"] = "\n".join(list(_cl.values()))
-        # The CVE in Qualys report might not have a CVSS score, so findings are informational by default
-        # unless we can find map to a Severity OR a CVSS score from the
-        # findings detail.
-        sev = None
-        if _temp.get("CVSS_value") is not None and _temp["CVSS_value"] > 0:
-            if 0.1 <= float(_temp["CVSS_value"]) <= 3.9:
-                sev = "Low"
-            elif 4.0 <= float(_temp["CVSS_value"]) <= 6.9:
-                sev = "Medium"
-            elif 7.0 <= float(_temp["CVSS_value"]) <= 8.9:
-                sev = "High"
-            elif float(_temp["CVSS_value"]) >= 9.0:
-                sev = "Critical"
-        elif vuln_item.findtext("SEVERITY") is not None:
-            if int(vuln_item.findtext("SEVERITY")) == 1:
-                sev = "Informational"
-            elif int(vuln_item.findtext("SEVERITY")) == 2:
-                sev = "Low"
-            elif int(vuln_item.findtext("SEVERITY")) == 3:
-                sev = "Medium"
-            elif int(vuln_item.findtext("SEVERITY")) == 4:
-                sev = "High"
-            elif int(vuln_item.findtext("SEVERITY")) == 5:
-                sev = "Critical"
-        elif sev is None:
-            sev = "Informational"
 
+        # Generate severity from number in XML's 'SEVERITY' field, if not present default to 'Informational'
+        sev = get_severity(vuln_item.findtext("SEVERITY"))
         finding = None
         if _temp_cve_details:
             refs = "\n".join(list(_cl.values()))
@@ -268,7 +280,7 @@ def parse_finding(host, tree):
         if _temp.get("CVSS_value") is not None:
             finding.cvssv3_score = _temp.get("CVSS_value")
         finding.verified = True
-        finding.unsaved_endpoints = list()
+        finding.unsaved_endpoints = []
         finding.unsaved_endpoints.append(ep)
         ret_rows.append(finding)
     return ret_rows
@@ -285,7 +297,7 @@ def qualys_parser(qualys_xml_file):
     return finding_list
 
 
-class QualysParser(object):
+class QualysParser:
     def get_scan_types(self):
         return ["Qualys Scan"]
 
