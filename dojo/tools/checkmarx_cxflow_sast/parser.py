@@ -1,15 +1,14 @@
 import json
-from enum import Enum
+import logging
 
 import dateutil.parser
-import logging
 
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 
-class _PathNode(object):
+class _PathNode:
     def __init__(self, file: str, line: str, column: str, node_object: str, length: str, snippet: str):
         self.file = file
         self.line = line
@@ -30,7 +29,7 @@ class _PathNode(object):
         )
 
 
-class _Path(object):
+class _Path:
     def __init__(self, sink: _PathNode, source: _PathNode, state: str, paths: [_PathNode]):
         self.sink = sink
         self.source = source
@@ -38,21 +37,7 @@ class _Path(object):
         self.paths = paths
 
 
-class _CheckmarxState(Enum):
-    def __str__(self):
-        return str(self.value)
-
-    # 0, 1, 2, 3, 4
-    # To verify, Not Exploitable, Confirmed, Urgent, Proposed not exploitable
-
-    ToVerify = 0
-    NotExploitable = 1
-    Confirmed = 2
-    Urgent = 3
-    ProposedNotExploitable = 4
-
-
-class CheckmarxCXFlowSastParser(object):
+class CheckmarxCXFlowSastParser:
     def __init__(self):
         pass
 
@@ -71,7 +56,7 @@ class CheckmarxCXFlowSastParser(object):
         else:
             # TODO: support CxXML format
             logger.warning(f"Not supported file format ${file}")
-            return list()
+            return []
 
     def _get_findings_json(self, file, test):
         data = json.load(file)
@@ -106,7 +91,7 @@ class CheckmarxCXFlowSastParser(object):
                     sink=_PathNode.from_json_object(result.get("sink")),
                     source=_PathNode.from_json_object(result.get("source")),
                     state=result.get("state"),
-                    paths=list([result[k] for k in path_keys])
+                    paths=[result[k] for k in path_keys]
                 )
 
                 map_paths[str(path.source.line)] = path
@@ -140,7 +125,8 @@ class CheckmarxCXFlowSastParser(object):
                         severity=severity,
                         file_path=filename,
                         line=detail.sink.line,
-                        false_p=issue.get("details")[detail_key].get("falsePositive") or self.is_not_exploitable(detail.state),
+                        false_p=issue.get("details")[detail_key].get("falsePositive") or self.is_not_exploitable(
+                            detail.state),
                         description=finding_detail,
                         verified=self.is_verify(detail.state),
                         active=self.is_active(detail.state)
@@ -152,13 +138,13 @@ class CheckmarxCXFlowSastParser(object):
 
     def is_verify(self, state):
         # Confirmed, urgent
-        verifiedStates = [_CheckmarxState.ToVerify, _CheckmarxState.Urgent]
+        verifiedStates = ["2", "3"]
         return state in verifiedStates
 
     def is_active(self, state):
         # To verify, Confirmed, Urgent, Proposed not exploitable
-        activeStates = [_CheckmarxState.ToVerify, _CheckmarxState.Confirmed, _CheckmarxState.Urgent, _CheckmarxState.ProposedNotExploitable]
+        activeStates = ["0", "2", "3", "4"]
         return state in activeStates
 
     def is_not_exploitable(self, state):
-        return state == _CheckmarxState.NotExploitable
+        return state == "1"
