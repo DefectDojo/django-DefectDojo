@@ -41,7 +41,7 @@ Please check for the latest version of these requirements at the time of impleme
 
 Otherwise add the following to requirements.txt:
 
-```
+```python
 python-ldap==3.4.2
 django-auth-ldap==4.1.0
 ```
@@ -119,7 +119,7 @@ Read the docs for Django Authentication with LDAP here: https://django-auth-ldap
 In order to pass the variables to the settings.dist.py file via docker, it's a good idea to add these to the docker-compose file.
 
 You can do this by adding the following variables to the environment section for the uwsgi image:
-```
+```yaml
 DD_LDAP_SERVER_URI: "${DD_LDAP_SERVER_URI:-ldap://ldap.example.com}"
 DD_LDAP_BIND_DN: "${DD_LDAP_BIND_DN:-}"
 DD_LDAP_BIND_PASSWORD: "${DD_LDAP_BIND_PASSWORD:-}"

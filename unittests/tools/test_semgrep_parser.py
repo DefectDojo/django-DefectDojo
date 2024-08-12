@@ -129,5 +129,5 @@ class TestSemgrepParser(DojoTestCase):
             finding = findings[0]
             self.assertEqual("High", finding.severity)
             self.assertEqual("requirements3.txt", finding.file_path)
-            self.assertEqual('222', finding.line)
+            self.assertEqual("222", finding.line)
             self.assertEqual(617, finding.cwe)

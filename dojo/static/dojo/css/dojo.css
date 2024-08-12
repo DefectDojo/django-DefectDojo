@@ -1587,24 +1587,25 @@ ul#sortable1 li div.panel-heading:hover, ul#sortable2 li div.panel-heading:hover
     margin-bottom: 10px;
 }
 
-hr.report-page-break {
-    padding: 0;
-    border: none;
-    border-top: thin dashed #333;
-    color: #505050;
+.report-page-break {
+    display: flex;
+    align-items: center;
     text-align: center;
-    font-weight: 500;
-    line-height: 1.1;
-    font-size: 14px;
 }
 
-hr.report-page-break:before {
-    content: "Page Break";
-    display: inline-block;
-    position: relative;
-    top: -10px;
-    padding: 0 0.25em;
-    background: #F5F5F5;
+.report-page-break::before,
+.report-page-break::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px dashed #000;
+}
+
+.report-page-break:not(:empty)::before {
+    margin-right: 0.25em;
+}
+
+.report-page-break:not(:empty)::after {
+    margin-left: 0.25em;
 }
 
 .editor * {

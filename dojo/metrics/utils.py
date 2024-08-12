@@ -36,21 +36,21 @@ from dojo.utils import (
 
 def finding_queries(
     prod_type: QuerySet[Product_Type],
-    request: HttpRequest
+    request: HttpRequest,
 ) -> dict[str, Any]:
     # Get the initial list of findings the user is authorized to see
     findings_query = get_authorized_findings(
         Permissions.Finding_View,
         user=request.user,
     ).select_related(
-        'reporter',
-        'test',
-        'test__engagement__product',
-        'test__engagement__product__prod_type',
+        "reporter",
+        "test",
+        "test__engagement__product",
+        "test__engagement__product__prod_type",
     ).prefetch_related(
-        'risk_acceptance_set',
-        'test__engagement__risk_acceptance',
-        'test__test_type',
+        "risk_acceptance_set",
+        "test__engagement__risk_acceptance",
+        "test__test_type",
     )
 
     filter_string_matching = get_system_setting("filter_string_matching", False)
@@ -65,8 +65,8 @@ def finding_queries(
         messages.add_message(
             request,
             messages.ERROR,
-            _('All objects have been filtered away. Displaying all objects'),
-            extra_tags='alert-danger')
+            _("All objects have been filtered away. Displaying all objects"),
+            extra_tags="alert-danger")
 
     start_date, end_date = get_date_range(findings_qs)
 
@@ -85,7 +85,7 @@ def finding_queries(
         active_findings = active_findings.filter(test__engagement__product__prod_type__in=prod_type)
 
     # Get the severity counts of risk accepted findings
-    accepted_findings_counts = severity_count(accepted_findings, 'aggregate', 'severity')
+    accepted_findings_counts = severity_count(accepted_findings, "aggregate", "severity")
 
     weeks_between, months_between = period_deltas(start_date, end_date)
 
@@ -94,7 +94,7 @@ def finding_queries(
         active_findings,
         accepted_findings,
         start_date,
-        MetricsType.FINDING
+        MetricsType.FINDING,
     )
 
     monthly_counts = query_counts_for_period(MetricsPeriod.MONTH, months_between)
@@ -106,43 +106,43 @@ def finding_queries(
                              engagement__test__finding__duplicate=False,
                              engagement__test__finding__out_of_scope=False,
                              engagement__test__finding__mitigated__isnull=True,
-                             engagement__test__finding__severity__in=('Critical', 'High', 'Medium', 'Low'),
+                             engagement__test__finding__severity__in=("Critical", "High", "Medium", "Low"),
                              prod_type__in=prod_type)
 
     top_ten = severity_count(
-        top_ten, 'annotate', 'engagement__test__finding__severity'
+        top_ten, "annotate", "engagement__test__finding__severity",
     ).order_by(
-        '-critical', '-high', '-medium', '-low'
+        "-critical", "-high", "-medium", "-low",
     )[:10]
 
     return {
-        'all': findings_query,
-        'closed': findings_closed,
-        'accepted': accepted_findings,
-        'accepted_count': accepted_findings_counts,
-        'top_ten': top_ten,
-        'monthly_counts': monthly_counts,
-        'weekly_counts': weekly_counts,
-        'weeks_between': weeks_between,
-        'start_date': start_date,
-        'end_date': end_date,
-        'form': form,
+        "all": findings_query,
+        "closed": findings_closed,
+        "accepted": accepted_findings,
+        "accepted_count": accepted_findings_counts,
+        "top_ten": top_ten,
+        "monthly_counts": monthly_counts,
+        "weekly_counts": weekly_counts,
+        "weeks_between": weeks_between,
+        "start_date": start_date,
+        "end_date": end_date,
+        "form": form,
     }
 
 
 def endpoint_queries(
     prod_type: QuerySet[Product_Type],
-    request: HttpRequest
+    request: HttpRequest,
 ) -> dict[str, Any]:
     endpoints_query = Endpoint_Status.objects.filter(
         mitigated=False,
-        finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
+        finding__severity__in=("Critical", "High", "Medium", "Low", "Info"),
     ).prefetch_related(
-        'finding__test__engagement__product',
-        'finding__test__engagement__product__prod_type',
-        'finding__test__engagement__risk_acceptance',
-        'finding__risk_acceptance_set',
-        'finding__reporter'
+        "finding__test__engagement__product",
+        "finding__test__engagement__product__prod_type",
+        "finding__test__engagement__risk_acceptance",
+        "finding__risk_acceptance_set",
+        "finding__reporter",
     )
 
     endpoints_query = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_query, request.user)
@@ -158,43 +158,43 @@ def endpoint_queries(
         messages.add_message(
             request,
             messages.ERROR,
-            _('All objects have been filtered away. Displaying all objects'),
-            extra_tags='alert-danger')
+            _("All objects have been filtered away. Displaying all objects"),
+            extra_tags="alert-danger")
 
     start_date, end_date = get_date_range(endpoints_qs)
 
     if len(prod_type) > 0:
         endpoints_closed = Endpoint_Status.objects.filter(
             mitigated_time__range=[start_date, end_date],
-            finding__test__engagement__product__prod_type__in=prod_type
+            finding__test__engagement__product__prod_type__in=prod_type,
         ).prefetch_related(
-            'finding__test__engagement__product'
+            "finding__test__engagement__product",
         )
         # capture the accepted findings in period
         accepted_endpoints = Endpoint_Status.objects.filter(
             date__range=[start_date, end_date],
             risk_accepted=True,
-            finding__test__engagement__product__prod_type__in=prod_type
+            finding__test__engagement__product__prod_type__in=prod_type,
         ).prefetch_related(
-            'finding__test__engagement__product'
+            "finding__test__engagement__product",
         )
     else:
         endpoints_closed = Endpoint_Status.objects.filter(
-            mitigated_time__range=[start_date, end_date]
+            mitigated_time__range=[start_date, end_date],
         ).prefetch_related(
-            'finding__test__engagement__product'
+            "finding__test__engagement__product",
         )
         # capture the accepted findings in period
         accepted_endpoints = Endpoint_Status.objects.filter(
             date__range=[start_date, end_date],
-            risk_accepted=True
+            risk_accepted=True,
         ).prefetch_related(
-            'finding__test__engagement__product'
+            "finding__test__engagement__product",
         )
 
     endpoints_closed = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_closed, request.user)
     accepted_endpoints = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints, request.user)
-    accepted_endpoints_counts = severity_count(accepted_endpoints, 'aggregate', 'finding__severity')
+    accepted_endpoints_counts = severity_count(accepted_endpoints, "aggregate", "finding__severity")
 
     weeks_between, months_between = period_deltas(start_date, end_date)
 
@@ -203,7 +203,7 @@ def endpoint_queries(
         endpoints_qs.filter(finding__active=True),
         accepted_endpoints,
         start_date,
-        MetricsType.ENDPOINT
+        MetricsType.ENDPOINT,
     )
 
     monthly_counts = query_counts_for_period(MetricsPeriod.MONTH, months_between)
@@ -214,32 +214,32 @@ def endpoint_queries(
                              engagement__test__finding__status_finding__false_positive=False,
                              engagement__test__finding__status_finding__out_of_scope=False,
                              engagement__test__finding__status_finding__risk_accepted=False,
-                             engagement__test__finding__severity__in=('Critical', 'High', 'Medium', 'Low'),
+                             engagement__test__finding__severity__in=("Critical", "High", "Medium", "Low"),
                              prod_type__in=prod_type)
 
     top_ten = severity_count(
-        top_ten, 'annotate', 'engagement__test__finding__severity'
+        top_ten, "annotate", "engagement__test__finding__severity",
     ).order_by(
-        '-critical', '-high', '-medium', '-low'
+        "-critical", "-high", "-medium", "-low",
     )[:10]
 
     return {
-        'all': endpoints,
-        'closed': endpoints_closed,
-        'accepted': accepted_endpoints,
-        'accepted_count': accepted_endpoints_counts,
-        'top_ten': top_ten,
-        'monthly_counts': monthly_counts,
-        'weekly_counts': weekly_counts,
-        'weeks_between': weeks_between,
-        'start_date': start_date,
-        'end_date': end_date,
-        'form': form,
+        "all": endpoints,
+        "closed": endpoints_closed,
+        "accepted": accepted_endpoints,
+        "accepted_count": accepted_endpoints_counts,
+        "top_ten": top_ten,
+        "monthly_counts": monthly_counts,
+        "weekly_counts": weekly_counts,
+        "weeks_between": weeks_between,
+        "start_date": start_date,
+        "end_date": end_date,
+        "form": form,
     }
 
 
 # For type-hinting methods that take querysets we can perform metrics over
-MetricsQuerySet = TypeVar('MetricsQuerySet', QuerySet[Finding], QuerySet[Endpoint_Status])
+MetricsQuerySet = TypeVar("MetricsQuerySet", QuerySet[Finding], QuerySet[Endpoint_Status])
 
 
 class _MetricsPeriodEntry(NamedTuple):
@@ -255,8 +255,8 @@ class MetricsPeriod(_MetricsPeriodEntry, Enum):
     """
     Enum for the two metrics periods supported: by week and month
     """
-    WEEK = ('weeks', TruncWeek)
-    MONTH = ('months', TruncMonth)
+    WEEK = ("weeks", TruncWeek)
+    MONTH = ("months", TruncMonth)
 
 
 class _MetricsTypeEntry(NamedTuple):
@@ -272,8 +272,8 @@ class MetricsType(_MetricsTypeEntry, Enum):
     """
     Enum for the two metrics types supported: by Findings and by Endpoints (Endpoint_Status)
     """
-    FINDING = ('severity', 'is_mitigated')
-    ENDPOINT = ('finding__severity', 'mitigated')
+    FINDING = ("severity", "is_mitigated")
+    ENDPOINT = ("finding__severity", "mitigated")
 
 
 def query_counts(
@@ -281,7 +281,7 @@ def query_counts(
     active_qs: MetricsQuerySet,
     accepted_qs: MetricsQuerySet,
     start_date: date,
-    metrics_type: MetricsType
+    metrics_type: MetricsType,
 ) -> Callable[[MetricsPeriod, int], dict[str, list[dict]]]:
     """
     Given three QuerySets, a start date, and a MetricsType, returns a method that can be used to generate statistics for
@@ -300,15 +300,15 @@ def query_counts(
             agg_qs = partial(aggregate_counts_by_period, period=period, metrics_type=metrics_type)
             return chart_data(agg_qs(qs, include_closed=include_closed), include_closed=include_closed)
         return {
-            'opened_per_period': _aggregate_data(open_qs, True),
-            'active_per_period': _aggregate_data(active_qs),
-            'accepted_per_period': _aggregate_data(accepted_qs)
+            "opened_per_period": _aggregate_data(open_qs, True),
+            "active_per_period": _aggregate_data(active_qs),
+            "accepted_per_period": _aggregate_data(accepted_qs),
         }
     return _aggregates_for_period
 
 
 def get_date_range(
-    qs: QuerySet
+    qs: QuerySet,
 ) -> tuple[datetime, datetime]:
     """
     Given a queryset of objects, returns a tuple of (earliest date, latest date) from among those objects, based on the
@@ -320,10 +320,10 @@ def get_date_range(
     try:
         tz = timezone.get_current_timezone()
 
-        start_date = qs.earliest('date').date
+        start_date = qs.earliest("date").date
         start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
 
-        end_date = qs.latest('date').date
+        end_date = qs.latest("date").date
         end_date = datetime(end_date.year, end_date.month, end_date.day, tzinfo=tz)
     except:
         start_date = end_date = timezone.now()
@@ -334,7 +334,7 @@ def get_date_range(
 def severity_count(
     queryset: MetricsQuerySet,
     method: str,
-    expression: str
+    expression: str,
 ) -> Union[MetricsQuerySet, dict[str, int]]:
     """
     Aggregates counts by severity for the given queryset.
@@ -344,19 +344,19 @@ def severity_count(
     :param expression: The lookup expression for severity, relative to the queryset model type
     :return: A queryset containing aggregated counts of severities
     """
-    total_expression = expression + '__in'
+    total_expression = expression + "__in"
     return getattr(queryset, method)(
-        total=Count('id', filter=Q(**{total_expression: ('Critical', 'High', 'Medium', 'Low', 'Info')})),
-        critical=Count('id', filter=Q(**{expression: 'Critical'})),
-        high=Count('id', filter=Q(**{expression: 'High'})),
-        medium=Count('id', filter=Q(**{expression: 'Medium'})),
-        low=Count('id', filter=Q(**{expression: 'Low'})),
-        info=Count('id', filter=Q(**{expression: 'Info'}))
+        total=Count("id", filter=Q(**{total_expression: ("Critical", "High", "Medium", "Low", "Info")})),
+        critical=Count("id", filter=Q(**{expression: "Critical"})),
+        high=Count("id", filter=Q(**{expression: "High"})),
+        medium=Count("id", filter=Q(**{expression: "Medium"})),
+        low=Count("id", filter=Q(**{expression: "Low"})),
+        info=Count("id", filter=Q(**{expression: "Info"})),
     )
 
 
 def identify_view(
-    request: HttpRequest
+    request: HttpRequest,
 ) -> str:
     """
     Identifies the requested metrics view.
@@ -365,24 +365,24 @@ def identify_view(
     :return: A string, either 'Endpoint' or 'Finding,' that represents the requested metrics view
     """
     get_data = request.GET
-    view = get_data.get('type', None)
+    view = get_data.get("type", None)
     if view:
         return view
 
-    finding_severity = get_data.get('finding__severity', None)
-    false_positive = get_data.get('false_positive', None)
+    finding_severity = get_data.get("finding__severity", None)
+    false_positive = get_data.get("false_positive", None)
 
-    referer = request.META.get('HTTP_REFERER', None)
-    endpoint_in_referer = referer and referer.find('type=Endpoint') > -1
+    referer = request.META.get("HTTP_REFERER", None)
+    endpoint_in_referer = referer and referer.find("type=Endpoint") > -1
 
     if finding_severity or false_positive or endpoint_in_referer:
-        return 'Endpoint'
+        return "Endpoint"
 
-    return 'Finding'
+    return "Finding"
 
 
 def js_epoch(
-    d: Union[date, datetime]
+    d: Union[date, datetime],
 ) -> int:
     """
     Converts a date/datetime object to a JavaScript epoch time (for use in FE charts)
@@ -400,7 +400,7 @@ def get_charting_data(
     start_date: date,
     period: MetricsPeriod,
     period_count: int,
-    include_closed: bool
+    include_closed: bool,
 ) -> list[dict]:
     """
     Given a queryset of severities data for charting, adds epoch timestamp information and fills in missing data points
@@ -427,20 +427,20 @@ def get_charting_data(
 
     # Arrange all our data by epoch date for easy lookup in the loop below.
     # At the same time, add the epoch date to each entry as the charts will rely on that.
-    by_date = {e: {'epoch': e, **q} for q in qs if (e := js_epoch(q['grouped_date'])) is not None}
+    by_date = {e: {"epoch": e, **q} for q in qs if (e := js_epoch(q["grouped_date"])) is not None}
 
     # Iterate over our period of time, adding zero-element data entries for dates not represented
     for x in range(-1, period_count):
         cur_date = start_date + relativedelta(**{period.datetime_name: x})
         if (e := js_epoch(cur_date)) not in by_date:
             by_date[e] = {
-                'epoch': e, 'grouped_date': cur_date.date(),
-                'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0, 'total': 0}
+                "epoch": e, "grouped_date": cur_date.date(),
+                "critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0, "total": 0}
             if include_closed:
-                by_date[e]['closed'] = 0
+                by_date[e]["closed"] = 0
 
     # Return, sorting by date
-    return sorted(by_date.values(), key=lambda m: m['grouped_date'])
+    return sorted(by_date.values(), key=lambda m: m["grouped_date"])
 
 
 def period_deltas(start_date, end_date):
@@ -479,29 +479,29 @@ def aggregate_counts_by_period(
     :return: A queryset with aggregate severity counts grouped by period
     """
 
-    desired_values = ('grouped_date', 'critical', 'high', 'medium', 'low', 'info', 'total',)
+    desired_values = ("grouped_date", "critical", "high", "medium", "low", "info", "total")
 
     severities_by_period = severity_count(
         # Group by desired period
-        qs.annotate(grouped_date=period.db_method('date')).values('grouped_date'),
-        'annotate',
-        metrics_type.severity_lookup
+        qs.annotate(grouped_date=period.db_method("date")).values("grouped_date"),
+        "annotate",
+        metrics_type.severity_lookup,
     )
     if include_closed:
         severities_by_period = severities_by_period.annotate(
             # Include 'closed' counts
             closed=Sum(Case(
                 When(Q(**{metrics_type.closed_lookup: True}), then=Value(1)),
-                output_field=IntegerField(), default=0)
+                output_field=IntegerField(), default=0),
             ),
         )
-        desired_values += ('closed',)
+        desired_values += ("closed",)
 
     return severities_by_period.values(*desired_values)
 
 
 def findings_by_product(
-    findings: QuerySet[Finding]
+    findings: QuerySet[Finding],
 ) -> QuerySet[Finding]:
     """
     Groups the given Findings queryset around related product (name/ID)
@@ -509,12 +509,12 @@ def findings_by_product(
     :param findings: A queryset of Findings
     :return: A queryset of Findings grouped by product (name/ID)
     """
-    return findings.values(product_name=F('test__engagement__product__name'),
-                           product_id=F('test__engagement__product__id'))
+    return findings.values(product_name=F("test__engagement__product__name"),
+                           product_id=F("test__engagement__product__id"))
 
 
 def get_in_period_details(
-    findings: QuerySet[Finding]
+    findings: QuerySet[Finding],
 ) -> tuple[QuerySet[Finding], QuerySet[Finding], dict[str, int]]:
     """
     Gathers details for the given queryset, corresponding to metrics information for 'in period' Findings
@@ -523,20 +523,20 @@ def get_in_period_details(
     :return: A tuple of (a queryset of severity aggregates, a queryset of severity aggregates by product, a dict of
         Findings by age)
     """
-    in_period_counts = severity_count(findings, 'aggregate', 'severity')
+    in_period_counts = severity_count(findings, "aggregate", "severity")
     in_period_details = severity_count(
-        findings_by_product(findings), 'annotate', 'severity'
-    ).order_by('product_name')
+        findings_by_product(findings), "annotate", "severity",
+    ).order_by("product_name")
 
     # Approach to age determination is db-engine dependent
-    if 'postgresql' in connection.settings_dict['ENGINE']:
-        age_detail = findings.annotate(age=ExtractDay(Coalesce('mitigated', Now()) - F('date')))
-    elif 'mysql' in connection.settings_dict['ENGINE']:
+    if "postgresql" in connection.settings_dict["ENGINE"]:
+        age_detail = findings.annotate(age=ExtractDay(Coalesce("mitigated", Now()) - F("date")))
+    elif "mysql" in connection.settings_dict["ENGINE"]:
         # MySQL doesn't support durations natively and using an expression with subtraction yields unwanted results,
         # so datediff() it is.
         finding_table = Finding.objects.model._meta.db_table
         age_detail = findings.annotate(
-            age=RawSQL(f'DATEDIFF(COALESCE({finding_table}.mitigated, CURRENT_TIMESTAMP), {finding_table}.date)', [])
+            age=RawSQL(f"DATEDIFF(COALESCE({finding_table}.mitigated, CURRENT_TIMESTAMP), {finding_table}.date)", []),
         )
     else:
         raise ValueError
@@ -552,7 +552,7 @@ def get_in_period_details(
 
 
 def get_accepted_in_period_details(
-    findings: QuerySet[Finding]
+    findings: QuerySet[Finding],
 ) -> QuerySet[Finding]:
     """
     Gathers details for the given queryset, corresponding to metrics information for 'accepted' Findings
@@ -561,12 +561,12 @@ def get_accepted_in_period_details(
     :return: A queryset of severity aggregates for Findings grouped by product (name/ID)
     """
     return severity_count(
-        findings_by_product(findings), 'annotate', 'severity'
-    ).order_by('product_name')
+        findings_by_product(findings), "annotate", "severity",
+    ).order_by("product_name")
 
 
 def get_closed_in_period_details(
-    findings: QuerySet[Finding]
+    findings: QuerySet[Finding],
 ) -> tuple[QuerySet[Finding], QuerySet[Finding]]:
     """
     Gathers details for the given queryset, corresponding to metrics information for 'closed' Findings
@@ -576,15 +576,15 @@ def get_closed_in_period_details(
         product)
     """
     return (
-        severity_count(findings, 'aggregate', 'severity'),
+        severity_count(findings, "aggregate", "severity"),
         severity_count(
-            findings_by_product(findings), 'annotate', 'severity'
-        ).order_by('product_name')
+            findings_by_product(findings), "annotate", "severity",
+        ).order_by("product_name"),
     )
 
 
 def findings_queryset(
-    qs: MetricsQuerySet
+    qs: MetricsQuerySet,
 ) -> QuerySet[Finding]:
     """
     Given a MetricsQuerySet, returns a QuerySet representing all its findings.

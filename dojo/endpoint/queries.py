@@ -21,7 +21,7 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
         return Endpoint.objects.none()
 
     if queryset is None:
-        endpoints = Endpoint.objects.all()
+        endpoints = Endpoint.objects.all().order_by("id")
     else:
         endpoints = queryset
 
@@ -33,19 +33,19 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('product__prod_type_id'),
+        product_type=OuterRef("product__prod_type_id"),
         user=user,
         role__in=roles)
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('product_id'),
+        product=OuterRef("product_id"),
         user=user,
         role__in=roles)
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('product__prod_type_id'),
+        product_type=OuterRef("product__prod_type_id"),
         group__users=user,
         role__in=roles)
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('product_id'),
+        product=OuterRef("product_id"),
         group__users=user,
         role__in=roles)
     endpoints = endpoints.annotate(
@@ -69,7 +69,7 @@ def get_authorized_endpoint_status(permission, queryset=None, user=None):
         return Endpoint_Status.objects.none()
 
     if queryset is None:
-        endpoint_status = Endpoint_Status.objects.all()
+        endpoint_status = Endpoint_Status.objects.all().order_by("id")
     else:
         endpoint_status = queryset
 
@@ -81,19 +81,19 @@ def get_authorized_endpoint_status(permission, queryset=None, user=None):
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('endpoint__product__prod_type_id'),
+        product_type=OuterRef("endpoint__product__prod_type_id"),
         user=user,
         role__in=roles)
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('endpoint__product_id'),
+        product=OuterRef("endpoint__product_id"),
         user=user,
         role__in=roles)
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('endpoint__product__prod_type_id'),
+        product_type=OuterRef("endpoint__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('endpoint__product_id'),
+        product=OuterRef("endpoint__product_id"),
         group__users=user,
         role__in=roles)
     endpoint_status = endpoint_status.annotate(

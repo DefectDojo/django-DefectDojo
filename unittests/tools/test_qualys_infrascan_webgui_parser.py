@@ -11,7 +11,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_0.xml"
+            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_0.xml",
         ) as testfile:
             parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
@@ -21,7 +21,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
     # + also verify data with one test
     def test_parse_file_with_one_vuln_has_one_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_1.xml"
+            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_1.xml",
         ) as testfile:
             parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
@@ -38,7 +38,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
     # Sample with Multiple Test
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         with open(
-            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_multiple.xml"
+            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_multiple.xml",
         ) as testfile:
             parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
@@ -61,7 +61,7 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
     # Sample with Multiple Test
     def test_parse_file_with_finding_no_dns(self):
         with open(
-            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_3.xml"
+            get_unit_tests_path() + "/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_3.xml",
         ) as testfile:
             parser = QualysInfrascanWebguiParser()
             findings = parser.get_findings(testfile, Test())
@@ -76,4 +76,4 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
             self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=pytz.utc), finding.date)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             unsaved_endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual('10.1.10.1', unsaved_endpoint.host)
+            self.assertEqual("10.1.10.1", unsaved_endpoint.host)

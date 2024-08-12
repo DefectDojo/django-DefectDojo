@@ -42,10 +42,10 @@ class SystemNotificationsView(View):
 
     def get_initial_context(self, request: HttpRequest, notifications: Notifications, scope: str):
         return {
-            'form': self.get_form(request, notifications),
-            'scope': scope,
-            'enabled_notifications': self.get_enabled_notifications(),
-            'admin': request.user.is_superuser
+            "form": self.get_form(request, notifications),
+            "scope": scope,
+            "enabled_notifications": self.get_enabled_notifications(),
+            "admin": request.user.is_superuser,
         }
 
     def set_breadcrumbs(self, request: HttpRequest):
@@ -58,8 +58,8 @@ class SystemNotificationsView(View):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Settings saved.'),
-                extra_tags='alert-success')
+                _("Settings saved."),
+                extra_tags="alert-success")
             return request, True
         return request, False
 

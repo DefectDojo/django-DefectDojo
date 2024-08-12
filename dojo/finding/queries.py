@@ -16,19 +16,19 @@ from dojo.models import (
 def get_authorized_groups(permission, user=None):
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('test__engagement__product__prod_type_id'),
+        product_type=OuterRef("test__engagement__product__prod_type_id"),
         user=user,
         role__in=roles)
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('test__engagement__product_id'),
+        product=OuterRef("test__engagement__product_id"),
         user=user,
         role__in=roles)
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('test__engagement__product__prod_type_id'),
+        product_type=OuterRef("test__engagement__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('test__engagement__product_id'),
+        product=OuterRef("test__engagement__product_id"),
         group__users=user,
         role__in=roles)
 
@@ -36,7 +36,7 @@ def get_authorized_groups(permission, user=None):
         authorized_product_type_roles,
         authorized_product_roles,
         authorized_product_type_groups,
-        authorized_product_groups
+        authorized_product_groups,
     )
 
 
@@ -46,7 +46,7 @@ def get_authorized_findings(permission, queryset=None, user=None):
     if user is None:
         return Finding.objects.none()
     if queryset is None:
-        findings = Finding.objects.all()
+        findings = Finding.objects.all().order_by("id")
     else:
         findings = queryset
 
@@ -60,7 +60,7 @@ def get_authorized_findings(permission, queryset=None, user=None):
         authorized_product_type_roles,
         authorized_product_roles,
         authorized_product_type_groups,
-        authorized_product_groups
+        authorized_product_groups,
     ) = get_authorized_groups(permission, user=user)
 
     findings = findings.annotate(
@@ -84,23 +84,23 @@ def get_authorized_stub_findings(permission):
         return Stub_Finding.objects.none()
 
     if user.is_superuser:
-        return Stub_Finding.objects.all()
+        return Stub_Finding.objects.all().order_by("id")
 
     if user_has_global_permission(user, permission):
-        return Stub_Finding.objects.all()
+        return Stub_Finding.objects.all().order_by("id")
 
     (
         authorized_product_type_roles,
         authorized_product_roles,
         authorized_product_type_groups,
-        authorized_product_groups
+        authorized_product_groups,
     ) = get_authorized_groups(permission, user=user)
 
     findings = Stub_Finding.objects.annotate(
         test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
         test__engagement__product__member=Exists(authorized_product_roles),
         test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        test__engagement__product__authorized_group=Exists(authorized_product_groups))
+        test__engagement__product__authorized_group=Exists(authorized_product_groups)).order_by("id")
     findings = findings.filter(
         Q(test__engagement__product__prod_type__member=True)
         | Q(test__engagement__product__member=True)
@@ -131,19 +131,19 @@ def get_authorized_vulnerability_ids(permission, queryset=None, user=None):
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('finding__test__engagement__product__prod_type_id'),
+        product_type=OuterRef("finding__test__engagement__product__prod_type_id"),
         user=user,
         role__in=roles)
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('finding__test__engagement__product_id'),
+        product=OuterRef("finding__test__engagement__product_id"),
         user=user,
         role__in=roles)
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('finding__test__engagement__product__prod_type_id'),
+        product_type=OuterRef("finding__test__engagement__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('finding__test__engagement__product_id'),
+        product=OuterRef("finding__test__engagement__product_id"),
         group__users=user,
         role__in=roles)
     vulnerability_ids = vulnerability_ids.annotate(

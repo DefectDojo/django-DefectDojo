@@ -58,7 +58,7 @@ class ImmuniwebParser:
             url = vulnerability.find("URL").text
 
             dupe_key = hashlib.md5(
-                str(description + title + severity).encode("utf-8")
+                str(description + title + severity).encode("utf-8"),
             ).hexdigest()
 
             # check if finding is a duplicate
@@ -78,7 +78,7 @@ class ImmuniwebParser:
                     mitigation=mitigation,
                     impact=impact,
                     references=reference,
-                    dynamic_finding=True
+                    dynamic_finding=True,
                 )
                 if vulnerability_id:
                     finding.unsaved_vulnerability_ids = [vulnerability_id]
