@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone as tz
 from django.utils.html import escape
+from django.views import View
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
@@ -36,6 +37,7 @@ from dojo.forms import (
     EditChoiceQuestionForm,
     EditQuestionnaireQuestionsForm,
     EditTextQuestionForm,
+    ExistingEngagementForm,
 )
 from dojo.models import (
     Answer,
@@ -866,3 +868,57 @@ def engagement_empty_survey(request, esid):
         top_level=False,
         request=request)
     return render(request, "defectDojo-engagement-survey/add_engagement.html", {"form": form})
+
+
+class ExistingEngagementEmptySurveyView(View):
+    def get(self, request, esid):
+        survey = get_object_or_404(Answered_Survey, id=esid)
+        if survey.engagement:
+            # If the questionnaire is already linked to a survey, ensure the user has permission to edit it
+            user_has_permission_or_403(request.user, survey.engagement, Permissions.Engagement_Edit)
+            # Prepopulate the form with the current engagement
+            form = self.get_form_class()({"engagement": survey.engagement})
+        else:
+            form = self.get_form_class()()
+        self.add_breadcrumb(request)
+        return render(request, self.get_template(), {"form": form})
+
+    def post(self, request, esid):
+        survey = get_object_or_404(Answered_Survey, id=esid)
+        form = self.get_form_class()(request.POST)
+        if form.is_valid():
+            # Validate perms on the target engagement
+            engagement = form.cleaned_data.get("engagement")
+            user_has_permission_or_403(request.user, engagement, Permissions.Engagement_Edit)
+            # If we're moving a questionnaire, make sure the user can edit the 'source' engagement too
+            if survey.engagement:
+                user_has_permission_or_403(request.user, survey.engagement, Permissions.Engagement_Edit)
+            # Link and save
+            survey.engagement = engagement
+            survey.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Questionnaire successfully linked to Engagement.",
+                extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("view_engagement", args=(engagement.id,)))
+
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Questionnaire could not be linked to the selected Engagement.",
+            extra_tags="alert-danger")
+        self.add_breadcrumb(request)
+        return render(request, self.get_template(), {"form": form})
+
+    def add_breadcrumb(self, request):
+        add_breadcrumb(
+            title="Link Questionnaire to existing Engagement",
+            top_level=False,
+            request=request)
+
+    def get_form_class(self):
+        return ExistingEngagementForm
+
+    def get_template(self):
+        return "defectDojo-engagement-survey/existing_engagement.html"

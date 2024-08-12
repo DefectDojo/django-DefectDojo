@@ -40,6 +40,13 @@
                                         <i class="fa-solid fa-plus"></i> Assign User</a>
                                 </li>
                                 {% endif %}
+                                {% if survey.engagement|has_object_permission:"Engagement_Edit" %}
+                                <li role="presentation">
+                                    <a class="" href="/empty_questionnaire/{{ survey.id }}/existing_engagement">
+                                        <i class="fa-solid fa-link"></i> Link to a Different Engagement
+                                    </a>
+                                </li>
+                                {% endif %}
                                 <li>
                                     <a class="" data-toggle="modal"
                                     data-target="#shareQuestionnaireModal"
