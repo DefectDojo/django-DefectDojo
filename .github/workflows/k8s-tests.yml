@@ -75,6 +75,7 @@ jobs:
         run: |-
              helm install \
                --timeout 800s \
+               --wait \
                defectdojo \
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
