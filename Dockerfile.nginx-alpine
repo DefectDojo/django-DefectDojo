@@ -5,8 +5,8 @@
 # Dockerfile.django-alpine to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.11.9-alpine3.20@sha256:df44c0c0761ddbd6388f4549cab42d24d64d257c2a960ad5b276bb7dab9639c7 as base
-FROM base as build
+FROM python:3.11.9-alpine3.20@sha256:df44c0c0761ddbd6388f4549cab42d24d64d257c2a960ad5b276bb7dab9639c7 AS base
+FROM base AS build
 WORKDIR /app
 RUN \
   apk update && \
@@ -14,15 +14,15 @@ RUN \
     gcc \
     build-base \
     bind-tools \
-    mysql-client \
-    mariadb-dev \
-    postgresql14-client \
+    postgresql16-client \
     xmlsec \
     git \
     util-linux \
     curl-dev \
     openssl \
     libffi-dev \
+    python3-dev \
+    libpq-dev \
     && \
     rm -rf /var/cache/apk/* && \
   true
@@ -34,7 +34,7 @@ RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 FROM build AS collectstatic
 
 # Node installation from https://github.com/nodejs/docker-node
-ENV NODE_VERSION 20.11.0
+ENV NODE_VERSION=20.11.0
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
@@ -103,7 +103,7 @@ RUN addgroup -g 1000 node \
   && node --version \
   && npm --version
 
-ENV YARN_VERSION 1.22.19
+ENV YARN_VERSION=1.22.19
 
 RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
   && for key in \
@@ -140,7 +140,7 @@ COPY manage.py ./
 COPY dojo/ ./dojo/
 RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
-FROM nginx:1.27.0-alpine@sha256:a45ee5d042aaa9e81e013f97ae40c3dda26fbe98f22b6251acdf28e579560d55
+FROM nginx:1.27.0-alpine@sha256:208b70eefac13ee9be00e486f79c695b15cef861c680527171a27d253d834be9
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/

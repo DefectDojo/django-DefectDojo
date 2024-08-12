@@ -44,9 +44,9 @@ jobs:
       
       - name: Update version numbers in key files
         run: |
-          sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number_dev }}'/" dojo/__init__.py
-          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number_dev }}\"/" helm/defectdojo/Chart.yaml
-          sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number_dev }}\"/" components/package.json
+          sed -ri 's/__version__ = ".*"/__version__ = "${{ github.event.inputs.release_number_dev }}"/' dojo/__init__.py
+          sed -ri 's/"version": ".*"/"version": "${{ github.event.inputs.release_number_dev }}"/' components/package.json
+          sed -ri 's/appVersion: ".*"/appVersion: "${{ github.event.inputs.release_number_dev }}"/' helm/defectdojo/Chart.yaml
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
       

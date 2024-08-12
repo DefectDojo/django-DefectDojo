@@ -1,0 +1,393 @@
+{
+    "id": "8001ea0c-7909-431f-b49b-ea73916cc7ba",
+    "projects": null,
+    "createdAt": "2024-07-22T05:45:06.845675076Z",
+    "startedAt": "0001-01-01T00:00:00Z",
+    "createdBy": {
+      "serviceAccount": {
+        "id": "12312312312312312"
+      }
+    },
+    "status": {
+      "state": "SUCCESS",
+      "verdict": "WARN_BY_POLICY"
+    },
+    "policies": [
+      {
+        "id": "013bb6be-50b3-408e-8fbc-7a316756affc",
+        "name": "Default sensitive data policy",
+        "description": "Default built-in policy for sensitive data scanning",
+        "type": "SENSITIVE_DATA",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "AUDIT",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamssensitivedata",
+          "dataFindingSeverityThreshold": "",
+          "countThreshold": 0
+        }
+      },
+      {
+        "id": "6b4ccd22-b76a-45d1-98cf-30165587d718",
+        "name": "Default vulnerabilities policy",
+        "description": "Default built-in policy",
+        "type": "VULNERABILITIES",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "BLOCK",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamsvulnerabilities",
+          "severity": "CRITICAL",
+          "packageCountThreshold": 1,
+          "ignoreUnfixed": true,
+          "packageAllowList": [],
+          "detectionMethods": null,
+          "fixGracePeriodHours": 0,
+          "publishGracePeriodHours": 0
+        }
+      },
+      {
+        "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+        "name": "Default secrets policy",
+        "description": "Default built-in policy for secret scanning",
+        "type": "SECRETS",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "AUDIT",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamssecrets",
+          "countThreshold": 1,
+          "pathAllowList": []
+        }
+      }
+    ],
+    "extraInfo": null,
+    "tags": null,
+    "outdatedPolicies": [],
+    "taggedResource": null,
+    "scanOriginResource": {
+      "__typename": "CICDScanOriginDirectory",
+      "name": "/Users/osama/Documents/testing"
+    },
+    "result": {
+      "__typename": "CICDDiskScanResult",
+      "osPackages": null,
+      "libraries": [
+        {
+          "name": "golang.org/x/net",
+          "version": "0.14.0",
+          "path": "/grpc/proto/go.mod",
+          "vulnerabilities": [
+            {
+              "name": "CVE-2023-44487",
+              "severity": "MEDIUM",
+              "fixedVersion": "0.17.0",
+              "source": "https://github.com/advisories/GHSA-qppj-fm5r-hxr3",
+              "description": null,
+              "score": 7.5,
+              "exploitabilityScore": 3.9,
+              "cvssV3Metrics": null,
+              "cvssV2Metrics": null,
+              "hasExploit": true,
+              "hasCisaKevExploit": true,
+              "cisaKevReleaseDate": null,
+              "cisaKevDueDate": null,
+              "epssProbability": null,
+              "epssPercentile": null,
+              "epssSeverity": null,
+              "weightedSeverity": null,
+              "publishDate": null,
+              "fixPublishDate": null,
+              "gracePeriodEnd": null,
+              "gracePeriodRemainingHours": null,
+              "failedPolicyMatches": null,
+              "finding": null
+            },
+            {
+              "name": "CVE-2023-45288",
+              "severity": "MEDIUM",
+              "fixedVersion": "0.23.0",
+              "source": "https://github.com/advisories/GHSA-4v7x-pqxf-cx7m",
+              "description": null,
+              "score": null,
+              "exploitabilityScore": null,
+              "cvssV3Metrics": null,
+              "cvssV2Metrics": null,
+              "hasExploit": false,
+              "hasCisaKevExploit": false,
+              "cisaKevReleaseDate": null,
+              "cisaKevDueDate": null,
+              "epssProbability": null,
+              "epssPercentile": null,
+              "epssSeverity": null,
+              "weightedSeverity": null,
+              "publishDate": null,
+              "fixPublishDate": null,
+              "gracePeriodEnd": null,
+              "gracePeriodRemainingHours": null,
+              "failedPolicyMatches": null,
+              "finding": null
+            },
+            {
+              "name": "CVE-2023-39325",
+              "severity": "HIGH",
+              "fixedVersion": "0.17.0",
+              "source": "https://github.com/advisories/GHSA-4374-p667-p6c8",
+              "description": null,
+              "score": 7.5,
+              "exploitabilityScore": 3.9,
+              "cvssV3Metrics": null,
+              "cvssV2Metrics": null,
+              "hasExploit": false,
+              "hasCisaKevExploit": false,
+              "cisaKevReleaseDate": null,
+              "cisaKevDueDate": null,
+              "epssProbability": null,
+              "epssPercentile": null,
+              "epssSeverity": null,
+              "weightedSeverity": null,
+              "publishDate": null,
+              "fixPublishDate": null,
+              "gracePeriodEnd": null,
+              "gracePeriodRemainingHours": null,
+              "failedPolicyMatches": null,
+              "finding": null
+            }
+          ],
+          "detectionMethod": "LIBRARY",
+          "layerMetadata": null,
+          "failedPolicyMatches": []
+        },
+        {
+          "name": "google.golang.org/grpc",
+          "version": "1.48.0",
+          "path": "/grpc/proto/go.mod",
+          "vulnerabilities": [
+            {
+              "name": "CVE-2023-44487",
+              "severity": "MEDIUM",
+              "fixedVersion": "1.56.3",
+              "source": "https://github.com/advisories/GHSA-qppj-fm5r-hxr3",
+              "description": null,
+              "score": 7.5,
+              "exploitabilityScore": 3.9,
+              "cvssV3Metrics": null,
+              "cvssV2Metrics": null,
+              "hasExploit": true,
+              "hasCisaKevExploit": true,
+              "cisaKevReleaseDate": null,
+              "cisaKevDueDate": null,
+              "epssProbability": null,
+              "epssPercentile": null,
+              "epssSeverity": null,
+              "weightedSeverity": null,
+              "publishDate": null,
+              "fixPublishDate": null,
+              "gracePeriodEnd": null,
+              "gracePeriodRemainingHours": null,
+              "failedPolicyMatches": null,
+              "finding": null
+            },
+            {
+              "name": "GHSA-m425-mq94-257g",
+              "severity": "HIGH",
+              "fixedVersion": "1.56.3",
+              "source": "https://github.com/advisories/GHSA-m425-mq94-257g",
+              "description": null,
+              "score": 7.5,
+              "exploitabilityScore": null,
+              "cvssV3Metrics": null,
+              "cvssV2Metrics": null,
+              "hasExploit": false,
+              "hasCisaKevExploit": false,
+              "cisaKevReleaseDate": null,
+              "cisaKevDueDate": null,
+              "epssProbability": null,
+              "epssPercentile": null,
+              "epssSeverity": null,
+              "weightedSeverity": null,
+              "publishDate": null,
+              "fixPublishDate": null,
+              "gracePeriodEnd": null,
+              "gracePeriodRemainingHours": null,
+              "failedPolicyMatches": null,
+              "finding": null
+            }
+          ],
+          "detectionMethod": "LIBRARY",
+          "layerMetadata": null,
+          "failedPolicyMatches": []
+        },
+        {
+          "name": "google.golang.org/protobuf",
+          "version": "1.28.1",
+          "path": "/grpc/proto/go.mod",
+          "vulnerabilities": [
+            {
+              "name": "CVE-2024-24786",
+              "severity": "MEDIUM",
+              "fixedVersion": "1.33.0",
+              "source": "https://github.com/advisories/GHSA-8r3f-844c-mc37",
+              "description": null,
+              "score": null,
+              "exploitabilityScore": null,
+              "cvssV3Metrics": null,
+              "cvssV2Metrics": null,
+              "hasExploit": false,
+              "hasCisaKevExploit": false,
+              "cisaKevReleaseDate": null,
+              "cisaKevDueDate": null,
+              "epssProbability": null,
+              "epssPercentile": null,
+              "epssSeverity": null,
+              "weightedSeverity": null,
+              "publishDate": null,
+              "fixPublishDate": null,
+              "gracePeriodEnd": null,
+              "gracePeriodRemainingHours": null,
+              "failedPolicyMatches": null,
+              "finding": null
+            }
+          ],
+          "detectionMethod": "LIBRARY",
+          "layerMetadata": null,
+          "failedPolicyMatches": []
+        }
+      ],
+      "applications": null,
+      "cpes": null,
+      "secrets": [
+        {
+          "id": null,
+          "externalId": null,
+          "description": "Password in URL (postgresql://postgres:---REDACTED---@localhost:5432/postgres?)",
+          "path": "/testing.go",
+          "lineNumber": 35,
+          "offset": 521,
+          "type": "PASSWORD",
+          "contains": [
+            {
+              "name": "Password",
+              "type": "PASSWORD"
+            }
+          ],
+          "snippet": null,
+          "failedPolicyMatches": [
+            {
+              "policy": {
+                "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+                "name": "Default secrets policy",
+                "description": "Default built-in policy for secret scanning",
+                "type": "SECRETS",
+                "builtin": true,
+                "projects": null,
+                "policyLifecycleEnforcements": [
+                  {
+                    "enforcementMethod": "AUDIT",
+                    "deploymentLifecycle": "CLI",
+                    "enforcementConfig": null
+                  }
+                ],
+                "ignoreRules": null,
+                "lifecycleTargets": null,
+                "Default": false,
+                "params": {
+                  "__typename": "cicdscanpolicyparamssecrets",
+                  "countThreshold": 1,
+                  "pathAllowList": []
+                }
+              }
+            }
+          ],
+          "details": {
+            "__typename": "DiskScanSecretDetailsPassword",
+            "length": 8,
+            "isComplex": false
+          }
+        }
+      ],
+      "dataFindings": null,
+      "vulnerableSBOMArtifactsByNameVersion": null,
+      "hostConfiguration": null,
+      "failedPolicyMatches": [
+        {
+          "policy": {
+            "id": "40b3e31c-9b23-47cd-8b83-eb062d04250e",
+            "name": "Default secrets policy",
+            "description": "Default built-in policy for secret scanning",
+            "type": "SECRETS",
+            "builtin": true,
+            "projects": null,
+            "policyLifecycleEnforcements": [
+              {
+                "enforcementMethod": "AUDIT",
+                "deploymentLifecycle": "CLI",
+                "enforcementConfig": null
+              }
+            ],
+            "ignoreRules": null,
+            "lifecycleTargets": null,
+            "Default": false,
+            "params": {
+              "__typename": "cicdscanpolicyparamssecrets",
+              "countThreshold": 1,
+              "pathAllowList": []
+            }
+          }
+        }
+      ],
+      "analytics": {
+        "vulnerabilities": {
+          "infoCount": 0,
+          "lowCount": 0,
+          "mediumCount": 4,
+          "highCount": 2,
+          "criticalCount": 0,
+          "unfixedCount": 0,
+          "totalCount": 0
+        },
+        "secrets": {
+          "privateKeyCount": 0,
+          "publicKeyCount": 0,
+          "passwordCount": 1,
+          "certificateCount": 0,
+          "cloudKeyCount": 0,
+          "sshAuthorizedKeyCount": 0,
+          "dbConnectionStringCount": 0,
+          "gitCredentialCount": 0,
+          "presignedURLCount": 0,
+          "saasAPIKeyCount": 0,
+          "totalCount": 1
+        },
+        "hostConfiguration": null,
+        "filesScannedCount": 34,
+        "directoriesScannedCount": 18
+      }
+    },
+    "reportUrl": "https://app.wiz.io/findings/cicd-scans"
+  }
+  

@@ -6,12 +6,12 @@ from dojo.models import Endpoint_Status
 register = template.Library()
 
 
-@register.filter(name='has_endpoints')
+@register.filter(name="has_endpoints")
 def has_endpoints(finding):
     return True if finding.endpoints.all() else False
 
 
-@register.filter(name='get_vulnerable_endpoints')
+@register.filter(name="get_vulnerable_endpoints")
 def get_vulnerable_endpoints(finding):
     return finding.endpoints.filter(
         status_endpoint__mitigated=False,
@@ -20,7 +20,7 @@ def get_vulnerable_endpoints(finding):
         status_endpoint__risk_accepted=False)
 
 
-@register.filter(name='get_mitigated_endpoints')
+@register.filter(name="get_mitigated_endpoints")
 def get_mitigated_endpoints(finding):
     return finding.endpoints.filter(
         Q(status_endpoint__mitigated=True)
@@ -42,7 +42,7 @@ def endpoint_display_status(endpoint, finding):
     if status.mitigated:
         statuses.append("Mitigated")
     if statuses:
-        return ', '.join(statuses)
+        return ", ".join(statuses)
     else:
         return "Active"
 

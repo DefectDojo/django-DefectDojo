@@ -169,7 +169,7 @@ class TruffleHogParser:
             #         severity = "Medium"
 
             dupe_key = hashlib.md5(
-                (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8")
+                (file + detector_name + str(line_number) + commit + (raw + rawV2)).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -210,7 +210,7 @@ class TruffleHogParser:
                 for key, value in obj.items():
                     if isinstance(value, dict):
                         return_string += self.walk_dict(
-                            value, tab_count=(tab_count + 1)
+                            value, tab_count=(tab_count + 1),
                         )
                         continue
                     else:

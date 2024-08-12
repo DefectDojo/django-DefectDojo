@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.mobsfscan.parser import MobsfscanParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestMobsfscanParser(DojoTestCase):

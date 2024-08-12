@@ -272,51 +272,72 @@
                     .selectpicker('render');
             }
 
+            // Retrieves (report) data at the given url and inserts it as HTMl into $targetEl, and configures filters
+            // on the returned data.
+            function retrieveReportData(url, $targetEl) {
+                $.get(url).done(function (data) {
+                    filterFieldInit(
+                        $targetEl.html(data)
+                    );
+                    setUpFindingFilters();
+                });
+            }
+
+            // --------
+            // Findings
+            // --------
+
+            // "Apply Filters"
             $(document).on('submit', 'form.finding-list', function (event) {
-                var form = this;
-                $.get("{% url 'report_findings' %}?" + $(this).serialize()).done(function (data) {
-                    filterFieldInit(
-                        $(form).closest('li.finding-list').html(data)
-                    );
-                    setUpFindingFilters();
-                });
-
+                const $form = $(this);
                 event.preventDefault();
+                retrieveReportData(
+                    "{% url 'report_findings' %}?" + $form.serialize(),
+                    $form.closest('li.finding-list')
+                );
             });
 
-            $(document).on('click', 'form.finding-list a.clear.centered, div.finding-pagination a', function (event) {
-                $.get("{% url 'report_findings' %}").done(function (data) {
-                    filterFieldInit(
-                        $('div.in-use-widgets li.finding-list').html(data)
-                    );
-                    setUpFindingFilters();
-                });
-
+            // "Clear filters"
+            $(document).on('click', 'form.finding-list a.clear.centered', function (event) {
+                const $a = $(this);
                 event.preventDefault();
+                retrieveReportData("{% url 'report_findings' %}", $a.closest('li.finding-list'));
             });
 
+            // Sort/order columns and Pagination
+            $(document).on('click', 'li.finding-list th a, div.finding-pagination a', function (event) {
+                const $a = $(this);
+                event.preventDefault();
+                retrieveReportData("{% url 'report_findings' %}" + $a.attr('href'), $a.closest('li.finding-list'));
+            });
+
+            /// --------
+            // Endpoints
+            // ---------
+
+            // "Apply filters"
             $(document).on('submit', 'form.endpoint-list', function (event) {
-                var form = this;
-                $.get("{% url 'report_endpoints' %}?" + $(this).serialize()).done(function (data) {
-                    filterFieldInit(
-                        $(form).closest('li.endpoint-list').html(data)
-                    );
-                    setUpFindingFilters();
-                });
-
+                const $form = $(this);
                 event.preventDefault();
+                retrieveReportData(
+                    "{% url 'report_endpoints' %}?" + $form.serialize(),
+                    $form.closest('li.endpoint-list')
+                );
             });
 
-            $(document).on('click', 'form.endpoint-list a.clear.centered, div.endpoint-pagination a', function (event) {
-                $.get("{% url 'report_endpoints' %}").done(function (data) {
-                    filterFieldInit(
-                        $('div.in-use-widgets li.endpoint-list').html(data)
-                    );
-                    setUpFindingFilters();
-                });
-
+            // "Clear filters"
+            $(document).on('click', 'form.endpoint-list a.clear.centered', function (event) {
+                const $a = $(this);
                 event.preventDefault();
+                retrieveReportData("{% url 'report_endpoints' %}", $a.closest('li.endpoint-list'));
             });
+
+            // Pagination
+            $(document).on('click', 'div.endpoint-pagination a', function (event) {
+                const $a = $(this);
+                event.preventDefault();
+                retrieveReportData("{% url 'report_endpoints' %}" + $a.attr('href'), $a.closest('li.endpoint-list'));
+            })
 
             $('[data-toggle="tooltip"]').tooltip()
 

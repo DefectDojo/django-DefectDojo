@@ -9,7 +9,7 @@ class SysdigData:
             "HIGH": "High",
             "MEDIUM": "Medium",
             "LOW": "Low",
-            "NEGLIGIBLE": "Informational"
+            "NEGLIGIBLE": "Informational",
         }
 
         return severity_mapping.get(severity, "Informational")

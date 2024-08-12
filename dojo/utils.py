@@ -93,14 +93,14 @@ def do_false_positive_history(finding, *args, **kwargs):
     existing_findings = match_finding_to_existing_findings(finding, product=finding.test.engagement.product)
     deduplicationLogger.debug(
         "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product",
-        len(existing_findings)
+        len(existing_findings),
     )
 
     existing_fp_findings = existing_findings.filter(false_p=True)
     deduplicationLogger.debug(
         "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
         + "that were previously marked as false positive",
-        len(existing_fp_findings)
+        len(existing_fp_findings),
     )
 
     if existing_fp_findings:
@@ -117,13 +117,13 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     # Remove the async user kwarg because save() really does not like it
     # Would rather not add anything to Finding.save()
-    if 'async_user' in kwargs:
-        kwargs.pop('async_user')
+    if "async_user" in kwargs:
+        kwargs.pop("async_user")
 
     for find in to_mark_as_fp:
         deduplicationLogger.debug(
             "FALSE_POSITIVE_HISTORY: Marking Finding %i:%s from %s as false positive",
-            find.id, find.title, find.test.engagement
+            find.id, find.title, find.test.engagement,
         )
         try:
             find.false_p = True
@@ -149,60 +149,60 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         test (:model:`dojo.Test`, optional): Test to filter findings by
     """
     if product:
-        custom_filter_type = 'product'
-        custom_filter = {'test__engagement__product': product}
+        custom_filter_type = "product"
+        custom_filter = {"test__engagement__product": product}
 
     elif engagement:
-        custom_filter_type = 'engagement'
-        custom_filter = {'test__engagement': engagement}
+        custom_filter_type = "engagement"
+        custom_filter = {"test__engagement": engagement}
 
     elif test:
-        custom_filter_type = 'test'
-        custom_filter = {'test': test}
+        custom_filter_type = "test"
+        custom_filter = {"test": test}
 
     else:
-        msg = 'No product, engagement or test provided as argument.'
+        msg = "No product, engagement or test provided as argument."
         raise ValueError(msg)
 
     deduplication_algorithm = finding.test.deduplication_algorithm
 
     deduplicationLogger.debug(
-        'Matching finding %i:%s to existing findings in %s %s using %s as deduplication algorithm.',
-        finding.id, finding.title, custom_filter_type, list(custom_filter.values())[0], deduplication_algorithm
+        "Matching finding %i:%s to existing findings in %s %s using %s as deduplication algorithm.",
+        finding.id, finding.title, custom_filter_type, list(custom_filter.values())[0], deduplication_algorithm,
     )
 
-    if deduplication_algorithm == 'hash_code':
+    if deduplication_algorithm == "hash_code":
         return (
             Finding.objects.filter(
                 **custom_filter,
-                hash_code=finding.hash_code
+                hash_code=finding.hash_code,
             ).exclude(hash_code=None)
             .exclude(id=finding.id)
-            .order_by('id')
+            .order_by("id")
         )
 
-    elif deduplication_algorithm == 'unique_id_from_tool':
+    elif deduplication_algorithm == "unique_id_from_tool":
         return (
             Finding.objects.filter(
                 **custom_filter,
-                unique_id_from_tool=finding.unique_id_from_tool
+                unique_id_from_tool=finding.unique_id_from_tool,
             ).exclude(unique_id_from_tool=None)
             .exclude(id=finding.id)
-            .order_by('id')
+            .order_by("id")
         )
 
-    elif deduplication_algorithm == 'unique_id_from_tool_or_hash_code':
+    elif deduplication_algorithm == "unique_id_from_tool_or_hash_code":
         query = Finding.objects.filter(
             Q(**custom_filter),
             (
                 (Q(hash_code__isnull=False) & Q(hash_code=finding.hash_code))
                 | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=finding.unique_id_from_tool))
-            )
-        ).exclude(id=finding.id).order_by('id')
+            ),
+        ).exclude(id=finding.id).order_by("id")
         deduplicationLogger.debug(query.query)
         return query
 
-    elif deduplication_algorithm == 'legacy':
+    elif deduplication_algorithm == "legacy":
         # This is the legacy reimport behavior. Although it's pretty flawed and
         # doesn't match the legacy algorithm for deduplication, this is left as is for simplicity.
         # Re-writing the legacy deduplication here would be complicated and counter-productive.
@@ -213,8 +213,8 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
                 **custom_filter,
                 title=finding.title,
                 severity=finding.severity,
-                numerical_severity=Finding.get_numerical_severity(finding.severity)
-            ).order_by('id')
+                numerical_severity=Finding.get_numerical_severity(finding.severity),
+            ).order_by("id")
         )
 
     else:
@@ -307,7 +307,7 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
         logger.warning("system settings not found")
         enabled = False
     if enabled:
-        deduplicationLogger.debug('dedupe for: ' + str(new_finding.id)
+        deduplicationLogger.debug("dedupe for: " + str(new_finding.id)
                     + ":" + str(new_finding.title))
         deduplicationAlgorithm = new_finding.test.deduplication_algorithm
         deduplicationLogger.debug("deduplication algorithm: " + deduplicationAlgorithm)
@@ -333,37 +333,21 @@ def deduplicate_legacy(new_finding):
     #    (this is "cond1")
     # ---------------------------------------------------------
     if new_finding.test.engagement.deduplication_on_engagement:
-        eng_findings_cwe = (
-            Finding.objects.filter(test__engagement=new_finding.test.engagement, cwe=new_finding.cwe)
-            .exclude(id=new_finding.id)
-            .exclude(cwe=0)
-            .exclude(duplicate=True)
-            .values("id")
-        )
-        eng_findings_title = (
-            Finding.objects.filter(test__engagement=new_finding.test.engagement, title=new_finding.title)
-            .exclude(id=new_finding.id)
-            .exclude(duplicate=True)
-            .values("id")
-        )
+        eng_findings_cwe = Finding.objects.filter(
+            test__engagement=new_finding.test.engagement,
+            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values("id")
+        eng_findings_title = Finding.objects.filter(
+            test__engagement=new_finding.test.engagement,
+            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values("id")
     else:
-        eng_findings_cwe = (
-            Finding.objects.filter(test__engagement__product=new_finding.test.engagement.product, cwe=new_finding.cwe)
-            .exclude(id=new_finding.id)
-            .exclude(cwe=0)
-            .exclude(duplicate=True)
-            .values("id")
-        )
-        eng_findings_title = (
-            Finding.objects.filter(
-                test__engagement__product=new_finding.test.engagement.product, title=new_finding.title
-            )
-            .exclude(id=new_finding.id)
-            .exclude(duplicate=True)
-            .values("id")
-        )
+        eng_findings_cwe = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            cwe=new_finding.cwe).exclude(id=new_finding.id).exclude(cwe=0).exclude(duplicate=True).values("id")
+        eng_findings_title = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            title=new_finding.title).exclude(id=new_finding.id).exclude(duplicate=True).values("id")
 
-    total_findings = Finding.objects.filter(Q(id__in=eng_findings_cwe) | Q(id__in=eng_findings_title)).prefetch_related('endpoints', 'test', 'test__engagement', 'found_by', 'original_finding', 'test__test_type')
+    total_findings = Finding.objects.filter(Q(id__in=eng_findings_cwe) | Q(id__in=eng_findings_title)).prefetch_related("endpoints", "test", "test__engagement", "found_by", "original_finding", "test__test_type")
     deduplicationLogger.debug("Found "
         + str(len(eng_findings_cwe)) + " findings with same cwe, "
         + str(len(eng_findings_title)) + " findings with same title: "
@@ -375,7 +359,8 @@ def deduplicate_legacy(new_finding):
         flag_line_path = False
         flag_hash = False
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
+            deduplicationLogger.debug(
+                "deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
 
         # ---------------------------------------------------------
@@ -401,9 +386,7 @@ def deduplicate_legacy(new_finding):
                 )
         else:
             deduplicationLogger.debug("find.static/dynamic: %s/%s", find.static_finding, find.dynamic_finding)
-            deduplicationLogger.debug(
-                "new_finding.static/dynamic: %s/%s", new_finding.static_finding, new_finding.dynamic_finding
-            )
+            deduplicationLogger.debug("new_finding.static/dynamic: %s/%s", new_finding.static_finding, new_finding.dynamic_finding)
             deduplicationLogger.debug("find.file_path: %s", find.file_path)
             deduplicationLogger.debug("new_finding.file_path: %s", new_finding.file_path)
 
@@ -415,8 +398,8 @@ def deduplicate_legacy(new_finding):
             flag_hash = True
 
         deduplicationLogger.debug(
-            'deduplication flags for new finding (' + ('dynamic' if new_finding.dynamic_finding else 'static') + ') ' + str(new_finding.id) + ' and existing finding ' + str(find.id)
-            + ' flag_endpoints: ' + str(flag_endpoints) + ' flag_line_path:' + str(flag_line_path) + ' flag_hash:' + str(flag_hash))
+            "deduplication flags for new finding (" + ("dynamic" if new_finding.dynamic_finding else "static") + ") " + str(new_finding.id) + " and existing finding " + str(find.id)
+            + " flag_endpoints: " + str(flag_endpoints) + " flag_line_path:" + str(flag_line_path) + " flag_hash:" + str(flag_hash))
 
         # ---------------------------------------------------------
         # 3) Findings are duplicate if (cond1 is true) and they have the same:
@@ -435,34 +418,28 @@ def deduplicate_legacy(new_finding):
 
 def deduplicate_unique_id_from_tool(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = (
-            Finding.objects.filter(
-                test__engagement=new_finding.test.engagement, unique_id_from_tool=new_finding.unique_id_from_tool
-            )
-            .exclude(id=new_finding.id)
-            .exclude(unique_id_from_tool=None)
-            .exclude(duplicate=True)
-            .order_by("id")
-        )
+        existing_findings = Finding.objects.filter(
+            test__engagement=new_finding.test.engagement,
+            unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
+                id=new_finding.id).exclude(
+                    unique_id_from_tool=None).exclude(
+                        duplicate=True).order_by("id")
     else:
-        existing_findings = (
-            Finding.objects.filter(
-                test__engagement__product=new_finding.test.engagement.product,
-                # the unique_id_from_tool is unique for a given tool: do not compare with other tools
-                test__test_type=new_finding.test.test_type,
-                unique_id_from_tool=new_finding.unique_id_from_tool,
-            )
-            .exclude(id=new_finding.id)
-            .exclude(unique_id_from_tool=None)
-            .exclude(duplicate=True)
-            .order_by("id")
-        )
+        existing_findings = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            # the unique_id_from_tool is unique for a given tool: do not compare with other tools
+            test__test_type=new_finding.test.test_type,
+            unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
+                id=new_finding.id).exclude(
+                    unique_id_from_tool=None).exclude(
+                        duplicate=True).order_by("id")
 
     deduplicationLogger.debug("Found "
         + str(len(existing_findings)) + " findings with same unique_id_from_tool")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
+            deduplicationLogger.debug(
+                "deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
         try:
             set_duplicate(new_finding, find)
@@ -474,29 +451,26 @@ def deduplicate_unique_id_from_tool(new_finding):
 
 def deduplicate_hash_code(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
-        existing_findings = (
-            Finding.objects.filter(test__engagement=new_finding.test.engagement, hash_code=new_finding.hash_code)
-            .exclude(id=new_finding.id)
-            .exclude(hash_code=None)
-            .exclude(duplicate=True)
-            .order_by("id")
-        )
+        existing_findings = Finding.objects.filter(
+            test__engagement=new_finding.test.engagement,
+            hash_code=new_finding.hash_code).exclude(
+                id=new_finding.id).exclude(
+                    hash_code=None).exclude(
+                        duplicate=True).order_by("id")
     else:
-        existing_findings = (
-            Finding.objects.filter(
-                test__engagement__product=new_finding.test.engagement.product, hash_code=new_finding.hash_code
-            )
-            .exclude(id=new_finding.id)
-            .exclude(hash_code=None)
-            .exclude(duplicate=True)
-            .order_by("id")
-        )
+        existing_findings = Finding.objects.filter(
+            test__engagement__product=new_finding.test.engagement.product,
+            hash_code=new_finding.hash_code).exclude(
+                id=new_finding.id).exclude(
+                    hash_code=None).exclude(
+                        duplicate=True).order_by("id")
 
     deduplicationLogger.debug("Found "
         + str(len(existing_findings)) + " findings with same hash_code")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
+            deduplicationLogger.debug(
+                "deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
         try:
             if are_endpoints_duplicates(new_finding, find):
@@ -515,7 +489,7 @@ def deduplicate_uid_or_hash_code(new_finding):
             | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
             test__engagement=new_finding.test.engagement).exclude(
                 id=new_finding.id).exclude(
-                        duplicate=True).order_by('id')
+                        duplicate=True).order_by("id")
     else:
         # same without "test__engagement=new_finding.test.engagement" condition
         existing_findings = Finding.objects.filter(
@@ -523,12 +497,13 @@ def deduplicate_uid_or_hash_code(new_finding):
             | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
             test__engagement__product=new_finding.test.engagement.product).exclude(
                 id=new_finding.id).exclude(
-                        duplicate=True).order_by('id')
+                        duplicate=True).order_by("id")
     deduplicationLogger.debug("Found "
         + str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
     for find in existing_findings:
         if is_deduplication_on_engagement_mismatch(new_finding, find):
-            deduplicationLogger.debug("deduplication_on_engagement_mismatch, skipping dedupe.")
+            deduplicationLogger.debug(
+                "deduplication_on_engagement_mismatch, skipping dedupe.")
             continue
         try:
             if are_endpoints_duplicates(new_finding, find):
@@ -543,7 +518,7 @@ def set_duplicate(new_finding, existing_finding):
     deduplicationLogger.debug(f"new_finding.status(): {new_finding.id} {new_finding.status()}")
     deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
     if existing_finding.duplicate:
-        deduplicationLogger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
+        deduplicationLogger.debug("existing finding: %s:%s:duplicate=%s;duplicate_finding=%s", existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else "None")
         msg = "Existing finding is a duplicate"
         raise Exception(msg)
     if existing_finding.id == new_finding.id:
@@ -556,7 +531,7 @@ def set_duplicate(new_finding, existing_finding):
         msg = "Skip this finding as we do not want to attach a new duplicate to a mitigated finding"
         raise Exception(msg)
 
-    deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
+    deduplicationLogger.debug("Setting new finding " + str(new_finding.id) + " as a duplicate of existing finding " + str(existing_finding.id))
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
@@ -653,8 +628,22 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
             start_of_period = curr - relativedelta(day=1, hour=0, minute=0, second=0)
             end_of_period = curr + relativedelta(day=31, hour=23, minute=59, second=59)
 
-        o_count = {"closed": 0, "zero": 0, "one": 0, "two": 0, "three": 0, "total": 0}
-        a_count = {"closed": 0, "zero": 0, "one": 0, "two": 0, "three": 0, "total": 0}
+        o_count = {
+            "closed": 0,
+            "zero": 0,
+            "one": 0,
+            "two": 0,
+            "three": 0,
+            "total": 0,
+        }
+        a_count = {
+            "closed": 0,
+            "zero": 0,
+            "one": 0,
+            "two": 0,
+            "three": 0,
+            "total": 0,
+        }
         for f in findings:
             if f.mitigated is not None and end_of_period >= f.mitigated >= start_of_period:
                 o_count["closed"] += 1
@@ -728,34 +717,41 @@ def add_breadcrumb(parent=None,
 
     if top_level or crumbs is None:
         crumbs = [
-            {"title": _("Home"), "url": reverse("home")},
+            {
+                "title": _("Home"),
+                "url": reverse("home"),
+            },
         ]
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
             crumbs += parent.get_breadcrumbs()
         else:
             crumbs += [{
-                'title': title,
-                'url': request.get_full_path() if url is None else url
+                "title": title,
+                "url": request.get_full_path() if url is None else url,
             }]
     else:
         resolver = get_resolver(None).resolve
         if parent is not None and getattr(parent, "get_breadcrumbs", None):
             obj_crumbs = parent.get_breadcrumbs()
             if title is not None:
-                obj_crumbs += [{"title": title, "url": request.get_full_path() if url is None else url}]
+                obj_crumbs += [{
+                    "title": title,
+                    "url": request.get_full_path() if url is None else url,
+                }]
         else:
             obj_crumbs = [{
-                'title': title,
-                'url': request.get_full_path() if url is None else url
+                "title": title,
+                "url": request.get_full_path() if url is None else url,
             }]
 
         for crumb in crumbs:
-            crumb_to_resolve = crumb["url"] if "?" not in crumb["url"] else crumb["url"][: crumb["url"].index("?")]
+            crumb_to_resolve = crumb["url"] if "?" not in crumb[
+                "url"] else crumb["url"][:crumb["url"].index("?")]
             crumb_view = resolver(crumb_to_resolve)
             for obj_crumb in obj_crumbs:
-                obj_crumb_to_resolve = (
-                    obj_crumb["url"] if "?" not in obj_crumb["url"] else obj_crumb["url"][: obj_crumb["url"].index("?")]
-                )
+                obj_crumb_to_resolve = obj_crumb[
+                    "url"] if "?" not in obj_crumb["url"] else obj_crumb[
+                        "url"][:obj_crumb["url"].index("?")]
                 obj_crumb_view = resolver(obj_crumb_to_resolve)
 
                 if crumb_view.view_name == obj_crumb_view.view_name:
@@ -799,21 +795,15 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
         # reminder: The first week of a year is the one that contains the year’s first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
         if view == "Finding":
-            severities_by_day = (
-                objs.filter(created__date__gte=first_sunday)
-                .filter(created__date__lt=last_sunday)
-                .values("created__date")
-                .annotate(count=Count("id"))
-                .order_by("created__date")
-            )
+            severities_by_day = objs.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
+                                        .values("created__date") \
+                                        .annotate(count=Count("id")) \
+                                        .order_by("created__date")
         elif view == "Endpoint":
-            severities_by_day = (
-                objs.filter(date__gte=first_sunday)
-                .filter(date__lt=last_sunday)
-                .values("date")
-                .annotate(count=Count("id"))
-                .order_by("date")
-            )
+            severities_by_day = objs.filter(date__gte=first_sunday).filter(date__lt=last_sunday) \
+                                        .values("date") \
+                                        .annotate(count=Count("id")) \
+                                        .order_by("date")
         # return empty stuff if no findings to be statted
         if severities_by_day.count() <= 0:
             return None, None
@@ -875,9 +865,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
-            # print(tick)
             week_data, label = get_week_data(start_of_week, tick, day_counts)
-            # print(week_data, label)
             punchcard.extend(week_data)
             ticks.append(label)
             tick += 1
@@ -902,7 +890,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
 def get_week_data(week_start_date, tick, day_counts):
     data = []
-    for i in range(0, len(day_counts)):
+    for i in range(len(day_counts)):
         data.append([tick, i, day_counts[i]])
     label = [tick, week_start_date.strftime("<span class='small'>%m/%d<br/>%Y</span>")]
     return data, label
@@ -914,13 +902,13 @@ def get_period_counts_legacy(findings,
                              accepted_findings,
                              period_interval,
                              start_date,
-                             relative_delta='months'):
+                             relative_delta="months"):
     opened_in_period = []
     accepted_in_period = []
     opened_in_period.append(
-        ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
+        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
     accepted_in_period.append(
-        ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
+        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
 
     for x in range(-1, period_interval):
         if relative_delta == "months":
@@ -942,22 +930,17 @@ def get_period_counts_legacy(findings,
                         new_date.year,
                         new_date.month,
                         monthrange(new_date.year, new_date.month)[1],
-                        tzinfo=timezone.get_current_timezone(),
-                    ),
-                ]
-            )
+                        tzinfo=timezone.get_current_timezone()),
+                ])
         else:
             risks_a = None
 
         crit_count, high_count, med_count, low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
         for finding in findings:
-            if (
-                new_date
-                <= datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=timezone.get_current_timezone())
-                <= end_date
-            ):
+            if new_date <= datetime.combine(finding.date, datetime.min.time(
+            )).replace(tzinfo=timezone.get_current_timezone()) <= end_date:
                 if finding.severity == "Critical":
                     crit_count += 1
                 elif finding.severity == "High":
@@ -973,7 +956,7 @@ def get_period_counts_legacy(findings,
              crit_count, high_count, med_count, low_count, total,
              closed_in_range_count])
         crit_count, high_count, med_count, low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
         if risks_a is not None:
             for finding in risks_a:
@@ -999,12 +982,19 @@ def get_period_counts_legacy(findings,
             ]
         )
 
-    return {"opened_per_period": opened_in_period, "accepted_per_period": accepted_in_period}
+    return {
+        "opened_per_period": opened_in_period,
+        "accepted_per_period": accepted_in_period,
+    }
 
 
-def get_period_counts(
-    findings, findings_closed, accepted_findings, period_interval, start_date, relative_delta="months"
-):
+def get_period_counts(findings,
+                      findings_closed,
+                      accepted_findings,
+                      period_interval,
+                      start_date,
+                      relative_delta="months"):
+
     tz = timezone.get_current_timezone()
 
     start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=tz)
@@ -1013,11 +1003,11 @@ def get_period_counts(
     active_in_period = []
     accepted_in_period = []
     opened_in_period.append(
-        ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
+        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
     active_in_period.append(
-        ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
+        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
     accepted_in_period.append(
-        ['Timestamp', 'Date', 'S0', 'S1', 'S2', 'S3', 'Total', 'Closed'])
+        ["Timestamp", "Date", "S0", "S1", "S2", "S3", "Total", "Closed"])
 
     for x in range(-1, period_interval):
         if relative_delta == "months":
@@ -1047,13 +1037,13 @@ def get_period_counts(
             risks_a = None
 
         f_crit_count, f_high_count, f_med_count, f_low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
         ra_crit_count, ra_high_count, ra_med_count, ra_low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
         active_crit_count, active_high_count, active_med_count, active_low_count, _ = [
-            0, 0, 0, 0, 0
+            0, 0, 0, 0, 0,
         ]
 
         for finding in findings:
@@ -1175,9 +1165,9 @@ def opened_in_period(start_date, end_date, **kwargs):
         out_of_scope=False,
         mitigated__isnull=True,
         severity__in=(
-            'Critical', 'High', 'Medium',
-            'Low')).values('numerical_severity').annotate(
-                Count('numerical_severity')).order_by('numerical_severity')
+            "Critical", "High", "Medium",
+            "Low")).values("numerical_severity").annotate(
+                Count("numerical_severity")).order_by("numerical_severity")
     total_opened_in_period = Finding.objects.filter(
         date__range=[start_date, end_date],
         **kwargs,
@@ -1186,34 +1176,41 @@ def opened_in_period(start_date, end_date, **kwargs):
         duplicate=False,
         out_of_scope=False,
         mitigated__isnull=True,
-        severity__in=("Critical", "High", "Medium", "Low"),
-    ).aggregate(
-        total=Sum(
-            Case(When(severity__in=("Critical", "High", "Medium", "Low"), then=Value(1)), output_field=IntegerField())
-        )
-    )[
-        "total"
-    ]
+        severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+            total=Sum(
+                Case(
+                    When(
+                        severity__in=("Critical", "High", "Medium", "Low"),
+                        then=Value(1)),
+                    output_field=IntegerField())))["total"]
 
     oip = {
-        "S0": 0,
-        "S1": 0,
-        "S2": 0,
-        "S3": 0,
-        "Total": total_opened_in_period,
-        "start_date": start_date,
-        "end_date": end_date,
-        "closed": Finding.objects.filter(
+        "S0":
+        0,
+        "S1":
+        0,
+        "S2":
+        0,
+        "S3":
+        0,
+        "Total":
+        total_opened_in_period,
+        "start_date":
+        start_date,
+        "end_date":
+        end_date,
+        "closed":
+        Finding.objects.filter(
             mitigated__date__range=[start_date, end_date],
             **kwargs,
-            severity__in=('Critical', 'High', 'Medium', 'Low')).aggregate(
+            severity__in=("Critical", "High", "Medium", "Low")).aggregate(
                 total=Sum(
                     Case(
                         When(
-                            severity__in=('Critical', 'High', 'Medium', 'Low'),
+                            severity__in=("Critical", "High", "Medium", "Low"),
                             then=Value(1)),
-                        output_field=IntegerField())))['total'],
-        'to_date_total':
+                        output_field=IntegerField())))["total"],
+        "to_date_total":
         Finding.objects.filter(
             date__lte=end_date.date(),
             verified=True,
@@ -1222,7 +1219,7 @@ def opened_in_period(start_date, end_date, **kwargs):
             out_of_scope=False,
             mitigated__isnull=True,
             **kwargs,
-            severity__in=('Critical', 'High', 'Medium', 'Low')).count()
+            severity__in=("Critical", "High", "Medium", "Low")).count(),
     }
 
     for o in opened_in_period:
@@ -1267,10 +1264,12 @@ def named_month(month_number):
     return date(1900, month_number, 1).strftime("%B")
 
 
-def normalize_query(
-    query_string, findterms=re.compile(r'"([^"]+)"|(\S+)').findall, normspace=re.compile(r"\s{2,}").sub
-):
-    return [normspace(" ", (t[0] or t[1]).strip()) for t in findterms(query_string)]
+def normalize_query(query_string,
+                    findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
+                    normspace=re.compile(r"\s{2,}").sub):
+    return [
+        normspace(" ", (t[0] or t[1]).strip()) for t in findterms(query_string)
+    ]
 
 
 def build_query(query_string, search_fields):
@@ -1342,22 +1341,22 @@ def handle_uploaded_threat(f, eng):
     # Check if threat folder exist.
     if not os.path.isdir(settings.MEDIA_ROOT + "/threat/"):
         # Create the folder
-        os.mkdir(settings.MEDIA_ROOT + '/threat/')
-    with open(settings.MEDIA_ROOT + f'/threat/{eng.id}{extension}',
-              'wb+') as destination:
+        os.mkdir(settings.MEDIA_ROOT + "/threat/")
+    with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
+              "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    eng.tmodel_path = settings.MEDIA_ROOT + f'/threat/{eng.id}{extension}'
+    eng.tmodel_path = settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}"
     eng.save()
 
 
 def handle_uploaded_selenium(f, cred):
     _name, extension = os.path.splitext(f.name)
-    with open(settings.MEDIA_ROOT + f'/selenium/{cred.id}{extension}',
-              'wb+') as destination:
+    with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
+              "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    cred.selenium_script = settings.MEDIA_ROOT + f'/selenium/{cred.id}{extension}'
+    cred.selenium_script = settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}"
     cred.save()
 
 
@@ -1411,7 +1410,7 @@ def reopen_external_issue(find, note, external_issue_provider, **kwargs):
 
 
 def process_tag_notifications(request, note, parent_url, parent_title):
-    regex = re.compile(r'(?:\A|\s)@(\w+)\b')
+    regex = re.compile(r"(?:\A|\s)@(\w+)\b")
 
     usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
 
@@ -1429,11 +1428,10 @@ def process_tag_notifications(request, note, parent_url, parent_title):
         event="user_mentioned",
         section=parent_title,
         note=note,
-        title=f'{request.user} jotted a note',
+        title=f"{request.user} jotted a note",
         url=parent_url,
         icon="commenting",
-        recipients=users_to_notify,
-    )
+        recipients=users_to_notify)
 
 
 def encrypt(key, iv, plaintext):
@@ -1479,8 +1477,8 @@ def dojo_crypto_encrypt(plaintext):
         key = get_db_key()
 
         iv = os.urandom(16)
-        text, tag = encrypt(key, iv, plaintext.encode("utf-8"))
-        data = prepare_for_save(iv, text, tag)
+        data = prepare_for_save(
+            iv, encrypt(key, iv, plaintext.encode("utf-8")))
 
     return data
 
@@ -1490,14 +1488,7 @@ def prepare_for_save(iv, encrypted_value, tag):
 
     if encrypted_value and encrypted_value is not None:
         binascii.b2a_hex(encrypted_value).rstrip()
-        stored_value = (
-            "AES.1:"
-            + binascii.b2a_hex(iv).decode("utf-8")
-            + ":"
-            + encrypted_value.decode("utf-8")
-            + ":"
-            + binascii.b2a_hex(tag).decode("utf-8")
-        )
+        stored_value = "AES.1:" + binascii.b2a_hex(iv).decode("utf-8") + ":" + encrypted_value.decode("utf-8")
     return stored_value
 
 
@@ -1505,7 +1496,9 @@ def get_db_key():
     db_key = None
     if hasattr(settings, "DB_KEY"):
         db_key = settings.DB_KEY
-        db_key = binascii.b2a_hex(hashlib.sha256(db_key.encode("utf-8")).digest().rstrip())[:32]
+        db_key = binascii.b2a_hex(
+            hashlib.sha256(db_key.encode("utf-8")).digest().rstrip())[:32]
+
     return db_key
 
 
@@ -1528,7 +1521,7 @@ def prepare_for_view(encrypted_value):
             value = encrypted_values[2]
 
             try:
-                decrypted_value = decrypt(key, iv, value, binascii.a2b_hex(encrypted_values[3]))
+                decrypted_value = decrypt(key, iv, value)
                 decrypted_value = decrypted_value.decode("utf-8")
             except UnicodeDecodeError:
                 decrypted_value = ""
@@ -1557,19 +1550,14 @@ def calculate_grade(product, *args, **kwargs):
 
     if system_settings.enable_product_grade:
         logger.debug("calculating product grade for %s:%s", product.id, product.name)
-        severity_values = (
-            Finding.objects.filter(
-                ~Q(severity="Info"),
-                active=True,
-                duplicate=False,
-                verified=True,
-                false_p=False,
-                test__engagement__product=product,
-            )
-            .values("severity")
-            .annotate(Count("numerical_severity"))
-            .order_by()
-        )
+        severity_values = Finding.objects.filter(
+            ~Q(severity="Info"),
+            active=True,
+            duplicate=False,
+            verified=True,
+            false_p=False,
+            test__engagement__product=product).values("severity").annotate(
+                Count("numerical_severity")).order_by()
 
         low = 0
         medium = 0
@@ -1657,7 +1645,8 @@ class Product_Tab:
         )
         self.endpoints_count = active_endpoints.distinct().count()
         self.endpoint_hosts_count = active_endpoints.values("host").distinct().count()
-        self.benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by("name")
+        self.benchmark_type = Benchmark_Type.objects.filter(
+            enabled=True).order_by("name")
         self.engagement = None
 
     def setTab(self, tab):
@@ -1711,7 +1700,8 @@ def tab_view_count(product_id):
     ).count()
     endpoints = Endpoint.objects.filter(product=product).count()
     # benchmarks = Benchmark_Product_Summary.objects.filter(product=product, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
-    benchmark_type = Benchmark_Type.objects.filter(enabled=True).order_by("name")
+    benchmark_type = Benchmark_Type.objects.filter(
+        enabled=True).order_by("name")
     return product, engagements, open_findings, endpoints, benchmark_type
 
 
@@ -1754,11 +1744,7 @@ def apply_cwe_to_template(finding, override=False):
 def truncate_with_dots(the_string, max_length_including_dots):
     if not the_string:
         return the_string
-    return (
-        the_string[: max_length_including_dots - 3] + "..."
-        if len(the_string) > max_length_including_dots
-        else the_string
-    )
+    return (the_string[:max_length_including_dots - 3] + "..." if len(the_string) > max_length_including_dots else the_string)
 
 
 def max_safe(list):
@@ -1790,7 +1776,7 @@ def user_post_save(sender, instance, created, **kwargs):
             notifications.pk = None
             notifications.template = False
             notifications.user = instance
-            logger.info('creating default set (from template) of notifications for: ' + str(instance))
+            logger.info("creating default set (from template) of notifications for: " + str(instance))
         except Exception:
             notifications = Notifications(user=instance)
             logger.info("creating default set of notifications for: " + str(instance))
@@ -1799,10 +1785,8 @@ def user_post_save(sender, instance, created, **kwargs):
 
         system_settings = System_Settings.objects.get()
         if system_settings.default_group and system_settings.default_group_role:
-            if (
-                system_settings.default_group_email_pattern
-                and re.fullmatch(system_settings.default_group_email_pattern, instance.email)
-            ) or not system_settings.default_group_email_pattern:
+            if (system_settings.default_group_email_pattern and re.fullmatch(system_settings.default_group_email_pattern, instance.email)) or \
+               not system_settings.default_group_email_pattern:
                 logger.info("setting default group for: " + str(instance))
                 dojo_group_member = Dojo_Group_Member(
                     group=system_settings.default_group, user=instance, role=system_settings.default_group_role
@@ -1828,11 +1812,9 @@ def is_safe_url(url):
 
 def get_return_url(request):
     return_url = request.POST.get("return_url", None)
-    # print('return_url from POST: ', return_url)
     if return_url is None or not return_url.strip():
         # for some reason using request.GET.get('return_url') never works
         return_url = request.GET["return_url"] if "return_url" in request.GET else None
-        # print('return_url from GET: ', return_url)
 
     return return_url if return_url else None
 
@@ -1854,7 +1836,7 @@ def redirect(request, redirect_to):
     """Only allow redirects to allowed_hosts to prevent open redirects"""
     if is_safe_url(redirect_to):
         return HttpResponseRedirect(redirect_to)
-    msg = 'invalid redirect, host and scheme not in allowed_hosts'
+    msg = "invalid redirect, host and scheme not in allowed_hosts"
     raise ValueError(msg)
 
 
@@ -1929,15 +1911,15 @@ def sla_compute_and_notify(*args, **kwargs):
 
     def _notification_title_for_finding(finding, kind, sla_age):
         title = f"Finding {finding.id} - "
-        if kind == 'breached':
+        if kind == "breached":
             abs_sla_age = abs(sla_age)
             period = "day"
             if abs_sla_age > 1:
                 period = "days"
             title += "SLA breached by %d %s! Overdue notice" % (abs_sla_age, period)
-        elif kind == 'prebreach':
+        elif kind == "prebreach":
             title += "SLA pre-breach warning - %d day(s) left" % (sla_age)
-        elif kind == 'breaching':
+        elif kind == "breaching":
             title += "SLA is breaching today"
 
         return title
@@ -1957,10 +1939,10 @@ def sla_compute_and_notify(*args, **kwargs):
                         title = _notification_title_for_finding(n.finding, kind, n.finding.sla_days_remaining())
 
                         create_notification(
-                            event='sla_breach',
+                            event="sla_breach",
                             title=title,
                             finding=n.finding,
-                            url=reverse('view_finding', args=(n.finding.id,)),
+                            url=reverse("view_finding", args=(n.finding.id,)),
                         )
 
                         if n.do_jira_sla_comment:
@@ -1973,7 +1955,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     title_combined = f"SLA alert ({kind}): product type '{pt}', product '{p}'"
                     product = combined_notifications[pt][p][kind][0].finding.test.engagement.product
                     create_notification(
-                        event='sla_breach_combined',
+                        event="sla_breach_combined",
                         title=title_combined,
                         product=product,
                         findings=findings_list,
@@ -2019,7 +2001,10 @@ def sla_compute_and_notify(*args, **kwargs):
             # .select_related('jira_issue') \
             # .prefetch_related(Prefetch('test__engagement__product__jira_project_set__jira_instance')) \
             # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
-            findings = Finding.objects.filter(query).exclude(severity="Info").exclude(id__in=no_jira_findings)
+            findings = Finding.objects \
+                .filter(query) \
+                .exclude(severity="Info") \
+                .exclude(id__in=no_jira_findings)
 
             for finding in findings:
                 total_count += 1
@@ -2069,7 +2054,7 @@ def sla_compute_and_notify(*args, **kwargs):
                     logger.info(f"Finding {finding.id} has breached by {abs(sla_age)} days.")
                     abs_sla_age = abs(sla_age)
                     if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
-                        _add_notification(finding, 'breached')
+                        _add_notification(finding, "breached")
                     else:
                         logger.info(
                             "Skipping notification as exponential backoff is enabled and the SLA is not a power of two"
@@ -2078,12 +2063,12 @@ def sla_compute_and_notify(*args, **kwargs):
                 elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
                     pre_breach_count += 1
                     logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
-                    _add_notification(finding, 'prebreach')
+                    _add_notification(finding, "prebreach")
                 # The finding breaches the SLA today
                 elif sla_age == 0:
                     at_breach_count += 1
                     logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
-                    _add_notification(finding, 'breaching')
+                    _add_notification(finding, "breaching")
 
             _create_notifications()
             logger.info(f"SLA run results: Pre-breach: {pre_breach_count}, at-breach: {at_breach_count}, post-breach: {post_breach_count}, post-breach-no-notify: {post_breach_no_notify_count}, with-jira: {jira_count}, TOTAL: {total_count}")
@@ -2102,7 +2087,7 @@ def get_words_for_field(model, fieldname):
 
     if models is not None:
         words = [
-            word for field_value in models.order_by().filter(**{f'{fieldname}__isnull': False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
+            word for field_value in models.order_by().filter(**{f"{fieldname}__isnull": False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
         ]
     else:
         words = []
@@ -2187,12 +2172,18 @@ def get_last_object_or_none(klass, *args, **kwargs):
 
 def add_success_message_to_response(message):
     if get_current_request():
-        messages.add_message(get_current_request(), messages.SUCCESS, message, extra_tags="alert-success")
+        messages.add_message(get_current_request(),
+                            messages.SUCCESS,
+                            message,
+                            extra_tags="alert-success")
 
 
 def add_error_message_to_response(message):
     if get_current_request():
-        messages.add_message(get_current_request(), messages.ERROR, message, extra_tags="alert-danger")
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            message,
+                            extra_tags="alert-danger")
 
 
 def add_field_errors_to_response(form):
@@ -2202,7 +2193,7 @@ def add_field_errors_to_response(form):
 
 
 def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix=""):
-    """Using the default for model in queryset can be slow for large querysets. Even
+    """ Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
     this process very well if we can process the models ordered by id.
     In that case we don't need LIMIT or OFFSET, but can keep track of the latest id that
@@ -2223,7 +2214,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
         # get maximum, which is the first due to descending order
         last_id = models.first().id + 1
     else:
-        msg = 'order must be ''asc'' or ''desc'''
+        msg = "order must be ""asc"" or ""desc"""
         raise ValueError(msg)
     # use filter to make count fast on mysql
     total_count = models.filter(id__gt=0).count()
@@ -2269,7 +2260,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
 def to_str_typed(obj):
     """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
-    return f'{type(obj)}: {obj}'
+    return f"{type(obj)}: {obj}"
 
 
 def get_product(obj):
@@ -2322,7 +2313,7 @@ def get_enabled_notifications_list():
     # Alerts need to enabled by default
     enabled = ["alert"]
     for choice in NOTIFICATION_CHOICES:
-        if get_system_setting(f'enable_{choice[0]}_notifications'):
+        if get_system_setting(f"enable_{choice[0]}_notifications"):
             enabled.append(choice[0])
     return enabled
 
@@ -2340,15 +2331,15 @@ class async_delete:
                 (Finding, "test__engagement__product__prod_type"),
                 (Test, "engagement__product__prod_type"),
                 (Engagement, "product__prod_type"),
-                (Product, "prod_type"),
-            ],
+                (Product, "prod_type")],
             "Product": [
                 (Endpoint, "product"),
                 (Finding, "test__engagement__product"),
                 (Test, "engagement__product"),
-                (Engagement, "product"),
-            ],
-            "Engagement": [(Finding, "test__engagement"), (Test, "engagement")],
+                (Engagement, "product")],
+            "Engagement": [
+                (Finding, "test__engagement"),
+                (Test, "engagement")],
             "Test": [(Finding, "test")],
         }
 
@@ -2362,7 +2353,6 @@ class async_delete:
                 logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
                 # The id must be None
                 # The object has already been deleted elsewhere
-                pass
 
     @dojo_async_task
     @app.task
@@ -2374,12 +2364,7 @@ class async_delete:
             self.crawl(object, model_list)
         else:
             # The object is not supported in async delete, delete normally
-            logger.debug(
-                "ASYNC_DELETE: "
-                + self.get_object_name(object)
-                + " async delete not supported. Deleteing normally: "
-                + str(object)
-            )
+            logger.debug("ASYNC_DELETE: " + self.get_object_name(object) + " async delete not supported. Deleteing normally: " + str(object))
             object.delete()
 
     @dojo_async_task
@@ -2391,16 +2376,10 @@ class async_delete:
             model_query = model_info[1]
             filter_dict = {model_query: object}
             objects_to_delete = model.objects.filter(**filter_dict)
-            logger.debug(
-                "ASYNC_DELETE: Deleting "
-                + str(len(objects_to_delete))
-                + " "
-                + self.get_object_name(model)
-                + "s in chunks"
-            )
+            logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
             chunks = self.chunk_list(model, objects_to_delete)
             for chunk in chunks:
-                logger.debug("deleting", len(chunk), self.get_object_name(model))
+                logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
                 self.delete_chunk(chunk)
         self.delete_chunk([object])
         logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(object) + ": " + str(object))
@@ -2408,15 +2387,8 @@ class async_delete:
     def chunk_list(self, model, list):
         chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
         # Break the list of objects into "chunk_size" lists
-        chunk_list = [list[i : i + chunk_size] for i in range(0, len(list), chunk_size)]
-        logger.debug(
-            "ASYNC_DELETE: Split "
-            + self.get_object_name(model)
-            + " into "
-            + str(len(chunk_list))
-            + " chunks of "
-            + str(chunk_size)
-        )
+        chunk_list = [list[i:i + chunk_size] for i in range(0, len(list), chunk_size)]
+        logger.debug("ASYNC_DELETE: Split " + self.get_object_name(model) + " into " + str(len(chunk_list)) + " chunks of " + str(chunk_size))
         return chunk_list
 
     def get_object_name(self, object):
@@ -2430,40 +2402,48 @@ def log_user_login(sender, request, user, **kwargs):
     # to cover more complex cases:
     # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
 
-    logger.info("login user: {user} via ip: {ip}".format(user=user.username, ip=request.META.get("REMOTE_ADDR")))
+    logger.info("login user: {user} via ip: {ip}".format(
+        user=user.username,
+        ip=request.META.get("REMOTE_ADDR"),
+    ))
 
 
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
-    logger.info("logout user: {user} via ip: {ip}".format(user=user.username, ip=request.META.get("REMOTE_ADDR")))
+
+    logger.info("logout user: {user} via ip: {ip}".format(
+        user=user.username,
+        ip=request.META.get("REMOTE_ADDR"),
+    ))
 
 
 @receiver(user_login_failed)
 def log_user_login_failed(sender, credentials, request, **kwargs):
+
     if "username" in credentials:
-        logger.warning(
-            "login failed for: {credentials} via ip: {ip}".format(
-                credentials=credentials["username"], ip=request.META["REMOTE_ADDR"]
-            )
-        )
+        logger.warning("login failed for: {credentials} via ip: {ip}".format(
+            credentials=credentials["username"],
+            ip=request.META["REMOTE_ADDR"],
+        ))
     else:
-        logger.error("login failed because of missing username via ip: {ip}".format(ip=request.META["REMOTE_ADDR"]))
+        logger.error("login failed because of missing username via ip: {ip}".format(
+            ip=request.META["REMOTE_ADDR"],
+        ))
 
 
 def get_password_requirements_string():
     s = "Password must contain {minimum_length} to {maximum_length} characters".format(
         minimum_length=int(get_system_setting("minimum_password_length")),
-        maximum_length=int(get_system_setting("maximum_password_length")),
-    )
+        maximum_length=int(get_system_setting("maximum_password_length")))
 
-    if bool(get_system_setting('lowercase_character_required')):
-        s += ', one lowercase letter (a-z)'
-    if bool(get_system_setting('uppercase_character_required')):
-        s += ', one uppercase letter (A-Z)'
-    if bool(get_system_setting('number_character_required')):
-        s += ', one number (0-9)'
-    if bool(get_system_setting('special_character_required')):
-        s += ', one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'\",<>./?)'
+    if bool(get_system_setting("lowercase_character_required")):
+        s += ", one lowercase letter (a-z)"
+    if bool(get_system_setting("uppercase_character_required")):
+        s += ", one uppercase letter (A-Z)"
+    if bool(get_system_setting("number_character_required")):
+        s += ", one number (0-9)"
+    if bool(get_system_setting("special_character_required")):
+        s += ', one special character (()[]{}|\\`~!@#$%^&*_-+=;:\'",<>./?)'
 
     if s.count(", ") == 1:
         password_requirements_string = s.rsplit(", ", 1)[0] + " and " + s.rsplit(", ", 1)[1]
@@ -2483,33 +2463,33 @@ def sum_by_severity_level(metrics):
     values = get_zero_severity_level()
 
     for m in metrics:
-        if values.get(m.get('severity')) is not None:
-            values[m.get('severity')] += 1
+        if values.get(m.get("severity")) is not None:
+            values[m.get("severity")] += 1
 
     return values
 
 
 def calculate_finding_age(f):
-    start_date = f.get('date', None)
+    start_date = f.get("date", None)
     if start_date and isinstance(start_date, str):
         start_date = parse(start_date).date()
 
     if settings.SLA_BUSINESS_DAYS:
-        if f.get('mitigated'):
-            mitigated_date = f.get('mitigated')
+        if f.get("mitigated"):
+            mitigated_date = f.get("mitigated")
             if isinstance(mitigated_date, datetime):
-                mitigated_date = f.get('mitigated').date()
-            days = get_work_days(f.get('date'), mitigated_date)
+                mitigated_date = f.get("mitigated").date()
+            days = get_work_days(f.get("date"), mitigated_date)
         else:
-            days = get_work_days(f.get('date'), timezone.now().date())
+            days = get_work_days(f.get("date"), timezone.now().date())
     else:
         if isinstance(start_date, datetime):
             start_date = start_date.date()
 
-        if f.get('mitigated'):
-            mitigated_date = f.get('mitigated')
+        if f.get("mitigated"):
+            mitigated_date = f.get("mitigated")
             if isinstance(mitigated_date, datetime):
-                mitigated_date = f.get('mitigated').date()
+                mitigated_date = f.get("mitigated").date()
             diff = mitigated_date - start_date
         else:
             diff = timezone.now().date() - start_date
@@ -2533,28 +2513,28 @@ def get_open_findings_burndown(product):
     # count all findings older than 90 days that are still active OR will be mitigated/risk-accepted in the next 90 days
     for f in list(findings.filter(date__lt=start_date)):
         if f.active:
-            if f.severity == 'Critical':
+            if f.severity == "Critical":
                 critical_count += 1
-            if f.severity == 'High':
+            if f.severity == "High":
                 high_count += 1
-            if f.severity == 'Medium':
+            if f.severity == "Medium":
                 medium_count += 1
-            if f.severity == 'Low':
+            if f.severity == "Low":
                 low_count += 1
-            if f.severity == 'Info':
+            if f.severity == "Info":
                 info_count += 1
         elif f.is_mitigated:
             f_mitigated_date = f.mitigated.timestamp()
             if f_mitigated_date >= start_date.timestamp():
-                if f.severity == 'Critical':
+                if f.severity == "Critical":
                     critical_count += 1
-                if f.severity == 'High':
+                if f.severity == "High":
                     high_count += 1
-                if f.severity == 'Medium':
+                if f.severity == "Medium":
                     medium_count += 1
-                if f.severity == 'Low':
+                if f.severity == "Low":
                     low_count += 1
-                if f.severity == 'Info':
+                if f.severity == "Info":
                     info_count += 1
         elif f.risk_accepted:
             # simple risk acceptance does not have a risk acceptance object, so we fall back to creation date.
@@ -2562,24 +2542,24 @@ def get_open_findings_burndown(product):
             if f.risk_acceptance:
                 f_risk_accepted_date = f.risk_acceptance.created.timestamp()
             if f_risk_accepted_date >= start_date.timestamp():
-                if f.severity == 'Critical':
+                if f.severity == "Critical":
                     critical_count += 1
-                if f.severity == 'High':
+                if f.severity == "High":
                     high_count += 1
-                if f.severity == 'Medium':
+                if f.severity == "Medium":
                     medium_count += 1
-                if f.severity == 'Low':
+                if f.severity == "Low":
                     low_count += 1
-                if f.severity == 'Info':
+                if f.severity == "Info":
                     info_count += 1
 
-    running_min, running_max = float('inf'), float('-inf')
+    running_min, running_max = float("inf"), float("-inf")
     past_90_days = {
-        'Critical': [],
-        'High': [],
-        'Medium': [],
-        'Low': [],
-        'Info': []
+        "Critical": [],
+        "High": [],
+        "Medium": [],
+        "Low": [],
+        "Info": [],
     }
 
     # count the number of open findings for the 90-day window
@@ -2593,30 +2573,30 @@ def get_open_findings_burndown(product):
             # If a finding was opened on this day we add it to the counter of that day
             f_open_date = datetime.combine(f.date, datetime.min.time()).timestamp()
             if f_open_date >= d_start and f_open_date < d_end:
-                if f.severity == 'Critical':
+                if f.severity == "Critical":
                     critical_count += 1
-                if f.severity == 'High':
+                if f.severity == "High":
                     high_count += 1
-                if f.severity == 'Medium':
+                if f.severity == "Medium":
                     medium_count += 1
-                if f.severity == 'Low':
+                if f.severity == "Low":
                     low_count += 1
-                if f.severity == 'Info':
+                if f.severity == "Info":
                     info_count += 1
 
             # If a finding was mitigated on this day we subtract it
             if f.is_mitigated:
                 f_mitigated_date = f.mitigated.timestamp()
                 if f_mitigated_date >= d_start and f_mitigated_date < d_end:
-                    if f.severity == 'Critical':
+                    if f.severity == "Critical":
                         critical_count -= 1
-                    if f.severity == 'High':
+                    if f.severity == "High":
                         high_count -= 1
-                    if f.severity == 'Medium':
+                    if f.severity == "Medium":
                         medium_count -= 1
-                    if f.severity == 'Low':
+                    if f.severity == "Low":
                         low_count -= 1
-                    if f.severity == 'Info':
+                    if f.severity == "Info":
                         info_count -= 1
 
             # If a finding was risk accepted on this day we subtract it
@@ -2625,15 +2605,15 @@ def get_open_findings_burndown(product):
                 if f.risk_acceptance:
                     f_risk_accepted_date = f.risk_acceptance.created.timestamp()
                 if f_risk_accepted_date >= d_start and f_risk_accepted_date < d_end:
-                    if f.severity == 'Critical':
+                    if f.severity == "Critical":
                         critical_count -= 1
-                    if f.severity == 'High':
+                    if f.severity == "High":
                         high_count -= 1
-                    if f.severity == 'Medium':
+                    if f.severity == "Medium":
                         medium_count -= 1
-                    if f.severity == 'Low':
+                    if f.severity == "Low":
                         low_count -= 1
-                    if f.severity == 'Info':
+                    if f.severity == "Info":
                         info_count -= 1
 
         f_day = [critical_count, high_count, medium_count, low_count, info_count]
@@ -2642,14 +2622,14 @@ def get_open_findings_burndown(product):
         if max(f_day) > running_max:
             running_max = max(f_day)
 
-        past_90_days['Critical'].append([d_start * 1000, critical_count])
-        past_90_days['High'].append([d_start * 1000, high_count])
-        past_90_days['Medium'].append([d_start * 1000, medium_count])
-        past_90_days['Low'].append([d_start * 1000, low_count])
-        past_90_days['Info'].append([d_start * 1000, info_count])
+        past_90_days["Critical"].append([d_start * 1000, critical_count])
+        past_90_days["High"].append([d_start * 1000, high_count])
+        past_90_days["Medium"].append([d_start * 1000, medium_count])
+        past_90_days["Low"].append([d_start * 1000, low_count])
+        past_90_days["Info"].append([d_start * 1000, info_count])
 
-    past_90_days['y_max'] = running_max
-    past_90_days['y_min'] = running_min
+    past_90_days["y_max"] = running_max
+    past_90_days["y_min"] = running_min
 
     return past_90_days
 
@@ -2665,7 +2645,7 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
         msg = f"FileUpload object expected but type <{type(file_object)}> received."
         raise TypeError(msg)
     # Determine the path of the file on disk within the MEDIA_ROOT
-    file_path = f'{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}'
+    file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
     _, file_extension = os.path.splitext(file_path)
     # Generate the FileResponse
     response = FileResponse(

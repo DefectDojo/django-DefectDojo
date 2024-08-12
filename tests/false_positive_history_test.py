@@ -15,7 +15,7 @@ class FalsePositiveHistoryTest(BaseTestCase):
         # Navigate to the Product page to select the product we created earlier
         self.goto_product_overview(driver)
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
-        driver.find_element(By.ID, 'products_wrapper')
+        driver.find_element(By.ID, "products_wrapper")
         # Select and click on the particular product to create finding for
         driver.find_element(By.LINK_TEXT, product_name).click()
         # Click on the 'Engagement' Dropdown button
@@ -55,14 +55,14 @@ class FalsePositiveHistoryTest(BaseTestCase):
     def assert_is_active(self, finding_url):
         driver = self.driver
         driver.get(finding_url)
-        self.assertTrue(self.is_element_by_css_selector_present(selector='#notes', text='Active'))
-        self.assertFalse(self.is_element_by_css_selector_present(selector='#notes', text='False Positive'))
+        self.assertTrue(self.is_element_by_css_selector_present(selector="#notes", text="Active"))
+        self.assertFalse(self.is_element_by_css_selector_present(selector="#notes", text="False Positive"))
 
     def assert_is_false_positive(self, finding_url):
         driver = self.driver
         driver.get(finding_url)
-        self.assertFalse(self.is_element_by_css_selector_present(selector='#notes', text='Active'))
-        self.assertTrue(self.is_element_by_css_selector_present(selector='#notes', text='False Positive'))
+        self.assertFalse(self.is_element_by_css_selector_present(selector="#notes", text="Active"))
+        self.assertTrue(self.is_element_by_css_selector_present(selector="#notes", text="False Positive"))
 
     def edit_toggle_false_positive(self, finding_url):
         driver = self.driver
@@ -99,16 +99,16 @@ class FalsePositiveHistoryTest(BaseTestCase):
     def test_retroactive_edit_finding(self):
         # Create two equal findings on different engagements
         finding_1 = self.create_finding(
-            product_name='QA Test',
-            engagement_name='FP History Eng 1',
-            test_name='FP History Test',
-            finding_name='Fake Vulnerability for Edit Test'
+            product_name="QA Test",
+            engagement_name="FP History Eng 1",
+            test_name="FP History Test",
+            finding_name="Fake Vulnerability for Edit Test",
         )
         finding_2 = self.create_finding(
-            product_name='QA Test',
-            engagement_name='FP History Eng 2',
-            test_name='FP History Test',
-            finding_name='Fake Vulnerability for Edit Test'
+            product_name="QA Test",
+            engagement_name="FP History Eng 2",
+            test_name="FP History Test",
+            finding_name="Fake Vulnerability for Edit Test",
         )
         # Assert that both findings are active
         self.assert_is_active(finding_1)
@@ -127,27 +127,27 @@ class FalsePositiveHistoryTest(BaseTestCase):
     def test_retroactive_bulk_edit_finding(self):
         # Create two equal findings on different engagements
         finding_1 = self.create_finding(
-            product_name='QA Test',
-            engagement_name='FP History Eng 1',
-            test_name='FP History Test',
-            finding_name='Fake Vulnerability for Bulk Edit Test'
+            product_name="QA Test",
+            engagement_name="FP History Eng 1",
+            test_name="FP History Test",
+            finding_name="Fake Vulnerability for Bulk Edit Test",
         )
         finding_2 = self.create_finding(
-            product_name='QA Test',
-            engagement_name='FP History Eng 2',
-            test_name='FP History Test',
-            finding_name='Fake Vulnerability for Bulk Edit Test'
+            product_name="QA Test",
+            engagement_name="FP History Eng 2",
+            test_name="FP History Test",
+            finding_name="Fake Vulnerability for Bulk Edit Test",
         )
         # Assert that both findings are active
         self.assert_is_active(finding_1)
         self.assert_is_active(finding_2)
         # Bulk edit first finding to be a false positive
-        self.bulk_edit(finding_1, status_id='id_bulk_false_p')
+        self.bulk_edit(finding_1, status_id="id_bulk_false_p")
         # Assert that both findings are false positives
         self.assert_is_false_positive(finding_1)
         self.assert_is_false_positive(finding_2)
         # Reactivate second finding
-        self.bulk_edit(finding_2, status_id='id_bulk_active')
+        self.bulk_edit(finding_2, status_id="id_bulk_active")
         # Assert that both findings are active again
         self.assert_is_active(finding_1)
         self.assert_is_active(finding_2)
@@ -155,18 +155,18 @@ class FalsePositiveHistoryTest(BaseTestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(BaseTestCase('enable_block_execution'))
-    suite.addTest(BaseTestCase('disable_deduplication'))
-    suite.addTest(BaseTestCase('enable_false_positive_history'))
-    suite.addTest(BaseTestCase('enable_retroactive_false_positive_history'))
+    suite.addTest(BaseTestCase("test_login"))
+    suite.addTest(BaseTestCase("enable_block_execution"))
+    suite.addTest(BaseTestCase("disable_deduplication"))
+    suite.addTest(BaseTestCase("enable_false_positive_history"))
+    suite.addTest(BaseTestCase("enable_retroactive_false_positive_history"))
     # Add each test the the suite to be run
     # success and failure is output by the test
-    suite.addTest(ProductTest('test_create_product'))
-    suite.addTest(FalsePositiveHistoryTest('test_retroactive_edit_finding'))
-    suite.addTest(ProductTest('test_create_product'))
-    suite.addTest(FalsePositiveHistoryTest('test_retroactive_bulk_edit_finding'))
-    suite.addTest(ProductTest('test_delete_product'))
+    suite.addTest(ProductTest("test_create_product"))
+    suite.addTest(FalsePositiveHistoryTest("test_retroactive_edit_finding"))
+    suite.addTest(ProductTest("test_create_product"))
+    suite.addTest(FalsePositiveHistoryTest("test_retroactive_bulk_edit_finding"))
+    suite.addTest(ProductTest("test_delete_product"))
     return suite
 
 

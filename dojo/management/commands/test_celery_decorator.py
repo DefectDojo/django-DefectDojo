@@ -1,4 +1,5 @@
 
+import logging
 from functools import wraps
 
 from django.core.management.base import BaseCommand
@@ -8,10 +9,7 @@ from dojo.celery import app
 from dojo.models import Finding, Notes
 from dojo.utils import test_valentijn
 
-import logging
-
 logger = logging.getLogger(__name__)
-
 
 
 class Command(BaseCommand):
@@ -25,7 +23,6 @@ class Command(BaseCommand):
         test_valentijn(finding, Notes.objects.all().first())
         # test_valentijn(1)
 
-        # print('sync')
         # my_test_task(finding)
 
         # sync
@@ -35,7 +32,6 @@ class Command(BaseCommand):
         # inside after
         # outside after
 
-        # print('async')
         # my_test_task.delay(finding)
 
         # async
@@ -63,7 +59,7 @@ def my_decorator_outside(func):
         func(*args, **kwargs)
         logger.debug("outside after")
 
-    if getattr(func, 'delay', None):
+    if getattr(func, "delay", None):
         wrapper.delay = my_decorator_outside(func.delay)
 
     return wrapper
@@ -82,7 +78,7 @@ def my_decorator_inside(func):
 @app.task
 @my_decorator_inside
 def my_test_task(new_finding, *args, **kwargs):
-    logger.debug('oh la la what a nice task')
+    logger.debug("oh la la what a nice task")
 
 
 # example working with multiple parameters...
@@ -93,6 +89,6 @@ def my_test_task(new_finding, *args, **kwargs):
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
 def test_valentijn_task(new_finding, note, **kwargs):
-    logger.debug('test_valentijn:')
+    logger.debug("test_valentijn:")
     logger.debug(new_finding)
     logger.debug(note)

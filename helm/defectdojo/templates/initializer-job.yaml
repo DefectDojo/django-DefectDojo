@@ -60,8 +60,6 @@ spec:
         - "-verbose={{ .Values.cloudsql.verbose }}"
         {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
-        {{- else if eq .Values.database "mysql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.primary.service.ports.mysql }}"
         {{- end }}
         {{- if .Values.cloudsql.enable_iam_login }}
         - "-enable_iam_login"
@@ -101,9 +99,6 @@ spec:
               {{- else if eq .Values.database "postgresqlha" }}
               name: {{ .Values.postgresqlha.postgresql.existingSecret }}
               key: postgresql-postgres-password
-              {{- else if eq .Values.database "mysql" }}
-              name: {{ .Values.mysql.auth.existingSecret }}
-              key: {{ .Values.mysql.auth.secretKey }}
               {{- end }}
         {{- if .Values.extraEnv }}
         {{- toYaml .Values.extraEnv | nindent 8 }}
