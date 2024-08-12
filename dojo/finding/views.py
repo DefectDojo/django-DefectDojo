@@ -32,6 +32,7 @@ import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.risk_acceptance.risk_pending as rp_helper
+import dojo.transfer_findings.helper as tf_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import (
     user_has_global_permission,
@@ -1348,13 +1349,10 @@ def close_finding(request, fid):
                 # Because it could generate too much noise, we keep it here only for findings created by hand in WebUI
                 # TODO: but same should be implemented for API endpoint
 
-                create_notification(
-                    event="finding_closed",
-                    title=_("Closing of %s") % finding.title,
-                    finding=finding,
-                    description=f'The finding "{finding.title}" was closed by {request.user}',
-                    url=reverse("view_finding", args=(finding.id,)),
-                )
+                tf_helper.close_or_reactive_related_finding(event="close",
+                                                            parent_finding=finding,
+                                                            notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                                                            send_notification=False)
                 return HttpResponseRedirect(
                     reverse("view_test", args=(finding.test.id,)),
                 )

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block add_styles %}
+    {{ block.super }}
+    .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+{% endblock %}
+{% block add_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
+    <style>
+        .modal-content {
+          width: 200%; /* Ajusta el ancho como desees */
+          margin: 0 -50%; /* Centra el contenido horizontalmente */
+        }
+      </style>
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    <h3> Transfer Finding Edit</h3>
+    <div id="transfer_finding">
+        <p>
+        </p>
+        <p>
+            A Transfer Finding Edit can consist of compensating control(s) and documentation.
+            Documentation can be in the form of an image or PDF file.<br/>
+            Select the findings that apply to this Tranfer finding.
+        </p>
+        <br/>
+        <form id="edit_transfer_finding" enctype="multipart/form-data" class="form-horizontal" method="post">
+            {% csrf_token %}
+            {% include "dojo/form_fields.html" with form=form %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn btn-primary" type="submit" value="Save"/>
+                </div>
+            </div>
+            <br/><br/>
+        </form>
+    </div>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+<script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>
+<script type="text/javascript">
+</script>
+
+{% endblock %}

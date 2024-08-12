@@ -7,4 +7,7 @@ urlpatterns = [
         views.TransferFindingDeleteView.as_view(),
         name='view_tranferFinding_delete'
     ),
+    path("transfer_finding/<int:pk>/edit/",
+         views.TransferFindingUpdateView.as_view(),
+         name="transferfinding_update_form")
 ]

@@ -2295,6 +2295,7 @@ class Finding(models.Model):
                       ('Risk Active', 'Risk Active'),
                       ('Transfer Pending', 'Transfer Pending'),
                       ('Transfer Rejected', 'Transfer Rejected'),
+                      ('Transfer Expired', 'Transfer Expired'),
                       ('Transfer Accepted', 'Transfer Accepted'))
 
     title = models.CharField(max_length=511,
@@ -3015,19 +3016,21 @@ class Finding(models.Model):
         if self.duplicate:
             status += ["Duplicate"]
         if self.risk_status == "Transfer Accepted":
-            status += ['Transfer Accepted']
+            status += ["Transfer Accepted"]
+        if self.risk_status == "Transfer Expired":
+            status += ["Transfer Expired"]
         if self.risk_status == "Transfer Pending":
-            status += ['Transfer Pending']
+            status += ["Transfer Pending"]
         if self.risk_status == "Transfer Rejected":
-            status += ['Transfer Rejected']
+            status += ["Transfer Rejected"]
         if self.risk_status == "Risk Pending":
-            status += ['Risk pending']
+            status += ["Risk pending"]
         if self.risk_status == "Risk Rejected":
-            status += ['Risk Rejected']
+            status += ["Risk Rejected"]
         if self.risk_status == "Risk Expired":
-            status += ['Risk Expired']
+            status += ["Risk Expired"]
         elif self.risk_accepted:
-            status += ['Risk Accepted']
+            status += ["Risk Accepted"]
         if not len(status):
             status += ["Initial"]
 
@@ -4209,17 +4212,17 @@ class Notifications(models.Model):
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
 
-    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, help_text=_("Triggered whenever an (re-)import has been done that created/updated/closed findings."))
+    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True, help_text=_("Triggered whenever an (re-)import has been done that created/updated/closed findings."))
     scan_added_empty = MultiSelectField(choices=NOTIFICATION_CHOICES, default=[], blank=True, help_text=_("Triggered whenever an (re-)import has been done (even if that created/updated/closed no findings)."))
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
-    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
+    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
     user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
     template = models.BooleanField(default=False)

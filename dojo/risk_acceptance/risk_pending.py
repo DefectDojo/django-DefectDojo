@@ -43,12 +43,29 @@ def risk_acceptance_decline(
     return Response(status=status, message=message)
 
 
-def update_expiration_risk_accepted(finding: Finding):
+def update_expiration_risk_accepted(finding: Finding,
+                                    risk_acceptance: Risk_Acceptance):
+    finding_accepteds = risk_acceptance.accepted_findings.filter(
+        risk_status__in=["Risk Accepted", "Risk Expired"]
+        )
     expiration_delta_days = sla_expiration_risk_acceptance('RiskAcceptanceExpiration')
-    logger.debug(f"Update RiskAcceptanceExpiration: {expiration_delta_days}")
-    expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days.get(finding.severity.lower()))
-    created_date = timezone.now().date()
-    return expiration_delta_days.get(finding.severity.lower()), expiration_date, created_date
+
+    if (
+        len(finding_accepteds) == 0 and
+        risk_acceptance.is_expired is False
+            ):
+
+        logger.debug(f"Update RiskAcceptanceExpiration: {expiration_delta_days}")
+        expiration_date = timezone.now().date() + relativedelta(
+            days=expiration_delta_days.get(finding.severity.lower())
+            )
+        created_date = timezone.now().date()
+        risk_acceptance.expiration_date = expiration_date
+        risk_acceptance.created = created_date
+        risk_acceptance.save()
+    return (expiration_delta_days.get(finding.severity.lower()),
+            risk_acceptance.expiration_date,
+            risk_acceptance.created)
 
 
 def handle_from_provider_risk(finding, acceptance_days):
@@ -78,24 +95,25 @@ def risk_accepted_succesfully(
     finding.risk_status = "Risk Accepted"
     finding.risk_accepted = True
     finding.active = False
-    acceptance_days, expiration_date, created_date = update_expiration_risk_accepted(finding)
-    handle_from_provider_risk(finding, acceptance_days)
-    risk_acceptance.expiration_date = expiration_date
-    risk_acceptance.created = created_date
-    risk_acceptance.save()
+    acceptance_days, __, __ = update_expiration_risk_accepted(finding,
+                                                              risk_acceptance)
     finding.save()
+    handle_from_provider_risk(finding, acceptance_days)
 
     system_settings = System_Settings.objects.get()
     if system_settings.enable_transfer_finding:
         hp_transfer_finding.close_or_reactive_related_finding(
-            event="close",
+            event="accepted",
             parent_finding=finding,
             notes=f"temporarily accepted by the parent finding {finding.id} (policies for the transfer of findings)",
-            send_notification=True)
+            send_notification=False)
 
     if send_notification:
         title = f"Request is accepted:  {str(risk_acceptance.engagement.product)} : {str(risk_acceptance.engagement.name)}"
-        Notification.risk_acceptance_accept(title=title, risk_acceptance=risk_acceptance, finding=finding) 
+        Notification.risk_acceptance_accept(
+            title=title,
+            risk_acceptance=risk_acceptance,
+            finding=finding) 
 
 
 def get_role_members(user, product: Product, product_type: Product_Type):
@@ -431,19 +449,3 @@ def validate_list_findings(conf_risk, type, finding, eng):
             ),
             None,
         )
-
-
-def acceptance_findings_related(parent_finding: Finding, risk_acceptance: Risk_Acceptance):
-    transfer_finding_findings = TransferFindingFinding.objects.filter(finding_related=parent_finding)
-    for transfer_finding_finding in transfer_finding_findings:
-
-        Risk_Acceptance(name="Transfer finding - " + transfer_finding_finding.finding_related.title,
-                        accepted_findings=[transfer_finding_finding.finding_related],
-                        severity=transfer_finding_finding.severity,
-                        accepted_by=risk_acceptance.accepted_by,
-                        owner=get_user(settings.SYSTEM_USER),
-                        expiration_date=update_expiration_risk_accepted(transfer_finding_finding),
-                        reactivate_expired=True,
-                        restart_sla_expired=False,
-                        notes=Notes(entry="Finding accepted by findings transfer policy")
-                        )
