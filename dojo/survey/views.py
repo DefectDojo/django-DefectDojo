@@ -874,7 +874,7 @@ class ExistingEngagementEmptySurveyView(View):
     def get(self, request, esid):
         survey = get_object_or_404(Answered_Survey, id=esid)
         if survey.engagement:
-            # If the questionnaire is already linked so a survey, ensure the user has permission edit it
+            # If the questionnaire is already linked to a survey, ensure the user has permission to edit it
             user_has_permission_or_403(request.user, survey.engagement, Permissions.Engagement_Edit)
             # Prepopulate the form with the current engagement
             form = self.get_form_class()({"engagement": survey.engagement})
