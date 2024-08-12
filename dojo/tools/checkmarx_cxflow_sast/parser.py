@@ -38,6 +38,20 @@ class _Path(object):
         self.paths = paths
 
 
+class _CheckmarxState(Enum):
+    def __str__(self):
+        return str(self.value)
+
+    # 0, 1, 2, 3, 4
+    # To verify, Not Exploitable, Confirmed, Urgent, Proposed not exploitable
+
+    ToVerify = 0
+    NotExploitable = 1
+    Confirmed = 2
+    Urgent = 3
+    ProposedNotExploitable = 4
+
+
 class CheckmarxCXFlowSastParser(object):
     def __init__(self):
         pass
@@ -138,13 +152,13 @@ class CheckmarxCXFlowSastParser(object):
 
     def is_verify(self, state):
         # Confirmed, urgent
-        verifiedStates = ["2", "3"]
+        verifiedStates = [_CheckmarxState.ToVerify, _CheckmarxState.Urgent]
         return state in verifiedStates
 
     def is_active(self, state):
         # To verify, Confirmed, Urgent, Proposed not exploitable
-        activeStates = ["0", "2", "3", "4"]
+        activeStates = [_CheckmarxState.ToVerify, _CheckmarxState.Confirmed, _CheckmarxState.Urgent, _CheckmarxState.ProposedNotExploitable]
         return state in activeStates
 
     def is_not_exploitable(self, state):
-        return state == "1"
+        return state == _CheckmarxState.NotExploitable
