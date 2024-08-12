@@ -1,4 +1,6 @@
 import json
+from enum import Enum
+
 import dateutil.parser
 import logging
 
@@ -36,6 +38,20 @@ class _Path(object):
         self.paths = paths
 
 
+class _CheckmarxState(Enum):
+    def __str__(self):
+        return str(self.value)
+
+    # 0, 1, 2, 3, 4
+    # To verify, Not Exploitable, Confirmed, Urgent, Proposed not exploitable
+
+    ToVerify = 0
+    NotExploitable = 1
+    Confirmed = 2
+    Urgent = 3
+    ProposedNotExploitable = 4
+
+
 class CheckmarxCXFlowSastParser(object):
     def __init__(self):
         pass
@@ -53,6 +69,7 @@ class CheckmarxCXFlowSastParser(object):
         if file.name.strip().lower().endswith(".json"):
             return self._get_findings_json(file, test)
         else:
+            # TODO: support CxXML format
             logger.warning(f"Not supported file format ${file}")
             return list()
 
@@ -114,7 +131,6 @@ class CheckmarxCXFlowSastParser(object):
                         cwe=int(cwe),
                         date=dateutil.parser.parse(scan_start_date),
                         static_finding=True,
-                        unique_id_from_tool=str(similarity_id) + str(detail_key),
                         test=test,
                         sast_source_object=detail.source.node_object if detail.source is not None else None,
                         sast_sink_object=detail.sink.node_object if detail.sink is not None else None,
@@ -136,13 +152,13 @@ class CheckmarxCXFlowSastParser(object):
 
     def is_verify(self, state):
         # Confirmed, urgent
-        verifiedStates = ["2", "3"]
+        verifiedStates = [_CheckmarxState.ToVerify, _CheckmarxState.Urgent]
         return state in verifiedStates
 
     def is_active(self, state):
         # To verify, Confirmed, Urgent, Proposed not exploitable
-        activeStates = ["0", "2", "3", "4"]
+        activeStates = [_CheckmarxState.ToVerify, _CheckmarxState.Confirmed, _CheckmarxState.Urgent, _CheckmarxState.ProposedNotExploitable]
         return state in activeStates
 
     def is_not_exploitable(self, state):
-        return state == "1"
+        return state == _CheckmarxState.NotExploitable

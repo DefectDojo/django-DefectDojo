@@ -1493,7 +1493,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
-    "Checkmarx CxFlow SAST": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Checkmarx CxFlow SAST": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

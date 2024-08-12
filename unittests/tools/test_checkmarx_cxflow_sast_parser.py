@@ -35,7 +35,7 @@ class TestCheckmarxCxflowSast(DojoTestCase):
         self.assertIn("Reflected XSS All Clients", finding.title)
         self.assertEqual(79, finding.cwe)
         self.assertEqual(dateutil.parser.parse("Sunday, January 19, 2020 2:40:11 AM"), finding.date)
-        self.assertEqual("14660819" + "88", finding.unique_id_from_tool)
+        self.assertEqual("14660819", finding.unique_id_from_tool)
         self.assertEqual("getRawParameter", finding.sast_source_object)
         self.assertEqual("username", finding.sast_sink_object)
         self.assertEqual("DOS_Login.java", finding.sast_source_file_path)
@@ -54,7 +54,7 @@ class TestCheckmarxCxflowSast(DojoTestCase):
         self.assertEqual(True, finding.active)
         self.assertEqual(False, finding.verified)
 
-    def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_11_finding(self):
+    def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_4_findings(self):
         my_file_handle, product, engagement, test = self.init(
             get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/4-findings.json"
         )
