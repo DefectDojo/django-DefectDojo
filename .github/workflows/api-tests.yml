@@ -1,0 +1,113 @@
+name: Api Tests and Change logs
+
+on:
+  workflow_call:
+
+jobs:
+  api_tests:
+    name: Api Tests and Change logs
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        validator:
+          - swagger-editor-validate
+          - spectral
+          - LimeFlight
+          - oasdiff-diff
+          - oasdiff-changelog
+          - oasdiff-breaking
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # load docker images from build jobs
+      - name: Load images from artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Load docker images
+        run: |-
+             docker load -i nginx/nginx-alpine_img
+             docker load -i django/django-alpine_img
+             docker images
+
+      - name: Start Dojo
+        run: docker compose up --no-deps -d postgres nginx uwsgi
+        env:
+          DJANGO_VERSION: alpine
+          NGINX_VERSION: alpine
+
+      - name: Download OpenAPI Specifications - base
+        run: |-
+             wget 'https://github.com/DefectDojo/django-DefectDojo/releases/latest/download/oas.json' -O oas_base.json
+
+      - name: Download OpenAPI Specifications
+        run: |-
+             wget 'http://localhost:8080/api/v2/oa3/schema/?format=json' -O oas.json --tries=10 --retry-on-http-error=502
+
+      - name: Logs
+        if: always()
+        run: docker compose logs --tail="2500"
+
+      - name: Shutdown
+        if: always()
+        run: docker compose down
+
+      - uses: char0n/swagger-editor-validate@v1
+        if: matrix.validator == 'swagger-editor-validate'
+        with:
+          definition-file: oas.json
+
+
+      - uses: stoplightio/spectral-action@v0.8.11
+        if: matrix.validator == 'spectral'
+        with:
+          file_glob: ./oas.json
+
+      - uses: LimeFlight/openapi-diff-action@master
+        if: matrix.validator == 'LimeFlight'
+        with:
+          head_spec: oas.json
+          base_spec: oas_base.json
+          output_path: ./output
+          github_token: ${{ github.token }}
+
+      - uses: oasdiff/oasdiff-action/diff@v0.0.19
+        id: oasdiff_diff
+        if: matrix.validator == 'oasdiff-diff'
+        with:
+          base: https://github.com/DefectDojo/django-DefectDojo/releases/latest/download/oas.json
+          revision: oas.json
+          format: text
+      - uses: thollander/actions-comment-pull-request@v2
+        if: matrix.validator == 'oasdiff-diff'
+        with:
+          message: |
+            ${{ steps.oasdiff_diff.outputs.diff }}
+          comment_tag: oasdiff-diff
+          
+      - uses: oasdiff/oasdiff-action/changelog@v0.0.19
+        id: oasdiff_changelog
+        if: matrix.validator == 'oasdiff-changelog'
+        with:
+          base: https://github.com/DefectDojo/django-DefectDojo/releases/latest/download/oas.json
+          revision: oas.json
+      - uses: thollander/actions-comment-pull-request@v2
+        if: matrix.validator == 'oasdiff-changelog'
+        with:
+          message: |
+            ${{ steps.oasdiff_changelog.outputs.changelog }}          
+          comment_tag: oasdiff-changelog
+
+      - uses: oasdiff/oasdiff-action/breaking@v0.0.19
+        if: matrix.validator == 'oasdiff-breaking'
+        with:
+          base: https://github.com/DefectDojo/django-DefectDojo/releases/latest/download/oas.json
+          revision: oas.json
+
