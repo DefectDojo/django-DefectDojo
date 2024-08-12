@@ -26,6 +26,19 @@ networkPolicy:
   #  - podSelector:
   #      matchLabels:
   #      app.kubernetes.io/instance: defectdojo-prometheus
+  # For more detailed configuration with ports and peers. It will ignore ingressExtend
+  ingress: []
+  # ingress:
+  #  - from:
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: defectdojo
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: defectdojo-prometheus
+  #    ports:
+  #    - protocol: TCP
+  #      port: 8443
   egress: []
   # egress:
   # - to:
