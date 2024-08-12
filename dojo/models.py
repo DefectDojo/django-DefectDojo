@@ -1264,18 +1264,6 @@ class Product(models.Model):
             engagement_list.append(engagement_dict)
         return engagement_list
 
-    @property
-    def engagements_list(self):
-        engagements = Engagement.objects.filter(product=self, active=True)
-        engagement_list = []
-        for engagement_dict in engagements.values("id", "name", "product_id", "status", "engagement_type", "build_id"):
-            findings = Finding.objects.filter(test__engagement__id=engagement_dict["id"], active=True, risk_status__in=["Risk Active", "Risk Expired"])
-            engagement_dict.update({"findings": list(
-                findings.values("id", "title", "cve", "severity", "description", "active",
-                                "verified", "risk_status", "risk_accepted", "accepted_by"))})
-            engagement_list.append(engagement_dict)
-        return engagement_list
-
     # only used in APIv2 serializers.py, query should be aligned with findings_count
     @cached_property
     def open_findings_list(self):
