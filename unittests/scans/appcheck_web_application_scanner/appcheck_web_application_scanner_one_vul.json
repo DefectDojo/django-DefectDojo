@@ -1,0 +1,131 @@
+{
+    "items": [
+        {
+            "mss_confirmed": false,
+            "domain": "example123456789",
+            "manually_altered": false,
+            "probability": "3.0-medium",
+            "cvss_base_score": 4.8,
+            "cpe": [],
+            "disabled": false,
+            "meta": {
+                "raw_data": "<?xml version='1.0' encoding='utf8'?>\n<result id=\"8fdb09bd-77a6-4e8c-af4d-538d12a6b5b4\"><name>FTP Unencrypted Cleartext Login</name><owner><name>admin</name></owner><comment /><creation_time>2020-01-29T20:15:02Z</creation_time><modification_time>2020-01-29T20:15:02Z</modification_time><user_tags><count>0</count></user_tags><host>0.0.0.1<asset asset_id=\"\" /></host><port>21/tcp</port><nvt oid=\"1.3.6.1.4.1.25623.1.0.108528\"><type>nvt</type><name>FTP Unencrypted Cleartext Login</name><family>General</family><cvss_base>4.8</cvss_base><cve>NOCVE</cve><bid>NOBID</bid><xref>NOXREF</xref><tags>cvss_base_vector=AV:A/AC:L/Au:N/C:P/I:P/A:N|summary=The remote host is running a FTP service that allows cleartext logins over\n  unencrypted connections.|impact=An attacker can uncover login names and passwords by sniffing traffic to the\n  FTP service.|vuldetect=Tries to login to a non FTPS enabled FTP service without sending a\n  'AUTH TLS' command first and checks if the service is accepting the login without enforcing the use of\n  the 'AUTH TLS' command.|solution=Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see\n  the manual of the FTP service for more information.|solution_type=Mitigation|qod_type=remote_analysis</tags><cert /></nvt><scan_nvt_version>$Revision: 13026 $</scan_nvt_version><threat>Medium</threat><severity>4.8</severity><qod><value>70</value><type>remote_analysis</type></qod><description>The remote FTP service accepts logins without a previous sent 'AUTH TLS' command. Response(s):\n\nAnonymous sessions:     331 Password required for anonymous.\nNon-anonymous sessions: 331 Password required for AppCheck-NG-vt.</description><original_threat>Medium</original_threat><original_severity>4.8</original_severity><notes /><overrides /></result>",
+                "scanning_engine": {
+                    "type": "unknown",
+                    "name": "OpenVASScanner",
+                    "_meta": {
+                        "ordered_keys": [
+                            "type",
+                            "name"
+                        ]
+                    }
+                },
+                "_meta": {
+                    "ordered_keys": [
+                        "raw_data",
+                        "scanning_engine"
+                    ]
+                }
+            },
+            "modified": "2020-01-29T20:15:27.593000",
+            "first_detected_at": "2020-01-28T14:29:10.173000",
+            "port": 21,
+            "cves": [],
+            "impact": "3.0-medium",
+            "last_detected_at": "2020-01-29T20:15:27.488000",
+            "authenticated": false,
+            "title": "FTP Unencrypted Cleartext Login",
+            "integration": [],
+            "priority": "3.0-medium",
+            "results_set_id": [
+                "ba93d00d59af4b5c",
+                "cc397006697f4eda"
+            ],
+            "details": {
+                "Impact": "[[markup]]An attacker can uncover login names and passwords by sniffing traffic to the   FTP service.",
+                "Detection": "[[markup]]Tries to login to a non FTPS enabled FTP service without sending a   'AUTH TLS' command first and checks if the service is accepting the login without enforcing the use of   the 'AUTH TLS' command.",
+                "Technical Details": "The remote FTP service accepts logins without a previous sent 'AUTH TLS' command. Response(s):\n\nAnonymous sessions:     331 Password required for anonymous.\nNon-anonymous sessions: 331 Password required for appcheck-ng-vt.",
+                "_meta": {
+                    "ordered_keys": [
+                        "Impact",
+                        "Detection",
+                        "Technical Details"
+                    ]
+                }
+            },
+            "type": "INFRA",
+            "trashed": false,
+            "status": "unfixed",
+            "category": "infra",
+            "description": "The remote host is running a FTP service that allows cleartext logins over\n  unencrypted connections.",
+            "tags": [
+                "vuln"
+            ],
+            "ipv4_address": "0.0.0.1",
+            "host": "0.0.0.1",
+            "OWASP": [],
+            "_meta": {
+                "ordered_keys": [
+                    "status",
+                    "domain",
+                    "manually_altered",
+                    "probability",
+                    "cvss_base_score",
+                    "solution",
+                    "disabled",
+                    "meta",
+                    "first_detected_at",
+                    "port",
+                    "cves",
+                    "impact",
+                    "last_detected_at",
+                    "authenticated",
+                    "title",
+                    "integration",
+                    "priority",
+                    "results_set_id",
+                    "details",
+                    "type",
+                    "trashed",
+                    "mss_confirmed",
+                    "category",
+                    "description",
+                    "tags",
+                    "cpe",
+                    "ipv4_address",
+                    "host",
+                    "OWASP",
+                    "cvss_vector",
+                    "_id",
+                    "target",
+                    "created",
+                    "latest_detected_result",
+                    "notes",
+                    "modified",
+                    "patch",
+                    "attachments",
+                    "suppression_days",
+                    "synopsis",
+                    "meta_migration",
+                    "signature",
+                    "fixed"
+                ]
+            },
+            "cvss_vector": "AV:A/AC:L/Au:N/C:P/I:P/A:N",
+            "fixed": false,
+            "target": "general",
+            "created": "2020-01-28T14:29:10.172000",
+            "latest_detected_result": true,
+            "notes": "",
+            "solution": "[[markup]]Enable FTPS or enforce the connection via the 'AUTH TLS' command. Please see   the manual of the FTP service for more information.",
+            "patch": [],
+            "attachments": [],
+            "suppression_days": 14,
+            "synopsis": "The remote host is running a FTP service that allows cleartext logins over\n  unencrypted connections.",
+            "meta_migration": [],
+            "signature": -3844490121075024351,
+            "_id": "c50f88e969225674a9a62abca23b15ac95a9cdb8"
+        }
+    ],
+    "hosts": []
+}
