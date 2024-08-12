@@ -37,6 +37,8 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v6
         timeout-minutes: 10
+        env:
+          DOCKER_BUILD_CHECKS_ANNOTATIONS: false
         with:
           context: .
           push: false
