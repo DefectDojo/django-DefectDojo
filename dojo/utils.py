@@ -1438,21 +1438,19 @@ def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
         backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=backend)
+        cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
         encryptor = cipher.encryptor()
-        encryptor.authenticate_additional_data(_pad_string(get_aad_key()))
         plaintext = _pad_string(plaintext)
         encrypted_text = encryptor.update(plaintext) + encryptor.finalize()
         text = binascii.b2a_hex(encrypted_text).rstrip()
-    return (text, encryptor.tag)
+    return text
 
 
-def decrypt(key, iv, encrypted_text, tag):
+def decrypt(key, iv, encrypted_text):
     backend = default_backend()
-    cipher = Cipher(algorithms.AES(key), modes.GCM(iv, tag), backend=backend)
+    cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
-    decryptor.authenticate_additional_data(_pad_string(get_aad_key()))
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
     decrypted_text = _unpad_string(decrypted_text)
     return decrypted_text
@@ -1483,7 +1481,7 @@ def dojo_crypto_encrypt(plaintext):
     return data
 
 
-def prepare_for_save(iv, encrypted_value, tag):
+def prepare_for_save(iv, encrypted_value):
     stored_value = None
 
     if encrypted_value and encrypted_value is not None:

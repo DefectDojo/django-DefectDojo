@@ -172,4 +172,3 @@ zipp==3.19.1
 sniffio==1.3.0
 anyio==4.2.0
 django-permissions-policy==4.19.0
-coverage==7.6.1
