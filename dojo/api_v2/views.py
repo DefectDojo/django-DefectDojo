@@ -1715,6 +1715,21 @@ class ProductViewSet(
         else:
             instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @extend_schema(
+        responses={status.HTTP_200_OK: serializers.EngagementByProductResponseSerializer},
+    )
+    @action(
+        detail=True, methods=["get"], permission_classes=[IsAuthenticated]
+    )
+    def engagements(self, request, pk=None):
+        try:
+            queryset = self.get_queryset().get(pk=pk)
+        except Product.DoesNotExist:
+            return http_response.non_authoritative_information()
+
+        serializer = serializers.EngagementByProductResponseSerializer(queryset)
+        return http_response.ok(data=serializer.data)
 
     # def list(self, request):
     #     # Note the use of `get_queryset()` instead of `self.queryset`
