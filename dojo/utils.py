@@ -669,12 +669,14 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             counts.append(start_of_period.strftime("%b %Y"))
-        counts.append(o_count["zero"])
-        counts.append(o_count["one"])
-        counts.append(o_count["two"])
-        counts.append(o_count["three"])
-        counts.append(total)
-        counts.append(o_count["closed"])
+        counts.extend((
+            o_count["zero"],
+            o_count["one"],
+            o_count["two"],
+            o_count["three"],
+            total,
+            o_count["closed"],
+        ))
 
         stuff.append(counts)
         o_stuff.append(counts[:-1])
@@ -687,11 +689,13 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             a_counts.append(start_of_period.strftime("%b %Y"))
-        a_counts.append(a_count["zero"])
-        a_counts.append(a_count["one"])
-        a_counts.append(a_count["two"])
-        a_counts.append(a_count["three"])
-        a_counts.append(a_total)
+        a_counts.extend((
+            a_count["zero"],
+            a_count["one"],
+            a_count["two"],
+            a_count["three"],
+            a_total,
+        ))
         a_stuff.append(a_counts)
 
 
@@ -1779,7 +1783,7 @@ def get_return_url(request):
         # for some reason using request.GET.get('return_url') never works
         return_url = request.GET["return_url"] if "return_url" in request.GET else None
 
-    return return_url if return_url else None
+    return return_url or None
 
 
 def redirect_to_return_url_or_else(request, or_else):
@@ -2435,7 +2439,7 @@ def calculate_finding_age(f):
         else:
             diff = timezone.now().date() - start_date
         days = diff.days
-    return days if days > 0 else 0
+    return max(0, days)
 
 
 def get_open_findings_burndown(product):

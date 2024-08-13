@@ -1247,7 +1247,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
                 )
             )
         ) or (
-            self.context["request"].method in ["POST"] and endpoint.count() > 0
+            self.context["request"].method == "POST" and endpoint.count() > 0
         ):
             msg = (
                 "It appears as though an endpoint with this data already "

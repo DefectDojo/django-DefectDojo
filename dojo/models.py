@@ -1476,7 +1476,7 @@ class Engagement(models.Model):
         ]
 
     def __str__(self):
-        return "Engagement %i: %s (%s)" % (self.id if id else 0, self.name if self.name else "",
+        return "Engagement %i: %s (%s)" % (self.id if id else 0, self.name or "",
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
 
@@ -1621,7 +1621,7 @@ class Endpoint_Status(models.Model):
         else:
             diff = get_current_date() - self.date
         days = diff.days
-        return days if days > 0 else 0
+        return max(0, days)
 
 
 class Endpoint(models.Model):
@@ -1664,7 +1664,7 @@ class Endpoint(models.Model):
             if self.host:
                 dummy_scheme = "dummy-scheme"  # workaround for https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988
                 url = hyperlink.EncodedURL(
-                    scheme=self.protocol if self.protocol else dummy_scheme,
+                    scheme=self.protocol or dummy_scheme,
                     userinfo=self.userinfo or "",
                     host=self.host,
                     port=self.port,
@@ -2982,7 +2982,7 @@ class Finding(models.Model):
             else:
                 diff = get_current_date() - start_date
             days = diff.days
-        return days if days > 0 else 0
+        return max(0, days)
 
     @property
     def age(self):
