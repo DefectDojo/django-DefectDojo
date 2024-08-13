@@ -61,6 +61,7 @@ select = [
    "PTH2",
    "PD",
    "PGH",
+   "PLE",
    "TRY003",
    "TRY004",
    "TRY2",
