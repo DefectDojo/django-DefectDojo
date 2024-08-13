@@ -4741,12 +4741,12 @@ class ChoiceAnswer(Answer):
 
 class PermissionKey(models.Model):
     token = models.CharField(max_length=100, unique=True, null=True)
-    status = models.BooleanField(default=False)
+    status = models.BooleanField(default=True)
     user = models.ForeignKey(Dojo_User, null=True, blank=True, on_delete=models.CASCADE)
     risk_acceptance = models.ForeignKey(Risk_Acceptance, null=True, blank=True, on_delete=models.CASCADE)
     transfer_finding = models.ForeignKey(TransferFinding, null=True, blank=True, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now=True)
-    expiration = models.DateTimeField(auto_now=True)
+    expiration = models.DateTimeField()
 
     def is_expired(self):
         return self.status
@@ -4773,16 +4773,14 @@ class PermissionKey(models.Model):
         ):
 
         token = secrets.token_urlsafe(64)
-        expiration = timezone.now() + timedelta(hours=lifetime)
-        created = timezone.now()
+        expiration = timezone.now() + timedelta(minutes=lifetime)
         try:
             permissionkey = cls.objects.create(
                 token=token,
                 user=user,
                 risk_acceptance=risk_acceptance,
                 transfer_finding=transfer_finding,
-                expiration=expiration,
-                created=created)
+                expiration=expiration)
         except IntegrityError:
             logger.debug("IntegrityError token key duplicated")
             permissionkey = cls.objects.create(
@@ -4790,8 +4788,7 @@ class PermissionKey(models.Model):
                 user=user,
                 risk_acceptance=risk_acceptance,
                 transfer_finding=transfer_finding,
-                expiration=expiration,
-                created=created)
+                expiration=expiration)
 
         return permissionkey
             

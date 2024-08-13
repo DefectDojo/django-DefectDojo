@@ -145,6 +145,7 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             url = "/".join([
                 settings.HOST_ACCEPTANCE_RISK_FOR_EMAIL,
                 "accept_bullk",
+                str(risk_pending.id),
                 token
                 ])
             

@@ -10,6 +10,7 @@ from django.urls import reverse
 from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
     Product, Product_Type, TransferFindingFinding, Dojo_User, Notes, TransferFinding, System_Settings, \
     PermissionKey
+from dojo.api_v2.api_error import ApiError
 from dojo.risk_acceptance.helper import post_jira_comments
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
@@ -129,9 +130,12 @@ def role_has_exclusive_permissions(user):
 def get_user_with_permission_key(permission_key=None):
     if permission_key is None:
         return crum.get_current_user()
-    user = PermissionKey.objects.get(token=permission_key).user
-    logger.debug(f"User {user} with Permmission key ****")
-    return user
+    permission_key = PermissionKey.objects.get(token=permission_key)
+    if permission_key.status and permission_key.is_expired:
+        user = permission_key.user
+        logger.debug(f"User {user} with Permmission key ****")
+        return user
+    raise ApiError.network_authentication_required(detail="Token is expired")
     
 
 def risk_acceptante_pending(eng: Engagement,
