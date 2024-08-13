@@ -827,15 +827,17 @@ class CSVExportView(View):
                         logger.error("Error in attribute: " + str(exc))
                         fields.append(key)
                         continue
-                fields.append("test")
-                fields.append("found_by")
-                fields.append("engagement_id")
-                fields.append("engagement")
-                fields.append("product_id")
-                fields.append("product")
-                fields.append("endpoints")
-                fields.append("vulnerability_ids")
-                fields.append("tags")
+                fields.extend((
+                    "test",
+                    "found_by",
+                    "engagement_id",
+                    "engagement",
+                    "product_id",
+                    "product",
+                    "endpoints",
+                    "vulnerability_ids",
+                    "tags",
+                ))
                 self.fields = fields
                 self.add_extra_headers()
 

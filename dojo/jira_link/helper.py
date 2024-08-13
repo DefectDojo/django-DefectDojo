@@ -1381,7 +1381,7 @@ def add_comment(obj, note, force_push=False, **kwargs):
                 j_issue = obj.jira_issue
                 jira.add_comment(
                     j_issue.jira_id,
-                    f"({note.author.get_full_name() if note.author.get_full_name() else note.author.username}): {note.entry}")
+                    f"({note.author.get_full_name() or note.author.username}): {note.entry}")
                 return True
             except JIRAError as e:
                 log_jira_generic_alert("Jira Add Comment Error", str(e))

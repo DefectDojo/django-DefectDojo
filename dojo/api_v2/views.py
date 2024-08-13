@@ -2624,7 +2624,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         # have been created yet
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
-            jira_driver = (engagement if engagement else product if product else None)
+            jira_driver = engagement or (product or None)
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
         logger.debug(f"push_to_jira: {push_to_jira}")
@@ -2793,9 +2793,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         # have been created yet
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
-            jira_driver = (
-                test if test else engagement if engagement else product if product else None
-            )
+            jira_driver = test or (engagement or (product or None))
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
         logger.debug(f"push_to_jira: {push_to_jira}")
