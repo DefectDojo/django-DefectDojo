@@ -31,6 +31,7 @@ from tagulous.forms import TagField
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 from dojo.models import (
@@ -579,10 +580,10 @@ class ImportScanForm(forms.Form):
         file = cleaned_data.get("file")
         tool_type = requires_tool_type(scan_type)
         if requires_file(scan_type) and not file:
-            msg = _(f"Uploading a Report File is required for {scan_type}")
+            msg = _("Uploading a Report File is required for %s") % scan_type
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
             raise forms.ValidationError(msg)
         if tool_type:
             api_scan_configuration = cleaned_data.get("api_scan_configuration")
@@ -694,7 +695,7 @@ class ReImportScanForm(forms.Form):
             msg = _("Uploading a report file is required for re-uploading findings.")
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
             raise forms.ValidationError(msg)
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:
@@ -3548,6 +3549,18 @@ class AddEngagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product"].queryset = get_authorized_products(Permissions.Engagement_Add)
+
+
+class ExistingEngagementForm(forms.Form):
+    engagement = forms.ModelChoiceField(
+        queryset=Engagement.objects.none(),
+        required=True,
+        widget=forms.widgets.Select(),
+        help_text="Select which Engagement to link the Questionnaire to")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["engagement"].queryset = get_authorized_engagements(Permissions.Engagement_Edit).order_by("-target_start")
 
 
 class ConfigurationPermissionsForm(forms.Form):

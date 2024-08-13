@@ -1,5 +1,5 @@
 import logging
-from re import compile
+import re
 from threading import local
 from urllib.parse import quote
 
@@ -13,9 +13,9 @@ from django.utils.functional import SimpleLazyObject
 
 logger = logging.getLogger(__name__)
 
-EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip("/"))]
+EXEMPT_URLS = [re.compile(settings.LOGIN_URL.lstrip("/"))]
 if hasattr(settings, "LOGIN_EXEMPT_URLS"):
-    EXEMPT_URLS += [compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
+    EXEMPT_URLS += [re.compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
 
 
 class LoginRequiredMiddleware:
