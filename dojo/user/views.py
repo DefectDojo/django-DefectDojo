@@ -70,7 +70,7 @@ class DojoLoginView(LoginView):
         messages.add_message(
             self.request,
             messages.SUCCESS,
-            _(f'Hello {name}! Your last login was {naturaltime(last_login)} ({last_login.strftime("%Y-%m-%d %I:%M:%S %p")})'),
+            _("Hello %s! Your last login was %s (%s)") % (name, naturaltime(last_login), last_login.strftime("%Y-%m-%d %I:%M:%S %p")),
             extra_tags="alert-success")
         return response
 
