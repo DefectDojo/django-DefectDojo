@@ -147,7 +147,7 @@ def get_message_from_multiformatMessageString(data, rule):
             else:
                 return text
     else:
-        # TODO manage markdown
+        # TODO: manage markdown
         return data.get("text")
 
 

@@ -146,7 +146,7 @@ class BlackduckBinaryAnalysisParser:
         impact = "The use of vulnerable third-party open source software in applications can have numerous negative impacts:\n\n"
         impact += "1. **Security Impact**: Vulnerable software can be exploited by hackers to compromise applications or systems, leading to unauthorized access, data theft, and/or malicious activities.  This would impact the confidentiality, data integrity, and/or operational availability of software exploited.\n"
         impact += "2. **Financial Impact**: Incidents involving security breaches can result in substantial financial loss to responsible organization(s).\n"
-        impact += "3. **Reputation Impact**: A security breach can greatly harm an organization’s reputation. Rebuilding public trust after a breach can be a substantial and long-lasting challenge.\n"
+        impact += "3. **Reputation Impact**: A security breach can greatly harm an organization's reputation. Rebuilding public trust after a breach can be a substantial and long-lasting challenge.\n"
         impact += "4. **Compliance Impact**: Many industries have strict regulations about data protection. Use of vulnerable software could compromise data security measures and result in compliance violations, leading to potential fines and other penalties.\n"
 
         return impact

@@ -55,7 +55,7 @@ EFFORT_FOR_FIXING_CHOICES = (("", ""), ("Low", "Low"), ("Medium", "Medium"), ("H
 # fields returned in statistics, typically all status fields
 STATS_FIELDS = ["active", "verified", "duplicate", "false_p", "out_of_scope", "is_mitigated", "risk_accepted", "total"]
 # default template with all values set to 0
-DEFAULT_STATS = {sev.lower(): {stat_field: 0 for stat_field in STATS_FIELDS} for sev in SEVERITIES}
+DEFAULT_STATS = {sev.lower(): dict.fromkeys(STATS_FIELDS, 0) for sev in SEVERITIES}
 
 IMPORT_CREATED_FINDING = "N"
 IMPORT_CLOSED_FINDING = "C"

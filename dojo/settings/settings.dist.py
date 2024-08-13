@@ -1272,6 +1272,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kubescape JSON Importer": ["title", "component_name"],
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
+    "AppCheck Web Application Scanner": ["title", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1493,6 +1494,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
+    "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1750,8 +1752,8 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 
 
 # The setting is here to avoid RemovedInDjango60Warning. It is here only for transition period.
-# TODO - Remove this setting in Django 6.0
-# TODO More info:
+# TODO: - Remove this setting in Django 6.0
+# TODO: More info:
 # Context:
 # uwsgi-1  |   File "/app/dojo/forms.py", line 515, in ImportScanForm
 # uwsgi-1  |     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")

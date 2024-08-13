@@ -65,7 +65,7 @@ class AnnouncementBannerTest(BaseTestCase):
         self.assertTrue(self.is_element_by_css_selector_present(f".announcement-banner.alert-{self.type.lower()}", text=text))
         driver.get(self.base_url)
         self.assertTrue(self.is_element_by_css_selector_present(f".announcement-banner.alert-{self.type.lower()}", text=text))
-        close_button = driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a/span[contains(text(), '×')]")
+        close_button = driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a/span[contains(text(), '×')]")  # noqa: RUF001
         close_button.click()
         dismiss_announcement_button = driver.find_element(By.XPATH, "//button[contains(@class, 'btn-danger') and contains(text(), 'Dismiss Announcement')]")
         dismiss_announcement_button.click()
@@ -84,7 +84,7 @@ class AnnouncementBannerTest(BaseTestCase):
         self.assertTrue(self.is_success_message_present("Announcement updated successfully."))
 
         self.assertTrue(self.is_element_by_css_selector_present(f".announcement-banner.alert-{self.type.lower()}", text=text))
-        close_button = driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a/span[contains(text(), '×')]")
+        close_button = driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a/span[contains(text(), '×')]")  # noqa: RUF001
         close_button.click()
         dismiss_announcement_button = driver.find_element(By.XPATH, "//button[contains(@class, 'btn-danger') and contains(text(), 'Dismiss Announcement')]")
         dismiss_announcement_button.click()
