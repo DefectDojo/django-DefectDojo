@@ -65,6 +65,7 @@ jobs:
         if: ${{ matrix.os  == 'debian' }}
         uses: docker/build-push-action@v6
         env:
+          DOCKER_BUILD_CHECKS_ANNOTATIONS: false
           REPO_ORG: ${{ env.repoorg }}
           docker-image: ${{ matrix.docker-image }}
         with:
@@ -79,6 +80,7 @@ jobs:
         if: ${{ matrix.os  == 'alpine' }}
         uses: docker/build-push-action@v6
         env:
+          DOCKER_BUILD_CHECKS_ANNOTATIONS: false
           REPO_ORG: ${{ env.repoorg }}
           docker-image: ${{ matrix.docker-image }}
         with:
