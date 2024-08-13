@@ -74,7 +74,9 @@ class Notification:
         )
     
     @staticmethod
-    def risk_acceptance_request(risk_pending):
+    def risk_acceptance_request(*args, **kwargs):
+        risk_pending = kwargs["risk_pending"]
+        permission_keys = kwargs.get("permission_keys", None)
         title = f"{risk_pending.TREATMENT_TRANSLATIONS.get(risk_pending.recommendation)} is requested:  {str(risk_pending.engagement.name)}"
         create_notification(event='risk_acceptance_request',
                         title=title, risk_acceptance=risk_pending,
@@ -83,6 +85,7 @@ class Notification:
                         reactivated_findings=risk_pending.accepted_findings, engagement=risk_pending.engagement,
                         product=risk_pending.engagement.product,
                         description=f"requested acceptance of the risks <b>{risk_pending.name}</b> for the findings",
+                        permission_keys=permission_keys,
                         recipients=eval(risk_pending.accepted_by),
                         icon="bell",
                         owner=risk_pending.owner,

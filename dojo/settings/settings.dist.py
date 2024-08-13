@@ -351,6 +351,10 @@ env = environ.FileAwareEnv(
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
     DD_COMPLIANCE_FILTER_RISK=(str, ""),
+    # The varible that allows settings acceptance for email
+    DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL=(bool, False),
+    DD_LIFETIME_MINUTE_PERMISSION_KEY=(int, 2880),
+    DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL=(str, "http://localhost/8080"),
     # System user for automated resource creation
     DD_SYSTEM_USER=(str, "admin"),
     # These variables are the params of providers name
@@ -2039,6 +2043,10 @@ RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
 COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
+# Acceptace for email
+ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
+LIFETIME_MINUTE_PERMISSION_KEY = env("DD_LIFETIME_MINUTE_PERMISSION_KEY")
+HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
 # System user for automated resource creation
 SYSTEM_USER = env("DD_SYSTEM_USER")
 # Engine Backend

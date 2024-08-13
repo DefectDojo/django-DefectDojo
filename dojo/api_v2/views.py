@@ -42,6 +42,7 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
+from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
 from dojo.cred.queries import get_authorized_cred_mappings
@@ -726,20 +727,24 @@ class RiskAcceptanceViewSet(
     @extend_schema(
         methods=["POST"],
         responses=None,
-        request=None
+        request=RiskAcceptanceEmailSerializer,
     )
     @action(detail=True, methods=["post"])
     def accept_bullk(self, request, pk=None):
         risk_acceptance = get_object_or_404(Risk_Acceptance.objects, id=pk)
         try:
-            eng = Risk_Acceptance.objects.filter(id=pk).first().accepted_findings.all().first().test.engagement
+            eng = Risk_Acceptance.objects.get(id=pk).accepted_findings.all().first().test.engagement
             product = eng.product
             product_type = product.prod_type
+            permission_key = request.data.get("permission_key", None)
         except Exception as e:
             logger.error("Failed accept bullk {e}")
             ApiError.internal_server_error(detail=str(e))
 
-        accept_risk_pending_bullk(eng, risk_acceptance, product, product_type)
+        accept_risk_pending_bullk(eng, risk_acceptance,
+                                  product,
+                                  product_type,
+                                  permission_key)
         return http_response.ok(message="Acceptance process completed")
 
 

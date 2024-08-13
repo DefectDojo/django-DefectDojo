@@ -28,6 +28,7 @@
 			{% endfor %}
 			<br/>
 		{%endblock%}
+	
 	{% block event %}
 		<br/>
 		<br/>
@@ -36,4 +37,16 @@
 		<center><a href="{{event_url}}" class="proton-button" target="_blank">Go Risk Acceptance</a></center>
 		{% endblocktranslate %}
 	{% endblock%}
+
+	{%block acceptance_for_url%}
+		<br/>
+		<br/>
+		If for some reason you can not enter vultacker you have the option to accept it directly. if you click on the following link
+			{% for permission_key in permission_keys %}
+				{% if permission_key.username == user.username%}
+				<a href="{{permission_key.url}}" >Accept all risks</a>
+				{% endif %}
+			{% endfor %}
+	{%endblock%}
+
 {%endblock%}
