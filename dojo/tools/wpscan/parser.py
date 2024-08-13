@@ -61,7 +61,7 @@ class WpscanParser:
             if report_date:
                 finding.date = report_date
             # if there is a fixed version fill mitigation
-            if "fixed_in" in vul and vul["fixed_in"]:
+            if vul.get("fixed_in"):
                 finding.mitigation = "fixed in : " + vul["fixed_in"]
             # manage CVE
             if "cve" in vul["references"]:
@@ -104,7 +104,7 @@ class WpscanParser:
             )
 
         # manage Wordpress version findings
-        if "version" in tree and tree["version"]:
+        if tree.get("version"):
             if (
                 "vulnerabilities" in tree["version"]
                 and tree["version"]["vulnerabilities"]

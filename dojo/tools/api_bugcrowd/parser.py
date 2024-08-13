@@ -106,11 +106,7 @@ class ApiBugcrowdParser:
                 except (
                     ValueError
                 ):  # We don't want to fail the whole import just for 1 error in the bug_url
-                    logger.error(
-                        "Error parsing bugcrowd bug_url : {}".format(
-                            entry["attributes"]["bug_url"].strip(),
-                        ),
-                    )
+                    logger.error("Error parsing bugcrowd bug_url : %s", entry["attributes"]["bug_url"].strip())
                 bug_url = entry["attributes"]["bug_url"]
 
             description = "\n".join(
