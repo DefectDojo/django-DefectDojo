@@ -143,7 +143,7 @@ class NotificationWebhooksView(View):
     def check_user_permissions(self, request: HttpRequest):
         if not request.user.is_superuser:
             raise PermissionDenied
-        # TODO finished access for other users
+        # TODO: finished access for other users
         # if not user_has_configuration_permission(request.user, self.permission):
         #     raise PermissionDenied()
 
@@ -183,8 +183,8 @@ class ListNotificationWebhooksView(NotificationWebhooksView):
 
     def get_notification_webhooks(self, request: HttpRequest):
         nwhs = Notification_Webhooks.objects.all().order_by("name")
-        # TODO finished pagination
-        # TODO restrict based on user - not only superadmins have access and they see everything
+        # TODO: finished pagination
+        # TODO: restrict based on user - not only superadmins have access and they see everything
         return nwhs
 
     def get(self, request: HttpRequest):
@@ -205,7 +205,7 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
     permission = "dojo.add_notification_webhooks"
     breadcrumb = "Add Notification Webhook"
 
-    # TODO Disable Owner if not superadmin
+    # TODO: Disable Owner if not superadmin
 
     def get_initial_context(self, request: HttpRequest):
         return {
@@ -273,13 +273,13 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
 class EditNotificationWebhooksView(NotificationWebhooksView):
     template = "dojo/edit_notification_webhook.html"
     permission = "dojo.change_notification_webhooks"
-    # TODO this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
+    # TODO: this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
     breadcrumb = "Edit Notification Webhook"
 
     def get_notification_webhook(self, nwhid: int):
         return get_object_or_404(Notification_Webhooks, id=nwhid)
 
-    # TODO Disable Owner if not superadmin
+    # TODO: Disable Owner if not superadmin
 
     def get_initial_context(self, request: HttpRequest, nwh: Notification_Webhooks):
         return {
@@ -291,7 +291,7 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
 
     def process_form(self, request: HttpRequest, nwh: Notification_Webhooks, context: dict):
         form = context["form"]
-        if "deactivate_webhook" in request.POST:  # TODO add this to API as well
+        if "deactivate_webhook" in request.POST:  # TODO: add this to API as well
             nwh.status = Notification_Webhooks.STATUS_INACTIVE_PERMANENT
             nwh.first_error = None
             nwh.last_error = None
@@ -362,13 +362,13 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
 class DeleteNotificationWebhooksView(NotificationWebhooksView):
     template = "dojo/delete_notification_webhook.html"
     permission = "dojo.delete_notification_webhooks"
-    # TODO this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
+    # TODO: this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
     breadcrumb = "Edit Notification Webhook"
 
     def get_notification_webhook(self, nwhid: int):
         return get_object_or_404(Notification_Webhooks, id=nwhid)
 
-    # TODO Disable Owner if not superadmin
+    # TODO: Disable Owner if not superadmin
 
     def get_form(
         self,
