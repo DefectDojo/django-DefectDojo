@@ -75,7 +75,7 @@ select = [
    "AIR",
    "FURB",
    "RUF1","RUF2",
-   "RUF001","RUF002", "RUF003",
+   "RUF001","RUF002", "RUF003", "RUF005",
    "RUF013",
    "RUF019",
    "RUF025",
