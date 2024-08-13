@@ -4754,16 +4754,8 @@ class PermissionKey(models.Model):
     def is_expired(self):
         return self.status
     
-    def expire(self, token=None, user=None):
-        if user is not None and token is None:
-            tokens = PermissionKey.objects.filter(user=id)
-            for token in tokens:
-                token.status = False
-                token.save()
-        elif token:
-            token = PermissionKey.objects.get(token=token)
-            token.status = False
-            token.save()
+    def expire(self):
+        self.status = False
 
     
     @classmethod

@@ -1,23 +1,32 @@
 import logging
 import crum
 import json
+from dateutil.relativedelta import relativedelta
+from dojo.celery import app
+from django.utils import timezone
 from django.conf import settings
 from dojo.utils import Response
-from django.utils import timezone
-from dateutil.relativedelta import relativedelta
 from dojo.utils import sla_expiration_risk_acceptance
-from django.urls import reverse
-from dojo.models import Engagement, Risk_Acceptance, Finding, Product_Type_Member, Role, Product_Member, \
-    Product, Product_Type, TransferFindingFinding, Dojo_User, Notes, TransferFinding, System_Settings, \
+from dojo.models import (
+    Engagement,
+    Risk_Acceptance,
+    Finding,
+    Product_Type_Member,
+    Product_Member,
+    Product,
+    Product_Type,
+    System_Settings,
     PermissionKey
+    )
 from dojo.api_v2.api_error import ApiError
 from dojo.risk_acceptance.helper import post_jira_comments
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
-from dojo.user.queries import get_user
 from dojo.authorization.roles_permissions import Permissions
 from dojo.risk_acceptance.notification import Notification
-from dojo.risk_acceptance.queries import abuse_control_min_vulnerability_closed, abuse_control_max_vulnerability_accepted
+from dojo.risk_acceptance.queries import (
+    abuse_control_min_vulnerability_closed,
+    abuse_control_max_vulnerability_accepted)
 from dojo.transfer_findings import helper as hp_transfer_finding
 import dojo.risk_acceptance.helper as ra_helper
 
@@ -25,7 +34,9 @@ logger = logging.getLogger(__name__)
 
 
 def risk_acceptance_decline(
-    eng: Engagement, finding: Finding, risk_acceptance: Risk_Acceptance
+    eng: Engagement,
+    finding: Finding,
+    risk_acceptance: Risk_Acceptance
 ):
     status = "Failed"
     message = "Cannot perform action"
@@ -471,3 +482,16 @@ def validate_list_findings(conf_risk, type, finding, eng):
             ),
             None,
         )
+
+@app.task
+def expiration_handler(*args, **kwargs):
+    permission_keys = PermissionKey.objects.filter(
+        expiration__date__lte=timezone.now())
+
+    logger.info(
+        'expiring %i permission_key that are past expiration date',
+        len(permission_keys))
+
+    for permission_key in permission_keys:
+        permission_key.expire()
+        permission_key.save()
