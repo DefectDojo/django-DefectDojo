@@ -94,7 +94,7 @@ def simple_search(request):
             authorized_app_analysis = get_authorized_app_analysis(Permissions.Product_View)
             authorized_vulnerability_ids = get_authorized_vulnerability_ids(Permissions.Finding_View)
 
-            # TODO better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
+            # TODO: better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
 
             findings = authorized_findings
             tests = authorized_tests

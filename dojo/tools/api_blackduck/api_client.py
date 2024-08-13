@@ -19,7 +19,7 @@ class BlackduckAPI:
             msg = f"Authentication type {tool_config.authentication_type} not supported"
             raise ValueError(msg)
 
-    # TODO
+    # TODO: tests should be implemented here
     # def test_connection(self):
     #     response = ...
     #     if not response.ok:
