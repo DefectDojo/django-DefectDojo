@@ -44,7 +44,7 @@ RISK_TO_CWE_MAP = {
     "untrusted-deserialization": 502,
     "wrong-communication-link": 1008,
     "wrong-trust-boudnary-content": 1008,
-    "xml-external-entity": 611
+    "xml-external-entity": 611,
 }
 
 
@@ -92,7 +92,7 @@ class ThreagileParser:
                 impact=item.get("exploitation_impact"),
                 severity=severity,
                 test=test,
-                unique_id_from_tool=item.get("synthetic_id")
+                unique_id_from_tool=item.get("synthetic_id"),
             )
             self.determine_mitigated(finding, item)
             self.determine_accepted(finding, item)

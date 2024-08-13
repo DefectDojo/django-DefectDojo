@@ -4,6 +4,6 @@ from split_settings.tools import optional, include
 # how to tune the configuration to your needs.
 
 include(
-    'settings.dist.py',
-    optional('local_settings.py')
+    "settings.dist.py",
+    optional("local_settings.py"),
 )

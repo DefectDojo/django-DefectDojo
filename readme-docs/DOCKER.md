@@ -30,43 +30,18 @@ When running the application without building images, the application will run b
     *  https://hub.docker.com/r/defectdojo/defectdojo-nginx
 
 
-# Setup via Docker Compose - Profiles
-
-## Parameters to start docker-compose
-
-The Docker Compose setup supports 2 different databases (MySQL and PostgreSQL) and 2 different celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameter `--profile` with one of these choices:
-
-- mysql-rabbitmq
-- mysql-redis
-- postgres-rabbitmq
-- postgres-redis*
-
-e.g. 
-```zsh
-./dc-up.sh mysql-redis
-```
-
-A default profile can be set with the environment variable `DD_PROFILE`. If this environment variable is set when starting the containers, the parameter for the profile needs not to be given for the start scripts.
-
-When DD_PROFILE or command-line profile is not specified, the command will run "postgres-redis" as the default profile. 
-
-The environment variables needed for the different profiles are prepared in files, which need to be included additionally with the parameter `--env-file` with a choices that fits to the profile:
-
-- ./docker/environments/mysql-rabbitmq.env
-- ./docker/environments/mysql-redis.env
-- ./docker/environments/postgres-rabbitmq.env
-- ./docker/environments/postgres-redis.env
+# Setup via Docker Compose
 
 ## Scripts
 
 6 shell scripts make life easier and avoid typing long commands:
 
 - `./dc-build.sh` - Build the docker images, it can take one additional parameter to be used in the build process, e.g. `./dc-build.sh --no-cache`.
-- `./dc-up.sh` - Start the docker containers in the foreground, it needs one of the profile names as a parameter, e.g. `./dc-up.sh postgres-redis`.
-- `./dc-up-d.sh` - Start the docker containers in the background, it needs one of the profile names as a parameter, e.g. `./dc-up-d.sh mysql-rabbitmq`
+- `./dc-up.sh` - Start the docker containers in the foreground.
+- `./dc-up-d.sh` - Start the docker containers in the background.
 - `./dc-stop.sh` - Stop the docker containers, it can take one additional parameter to be used in the stop process.
 - `./dc-down.sh` - Stop and remove the docker containers, it can take one additional parameter to be used in the stop and remove process.
-- `./dc-unittest.sh` - Utility script to aid in running a specific unit test class.  Requires a profile and test case as parameters.
+- `./dc-unittest.sh` - Utility script to aid in running a specific unit test class.
 
 
 # Setup via Docker Compose - Building and running the application
@@ -97,7 +72,7 @@ To run the application based on previously built image (or based on dockerhub im
 
 ```zsh
 docker/setEnv.sh release
-./dc-up.sh postgres-redis # or an other profile
+./dc-up.sh
 ```
 
 This will run the application based on docker-compose.yml only.
@@ -112,7 +87,7 @@ For development, use:
 ```zsh
 docker/setEnv.sh dev
 ./dc-build.sh
-./dc-up.sh postgres-redis # or an other profile
+./dc-up.sh
 ```
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.dev.yml.
@@ -128,7 +103,7 @@ This will run the application based on merged configurations from docker-compose
 docker-compose restart celeryworker
 ```
 
-*  The mysql port is forwarded to the host so that you can access your database from outside the container.
+*  The postgres port is forwarded to the host so that you can access your database from outside the container.
 
 To update changes in static resources, served by nginx, just refresh the browser with ctrl + F5.
 
@@ -375,10 +350,10 @@ python manage.py test unittests.tools.test_dependency_check_parser.TestDependenc
 ```
 
 For docker compose stack, there is a convenience script (`dc-unittest.sh`) capable of running a single test class. 
-You will need to provide a docker compose profile (`--profile`), and a test case (`--test-case`). Example:
+You will need to provide a test case (`--test-case`). Example:
 
 ```
-./dc-unittest.sh --profile mysql-rabbitmq --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
+./dc-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
 ```
 
 ## Running the integration tests

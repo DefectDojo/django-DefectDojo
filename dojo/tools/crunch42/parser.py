@@ -49,7 +49,7 @@ class Crunch42Parser:
             for key, node in results.items():
                 for issue in node["issues"]:
                     item = self.get_item(
-                        issue, key, test
+                        issue, key, test,
                     )
                     items[iterator] = item
                     iterator += 1
@@ -58,7 +58,7 @@ class Crunch42Parser:
     def get_item(self, issue, title, test):
         fingerprint = issue["fingerprint"]
         pointer = issue["pointer"]
-        message = issue["specificDescription"] if 'specificDescription' in issue else title
+        message = issue["specificDescription"] if "specificDescription" in issue else title
         score = issue["score"]
         criticality = issue["criticality"]
         if criticality == 1:

@@ -47,8 +47,8 @@
                     </tbody>
                 </table>
             </div>
-            <div class="clearfix">
-                {% include "dojo/paging_snippet.html" with page=findings page_size=False %}
+            <div class="clearfix endpoint-pagination">
+                {% include "dojo/paging_snippet.html" with page=endpoints page_size=False %}
             </div>
 
         {% endif %}

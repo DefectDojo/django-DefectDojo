@@ -51,113 +51,113 @@ class TestUserValidators(DojoTestCase):
         self.user.save()
 
     def test_validator_minimum_password_length(self):
-        with self.subTest(policy='minimum_password_length 1≥0'):
+        with self.subTest(policy="minimum_password_length 1≥0"):
             self.set_policy(minimum_password_length=0)
-            self.assertTrue(self.form_test('x').is_valid())
-        with self.subTest(policy='minimum_password_length 1≥1'):
+            self.assertTrue(self.form_test("x").is_valid())
+        with self.subTest(policy="minimum_password_length 1≥1"):
             self.set_policy(minimum_password_length=1)
-            self.assertTrue(self.form_test('x').is_valid())
-        with self.subTest(policy='minimum_password_length 1≱2'):
+            self.assertTrue(self.form_test("x").is_valid())
+        with self.subTest(policy="minimum_password_length 1≱2"):
             self.set_policy(minimum_password_length=2)
-            form = self.form_test('x')
+            form = self.form_test("x")
             self.assertFalse(form.is_valid())
             self.assertEqual(
-                form.errors['new_password'][0],
-                'Password must be at least 2 characters long.')
+                form.errors["new_password"][0],
+                "Password must be at least 2 characters long.")
 
     def test_validator_maximum_password_length(self):
-        with self.subTest(policy='maximum_password_length 1≤2'):
+        with self.subTest(policy="maximum_password_length 1≤2"):
             self.set_policy(maximum_password_length=2)
-            self.assertTrue(self.form_test('x').is_valid())
-        with self.subTest(policy='maximum_password_length 1≤1'):
+            self.assertTrue(self.form_test("x").is_valid())
+        with self.subTest(policy="maximum_password_length 1≤1"):
             self.set_policy(maximum_password_length=1)
-            self.assertTrue(self.form_test('x').is_valid())
-        with self.subTest(policy='maximum_password_length 2≰1'):
+            self.assertTrue(self.form_test("x").is_valid())
+        with self.subTest(policy="maximum_password_length 2≰1"):
             self.set_policy(maximum_password_length=0)
-            form = self.form_test('x')
+            form = self.form_test("x")
             self.assertFalse(form.is_valid())
             self.assertEqual(
-                form.errors['new_password'][0],
-                'Password must be less than 0 characters long.')
+                form.errors["new_password"][0],
+                "Password must be less than 0 characters long.")
 
     def test_validator_number_character_required(self):
-        with self.subTest(policy='number_character_required=False'):
+        with self.subTest(policy="number_character_required=False"):
             self.set_policy(number_character_required=False)
-            self.assertTrue(self.form_test('x').is_valid())
-        with self.subTest(policy='number_character_required=True'):
+            self.assertTrue(self.form_test("x").is_valid())
+        with self.subTest(policy="number_character_required=True"):
             self.set_policy(number_character_required=True)
-            form = self.form_test('x')
+            form = self.form_test("x")
             self.assertFalse(form.is_valid())
             self.assertEqual(
-                form.errors['new_password'][0],
-                'Password must contain at least 1 digit, 0-9.')
+                form.errors["new_password"][0],
+                "Password must contain at least 1 digit, 0-9.")
 
     def test_validator_special_character_required(self):
-        with self.subTest(policy='special_character_required=False'):
+        with self.subTest(policy="special_character_required=False"):
             self.set_policy(special_character_required=False)
-            self.assertTrue(self.form_test('x').is_valid())
-        with self.subTest(policy='special_character_required=True'):
+            self.assertTrue(self.form_test("x").is_valid())
+        with self.subTest(policy="special_character_required=True"):
             self.set_policy(special_character_required=True)
-            form = self.form_test('x')
+            form = self.form_test("x")
             self.assertFalse(form.is_valid())
             self.assertEqual(
-                form.errors['new_password'][0],
-                '''The password must contain at least 1 special character, ()[]{}|`~!@#$%^&*_-+=;:'",<>./?.''')
+                form.errors["new_password"][0],
+                """The password must contain at least 1 special character, ()[]{}|`~!@#$%^&*_-+=;:'",<>./?.""")
 
     def test_validator_lowercase_character_required(self):
-        with self.subTest(policy='lowercase_character_required=False'):
+        with self.subTest(policy="lowercase_character_required=False"):
             self.set_policy(lowercase_character_required=False)
-            self.assertTrue(self.form_test('X').is_valid())
-        with self.subTest(policy='lowercase_character_required=True'):
+            self.assertTrue(self.form_test("X").is_valid())
+        with self.subTest(policy="lowercase_character_required=True"):
             self.set_policy(lowercase_character_required=True)
-            form = self.form_test('X')
+            form = self.form_test("X")
             self.assertFalse(form.is_valid())
             self.assertEqual(
-                form.errors['new_password'][0],
-                'Password must contain at least 1 lowercase letter, a-z.')
+                form.errors["new_password"][0],
+                "Password must contain at least 1 lowercase letter, a-z.")
 
     def test_validator_uppercase_character_required(self):
-        with self.subTest(policy='uppercase_character_required=False'):
+        with self.subTest(policy="uppercase_character_required=False"):
             self.set_policy(uppercase_character_required=False)
-            self.assertTrue(self.form_test('x').is_valid())
-        with self.subTest(policy='uppercase_character_required=True'):
+            self.assertTrue(self.form_test("x").is_valid())
+        with self.subTest(policy="uppercase_character_required=True"):
             self.set_policy(uppercase_character_required=True)
-            form = self.form_test('x')
+            form = self.form_test("x")
             self.assertFalse(form.is_valid())
             self.assertEqual(
-                form.errors['new_password'][0],
-                'Password must contain at least 1 uppercase letter, A-Z.')
+                form.errors["new_password"][0],
+                "Password must contain at least 1 uppercase letter, A-Z.")
 
     def test_validator_non_common_password_required(self):
-        with self.subTest(policy='non_common_password_required=False'):
+        with self.subTest(policy="non_common_password_required=False"):
             self.set_policy(non_common_password_required=False)
-            self.assertTrue(self.form_test('x').is_valid())
-        with self.subTest(policy='non_common_password_required=True'):
+            self.assertTrue(self.form_test("x").is_valid())
+        with self.subTest(policy="non_common_password_required=True"):
             self.set_policy(non_common_password_required=True)
-            form = self.form_test('x')
+            form = self.form_test("x")
             self.assertFalse(form.is_valid())
             self.assertEqual(
-                form.errors['new_password'][0],
-                'This password is too common.')
+                form.errors["new_password"][0],
+                "This password is too common.")
 
     def test_form_invalid_current_pass(self):
         self.set_policy()
-        form = self.form_test('x', current_password='not current password')
+        form = self.form_test("x", current_password="not current password")
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            form.errors['__all__'][0],
-            'Current password is incorrect.')
+            form.errors["__all__"][0],
+            "Current password is incorrect.")
 
     def test_form_same_pass_as_before(self):
         self.set_policy()
         form = self.form_test(self.current_password)
         self.assertFalse(form.is_valid())
         self.assertEqual(
-            form.errors['__all__'][0],
-            'New password must be different from current password.')
+            form.errors["__all__"][0],
+            "New password must be different from current password.")
 
     def test_form_diff_confirm_password(self):
         self.set_policy()
-        form = self.form_test(password='x', confirm_password='y')
+        form = self.form_test(password="x", confirm_password="y")
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['__all__'][0], 'Passwords do not match.')
+        self.assertEqual(form.errors["__all__"][0], "Passwords do not match.")

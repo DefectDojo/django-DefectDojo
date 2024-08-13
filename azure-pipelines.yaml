@@ -46,6 +46,7 @@ steps:
       sudo apt-get install libgnutls28-dev
       sudo apt-get install libgnutls28-dev
       pip install -r requirements.txt -i $(registry) --trusted-host $(trusted-host)
+      pip install coverage
 
       echo -e "\033[94m--------defectdojo unit test--------\033[0m"
       unset DD_DATABASE_URL
@@ -61,9 +62,14 @@ steps:
       python manage.py makemigrations dojo
       python manage.py migrate
 
-      coverage run -p --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --parallel --exclude-tag="non-parallel"
-      coverage run -p --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --failfast --shuffle --tag="non-parallel"
-      coverage combine -a
+      coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
+        exit 1; 
+      }
+      coverage report
+      coverage run -a --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
+        exit 1; 
+      }
+      coverage report
       coverage xml
     displayName: "Unit test"
 
