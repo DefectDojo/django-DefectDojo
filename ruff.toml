@@ -50,7 +50,7 @@ select = [
    "EXE",
    "ICN",
    "LOG",
-   "G1", "G2",
+   "G001", "G002", "G1", "G2",
    "INP",
    "SLOT",
    "PIE",
