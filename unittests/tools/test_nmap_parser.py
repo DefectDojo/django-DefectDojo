@@ -131,3 +131,6 @@ class TestNmapParser(DojoTestCase):
                 self.assertEqual("ip-10-250-195-71.eu-west-1.compute.internal", endpoint.host)
                 self.assertEqual(31641, endpoint.port)
                 self.assertEqual("tcp", endpoint.protocol)
+            with self.subTest(i=55):
+                finding = findings[55]
+                self.assertEqual("### Host\n\n**IP Address:** 10.250.195.71\n**FQDN:** ip-10-250-195-71.eu-west-1.compute.internal\n\n\n**Port/Protocol:** 30150/tcp\n\n\n**Script ID:** fingerprint-strings\n**Script Output:** \n  GenericLines: \n    E_BAD_PROTOCOL\n\n\n", finding.description)
