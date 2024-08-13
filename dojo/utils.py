@@ -875,8 +875,8 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
         return punchcard, ticks
 
-    except Exception as e:
-        logger.exception("Not showing punchcard graph due to exception gathering data", e)
+    except Exception:
+        logger.exception("Not showing punchcard graph due to exception gathering data")
         return None, None
 
 
@@ -2354,33 +2354,22 @@ def log_user_login(sender, request, user, **kwargs):
     # to cover more complex cases:
     # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
 
-    logger.info("login user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("login user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
 
-    logger.info("logout user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)
 def log_user_login_failed(sender, credentials, request, **kwargs):
 
     if "username" in credentials:
-        logger.warning("login failed for: {credentials} via ip: {ip}".format(
-            credentials=credentials["username"],
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.warning("login failed for: %s via ip: %s", credentials["username"], request.META["REMOTE_ADDR"])
     else:
-        logger.error("login failed because of missing username via ip: {ip}".format(
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.error("login failed because of missing username via ip: %s", request.META["REMOTE_ADDR"])
 
 
 def get_password_requirements_string():
