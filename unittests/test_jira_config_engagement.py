@@ -365,5 +365,5 @@ class JIRAConfigEngagementTest_Inheritance(JIRAConfigEngagementTest):
         product = Product.objects.get(id=self.product_id)
         self.assertIsNotNone(jira_helper.get_jira_project(product))
 
-# TODO UI
+# TODO: UI
 # linking / unlinking

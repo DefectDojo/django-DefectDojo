@@ -60,6 +60,7 @@ select = [
    "TID",
    "INT",
    "PTH2",
+   "TD001", "TD004", "TD005",
    "PD",
    "PGH",
    "PLE",

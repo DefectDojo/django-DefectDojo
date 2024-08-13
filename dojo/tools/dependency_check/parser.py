@@ -128,7 +128,7 @@ class DependencyCheckParser:
                     component_version = maven_parts[2]
                     return component_name, component_version
 
-        # TODO what happens when there multiple evidencecollectednodes with
+        # TODO: what happens when there multiple evidencecollectednodes with
         # product or version as type?
         evidence_collected_node = dependency.find(
             namespace + "evidenceCollected",

@@ -191,7 +191,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                # TODO marking as false positive resets verified to False, possible bug / undesired behaviour?
+                # TODO: marking as false positive resets verified to False, possible bug / undesired behaviour?
                 (False, False, True, False, True, frozen_datetime, self.user_1, frozen_datetime),
             )
 
@@ -209,7 +209,7 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
             self.assertEqual(
                 self.get_status_fields(finding),
-                # TODO marking as false positive resets verified to False, possible bug / undesired behaviour?
+                # TODO: marking as false positive resets verified to False, possible bug / undesired behaviour?
                 (False, False, False, True, True, frozen_datetime, self.user_1, frozen_datetime),
             )
 

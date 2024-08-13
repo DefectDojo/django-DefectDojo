@@ -1752,8 +1752,8 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 
 
 # The setting is here to avoid RemovedInDjango60Warning. It is here only for transition period.
-# TODO - Remove this setting in Django 6.0
-# TODO More info:
+# TODO: - Remove this setting in Django 6.0
+# TODO: More info:
 # Context:
 # uwsgi-1  |   File "/app/dojo/forms.py", line 515, in ImportScanForm
 # uwsgi-1  |     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")

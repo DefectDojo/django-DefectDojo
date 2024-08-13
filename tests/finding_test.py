@@ -326,7 +326,7 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Get the status of the current endpoint
         # This will throw exception if the test fails due to invalid xpath
-        # TODO risk acceptance doesn't mitigate endpoints currently
+        # TODO: risk acceptance doesn't mitigate endpoints currently
         # post_status = driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
         # self.assertTrue(pre_status != post_status)
 
@@ -350,7 +350,7 @@ class FindingTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Get the status of the current endpoint
         # This will throw exception if the test fails due to invalid xpath
-        # TODO risk acceptance doesn't mitigate endpoints currently
+        # TODO: risk acceptance doesn't mitigate endpoints currently
         # post_status = driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
         # self.assertTrue(pre_status != post_status)
 
