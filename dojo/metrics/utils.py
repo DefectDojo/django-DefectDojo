@@ -296,12 +296,12 @@ def query_counts(
     :return: A method that takes period information to generate statistics for the given QuerySets
     """
     def _aggregates_for_period(period: MetricsPeriod, period_count: int) -> dict[str, list[dict]]:
-        def _aggregate_data(qs: MetricsQuerySet, include_closed: bool = False) -> list[dict]:
+        def _aggregate_data(qs: MetricsQuerySet, *, include_closed: bool = False) -> list[dict]:
             chart_data = partial(get_charting_data, start_date=start_date, period=period, period_count=period_count)
             agg_qs = partial(aggregate_counts_by_period, period=period, metrics_type=metrics_type)
             return chart_data(agg_qs(qs, include_closed=include_closed), include_closed=include_closed)
         return {
-            "opened_per_period": _aggregate_data(open_qs, True),
+            "opened_per_period": _aggregate_data(open_qs, include_closed=True),
             "active_per_period": _aggregate_data(active_qs),
             "accepted_per_period": _aggregate_data(accepted_qs),
         }
@@ -401,6 +401,7 @@ def get_charting_data(
     start_date: date,
     period: MetricsPeriod,
     period_count: int,
+    *,
     include_closed: bool,
 ) -> list[dict]:
     """
@@ -467,6 +468,7 @@ def aggregate_counts_by_period(
     qs: MetricsQuerySet,
     period: MetricsPeriod,
     metrics_type: MetricsType,
+    *,
     include_closed: bool,
 ) -> QuerySet:
     """
