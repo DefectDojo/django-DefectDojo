@@ -17,7 +17,6 @@ class AWSProwlerV4Parser:
 
             mute_status = deserialized.get("status")
             status = deserialized.get("status_code")
-            if status.upper() != "FAIL":
             if (status.upper() != "FAIL") or (status.upper() == "FAIL" and mute_status == "Suppressed"):
                 continue
 
