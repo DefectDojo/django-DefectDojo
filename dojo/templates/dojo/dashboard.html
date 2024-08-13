@@ -208,6 +208,7 @@
                                                         <a class="btn btn-sm btn-secondary"
                                                         href="/empty_questionnaire/{{ survey.id }}">{% trans "View Responses" %}</a>
                                                         <a class="btn btn-sm btn-success" href="/empty_questionnaire/{{ survey.id }}/new_engagement">{% trans "Create Engagement" %}</a>
+                                                        <a class="btn btn-sm btn-success" href="/empty_questionnaire/{{ survey.id }}/existing_engagement">{% trans "Link to Existing Engagement" %}</a>
                                                         <button class="btn btn-sm btn-info" disabled
                                                         href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign">{% trans "Assign User" %}</button>
                                                     {% endif %}
