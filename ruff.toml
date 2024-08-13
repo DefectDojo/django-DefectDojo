@@ -71,6 +71,7 @@ select = [
    "NPY",
    "FAST",
    "AIR",
+   "RUF013",
    "RUF019",
    "RUF025",
 ]
