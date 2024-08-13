@@ -277,7 +277,7 @@ class SchemaChecker:
             _check_helper(isinstance(obj, str))
         else:
             # Default case
-            _check_helper(False)
+            _check_helper(check=False)
 
         # print('_check_type ok for: %s: %s' % (schema, obj))
 
