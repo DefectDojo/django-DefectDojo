@@ -148,9 +148,9 @@ def get_vuln_id_from_tool(vulnerability):
 
 def clean_title(title):
     if title.startswith("Issue summary: "):
-        title = title[len("Issue summary: ") :]
+        title = title[len("Issue summary: "):]
     if "\n" in title:
-        title = title[: title.index("\n")]
+        title = title[:title.index("\n")]
     return title
 
 

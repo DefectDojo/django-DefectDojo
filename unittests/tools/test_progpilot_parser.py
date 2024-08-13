@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.progpilot.parser import ProgpilotParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestProgpilotParser(DojoTestCase):

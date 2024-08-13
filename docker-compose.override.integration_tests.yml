@@ -5,15 +5,10 @@ services:
       context: ./
       dockerfile: ${INTEGRATION_TESTS_DOCKERFILE:-Dockerfile.integration-tests-debian}
     image: "defectdojo/defectdojo-integration-tests:${INTEGRATION_TESTS_VERSION:-latest}"
-    profiles: 
-      - mysql-rabbitmq
-      - mysql-redis
-      - postgres-rabbitmq
-      - postgres-redis
     depends_on:
       - nginx
       - uwsgi
-    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/app/docker/entrypoint-integration-tests.sh']
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/app/docker/entrypoint-integration-tests.sh']
     volumes:
       - '.:/app:z'
       - "defectdojo_media_integration_tests:${DD_MEDIA_ROOT:-/app/media}"
@@ -28,50 +23,40 @@ services:
     volumes:
       - defectdojo_media_integration_tests:/usr/share/nginx/html/media
   uwsgi:
-    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST}:${DD_DATABASE_PORT}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
+    entrypoint: ['/wait-for-it.sh', '${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432}', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
     volumes:
       - '.:/app:z'
       - defectdojo_media_integration_tests:${DD_MEDIA_ROOT:-/app/media}
     environment:
       PYTHONWARNINGS: error  # We are strict about Warnings during testing
       DD_DEBUG: 'True'
-      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/test_defectdojo}
       DD_SECURE_CROSS_ORIGIN_OPENER_POLICY: 'None'
       DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
       DD_EMAIL_URL: "smtp://mailhog:1025"
   celerybeat:
     environment:
-      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/test_defectdojo}
   celeryworker:
     environment:
-      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/test_defectdojo}
   initializer:
     environment:
       PYTHONWARNINGS: error  # We are strict about Warnings during testing
       DD_INITIALIZE: 'true'
-      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL}
+      DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/test_defectdojo}
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-AdminsLoveIntegrationtests!}"
       DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
     volumes:
       - '.:/app:z'
-  mysql:
-    ports:
-      - target: ${DD_DATABASE_PORT}
-        published: ${DD_DATABASE_PORT}
-        protocol: tcp
-        mode: host
-    environment:
-      MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME}
-    volumes:
-      - defectdojo_data_integration_tests:/var/lib/mysql
   postgres:
     ports:
-      - target: ${DD_DATABASE_PORT}
-        published: ${DD_DATABASE_PORT}
+      - target: ${DD_DATABASE_PORT:-5432}
+        published: ${DD_DATABASE_PORT:-5432}
         protocol: tcp
         mode: host
     environment:
-      POSTGRES_DB: ${DD_TEST_DATABASE_NAME}
+      POSTGRES_DB: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
     volumes:
       - defectdojo_postgres_integration_tests:/var/lib/postgresql/data
   mailhog:
@@ -82,6 +67,5 @@ services:
         protocol: tcp
         mode: host
 volumes:
-  defectdojo_data_integration_tests: {}
   defectdojo_postgres_integration_tests: {}
   defectdojo_media_integration_tests: {}

@@ -100,12 +100,13 @@ env = environ.FileAwareEnv(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
+    DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
-    DD_DATABASE_ENGINE=(str, "django.db.backends.mysql"),
-    DD_DATABASE_HOST=(str, "mysql"),
+    DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
+    DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
     # default django database name for testing is test_<dbname>
     DD_TEST_DATABASE_NAME=(str, "test_defectdojo"),
@@ -194,23 +195,19 @@ env = environ.FileAwareEnv(
     DD_SAML2_LOGOUT_URL=(str, ""),
     # Metadata is required for SAML, choose either remote url or local file path
     DD_SAML2_METADATA_AUTO_CONF_URL=(str, ""),
-    # ex. '/public/share/idp_metadata.xml'
-    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ""),
+    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ""),  # ex. '/public/share/idp_metadata.xml'
     # Optional, default is SITE_URL + /saml2/metadata/
     DD_SAML2_ENTITY_ID=(str, ""),
     # Allow to create user that are not already in the Django database
     DD_SAML2_CREATE_USER=(bool, False),
-    DD_SAML2_ATTRIBUTES_MAP=(
-        dict,
-        {
-            # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
-            # format: SAML attrib:django_user_model
-            "Email": "email",
-            "UserName": "username",
-            "Firstname": "first_name",
-            "Lastname": "last_name",
-        },
-    ),
+    DD_SAML2_ATTRIBUTES_MAP=(dict, {
+        # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
+        # format: SAML attrib:django_user_model
+        "Email": "email",
+        "UserName": "username",
+        "Firstname": "first_name",
+        "Lastname": "last_name",
+    }),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
     # Authentication via HTTP Proxy which put username to HTTP Header REMOTE_USER
     DD_AUTH_REMOTEUSER_ENABLED=(bool, False),
@@ -223,7 +220,7 @@ env = environ.FileAwareEnv(
     DD_AUTH_REMOTEUSER_GROUPS_HEADER=(str, ""),
     DD_AUTH_REMOTEUSER_GROUPS_CLEANUP=(bool, True),
     # Comma separated list of IP ranges with trusted proxies
-    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ['127.0.0.1/32']),
+    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ["127.0.0.1/32"]),
     # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
     DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
     # `RemoteUser` is usually used behind AuthN proxy and users should not know about this mechanism from Swagger because it is not usable by users.
@@ -268,7 +265,7 @@ env = environ.FileAwareEnv(
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
     # AWS Scout2 Scan Parser is deprecated (see https://github.com/DefectDojo/django-DefectDojo/pull/5268)
-    DD_PARSER_EXCLUDE=(str, ''),
+    DD_PARSER_EXCLUDE=(str, ""),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -282,8 +279,8 @@ env = environ.FileAwareEnv(
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
-    DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
-    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
+    DD_JIRA_TEMPLATE_ROOT=(str, "dojo/templates/issue-trackers"),
+    DD_TEMPLATE_DIR_PREFIX=(str, "dojo/templates/"),
     # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
     # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
     # Set to True to revert to the old behaviour where all duplicates are deleted
@@ -311,8 +308,8 @@ env = environ.FileAwareEnv(
     # for very large objects
     DD_DELETE_PREVIEW=(bool, True),
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
-    DD_FILE_UPLOAD_TYPES=(list, ['.txt', '.pdf', '.json', '.xml', '.csv', '.yml', '.png', '.jpeg',
-                                 '.sarif', '.xlsx', '.doc', '.html', '.js', '.nessus', '.zip']),
+    DD_FILE_UPLOAD_TYPES=(list, [".txt", ".pdf", ".json", ".xml", ".csv", ".yml", ".png", ".jpeg",
+                                 ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip"]),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -526,7 +523,7 @@ SITE_ID = env("DD_SITE_ID")
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = env('DD_USE_I18N')
+USE_I18N = env("DD_USE_I18N")
 
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = env("DD_USE_TZ")
@@ -681,7 +678,7 @@ LOGIN_URL = env("DD_LOGIN_URL")
 AUTHENTICATION_BACKENDS = (
     "social_core.backends.auth0.Auth0OAuth2",
     "social_core.backends.google.GoogleOAuth2",
-    "dojo.okta.OktaOAuth2",
+    "social_core.backends.okta.OktaOAuth2",
     "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
     "social_core.backends.gitlab.GitLabOAuth2",
     "social_core.backends.keycloak.KeycloakOAuth2",
@@ -696,12 +693,12 @@ AUTHENTICATION_BACKENDS = (
 # PASSWORD_HASHERS list here as a variable which we could modify,
 # so we have to list all the hashers present in Django :-(
 PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
-    'django.contrib.auth.hashers.BCryptPasswordHasher',
-    'django.contrib.auth.hashers.MD5PasswordHasher',
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.BCryptPasswordHasher",
+    "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
 SOCIAL_AUTH_PIPELINE = (
@@ -833,25 +830,25 @@ SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")
 SLA_BUSINESS_DAYS = env("DD_SLA_BUSINESS_DAYS")
 
 
-SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
-SIMILAR_FINDINGS_MAX_RESULTS = env('DD_SIMILAR_FINDINGS_MAX_RESULTS')
-MAX_REQRESP_FROM_API = env('DD_MAX_REQRESP_FROM_API')
-MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
+SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
+SIMILAR_FINDINGS_MAX_RESULTS = env("DD_SIMILAR_FINDINGS_MAX_RESULTS")
+MAX_REQRESP_FROM_API = env("DD_MAX_REQRESP_FROM_API")
+MAX_AUTOCOMPLETE_WORDS = env("DD_MAX_AUTOCOMPLETE_WORDS")
 
 LOGIN_EXEMPT_URLS = (
-    rf'^{URL_PREFIX}static/',
-    rf'^{URL_PREFIX}webhook/([\w-]+)$',
-    rf'^{URL_PREFIX}webhook/',
-    rf'^{URL_PREFIX}jira/webhook/([\w-]+)$',
-    rf'^{URL_PREFIX}jira/webhook/',
-    rf'^{URL_PREFIX}reports/cover$',
-    rf'^{URL_PREFIX}finding/image/(?P<token>[^/]+)$',
-    rf'^{URL_PREFIX}api/v2/',
-    r'complete/',
-    r'empty_questionnaire/([\d]+)/answer',
-    rf'^{URL_PREFIX}password_reset/',
-    rf'^{URL_PREFIX}forgot_username',
-    rf'^{URL_PREFIX}reset/',
+    rf"^{URL_PREFIX}static/",
+    rf"^{URL_PREFIX}webhook/([\w-]+)$",
+    rf"^{URL_PREFIX}webhook/",
+    rf"^{URL_PREFIX}jira/webhook/([\w-]+)$",
+    rf"^{URL_PREFIX}jira/webhook/",
+    rf"^{URL_PREFIX}reports/cover$",
+    rf"^{URL_PREFIX}finding/image/(?P<token>[^/]+)$",
+    rf"^{URL_PREFIX}api/v2/",
+    r"complete/",
+    r"empty_questionnaire/([\d]+)/answer",
+    rf"^{URL_PREFIX}password_reset/",
+    rf"^{URL_PREFIX}forgot_username",
+    rf"^{URL_PREFIX}reset/",
 )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -897,11 +894,11 @@ CSRF_COOKIE_HTTPONLY = env("DD_CSRF_COOKIE_HTTPONLY")
 # Whether to use a secure cookie for the session cookie. If this is set to True,
 # the cookie will be marked as secure, which means browsers may ensure that the
 # cookie is only sent with an HTTPS connection.
-SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
-SESSION_COOKIE_SAMESITE = env('DD_SESSION_COOKIE_SAMESITE')
+SESSION_COOKIE_SECURE = env("DD_SESSION_COOKIE_SECURE")
+SESSION_COOKIE_SAMESITE = env("DD_SESSION_COOKIE_SAMESITE")
 
 # Override default Django behavior for incorrect URLs
-APPEND_SLASH = env('DD_APPEND_SLASH')
+APPEND_SLASH = env("DD_APPEND_SLASH")
 
 # Whether to use a secure cookie for the CSRF cookie.
 CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
@@ -1008,7 +1005,7 @@ MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
 # ------------------------------------------------------------------------------
 # ADMIN
 # ------------------------------------------------------------------------------
-ADMINS = getaddresses([env('DD_ADMINS')])
+ADMINS = getaddresses([env("DD_ADMINS")])
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
 MANAGERS = ADMINS
@@ -1058,12 +1055,14 @@ SPECTACULAR_SETTINGS = {
     "POSTPROCESSING_HOOKS": ["dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook"],
     # show file selection dialogue, see https://github.com/tfranzel/drf-spectacular/issues/455
     "COMPONENT_SPLIT_REQUEST": True,
-    "SWAGGER_UI_SETTINGS": {"docExpansion": "none"},
+    "SWAGGER_UI_SETTINGS": {
+        "docExpansion": "none",
+    },
 }
 
-if not env('DD_DEFAULT_SWAGGER_UI'):
-    SPECTACULAR_SETTINGS['SWAGGER_UI_DIST'] = 'SIDECAR'
-    SPECTACULAR_SETTINGS['SWAGGER_UI_FAVICON_HREF'] = 'SIDECAR'
+if not env("DD_DEFAULT_SWAGGER_UI"):
+    SPECTACULAR_SETTINGS["SWAGGER_UI_DIST"] = "SIDECAR"
+    SPECTACULAR_SETTINGS["SWAGGER_UI_FAVICON_HREF"] = "SIDECAR"
 
 # ------------------------------------------------------------------------------
 # TEMPLATES
@@ -1096,54 +1095,54 @@ TEMPLATES = [
 # ------------------------------------------------------------------------------
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'polymorphic',  # provides admin templates
-    'django.contrib.admin',
-    'django.contrib.humanize',
-    'auditlog',
-    'dojo',
-    'watson',
-    'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
-    'imagekit',
-    'multiselectfield',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'dbbackup',
-    'django_celery_results',
-    'social_django',
-    'drf_spectacular',
-    'drf_spectacular_sidecar',  # required for Django collectstatic discovery
-    'tagulous',
-    'fontawesomefree',
-    'django_filters',
-    'django.db.migrations',
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.sites",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "polymorphic",  # provides admin templates
+    "django.contrib.admin",
+    "django.contrib.humanize",
+    "auditlog",
+    "dojo",
+    "watson",
+    "tagging",  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
+    "imagekit",
+    "multiselectfield",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "dbbackup",
+    "django_celery_results",
+    "social_django",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",  # required for Django collectstatic discovery
+    "tagulous",
+    "fontawesomefree",
+    "django_filters",
+    "django.db.migrations",
 )
 
 # ------------------------------------------------------------------------------
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
-    'django.middleware.common.CommonMiddleware',
-    'dojo.middleware.APITrailingSlashMiddleware',
-    'dojo.middleware.DojoSytemSettingsMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'dojo.middleware.LoginRequiredMiddleware',
-    'dojo.middleware.AdditionalHeaderMiddleware',
-    'social_django.middleware.SocialAuthExceptionMiddleware',
-    'watson.middleware.SearchContextMiddleware',
-    'dojo.middleware.AuditlogMiddleware',
-    'crum.CurrentRequestUserMiddleware',
-    'dojo.request_cache.middleware.RequestCacheMiddleware',
+    "django.middleware.common.CommonMiddleware",
+    "dojo.middleware.APITrailingSlashMiddleware",
+    "dojo.middleware.DojoSytemSettingsMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "dojo.middleware.LoginRequiredMiddleware",
+    "dojo.middleware.AdditionalHeaderMiddleware",
+    "social_django.middleware.SocialAuthExceptionMiddleware",
+    "watson.middleware.SearchContextMiddleware",
+    "dojo.middleware.AuditlogMiddleware",
+    "crum.CurrentRequestUserMiddleware",
+    "dojo.request_cache.middleware.RequestCacheMiddleware",
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -1160,7 +1159,7 @@ if env("DD_WHITENOISE"):
     MIDDLEWARE = MIDDLEWARE + WHITE_NOISE
 
 EMAIL_CONFIG = env.email_url(
-    'DD_EMAIL_URL', default='smtp://user@:password@localhost:25')
+    "DD_EMAIL_URL", default="smtp://user@:password@localhost:25")
 
 vars().update(EMAIL_CONFIG)
 
@@ -1191,34 +1190,35 @@ if SAML2_ENABLED:
     import saml2.saml
     # SSO_URL = env('DD_SSO_URL')
     SAML_METADATA = {}
-    if len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:
-        SAML_METADATA['remote'] = [{"url": env('DD_SAML2_METADATA_AUTO_CONF_URL')}]
-    if len(env('DD_SAML2_METADATA_LOCAL_FILE_PATH')) > 0:
-        SAML_METADATA['local'] = [env('DD_SAML2_METADATA_LOCAL_FILE_PATH')]
-    INSTALLED_APPS += ('djangosaml2',)
-    MIDDLEWARE.append('djangosaml2.middleware.SamlSessionMiddleware')
-    AUTHENTICATION_BACKENDS += (env('DD_SAML2_AUTHENTICATION_BACKENDS'),)
-    LOGIN_EXEMPT_URLS += (rf'^{URL_PREFIX}saml2/',)
+    if len(env("DD_SAML2_METADATA_AUTO_CONF_URL")) > 0:
+        SAML_METADATA["remote"] = [{"url": env("DD_SAML2_METADATA_AUTO_CONF_URL")}]
+    if len(env("DD_SAML2_METADATA_LOCAL_FILE_PATH")) > 0:
+        SAML_METADATA["local"] = [env("DD_SAML2_METADATA_LOCAL_FILE_PATH")]
+    INSTALLED_APPS += ("djangosaml2",)
+    MIDDLEWARE.append("djangosaml2.middleware.SamlSessionMiddleware")
+    AUTHENTICATION_BACKENDS += (env("DD_SAML2_AUTHENTICATION_BACKENDS"),)
+    LOGIN_EXEMPT_URLS += (rf"^{URL_PREFIX}saml2/",)
     SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
     SAML_IGNORE_LOGOUT_ERRORS = True
     SAML_DJANGO_USER_MAIN_ATTRIBUTE = "username"
-    #    SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
+#    SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
     SAML_USE_NAME_ID_AS_USERNAME = True
     SAML_CREATE_UNKNOWN_USER = env("DD_SAML2_CREATE_USER")
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env("DD_SAML2_ATTRIBUTES_MAP"))
     SAML_FORCE_AUTH = env("DD_SAML2_FORCE_AUTH")
     SAML_ALLOW_UNKNOWN_ATTRIBUTES = env("DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE")
     BASEDIR = path.dirname(path.abspath(__file__))
-    if len(env('DD_SAML2_ENTITY_ID')) == 0:
-        SAML2_ENTITY_ID = f'{SITE_URL}/saml2/metadata/'
+    if len(env("DD_SAML2_ENTITY_ID")) == 0:
+        SAML2_ENTITY_ID = f"{SITE_URL}/saml2/metadata/"
     else:
         SAML2_ENTITY_ID = env("DD_SAML2_ENTITY_ID")
 
     SAML_CONFIG = {
         # full path to the xmlsec1 binary programm
         "xmlsec_binary": "/usr/bin/xmlsec1",
+
         # your entity id, usually your subdomain plus the url to the metadata view
-        'entityid': str(SAML2_ENTITY_ID),
+        "entityid": str(SAML2_ENTITY_ID),
 
         # directory with attribute mapping
         "attribute_map_dir": path.join(BASEDIR, "attribute-maps"),
@@ -1234,29 +1234,33 @@ if SAML2_ENABLED:
                 "want_assertions_signed": True,
                 "force_authn": SAML_FORCE_AUTH,
                 "allow_unsolicited": True,
+
                 # For Okta add signed logout requets. Enable this:
                 # "logout_requests_signed": True,
+
                 "endpoints": {
                     # url and binding to the assetion consumer service view
                     # do not change the binding or service name
-                    'assertion_consumer_service': [
-                        (f'{SITE_URL}/saml2/acs/',
+                    "assertion_consumer_service": [
+                        (f"{SITE_URL}/saml2/acs/",
                         saml2.BINDING_HTTP_POST),
                     ],
                     # url and binding to the single logout service view
                     # do not change the binding or service name
                     "single_logout_service": [
                         # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
-                        (f'{SITE_URL}/saml2/ls/',
+                        (f"{SITE_URL}/saml2/ls/",
                         saml2.BINDING_HTTP_REDIRECT),
-                        (f'{SITE_URL}/saml2/ls/post',
+                        (f"{SITE_URL}/saml2/ls/post",
                         saml2.BINDING_HTTP_POST),
                     ],
                 },
                 # attributes that this project need to identify a user
                 "required_attributes": ["Email", "UserName"],
+
                 # attributes that may be useful to have but not required
                 "optional_attributes": ["Firstname", "Lastname"],
+
                 # in this section the list of IdPs we talk to are defined
                 # This is not mandatory! All the IdP available in the metadata will be considered.
                 # 'idp': {
@@ -1278,8 +1282,10 @@ if SAML2_ENABLED:
         # where the remote metadata is stored, local, remote or mdq server.
         # One metadatastore or many ...
         "metadata": SAML_METADATA,
+
         # set to 1 to output debugging information
         "debug": 0,
+
         # Signing
         # 'key_file': path.join(BASEDIR, 'private.key'),  # private part
         # 'cert_file': path.join(BASEDIR, 'public.pem'),  # public part
@@ -1290,20 +1296,16 @@ if SAML2_ENABLED:
         # }],
         # own metadata settings
         "contact_person": [
-            {
-                "given_name": "Lorenzo",
-                "sur_name": "Gil",
-                "company": "Yaco Sistemas",
-                "email_address": "lgs@yaco.es",
-                "contact_type": "technical",
-            },
-            {
-                "given_name": "Angel",
-                "sur_name": "Fernandez",
-                "company": "Yaco Sistemas",
-                "email_address": "angel@yaco.es",
-                "contact_type": "administrative",
-            },
+            {"given_name": "Lorenzo",
+            "sur_name": "Gil",
+            "company": "Yaco Sistemas",
+            "email_address": "lgs@yaco.es",
+            "contact_type": "technical"},
+            {"given_name": "Angel",
+            "sur_name": "Fernandez",
+            "company": "Yaco Sistemas",
+            "email_address": "angel@yaco.es",
+            "contact_type": "administrative"},
         ],
         # you can set multilanguage information here
         "organization": {
@@ -1318,33 +1320,33 @@ if SAML2_ENABLED:
 # REMOTE_USER
 # ------------------------------------------------------------------------------
 
-AUTH_REMOTEUSER_ENABLED = env('DD_AUTH_REMOTEUSER_ENABLED')
-AUTH_REMOTEUSER_USERNAME_HEADER = env('DD_AUTH_REMOTEUSER_USERNAME_HEADER')
-AUTH_REMOTEUSER_EMAIL_HEADER = env('DD_AUTH_REMOTEUSER_EMAIL_HEADER')
-AUTH_REMOTEUSER_FIRSTNAME_HEADER = env('DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER')
-AUTH_REMOTEUSER_LASTNAME_HEADER = env('DD_AUTH_REMOTEUSER_LASTNAME_HEADER')
-AUTH_REMOTEUSER_GROUPS_HEADER = env('DD_AUTH_REMOTEUSER_GROUPS_HEADER')
-AUTH_REMOTEUSER_GROUPS_CLEANUP = env('DD_AUTH_REMOTEUSER_GROUPS_CLEANUP')
-AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER = env('DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER')
+AUTH_REMOTEUSER_ENABLED = env("DD_AUTH_REMOTEUSER_ENABLED")
+AUTH_REMOTEUSER_USERNAME_HEADER = env("DD_AUTH_REMOTEUSER_USERNAME_HEADER")
+AUTH_REMOTEUSER_EMAIL_HEADER = env("DD_AUTH_REMOTEUSER_EMAIL_HEADER")
+AUTH_REMOTEUSER_FIRSTNAME_HEADER = env("DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER")
+AUTH_REMOTEUSER_LASTNAME_HEADER = env("DD_AUTH_REMOTEUSER_LASTNAME_HEADER")
+AUTH_REMOTEUSER_GROUPS_HEADER = env("DD_AUTH_REMOTEUSER_GROUPS_HEADER")
+AUTH_REMOTEUSER_GROUPS_CLEANUP = env("DD_AUTH_REMOTEUSER_GROUPS_CLEANUP")
+AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER = env("DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER")
 
 AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
-for ip_range in env('DD_AUTH_REMOTEUSER_TRUSTED_PROXY'):
+for ip_range in env("DD_AUTH_REMOTEUSER_TRUSTED_PROXY"):
     AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
 
-if env('DD_AUTH_REMOTEUSER_LOGIN_ONLY'):
-    RemoteUserMiddleware = 'dojo.remote_user.PersistentRemoteUserMiddleware'
+if env("DD_AUTH_REMOTEUSER_LOGIN_ONLY"):
+    RemoteUserMiddleware = "dojo.remote_user.PersistentRemoteUserMiddleware"
 else:
-    RemoteUserMiddleware = 'dojo.remote_user.RemoteUserMiddleware'
+    RemoteUserMiddleware = "dojo.remote_user.RemoteUserMiddleware"
 # we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
 for i in range(len(MIDDLEWARE)):
-    if MIDDLEWARE[i] == 'django.contrib.auth.middleware.AuthenticationMiddleware':
+    if MIDDLEWARE[i] == "django.contrib.auth.middleware.AuthenticationMiddleware":
         MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
         break
 
 if AUTH_REMOTEUSER_ENABLED:
-    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = \
-        ('dojo.remote_user.RemoteUserAuthentication',) + \
-        REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
+    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = \
+        ("dojo.remote_user.RemoteUserAuthentication",) + \
+        REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]
 
 # ------------------------------------------------------------------------------
 # CELERY
@@ -1386,6 +1388,7 @@ CELERY_BEAT_SCHEDULE_FILENAME = env("DD_CELERY_BEAT_SCHEDULE_FILENAME")
 CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
+CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
@@ -1404,13 +1407,13 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": timedelta(minutes=1),
         "args": [timedelta(minutes=1)],
     },
-    'flush_auditlog': {
-        'task': 'dojo.tasks.flush_auditlog',
-        'schedule': timedelta(hours=8),
+    "flush_auditlog": {
+        "task": "dojo.tasks.flush_auditlog",
+        "schedule": timedelta(hours=8),
     },
-    'update-findings-from-source-issues': {
-        'task': 'dojo.tools.tool_issue_updater.update_findings_from_source_issues',
-        'schedule': timedelta(hours=3),
+    "update-findings-from-source-issues": {
+        "task": "dojo.tools.tool_issue_updater.update_findings_from_source_issues",
+        "schedule": timedelta(hours=3),
     },
     "compute-sla-age-and-notify": {
         "task": "dojo.tasks.async_sla_compute_and_notify_task",
@@ -1422,7 +1425,11 @@ CELERY_BEAT_SCHEDULE = {
     },
     "transfer_finding_expiration_handler": {
         "task": "dojo.transfer_findings.helper.expiration_handler",
-        "schedule": crontab(minute=0, hour="*/3"),
+        "schedule": crontab(minute=CELERY_CRON_SCHEDULE.split()[0],
+                            hour=CELERY_CRON_SCHEDULE.split()[1],
+                            day_of_month=CELERY_CRON_SCHEDULE.split()[2],
+                            month_of_year=CELERY_CRON_SCHEDULE.split()[3],
+                            day_of_week=CELERY_CRON_SCHEDULE.split()[4]),
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
@@ -1457,7 +1464,7 @@ if env("DD_DJANGO_METRICS_ENABLED"):
     database_engine = DATABASES.get("default").get("ENGINE")
     DATABASES["default"]["ENGINE"] = database_engine.replace("django.", "django_prometheus.", 1)
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
-    LOGIN_EXEMPT_URLS += (rf'^{URL_PREFIX}django_metrics/',)
+    LOGIN_EXEMPT_URLS += (rf"^{URL_PREFIX}django_metrics/",)
 
 # ------------------------------------
 # Traces OpenTelemetry to OTLP
@@ -1482,92 +1489,94 @@ if env("DD_OPENTELEMETRY_TRACES_ENABLED"):
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
-    'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
-    'AnchoreCTL Vuln Report': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
-    'AnchoreCTL Policies Report': ['title', 'severity', 'component_name', 'file_path'],
-    'Anchore Enterprise Policy Check': ['title', 'severity', 'component_name', 'file_path'],
-    'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
-    'Aqua Scan': ['severity', 'vulnerability_ids', 'component_name', 'component_version'],
-    'Bandit Scan': ['file_path', 'line', 'vuln_id_from_tool'],
-    'CargoAudit Scan': ['vulnerability_ids', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
-    'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
-    'Checkmarx OSA': ['vulnerability_ids', 'component_name'],
-    'Cloudsploit Scan': ['title', 'description'],
-    'Coverity Scan JSON Report': ['title', 'cwe', 'line', 'file_path', 'description'],
-    'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'SonarQube API Import': ['title', 'file_path', 'line'],
-    'Sonatype Application Scan': ['title', 'cwe', 'file_path', 'component_name', 'component_version', 'vulnerability_ids'],
-    'Dependency Check Scan': ['title', 'cwe', 'file_path'],
-    'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'vulnerability_ids'],
-    'Mobsfscan Scan': ['title', 'severity', 'cwe'],
-    'Tenable Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
-    'Nexpose Scan': ['title', 'severity', 'vulnerability_ids', 'cwe'],
+    "Anchore Engine Scan": ["title", "severity", "component_name", "component_version", "file_path"],
+    "AnchoreCTL Vuln Report": ["title", "severity", "component_name", "component_version", "file_path"],
+    "AnchoreCTL Policies Report": ["title", "severity", "component_name", "file_path"],
+    "Anchore Enterprise Policy Check": ["title", "severity", "component_name", "file_path"],
+    "Anchore Grype": ["title", "severity", "component_name", "component_version"],
+    "Aqua Scan": ["severity", "vulnerability_ids", "component_name", "component_version"],
+    "Bandit Scan": ["file_path", "line", "vuln_id_from_tool"],
+    "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
+    "Checkmarx Scan": ["cwe", "severity", "file_path"],
+    "Checkmarx OSA": ["vulnerability_ids", "component_name"],
+    "Cloudsploit Scan": ["title", "description"],
+    "Coverity Scan JSON Report": ["title", "cwe", "line", "file_path", "description"],
+    "SonarQube Scan": ["cwe", "severity", "file_path"],
+    "SonarQube API Import": ["title", "file_path", "line"],
+    "Sonatype Application Scan": ["title", "cwe", "file_path", "component_name", "component_version", "vulnerability_ids"],
+    "Dependency Check Scan": ["title", "cwe", "file_path"],
+    "Dockle Scan": ["title", "description", "vuln_id_from_tool"],
+    "Dependency Track Finding Packaging Format (FPF) Export": ["component_name", "component_version", "vulnerability_ids"],
+    "Mobsfscan Scan": ["title", "severity", "cwe"],
+    "Tenable Scan": ["title", "severity", "vulnerability_ids", "cwe", "description"],
+    "Nexpose Scan": ["title", "severity", "vulnerability_ids", "cwe"],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
-    'NPM Audit Scan': ['title', 'severity', 'file_path', 'vulnerability_ids', 'cwe'],
-    'NPM Audit v7+ Scan': ['title', 'severity', 'cwe', 'vuln_id_from_tool'],
+    "NPM Audit Scan": ["title", "severity", "file_path", "vulnerability_ids", "cwe"],
+    "NPM Audit v7+ Scan": ["title", "severity", "cwe", "vuln_id_from_tool"],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     "Yarn Audit Scan": ["title", "severity", "file_path", "vulnerability_ids", "cwe"],
     # possible improvement: in the scanner put the library name into file_path, then dedup on vulnerability_ids + file_path + severity
-    'Mend Scan': ['title', 'severity', 'description'],
-    'ZAP Scan': ['title', 'cwe', 'severity'],
-    'Qualys Scan': ['title', 'severity', 'endpoints'],
+    "Mend Scan": ["title", "severity", "description"],
+    "ZAP Scan": ["title", "cwe", "severity"],
+    "Qualys Scan": ["title", "severity", "endpoints"],
     # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
-    'PHP Symfony Security Check': ['title', 'vulnerability_ids'],
-    'Clair Scan': ['title', 'vulnerability_ids', 'description', 'severity'],
+    "PHP Symfony Security Check": ["title", "vulnerability_ids"],
+    "Clair Scan": ["title", "vulnerability_ids", "description", "severity"],
     # for backwards compatibility because someone decided to rename this scanner:
-    'Symfony Security Check': ['title', 'vulnerability_ids'],
-    'DSOP Scan': ['vulnerability_ids'],
-    'Acunetix Scan': ['title', 'description'],
-    'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
-    'Trivy Operator Scan': ['title', 'severity', 'vulnerability_ids', 'description'],
-    'Trivy Scan': ['title', 'severity', 'vulnerability_ids', 'cwe', 'description'],
-    'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
-    'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
-    'GitLab Dependency Scanning Report': ['title', 'vulnerability_ids', 'file_path', 'component_name', 'component_version'],
-    'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
-    'JFrog Xray Unified Scan': ['vulnerability_ids', 'file_path', 'component_name', 'component_version'],
-    'JFrog Xray On Demand Binary Scan': ["title", "component_name", "component_version"],
-    'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
-    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Github Vulnerability Scan': ['title', 'severity', 'component_name', 'vulnerability_ids', 'file_path'],
-    'Solar Appscreener Scan': ['title', 'file_path', 'line', 'severity'],
-    'pip-audit Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
-    'Rubocop Scan': ['vuln_id_from_tool', 'file_path', 'line'],
-    'JFrog Xray Scan': ['title', 'description', 'component_name', 'component_version'],
-    'CycloneDX Scan': ['vuln_id_from_tool', 'component_name', 'component_version'],
-    'SSLyze Scan (JSON)': ['title', 'description'],
-    'Harbor Vulnerability Scan': ['title', 'mitigation'],
-    'Rusty Hog Scan': ['file_path', 'payload'],
-    'StackHawk HawkScan': ['vuln_id_from_tool', 'component_name', 'component_version'],
-    'Hydra Scan': ['title', 'description'],
-    'DrHeader JSON Importer': ['title', 'description'],
-    'Whispers': ['vuln_id_from_tool', 'file_path', 'line'],
-    'Blackduck Hub Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version'],
-    'Veracode SourceClear Scan': ['title', 'vulnerability_ids', 'component_name', 'component_version', 'severity'],
-    'Vulners Scan': ['vuln_id_from_tool', 'component_name'],
-    'Twistlock Image Scan': ['title', 'severity', 'component_name', 'component_version'],
-    'NeuVector (REST)': ['title', 'severity', 'component_name', 'component_version'],
-    'NeuVector (compliance)': ['title', 'vuln_id_from_tool', 'description'],
-    'Wpscan': ['title', 'description', 'severity'],
-    'Popeye Scan': ['title', 'description'],
-    'Nuclei Scan': ['title', 'cwe', 'severity'],
-    'KubeHunter Scan': ['title', 'description'],
-    'kube-bench Scan': ['title', 'vuln_id_from_tool', 'description'],
-    'Threagile risks report': ['title', 'cwe', "severity"],
-    'Trufflehog Scan': ['title', 'description', 'line'],
-    'Humble Json Importer': ['title'],
-    'MSDefender Parser': ['title', 'description'],
-    'HCLAppScan XML': ['title', 'description'],
-    'KICS Scan': ['file_path', 'line', 'severity', 'description', 'title'],
-    'MobSF Scan': ['title', 'description', 'severity'],
-    'OSV Scan': ['title', 'description', 'severity'],
-    'Snyk Code Scan': ['vuln_id_from_tool', 'file_path'],
-    'Deepfence Threatmapper Report': ['title', 'description', 'severity'],
-    'Bearer CLI': ['title', 'severity'],
-    'Nancy Scan': ['title', 'vuln_id_from_tool'],
-    'Wiz Scan': ['title', 'description', 'severity'],
-    'Kubescape JSON Importer': ['title', 'component_name']
+    "Symfony Security Check": ["title", "vulnerability_ids"],
+    "DSOP Scan": ["vulnerability_ids"],
+    "Acunetix Scan": ["title", "description"],
+    "Terrascan Scan": ["vuln_id_from_tool", "title", "severity", "file_path", "line", "component_name"],
+    "Trivy Operator Scan": ["title", "severity", "vulnerability_ids", "description"],
+    "Trivy Scan": ["title", "severity", "vulnerability_ids", "cwe", "description"],
+    "TFSec Scan": ["severity", "vuln_id_from_tool", "file_path", "line"],
+    "Snyk Scan": ["vuln_id_from_tool", "file_path", "component_name", "component_version"],
+    "GitLab Dependency Scanning Report": ["title", "vulnerability_ids", "file_path", "component_name", "component_version"],
+    "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
+    "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
+    "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
+    "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
+    "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
+    "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
+    "Solar Appscreener Scan": ["title", "file_path", "line", "severity"],
+    "pip-audit Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    "Rubocop Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "JFrog Xray Scan": ["title", "description", "component_name", "component_version"],
+    "CycloneDX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    "SSLyze Scan (JSON)": ["title", "description"],
+    "Harbor Vulnerability Scan": ["title", "mitigation"],
+    "Rusty Hog Scan": ["file_path", "payload"],
+    "StackHawk HawkScan": ["vuln_id_from_tool", "component_name", "component_version"],
+    "Hydra Scan": ["title", "description"],
+    "DrHeader JSON Importer": ["title", "description"],
+    "Whispers": ["vuln_id_from_tool", "file_path", "line"],
+    "Blackduck Hub Scan": ["title", "vulnerability_ids", "component_name", "component_version"],
+    "Veracode SourceClear Scan": ["title", "vulnerability_ids", "component_name", "component_version", "severity"],
+    "Vulners Scan": ["vuln_id_from_tool", "component_name"],
+    "Twistlock Image Scan": ["title", "severity", "component_name", "component_version"],
+    "NeuVector (REST)": ["title", "severity", "component_name", "component_version"],
+    "NeuVector (compliance)": ["title", "vuln_id_from_tool", "description"],
+    "Wpscan": ["title", "description", "severity"],
+    "Popeye Scan": ["title", "description"],
+    "Nuclei Scan": ["title", "cwe", "severity"],
+    "KubeHunter Scan": ["title", "description"],
+    "kube-bench Scan": ["title", "vuln_id_from_tool", "description"],
+    "Threagile risks report": ["title", "cwe", "severity"],
+    "Trufflehog Scan": ["title", "description", "line"],
+    "Humble Json Importer": ["title"],
+    "MSDefender Parser": ["title", "description"],
+    "HCLAppScan XML": ["title", "description"],
+    "KICS Scan": ["file_path", "line", "severity", "description", "title"],
+    "MobSF Scan": ["title", "description", "severity"],
+    "OSV Scan": ["title", "description", "severity"],
+    "Snyk Code Scan": ["vuln_id_from_tool", "file_path"],
+    "Deepfence Threatmapper Report": ["title", "description", "severity"],
+    "Bearer CLI": ["title", "severity"],
+    "Nancy Scan": ["title", "vuln_id_from_tool"],
+    "Wiz Scan": ["title", "description", "severity"],
+    "Kubescape JSON Importer": ["title", "component_name"],
+    "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
+    "Rapplex Scan": ["title", "endpoints", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1586,71 +1595,56 @@ if len(env("DD_HASHCODE_FIELDS_PER_SCANNER")) > 0:
 # If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
-    'Anchore Engine Scan': True,
-    'AnchoreCTL Vuln Report': True,
-    'AnchoreCTL Policies Report': True,
-    'Anchore Enterprise Policy Check': True,
-    'Anchore Grype': True,
-    'AWS Prowler Scan': True,
-    'AWS Prowler V3': True,
-    'Checkmarx Scan': False,
-    'Checkmarx OSA': True,
-    'Cloudsploit Scan': True,
-    'SonarQube Scan': False,
-    'Dependency Check Scan': True,
-    'Mobsfscan Scan': False,
-    'Tenable Scan': True,
-    'Nexpose Scan': True,
-    'NPM Audit Scan': True,
-    'NPM Audit v7+ Scan': True,
-    'Yarn Audit Scan': True,
-    'Mend Scan': True,
-    'ZAP Scan': False,
-    'Qualys Scan': True,
-    'DSOP Scan': True,
-    'Acunetix Scan': True,
-    'Trivy Operator Scan': True,
-    'Trivy Scan': True,
-    'SpotBugs Scan': False,
-    'Scout Suite Scan': True,
-    'AWS Security Hub Scan': True,
-    'Meterian Scan': True,
-    'SARIF': True,
-    'Hadolint Dockerfile check': True,
-    'Semgrep JSON Report': True,
-    'Generic Findings Import': True,
-    'Edgescan Scan': True,
-    'Bugcrowd API Import': True,
-    'Veracode SourceClear Scan': True,
-    'Vulners Scan': True,
-    'Twistlock Image Scan': True,
-    'Wpscan': True,
-    'Rusty Hog Scan': True,
-    'Codechecker Report native': True,
-    'Wazuh': True,
-    'Nuclei Scan': True,
-    'Threagile risks report': True
+    "Anchore Engine Scan": True,
+    "AnchoreCTL Vuln Report": True,
+    "AnchoreCTL Policies Report": True,
+    "Anchore Enterprise Policy Check": True,
+    "Anchore Grype": True,
+    "AWS Prowler Scan": True,
+    "AWS Prowler V3": True,
+    "Checkmarx Scan": False,
+    "Checkmarx OSA": True,
+    "Cloudsploit Scan": True,
+    "SonarQube Scan": False,
+    "Dependency Check Scan": True,
+    "Mobsfscan Scan": False,
+    "Tenable Scan": True,
+    "Nexpose Scan": True,
+    "NPM Audit Scan": True,
+    "NPM Audit v7+ Scan": True,
+    "Yarn Audit Scan": True,
+    "Mend Scan": True,
+    "ZAP Scan": False,
+    "Qualys Scan": True,
+    "DSOP Scan": True,
+    "Acunetix Scan": True,
+    "Trivy Operator Scan": True,
+    "Trivy Scan": True,
+    "SpotBugs Scan": False,
+    "Scout Suite Scan": True,
+    "AWS Security Hub Scan": True,
+    "Meterian Scan": True,
+    "SARIF": True,
+    "Hadolint Dockerfile check": True,
+    "Semgrep JSON Report": True,
+    "Generic Findings Import": True,
+    "Edgescan Scan": True,
+    "Bugcrowd API Import": True,
+    "Veracode SourceClear Scan": True,
+    "Vulners Scan": True,
+    "Twistlock Image Scan": True,
+    "Wpscan": True,
+    "Rusty Hog Scan": True,
+    "Codechecker Report native": True,
+    "Wazuh": True,
+    "Nuclei Scan": True,
+    "Threagile risks report": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = [
-    "title",
-    "cwe",
-    "vulnerability_ids",
-    "line",
-    "file_path",
-    "payload",
-    "component_name",
-    "component_version",
-    "description",
-    "endpoints",
-    "unique_id_from_tool",
-    "severity",
-    "vuln_id_from_tool",
-    "mitigation",
-]
+HASHCODE_ALLOWED_FIELDS = ["title", "cwe", "vulnerability_ids", "line", "file_path", "payload", "component_name", "component_version", "description", "endpoints", "unique_id_from_tool", "severity", "vuln_id_from_tool", "mitigation"]
 
 # Adding fields to the hash_code calculation regardless of the previous settings
 HASH_CODE_FIELDS_ALWAYS = ["service"]
@@ -1694,37 +1688,37 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AWS Prowler Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Prowler V3": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "AWS Security Finding Format (ASFF) Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Bandit Scan': DEDUPE_ALGO_HASH_CODE,
-    'CargoAudit Scan': DEDUPE_ALGO_HASH_CODE,
-    'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
-    'Checkmarx One Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    'Codechecker Report native': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Coverity Scan JSON Report': DEDUPE_ALGO_HASH_CODE,
-    'Cobalt.io API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Crunch42 Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
-    'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
-    'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
-    'SonarQube API Import': DEDUPE_ALGO_HASH_CODE,
-    'Sonatype Application Scan': DEDUPE_ALGO_HASH_CODE,
-    'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
-    'Dockle Scan': DEDUPE_ALGO_HASH_CODE,
-    'Tenable Scan': DEDUPE_ALGO_HASH_CODE,
-    'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
-    'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
-    'NPM Audit v7+ Scan': DEDUPE_ALGO_HASH_CODE,
-    'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
-    'Mend Scan': DEDUPE_ALGO_HASH_CODE,
-    'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
-    'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
-    'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
-    'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
-    'Clair Scan': DEDUPE_ALGO_HASH_CODE,
+    "Burp REST API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Bandit Scan": DEDUPE_ALGO_HASH_CODE,
+    "CargoAudit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Checkmarx Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Checkmarx Scan": DEDUPE_ALGO_HASH_CODE,
+    "Checkmarx One Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Checkmarx OSA": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Codechecker Report native": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Coverity API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Coverity Scan JSON Report": DEDUPE_ALGO_HASH_CODE,
+    "Cobalt.io API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Crunch42 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Dependency Track Finding Packaging Format (FPF) Export": DEDUPE_ALGO_HASH_CODE,
+    "Mobsfscan Scan": DEDUPE_ALGO_HASH_CODE,
+    "SonarQube Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "SonarQube Scan": DEDUPE_ALGO_HASH_CODE,
+    "SonarQube API Import": DEDUPE_ALGO_HASH_CODE,
+    "Sonatype Application Scan": DEDUPE_ALGO_HASH_CODE,
+    "Dependency Check Scan": DEDUPE_ALGO_HASH_CODE,
+    "Dockle Scan": DEDUPE_ALGO_HASH_CODE,
+    "Tenable Scan": DEDUPE_ALGO_HASH_CODE,
+    "Nexpose Scan": DEDUPE_ALGO_HASH_CODE,
+    "NPM Audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "NPM Audit v7+ Scan": DEDUPE_ALGO_HASH_CODE,
+    "Yarn Audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Mend Scan": DEDUPE_ALGO_HASH_CODE,
+    "ZAP Scan": DEDUPE_ALGO_HASH_CODE,
+    "Qualys Scan": DEDUPE_ALGO_HASH_CODE,
+    "PHP Symfony Security Check": DEDUPE_ALGO_HASH_CODE,
+    "Acunetix Scan": DEDUPE_ALGO_HASH_CODE,
+    "Clair Scan": DEDUPE_ALGO_HASH_CODE,
     # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     "Veracode Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Veracode SourceClear Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1745,63 +1739,65 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Checkov Scan": DEDUPE_ALGO_HASH_CODE,
     "SpotBugs Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray Unified Scan": DEDUPE_ALGO_HASH_CODE,
-    'JFrog Xray On Demand Binary Scan': DEDUPE_ALGO_HASH_CODE,
-    'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
-    'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
-    'Github Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
-    'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
-    'SARIF': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
-    'Semgrep JSON Report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
-    'Trufflehog Scan': DEDUPE_ALGO_HASH_CODE,
-    'Trufflehog3 Scan': DEDUPE_ALGO_HASH_CODE,
-    'Detect-secrets Scan': DEDUPE_ALGO_HASH_CODE,
-    'Solar Appscreener Scan': DEDUPE_ALGO_HASH_CODE,
-    'Gitleaks Scan': DEDUPE_ALGO_HASH_CODE,
-    'pip-audit Scan': DEDUPE_ALGO_HASH_CODE,
-    'Nancy Scan': DEDUPE_ALGO_HASH_CODE,
-    'Edgescan Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Bugcrowd API Import': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Rubocop Scan': DEDUPE_ALGO_HASH_CODE,
-    'JFrog Xray Scan': DEDUPE_ALGO_HASH_CODE,
-    'CycloneDX Scan': DEDUPE_ALGO_HASH_CODE,
-    'SSLyze Scan (JSON)': DEDUPE_ALGO_HASH_CODE,
-    'Harbor Vulnerability Scan': DEDUPE_ALGO_HASH_CODE,
-    'Rusty Hog Scan': DEDUPE_ALGO_HASH_CODE,
-    'StackHawk HawkScan': DEDUPE_ALGO_HASH_CODE,
-    'Hydra Scan': DEDUPE_ALGO_HASH_CODE,
-    'DrHeader JSON Importer': DEDUPE_ALGO_HASH_CODE,
-    'PWN SAST': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Whispers': DEDUPE_ALGO_HASH_CODE,
-    'Blackduck Hub Scan': DEDUPE_ALGO_HASH_CODE,
-    'BlackDuck API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Blackduck Binary Analysis': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'docker-bench-security Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Vulners Scan': DEDUPE_ALGO_HASH_CODE,
-    'Twistlock Image Scan': DEDUPE_ALGO_HASH_CODE,
-    'NeuVector (REST)': DEDUPE_ALGO_HASH_CODE,
-    'NeuVector (compliance)': DEDUPE_ALGO_HASH_CODE,
-    'Wpscan': DEDUPE_ALGO_HASH_CODE,
-    'Popeye Scan': DEDUPE_ALGO_HASH_CODE,
-    'Nuclei Scan': DEDUPE_ALGO_HASH_CODE,
-    'KubeHunter Scan': DEDUPE_ALGO_HASH_CODE,
-    'kube-bench Scan': DEDUPE_ALGO_HASH_CODE,
-    'Threagile risks report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    'Humble Json Importer': DEDUPE_ALGO_HASH_CODE,
-    'Wazuh Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'MSDefender Parser': DEDUPE_ALGO_HASH_CODE,
-    'HCLAppScan XML': DEDUPE_ALGO_HASH_CODE,
-    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
-    'MobSF Scan': DEDUPE_ALGO_HASH_CODE,
-    'OSV Scan': DEDUPE_ALGO_HASH_CODE,
-    'Nosey Parker Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    'Bearer CLI': DEDUPE_ALGO_HASH_CODE,
-    'Wiz Scan': DEDUPE_ALGO_HASH_CODE,
-    'Deepfence Threatmapper Report': DEDUPE_ALGO_HASH_CODE,
-    'Kubescape JSON Importer': DEDUPE_ALGO_HASH_CODE
+    "JFrog Xray On Demand Binary Scan": DEDUPE_ALGO_HASH_CODE,
+    "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
+    "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
+    "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
+    "SARIF": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Azure Security Center Recommendations Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Hadolint Dockerfile check": DEDUPE_ALGO_HASH_CODE,
+    "Semgrep JSON Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Generic Findings Import": DEDUPE_ALGO_HASH_CODE,
+    "Trufflehog Scan": DEDUPE_ALGO_HASH_CODE,
+    "Trufflehog3 Scan": DEDUPE_ALGO_HASH_CODE,
+    "Detect-secrets Scan": DEDUPE_ALGO_HASH_CODE,
+    "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
+    "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
+    "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Nancy Scan": DEDUPE_ALGO_HASH_CODE,
+    "Edgescan Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Bugcrowd API Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Rubocop Scan": DEDUPE_ALGO_HASH_CODE,
+    "JFrog Xray Scan": DEDUPE_ALGO_HASH_CODE,
+    "CycloneDX Scan": DEDUPE_ALGO_HASH_CODE,
+    "SSLyze Scan (JSON)": DEDUPE_ALGO_HASH_CODE,
+    "Harbor Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
+    "Rusty Hog Scan": DEDUPE_ALGO_HASH_CODE,
+    "StackHawk HawkScan": DEDUPE_ALGO_HASH_CODE,
+    "Hydra Scan": DEDUPE_ALGO_HASH_CODE,
+    "DrHeader JSON Importer": DEDUPE_ALGO_HASH_CODE,
+    "PWN SAST": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Whispers": DEDUPE_ALGO_HASH_CODE,
+    "Blackduck Hub Scan": DEDUPE_ALGO_HASH_CODE,
+    "BlackDuck API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Blackduck Binary Analysis": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "docker-bench-security Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Vulners Scan": DEDUPE_ALGO_HASH_CODE,
+    "Twistlock Image Scan": DEDUPE_ALGO_HASH_CODE,
+    "NeuVector (REST)": DEDUPE_ALGO_HASH_CODE,
+    "NeuVector (compliance)": DEDUPE_ALGO_HASH_CODE,
+    "Wpscan": DEDUPE_ALGO_HASH_CODE,
+    "Popeye Scan": DEDUPE_ALGO_HASH_CODE,
+    "Nuclei Scan": DEDUPE_ALGO_HASH_CODE,
+    "KubeHunter Scan": DEDUPE_ALGO_HASH_CODE,
+    "kube-bench Scan": DEDUPE_ALGO_HASH_CODE,
+    "Threagile risks report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Humble Json Importer": DEDUPE_ALGO_HASH_CODE,
+    "Wazuh Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "MSDefender Parser": DEDUPE_ALGO_HASH_CODE,
+    "HCLAppScan XML": DEDUPE_ALGO_HASH_CODE,
+    "KICS Scan": DEDUPE_ALGO_HASH_CODE,
+    "MobSF Scan": DEDUPE_ALGO_HASH_CODE,
+    "OSV Scan": DEDUPE_ALGO_HASH_CODE,
+    "Nosey Parker Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Bearer CLI": DEDUPE_ALGO_HASH_CODE,
+    "Wiz Scan": DEDUPE_ALGO_HASH_CODE,
+    "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
+    "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
+    "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
+    "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1837,9 +1833,9 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
     if env("DD_JIRA_EXTRA_ISSUE_TYPES").count(",") > 0:
         for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
-            JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
+            JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type)
     else:
-        JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((env("DD_JIRA_EXTRA_ISSUE_TYPES"), env("DD_JIRA_EXTRA_ISSUE_TYPES")),)
+        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env("DD_JIRA_EXTRA_ISSUE_TYPES"), env("DD_JIRA_EXTRA_ISSUE_TYPES"))
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
 
@@ -1862,14 +1858,20 @@ LOGGING = {
             "format": "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)d] %(message)s",
             "datefmt": "%d/%b/%Y %H:%M:%S",
         },
-        "simple": {"format": "%(levelname)s %(funcName)s %(lineno)d %(message)s"},
+        "simple": {
+            "format": "%(levelname)s %(funcName)s %(lineno)d %(message)s",
+        },
         "json": {
             "()": "json_log_formatter.JSONFormatter",
         },
     },
     "filters": {
-        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
-        "require_debug_true": {"()": "django.utils.log.RequireDebugTrue"},
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        },
     },
     "handlers": {
         "mail_admins": {
@@ -1877,55 +1879,61 @@ LOGGING = {
             "filters": ["require_debug_false"],
             "class": "django.utils.log.AdminEmailHandler",
         },
-        "console": {"class": "logging.StreamHandler", "formatter": "verbose"},
-        "json_console": {"class": "logging.StreamHandler", "formatter": "json"},
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "json_console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+        },
     },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins', 'console'],
-            'level': str(LOG_LEVEL),
-            'propagate': False,
+    "loggers": {
+        "django.request": {
+            "handlers": ["mail_admins", "console"],
+            "level": str(LOG_LEVEL),
+            "propagate": False,
         },
-        'django.security': {
-            'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': str(LOG_LEVEL),
-            'propagate': False,
+        "django.security": {
+            "handlers": [rf"{LOGGING_HANDLER}"],
+            "level": str(LOG_LEVEL),
+            "propagate": False,
         },
-        'celery': {
-            'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': str(LOG_LEVEL),
-            'propagate': False,
+        "celery": {
+            "handlers": [rf"{LOGGING_HANDLER}"],
+            "level": str(LOG_LEVEL),
+            "propagate": False,
             # workaround some celery logging known issue
             "worker_hijack_root_logger": False,
         },
-        'dojo': {
-            'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': str(LOG_LEVEL),
-            'propagate': False,
+        "dojo": {
+            "handlers": [rf"{LOGGING_HANDLER}"],
+            "level": str(LOG_LEVEL),
+            "propagate": False,
         },
-        'dojo.specific-loggers.deduplication': {
-            'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': str(LOG_LEVEL),
-            'propagate': False,
+        "dojo.specific-loggers.deduplication": {
+            "handlers": [rf"{LOGGING_HANDLER}"],
+            "level": str(LOG_LEVEL),
+            "propagate": False,
         },
-        'saml2': {
-            'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': str(LOG_LEVEL),
-            'propagate': False,
+        "saml2": {
+            "handlers": [rf"{LOGGING_HANDLER}"],
+            "level": str(LOG_LEVEL),
+            "propagate": False,
         },
         "MARKDOWN": {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': str(LOG_LEVEL),
-            'propagate': False,
+            "handlers": [rf"{LOGGING_HANDLER}"],
+            "level": str(LOG_LEVEL),
+            "propagate": False,
         },
         "titlecase": {
             # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [rf'{LOGGING_HANDLER}'],
-            'level': str(LOG_LEVEL),
-            'propagate': False,
+            "handlers": [rf"{LOGGING_HANDLER}"],
+            "level": str(LOG_LEVEL),
+            "propagate": False,
         },
-    }
+    },
 }
 
 # override filter to ensure sensitive variables are also hidden when DEBUG = True
@@ -1968,12 +1976,9 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 )
 
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
-TAGULOUS_AUTOCOMPLETE_SETTINGS = {
-    "placeholder": "Enter some tags (comma separated, use enter to select / create a new tag)",
-    "width": "70%",
-}
+TAGULOUS_AUTOCOMPLETE_SETTINGS = {"placeholder": "Enter some tags (comma separated, use enter to select / create a new tag)", "width": "70%"}
 
-EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
+EDITABLE_MITIGATED_DATA = env("DD_EDITABLE_MITIGATED_DATA")
 
 # FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
 FEATURE_FINDING_GROUPS = env("DD_FEATURE_FINDING_GROUPS")
@@ -2003,17 +2008,17 @@ DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
 
 VULNERABILITY_URLS = {
-    'CVE': 'https://nvd.nist.gov/vuln/detail/',
-    'GHSA': 'https://github.com/advisories/',
-    'OSV': 'https://osv.dev/vulnerability/',
-    'PYSEC': 'https://osv.dev/vulnerability/',
-    'SNYK': 'https://snyk.io/vuln/',
-    'RUSTSEC': 'https://rustsec.org/advisories/',
-    'VNS': 'https://vulners.com/',
-    'RHSA': 'https://access.redhat.com/errata/',
-    'RHBA': 'https://access.redhat.com/errata/',
-    'RHEA': 'https://access.redhat.com/errata/',
-    'FEDORA': 'https://bodhi.fedoraproject.org/updates/',
+    "CVE": "https://nvd.nist.gov/vuln/detail/",
+    "GHSA": "https://github.com/advisories/",
+    "OSV": "https://osv.dev/vulnerability/",
+    "PYSEC": "https://osv.dev/vulnerability/",
+    "SNYK": "https://snyk.io/vuln/",
+    "RUSTSEC": "https://rustsec.org/advisories/",
+    "VNS": "https://vulners.com/",
+    "RHSA": "https://access.redhat.com/errata/",
+    "RHBA": "https://access.redhat.com/errata/",
+    "RHEA": "https://access.redhat.com/errata/",
+    "FEDORA": "https://bodhi.fedoraproject.org/updates/",
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
@@ -2100,7 +2105,7 @@ CSP_FRAME_SRC = [
 # ------------------------------------------------------------------------------
 # Notifications
 # ------------------------------------------------------------------------------
-NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env('DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP')
+NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings

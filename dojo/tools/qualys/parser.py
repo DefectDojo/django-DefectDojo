@@ -111,7 +111,7 @@ def split_cvss(value, _temp):
             # remove ")" at the end
         if _temp.get("CVSS_vector") is None:
             _temp["CVSS_vector"] = CVSS3(
-                "CVSS:3.0/" + split[1][:-1]
+                "CVSS:3.0/" + split[1][:-1],
             ).clean_vector()
     else:
         if _temp.get("CVSS_value") is None:
@@ -174,7 +174,7 @@ def parse_finding(host, tree):
             last_fixed = vuln_details.findtext("LAST_FIXED")
             if last_fixed is not None:
                 _temp["mitigation_date"] = datetime.datetime.strptime(
-                    last_fixed, "%Y-%m-%dT%H:%M:%SZ"
+                    last_fixed, "%Y-%m-%dT%H:%M:%SZ",
                 )
             else:
                 _temp["mitigation_date"] = None
@@ -217,7 +217,7 @@ def parse_finding(host, tree):
                     htmltext("First Found: " + _first_found),
                     htmltext("Last Found: " + _last_found),
                     htmltext("Times Found: " + _times_found),
-                ]
+                ],
             )
             # Impact description
             _temp["IMPACT"] = htmltext(vuln_item.findtext("IMPACT"))

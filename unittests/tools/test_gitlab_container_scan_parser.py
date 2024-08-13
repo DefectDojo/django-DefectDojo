@@ -2,8 +2,7 @@ from datetime import datetime
 
 from dojo.models import Test
 from dojo.tools.gitlab_container_scan.parser import GitlabContainerScanParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestGitlabContainerScanParser(DojoTestCase):
@@ -94,7 +93,7 @@ class TestGitlabContainerScanParser(DojoTestCase):
             finding = findings[50]
             self.assertIsNone(finding.date)
             self.assertEqual(
-                "openssl: Infinite loop in BN_mod_sqrt() reachable when parsing certificates", finding.title
+                "openssl: Infinite loop in BN_mod_sqrt() reachable when parsing certificates", finding.title,
             )
             self.assertEqual("libretls", finding.component_name)
             self.assertEqual("3.3.4-r2", finding.component_version)

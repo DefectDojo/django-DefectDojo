@@ -3,8 +3,7 @@ from unittest.mock import patch
 
 from dojo.models import Test, Test_Type
 from dojo.tools.api_cobalt.parser import ApiCobaltParser
-
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestApiCobaltParser(DojoTestCase):
@@ -267,14 +266,14 @@ class TestApiCobaltParser(DojoTestCase):
             self.assertFalse(finding.static_finding)
             self.assertTrue(finding.dynamic_finding)
 
-    @patch('dojo.tools.api_cobalt.importer.CobaltApiImporter.get_findings')
+    @patch("dojo.tools.api_cobalt.importer.CobaltApiImporter.get_findings")
     def test_cobalt_api_parser_with_api(self, mock):
-        with open(get_unit_tests_path() + '/scans/api_cobalt/cobalt_api_many_vul.json') as api_findings_file:
+        with open(get_unit_tests_path() + "/scans/api_cobalt/cobalt_api_many_vul.json") as api_findings_file:
             api_findings = json.load(api_findings_file)
         mock.return_value = api_findings
 
         test_type = Test_Type()
-        test_type.name = 'test_type'
+        test_type.name = "test_type"
         test = Test()
         test.test_type = test_type
 
@@ -283,6 +282,6 @@ class TestApiCobaltParser(DojoTestCase):
 
         mock.assert_called_with(test)
         self.assertEqual(3, len(findings))
-        self.assertEqual(findings[0].title, 'SQL Injection')
-        self.assertEqual(findings[1].title, 'Cross Site Scripting')
-        self.assertEqual(findings[2].title, 'Missing firewall')
+        self.assertEqual(findings[0].title, "SQL Injection")
+        self.assertEqual(findings[1].title, "Cross Site Scripting")
+        self.assertEqual(findings[2].title, "Missing firewall")

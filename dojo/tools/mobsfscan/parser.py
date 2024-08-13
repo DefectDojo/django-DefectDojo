@@ -35,8 +35,8 @@ class MobsfscanParser:
                 metadata = item.get("metadata")
                 cwe = int(
                     re.match(r"(cwe|CWE)-([0-9]+)", metadata.get("cwe")).group(
-                        2
-                    )
+                        2,
+                    ),
                 )
                 masvs = metadata.get("masvs")
                 owasp_mobile = metadata.get("owasp-mobile")
@@ -45,7 +45,7 @@ class MobsfscanParser:
                         f"**Description:** `{metadata.get('description')}`",
                         f"**OWASP MASVS:** `{masvs}`",
                         f"**OWASP Mobile:** `{owasp_mobile}`",
-                    ]
+                    ],
                 )
                 references = metadata.get("reference")
                 if metadata.get("severity") in self.SEVERITY:
@@ -70,7 +70,7 @@ class MobsfscanParser:
                         finding.line = line
 
                 dupe_key = hashlib.sha256(
-                    (key + str(cwe) + masvs + owasp_mobile).encode("utf-8")
+                    (key + str(cwe) + masvs + owasp_mobile).encode("utf-8"),
                 ).hexdigest()
 
                 if dupe_key in dupes:

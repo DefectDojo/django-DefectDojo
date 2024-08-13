@@ -54,6 +54,40 @@ class BurpParser:
 
         return list(items.values())
 
+
+def get_attrib_from_subnode(xml_node, subnode_xpath_expr, attrib_name):
+    """
+    Finds a subnode in the item node and the retrieves a value from it
+
+    @return An attribute value
+    """
+    global ETREE_VERSION
+    node = None
+
+    if ETREE_VERSION[0] <= 1 and ETREE_VERSION[1] < 3:
+        match_obj = re.search(
+            r"([^\@]+?)\[\@([^=]*?)=\'([^\']*?)\'", subnode_xpath_expr,
+        )
+        if match_obj is not None:
+            node_to_find = match_obj.group(1)
+            xpath_attrib = match_obj.group(2)
+            xpath_value = match_obj.group(3)
+            for node_found in xml_node.findall(node_to_find):
+                if node_found.attrib[xpath_attrib] == xpath_value:
+                    node = node_found
+                    break
+        else:
+            node = xml_node.find(subnode_xpath_expr)
+
+    else:
+        node = xml_node.find(subnode_xpath_expr)
+
+    if node is not None:
+        return node.get(attrib_name)
+
+    return None
+
+
 def do_clean(value):
     myreturn = ""
     if value is not None:
@@ -68,7 +102,9 @@ def get_clean_base64(value):
     if value is None:
         return ""
     try:
-        return base64.b64decode(value).decode("utf-8", "replace")  # wouldn't this be cleaner than below?
+        return base64.b64decode(value).decode(
+            "utf-8", "replace",
+        )  # wouldn't this be cleaner than below?
     except UnicodeDecodeError:
         # decoding of UTF-8 fail when you have a binary payload in the HTTP response
         # so we just cut it to have only the header and add fake body
@@ -76,7 +112,7 @@ def get_clean_base64(value):
             [
                 base64.b64decode(value).split(b"\r\n\r\n")[0].decode(),
                 "<Binary Redacted Data>",
-            ]
+            ],
         )
 
 
@@ -107,7 +143,9 @@ def get_item(item_node, test):
     for request_response in item_node.findall("./requestresponse"):
         request = get_clean_base64(request_response.findall("request")[0].text)
         if request_response.findall("response"):
-            response = get_clean_base64(request_response.findall("response")[0].text)
+            response = get_clean_base64(
+                request_response.findall("response")[0].text,
+            )
         else:
             response = ""
             # This case happens when a request_response pair doesn't have
@@ -139,8 +177,12 @@ def get_item(item_node, test):
             )
 
         for request_response in event.findall("./requestresponse"):
-            request = get_clean_base64(request_response.findall("request")[0].text)
-            response = get_clean_base64(request_response.findall("response")[0].text)
+            request = get_clean_base64(
+                request_response.findall("request")[0].text,
+            )
+            response = get_clean_base64(
+                request_response.findall("response")[0].text,
+            )
             unsaved_req_resp.append({"req": request, "resp": response})
         if collab_details[0] == "HTTP":
             collab_text += (
@@ -222,7 +264,9 @@ def get_item(item_node, test):
     cwes = do_clean_cwe(item_node.findall("vulnerabilityClassifications"))
     if len(cwes) > 1:
         # FIXME support more than one CWE
-        logger.debug(f"more than one CWE for a finding {cwes}. NOT supported by parser API")
+        logger.debug(
+            f"more than one CWE for a finding {cwes}. NOT supported by parser API",
+        )
     if len(cwes) > 0:
         finding.cwe = cwes[0]
     return finding

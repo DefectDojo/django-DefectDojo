@@ -50,7 +50,6 @@ class Parser:
         TODO This should be enforced in the future, but here is not the place
         TODO once this enforced, this stub class should be removed
         """
-        pass
 
 
 class BaseImporter(ImporterOptions):
@@ -296,9 +295,9 @@ class BaseImporter(ImporterOptions):
         # Update the target end of the engagement if it is a CI/CD engagement
         # If the supplied scan date is greater than the current configured
         # target end date on the engagement
-        if self.test.engagement.engagement_type == 'CI/CD':
+        if self.test.engagement.engagement_type == "CI/CD":
             self.test.engagement.target_end = max_safe(
-                [self.scan_date.date(), self.test.engagement.target_end]
+                [self.scan_date.date(), self.test.engagement.target_end],
             )
         # Set the target end date on the test in a similar fashion
         max_test_start_date = max_safe([self.scan_date, self.test.target_end])
@@ -337,19 +336,19 @@ class BaseImporter(ImporterOptions):
             f"new: {len(new_findings)} "
             f"closed: {len(closed_findings)} "
             f"reactivated: {len(reactivated_findings)} "
-            f"untouched: {len(untouched_findings)} "
+            f"untouched: {len(untouched_findings)} ",
         )
         # Create a dictionary to stuff into the test import object
         import_settings = {}
-        import_settings['active'] = self.active
-        import_settings['verified'] = self.verified
-        import_settings['minimum_severity'] = self.minimum_severity
-        import_settings['close_old_findings'] = self.close_old_findings_toggle
-        import_settings['push_to_jira'] = self.push_to_jira
-        import_settings['tags'] = self.tags
+        import_settings["active"] = self.active
+        import_settings["verified"] = self.verified
+        import_settings["minimum_severity"] = self.minimum_severity
+        import_settings["close_old_findings"] = self.close_old_findings_toggle
+        import_settings["push_to_jira"] = self.push_to_jira
+        import_settings["tags"] = self.tags
         # Add the list of endpoints that were added exclusively at import time
         if len(self.endpoints_to_add) > 0:
-            import_settings['endpoints'] = [str(endpoint) for endpoint in self.endpoints_to_add]
+            import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
         # Create the test import object
         test_import = Test_Import.objects.create(
             test=self.test,
@@ -560,17 +559,17 @@ class BaseImporter(ImporterOptions):
         If not, raise a ValidationError explaining as such
         """
         # Checks around Informational/Info severity
-        starts_with_info = finding.severity.lower().startswith('info')
-        lower_none = finding.severity.lower() == 'none'
-        not_info = finding.severity != 'Info'
+        starts_with_info = finding.severity.lower().startswith("info")
+        lower_none = finding.severity.lower() == "none"
+        not_info = finding.severity != "Info"
         # Make the comparisons
         if not_info and (starts_with_info or lower_none):
             # Correct the severity
-            finding.severity = 'Info'
+            finding.severity = "Info"
         # Ensure the final severity is one of the supported options
         if finding.severity not in SEVERITIES:
             msg = (
-                f"Finding severity \"{finding.severity}\" is not supported. "
+                f'Finding severity "{finding.severity}" is not supported. '
                 f"Any of the following are supported: {SEVERITIES}."
             )
             raise ValidationError(msg)
@@ -600,7 +599,7 @@ class BaseImporter(ImporterOptions):
 
     def process_request_response_pairs(
         self,
-        finding: Finding
+        finding: Finding,
     ) -> None:
         """
         Search the unsaved finding for the following attributes to determine
@@ -611,7 +610,7 @@ class BaseImporter(ImporterOptions):
         Create BurpRawRequestResponse objects linked to the finding without
         returning the finding afterward
         """
-        if len(unsaved_req_resp := getattr(finding, 'unsaved_req_resp', [])) > 0:
+        if len(unsaved_req_resp := getattr(finding, "unsaved_req_resp", [])) > 0:
             for req_resp in unsaved_req_resp:
                 burp_rr = BurpRawRequestResponse(
                     finding=finding,
@@ -646,12 +645,12 @@ class BaseImporter(ImporterOptions):
         self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding.unsaved_endpoints)
         # Check for any that were added in the form
         if len(endpoints_to_add) > 0:
-            logger.debug('endpoints_to_add: %s', endpoints_to_add)
+            logger.debug("endpoints_to_add: %s", endpoints_to_add)
             self.endpoint_manager.chunk_endpoints_and_disperse(finding, endpoints_to_add)
 
     def process_vulnerability_ids(
         self,
-        finding: Finding
+        finding: Finding,
     ) -> Finding:
         """
         Parse the `unsaved_vulnerability_ids` field from findings after they are parsed
@@ -690,8 +689,8 @@ class BaseImporter(ImporterOptions):
         """
         if finding.unsaved_files:
             for unsaved_file in finding.unsaved_files:
-                data = base64.b64decode(unsaved_file.get('data'))
-                title = unsaved_file.get('title', '<No title>')
+                data = base64.b64decode(unsaved_file.get("data"))
+                title = unsaved_file.get("title", "<No title>")
                 file_upload, _ = FileUpload.objects.get_or_create(title=title)
                 file_upload.file.save(title, ContentFile(data))
                 file_upload.save()
