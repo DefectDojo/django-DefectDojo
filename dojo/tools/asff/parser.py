@@ -40,10 +40,30 @@ class AsffParser:
                 active = True
             else:
                 active = False
+                
+            # Adding the Resources:0/Id value to the description. 
+            #
+            # This is needed because every Finding in AWS from Security Hub has an
+            # associated ResourceId that contains the full AWS ARN and without it, 
+            # it is much more difficult to track down the specific resource.
+            #
+            # This is different from the Finding Id - as that is from the Security Hub
+            # control and has no information about the offending resource.
+            #
+            # Retrieve the AWS ARN / Resource Id
+            resource_arn = item.get("ProductFields").get("Resources:0/Id")
+            
+            # Define the control_description
+            control_description = item.get("Description")
+            
+            if resource_arn:
+                full_description = f"{resource_arn}\n\n{control_description}"
+            else:
+                full_description = control_description
 
             finding = Finding(
                 title=item.get("Title"),
-                description=item.get("Description"),
+                description=full_description,
                 date=dateutil.parser.parse(item.get("CreatedAt")),
                 mitigation=mitigation,
                 references=references,
