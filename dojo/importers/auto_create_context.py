@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Optional
 
 from crum import get_current_user
 from django.db import transaction
@@ -111,7 +111,7 @@ class AutoCreateContextManager:
     """
     def get_target_product_type_if_exists(
         self,
-        product_type_name: str = None,
+        product_type_name: Optional[str] = None,
         **kwargs: dict,
     ) -> Product_Type | None:
         """
@@ -126,8 +126,8 @@ class AutoCreateContextManager:
 
     def get_target_product_if_exists(
         self,
-        product_name: str = None,
-        product_type_name: str = None,
+        product_name: Optional[str] = None,
+        product_type_name: Optional[str] = None,
         **kwargs: dict,
     ) -> Product | None:
         """
@@ -166,7 +166,7 @@ class AutoCreateContextManager:
     def get_target_engagement_if_exists(
         self,
         engagement_id: int = 0,
-        engagement_name: str = None,
+        engagement_name: Optional[str] = None,
         product: Product = None,
         **kwargs: dict,
     ) -> Engagement | None:
@@ -178,7 +178,7 @@ class AutoCreateContextManager:
         If a match is not found, and a product is not supplied, return None
         """
         if engagement := get_object_or_none(Engagement, pk=engagement_id):
-            logger.debug('Using existing engagement by id: %s', engagement_id)
+            logger.debug("Using existing engagement by id: %s", engagement_id)
             return engagement
         # if there's no product, then for sure there's no engagement either
         if product is None:
@@ -189,8 +189,8 @@ class AutoCreateContextManager:
     def get_target_test_if_exists(
         self,
         test_id: int = 0,
-        test_title: str = None,
-        scan_type: str = None,
+        test_title: Optional[str] = None,
+        scan_type: Optional[str] = None,
         engagement: Engagement = None,
         **kwargs: dict,
     ) -> Test | None:
@@ -200,7 +200,7 @@ class AutoCreateContextManager:
         the provided scan_type and test_title.
         """
         if test := get_object_or_none(Test, pk=test_id):
-            logger.debug('Using existing Test by id: %s', test_id)
+            logger.debug("Using existing Test by id: %s", test_id)
             return test
         # If the engagement is not supplied, we cannot do anything
         if not engagement:
@@ -218,7 +218,7 @@ class AutoCreateContextManager:
     """
     def get_or_create_product_type(
         self,
-        product_type_name: str = None,
+        product_type_name: Optional[str] = None,
         **kwargs: dict,
     ) -> Product_Type:
         """
@@ -242,8 +242,9 @@ class AutoCreateContextManager:
 
     def get_or_create_product(
         self,
-        product_name: str = None,
-        product_type_name: str = None,
+        product_name: Optional[str] = None,
+        product_type_name: Optional[str] = None,
+        *,
         auto_create_context: bool = False,
         **kwargs: dict,
     ) -> Product:
@@ -276,13 +277,14 @@ class AutoCreateContextManager:
     def get_or_create_engagement(
         self,
         engagement_id: int = 0,
-        engagement_name: str = None,
-        product_name: str = None,
-        product_type_name: str = None,
+        engagement_name: Optional[str] = None,
+        product_name: Optional[str] = None,
+        product_type_name: Optional[str] = None,
+        *,
         auto_create_context: bool = False,
         deduplication_on_engagement: bool = False,
-        source_code_management_uri: str = None,
-        target_end: datetime = None,
+        source_code_management_uri: Optional[str] = None,
+        target_end: Optional[datetime] = None,
         **kwargs: dict,
     ) -> Engagement:
         """

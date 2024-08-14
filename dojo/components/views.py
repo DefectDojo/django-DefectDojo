@@ -25,7 +25,7 @@ def components(request):
             .order_by("component_name")
             .annotate(
                 component_version=StringAgg(
-                    "component_version", delimiter=separator, distinct=True, default=Value(''),
+                    "component_version", delimiter=separator, distinct=True, default=Value(""),
                 ),
             )
         )
@@ -70,5 +70,6 @@ def components(request):
             "filter": comp_filter,
             "result": result,
             "component_words": sorted(set(component_words)),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         },
     )

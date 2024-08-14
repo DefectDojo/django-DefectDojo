@@ -388,8 +388,6 @@ details about the deduplication process : switch
 
 ### Deduplication - APIv2 parameters
 
-- `skip_duplicates`: if true, duplicates are not
-    inserted at all
 - `close_old_findings` : if true, findings that are not
     duplicates and that were in the previous scan of the same type
     (example ZAP) for the same engagement (or product in case of
@@ -540,7 +538,7 @@ Custom reports, generated with the Report Builder, allow you to select specific 
 5.  Vulnerable Endpoints
 6.  Page Breaks
 
-DefectDojo's reports can be generated in HTML and AsciiDoc.
+DefectDojo's reports can be generated in HTML.
 
 ## Metrics
 

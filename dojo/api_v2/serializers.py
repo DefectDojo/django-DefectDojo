@@ -18,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
 
 import dojo.jira_link.helper as jira_helper
@@ -200,7 +201,7 @@ class TagListSerializerField(serializers.ListField):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
-        if isinstance(data, list) and data == [''] and self.allow_empty:
+        if isinstance(data, list) and data == [""] and self.allow_empty:
             return []
         if isinstance(data, six.string_types):
             if not data:
@@ -1100,7 +1101,7 @@ class ToolTypeSerializer(serializers.ModelSerializer):
             name = data.get("name")
             # Make sure this will not create a duplicate test type
             if Tool_Type.objects.filter(name=name).count() > 0:
-                msg = 'A Tool Type with the name already exists'
+                msg = "A Tool Type with the name already exists"
                 raise serializers.ValidationError(msg)
         return data
 
@@ -1138,6 +1139,16 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         model = Endpoint_Status
         fields = "__all__"
 
+    def run_validators(self, initial_data):
+        try:
+            return super().run_validators(initial_data)
+        except RestFrameworkValidationError as exc:
+            if "finding, endpoint must make a unique set" in str(exc):
+                msg = "This endpoint-finding relation already exists"
+                raise serializers.ValidationError(msg) from exc
+            else:
+                raise
+
     def create(self, validated_data):
         endpoint = validated_data.get("endpoint")
         finding = validated_data.get("finding")
@@ -1146,7 +1157,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
                 finding=finding, endpoint=endpoint,
             )
         except IntegrityError as ie:
-            if "endpoint-finding relation" in str(ie):
+            if "finding, endpoint must make a unique set" in str(ie):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg)
             else:
@@ -1163,7 +1174,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         try:
             return super().update(instance, validated_data)
         except IntegrityError as ie:
-            if "endpoint-finding relation" in str(ie):
+            if "finding, endpoint must make a unique set" in str(ie):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg)
             else:
@@ -1178,7 +1189,6 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("inherited_tags",)
 
     def validate(self, data):
-        # print('EndpointSerialize.validate')
 
         if not self.context["request"].method == "PATCH":
             if "product" not in data:
@@ -1237,7 +1247,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
                 )
             )
         ) or (
-            self.context["request"].method in ["POST"] and endpoint.count() > 0
+            self.context["request"].method == "POST" and endpoint.count() > 0
         ):
             msg = (
                 "It appears as though an endpoint with this data already "
@@ -1512,12 +1522,12 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         def validate_findings_have_same_engagement(finding_objects: List[Finding]):
-            engagements = finding_objects.values_list('test__engagement__id', flat=True).distinct().count()
+            engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
             if engagements > 1:
                 msg = "You are not permitted to add findings from multiple engagements"
                 raise PermissionDenied(msg)
 
-        findings = data.get('accepted_findings', [])
+        findings = data.get("accepted_findings", [])
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
         authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
@@ -1526,7 +1536,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
             raise PermissionDenied(msg)
         if self.context["request"].method == "POST":
             validate_findings_have_same_engagement(finding_objects)
-        elif self.context['request'].method in ['PATCH', 'PUT']:
+        elif self.context["request"].method in ["PATCH", "PUT"]:
             existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
             existing_and_new_findings = existing_findings | finding_objects
             validate_findings_have_same_engagement(existing_and_new_findings)
@@ -1645,10 +1655,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     age = serializers.IntegerField(read_only=True)
     sla_days_remaining = serializers.IntegerField(read_only=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
-    related_fields = serializers.SerializerMethodField()
+    related_fields = serializers.SerializerMethodField(allow_null=True)
     # for backwards compatibility
-    jira_creation = serializers.SerializerMethodField(read_only=True)
-    jira_change = serializers.SerializerMethodField(read_only=True)
+    jira_creation = serializers.SerializerMethodField(read_only=True, allow_null=True)
+    jira_change = serializers.SerializerMethodField(read_only=True, allow_null=True)
     display_status = serializers.SerializerMethodField()
     finding_groups = FindingGroupSerializer(
         source="finding_group_set", many=True, read_only=True,
@@ -1724,7 +1734,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         # If we need to push to JIRA, an extra save call is needed.
         # Also if we need to update the mitigation date of the finding.
-        # TODO try to combine create and save, but for now I'm just fixing a
+        # TODO: try to combine create and save, but for now I'm just fixing a
         # bug and don't want to change to much
         if push_to_jira:
             instance.save(push_to_jira=push_to_jira)
@@ -1861,7 +1871,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
 
         # If we need to push to JIRA, an extra save call is needed.
-        # TODO try to combine create and save, but for now I'm just fixing a
+        # TODO: try to combine create and save, but for now I'm just fixing a
         # bug and don't want to change to much
         if push_to_jira or new_finding:
             new_finding.save(push_to_jira=push_to_jira)
@@ -2024,19 +2034,19 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        async_updating = getattr(self.instance, 'async_updating', None)
+        async_updating = getattr(self.instance, "async_updating", None)
         if async_updating:
-            new_sla_config = data.get('sla_configuration', None)
-            old_sla_config = getattr(self.instance, 'sla_configuration', None)
+            new_sla_config = data.get("sla_configuration", None)
+            old_sla_config = getattr(self.instance, "sla_configuration", None)
             if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
-                msg = 'Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete.'
+                msg = "Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete."
                 raise serializers.ValidationError(msg)
         return data
 
     def get_findings_count(self, obj) -> int:
         return obj.findings_count
 
-    # TODO, maybe extend_schema_field is needed here?
+    # TODO: maybe extend_schema_field is needed here?
     def get_findings_list(self, obj) -> List[int]:
         return obj.open_findings_list
 
@@ -2059,12 +2069,12 @@ class ImportScanSerializer(serializers.Serializer):
         help_text="Override the verified setting from the tool.",
     )
     scan_type = serializers.ChoiceField(choices=get_choices_sorted())
-    # TODO why do we allow only existing endpoints?
+    # TODO: why do we allow only existing endpoints?
     endpoint_to_add = serializers.PrimaryKeyRelatedField(
         queryset=Endpoint.objects.all(),
         required=False,
         default=None,
-        help_text="The IP address, host name or full URL. It must be valid",
+        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
     )
     file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
@@ -2331,7 +2341,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         choices=get_choices_sorted(), required=True,
     )
     endpoint_to_add = serializers.PrimaryKeyRelatedField(
-        queryset=Endpoint.objects.all(), default=None, required=False,
+        queryset=Endpoint.objects.all(),
+        required=False,
+        default=None,
+        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
     )
     file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
@@ -2951,6 +2964,7 @@ class NotificationsSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = None
         product = None
+        template = False
 
         if self.instance is not None:
             user = self.instance.user
@@ -2960,25 +2974,26 @@ class NotificationsSerializer(serializers.ModelSerializer):
             user = data.get("user")
         if "product" in data:
             product = data.get("product")
+        if "template" in data:
+            template = data.get("template")
 
+        if (
+            template
+            and Notifications.objects.filter(template=True).count() > 0
+        ):
+            msg = "Notification template already exists"
+            raise ValidationError(msg)
         if (
             self.instance is None
             or user != self.instance.user
             or product != self.instance.product
         ):
             notifications = Notifications.objects.filter(
-                user=user, product=product, template=False,
+                user=user, product=product, template=template,
             ).count()
             if notifications > 0:
                 msg = "Notification for user and product already exists"
                 raise ValidationError(msg)
-        if (
-            data.get("template")
-            and Notifications.objects.filter(template=True).count() > 0
-        ):
-            msg = "Notification template already exists"
-            raise ValidationError(msg)
-
         return data
 
 
@@ -3002,13 +3017,13 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        async_updating = getattr(self.instance, 'async_updating', None)
+        async_updating = getattr(self.instance, "async_updating", None)
         if async_updating:
-            for field in ['critical', 'enforce_critical', 'high', 'enforce_high', 'medium', 'enforce_medium', 'low', 'enforce_low']:
+            for field in ["critical", "enforce_critical", "high", "enforce_high", "medium", "enforce_medium", "low", "enforce_low"]:
                 old_days = getattr(self.instance, field, None)
                 new_days = data.get(field, None)
                 if old_days is not None and new_days is not None and (old_days != new_days):
-                    msg = 'Finding SLA expiration dates are currently being calculated. The SLA days for this SLA configuration cannot be changed until the calculation is complete.'
+                    msg = "Finding SLA expiration dates are currently being calculated. The SLA days for this SLA configuration cannot be changed until the calculation is complete."
                     raise serializers.ValidationError(msg)
         return data
 

@@ -255,21 +255,6 @@ function togglePassVisibility() {
     }
 }
 
-function asciidocDownload() {
-    var content = document.getElementById('base-content')
-    var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' +
-        encodeURIComponent(content.innerText.slice(16)));
-    element.setAttribute('download', 'asciidoc-report.txt');
-
-    element.style.display = 'none';
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
-  }
-
 
 // Parse a string that contains HTML to retrieve value from the HTML tag or Attribute, returning only a TEXT version.
 // The htmlTagAttributValye is optional, and if supplied, then this function will look within the HTML tag attributes to

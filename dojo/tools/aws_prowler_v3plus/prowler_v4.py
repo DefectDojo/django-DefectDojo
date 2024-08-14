@@ -15,31 +15,31 @@ class AWSProwlerV4Parser:
         # https://docs.prowler.com/projects/prowler-open-source/en/latest/tutorials/reporting/#json
         for deserialized in data:
 
-            status = deserialized.get('status_code')
-            if status.upper() != 'FAIL':
+            status = deserialized.get("status_code")
+            if status.upper() != "FAIL":
                 continue
 
-            account_id = deserialized.get('cloud', {}).get('account', {}).get("uid", '')
-            region = deserialized.get('resources', [{}])[0].get('region', '')
-            provider = deserialized.get('cloud', {}).get('provider', '')
-            compliance = ''
-            compliance_field = deserialized.get('unmapped', {}).get("compliance", {})
+            account_id = deserialized.get("cloud", {}).get("account", {}).get("uid", "")
+            region = deserialized.get("resources", [{}])[0].get("region", "")
+            provider = deserialized.get("cloud", {}).get("provider", "")
+            compliance = ""
+            compliance_field = deserialized.get("unmapped", {}).get("compliance", {})
             if compliance_field:
-                compliance = ' | '.join([f"{key}:{','.join(value)}" for key, value in compliance_field.items()])
-            result_extended = deserialized.get('status_detail')
-            general_description = deserialized.get('finding_info', {}).get('desc', '')
-            asff_compliance_type = deserialized.get('unmapped', {}).get('check_type', '')
-            severity = deserialized.get('severity', 'Info').capitalize()
-            aws_service_name = deserialized.get('resources', [{}])[0].get('group', {}).get('name', '')
-            impact = deserialized.get('risk_details')
-            mitigation = deserialized.get('remediation', {}).get("desc", '')
-            documentation = deserialized.get('remediation', {}).get("references", '')
-            documentation = str(documentation) + "\n" + str(deserialized.get('unmapped', {}).get('related_url', ''))
-            security_domain = deserialized.get('resources', [{}])[0].get('type', '')
+                compliance = " | ".join([f"{key}:{','.join(value)}" for key, value in compliance_field.items()])
+            result_extended = deserialized.get("status_detail")
+            general_description = deserialized.get("finding_info", {}).get("desc", "")
+            asff_compliance_type = deserialized.get("unmapped", {}).get("check_type", "")
+            severity = deserialized.get("severity", "Info").capitalize()
+            aws_service_name = deserialized.get("resources", [{}])[0].get("group", {}).get("name", "")
+            impact = deserialized.get("risk_details")
+            mitigation = deserialized.get("remediation", {}).get("desc", "")
+            documentation = deserialized.get("remediation", {}).get("references", "")
+            documentation = str(documentation) + "\n" + str(deserialized.get("unmapped", {}).get("related_url", ""))
+            security_domain = deserialized.get("resources", [{}])[0].get("type", "")
             timestamp = deserialized.get("event_time")
-            resource_arn = deserialized.get('resources', [{}])[0].get('uid', '')
-            resource_id = deserialized.get('resources', [{}])[0].get('name', '')
-            unique_id_from_tool = deserialized.get('finding_info', {}).get('uid', '')
+            resource_arn = deserialized.get("resources", [{}])[0].get("uid", "")
+            resource_id = deserialized.get("resources", [{}])[0].get("name", "")
+            unique_id_from_tool = deserialized.get("finding_info", {}).get("uid", "")
             if not resource_arn or resource_arn == "":
                 component_name = str(provider) + "-" + str(account_id) + "-" + str(region) + "-" + str(resource_id)
             else:
@@ -55,7 +55,7 @@ class AWSProwlerV4Parser:
                           "\n**ASFF Compliance Type:** " + str(asff_compliance_type)
 
             # improving key to get duplicates
-            dupe_key = hashlib.sha256(unique_id_from_tool.encode('utf-8')).hexdigest()
+            dupe_key = hashlib.sha256(unique_id_from_tool.encode("utf-8")).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if description is not None:

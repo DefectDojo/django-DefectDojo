@@ -83,7 +83,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         - Send out notifications
         - Update the test progress
         """
-        logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
+        logger.debug(f"REIMPORT_SCAN: parameters: {locals()}")
         # Validate the Tool_Configuration
         self.verify_tool_configuration_from_test()
         # Fetch the parser based upon the string version of the scan type
@@ -123,7 +123,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             untouched_findings=untouched_findings,
         )
         # Send out som notifications to the user
-        logger.debug('REIMPORT_SCAN: Generating notifications')
+        logger.debug("REIMPORT_SCAN: Generating notifications")
         updated_count = (
             len(closed_findings) + len(reactivated_findings) + len(new_findings)
         )
@@ -134,9 +134,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             findings_mitigated=closed_findings,
         )
         # Update the test progress to reflect that the import has completed
-        logger.debug('REIMPORT_SCAN: Updating Test progress')
+        logger.debug("REIMPORT_SCAN: Updating Test progress")
         self.update_test_progress()
-        logger.debug('REIMPORT_SCAN: Done')
+        logger.debug("REIMPORT_SCAN: Done")
         return (
             self.test,
             updated_count,
@@ -175,7 +175,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # make sure the severity is something is digestible
             unsaved_finding = self.sanitize_severity(unsaved_finding)
             # Filter on minimum severity if applicable
-            if (minimum_severity := kwargs.get("minimum_severity")) and (Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[minimum_severity]):
+            if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
@@ -267,7 +267,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 self.mitigate_finding(
                     finding,
                     f"Mitigated by {self.test.test_type} re-upload.",
-                    self.findings_groups_enabled,
+                    finding_groups_enabled=self.findings_groups_enabled,
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
@@ -276,6 +276,24 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 jira_helper.push_to_jira(finding_group)
 
         return mitigated_findings
+
+    def parse_findings(
+        self,
+        scan: TemporaryUploadedFile,
+        parser: Parser,
+    ) -> List[Finding]:
+        """
+        Determine how to parse the findings based on the presence of the
+        `get_tests` function on the parser object
+        """
+        # Attempt any preprocessing before generating findings
+        if len(self.parsed_findings) == 0 or self.test is None:
+            scan = self.process_scan_file(scan)
+            if hasattr(parser, "get_tests"):
+                self.parsed_findings = self.parse_findings_dynamic_test_type(scan, parser)
+            else:
+                self.parsed_findings = self.parse_findings_static_test_type(scan, parser)
+        return self.parsed_findings
 
     def parse_findings_static_test_type(
         self,
@@ -368,26 +386,26 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         """
         # This code should match the logic used for deduplication out of the re-import feature.
         # See utils.py deduplicate_* functions
-        deduplicationLogger.debug('return findings bases on algorithm: %s', self.deduplication_algorithm)
-        if self.deduplication_algorithm == 'hash_code':
+        deduplicationLogger.debug("return findings bases on algorithm: %s", self.deduplication_algorithm)
+        if self.deduplication_algorithm == "hash_code":
             return Finding.objects.filter(
                 test=self.test,
                 hash_code=unsaved_finding.hash_code,
-            ).exclude(hash_code=None).order_by('id')
-        elif self.deduplication_algorithm == 'unique_id_from_tool':
+            ).exclude(hash_code=None).order_by("id")
+        elif self.deduplication_algorithm == "unique_id_from_tool":
             return Finding.objects.filter(
                 test=self.test,
                 unique_id_from_tool=unsaved_finding.unique_id_from_tool,
-            ).exclude(unique_id_from_tool=None).order_by('id')
-        elif self.deduplication_algorithm == 'unique_id_from_tool_or_hash_code':
+            ).exclude(unique_id_from_tool=None).order_by("id")
+        elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             query = Finding.objects.filter(
                 Q(test=self.test),
                 (Q(hash_code__isnull=False) & Q(hash_code=unsaved_finding.hash_code))
                 | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=unsaved_finding.unique_id_from_tool)),
-            ).order_by('id')
+            ).order_by("id")
             deduplicationLogger.debug(query.query)
             return query
-        elif self.deduplication_algorithm == 'legacy':
+        elif self.deduplication_algorithm == "legacy":
             # This is the legacy reimport behavior. Although it's pretty flawed and doesn't match the legacy algorithm for deduplication,
             # this is left as is for simplicity.
             # Re-writing the legacy deduplication here would be complicated and counter-productive.
@@ -397,7 +415,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     title=unsaved_finding.title,
                     test=self.test,
                     severity=unsaved_finding.severity,
-                    numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity)).order_by('id')
+                    numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity)).order_by("id")
         else:
             logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
             return None
@@ -586,7 +604,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.verified is not None:
                     existing_finding.verified = self.verified
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
-                logger.debug('Reimported mitigated item matches a finding that is currently open, closing.')
+                logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
                 logger.debug(
                     f"Closing: {existing_finding.id}: {existing_finding.title} "
                     f"({existing_finding.component_name} - {existing_finding.component_version})",

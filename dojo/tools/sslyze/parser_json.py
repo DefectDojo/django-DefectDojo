@@ -2,7 +2,7 @@ import json
 
 from dojo.models import Endpoint, Finding
 
-# FIXME discuss this list as maintenance subject
+# TODO: discuss this list as maintenance subject
 # Recommended cipher suites according to German BSI as of 2020
 TLS12_RECOMMENDED_CIPHERS = [
     "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",

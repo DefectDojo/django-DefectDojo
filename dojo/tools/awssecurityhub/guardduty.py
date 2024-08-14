@@ -32,8 +32,8 @@ class GuardDuty:
                 mitigated = datetime.utcnow()
         description = f"This is a GuardDuty Finding\n{finding.get('Description', '')}" + "\n"
         description += f"**AWS Finding ARN:** {finding_id}\n"
-        if finding.get('SourceUrl'):
-            sourceurl = "[" + finding.get('SourceUrl') + "](" + finding.get('SourceUrl') + ")"
+        if finding.get("SourceUrl"):
+            sourceurl = "[" + finding.get("SourceUrl") + "](" + finding.get("SourceUrl") + ")"
             description += f"**SourceURL:** {sourceurl}\n"
         description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
         description += f"**Region:** {finding.get('Region', '')}\n"
@@ -48,10 +48,12 @@ class GuardDuty:
                 details = resource.get("Details", {}).get("AwsEcrContainerImage")
                 arn = resource.get("Id")
                 if details:
-                    impact.append(f"Image ARN: {arn}")
-                    impact.append(f"Registry: {details.get('RegistryId')}")
-                    impact.append(f"Repository: {details.get('RepositoryName')}")
-                    impact.append(f"Image digest: {details.get('ImageDigest')}")
+                    impact.extend((
+                        f"Image ARN: {arn}",
+                        f"Registry: {details.get('RegistryId')}",
+                        f"Repository: {details.get('RepositoryName')}",
+                        f"Image digest: {details.get('ImageDigest')}",
+                    ))
                 title_suffix = f" - Image: {arn.split('/', 1)[1]}"  # repo-name/sha256:digest
             else:  # generic implementation
                 resource_id = resource["Id"].split(":")[-1]

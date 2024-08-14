@@ -76,4 +76,4 @@ class TestQualysInfrascanWebguiParser(DojoTestCase):
             self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=pytz.utc), finding.date)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             unsaved_endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual('10.1.10.1', unsaved_endpoint.host)
+            self.assertEqual("10.1.10.1", unsaved_endpoint.host)

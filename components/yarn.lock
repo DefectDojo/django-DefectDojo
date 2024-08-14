@@ -714,10 +714,10 @@ jszip@^3.10.1:
     readable-stream "~2.3.6"
     setimmediate "^1.0.5"
 
-justgage@^1.6.1:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/justgage/-/justgage-1.6.1.tgz#e4827bf6220b086e896520cfc3167cfc6e1164a3"
-  integrity sha512-09GTQ0uiGlB/jJO3l+aUGeCrYmz5ZcHC0JVb4SB6ZKIXPeHL7wVt6rIZMkC+Gs6a9Yhgo4W8L4XMdeZJHOichg==
+justgage@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/justgage/-/justgage-1.7.0.tgz#4b615c6a88c75d4f7fab20dd32b2710e9eb36411"
+  integrity sha512-yJ9O8HU9cxo2UMFyouOJ+cnEsKVyX44Ghu3iLFaKlzahrGUAB0UcEzWDcu7JqEwC7bU/hunoAZLKF/sIcVbYQQ==
   dependencies:
     raphael "^2.3.0"
 
@@ -824,10 +824,10 @@ path-parse@^1.0.7:
   resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.7.tgz#fbc114b60ca42b30d9daf5858e4bd68bbedb6735"
   integrity sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==
 
-pdfmake@^0.2.10:
-  version "0.2.10"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.10.tgz#a8a0ee8a5acca8f5d728e0dfe4db8be5f1b9ec6b"
-  integrity sha512-doipFnmE1UHSk+Z3wfQuVweVQqx2pE/Ns2G5gCqZmWwqjDj+mZHnZYH/ryXWoIfD+iVdZUAutgI/VHkTCN+Xrw==
+pdfmake@^0.2.11:
+  version "0.2.11"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.11.tgz#359e27dabc48ba6dc8f7ebc236c166eb98d39b5b"
+  integrity sha512-Ig9LBhIYWW8t0/MiXQPYOQdMgwjg+f3JS2iWA7q94Ftc4wSDO5VZP+a1+QN7uz3FbA7+vB4EEYfg3xU0wRPk8w==
   dependencies:
     "@foliojs-fork/linebreak" "^1.1.1"
     "@foliojs-fork/pdfkit" "^0.14.0"

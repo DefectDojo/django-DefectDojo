@@ -7,6 +7,7 @@ import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
 from itertools import chain
+from typing import Optional
 
 from django.conf import settings
 from django.contrib import messages
@@ -264,9 +265,9 @@ class BaseListFindings:
     def __init__(
         self,
         filter_name: str = "All",
-        product_id: int = None,
-        engagement_id: int = None,
-        test_id: int = None,
+        product_id: Optional[int] = None,
+        engagement_id: Optional[int] = None,
+        test_id: Optional[int] = None,
         order_by: str = "numerical_severity",
         prefetch_type: str = "all",
     ):
@@ -376,6 +377,7 @@ class ListFindings(View, BaseListFindings):
             "jira_project": None,
             "github_config": None,
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "title_words": get_words_for_field(Finding, "title"),
             "component_words": get_words_for_field(Finding, "component_name"),
         }
@@ -406,7 +408,7 @@ class ListFindings(View, BaseListFindings):
         # show custom breadcrumb if user has filtered by exactly 1 endpoint
         if "endpoints" in request.GET:
             endpoint_ids = request.GET.getlist("endpoints", [])
-            if len(endpoint_ids) == 1 and endpoint_ids[0] != '':
+            if len(endpoint_ids) == 1 and endpoint_ids[0] != "":
                 endpoint_id = endpoint_ids[0]
                 endpoint = get_object_or_404(Endpoint, id=endpoint_id)
                 context["filter_name"] = "Vulnerable Endpoints"
@@ -422,7 +424,7 @@ class ListFindings(View, BaseListFindings):
 
         return request, context
 
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         # Store the product and engagement ids
         self.product_id = product_id
         self.engagement_id = engagement_id
@@ -448,43 +450,43 @@ class ListFindings(View, BaseListFindings):
 
 
 class ListOpenFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Open"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListVerifiedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Verified"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListOutOfScopeFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Out of Scope"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListFalsePositiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "False Positive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListInactiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Inactive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListAcceptedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Accepted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListClosedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Closed"
         self.order_by = "-mitigated"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
@@ -585,10 +587,10 @@ class ViewFinding(View):
         test_import_finding_actions = test_import_finding_actions.filter(test_import__in=test_import_filter.qs)
         test_import_finding_action_filter = TestImportFindingActionFilter(request.GET, test_import_finding_actions)
 
-        paged_test_import_finding_actions = get_page_items_and_count(request, test_import_finding_action_filter.qs, 5, prefix='test_import_finding_actions')
-        paged_test_import_finding_actions.object_list = paged_test_import_finding_actions.object_list.prefetch_related('test_import')
+        paged_test_import_finding_actions = get_page_items_and_count(request, test_import_finding_action_filter.qs, 5, prefix="test_import_finding_actions")
+        paged_test_import_finding_actions.object_list = paged_test_import_finding_actions.object_list.prefetch_related("test_import")
 
-        latest_test_import_finding_action = finding.test_import_finding_action_set.order_by('-created').first
+        latest_test_import_finding_action = finding.test_import_finding_action_set.order_by("-created").first
 
         return {
             "test_import_filter": test_import_filter,
@@ -742,6 +744,7 @@ class ViewFinding(View):
             "files": finding.files.all(),
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "product_tab": Product_Tab(
                 finding.test.engagement.product, title="View Finding", tab="findings",
             ),
@@ -942,14 +945,14 @@ class EditFinding(View):
             # fp history function because it will be called by the save function
             # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
             if finding.false_p and not finding.false_p and get_system_setting("retroactive_false_positive_history"):
-                logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', finding)
+                logger.debug("FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s", finding)
 
                 existing_fp_findings = match_finding_to_existing_findings(
                     finding, product=finding.test.engagement.product,
                 ).filter(false_p=True)
 
                 for fp in existing_fp_findings:
-                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                    logger.debug("FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s", fp.id, fp)
                     fp.active = finding.active
                     fp.verified = finding.verified
                     fp.false_p = False
@@ -1251,6 +1254,7 @@ def close_finding(request, fid):
                     form.cleaned_data.get("mitigated_by") or request.user
                 )
                 finding.is_mitigated = True
+                finding.under_review = False
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.false_p = form.cleaned_data.get("false_p", False)
@@ -1265,6 +1269,8 @@ def close_finding(request, fid):
                     status.mitigated = True
                     status.last_modified = timezone.now()
                     status.save()
+                # Clear the risk acceptance, if present
+                ra_helper.risk_unaccept(finding)
 
                 # Manage the jira status changes
                 push_to_jira = False
@@ -1272,17 +1278,18 @@ def close_finding(request, fid):
                 finding_in_group = finding.has_finding_group
                 # Check if there is a jira issue that needs to be updated
                 jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+                # fetch the project
+                jira_instance = jira_helper.get_jira_instance(finding)
+                jira_project = jira_helper.get_jira_project(finding)
                 # Only push if the finding is not in a group
                 if jira_issue_exists:
                     # Determine if any automatic sync should occur
-                    push_to_jira = jira_helper.is_push_all_issues(finding) \
-                        or jira_helper.get_jira_instance(finding).finding_jira_sync
-                # Add the closing note
-                if push_to_jira and not finding_in_group:
-                    jira_helper.add_comment(finding, new_note, force_push=True)
+                    push_to_jira = jira_helper.is_push_all_issues(finding) or jira_instance.finding_jira_sync
+                    # Add the closing note
+                    if (jira_project.push_notes or push_to_jira) and not finding_in_group:
+                        jira_helper.add_comment(finding, new_note, force_push=True)
                 # Save the finding
                 finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-
                 # we only push the group after saving the finding to make sure
                 # the updated data of the finding is pushed as part of the group
                 if push_to_jira and finding_in_group:
@@ -1430,6 +1437,7 @@ def reopen_finding(request, fid):
     finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
+    finding.under_review = False
     endpoint_status = finding.status_finding.all()
     for status in endpoint_status:
         status.mitigated_by = None
@@ -1437,6 +1445,8 @@ def reopen_finding(request, fid):
         status.mitigated = False
         status.last_modified = timezone.now()
         status.save()
+    # Clear the risk acceptance, if present
+    ra_helper.risk_unaccept(finding)
 
     # Manage the jira status changes
     push_to_jira = False
@@ -1526,7 +1536,7 @@ def copy_finding(request, fid):
                 extra_tags="alert-success",
             )
             create_notification(
-                event="finding_copied",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                event="finding_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title=_("Copying of %s") % finding.title,
                 description=f'The finding "{finding.title}" was copied by {request.user} to {test.title}',
                 product=product,
@@ -1702,7 +1712,7 @@ def request_finding_review(request, fid):
             logger.debug(f"Asking {reviewers_string} for review")
 
             create_notification(
-                event="review_requested",  # TODO - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                event="review_requested",  # TODO: - if 'review_requested' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title="Finding review requested",
                 requested_by=user,
                 note=new_note,
@@ -1729,7 +1739,7 @@ def request_finding_review(request, fid):
     return render(
         request,
         "dojo/review_finding.html",
-        {"finding": finding, "product_tab": product_tab, "user": user, "form": form},
+        {"finding": finding, "product_tab": product_tab, "user": user, "form": form, "enable_table_filtering": get_system_setting("enable_ui_table_based_searching")},
     )
 
 
@@ -1758,6 +1768,9 @@ def clear_finding_review(request, fid):
 
             finding = form.save(commit=False)
 
+            if finding.is_mitigated:
+                finding.mitigated = now
+                finding.mitigated_by = request.user
             finding.under_review = False
             finding.last_reviewed = now
             finding.last_reviewed_by = request.user
@@ -2406,7 +2419,7 @@ def edit_template(request, tid):
                 extra_tags="alert-danger",
             )
 
-    count = apply_cwe_mitigation(True, template, False)
+    count = apply_cwe_mitigation(apply_to_findings=True, template=template, update=False)
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(
         request,
@@ -2756,6 +2769,7 @@ def finding_bulk_update_all(request, pid=None):
                     )
 
                 finds = prefetch_for_findings(finds)
+                note = None
                 if form.cleaned_data["severity"] or form.cleaned_data["status"]:
                     for find in finds:
                         old_find = copy.deepcopy(find)
@@ -2790,14 +2804,14 @@ def finding_bulk_update_all(request, pid=None):
                             # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
                             elif old_find.false_p and not find.false_p:
                                 if system_settings.retroactive_false_positive_history:
-                                    logger.debug('FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s', find)
+                                    logger.debug("FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s", find)
 
                                     existing_fp_findings = match_finding_to_existing_findings(
                                         find, product=find.test.engagement.product,
                                     ).filter(false_p=True)
 
                                     for fp in existing_fp_findings:
-                                        logger.debug('FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s', fp.id, fp)
+                                        logger.debug("FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s", fp.id, fp)
                                         fp.active = find.active
                                         fp.verified = find.verified
                                         fp.false_p = False
@@ -3083,6 +3097,8 @@ def finding_bulk_update_all(request, pid=None):
                                 "pushing to jira from finding.finding_bulk_update_all()",
                             )
                             jira_helper.push_to_jira(finding)
+                            if note is not None and isinstance(note, Notes):
+                                jira_helper.add_comment(finding, note)
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():
@@ -3386,9 +3402,8 @@ def push_to_jira(request, fid):
             )
 
         return JsonResponse({"result": "OK"})
-    except Exception as e:
-        logger.exception(e)
-        logger.error("Error pushing to JIRA: ", exc_info=True)
+    except Exception:
+        logger.exception("Error pushing to JIRA")
         messages.add_message(
             request, messages.ERROR, "Error pushing to JIRA", extra_tags="alert-danger",
         )
@@ -3485,34 +3500,32 @@ def calculate_possible_related_actions_for_similar_finding(
         else:
             # similar is not a duplicate yet
             if finding.duplicate or finding.original_finding.all():
-                actions.append(
+                actions.extend((
                     {
                         "action": "mark_finding_duplicate",
                         "reason": "Will mark this finding as duplicate of the root finding in this cluster",
-                    },
-                )
-                actions.append(
-                    {
+                    }, {
                         "action": "set_finding_as_original",
-                        "reason": ("Sets this finding as the Original for the whole cluster. "
-                                   "The existing Original will be downgraded to become a member of the cluster and, "
-                                   "together with the other members, will be marked as duplicate of the new Original."),
+                        "reason": (
+                            "Sets this finding as the Original for the whole cluster. "
+                            "The existing Original will be downgraded to become a member of the cluster and, "
+                            "together with the other members, will be marked as duplicate of the new Original."
+                        ),
                     },
-                )
+                ))
             else:
                 # similar_finding is not an original/root of a cluster as per earlier if clause
-                actions.append(
+                actions.extend((
                     {
                         "action": "mark_finding_duplicate",
                         "reason": "Will mark this finding as duplicate of the finding on this page.",
-                    },
-                )
-                actions.append(
-                    {
+                    }, {
                         "action": "set_finding_as_original",
-                        "reason": ("Sets this finding as the Original marking the finding "
-                                   "on this page as duplicate of this original."),
+                        "reason": (
+                            "Sets this finding as the Original marking the finding "
+                            "on this page as duplicate of this original."
+                        ),
                     },
-                )
+                ))
 
     return actions

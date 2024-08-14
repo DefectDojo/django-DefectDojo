@@ -77,7 +77,7 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
             self.assertFalse(findings[0].dynamic_finding)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", findings[0].cvssv3)
             self.assertEqual("XRAY-515353", findings[0].vuln_id_from_tool)
-            self.assertEqual(['CVE-2023-30608'], findings[0].unsaved_vulnerability_ids)
+            self.assertEqual(["CVE-2023-30608"], findings[0].unsaved_vulnerability_ids)
 
         with self.subTest(finding=1):
             self.assertIn("**Short description**\nA design problem in Django may lead to denial of service when processing multipart forms.\n", findings[1].severity_justification)

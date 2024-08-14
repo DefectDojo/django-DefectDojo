@@ -41,7 +41,7 @@ class GovulncheckParser:
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract traces.
         trace_info_strs = []
         for elem in data:
-            if 'finding' in elem.keys():
+            if "finding" in elem.keys():
                 finding = elem["finding"]
                 if finding.get("osv") == osv_id:
                     trace_info = finding.get("trace", [])
@@ -59,12 +59,12 @@ class GovulncheckParser:
     def get_affected_version(self, data, osv_id):
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract the first affected version.
         for elem in data:
-            if 'finding' in elem.keys():
+            if "finding" in elem.keys():
                 finding = elem["finding"]
                 if finding.get("osv") == osv_id:
                     trace_info = finding.get("trace", [])
                     for trace in trace_info:
-                        if 'version' in trace.keys():
+                        if "version" in trace.keys():
                             return trace.get("version")
         return ""
 
@@ -127,25 +127,25 @@ class GovulncheckParser:
             elif isinstance(data, list):
                 # Parsing for new govulncheck output format
                 for elem in data:
-                    if 'osv' in elem.keys():
+                    if "osv" in elem.keys():
                         cve = elem["osv"]["aliases"][0]
                         osv_data = elem["osv"]
                         affected_package = osv_data["affected"][0]["package"]
                         affected_ranges = osv_data["affected"][0]["ranges"]
                         affected_ecosystem = affected_package.get("ecosystem", "Unknown")
-                        impact = osv_data.get('details', 'Unknown')
+                        impact = osv_data.get("details", "Unknown")
                         formatted_ranges = []
-                        summary = osv_data.get('summary', 'Unknown')
+                        summary = osv_data.get("summary", "Unknown")
                         component_name = affected_package["name"]
                         id = osv_data["id"]
 
                         for r in affected_ranges:
-                            events = r['events']
+                            events = r["events"]
                             event_pairs = []
                             for i in range(0, len(events), 2):
                                 # Events come in pairs: introduced, then fixed
-                                introduced = events[i].get('introduced', 'Unknown')
-                                fixed = events[i + 1].get('fixed', 'Unknown') if i + 1 < len(events) else 'Unknown'
+                                introduced = events[i].get("introduced", "Unknown")
+                                fixed = events[i + 1].get("fixed", "Unknown") if i + 1 < len(events) else "Unknown"
                                 event_pairs.append(f"\n\t\tIntroduced in {introduced}, fixed in {fixed}")
                             formatted_ranges.append(f"type {r['type']}: {'. '.join(event_pairs)}")
                         range_info = "\n ".join(formatted_ranges)
@@ -177,9 +177,9 @@ class GovulncheckParser:
                         else:
                             title = f"{osv_data['id']} - {affected_package['name']}"
 
-                        affected_version = self.get_affected_version(data, osv_data['id'])
+                        affected_version = self.get_affected_version(data, osv_data["id"])
 
-                        if 'severity' in elem["osv"].keys():
+                        if "severity" in elem["osv"].keys():
                             severity = elem["osv"]["severity"]
                         else:
                             severity = SEVERITY
