@@ -435,13 +435,20 @@
                                                         {% trans "Metrics Panel" %}
                                                     </a>
                                                 </li> 
+                                                {% if "Metrics_Panel_Admin"|has_global_permission %}
+                                                    <li>
+                                                        <a rel="noopener noreferrer" href="{% url 'metrics_panel_admin' %}">
+                                                            {% trans "Metrics Panel Admin" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}  
                                                 {% if "Metrics_DevSecOps"|has_global_permission %}
                                                     <li>
                                                         <a rel="noopener noreferrer" href="{% url 'metrics_devsecops' %}">
                                                             {% trans "Metrics DevSecOps" %}
                                                         </a>
                                                     </li>
-                                                {% endif %}                                              
+                                                {% endif %}                                           
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
