@@ -26,6 +26,7 @@ from dojo.models import (
     Testing_Guide_Category,
     Tool_Product_History,
     UserAnnouncement,
+    PermissionKey,
 )
 from dojo.urls import v2_api
 
@@ -51,7 +52,7 @@ class ApiEndpointMethods(DojoTestCase):
             "questionnaire_answers", "questionnaire_answered_questionnaires",
             "questionnaire_engagement_questionnaires", "questionnaire_general_questionnaires",
             "dojo_group_members", "product_members", "product_groups", "product_type_groups",
-            "product_type_members", "permission_key",
+            "product_type_members",
         ]
         for reg, _, _ in sorted(self.registry):
             if reg in exempt_list:
@@ -112,6 +113,7 @@ class ApiEndpoints(DojoTestCase):
             Benchmark_Product,
             Benchmark_Product_Summary,
             Choice,
+            PermissionKey,
         ]
 
     def test_is_defined(self):
