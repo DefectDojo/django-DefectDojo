@@ -63,7 +63,7 @@ class AsffParser:
 
             if resource_arns:
                 resource_arn_strings = ', '.join(resource_arns)
-                full_description = f"**AWS resource ARN:** {resource_arn}\n\n{control_description}"
+                full_description = f"**AWS resource ARN:** {resource_arn_strings}\n\n{control_description}"
             else:
                 full_description = control_description
 
