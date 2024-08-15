@@ -41,7 +41,7 @@ class TestAsffParser(DojoTestCase):
             findings = parser.get_findings(file, Test())
             self.assertEqual(1, len(findings))
             self.common_check_finding(findings[0], data, 0)
-            self.assertEqual(findings.description, "**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
+            self.assertEqual(finding.description, "**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
 
     def test_asff_many_vulns(self):
         data = self.load_sample_json("many_vulns.json")
