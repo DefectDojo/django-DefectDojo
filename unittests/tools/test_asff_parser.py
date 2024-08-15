@@ -18,11 +18,6 @@ class TestAsffParser(DojoTestCase):
 
     def common_check_finding(self, finding, data, index, guarddutydate=False):
         self.assertEqual(finding.title, data[index]["Title"])
-        if isinstance(data[index], dict):
-            resource_id = data[index]["Resources"].get["Id", None]
-        else:
-            resource_id = data[index][0].get["Resources"]["Id", None]
-        self.assertEqual(finding.description, f"**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
         if guarddutydate:
             self.assertEqual(finding.date.date(),
                 datetime.strptime(data[0]["CreatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ").date())
@@ -42,16 +37,21 @@ class TestAsffParser(DojoTestCase):
         data = self.load_sample_json("one_vuln.json")
         with open(sample_path("one_vuln.json")) as file:
             parser = AsffParser()
+            resource_id = data[0]["Resources"][0]["Id"]
             findings = parser.get_findings(file, Test())
+            description = parser.get_item_resource_arns(self, item)
             self.assertEqual(1, len(findings))
             self.common_check_finding(findings[0], data, 0)
+            self.assertEqual(finding.description, f"**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
 
     def test_asff_many_vulns(self):
         data = self.load_sample_json("many_vulns.json")
         with open(sample_path("many_vulns.json")) as file:
             parser = AsffParser()
+            resource_id = data[0]["Resources"][0]["Id"]
             findings = parser.get_findings(file, Test())
             self.assertEqual(len(findings), 5)
+            self.assertEqual(finding.description, f"**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
             for index, finding in enumerate(findings):
                 self.common_check_finding(finding, data, index)
 
@@ -59,8 +59,10 @@ class TestAsffParser(DojoTestCase):
         data = self.load_sample_json("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json")
         with open(sample_path("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json")) as file:
             parser = AsffParser()
+            resource_id = data[0]["Resources"][0]["Id"]
             findings = parser.get_findings(file, Test())
             self.assertEqual(len(findings), 1)
+            self.assertEqual(finding.description, f"**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
             for index, finding in enumerate(findings):
                 self.common_check_finding(finding, data, index, guarddutydate=True)
             self.assertEqual(finding.unsaved_endpoints[0], Endpoint(host="10.0.0.1"))
