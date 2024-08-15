@@ -39,7 +39,6 @@ class TestAsffParser(DojoTestCase):
             parser = AsffParser()
             resource_id = data[0]["Resources"][0]["Id"]
             findings = parser.get_findings(file, Test())
-            description = parser.get_item_resource_arns(self, item)
             self.assertEqual(1, len(findings))
             self.common_check_finding(findings[0], data, 0)
             self.assertEqual(findings.description, f"**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
