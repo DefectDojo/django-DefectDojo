@@ -32,7 +32,7 @@ class AsffParser:
         for resource in resource_ids:
             resource_id = resource.get("Id")
             if resource_id:
-                resource_arns.append(resource_id)        
+                resource_arns.append(resource_id) 
 
     def get_findings(self, file, test):
         data = json.load(file)
