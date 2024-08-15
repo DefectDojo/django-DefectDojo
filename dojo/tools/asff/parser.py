@@ -51,13 +51,13 @@ class AsffParser:
             # control and has no information about the offending resource.
             #
             # Retrieve the AWS ARN / Resource Id
-            resource_arn = item.get("ProductFields").get("Resources:0/Id")
+            resource_arn = item.get("Resources").get("Id")
 
             # Define the control_description
             control_description = item.get("Description")
 
             if resource_arn:
-                full_description = f"{resource_arn}\n\n{control_description}"
+                full_description = f"**AWS resource ARN:** {resource_arn}\n\n{control_description}"
             else:
                 full_description = control_description
 
