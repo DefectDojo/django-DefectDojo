@@ -17,7 +17,9 @@ class TestAsffParser(DojoTestCase):
             return json.load(file)
 
     def common_check_finding(self, finding, data, index, guarddutydate=False):
+        parser = AsffParser()
         self.assertEqual(finding.title, data[index]["Title"])
+        self.assertEqual(finding.description, data[index]["Description"])
         if guarddutydate:
             self.assertEqual(finding.date.date(),
                 datetime.strptime(data[0]["CreatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ").date())
@@ -37,32 +39,26 @@ class TestAsffParser(DojoTestCase):
         data = self.load_sample_json("one_vuln.json")
         with open(sample_path("one_vuln.json")) as file:
             parser = AsffParser()
-            resource_id = data[0]["Resources"][0]["Id"]
             findings = parser.get_findings(file, Test())
             self.assertEqual(1, len(findings))
             self.common_check_finding(findings[0], data, 0)
-            self.assertEqual(finding.description, "**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
 
     def test_asff_many_vulns(self):
         data = self.load_sample_json("many_vulns.json")
         with open(sample_path("many_vulns.json")) as file:
             parser = AsffParser()
-            resource_id = data[0]["Resources"][0]["Id"]
             findings = parser.get_findings(file, Test())
             self.assertEqual(len(findings), 5)
             for index, finding in enumerate(findings):
                 self.common_check_finding(finding, data, index)
-                self.assertEqual(finding.description, "**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
 
     def test_asff_guardduty(self):
         data = self.load_sample_json("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json")
         with open(sample_path("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json")) as file:
             parser = AsffParser()
-            resource_id = data[0]["Resources"][0]["Id"]
             findings = parser.get_findings(file, Test())
             self.assertEqual(len(findings), 1)
             for index, finding in enumerate(findings):
                 self.common_check_finding(finding, data, index, guarddutydate=True)
             self.assertEqual(finding.unsaved_endpoints[0], Endpoint(host="10.0.0.1"))
             self.assertTrue(finding.active)
-            self.assertEqual(finding.description, "**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
