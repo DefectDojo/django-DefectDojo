@@ -61,7 +61,7 @@ class AsffParser:
             # Define the control_description
             control_description = item.get("Description")
 
-            if resource_arn:
+            if resource_arns:
                 resource_arn_strings = ', '.join(resource_arns)
                 full_description = f"**AWS resource ARN:** {resource_arn}\n\n{control_description}"
             else:
