@@ -53,7 +53,7 @@ class AsffParser:
             # Retrieve the AWS ARN / Resource Id
             resource_arns = []
             resource_ids = item.get("Resources", [])
-            for resource in resources:
+            for resource in resource_ids:
                 resource_id = resource.get("Id")
                 if resource_id:
                     resource_arns.append(resource_id)
