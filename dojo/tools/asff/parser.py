@@ -26,6 +26,14 @@ class AsffParser:
         return """AWS Security Finding Format (ASFF).
         https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
 
+    def get_item_resource_arns(self, item):
+        resource_arns = []
+        resource_ids = item.get("Resources", [])
+        for resource in resource_ids:
+            resource_id = resource.get("Id")
+            if resource_id:
+                resource_arns.append(resource_id)        
+
     def get_findings(self, file, test):
         data = json.load(file)
         result = []
@@ -51,15 +59,8 @@ class AsffParser:
             # control and has no information about the offending resource.
             #
             # Retrieve the AWS ARN / Resource Id
-    def get_item_resource_arns(self, item):
-        resource_arns = []
-        resource_ids = item.get("Resources", [])
-        for resource in resource_ids:
-            resource_id = resource.get("Id")
-            if resource_id:
-                resource_arns.append(resource_id)
-        resource_arns = self.get_item_resource_arns(item)
-        
+            resource_arns = self.get_item_resource_arns(item)
+
             # Define the control_description
             control_description = item.get("Description")
 
