@@ -42,6 +42,7 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
+from dojo.transfer_findings.serializers import TransferFindingFindingSerializer, TransferFindingFindingsSerializer
 from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
@@ -3419,12 +3420,12 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                              DojoModelViewSet):
     queryset = TransferFindingFinding.objects.all()
     permission_classes = (IsAuthenticated,)
-    serializer_class = serializers.TransferFindingFindingsSerializer
+    serializer_class = TransferFindingFindingsSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id"]
 
     @extend_schema(
-        request=serializers.TransferFindingFindingSerializer,
+        request=TransferFindingFindingSerializer,
         responses={status.HTTP_200_OK: serializers.TransferFindingFindingsUpdateSerializer},
     )
     @action(detail=True, methods=['post'])

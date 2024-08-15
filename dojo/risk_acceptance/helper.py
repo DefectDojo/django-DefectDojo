@@ -153,7 +153,8 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
 
     Notification.risk_acceptance_request(
         risk_pending=risk_pending,
-        permission_keys=permission_keys)
+        permission_keys=permission_keys,
+        enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
     post_jira_comments(risk_pending, findings, accepted_message_creator)
 
 

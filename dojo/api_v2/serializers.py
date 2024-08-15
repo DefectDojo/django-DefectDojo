@@ -20,8 +20,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
-
 import dojo.jira_link.helper as jira_helper
+from dojo.transfer_findings.serializers import TransferFindingSerializer 
 from dojo.authorization.authorization import user_has_permission, user_has_global_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
@@ -1646,12 +1646,14 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
         model = Vulnerability_Id
         fields = ["vulnerability_id"]
 
-
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
         many=True, read_only=True, source="risk_acceptance_set",
+    )
+    transfer_finding = TransferFindingSerializer(
+        read_only=True,
     )
     push_to_jira = serializers.BooleanField(default=False)
     age = serializers.IntegerField(read_only=True)
@@ -3227,98 +3229,12 @@ class TransferFindingDeleteSerializer(serializers.Serializer):
     findings = FindingDeleteSerializers(required=False)
 
 
-class FindingTfSerlilizer(serializers.ModelSerializer):
-    class Meta:
-        model = Finding 
-        fields = '__all__'
-
-
-class TransferFindingFindingSerializer(serializers.ModelSerializer):
-    findings = FindingTfSerlilizer(read_only=True)
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['permission'] = []
-        transfer_finding_finding_obj = TransferFindingFinding.objects.get(id=representation['id'])
-        for permission in [Permissions.Transfer_Finding_Finding_View,
-                        Permissions.Transfer_Finding_Finding_Edit,
-                        Permissions.Transfer_Finding_Finding_Delete,
-                        Permissions.Transfer_Finding_Finding_Add]:
-            user = self.context["request"].user
-
-            if user.is_superuser:
-                representation['permission'].append(permission)
-
-            elif user_has_global_permission(user, permission):
-                representation['permission'].append(permission)
-
-            elif user_has_permission(
-                    self.context["request"].user,
-                    transfer_finding_finding_obj,
-                    permission):
-                if(transfer_finding_finding_obj.findings.risk_status == "Transfer Accepted"
-                   and permission == Permissions.Transfer_Finding_Finding_View):
-                    representation['permission'].append(permission)
-                elif transfer_finding_finding_obj.findings.risk_status in ["Transfer Rejected", "Transfer Pending"]:
-                    representation['permission'].append(permission)
-
-        return representation
-            
-
-    class Meta:
-        model = TransferFindingFinding
-        fields = '__all__'
-
-
-class TransferFindingSerializer(serializers.ModelSerializer):
-    transfer_findings = TransferFindingFindingSerializer(many=True)
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['permission'] = []
-        transfer_finding_obj = TransferFinding.objects.get(id=representation.get("id"))
-        all_permissions = [Permissions.Transfer_Finding_View,
-                           Permissions.Transfer_Finding_Edit,
-                           Permissions.Transfer_Finding_Delete,
-                           Permissions.Transfer_Finding_Add]
-        user = self.context["request"].user
-        for permission in all_permissions:
-            if user.is_superuser:
-                representation['permission'].append(permission)
-
-            elif user_has_global_permission(user, permission):
-                representation['permission'].append(permission)
-
-            elif user_has_permission(
-                    user,
-                    transfer_finding_obj,
-                    permission):
-                transfer_finding_finding = transfer_finding_obj.transfer_findings.filter(findings__risk_status="Transfer Accepted")
-                if transfer_finding_finding:
-                    if permission == Permissions.Transfer_Finding_View:
-                        representation['permission'].append(permission)
-
-        return representation
-
-    class Meta:
-        model = TransferFinding
-        fields = "__all__"
-
-
 class TransferFindingUpdateSerializer(serializers.ModelSerializer):
     findings = TransferFindinFindingsSerializers(many=True, read_only=True)
     
     class Meta:
         model = TransferFinding
         fields = ("findings",)
-
-
-class TransferFindingFindingsSerializer(serializers.ModelSerializer):
-    findings = FindingTfSerlilizer(read_only=True)
-
-    class Meta:
-        model = TransferFindingFinding
-        fields = '__all__'
 
 
 class TransferFindingFindingsDetailSerializer(serializers.Serializer):

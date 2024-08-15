@@ -172,7 +172,7 @@ def risk_acceptante_pending(eng: Engagement,
                             risk_acceptance: Risk_Acceptance,
                             product: Product,
                             product_type: Product_Type,
-                            permission_key):
+                            permission_key=None):
 
     user = get_user_with_permission_key(permission_key)
     status = "Failed"
@@ -187,8 +187,7 @@ def risk_acceptante_pending(eng: Engagement,
         ).get("number_acceptors")
     )
     if (
-        permission_key is None
-        or user.is_superuser is True
+        user.is_superuser is True
         or role_has_exclusive_permissions(user)
         or number_of_acceptors_required == 0
         or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS
@@ -429,7 +428,8 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             finding.save(dedupe_option=False)
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
-    Notification.risk_acceptance_request(risk_pending=risk_pending)
+    Notification.risk_acceptance_request(risk_pending=risk_pending,
+                                         enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
     post_jira_comments(risk_pending, findings, ra_helper.accepted_message_creator)
 
 

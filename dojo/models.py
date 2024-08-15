@@ -2810,6 +2810,14 @@ class Finding(models.Model):
             return ras[0]
 
         return None
+    
+    @property
+    def transfer_finding(self):
+        if self.findings:
+            tf = self.findings.first().transfer_findings
+            if tf:
+                return tf
+        return None
 
     def compute_hash_code(self):
 
