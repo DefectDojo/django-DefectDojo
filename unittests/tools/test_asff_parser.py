@@ -41,7 +41,7 @@ class TestAsffParser(DojoTestCase):
             findings = parser.get_findings(file, Test())
             self.assertEqual(1, len(findings))
             self.common_check_finding(findings[0], data, 0)
-            self.assertEqual(findings.description, f"**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
+            self.assertEqual(findings.description, "**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
 
     def test_asff_many_vulns(self):
         data = self.load_sample_json("many_vulns.json")
@@ -52,7 +52,7 @@ class TestAsffParser(DojoTestCase):
             self.assertEqual(len(findings), 5)
             for index, finding in enumerate(findings):
                 self.common_check_finding(finding, data, index)
-                self.assertEqual(finding.description, f"**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
+                self.assertEqual(finding.description, "**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
 
     def test_asff_guardduty(self):
         data = self.load_sample_json("guardduty/Unusual Behaviors-User-Persistence IAMUser-NetworkPermissions.json")
@@ -65,4 +65,4 @@ class TestAsffParser(DojoTestCase):
                 self.common_check_finding(finding, data, index, guarddutydate=True)
             self.assertEqual(finding.unsaved_endpoints[0], Endpoint(host="10.0.0.1"))
             self.assertTrue(finding.active)
-            self.assertEqual(finding.description, f"**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
+            self.assertEqual(finding.description, "**AWS resource ARN:** {resource_id}", "\n\n", ["Description"])
