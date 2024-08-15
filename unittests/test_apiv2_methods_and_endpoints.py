@@ -116,7 +116,6 @@ class ApiEndpoints(DojoTestCase):
             Benchmark_Product_Summary,
             Choice,
             TransferFindingFinding,
-            TransferFinding,
             PermissionKey,
         ]
 
