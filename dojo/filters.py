@@ -2873,7 +2873,7 @@ class EndpointReportFilter(DojoFilter):
 
 class ReportFindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr="icontains", label="Name")
-    date = DateFromToRangeFilter(field_name='date', label="Date Discovered")
+    date = DateFromToRangeFilter(field_name="date", label="Date Discovered")
     date_recent = DateRangeFilter(field_name="date", label="Relative Date")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
