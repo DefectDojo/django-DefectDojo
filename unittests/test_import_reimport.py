@@ -1756,7 +1756,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
     client_ui = Client()
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         ImportReimportMixin.__init__(self, *args, **kwargs)
         # super(ImportReimportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)

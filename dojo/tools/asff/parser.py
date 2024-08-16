@@ -87,10 +87,10 @@ class AsffParser:
             return SEVERITY_MAPPING[data.get("Label")]
         elif isinstance(data.get("Normalized"), int):
             # 0 - INFORMATIONAL
-            # 1–39 - LOW
-            # 40–69 - MEDIUM
-            # 70–89 - HIGH
-            # 90–100 - CRITICAL
+            # 1-39 - LOW
+            # 40-69 - MEDIUM
+            # 70-89 - HIGH
+            # 90-100 - CRITICAL
             if data.get("Normalized") > 89:
                 return "Critical"
             elif data.get("Normalized") > 69:

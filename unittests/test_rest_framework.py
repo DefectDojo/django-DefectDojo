@@ -4,6 +4,7 @@ import pathlib
 from collections import OrderedDict
 from enum import Enum
 from json import dumps
+from pathlib import Path
 
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import ANY, MagicMock, call, patch
@@ -219,7 +220,7 @@ class SchemaChecker:
 
         for required_field in required_fields:
             # passwords are writeOnly, but this is not supported by Swagger / OpenAPIv2
-            # TODO check this for OpenAPI3
+            # TODO: check this for OpenAPI3
             if required_field != "password":
                 # print('checking field: ', required_field)
                 field = f"{self._get_prefix()}#{required_field}"
@@ -227,7 +228,7 @@ class SchemaChecker:
 
     def _check_type(self, schema, obj):
         if "type" not in schema:
-            # TODO implement OneOf / AllOff  (enums)
+            # TODO: implement OneOf / AllOff  (enums)
             # Engagement
             # "status": {
             #     "nullable": true,
@@ -276,7 +277,7 @@ class SchemaChecker:
             _check_helper(isinstance(obj, str))
         else:
             # Default case
-            _check_helper(False)
+            _check_helper(check=False)
 
         # print('_check_type ok for: %s: %s' % (schema, obj))
 
@@ -311,8 +312,8 @@ class SchemaChecker:
                         _check(prop, obj_child)
 
                 for child_name in obj.keys():
-                    # TODO prefetch mixins not picked up by spectcular?
-                    if child_name not in ["prefetch"]:
+                    # TODO: prefetch mixins not picked up by spectcular?
+                    if child_name != "prefetch":
                         if not properties or child_name not in properties.keys():
                             self._has_failed = True
                             self._register_error(f'unexpected property "{child_name}" found')
@@ -322,7 +323,7 @@ class SchemaChecker:
                 for name, obj_child in obj.items():
                     self._with_prefix(f"additionalProp<{name}>", _check, additional_properties, obj_child)
 
-            # TODO implement support for enum / OneOff / AllOff
+            # TODO: implement support for enum / OneOff / AllOff
             if "type" in schema and schema["type"] is TYPE_ARRAY:
                 items_schema = schema["items"]
                 for index in range(len(obj)):
@@ -425,7 +426,7 @@ class BaseClass:
                 for value in values:
                     self.assertIn(value, obj["prefetch"][field])
 
-            # TODO add schema check
+            # TODO: add schema check
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_object_not_authorized(self):
@@ -519,7 +520,7 @@ class BaseClass:
                             value = value["id"]
                         self.assertIn(value, objs["prefetch"][field])
 
-            # TODO add schema check
+            # TODO: add schema check
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list_object_not_authorized(self):
@@ -1122,8 +1123,7 @@ class FilesTest(DojoAPITestCase):
                 self.url_levels[level] = response.data.get("id")
 
         #  Test the download
-        with open(f"{str(self.path)}/scans/acunetix/one_finding.xml") as file:
-            file_data = file.read()
+        file_data = Path(f"{str(self.path)}/scans/acunetix/one_finding.xml").read_text()
         for level, file_id in self.url_levels.items():
             response = self.client.get(f"/api/v2/{level}/files/download/{file_id}/")
             self.assertEqual(200, response.status_code)
@@ -2051,7 +2051,7 @@ class ReimportScanTest(DojoAPITestCase):
                 })
             self.assertEqual(length, Test.objects.all().count())
             self.assertEqual(201, response.status_code, response.content[:1000])
-            # TODO add schema check
+            # TODO: add schema check
             importer_mock.assert_not_called()
             reimporter_mock.assert_called_once()
 

@@ -159,7 +159,7 @@ class EndpointMetaImportTestAPI(DojoAPITestCase, EndpointMetaImportMixin):
     fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         EndpointMetaImportMixin.__init__(self, *args, **kwargs)
         # super(EndpointMetaImportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)
@@ -178,7 +178,7 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
     client_ui = Client()
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         EndpointMetaImportMixin.__init__(self, *args, **kwargs)
         # super(EndpointMetaImportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)

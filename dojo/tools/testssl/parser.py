@@ -27,7 +27,7 @@ class TestsslParser:
         for row in reader:
             # filter 'OK'
             # possible values: LOW|MEDIUM|HIGH|CRITICAL + WARN|OK|INFO
-            if row["severity"] in ["OK"]:
+            if row["severity"] == "OK":
                 continue
             if row["id"] in [
                 "rating_spec",
