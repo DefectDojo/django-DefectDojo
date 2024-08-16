@@ -1272,7 +1272,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
     "AppCheck Web Application Scanner": ["title", "severity"],
-    "Checkmarx CxFlow SAST": ["vuln_id_from_tool", "file_path", "line"]
+    "Checkmarx CxFlow SAST": ["vuln_id_from_tool", "file_path", "line"],
 }
 
 # Override the hardcoded settings here via the env var
