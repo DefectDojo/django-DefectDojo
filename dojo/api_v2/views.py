@@ -42,8 +42,10 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
+from dojo.transfer_findings.serializers import TransferFindingFindingSerializer, TransferFindingFindingsSerializer
+from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import role_has_global_permission
+from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
 from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
@@ -166,6 +168,7 @@ from dojo.reports.views import (
 )
 from dojo.risk_acceptance import api as ra_api
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
+from dojo.risk_acceptance.risk_pending import accept_risk_pending_bullk 
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
@@ -721,10 +724,31 @@ class RiskAcceptanceViewSet(
         ] = f'attachment; filename="{risk_acceptance.filename()}"'
 
         return response
+    
+    @extend_schema(
+        methods=["POST"],
+        responses=None,
+        request=RiskAcceptanceEmailSerializer,
+    )
+    @action(detail=True, methods=["post"])
+    def accept_bullk(self, request, pk=None):
+        risk_acceptance = get_object_or_404(Risk_Acceptance.objects, id=pk)
+        try:
+            eng = Risk_Acceptance.objects.get(id=pk).accepted_findings.all().first().test.engagement
+            product = eng.product
+            product_type = product.prod_type
+            permission_key = request.data.get("permission_key", None)
+        except Exception as e:
+            logger.error("Failed accept bullk {e}")
+            ApiError.internal_server_error(detail=str(e))
+
+        accept_risk_pending_bullk(eng, risk_acceptance,
+                                  product,
+                                  product_type,
+                                  permission_key)
+        return http_response.ok(message="Acceptance process completed")
 
 
-# These are technologies in the UI and the API!
-# Authorization: object-based
 class AppAnalysisViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -3396,12 +3420,12 @@ class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
                              DojoModelViewSet):
     queryset = TransferFindingFinding.objects.all()
     permission_classes = (IsAuthenticated,)
-    serializer_class = serializers.TransferFindingFindingsSerializer
+    serializer_class = TransferFindingFindingsSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["id"]
 
     @extend_schema(
-        request=serializers.TransferFindingFindingSerializer,
+        request=TransferFindingFindingSerializer,
         responses={status.HTTP_200_OK: serializers.TransferFindingFindingsUpdateSerializer},
     )
     @action(detail=True, methods=['post'])
