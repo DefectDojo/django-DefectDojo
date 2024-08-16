@@ -357,7 +357,7 @@ class System_Settings(models.Model):
         models.BooleanField(default=False,
                             verbose_name=_("Enable Webhook notifications"),
                             blank=False)
-    webhooks_notifications_timeout = models.IntegerField(default=60,
+    webhooks_notifications_timeout = models.IntegerField(default=10,
                                           help_text=_("How many seconds will DefectDojo waits for response from webhook endpoint"))
 
     false_positive_history = models.BooleanField(

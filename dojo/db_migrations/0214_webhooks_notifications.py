@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='system_settings',
             name='webhooks_notifications_timeout',
-            field=models.IntegerField(default=60, help_text='How many seconds will DefectDojo waits for response from webhook endpoint'),
+            field=models.IntegerField(default=10, help_text='How many seconds will DefectDojo waits for response from webhook endpoint'),
         ),
         migrations.AlterField(
             model_name='notifications',
