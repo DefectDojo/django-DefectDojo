@@ -244,7 +244,7 @@ class DojoTestUtilsMixin:
         }
 
     def get_expected_redirect_product(self, product):
-        return "/product/%i" % product.id
+        return f"/product/{product.id}"
 
     def add_product_jira(self, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse("new_product"))

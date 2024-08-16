@@ -573,18 +573,18 @@ def fix_loop_duplicates():
     loop_count = len(candidates)
 
     if loop_count > 0:
-        deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
+        deduplicationLogger.info(f"Identified {len(candidates)} Findings with Loops")
         for find_id in candidates.values_list("id", flat=True):
             removeLoop(find_id, 50)
 
         new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
         for f in new_originals:
-            deduplicationLogger.info("New Original: %d " % f.id)
+            deduplicationLogger.info(f"New Original: {f.id}")
             f.duplicate = False
             super(Finding, f).save()
 
         loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
-        deduplicationLogger.info("%d Finding found which still has Loops, please run fix loop duplicates again" % loop_count)
+        deduplicationLogger.info(f"{loop_count} Finding found which still has Loops, please run fix loop duplicates again")
     return loop_count
 
 

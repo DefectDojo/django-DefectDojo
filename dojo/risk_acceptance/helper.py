@@ -175,30 +175,30 @@ def expiration_handler(*args, **kwargs):
 
 
 def expiration_message_creator(risk_acceptance, heads_up_days=0):
-    return "Risk acceptance [(%s)|%s] with %i findings has expired" % \
-        (escape_for_jira(risk_acceptance.name),
+    return "Risk acceptance [({})|{}] with {} findings has expired".format(
+        escape_for_jira(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
         len(risk_acceptance.accepted_findings.all()))
 
 
 def expiration_warning_message_creator(risk_acceptance, heads_up_days=0):
-    return "Risk acceptance [(%s)|%s] with %i findings will expire in %i days" % \
-        (escape_for_jira(risk_acceptance.name),
+    return "Risk acceptance [({})|{}] with {} findings will expire in {} days".format(
+        escape_for_jira(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
         len(risk_acceptance.accepted_findings.all()), heads_up_days)
 
 
 def reinstation_message_creator(risk_acceptance, heads_up_days=0):
-    return "Risk acceptance [(%s)|%s] with %i findings has been reinstated (expires on %s)" % \
-        (escape_for_jira(risk_acceptance.name),
+    return "Risk acceptance [({})|{}] with {} findings has been reinstated (expires on {})".format(
+        escape_for_jira(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
         len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
 
 
 def accepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
-        return "Finding has been added to risk acceptance [(%s)|%s] with %i findings (expires on %s)" % \
-            (escape_for_jira(risk_acceptance.name),
+        return "Finding has been added to risk acceptance [({})|{}] with {} findings (expires on {})".format(
+            escape_for_jira(risk_acceptance.name),
             get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
             len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
     else:
