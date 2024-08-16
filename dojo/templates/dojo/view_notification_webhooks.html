@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load display_tags %}
 {% load i18n %}
 {% load authorization_tags %}
 {% block content %}
@@ -57,7 +58,11 @@
                             <tr>
                               <td><a>{{ nwh.name }}</a></td>
                               <td><a>{{ nwh.url }}</a></td>
-                              <td><a>{{ nwh.get_status_display }}</a></td>
+                              <td><a>{{ nwh.get_status_display }}
+                                {% if nwh.first_error or nwh.last_error %}
+                                    <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="First error: {{ nwh.first_error | display_date_with_secs }}, Last error: {{ nwh.last_error | display_date_with_secs }}" data-placement="right" data-container="body" data-original-title="" title=""></i>
+                                {% endif %}    
+                              </a></td>
                               <td><a>{{ nwh.note }}</a></td>
                               <td><a>{% if nwh.owner %}<a class="" href="{% url 'view_user' nwh.owner.id %}">{{ nwh.owner }}</a>{% else %}System Webhook{% endif %}</a></td>
                               {% if "dojo.edit_notification_webhook"|has_configuration_permission:request %}
