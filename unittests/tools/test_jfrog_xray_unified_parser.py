@@ -8,14 +8,14 @@ from unittests.dojo_test_case import DojoTestCase
 class TestJFrogXrayUnifiedParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/no_vuln.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/no_vuln.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/one_vuln.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/one_vuln.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -45,14 +45,14 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertEqual("XRAY-139239", item.unique_id_from_tool)
 
     def test_parse_file_with_many_vulns(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/many_vulns.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/many_vulns.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
 
     def test_parse_file_with_very_many_vulns(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/very_many_vulns.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/very_many_vulns.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -339,7 +339,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         # **finished various packages**
 
     def test_parse_file_with_another_report(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/Vulnerabilities-Report-XRAY_Unified.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/Vulnerabilities-Report-XRAY_Unified.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
