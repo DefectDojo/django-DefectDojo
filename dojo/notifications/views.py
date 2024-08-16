@@ -189,7 +189,7 @@ class ListNotificationWebhooksView(NotificationWebhooksView):
 
     def get(self, request: HttpRequest):
         # Run common checks
-        super().get(request)
+        super().preprocess_request(request)
         # Get Notification Webhooks
         nwhs = self.get_notification_webhooks(request)
         # Set up the initial context
@@ -247,7 +247,7 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
 
     def get(self, request: HttpRequest):
         # Run common checks
-        super().get(request)
+        super().preprocess_request(request)
         # Set up the initial context
         context = self.get_initial_context(request)
         # Add any breadcrumbs
@@ -256,8 +256,8 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
         return render(request, self.template, context)
 
     def post(self, request: HttpRequest):
-        # POST needs to pass same common checks as GET
-        super().get(request)
+        # Run common checks
+        super().preprocess_request(request)
         # Set up the initial context
         context = self.get_initial_context(request)
         # Determine the validity of the form
@@ -334,7 +334,7 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
 
     def get(self, request: HttpRequest, nwhid: int):
         # Run common checks
-        super().get(request)
+        super().preprocess_request(request)
         nwh = self.get_notification_webhook(nwhid)
         # Set up the initial context
         context = self.get_initial_context(request, nwh)
@@ -344,8 +344,8 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
         return render(request, self.template, context)
 
     def post(self, request: HttpRequest, nwhid: int):
-        # POST needs to pass same common checks as GET
-        super().get(request)
+        # Run common checks
+        super().preprocess_request(request)
         nwh = self.get_notification_webhook(nwhid)
         # Set up the initial context
         context = self.get_initial_context(request, nwh)
@@ -401,7 +401,7 @@ class DeleteNotificationWebhooksView(NotificationWebhooksView):
 
     def get(self, request: HttpRequest, nwhid: int):
         # Run common checks
-        super().get(request)
+        super().preprocess_request(request)
         nwh = self.get_notification_webhook(nwhid)
         # Set up the initial context
         context = self.get_initial_context(request, nwh)
@@ -411,8 +411,8 @@ class DeleteNotificationWebhooksView(NotificationWebhooksView):
         return render(request, self.template, context)
 
     def post(self, request: HttpRequest, nwhid: int):
-        # POST needs to pass same common checks as GET
-        super().get(request)
+        # Run common checks
+        super().preprocess_request(request)
         nwh = self.get_notification_webhook(nwhid)
         # Set up the initial context
         context = self.get_initial_context(request, nwh)
