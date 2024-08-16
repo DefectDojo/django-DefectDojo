@@ -1,5 +1,7 @@
+import base64
 import datetime
 import logging
+import mimetypes
 from itertools import chain
 
 import bleach
@@ -418,6 +420,18 @@ def pic_token(context, image, size):
     token = FileAccessToken(user=user, file=image, size=size)
     token.save()
     return reverse("download_finding_pic", args=[token.token])
+
+
+@register.filter
+def inline_image(image_file):
+    try:
+        if img_type := mimetypes.guess_type(image_file.file.name)[0]:
+            if img_type.startswith("image/"):
+                img_data = base64.b64encode(image_file.file.read())
+                return f"data:{img_type};base64, {img_data.decode('utf-8')}"
+    except:
+        pass
+    return ""
 
 
 @register.filter

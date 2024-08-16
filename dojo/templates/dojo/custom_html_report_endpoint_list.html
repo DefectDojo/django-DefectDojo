@@ -151,7 +151,7 @@
             <pre>{{ finding.references|markdown_render }}</pre>
             {% endif %}
             {% if include_finding_images %}
-                {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
+                {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="INLINE" %}
             {% endif %}
             {% if include_finding_notes %}
                 {% with notes=finding.notes.all|get_public_notes %}
