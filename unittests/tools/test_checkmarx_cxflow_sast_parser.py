@@ -1,8 +1,8 @@
-from dojo.models import Product, Engagement, Test
-from dojo.tools.checkmarx_cxflow_sast.parser import CheckmarxCXFlowSastParser
-from ..dojo_test_case import DojoTestCase, get_unit_tests_path
-
 import dateutil.parser
+
+from dojo.models import Engagement, Product, Test
+from dojo.tools.checkmarx_cxflow_sast.parser import CheckmarxCXFlowSastParser
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestCheckmarxCxflowSast(DojoTestCase):
@@ -17,16 +17,16 @@ class TestCheckmarxCxflowSast(DojoTestCase):
         return my_file_handle, product, engagement, test
 
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(self):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/no_finding.json"
+        my_file_handle, _, _, test = self.init(
+            get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/no_finding.json",
         )
         parser = CheckmarxCXFlowSastParser()
         findings = parser.get_findings(my_file_handle, test)
         self.assertEqual(0, len(findings))
 
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_1_finding(self):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/1-finding.json"
+        my_file_handle, _, _, test = self.init(
+            get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/1-finding.json",
         )
         parser = CheckmarxCXFlowSastParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -54,8 +54,8 @@ class TestCheckmarxCxflowSast(DojoTestCase):
         self.assertEqual(False, finding.verified)
 
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_4_findings(self):
-        my_file_handle, product, engagement, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/4-findings.json"
+        my_file_handle, _, _, test = self.init(
+            get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/4-findings.json",
         )
         parser = CheckmarxCXFlowSastParser()
         findings = parser.get_findings(my_file_handle, test)

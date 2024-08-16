@@ -25,7 +25,7 @@ class _PathNode:
             data.get("column"),
             data.get("object"),
             data.get("length"),
-            data.get("snippet")
+            data.get("snippet"),
         )
 
 
@@ -91,7 +91,7 @@ class CheckmarxCXFlowSastParser:
                     sink=_PathNode.from_json_object(result.get("sink")),
                     source=_PathNode.from_json_object(result.get("source")),
                     state=result.get("state"),
-                    paths=[result[k] for k in path_keys]
+                    paths=[result[k] for k in path_keys],
                 )
 
                 map_paths[str(path.source.line)] = path
@@ -129,7 +129,7 @@ class CheckmarxCXFlowSastParser:
                             detail.state),
                         description=finding_detail,
                         verified=self.is_verify(detail.state),
-                        active=self.is_active(detail.state)
+                        active=self.is_active(detail.state),
                     )
 
                     findings.append(finding)
