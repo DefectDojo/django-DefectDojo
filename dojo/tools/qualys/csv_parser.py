@@ -23,7 +23,7 @@ def parse_csv(csv_file) -> [Finding]:
     if isinstance(content, bytes):
         content = content.decode("utf-8")
     csv_reader = csv.DictReader(
-        io.StringIO(content), delimiter=",", quotechar='"'
+        io.StringIO(content), delimiter=",", quotechar='"',
     )
 
     report_findings = get_report_findings(csv_reader)
@@ -78,17 +78,17 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
         if cvss_temporal:
             try:
                 cvss_temporal_vector = re.search(
-                    vector_pattern, cvss_temporal
+                    vector_pattern, cvss_temporal,
                 ).group(1)
                 cvss_vector += "/"
                 cvss_vector += cvss_temporal_vector
             except IndexError:
                 _logger.error(
-                    f"CVSS3 Temporal Vector not found in {cvss_base}"
+                    f"CVSS3 Temporal Vector not found in {cvss_base}",
                 )
             except AttributeError:
                 _logger.error(
-                    f"CVSS3 Temporal Vector not found in {cvss_base}"
+                    f"CVSS3 Temporal Vector not found in {cvss_base}",
                 )
 
         return cvss_vector
@@ -159,11 +159,11 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
 
         if "CVSS3 Base" in report_finding:
             cvssv3 = _extract_cvss_vectors(
-                        report_finding["CVSS3 Base"], report_finding["CVSS3 Temporal"]
+                        report_finding["CVSS3 Base"], report_finding["CVSS3 Temporal"],
                     )
         elif "CVSS3.1 Base" in report_finding:
             cvssv3 = _extract_cvss_vectors(
-                        report_finding["CVSS3.1 Base"], report_finding["CVSS3.1 Temporal"]
+                        report_finding["CVSS3.1 Base"], report_finding["CVSS3.1 Temporal"],
                     )
         # Get the date based on the first_seen setting
         try:
@@ -189,13 +189,13 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     impact=report_finding["Impact"],
                     date=date,
                     vuln_id_from_tool=report_finding["QID"],
-                    cvssv3=cvssv3
+                    cvssv3=cvssv3,
                 )
                 # Qualys reports regression findings as active, but with a Date Last
                 # Fixed.
                 if report_finding["Date Last Fixed"]:
                     finding.mitigated = datetime.strptime(
-                        report_finding["Date Last Fixed"], "%m/%d/%Y %H:%M:%S"
+                        report_finding["Date Last Fixed"], "%m/%d/%Y %H:%M:%S",
                     )
                     finding.is_mitigated = True
                 else:
@@ -229,7 +229,7 @@ def build_findings_from_dict(report_findings: [dict]) -> [Finding]:
                     severity=report_finding["SEVERITY"],
                     impact=report_finding["IMPACT"],
                     date=date,
-                    vuln_id_from_tool=report_finding["QID"]
+                    vuln_id_from_tool=report_finding["QID"],
                 )
         # Make sure we have something to append to
         if isinstance(finding.unsaved_vulnerability_ids, list):

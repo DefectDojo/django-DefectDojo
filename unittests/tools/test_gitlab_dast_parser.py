@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.gitlab_dast.parser import GitlabDastParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestGitlabDastParser(DojoTestCase):
@@ -23,7 +22,7 @@ class TestGitlabDastParser(DojoTestCase):
                 endpoint.clean()
 
             self.assertEqual(
-                "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool
+                "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool,
             )
             self.assertEqual(3, finding.scanner_confidence)
             # vulnerability does not have a name: fallback to using id as a title
@@ -51,7 +50,7 @@ class TestGitlabDastParser(DojoTestCase):
                 endpoint.clean()
 
             self.assertEqual(
-                "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool
+                "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool,
             )
             self.assertEqual(None, finding.scanner_confidence)
             # vulnerability does not have a name: fallback to using id as a title
@@ -91,7 +90,7 @@ class TestGitlabDastParser(DojoTestCase):
             date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
             self.assertEqual("2021-04-23T15:46:40.644000", date)
             self.assertEqual(
-                "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool
+                "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool,
             )
             # vulnerability does not have a name: fallback to using id as a title
             self.assertEqual(finding.unique_id_from_tool, finding.title)
@@ -129,7 +128,7 @@ class TestGitlabDastParser(DojoTestCase):
             date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
             self.assertEqual("2021-04-23T15:46:40.644000", date)
             self.assertEqual(
-                "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool
+                "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool,
             )
             # vulnerability does not have a name: fallback to using id as a title
             self.assertEqual(finding.unique_id_from_tool, finding.title)

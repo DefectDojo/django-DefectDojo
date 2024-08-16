@@ -40,6 +40,6 @@ class TestNoseyParkerParser(TestCase):
                 testfile.close()
                 self.assertEqual(0, len(findings))
                 self.assertTrue(
-                    "Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0" in str(context.exception)
+                    "Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0" in str(context.exception),
                 )
                 self.assertTrue("ECONNREFUSED" in str(context.exception))

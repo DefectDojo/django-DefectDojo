@@ -5,8 +5,7 @@ from django.core.exceptions import ValidationError
 
 from dojo.models import Engagement, Product, Product_API_Scan_Configuration, Test, Tool_Configuration, Tool_Type
 from dojo.tools.api_cobalt.importer import CobaltApiImporter
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestCobaltApiImporter(DojoTestCase):
@@ -17,12 +16,12 @@ class TestCobaltApiImporter(DojoTestCase):
         cls.tool_type = Tool_Type()
         cls.tool_configuration = Tool_Configuration()
         cls.tool_configuration.tool_type = cls.tool_type
-        cls.tool_configuration.authentication_type = 'API'
-        cls.tool_configuration.api_key = 'API_KEY'
-        cls.tool_configuration.extras = 'EXTRAS'
+        cls.tool_configuration.authentication_type = "API"
+        cls.tool_configuration.api_key = "API_KEY"
+        cls.tool_configuration.extras = "EXTRAS"
 
         cls.product = Product()
-        cls.product.name = 'Product'
+        cls.product.name = "Product"
         cls.engagement = Engagement()
         cls.engagement.product = cls.product
         cls.test = Test()
@@ -34,7 +33,7 @@ class TestCobaltApiImporter(DojoTestCase):
         cls.api_scan_configuration.tool_configuration = cls.tool_configuration
 
         cls.product_2 = Product()
-        cls.product_2.name = 'Product_2'
+        cls.product_2.name = "Product_2"
         cls.engagement_2 = Engagement()
         cls.engagement_2.product = cls.product_2
         cls.test_2 = Test()
@@ -45,9 +44,9 @@ class TestCobaltApiImporter(DojoTestCase):
         cls.test_2.api_scan_configuration = cls.api_scan_configuration_2
         cls.api_scan_configuration_2.product = cls.product_2
         cls.api_scan_configuration_2.tool_configuration = cls.tool_configuration
-        cls.api_scan_configuration_2.service_key_1 = 'SERVICE_KEY_1'
+        cls.api_scan_configuration_2.service_key_1 = "SERVICE_KEY_1"
 
-        cls.findings = json.dumps({'a': 1, 'b': 2})
+        cls.findings = json.dumps({"a": 1, "b": 2})
 
     def test_prepare_client_do_not_match(self):
         product_3 = Product()
@@ -63,7 +62,7 @@ class TestCobaltApiImporter(DojoTestCase):
             cobalt_api_importer = CobaltApiImporter()
             cobalt_api_importer.prepare_client(test_3)
 
-    @patch('dojo.models.Product_API_Scan_Configuration.objects')
+    @patch("dojo.models.Product_API_Scan_Configuration.objects")
     def test_prepare_client_more_than_one_configuration(self, mock_foo):
         mock_foo.filter.return_value = mock_foo
         mock_foo.count.return_value = 2
@@ -74,7 +73,7 @@ class TestCobaltApiImporter(DojoTestCase):
 
             mock_foo.filter.assert_called_with(product=self.product)
 
-    @patch('dojo.models.Product_API_Scan_Configuration.objects')
+    @patch("dojo.models.Product_API_Scan_Configuration.objects")
     def test_prepare_client_no_configuration(self, mock_foo):
         mock_foo.filter.return_value = mock_foo
         mock_foo.count.return_value = 0
@@ -85,7 +84,7 @@ class TestCobaltApiImporter(DojoTestCase):
 
             mock_foo.filter.assert_called_with(product=self.product)
 
-    @patch('dojo.models.Product_API_Scan_Configuration.objects')
+    @patch("dojo.models.Product_API_Scan_Configuration.objects")
     def test_prepare_client_one_product_configuration(self, mock_foo):
         mock_foo.filter.return_value = mock_foo
         mock_foo.count.return_value = 1
@@ -94,25 +93,25 @@ class TestCobaltApiImporter(DojoTestCase):
         cobalt_api_importer = CobaltApiImporter()
         cobalt_api, api_scan_configuration = cobalt_api_importer.prepare_client(self.test)
 
-        mock_foo.filter.assert_called_with(product=self.product, tool_configuration__tool_type__name='Cobalt.io')
+        mock_foo.filter.assert_called_with(product=self.product, tool_configuration__tool_type__name="Cobalt.io")
         self.assertEqual(api_scan_configuration, self.api_scan_configuration)
-        self.assertEqual(cobalt_api.api_token, 'API_KEY')
-        self.assertEqual(cobalt_api.org_token, 'EXTRAS')
+        self.assertEqual(cobalt_api.api_token, "API_KEY")
+        self.assertEqual(cobalt_api.org_token, "EXTRAS")
 
     def test_prepare_client_one_test_configuration(self):
         cobalt_api_importer = CobaltApiImporter()
         cobalt_api, api_scan_configuration = cobalt_api_importer.prepare_client(self.test_2)
 
         self.assertEqual(api_scan_configuration, self.api_scan_configuration_2)
-        self.assertEqual(cobalt_api.api_token, 'API_KEY')
-        self.assertEqual(cobalt_api.org_token, 'EXTRAS')
+        self.assertEqual(cobalt_api.api_token, "API_KEY")
+        self.assertEqual(cobalt_api.org_token, "EXTRAS")
 
-    @patch('dojo.tools.api_cobalt.importer.CobaltAPI.get_findings')
+    @patch("dojo.tools.api_cobalt.importer.CobaltAPI.get_findings")
     def test_get_findings(self, mock_foo):
         mock_foo.return_value = self.findings
 
         cobalt_api_importer = CobaltApiImporter()
         my_findings = cobalt_api_importer.get_findings(self.test_2)
 
-        mock_foo.assert_called_with('SERVICE_KEY_1')
+        mock_foo.assert_called_with("SERVICE_KEY_1")
         self.assertEqual(my_findings, self.findings)

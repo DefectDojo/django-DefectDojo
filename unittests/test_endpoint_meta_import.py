@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 # test methods to be used both by API Test and UI Test
 class EndpointMetaImportMixin:
     def __init__(self, *args, **kwargs):
-        self.meta_import_full = 'endpoint_meta_import/full_endpoint_meta_import.csv'
-        self.meta_import_no_hostname = 'endpoint_meta_import/no_hostname_endpoint_meta_import.csv'
-        self.meta_import_updated_added = 'endpoint_meta_import/updated_added_endpoint_meta_import.csv'
-        self.meta_import_updated_removed = 'endpoint_meta_import/updated_removed_endpoint_meta_import.csv'
-        self.meta_import_updated_changed = 'endpoint_meta_import/updated_changed_endpoint_meta_import.csv'
-        self.updated_tag_host = 'feedback.internal.google.com'
+        self.meta_import_full = "endpoint_meta_import/full_endpoint_meta_import.csv"
+        self.meta_import_no_hostname = "endpoint_meta_import/no_hostname_endpoint_meta_import.csv"
+        self.meta_import_updated_added = "endpoint_meta_import/updated_added_endpoint_meta_import.csv"
+        self.meta_import_updated_removed = "endpoint_meta_import/updated_removed_endpoint_meta_import.csv"
+        self.meta_import_updated_changed = "endpoint_meta_import/updated_changed_endpoint_meta_import.csv"
+        self.updated_tag_host = "feedback.internal.google.com"
 
     def test_endpoint_meta_import_endpoint_create_tag_create_meta_create(self):
         endpoint_count_before = self.db_endpoint_count()
@@ -83,8 +83,8 @@ class EndpointMetaImportMixin:
         endpoint_count_before = self.db_endpoint_count()
         endpoint_tag_count_before = self.db_endpoint_tag_count()
         # Grab the endpoint that is known to change
-        endpoint = self.get_product_endpoints_api(1, host=self.updated_tag_host)['results'][0]
-        human_resource_tag = endpoint['tags'][endpoint['tags'].index('team:human resources')]
+        endpoint = self.get_product_endpoints_api(1, host=self.updated_tag_host)["results"][0]
+        human_resource_tag = endpoint["tags"][endpoint["tags"].index("team:human resources")]
         # Import again with one column missing
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             self.endpoint_meta_import_scan_with_params(
@@ -93,8 +93,8 @@ class EndpointMetaImportMixin:
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
         self.assertEqual(endpoint_tag_count_before, self.db_endpoint_tag_count())
         # Grab the updated endpoint
-        endpoint = self.get_product_endpoints_api(1, host=self.updated_tag_host)['results'][0]
-        human_resource_tag_updated = endpoint['tags'][endpoint['tags'].index('team:hr')]
+        endpoint = self.get_product_endpoints_api(1, host=self.updated_tag_host)["results"][0]
+        human_resource_tag_updated = endpoint["tags"][endpoint["tags"].index("team:hr")]
         # Make sure the tags are not the same
         self.assertNotEqual(human_resource_tag, human_resource_tag_updated)
 
@@ -139,8 +139,8 @@ class EndpointMetaImportMixin:
         endpoint_count_before = self.db_endpoint_count()
         meta_count_before = self.db_dojo_meta_count()
         # Grab the endpoint that is known to change
-        endpoint_id = self.get_product_endpoints_api(1, host=self.updated_tag_host)['results'][0]['id']
-        meta_value = self.get_endpoints_meta_api(endpoint_id, 'team')['results'][0]['value']
+        endpoint_id = self.get_product_endpoints_api(1, host=self.updated_tag_host)["results"][0]["id"]
+        meta_value = self.get_endpoints_meta_api(endpoint_id, "team")["results"][0]["value"]
         # Import again with one column missing
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0, endpoints=0):
             self.endpoint_meta_import_scan_with_params(
@@ -149,14 +149,14 @@ class EndpointMetaImportMixin:
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
         self.assertEqual(meta_count_before, self.db_dojo_meta_count())
         # Grab the updated endpoint
-        endpoint_id = self.get_product_endpoints_api(1, host=self.updated_tag_host)['results'][0]['id']
-        meta_value_updated = self.get_endpoints_meta_api(endpoint_id, 'team')['results'][0]['value']
+        endpoint_id = self.get_product_endpoints_api(1, host=self.updated_tag_host)["results"][0]["id"]
+        meta_value_updated = self.get_endpoints_meta_api(endpoint_id, "team")["results"][0]["value"]
         # Make sure the tags are not the same
         self.assertNotEqual(meta_value, meta_value_updated)
 
 
 class EndpointMetaImportTestAPI(DojoAPITestCase, EndpointMetaImportMixin):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
         # TODO remove __init__ if it does nothing...
@@ -166,15 +166,15 @@ class EndpointMetaImportTestAPI(DojoAPITestCase, EndpointMetaImportMixin):
         super().__init__(*args, **kwargs)
 
     def setUp(self):
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
         # self.url = reverse(self.viewname + '-list')
 
 
 class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
-    fixtures = ['dojo_testdata.json']
+    fixtures = ["dojo_testdata.json"]
     client_ui = Client()
 
     def __init__(self, *args, **kwargs):
@@ -186,10 +186,10 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
 
     def setUp(self):
         # still using the API to verify results
-        testuser = User.objects.get(username='admin')
+        testuser = User.objects.get(username="admin")
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
         # self.url = reverse(self.viewname + '-list')
 
         self.client_ui = Client()
@@ -200,13 +200,13 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
         return self.endpoint_meta_import_scan_with_params_ui(*args, **kwargs)
 
     def endpoint_meta_import_ui(self, product, payload):
-        logger.debug('import_scan payload %s', payload)
-        response = self.client_ui.post(reverse('import_endpoint_meta', args=(product, )), payload)
+        logger.debug("import_scan payload %s", payload)
+        response = self.client_ui.post(reverse("import_endpoint_meta", args=(product, )), payload)
         self.assertEqual(302, response.status_code, response.content[:1000])
 
     def endpoint_meta_import_scan_with_params_ui(self, filename, product=1, create_endpoints=True,
                                                  create_tags=True, create_dojo_meta=True, expected_http_status_code=201):
-        with open(get_unit_tests_path() + '/' + filename) as testfile:
+        with open(get_unit_tests_path() + "/" + filename) as testfile:
             payload = {
                 "create_endpoints": create_endpoints,
                 "create_tags": create_tags,

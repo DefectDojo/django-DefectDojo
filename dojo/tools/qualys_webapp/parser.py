@@ -1,7 +1,8 @@
 import base64
 import re
-import xml.etree.ElementTree
 from datetime import datetime
+
+from defusedxml import ElementTree
 
 from dojo.models import Endpoint, Finding
 
@@ -90,13 +91,13 @@ def attach_unique_extras(
                 protocol=protocol,
                 query=truncate_str(query, 1000),
                 fragment=truncate_str(fragment, 500),
-            )
+            ),
         )
 
-    for i in range(0, len(requests)):
+    for i in range(len(requests)):
         if requests[i] != "" or responses[i] != "":
             finding.unsaved_req_resp.append(
-                {"req": requests[i], "resp": responses[i]}
+                {"req": requests[i], "resp": responses[i]},
             )
 
     if active_text is not None:
@@ -130,10 +131,10 @@ def attach_extras(endpoints, requests, responses, finding, date, qid, test):
     for endpoint in endpoints:
         finding.unsaved_endpoints.append(Endpoint.from_uri(endpoint))
 
-    for i in range(0, len(requests)):
+    for i in range(len(requests)):
         if requests[i] != "" or responses[i] != "":
             finding.unsaved_req_resp.append(
-                {"req": requests[i], "resp": responses[i]}
+                {"req": requests[i], "resp": responses[i]},
             )
 
     return finding
@@ -186,7 +187,7 @@ def get_request_response(payloads):
 
 
 def get_unique_vulnerabilities(
-    vulnerabilities, test, is_info=False, is_app_report=False
+    vulnerabilities, test, is_info=False, is_app_report=False,
 ):
     findings = {}
     # Iterate through all vulnerabilites to pull necessary info
@@ -216,11 +217,11 @@ def get_unique_vulnerabilities(
         if raw_finding_date is not None:
             if raw_finding_date.endswith("GMT"):
                 finding_date = datetime.strptime(
-                    raw_finding_date, "%d %b %Y %I:%M%p GMT"
+                    raw_finding_date, "%d %b %Y %I:%M%p GMT",
                 )
             else:
                 finding_date = datetime.strptime(
-                    raw_finding_date, "%d %b %Y %I:%M%p GMT%z"
+                    raw_finding_date, "%d %b %Y %I:%M%p GMT%z",
                 )
         else:
             finding_date = None
@@ -253,7 +254,7 @@ def get_unique_vulnerabilities(
 # Traverse and retreive any information in the VULNERABILITY_LIST
 # section of the report. This includes all endpoints and request/response pairs
 def get_vulnerabilities(
-    vulnerabilities, test, is_info=False, is_app_report=False
+    vulnerabilities, test, is_info=False, is_app_report=False,
 ):
     findings = {}
     # Iterate through all vulnerabilites to pull necessary info
@@ -283,18 +284,18 @@ def get_vulnerabilities(
         if raw_finding_date is not None:
             if raw_finding_date.endswith("GMT"):
                 finding_date = datetime.strptime(
-                    raw_finding_date, "%d %b %Y %I:%M%p GMT"
+                    raw_finding_date, "%d %b %Y %I:%M%p GMT",
                 )
             else:
                 finding_date = datetime.strptime(
-                    raw_finding_date, "%d %b %Y %I:%M%p GMT%z"
+                    raw_finding_date, "%d %b %Y %I:%M%p GMT%z",
                 )
         else:
             finding_date = None
 
         finding = findings.get(qid, None)
         findings[qid] = attach_extras(
-            urls, req_resps[0], req_resps[1], finding, finding_date, qid, test
+            urls, req_resps[0], req_resps[1], finding, finding_date, qid, test,
         )
     return findings
 
@@ -351,22 +352,22 @@ def get_unique_items(
     findings = {}
 
     for unique_id, finding in get_unique_vulnerabilities(
-        vulnerabilities, test, False, is_app_report
+        vulnerabilities, test, False, is_app_report,
     ).items():
         qid = int(finding.vuln_id_from_tool)
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[unique_id] = get_glossary_item(
-                glossary[index], finding, enable_weakness=enable_weakness
+                glossary[index], finding, enable_weakness=enable_weakness,
             )
     for unique_id, finding in get_unique_vulnerabilities(
-        info_gathered, test, True, is_app_report
+        info_gathered, test, True, is_app_report,
     ).items():
         qid = int(finding.vuln_id_from_tool)
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness=enable_weakness
+                glossary[index], finding, True, enable_weakness=enable_weakness,
             )
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
@@ -390,20 +391,20 @@ def get_items(
     findings = {}
 
     for qid, finding in get_vulnerabilities(
-        vulnerabilities, test, False, is_app_report
+        vulnerabilities, test, False, is_app_report,
     ).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[qid] = get_glossary_item(
-                glossary[index], finding, enable_weakness=enable_weakness
+                glossary[index], finding, enable_weakness=enable_weakness,
             )
     for qid, finding in get_vulnerabilities(
-        info_gathered, test, True, is_app_report
+        info_gathered, test, True, is_app_report,
     ).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness=enable_weakness
+                glossary[index], finding, True, enable_weakness=enable_weakness,
             )
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
@@ -418,22 +419,22 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
 
     # supposed to be safe against XEE:
     # https://docs.python.org/3/library/xml.html#xml-vulnerabilities
-    tree = xml.etree.ElementTree.parse(qualys_xml_file)
+    tree = ElementTree.parse(qualys_xml_file)
     is_app_report = tree.getroot().tag == "WAS_WEBAPP_REPORT"
 
     if is_app_report:
         vulnerabilities = tree.findall(
-            "./RESULTS/WEB_APPLICATION/VULNERABILITY_LIST/VULNERABILITY"
+            "./RESULTS/WEB_APPLICATION/VULNERABILITY_LIST/VULNERABILITY",
         )
         info_gathered = tree.findall(
-            "./RESULTS/WEB_APPLICATION/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED"
+            "./RESULTS/WEB_APPLICATION/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED",
         )
     else:
         vulnerabilities = tree.findall(
-            "./RESULTS/VULNERABILITY_LIST/VULNERABILITY"
+            "./RESULTS/VULNERABILITY_LIST/VULNERABILITY",
         )
         info_gathered = tree.findall(
-            "./RESULTS/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED"
+            "./RESULTS/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED",
         )
     glossary = tree.findall("./GLOSSARY/QID_LIST/QID")
 
@@ -446,7 +447,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
                 is_app_report,
                 test,
                 enable_weakness,
-            ).values()
+            ).values(),
         )
     else:
         items = list(
@@ -457,7 +458,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
                 is_app_report,
                 test,
                 enable_weakness,
-            ).values()
+            ).values(),
         )
 
     return items
@@ -474,8 +475,8 @@ class QualysWebAppParser:
         return "Qualys WebScan output files can be imported in XML format."
 
     def get_findings(
-        self, file, test, enable_weakness=QUALYS_WAS_WEAKNESS_IS_VULN
+        self, file, test, enable_weakness=QUALYS_WAS_WEAKNESS_IS_VULN,
     ):
         return qualys_webapp_parser(
-            file, test, QUALYS_WAS_UNIQUE_ID, enable_weakness
+            file, test, QUALYS_WAS_UNIQUE_ID, enable_weakness,
         )

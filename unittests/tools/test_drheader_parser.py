@@ -1,7 +1,6 @@
 from dojo.models import Test
 from dojo.tools.drheader.parser import DrHeaderParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestDrHeaderParser(DojoTestCase):

@@ -43,7 +43,7 @@ class GosecParser:
             # Best attempt at ongoing documentation provided by gosec, based on
             # rule id
             references = "https://securego.io/docs/rules/{}.html".format(
-                item["rule_id"]
+                item["rule_id"],
             ).lower()
 
             if scanner_confidence:
@@ -80,7 +80,7 @@ class GosecParser:
                     file_path=filename,
                     line=line,
                     scanner_confidence=scanner_confidence,
-                    static_finding=True
+                    static_finding=True,
                 )
 
                 dupes[dupe_key] = find
