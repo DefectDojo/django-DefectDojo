@@ -28,11 +28,15 @@ class AsffParser:
 
     def get_item_resource_arns(self, item):
         resource_arns = []
-        resource_ids = getattr(item, "Resources", [])
-        for resource in resource_ids:
-            resource_id = resource.get("Id")
-            if resource_id:
-                resource_arns.append(resource_id)
+        resource_ids = item.get("Resources", {})
+        if isinstance(resource_ids, dict):
+            for key, value in resource_ids.items():
+                if isinstance(value, list):
+                    for resource in value:
+                        resource_id = resource.get("Id")
+                        if resource_id:
+                            resource_arns.append(resource_id)
+                            
         return resource_arns
 
     def get_findings(self, file, test):
