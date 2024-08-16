@@ -33,7 +33,7 @@ class AsffParser:
                 if isinstance(resource_block, dict):
                     resource_id = resource_block.get("Id")
                     if resource_id:
-                        resource_arns.append(resouce_id)
+                        resource_arns.append(resource_id)
 
         return resource_arns
 
