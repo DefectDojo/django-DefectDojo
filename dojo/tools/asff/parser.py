@@ -28,14 +28,12 @@ class AsffParser:
 
     def get_item_resource_arns(self, item):
         resource_arns = []
-        resource_ids = item.get("Resources", {})
-        if isinstance(resource_ids, dict):
-            for key, value in resource_ids.items():
-                if isinstance(value, list):
-                    for resource in value:
-                        resource_id = resource.get("Id")
-                        if resource_id:
-                            resource_arns.append(resource_id)
+        if isinstance(item.get("Resources"), list):
+            for resource_block in item["Resources"]:
+                if isinstance(resource_block, dict):
+                    resource_id = resource_block.get("Id")
+                    if resource_id:
+                        resource_arns.append(resouce_id)
 
         return resource_arns
 
