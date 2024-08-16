@@ -361,8 +361,8 @@ def test_webhooks_notification(endpoint):
 
 
 @app.task(ignore_result=True)
-def webhook_reactivation(*args, **kwargs):
-    endpoint = Notification_Webhooks.objects.get(pk=kwargs.get("endpoint_id"))
+def webhook_reactivation(endpoint_id: int, *args, **kwargs):
+    endpoint = Notification_Webhooks.objects.get(pk=endpoint_id)
 
     # User already changed status of endpoint
     if endpoint.status != Notification_Webhooks.Status.STATUS_INACTIVE_TMP:
