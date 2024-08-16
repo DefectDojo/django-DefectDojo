@@ -161,7 +161,7 @@ class NotificationWebhooksView(View):
         else:
             return NotificationsWebhookForm(**kwargs)
 
-    def get(self, request: HttpRequest):
+    def preprocess_request(self, request: HttpRequest):
         # Check Webhook notifications are enabled
         self.check_webhooks_enabled()
         # Check permissions
