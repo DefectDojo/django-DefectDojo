@@ -18,7 +18,7 @@ class TestAsffParser(DojoTestCase):
 
     def common_check_finding(self, finding, data, index, guarddutydate=False):
         parser = AsffParser()
-        resource_arns = parser.get_item_resource_arns(item)
+        resource_arns = parser.get_item_resource_arns(finding)
         self.assertEqual(finding.title, data[index]["Title"])
         self.assertEqual(finding.description, data[index], f"**AWS resource ARN:** {resource_arns}", "\n\n", ["Description"])
         if guarddutydate:
