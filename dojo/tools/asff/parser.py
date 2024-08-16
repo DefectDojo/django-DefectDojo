@@ -28,7 +28,7 @@ class AsffParser:
 
     def get_item_resource_arns(self, item):
         resource_arns = []
-        resource_ids = item.get("Resources", [])
+        resource_ids = item.get("Resources")
         for resource in resource_ids:
             resource_id = resource.get("Id")
             if resource_id:
