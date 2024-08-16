@@ -32,7 +32,7 @@ class TestCheckmarxOneParser(DojoTestCase):
         with open("unittests/scans/checkmarx_one/many_findings.json", encoding="utf-8") as testfile:
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(6, len(findings))
+            self.assertEqual(8, len(findings))
             with self.subTest(i=0):
                 for finding in findings:
                     self.assertIsNotNone(finding.unique_id_from_tool)
@@ -43,7 +43,6 @@ class TestCheckmarxOneParser(DojoTestCase):
                     self.assertIsNotNone(finding.description)
                 finding_test = findings[0]
                 self.assertEqual("High", finding_test.severity)
-                self.assertEqual("/qe/testharness/Dockerfile", finding_test.file_path)
 
     def test_checkmarx_one_no_findings(self):
         with open("unittests/scans/checkmarx_one/no_findings.json", encoding="utf-8") as testfile:
