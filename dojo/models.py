@@ -4119,18 +4119,14 @@ class NotificationsAdmin(admin.ModelAdmin):
 
 
 class Notification_Webhooks(models.Model):
-    _STATUS_ACTIVE = "active"
-    _STATUS_INACTIVE = "inactive"
-    STATUS_ACTIVE = f"{_STATUS_ACTIVE}"
-    STATUS_ACTIVE_TMP = f"{_STATUS_ACTIVE}_tmp"
-    STATUS_INACTIVE_TMP = f"{_STATUS_INACTIVE}_tmp"
-    STATUS_INACTIVE_PERMANENT = f"{_STATUS_INACTIVE}_permanent"
-    STATUS_CHOICES = (
-        (STATUS_ACTIVE, "Active"),
-        (STATUS_ACTIVE_TMP, "Active but 5xx (or similar) error detected"),
-        (STATUS_INACTIVE_TMP, "Temporary inactive because of 5xx (or similar) error"),
-        (STATUS_INACTIVE_PERMANENT, "Permanently inactive"),
-    )
+    class Status(models.TextChoices):
+        __STATUS_ACTIVE = "active"
+        __STATUS_INACTIVE = "inactive"
+        STATUS_ACTIVE = f"{__STATUS_ACTIVE}", _("Active")
+        STATUS_ACTIVE_TMP = f"{__STATUS_ACTIVE}_tmp", _("Active but 5xx (or similar) error detected")
+        STATUS_INACTIVE_TMP = f"{__STATUS_INACTIVE}_tmp", _("Temporary inactive because of 5xx (or similar) error")
+        STATUS_INACTIVE_PERMANENT = f"{__STATUS_INACTIVE}_permanent", _("Permanently inactive")
+
     name = models.CharField(max_length=100, default="", blank=False, unique=True,
                                     help_text=_("Name of the incoming webhook"))
     url = models.URLField(max_length=200, default="", blank=False,
@@ -4139,7 +4135,7 @@ class Notification_Webhooks(models.Model):
                                    help_text=_("Name of the header required for interacting with Webhook endpoint"))
     header_value = models.CharField(max_length=100, default="", blank=True, null=True,
                                    help_text=_("Content of the header required for interacting with Webhook endpoint"))
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active", blank=False,
+    status = models.CharField(max_length=20, choices=Status, default="active", blank=False,
                               help_text=_("Status of the incoming webhook"), editable=False)
     first_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened first time"), blank=True, null=True, editable=False)
     last_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened last time"), blank=True, null=True, editable=False)

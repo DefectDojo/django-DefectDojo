@@ -231,7 +231,7 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
                 # User can put here what ever he want
                 # we override it with our only valid defaults
                 nwh = form.save(commit=False)
-                nwh.status = Notification_Webhooks.STATUS_ACTIVE
+                nwh.status = Notification_Webhooks.Status.STATUS_ACTIVE
                 nwh.first_error = None
                 nwh.last_error = None
                 nwh.note = None
@@ -292,7 +292,7 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
     def process_form(self, request: HttpRequest, nwh: Notification_Webhooks, context: dict):
         form = context["form"]
         if "deactivate_webhook" in request.POST:  # TODO: add this to API as well
-            nwh.status = Notification_Webhooks.STATUS_INACTIVE_PERMANENT
+            nwh.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
             nwh.first_error = None
             nwh.last_error = None
             nwh.note = "Deactivate from UI"
@@ -318,7 +318,7 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
             else:
                 # correct definition reset defaults
                 nwh = form.save(commit=False)
-                nwh.status = Notification_Webhooks.STATUS_ACTIVE
+                nwh.status = Notification_Webhooks.Status.STATUS_ACTIVE
                 nwh.first_error = None
                 nwh.last_error = None
                 nwh.note = None

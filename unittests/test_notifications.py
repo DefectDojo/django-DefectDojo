@@ -438,7 +438,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.assertIn("URLs for Webhooks not configured for user '(admin)': skipping user notification", cm.output[0])
 
     def test_system_webhook_inactive(self):
-        self.sys_wh.status = Notification_Webhooks.STATUS_INACTIVE_PERMANENT
+        self.sys_wh.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
         self.sys_wh.save()
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
             send_webhooks_notification(event="dummy")
@@ -450,7 +450,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.assertIn("Message sent to endpoint 'My webhook endpoint' successfully.", cm.output[-1])
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE)
+        self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE)
         self.assertIsNone(updated_wh.first_error)
         self.assertIsNone(updated_wh.last_error)
 
@@ -463,7 +463,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.assertIn("Error when sending message to Webhooks 'My webhook endpoint' (status: 400)", cm.output[-1])
 
         updated_wh = Notification_Webhooks.objects.all().filter(owner=None).first()
-        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_PERMANENT)
+        self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT)
         self.assertIsNotNone(updated_wh.first_error)
         self.assertEqual(updated_wh.first_error, updated_wh.last_error)
 
@@ -475,7 +475,7 @@ class TestNotificationWebhooks(DojoTestCase):
             send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_TMP)
+        self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_TMP)
         self.assertIsNotNone(updated_wh.first_error)
         self.assertEqual(updated_wh.first_error, updated_wh.last_error)
         self.assertEqual("Response status code: 500", updated_wh.note)
@@ -484,7 +484,7 @@ class TestNotificationWebhooks(DojoTestCase):
     def test_system_webhook_second_5xx_within_one_day(self):
         ten_mins_ago = get_current_datetime() - datetime.timedelta(minutes=10)
         self.sys_wh.url = f"{self.url_base}/status/500"
-        self.sys_wh.status = Notification_Webhooks.STATUS_ACTIVE_TMP
+        self.sys_wh.status = Notification_Webhooks.Status.STATUS_ACTIVE_TMP
         self.sys_wh.first_error = ten_mins_ago
         self.sys_wh.last_error = ten_mins_ago
         self.sys_wh.save()
@@ -493,7 +493,7 @@ class TestNotificationWebhooks(DojoTestCase):
             send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_TMP)
+        self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_TMP)
         self.assertEqual(updated_wh.first_error, ten_mins_ago)
         self.assertGreater(updated_wh.last_error, ten_mins_ago)
         self.assertEqual("Response status code: 500", updated_wh.note)
@@ -504,7 +504,7 @@ class TestNotificationWebhooks(DojoTestCase):
         day_ago = now - datetime.timedelta(hours=24, minutes=10)
         ten_minutes_ago = now - datetime.timedelta(minutes=10)
         self.sys_wh.url = f"{self.url_base}/status/500"
-        self.sys_wh.status = Notification_Webhooks.STATUS_ACTIVE_TMP
+        self.sys_wh.status = Notification_Webhooks.Status.STATUS_ACTIVE_TMP
         self.sys_wh.first_error = day_ago
         self.sys_wh.last_error = ten_minutes_ago
         self.sys_wh.save()
@@ -513,7 +513,7 @@ class TestNotificationWebhooks(DojoTestCase):
             send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_PERMANENT)
+        self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT)
         self.assertEqual(updated_wh.first_error, day_ago)
         self.assertGreater(updated_wh.last_error, ten_minutes_ago)
         self.assertEqual("Response status code: 500", updated_wh.note)
@@ -525,7 +525,7 @@ class TestNotificationWebhooks(DojoTestCase):
             webhook_reactivation(endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE)
+            self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE)
             self.assertIsNone(updated_wh.first_error)
             self.assertIsNone(updated_wh.last_error)
             self.assertIsNone(updated_wh.note)
@@ -533,7 +533,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("inactive"):
             now = get_current_datetime()
             wh = Notification_Webhooks.objects.filter(owner=None).first()
-            wh.status = Notification_Webhooks.STATUS_INACTIVE_TMP
+            wh.status = Notification_Webhooks.Status.STATUS_INACTIVE_TMP
             wh.first_error = now
             wh.last_error = now
             wh.note = "Response status code: 418"
@@ -543,7 +543,7 @@ class TestNotificationWebhooks(DojoTestCase):
                 webhook_reactivation(endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_TMP)
+            self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE_TMP)
             self.assertIsNotNone(updated_wh.first_error)
             self.assertEqual(updated_wh.first_error, updated_wh.last_error)
             self.assertEqual(updated_wh.note, "Response status code: 418")
@@ -554,7 +554,7 @@ class TestNotificationWebhooks(DojoTestCase):
             webhook_status_cleanup()
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE)
+            self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE)
             self.assertIsNone(updated_wh.first_error)
             self.assertIsNone(updated_wh.last_error)
             self.assertIsNone(updated_wh.note)
@@ -562,7 +562,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("active_tmp_new"):
             now = get_current_datetime()
             wh = Notification_Webhooks.objects.filter(owner=None).first()
-            wh.status = Notification_Webhooks.STATUS_ACTIVE_TMP
+            wh.status = Notification_Webhooks.Status.STATUS_ACTIVE_TMP
             wh.first_error = now
             wh.last_error = now
             wh.note = "Response status code: 503"
@@ -571,7 +571,7 @@ class TestNotificationWebhooks(DojoTestCase):
             webhook_status_cleanup()
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_TMP)
+            self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE_TMP)
             self.assertIsNotNone(updated_wh.first_error)
             self.assertEqual(updated_wh.first_error, updated_wh.last_error)
             self.assertEqual(updated_wh.note, "Response status code: 503")
@@ -579,7 +579,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("active_tmp_old"):
             day_ago = get_current_datetime() - datetime.timedelta(hours=24, minutes=10)
             wh = Notification_Webhooks.objects.filter(owner=None).first()
-            wh.status = Notification_Webhooks.STATUS_ACTIVE_TMP
+            wh.status = Notification_Webhooks.Status.STATUS_ACTIVE_TMP
             wh.first_error = day_ago
             wh.last_error = day_ago
             wh.note = "Response status code: 503"
@@ -589,7 +589,7 @@ class TestNotificationWebhooks(DojoTestCase):
                 webhook_status_cleanup()
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE)
+            self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE)
             self.assertIsNone(updated_wh.first_error)
             self.assertIsNone(updated_wh.last_error)
             self.assertEqual(updated_wh.note, "Reactivation from active_tmp")
@@ -598,7 +598,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("inactive_tmp_new"):
             minute_ago = get_current_datetime() - datetime.timedelta(minutes=1)
             wh = Notification_Webhooks.objects.filter(owner=None).first()
-            wh.status = Notification_Webhooks.STATUS_INACTIVE_TMP
+            wh.status = Notification_Webhooks.Status.STATUS_INACTIVE_TMP
             wh.first_error = minute_ago
             wh.last_error = minute_ago
             wh.note = "Response status code: 503"
@@ -607,7 +607,7 @@ class TestNotificationWebhooks(DojoTestCase):
             webhook_status_cleanup()
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_TMP)
+            self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_TMP)
             self.assertEqual(updated_wh.first_error, minute_ago)
             self.assertEqual(updated_wh.last_error, minute_ago)
             self.assertEqual(updated_wh.note, "Response status code: 503")
@@ -615,7 +615,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("inactive_tmp_old"):
             ten_minutes_ago = get_current_datetime() - datetime.timedelta(minutes=10)
             wh = Notification_Webhooks.objects.filter(owner=None).first()
-            wh.status = Notification_Webhooks.STATUS_INACTIVE_TMP
+            wh.status = Notification_Webhooks.Status.STATUS_INACTIVE_TMP
             wh.first_error = ten_minutes_ago
             wh.last_error = ten_minutes_ago
             wh.note = "Response status code: 503"
@@ -625,7 +625,7 @@ class TestNotificationWebhooks(DojoTestCase):
                 webhook_status_cleanup()
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-            self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_ACTIVE_TMP)
+            self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE_TMP)
             self.assertEqual(updated_wh.first_error, ten_minutes_ago)
             self.assertEqual(updated_wh.last_error, ten_minutes_ago)
             self.assertEqual(updated_wh.note, "Response status code: 503")
@@ -643,7 +643,7 @@ class TestNotificationWebhooks(DojoTestCase):
             send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_TMP)
+        self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_TMP)
         self.assertIsNotNone(updated_wh.first_error)
         self.assertEqual(updated_wh.first_error, updated_wh.last_error)
         self.assertIn("HTTPConnectionPool(host='webhook.endpoint', port=8080): Read timed out.", updated_wh.note)
@@ -658,7 +658,7 @@ class TestNotificationWebhooks(DojoTestCase):
             send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
-        self.assertEqual(updated_wh.status, Notification_Webhooks.STATUS_INACTIVE_PERMANENT)
+        self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT)
         self.assertIsNotNone(updated_wh.first_error)
         self.assertEqual(updated_wh.first_error, updated_wh.last_error)
         self.assertIn("HTTPConnectionPool(host='non.existing.place', port=80): Max retries exceeded with url: /", updated_wh.note)

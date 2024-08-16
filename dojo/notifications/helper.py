@@ -365,12 +365,12 @@ def webhook_reactivation(*args, **kwargs):
     endpoint = Notification_Webhooks.objects.get(pk=kwargs.get("endpoint_id"))
 
     # User already changed status of endpoint
-    if endpoint.status != Notification_Webhooks.STATUS_INACTIVE_TMP:
+    if endpoint.status != Notification_Webhooks.Status.STATUS_INACTIVE_TMP:
         return
 
-    endpoint.status = Notification_Webhooks.STATUS_ACTIVE_TMP
+    endpoint.status = Notification_Webhooks.Status.STATUS_ACTIVE_TMP
     endpoint.save()
-    logger.debug(f"Webhook endpoint '{endpoint.name}' reactivated to '{Notification_Webhooks.STATUS_ACTIVE_TMP}'")
+    logger.debug(f"Webhook endpoint '{endpoint.name}' reactivated to '{Notification_Webhooks.Status.STATUS_ACTIVE_TMP}'")
 
 
 @app.task(ignore_result=True)
@@ -378,22 +378,22 @@ def webhook_status_cleanup(*args, **kwargs):
     # If some endpoint was affected by some outage (5xx, 429, Timeout) but it was clean during last 24 hours,
     # we consider this endpoint as healthy so need to reset it
     endpoints = Notification_Webhooks.objects.filter(
-        status=Notification_Webhooks.STATUS_ACTIVE_TMP,
+        status=Notification_Webhooks.Status.STATUS_ACTIVE_TMP,
         last_error__lt=get_current_datetime() - timedelta(hours=24),
     )
     for endpoint in endpoints:
-        endpoint.status = Notification_Webhooks.STATUS_ACTIVE
+        endpoint.status = Notification_Webhooks.Status.STATUS_ACTIVE
         endpoint.first_error = None
         endpoint.last_error = None
-        endpoint.note = f"Reactivation from {Notification_Webhooks.STATUS_ACTIVE_TMP}"
+        endpoint.note = f"Reactivation from {Notification_Webhooks.Status.STATUS_ACTIVE_TMP}"
         endpoint.save()
-        logger.debug(f"Webhook endpoint '{endpoint.name}' reactivated from '{Notification_Webhooks.STATUS_ACTIVE_TMP}' to '{Notification_Webhooks.STATUS_ACTIVE}'")
+        logger.debug(f"Webhook endpoint '{endpoint.name}' reactivated from '{Notification_Webhooks.Status.STATUS_ACTIVE_TMP}' to '{Notification_Webhooks.Status.STATUS_ACTIVE}'")
 
     # Reactivation of STATUS_INACTIVE_TMP endpoints.
     # They should reactive automatically in 60s, however in case of some unexpected event (e.g. start of whole stack),
     # endpoints should not be left in STATUS_INACTIVE_TMP state
     broken_endpoints = Notification_Webhooks.objects.filter(
-        status=Notification_Webhooks.STATUS_INACTIVE_TMP,
+        status=Notification_Webhooks.Status.STATUS_INACTIVE_TMP,
         last_error__lt=get_current_datetime() - timedelta(minutes=5),
     )
     for endpoint in broken_endpoints:
@@ -419,7 +419,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
     for endpoint in endpoints:
 
         error = None
-        if endpoint.status not in [Notification_Webhooks.STATUS_ACTIVE, Notification_Webhooks.STATUS_ACTIVE_TMP]:
+        if endpoint.status not in [Notification_Webhooks.Status.STATUS_ACTIVE, Notification_Webhooks.Status.STATUS_ACTIVE_TMP]:
             logger.info(f"URL for Webhook '{endpoint.name}' is not active: {endpoint.get_status_display()} ({endpoint.status})")
             continue
 
@@ -457,21 +457,21 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
 
             # If endpoint is unstable for more then one day, it needs to be deactivated
             if endpoint.first_error is not None and (now - endpoint.first_error).total_seconds() > 60 * 60 * 24:
-                endpoint.status = Notification_Webhooks.STATUS_INACTIVE_PERMANENT
+                endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
 
             else:
                 # We need to monitor when outage started
-                if endpoint.status == Notification_Webhooks.STATUS_ACTIVE:
+                if endpoint.status == Notification_Webhooks.Status.STATUS_ACTIVE:
                     endpoint.first_error = now
 
-                endpoint.status = Notification_Webhooks.STATUS_INACTIVE_TMP
+                endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_TMP
 
                 # In case of failure within one day, endpoint can be deactivated temporally only for one minute
                 webhook_reactivation.apply_async(kwargs={"endpoint_id": endpoint.pk}, countdown=60)
 
         # There is no reason to keep endpoint active if it is returning 4xx errors
         else:
-            endpoint.status = Notification_Webhooks.STATUS_INACTIVE_PERMANENT
+            endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
             endpoint.first_error = now
 
         endpoint.last_error = now
