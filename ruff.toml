@@ -65,6 +65,7 @@ select = [
    "PD",
    "PGH",
    "PLE",
+   "PLW15",
    "TRY003",
    "TRY004",
    "TRY2",

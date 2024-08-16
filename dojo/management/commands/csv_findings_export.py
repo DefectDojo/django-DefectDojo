@@ -26,7 +26,7 @@ class Command(BaseCommand):
         findings = Finding.objects.filter(verified=True,
                                           active=True).select_related(
             "test__engagement__product")
-        writer = csv.writer(open(file_path, "w"))
+        writer = csv.writer(open(file_path, "w", encoding="utf-8"))
 
         headers = [
             "product_name",
