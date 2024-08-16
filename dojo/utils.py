@@ -1966,6 +1966,8 @@ def sla_compute_and_notify(*args, **kwargs):
                 total_count += 1
                 sla_age = finding.sla_days_remaining()
 
+                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
+                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
                 severity, enforce = finding.get_sla_period()
                 if not enforce:
                     logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
