@@ -28,12 +28,12 @@ class AsffParser:
 
     def get_item_resource_arns(self, item):
         resource_arns = []
-        resource_ids = item.get("Resources")
+        resource_ids = getattr(item, "Resources", [])
         for resource in resource_ids:
             resource_id = resource.get("Id")
             if resource_id:
                 resource_arns.append(resource_id)
-            return resource_arns
+        return resource_arns
 
     def get_findings(self, file, test):
         data = json.load(file)
