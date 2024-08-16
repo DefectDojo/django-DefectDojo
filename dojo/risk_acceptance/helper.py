@@ -14,7 +14,8 @@ from retry import retry
 from dojo.celery import app
 import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
-from dojo.models import Finding, Risk_Acceptance, System_Settings
+from dojo.models import Finding, Risk_Acceptance, System_Settings, PermissionKey, Dojo_User
+from dojo.user import queries as user_queries
 from dojo.transfer_findings import helper as hp_transfer_finding
 from dojo.risk_acceptance.notification import Notification
 from dojo.utils import get_full_url, get_system_setting, get_remote_json_config
@@ -125,6 +126,7 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
 
 
 def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
+    permission_keys = []
     for finding in findings:
         add_severity_to_risk_acceptance(risk_pending, finding.severity)
         if not finding.duplicate:
@@ -133,8 +135,36 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             finding.save(dedupe_option=False)
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
-    Notification.risk_acceptance_request(risk_pending)
+    if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:
+        for user_name in eval(risk_pending.accepted_by):
+            user = Dojo_User.objects.get(username=user_name)
+            token = generate_permision_key(
+                user=user,
+                risk_acceptance=risk_pending)
+
+            url = "/".join([
+                settings.HOST_ACCEPTANCE_RISK_FOR_EMAIL,
+                str(risk_pending.id),
+                token
+                ])
+            
+            permission_keys.append(
+                {"username": user.username, "url": url})
+
+    Notification.risk_acceptance_request(
+        risk_pending=risk_pending,
+        permission_keys=permission_keys,
+        enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
     post_jira_comments(risk_pending, findings, accepted_message_creator)
+
+
+def generate_permision_key(risk_acceptance, user, transfer_finding=None):
+    permission_key = PermissionKey.create_token(
+        lifetime=settings.LIFETIME_MINUTE_PERMISSION_KEY,
+        user=user,
+        risk_acceptance=risk_acceptance,
+        transfer_finding=transfer_finding)
+    return permission_key.token
 
 
 def add_severity_to_risk_acceptance(risk_acceptance: Risk_Acceptance, severity: str):

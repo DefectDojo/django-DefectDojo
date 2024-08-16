@@ -28,6 +28,7 @@
 			{% endfor %}
 			<br/>
 		{%endblock%}
+	
 	{% block event %}
 		<br/>
 		<br/>
@@ -36,4 +37,19 @@
 		<center><a href="{{event_url}}" class="proton-button" target="_blank">Go Risk Acceptance</a></center>
 		{% endblocktranslate %}
 	{% endblock%}
+
+	{%block acceptance_for_url%}
+		<br/>
+		<br/>
+		{% if enable_acceptance_risk_for_email and permission_keys %}
+			If for some reason you cannot login to vultacker you have the option to accept it directly.
+			clicking on the following link will automatically accept all findings. use this functionality responsibly.
+				{% for permission_key in permission_keys %}
+					{% if permission_key.username == user.username%}
+					<a href="{{permission_key.url}}" >Accept all risks</a>
+					{% endif %}
+				{% endfor %}
+		{% endif %}
+	{%endblock%}
+
 {%endblock%}

@@ -24,7 +24,7 @@ class Notification:
             description=description,
             recipients=[transfer_finding.accepted_by.get_username()],
             icon="check-circle",
-            color_icon="#096C11",
+            color_icon="#b97a0c",
             owner=transfer_finding.owner,
             url=reverse("view_transfer_finding", args=(pid,)))
 
@@ -41,7 +41,7 @@ class Notification:
             description=f"Acceptance request for <b>{transfer_finding.title}</b> for the findings:",
             recipients=[transfer_finding.accepted_by.get_username()],
             icon="check-circle",
-            color_icon="#096C11",
+            color_icon="#1B30DE",
             owner=transfer_finding.owner,
             url=reverse("view_transfer_finding", args=(pid,)))
 
@@ -60,7 +60,7 @@ class Notification:
             description=f"Changes <b>{transfer_finding.title}</b> for the findings",
             recipients=[transfer_finding.owner.get_username()],
             icon="check-circle",
-            color_icon="#b97a0c",
+            color_icon="#096C11",
             owner=transfer_finding.owner,
             url=reverse("view_transfer_finding", args=(pid,)))
     
