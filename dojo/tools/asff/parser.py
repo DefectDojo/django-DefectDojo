@@ -34,7 +34,6 @@ class AsffParser:
                     resource_id = resource_block.get("Id")
                     if resource_id:
                         resource_arns.append(resource_id)
-
         return resource_arns
 
     def get_findings(self, file, test):
