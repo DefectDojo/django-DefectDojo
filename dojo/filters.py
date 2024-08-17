@@ -1830,7 +1830,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         if self.pid is not None:
             del self.form.fields["test__engagement__product"]
             del self.form.fields["test__engagement__product__prod_type"]
-            # TODO add authorized check to be sure
+            # TODO: add authorized check to be sure
             self.form.fields["test__engagement"].queryset = Engagement.objects.filter(
                 product_id=self.pid,
             ).all()

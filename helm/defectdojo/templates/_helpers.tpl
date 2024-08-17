@@ -168,5 +168,5 @@ Create chart name and version as used by the chart label.
   {{- toYaml .Values.extraEnv | nindent 8 }}
   {{- end }}
   resources:
-    {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
+    {{- toYaml .Values.dbMigrationChecker.resources | nindent 10 }}
 {{- end -}}

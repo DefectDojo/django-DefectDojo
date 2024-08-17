@@ -1,4 +1,5 @@
 import re
+from itertools import starmap
 from typing import Any, Optional, Tuple, Union
 
 import cvss.parser
@@ -215,7 +216,7 @@ class BaseEngineParser:
         if addendum:
             if finding.description:
                 finding.description += "\n\n"
-            finding.description += "\n\n".join([self.format_additional_description(k, v) for k, v in addendum.items()])
+            finding.description += "\n\n".join(list(starmap(self.format_additional_description, addendum.items())))
 
     def parse_notes(self, finding: Finding, value: str) -> None:
         self.append_description(finding, {"Notes": value})

@@ -48,7 +48,7 @@ social-auth-core==4.5.4
 gitpython==3.1.43
 debugpy==1.8.5
 python-gitlab==4.9.0
-cpe==1.2.1
+cpe==1.3.0
 packageurl-python==0.15.6
 django-crum==0.7.9
 JSON-log-formatter==1.0
@@ -70,7 +70,7 @@ django-ratelimit==4.1.0
 argon2-cffi==23.1.0
 blackduck==1.1.3
 pycurl==7.45.3  # Required for Celery Broker AWS (SQS) support
-boto3==1.34.158  # Required for Celery Broker AWS (SQS) support
+boto3==1.34.162  # Required for Celery Broker AWS (SQS) support
 netaddr==1.3.0
 vulners==2.2.0
 fontawesomefree==6.6.0

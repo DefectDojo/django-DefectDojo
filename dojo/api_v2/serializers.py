@@ -1247,7 +1247,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
                 )
             )
         ) or (
-            self.context["request"].method in ["POST"] and endpoint.count() > 0
+            self.context["request"].method == "POST" and endpoint.count() > 0
         ):
             msg = (
                 "It appears as though an endpoint with this data already "
@@ -1734,7 +1734,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         # If we need to push to JIRA, an extra save call is needed.
         # Also if we need to update the mitigation date of the finding.
-        # TODO try to combine create and save, but for now I'm just fixing a
+        # TODO: try to combine create and save, but for now I'm just fixing a
         # bug and don't want to change to much
         if push_to_jira:
             instance.save(push_to_jira=push_to_jira)
@@ -1871,7 +1871,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
 
         # If we need to push to JIRA, an extra save call is needed.
-        # TODO try to combine create and save, but for now I'm just fixing a
+        # TODO: try to combine create and save, but for now I'm just fixing a
         # bug and don't want to change to much
         if push_to_jira or new_finding:
             new_finding.save(push_to_jira=push_to_jira)
@@ -2046,7 +2046,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_findings_count(self, obj) -> int:
         return obj.findings_count
 
-    # TODO, maybe extend_schema_field is needed here?
+    # TODO: maybe extend_schema_field is needed here?
     def get_findings_list(self, obj) -> List[int]:
         return obj.open_findings_list
 
@@ -2069,7 +2069,7 @@ class ImportScanSerializer(serializers.Serializer):
         help_text="Override the verified setting from the tool.",
     )
     scan_type = serializers.ChoiceField(choices=get_choices_sorted())
-    # TODO why do we allow only existing endpoints?
+    # TODO: why do we allow only existing endpoints?
     endpoint_to_add = serializers.PrimaryKeyRelatedField(
         queryset=Endpoint.objects.all(),
         required=False,
