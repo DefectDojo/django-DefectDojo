@@ -15,25 +15,25 @@ from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def dummy_product(self, *args, **kwargs):
-    with open("unittests/scans/api_sonarqube/product.json") as json_file:
+    with open("unittests/scans/api_sonarqube/product.json", encoding="utf-8") as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_issues(self, *args, **kwargs):
-    with open("unittests/scans/api_sonarqube/issues.json") as json_file:
+    with open("unittests/scans/api_sonarqube/issues.json", encoding="utf-8") as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_rule(self, *args, **kwargs):
-    with open("unittests/scans/api_sonarqube/rule.json") as json_file:
+    with open("unittests/scans/api_sonarqube/rule.json", encoding="utf-8") as json_file:
         data = json.load(json_file)
         return data
 
 
 def dummy_hotspot_rule(self, *args, **kwargs):
-    with open(get_unit_tests_path() + "/scans/api_sonarqube/hotspots/rule.json") as json_file:
+    with open(get_unit_tests_path() + "/scans/api_sonarqube/hotspots/rule.json", encoding="utf-8") as json_file:
         data = json.load(json_file)
         return data
 

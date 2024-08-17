@@ -9,14 +9,14 @@ from unittests.dojo_test_case import DojoTestCase
 
 class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
     def test_parse_file_with_no_vuln(self):
-        testfile = open("unittests/scans/jfrog_xray_api_summary_artifact/no_vuln.json")
+        testfile = open("unittests/scans/jfrog_xray_api_summary_artifact/no_vuln.json", encoding="utf-8")
         parser = JFrogXrayApiSummaryArtifactParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln(self):
-        testfile = open("unittests/scans/jfrog_xray_api_summary_artifact/one_vuln.json")
+        testfile = open("unittests/scans/jfrog_xray_api_summary_artifact/one_vuln.json", encoding="utf-8")
         parser = JFrogXrayApiSummaryArtifactParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -52,7 +52,7 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
 
     def test_parse_file_with_many_vulns(self):
         testfile = open(
-            "unittests/scans/jfrog_xray_api_summary_artifact/many_vulns.json",
+            "unittests/scans/jfrog_xray_api_summary_artifact/many_vulns.json", encoding="utf-8",
         )
         parser = JFrogXrayApiSummaryArtifactParser()
         findings = parser.get_findings(testfile, Test())
@@ -64,7 +64,7 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
 
     def test_parse_file_with_malformed_cvssv3_score(self):
         testfile = open(
-            "unittests/scans/jfrog_xray_api_summary_artifact/malformed_cvssv3.json",
+            "unittests/scans/jfrog_xray_api_summary_artifact/malformed_cvssv3.json", encoding="utf-8",
         )
         parser = JFrogXrayApiSummaryArtifactParser()
         findings = parser.get_findings(testfile, Test())
