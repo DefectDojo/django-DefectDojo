@@ -1,6 +1,7 @@
 import base64
 import re
 from datetime import datetime
+from urllib.parse import urlparse
 
 from defusedxml import ElementTree
 
@@ -352,22 +353,22 @@ def get_unique_items(
     findings = {}
 
     for unique_id, finding in get_unique_vulnerabilities(
-        vulnerabilities, test, False, is_app_report,
+        vulnerabilities, test, is_info=False, is_app_report=is_app_report,
     ).items():
         qid = int(finding.vuln_id_from_tool)
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[unique_id] = get_glossary_item(
-                glossary[index], finding, enable_weakness=enable_weakness,
+                glossary[index], finding, is_info=False, enable_weakness=enable_weakness,
             )
     for unique_id, finding in get_unique_vulnerabilities(
-        info_gathered, test, True, is_app_report,
+        info_gathered, test, is_info=True, is_app_report=is_app_report,
     ).items():
         qid = int(finding.vuln_id_from_tool)
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness=enable_weakness,
+                glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
@@ -391,20 +392,20 @@ def get_items(
     findings = {}
 
     for qid, finding in get_vulnerabilities(
-        vulnerabilities, test, False, is_app_report,
+        vulnerabilities, test, is_info=False, is_app_report=is_app_report,
     ).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             findings[qid] = get_glossary_item(
-                glossary[index], finding, enable_weakness=enable_weakness,
+                glossary[index], finding, is_info=False, enable_weakness=enable_weakness,
             )
     for qid, finding in get_vulnerabilities(
-        info_gathered, test, True, is_app_report,
+        info_gathered, test, is_info=True, is_app_report=is_app_report,
     ).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
             finding = get_glossary_item(
-                glossary[index], finding, True, enable_weakness=enable_weakness,
+                glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)

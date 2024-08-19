@@ -8,7 +8,7 @@ from unittests.dojo_test_case import DojoTestCase
 class TestBurpParser(DojoTestCase):
 
     def test_burp_with_one_vuln_has_one_finding(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp/one_finding.xml")) as test_file:
+        with open(path.join(path.dirname(__file__), "../scans/burp/one_finding.xml"), encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
@@ -20,7 +20,7 @@ class TestBurpParser(DojoTestCase):
             self.assertEqual(3, len(findings[0].unsaved_endpoints))
 
     def test_burp_with_multiple_vulns_has_multiple_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp/seven_findings.xml")) as test_file:
+        with open(path.join(path.dirname(__file__), "../scans/burp/seven_findings.xml"), encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
@@ -34,7 +34,7 @@ class TestBurpParser(DojoTestCase):
                 self.assertEqual("Frameable response (potential Clickjacking)", finding.title)
 
     def test_burp_with_one_vuln_with_blank_response(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp/one_finding_with_blank_response.xml")) as test_file:
+        with open(path.join(path.dirname(__file__), "../scans/burp/one_finding_with_blank_response.xml"), encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
@@ -50,7 +50,7 @@ class TestBurpParser(DojoTestCase):
             self.assertEqual("High", findings[0].severity)
 
     def test_burp_with_one_vuln_with_cwe(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp/one_finding_with_cwe.xml")) as test_file:
+        with open(path.join(path.dirname(__file__), "../scans/burp/one_finding_with_cwe.xml"), encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
@@ -66,7 +66,7 @@ class TestBurpParser(DojoTestCase):
             self.assertEqual("Info", findings[0].severity)
 
     def test_burp_issue4399(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp/issue4399.xml")) as test_file:
+        with open(path.join(path.dirname(__file__), "../scans/burp/issue4399.xml"), encoding="utf-8") as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:

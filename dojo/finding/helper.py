@@ -55,7 +55,7 @@ def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwar
     logger.debug("%i: changed status fields pre_save: %s", instance.id or 0, changed_fields)
 
     for field, (old, new) in changed_fields.items():
-        logger.debug("%i: %s changed from %s to %s" % (instance.id or 0, field, old, new))
+        logger.debug("%i: %s changed from %s to %s", instance.id or 0, field, old, new)
         user = None
         if get_current_user() and get_current_user().is_authenticated:
             user = get_current_user()
@@ -248,8 +248,7 @@ def get_group_by_group_name(finding, finding_group_by_option):
         group_name = finding.component_name
     elif finding_group_by_option == "component_name+component_version":
         if finding.component_name or finding.component_version:
-            group_name = "{}:{}".format((finding.component_name if finding.component_name else "None"),
-                (finding.component_version if finding.component_version else "None"))
+            group_name = "{}:{}".format(finding.component_name or "None", finding.component_version or "None")
     elif finding_group_by_option == "file_path":
         if finding.file_path:
             group_name = f"Filepath {finding.file_path}"
