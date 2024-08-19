@@ -51,8 +51,8 @@ class TestCheckmarxOneParser(DojoTestCase):
                 self.assertEqual("High", finding_test.severity)
                 self.assertEqual("/qe/testharness/Dockerfile", finding_test.file_path)
 
-    def test_checkmarx_one_cwe(self):
-        with open("unittests/scans/checkmarx_one/many_findings_cwe.json") as testfile:
+    def test_checkmarx_one_sca_10770(self):
+        with open("unittests/scans/checkmarx_one/checkmarx_one_sca_10770.json") as testfile:
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(8, len(findings))
