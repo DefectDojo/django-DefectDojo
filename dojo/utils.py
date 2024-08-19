@@ -1965,6 +1965,14 @@ def sla_compute_and_notify(*args, **kwargs):
             for finding in findings:
                 total_count += 1
                 sla_age = finding.sla_days_remaining()
+
+                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
+                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
+                severity, enforce = finding.get_sla_period()
+                if not enforce:
+                    logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
+                    continue
+
                 # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
                 if sla_age is None:
                     sla_age = 0
