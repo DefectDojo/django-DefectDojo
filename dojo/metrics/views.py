@@ -829,7 +829,7 @@ def view_engineer(request, eid):
         detail = [team, name, severity, description, life, status, find.reporter]
         details.append(detail)
 
-    details = sorted(details, key=lambda x: x[2])
+    details = sorted(details, key=itemgetter(2))
 
     add_breadcrumb(title=f"{user.get_full_name()} Metrics", top_level=False, request=request)
 

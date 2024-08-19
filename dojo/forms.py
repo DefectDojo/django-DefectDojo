@@ -580,10 +580,10 @@ class ImportScanForm(forms.Form):
         file = cleaned_data.get("file")
         tool_type = requires_tool_type(scan_type)
         if requires_file(scan_type) and not file:
-            msg = _(f"Uploading a Report File is required for {scan_type}")
+            msg = _("Uploading a Report File is required for %s") % scan_type
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
             raise forms.ValidationError(msg)
         if tool_type:
             api_scan_configuration = cleaned_data.get("api_scan_configuration")
@@ -695,7 +695,7 @@ class ReImportScanForm(forms.Form):
             msg = _("Uploading a report file is required for re-uploading findings.")
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
             raise forms.ValidationError(msg)
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:

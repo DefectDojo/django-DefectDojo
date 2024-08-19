@@ -7,7 +7,7 @@ from dojo.tools.bearer_cli.parser import BearerCLIParser
 class TestBearerParser(TestCase):
 
     def test_bearer_parser_with_one_vuln_has_one_findings(self):
-        testfile = open("unittests/scans/bearer_cli/bearer_cli_one_vul.json")
+        testfile = open("unittests/scans/bearer_cli/bearer_cli_one_vul.json", encoding="utf-8")
         parser = BearerCLIParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -21,7 +21,7 @@ class TestBearerParser(TestCase):
         self.assertEqual(581, findings[0].line)
 
     def test_bearer_parser_with_many_vuln_has_many_findings(self):
-        testfile = open("unittests/scans/bearer_cli/bearer_cli_many_vul.json")
+        testfile = open("unittests/scans/bearer_cli/bearer_cli_many_vul.json", encoding="utf-8")
         parser = BearerCLIParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
