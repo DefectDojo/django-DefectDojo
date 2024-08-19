@@ -48,6 +48,24 @@ spec:
           path: {{ .hostPath }}
           {{- end }}
       {{- end }}
+      initContainers:
+      - name: wait-for-db
+        command:
+        - '/bin/bash'
+        - '-c'
+        - '/wait-for-it.sh ${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432} -t 30 -s -- /bin/echo Database is up'
+        image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ $fullName }}
+        - secretRef:
+            name: {{ $fullName }}
+            optional: true
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
