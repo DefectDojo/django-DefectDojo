@@ -49,7 +49,7 @@ class BearerCLIParser:
                     sast_source_file_path=bearerfinding["filename"],
                     vuln_id_from_tool=bearerfinding["id"],
                 )
-                finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("bearer")]
+                finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("bearer_cli")]
                 items.append(finding)
 
         return items
