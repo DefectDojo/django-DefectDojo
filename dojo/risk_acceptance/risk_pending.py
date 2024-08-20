@@ -485,13 +485,14 @@ def validate_list_findings(conf_risk, type, finding, eng):
 
 @app.task
 def expiration_handler(*args, **kwargs):
-    permission_keys = PermissionKey.objects.filter(
-        expiration__date__lte=timezone.now())
+    if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:
+        permission_keys = PermissionKey.objects.filter(
+            expiration__date__lte=timezone.now())
 
-    logger.info(
-        'expiring %i permission_key that are past expiration date',
-        len(permission_keys))
+        logger.info(
+            'expiring %i permission_key that are past expiration date',
+            len(permission_keys))
 
-    for permission_key in permission_keys:
-        permission_key.expire()
-        permission_key.save()
+        for permission_key in permission_keys:
+            permission_key.expire()
+            permission_key.save()
