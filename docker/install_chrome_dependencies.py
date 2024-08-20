@@ -5,12 +5,13 @@ https://github.com/microsoft/playwright/blob/main/utils/linux-browser-dependenci
 """
 import logging
 import subprocess
+from contextlib import suppress
 
 logger = logging.getLogger(__name__)
 
 
 def find_packages(library_name):
-    stdout = run_command(["apt-file", "search", library_name])
+    stdout, _code = run_command(["apt-file", "search", library_name])
     if not stdout.strip():
         return []
     libs = [line.split(":")[0] for line in stdout.strip().split("\n")]
@@ -18,23 +19,14 @@ def find_packages(library_name):
 
 
 def run_command(cmd, cwd=None, env=None):
-    result = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True, check=False)
-    return result.stdout
+    result = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True, check=True)
+    return result.stdout, result.returncode
 
 
 def ldd(file_path):
-    stdout = run_command(["ldd", file_path])
-    # For simplicity, I'm assuming if we get an error, the code is non-zero.
-    try:
-        result = subprocess.run(
-            ["ldd", file_path], capture_output=True, text=True, check=False,
-        )
-        stdout = result.stdout
-        code = result.returncode
-    except subprocess.CalledProcessError:
-        stdout = ""
-        code = 1
-    return stdout, code
+    with suppress(subprocess.CalledProcessError):
+        return run_command(["ldd", file_path])
+    return "", 1
 
 
 raw_deps = ldd("/opt/chrome/chrome")
