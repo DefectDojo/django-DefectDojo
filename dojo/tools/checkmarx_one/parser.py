@@ -29,7 +29,7 @@ class CheckmarxOneParser:
 
     def _parse_cwe(self, cwe):
         if isinstance(cwe, str):
-            cwe_num = re.findall(r'\d+', cwe)
+            cwe_num = re.findall(r"\d+", cwe)
             if cwe_num:
                 return cwe_num[0]
             else:
