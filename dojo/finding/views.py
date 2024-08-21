@@ -2862,9 +2862,8 @@ def finding_bulk_update_all(request, pid=None):
                     messages.add_message(
                         request,
                         messages.WARNING,
-                        ("Skipped simple risk acceptance of %i findings, "
-                         "simple risk acceptance is disabled on the related products")
-                        % skipped_risk_accept_count,
+                        (f"Skipped simple risk acceptance of {skipped_risk_accept_count} findings, "
+                         "simple risk acceptance is disabled on the related products"),
                         extra_tags="alert-warning",
                     )
 
@@ -2963,8 +2962,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if grouped:
                         add_success_message_to_response(
-                            "Grouped %d findings into %d (%d newly created) finding groups"
-                            % (grouped, len(finding_groups), groups_created),
+                            f"Grouped {grouped} findings into {len(finding_groups)} ({groups_created} newly created) finding groups",
                         )
 
                     if skipped:
@@ -3042,15 +3040,10 @@ def finding_bulk_update_all(request, pid=None):
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():
-                    add_error_message_to_response(
-                        "%i finding groups could not be pushed to JIRA: %s"
-                        % (error_count, error_message),
-                    )
+                    add_error_message_to_response("{error_count} finding groups could not be pushed to JIRA: {error_message}")
 
                 if success_count > 0:
-                    add_success_message_to_response(
-                        "%i finding groups pushed to JIRA successfully" % success_count,
-                    )
+                    add_success_message_to_response(f"{success_count} finding groups pushed to JIRA successfully")
                     groups_pushed_to_jira = True
 
                 # refresh from db
@@ -3102,15 +3095,10 @@ def finding_bulk_update_all(request, pid=None):
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():
-                    add_error_message_to_response(
-                        "%i findings could not be pushed to JIRA: %s"
-                        % (error_count, error_message),
-                    )
+                    add_error_message_to_response(f"{error_count} findings could not be pushed to JIRA: {error_message}")
 
                 if success_count > 0:
-                    add_success_message_to_response(
-                        "%i findings pushed to JIRA successfully" % success_count,
-                    )
+                    add_success_message_to_response(f"{success_count} findings pushed to JIRA successfully")
 
                 if updated_find_count > 0:
                     messages.add_message(
