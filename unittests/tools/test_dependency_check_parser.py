@@ -22,13 +22,13 @@ class TestFile:
 
 class TestDependencyCheckParser(DojoTestCase):
     def test_parse_empty_file(self):
-        with open("unittests/scans/dependency_check/single_dependency_with_related_no_vulnerability.xml") as testfile:
+        with open("unittests/scans/dependency_check/single_dependency_with_related_no_vulnerability.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_single_vulnerability_has_single_finding(self):
-        with open("unittests/scans/dependency_check/single_vuln.xml") as testfile:
+        with open("unittests/scans/dependency_check/single_vuln.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             items = findings
@@ -46,14 +46,14 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[i].date, datetime(2016, 11, 5, 14, 52, 15, 748000, tzinfo=tzoffset(None, -14400)))
 
     def test_parse_file_with_single_dependency_with_related_no_vulnerability(self):
-        with open("unittests/scans/dependency_check/single_dependency_with_related_no_vulnerability.xml") as testfile:
+        with open("unittests/scans/dependency_check/single_dependency_with_related_no_vulnerability.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             items = findings
             self.assertEqual(0, len(items))
 
     def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
-        with open("unittests/scans/dependency_check/multiple_vulnerabilities_has_multiple_findings.xml") as testfile:
+        with open("unittests/scans/dependency_check/multiple_vulnerabilities_has_multiple_findings.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             items = findings
@@ -255,7 +255,7 @@ class TestDependencyCheckParser(DojoTestCase):
 
     def test_parse_java_6_5_3(self):
         """Test with version 6.5.3"""
-        with open(path.join(path.dirname(__file__), "../scans/dependency_check/version-6.5.3.xml")) as test_file:
+        with open(path.join(path.dirname(__file__), "../scans/dependency_check/version-6.5.3.xml"), encoding="utf-8") as test_file:
             parser = DependencyCheckParser()
             findings = parser.get_findings(test_file, Test())
             items = findings
@@ -274,7 +274,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[i].date, datetime(2022, 1, 15, 14, 31, 13, 42600, tzinfo=timezone.utc))
 
     def test_parse_file_pr6439(self):
-        with open("unittests/scans/dependency_check/PR6439.xml") as testfile:
+        with open("unittests/scans/dependency_check/PR6439.xml", encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
             findings = parser.get_findings(testfile, Test())
             items = findings

@@ -89,6 +89,13 @@ securityContext:
 
 dbMigrationChecker:
   enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
 
 tests:
   unitTests:
@@ -311,9 +318,7 @@ django:
 
 initializer:
   run: true
-  jobAnnotations: {
-    helm.sh/hook: "post-install,post-upgrade"
-  }
+  jobAnnotations: {}
   annotations: {}
   labels: {}
   keepSeconds: 60

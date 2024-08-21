@@ -65,6 +65,7 @@ select = [
    "PD",
    "PGH",
    "PLE",
+   "PLW15",
    "TRY003",
    "TRY004",
    "TRY2",
@@ -78,7 +79,7 @@ select = [
    "RUF001","RUF002", "RUF003", "RUF005",
    "RUF013",
    "RUF019",
-   "RUF025",
+   "RUF021",
 ]
 ignore = ["E501", "E722"]
 

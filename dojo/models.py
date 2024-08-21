@@ -1476,7 +1476,7 @@ class Engagement(models.Model):
         ]
 
     def __str__(self):
-        return "Engagement %i: %s (%s)" % (self.id if id else 0, self.name or "",
+        return "Engagement {}: {} ({})".format(self.id if id else 0, self.name or "",
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
 
@@ -2244,7 +2244,7 @@ class Test_Import_Finding_Action(TimeStampedModel):
         ordering = ("test_import", "action", "finding")
 
     def __str__(self):
-        return "%i: %s" % (self.finding.id, self.action)
+        return f"{self.finding.id}: {self.action}"
 
 
 class Finding(models.Model):

@@ -1543,7 +1543,7 @@ class PercentageRangeFilter(RangeFilter):
 
 class FindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr="icontains")
-    date = DateFromToRangeFilter(field_name="date", label="Date Discovered")
+    date = DateRangeFilter(field_name="date", label="Date Discovered")
     on = DateFilter(field_name="date", lookup_expr="exact", label="On")
     before = DateFilter(field_name="date", lookup_expr="lt", label="Before")
     after = DateFilter(field_name="date", lookup_expr="gt", label="After")
@@ -2874,6 +2874,7 @@ class EndpointReportFilter(DojoFilter):
 class ReportFindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr="icontains", label="Name")
     date = DateFromToRangeFilter(field_name="date", label="Date Discovered")
+    date_recent = DateRangeFilter(field_name="date", label="Relative Date")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()

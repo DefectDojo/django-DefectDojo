@@ -7,13 +7,13 @@ from dojo.tools.sysdig_reports.parser import SysdigReportsParser
 class TestSysdigParser(TestCase):
 
     def test_sysdig_parser_with_no_vuln_has_no_findings(self):
-        with open("unittests/scans/sysdig_reports/sysdig_reports_zero_vul.csv") as testfile:
+        with open("unittests/scans/sysdig_reports/sysdig_reports_zero_vul.csv", encoding="utf-8") as testfile:
             parser = SysdigReportsParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_sysdig_parser_with_one_criticle_vuln_has_one_findings(self):
-        with open("unittests/scans/sysdig_reports/sysdig_reports_one_vul.csv") as testfile:
+        with open("unittests/scans/sysdig_reports/sysdig_reports_one_vul.csv", encoding="utf-8") as testfile:
             parser = SysdigReportsParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -25,7 +25,7 @@ class TestSysdigParser(TestCase):
             self.assertEqual("CVE-2018-19360", findings[0].unsaved_vulnerability_ids[0])
 
     def test_sysdig_parser_with_many_vuln_has_many_findings(self):
-        with open("unittests/scans/sysdig_reports/sysdig_reports_many_vul.csv") as testfile:
+        with open("unittests/scans/sysdig_reports/sysdig_reports_many_vul.csv", encoding="utf-8") as testfile:
             parser = SysdigReportsParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -35,7 +35,7 @@ class TestSysdigParser(TestCase):
 
     def test_sysdig_parser_missing_cve_field_id_from_csv_file(self):
         with self.assertRaises(ValueError) as context:
-            with open("unittests/scans/sysdig_reports/sysdig_reports_missing_cve_field.csv") as testfile:
+            with open("unittests/scans/sysdig_reports/sysdig_reports_missing_cve_field.csv", encoding="utf-8") as testfile:
                 parser = SysdigReportsParser()
                 findings = parser.get_findings(testfile, Test())
                 for finding in findings:
@@ -47,7 +47,7 @@ class TestSysdigParser(TestCase):
 
     def test_sysdig_parser_missing_cve_field_not_starting_with_cve(self):
         with self.assertRaises(ValueError) as context:
-            with open("unittests/scans/sysdig_reports/sysdig_reports_not_starting_with_cve.csv") as testfile:
+            with open("unittests/scans/sysdig_reports/sysdig_reports_not_starting_with_cve.csv", encoding="utf-8") as testfile:
                 parser = SysdigReportsParser()
                 findings = parser.get_findings(testfile, Test())
                 for finding in findings:
@@ -58,7 +58,7 @@ class TestSysdigParser(TestCase):
         )
 
     def test_sysdig_parser_json_with_many_findings(self):
-        with open("unittests/scans/sysdig_reports/sysdig.json") as testfile:
+        with open("unittests/scans/sysdig_reports/sysdig.json", encoding="utf-8") as testfile:
             parser = SysdigReportsParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

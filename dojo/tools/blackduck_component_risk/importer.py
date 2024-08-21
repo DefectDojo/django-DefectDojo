@@ -52,15 +52,15 @@ class BlackduckCRImporter:
                     file_name = full_file_name.split("/")[-1]
                     # Look for the component and security CSVs.
                     if "component" in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                        with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                             components = self.__get_components(f)
                             c_file = True
                     elif "security" in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                        with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                             security_issues = self.__get_security_risks(f)
                             s_file = True
                     elif "source" in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                        with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                             source = self.__get_source(f)
                 # Raise exception to error-out if the zip is missing either of
                 # these files.

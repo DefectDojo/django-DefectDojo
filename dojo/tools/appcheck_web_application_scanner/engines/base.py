@@ -198,8 +198,8 @@ class BaseEngineParser:
             return None, None
         cpe_obj = CPE(cpe_str)
         return (
-            cpe_obj.get_product() and cpe_obj.get_product()[0] or None,
-            cpe_obj.get_version() and cpe_obj.get_version()[0] or None,
+            (cpe_obj.get_product() and cpe_obj.get_product()[0]) or None,
+            (cpe_obj.get_version() and cpe_obj.get_version()[0]) or None,
         )
 
     def parse_components(self, finding: Finding, value: [str]) -> None:
