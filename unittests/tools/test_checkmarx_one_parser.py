@@ -35,7 +35,7 @@ class TestCheckmarxOneParser(DojoTestCase):
             self.assertEqual(0, len(findings))
 
     def test_checkmarx_one_many_findings(self):
-        with open("unittests/scans/checkmarx_one/many_findings.json") as testfile:
+        with open("unittests/scans/checkmarx_one/many_findings.json", encoding="utf-8") as testfile:
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(6, len(findings))
@@ -52,7 +52,7 @@ class TestCheckmarxOneParser(DojoTestCase):
                 self.assertEqual("/qe/testharness/Dockerfile", finding_test.file_path)
 
     def test_checkmarx_one_sca_10770(self):
-        with open("unittests/scans/checkmarx_one/checkmarx_one_sca_10770.json") as testfile:
+        with open("unittests/scans/checkmarx_one/checkmarx_one_sca_10770.json", encoding="utf-8") as testfile:
             parser = CheckmarxOneParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(8, len(findings))
