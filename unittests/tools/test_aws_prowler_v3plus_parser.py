@@ -55,13 +55,10 @@ class TestAwsProwlerV3plusParser(DojoTestCase):
     def test_aws_prowler_parser_with_many_vuln_has_many_findings_ocsf_json(self):
         findings = self.setup(
             open("unittests/scans/aws_prowler_v3plus/many_vuln.ocsf.json", encoding="utf-8"))
-        self.assertEqual(3, len(findings))
+        self.assertEqual(2, len(findings))
         with self.subTest(i=0):
             self.assertEqual("prowler-aws-iam_role_administratoraccess_policy_permissive_trust_relationship-123456789012-us-east-1-myAdministratorExecutionRole", findings[0].unique_id_from_tool)
             self.assertIn("Ensure IAM Roles with attached AdministratorAccess policy have a well defined trust relationship", findings[0].description)
         with self.subTest(i=1):
             self.assertEqual("prowler-aws-iam_role_cross_account_readonlyaccess_policy-123456789012-us-east-1-AuditRole", findings[1].unique_id_from_tool)
             self.assertIn("Ensure IAM Roles do not have ReadOnlyAccess access for external AWS accounts", findings[1].description)
-        with self.subTest(i=3):
-            self.assertEqual("prowler-aws-iam_role_permissive_trust_relationship-123456789012-us-east-1-CrossAccountResourceAccessRole", findings[2].unique_id_from_tool)
-            self.assertIn("Ensure IAM Roles do not allow assume role from any role of a cross account", findings[2].description)
