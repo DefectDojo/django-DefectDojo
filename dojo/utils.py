@@ -1876,9 +1876,9 @@ def sla_compute_and_notify(*args, **kwargs):
             period = "day"
             if abs_sla_age > 1:
                 period = "days"
-            title += "SLA breached by %d %s! Overdue notice" % (abs_sla_age, period)
+            title += f"SLA breached by {abs_sla_age} {period}! Overdue notice"
         elif kind == "prebreach":
-            title += "SLA pre-breach warning - %d day(s) left" % (sla_age)
+            title += f"SLA pre-breach warning - {sla_age} day(s) left"
         elif kind == "breaching":
             title += "SLA is breaching today"
 
