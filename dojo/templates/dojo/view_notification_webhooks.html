@@ -12,9 +12,9 @@
                     <h3 class="has-filters">
                         Notification Webhook List
                         <div class="dropdown pull-right">
-                            <button id="show-filters" name="show filter" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            <button id="show-filters" name="show filter" aria-label="show filter" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                             {% if "dojo.add_notification_webhook"|has_configuration_permission:request %}
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" name="show filter"
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" name="show filter" aria-label="show filter"
                                   data-toggle="dropdown" aria-expanded="true">
                               <span class="fa-solid fa-screwdriver-wrench"></span>
                               <span class="caret"></span>
