@@ -11,7 +11,14 @@ class ThreatComposerParser:
     """
 
     PRIORITY_VALUES = ["Low", "Medium", "High"]
-    STRIDE_VALUES = {"S": "Spoofing", "T": "Tampering", "R": "Repudiation", "I": "Information Disclosure", "D": "Denial of Service", "E": "Elevation of Privilege"}
+    STRIDE_VALUES = {
+        "S": "Spoofing",
+        "T": "Tampering",
+        "R": "Repudiation",
+        "I": "Information Disclosure",
+        "D": "Denial of Service",
+        "E": "Elevation of Privilege",
+    }
 
     def get_scan_types(self):
         return ["ThreatComposer Scan"]
@@ -26,59 +33,63 @@ class ThreatComposerParser:
         data = json.load(file)
         findings = []
 
-        if "threats" in data:
-
-            if "assumptionLinks" in data:
-                assumptions = {assumption["id"]: assumption for assumption in data["assumptions"]}
-                assumption_mitigation_links = defaultdict(list)
-                assumption_threat_links = defaultdict(list)
-                for link in data["assumptionLinks"]:
-                    linked_id = link["linkedId"]
-                    assumption_id = link["assumptionId"]
-                    assumption_type = link["type"]
-                    if assumption_id in assumptions:
-                        if assumption_type == "Threat":
-                            assumption_threat_links[linked_id].append(assumptions[assumption_id])
-                        elif assumption_type == "Mitigation":
-                            assumption_mitigation_links[linked_id].append(assumptions[assumption_id])
-
-            if "mitigationLinks" in data:
-                mitigations = {mitigation["id"]: {"mitigation": mitigation, "assumptions": assumption_mitigation_links[mitigation["id"]]} for mitigation in data["mitigations"]}
-                mitigation_links = defaultdict(list)
-                for link in data["mitigationLinks"]:
-                    linked_id = link["linkedId"]
-                    mitigation_id = link["mitigationId"]
-                    if mitigation_id in mitigations:
-                        mitigation_links[linked_id].append(mitigations[mitigation_id])
-
-            for threat in data["threats"]:
-                if threat["threatAction"]:
-                    title = threat["threatAction"]
-                    severity, impact, comments = self.parse_threat_metadata(threat["metadata"])
-                    description = self.to_description_text(threat, comments, assumption_threat_links[threat["id"]])
-                    mitigation = self.to_mitigation_text(mitigation_links[threat["id"]])
-                    unique_id_from_tool = threat["id"]
-                    vuln_id_from_tool = threat["numericId"]
-                    tags = threat["tags"] if "tags" in threat else []
-
-                    finding = Finding(
-                        title=title,
-                        test=test,
-                        description=description,
-                        severity=severity,
-                        vuln_id_from_tool=vuln_id_from_tool,
-                        unique_id_from_tool=unique_id_from_tool,
-                        mitigation=mitigation,
-                        impact=impact,
-                        tags=tags,
-                        static_finding=False,
-                        dynamic_finding=False,
-                    )
-
-                    findings.append(finding)
-        else:
-            msg = "No threats found in the JSON file"
+        if "threats" not in data:
+            msg = "Invalid ThreatComposer data"
             raise ValueError(msg)
+
+        if "assumptionLinks" in data:
+            assumptions = {assumption["id"]: assumption for assumption in data["assumptions"]}
+            assumption_mitigation_links = defaultdict(list)
+            assumption_threat_links = defaultdict(list)
+            for link in data["assumptionLinks"]:
+                linked_id = link["linkedId"]
+                assumption_id = link["assumptionId"]
+                assumption_type = link["type"]
+                if assumption_id in assumptions:
+                    if assumption_type == "Threat":
+                        assumption_threat_links[linked_id].append(assumptions[assumption_id])
+                    elif assumption_type == "Mitigation":
+                        assumption_mitigation_links[linked_id].append(assumptions[assumption_id])
+
+        if "mitigationLinks" in data:
+            mitigations = {
+                mitigation["id"]: {
+                    "mitigation": mitigation,
+                    "assumptions": assumption_mitigation_links[mitigation["id"]],
+                }
+                for mitigation in data["mitigations"]
+            }
+            mitigation_links = defaultdict(list)
+            for link in data["mitigationLinks"]:
+                linked_id = link["linkedId"]
+                mitigation_id = link["mitigationId"]
+                if mitigation_id in mitigations:
+                    mitigation_links[linked_id].append(mitigations[mitigation_id])
+
+        for threat in data["threats"]:
+            if threat["threatAction"]:
+                title = threat["threatAction"]
+                severity, impact, comments = self.parse_threat_metadata(threat["metadata"])
+                description = self.to_description_text(threat, comments, assumption_threat_links[threat["id"]])
+                mitigation = self.to_mitigation_text(mitigation_links[threat["id"]])
+                unique_id_from_tool = threat["id"]
+                vuln_id_from_tool = threat["numericId"]
+                tags = threat["tags"] if "tags" in threat else []
+
+                finding = Finding(
+                    title=title,
+                    description=description,
+                    severity=severity,
+                    vuln_id_from_tool=vuln_id_from_tool,
+                    unique_id_from_tool=unique_id_from_tool,
+                    mitigation=mitigation,
+                    impact=impact,
+                    tags=tags,
+                    static_finding=False,
+                    dynamic_finding=False,
+                )
+
+                findings.append(finding)
 
         return findings
 
