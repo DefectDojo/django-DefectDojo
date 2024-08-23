@@ -108,7 +108,7 @@ class BaseTestCase(unittest.TestCase):
             # dd_driver_options.default_capabilities = desired
 
             dd_driver_service = Service(
-                executable_path=os.environ["CHROME_PATH"],
+                executable_path=os.environ["CHROMEDRIVER"],
             )
 
             dd_driver = webdriver.Chrome(
