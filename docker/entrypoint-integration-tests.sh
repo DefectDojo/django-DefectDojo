@@ -29,6 +29,9 @@ export CHROMEDRIVER
 CHROME_PATH=/opt/chrome/chrome
 export CHROME_PATH
 
+# TODO: REMOVE
+${CHROME_PATH} --version
+
 # Run available unittests with a simple setup
 # All available Integrationtest Scripts are activated below
 # If successsful, A successs message is printed and the script continues
