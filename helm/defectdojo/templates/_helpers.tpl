@@ -142,7 +142,7 @@ Create chart name and version as used by the chart label.
   imagePullPolicy: {{ .Values.imagePullPolicy }}
   {{- if .Values.securityContext.enabled }}
   securityContext:
-    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 4 }}
   {{- end }}
   envFrom:
   - configMapRef:
