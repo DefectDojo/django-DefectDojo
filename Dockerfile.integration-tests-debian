@@ -21,7 +21,7 @@ RUN \
   apt-get clean && \
   true
 
-RUN pip install --no-cache-dir selenium==4.9.0 requests
+RUN pip install --no-cache-dir selenium==4.23.0 requests
 
 # Install the latest Google Chrome stable release
 WORKDIR /opt/chrome
