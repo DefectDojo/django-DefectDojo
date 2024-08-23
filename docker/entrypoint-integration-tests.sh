@@ -30,7 +30,11 @@ CHROME_PATH=/opt/chrome/chrome
 export CHROME_PATH
 
 # TODO: REMOVE
+ls -lAh /opt/chrome
+ls -lAh /opt/chrome/chrome
+ls -lAh /usr/bin/chrome
 ${CHROME_PATH} --version
+/usr/bin/chrome --version
 
 # Run available unittests with a simple setup
 # All available Integrationtest Scripts are activated below
