@@ -95,7 +95,8 @@ class BaseTestCase(unittest.TestCase):
             prefs = {"download.default_directory": cls.export_path}
             dd_driver_options.add_experimental_option("prefs", prefs)
 
-            dd_driver_options.binary_location = os.environ["CHROME_PATH"]
+            # dd_driver_options.binary_location = os.environ["CHROME_PATH"]
+            dd_driver_options.binary_location = "/opt/chrome/chrome-linux64/chrome"
 
             # change path of chromedriver according to which directory you have chromedriver.
             logger.info(

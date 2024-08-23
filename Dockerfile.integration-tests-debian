@@ -33,14 +33,17 @@ RUN \
   unzip chrome-linux64.zip && \
   rm -rf chrome-linux64.zip && \
   chmod -R 0755 . && \
-  mv /opt/chrome/chrome-linux64/chrome /opt/chrome/chrome && \
-  ln -s /opt/chrome/chrome /usr/bin/chrome
+  ln -s /opt/chrome/chrome-linux64/chrome /opt/chrome/chrome
+  # mv /opt/chrome/chrome-linux64/chrome /usr/bin/google-chrome && \
+  # mv /opt/chrome/chrome-linux64/chrome /opt/chrome/chrome && \
+  # ln -s /opt/chrome/chrome /usr/bin/chrome
 
 # Install the dependencies for Google Chrome
 RUN apt-file update
 COPY docker/install_chrome_dependencies.py install_chrome_dependencies.py
 RUN \
   missing_chrome_deps=$(python install_chrome_dependencies.py) && \
+  echo "MISSING CHROME DEPS: ${missing_chrome_deps}" && \
   apt-get -y install $missing_chrome_deps
 
 # Install a suggested list of additional packages (https://stackoverflow.com/a/76734752)

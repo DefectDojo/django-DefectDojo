@@ -4,6 +4,17 @@
 
 echo "Testing DefectDojo Service"
 
+# TODO: REMOVE
+ls -lAh /opt/chrome
+ls -lAh /opt/chrome/chrome
+ls -lAh /usr/bin/chrome
+# ${CHROME_PATH} --version
+chrome_binary="/opt/chrome/chrome-linux64/chrome"
+echo "VERSION: $(${chrome_binary} --version)"
+
+# /opt/chrome/chrome --headless --no-sandbox 
+# ${chrome_binary} --headless --no-sandbox
+
 echo "Waiting max 60s for services to start"
 # Wait for services to become available
 COUNTER=0
@@ -28,13 +39,6 @@ CHROMEDRIVER=$(find /opt/chrome-driver -name chromedriver)
 export CHROMEDRIVER
 CHROME_PATH=/opt/chrome/chrome
 export CHROME_PATH
-
-# TODO: REMOVE
-ls -lAh /opt/chrome
-ls -lAh /opt/chrome/chrome
-ls -lAh /usr/bin/chrome
-${CHROME_PATH} --version
-/usr/bin/chrome --version
 
 # Run available unittests with a simple setup
 # All available Integrationtest Scripts are activated below
