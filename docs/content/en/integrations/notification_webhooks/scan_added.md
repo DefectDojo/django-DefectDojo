@@ -22,7 +22,9 @@ X-DefectDojo-Event: scan_added_empty
     "description": null,
     "engagement": {
         "id": 7,
-        "name": "notif eng"
+        "name": "notif eng",
+        "url_api": "http://localhost:8080/api/v2/engagements/7/",
+        "url_ui": "http://localhost:8080/engagement/7"
     },
     "finding_count": 4,
     "findings": {
@@ -31,7 +33,8 @@ X-DefectDojo-Event: scan_added_empty
                 "id": 233,
                 "severity": "Medium",
                 "title": "Mitigated Finding",
-                "url": "http://localhost:8080/finding/233"
+                "url_api": "http://localhost:8080/api/v2/findings/233/",
+                "url_ui": "http://localhost:8080/finding/233"
             }
         ],
         "new": [
@@ -39,7 +42,8 @@ X-DefectDojo-Event: scan_added_empty
                 "id": 232,
                 "severity": "Critical",
                 "title": "New Finding",
-                "url": "http://localhost:8080/finding/232"
+                "url_api": "http://localhost:8080/api/v2/findings/232/",
+                "url_ui": "http://localhost:8080/finding/232"
             }
         ],
         "reactivated": [
@@ -47,7 +51,8 @@ X-DefectDojo-Event: scan_added_empty
                 "id": 234,
                 "severity": "Low",
                 "title": "Reactivated Finding",
-                "url": "http://localhost:8080/finding/234"
+                "url_api": "http://localhost:8080/api/v2/findings/234/",
+                "url_ui": "http://localhost:8080/finding/234"
             }
         ],
         "untouched": [
@@ -55,23 +60,31 @@ X-DefectDojo-Event: scan_added_empty
                 "id": 235,
                 "severity": "Info",
                 "title": "Untouched Finding",
-                "url": "http://localhost:8080/finding/235"
+                "url_api": "http://localhost:8080/api/v2/findings/235/",
+                "url_ui": "http://localhost:8080/finding/235"
             }
         ]
     },
     "product": {
         "id": 4,
-        "name": "notif prod"
+        "name": "notif prod",
+        "url_api": "http://localhost:8080/api/v2/products/4/",
+        "url_ui": "http://localhost:8080/product/4"
     },
     "product_type": {
         "id": 4,
-        "name": "notif prod type"
+        "name": "notif prod type",
+        "url_api": "http://localhost:8080/api/v2/product_types/4/",
+        "url_ui": "http://localhost:8080/product/type/4"
     },
     "test": {
         "id": 90,
-        "title": "notif test"
+        "title": "notif test",
+        "url_api": "http://localhost:8080/api/v2/tests/90/",
+        "url_ui": "http://localhost:8080/test/90"
     },
-    "url": "http://localhost:8080/test/90",
+    "url_api": "http://localhost:8080/api/v2/tests/90/",
+    "url_ui": "http://localhost:8080/test/90",
     "user": null
 }
 ```

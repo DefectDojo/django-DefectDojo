@@ -683,10 +683,13 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": None,
                 "user": None,
-                "url": f"http://localhost:8080/product/type/{prod_type.pk}",
+                "url_api": f"http://localhost:8080/api/v2/product_types/{prod_type.pk}/",
+                "url_ui": f"http://localhost:8080/product/type/{prod_type.pk}",
                 "product_type": {
                     "id": prod_type.pk,
                     "name": "notif prod type",
+                    "url_api": f"http://localhost:8080/api/v2/product_types/{prod_type.pk}/",
+                    "url_ui": f"http://localhost:8080/product/type/{prod_type.pk}",
                 },
             })
 
@@ -696,14 +699,19 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": None,
                 "user": None,
-                "url": f"http://localhost:8080/product/{prod.pk}",
+                "url_api": f"http://localhost:8080/api/v2/products/{prod.pk}/",
+                "url_ui": f"http://localhost:8080/product/{prod.pk}",
                 "product_type": {
                     "id": prod_type.pk,
                     "name": "notif prod type",
+                    "url_api": f"http://localhost:8080/api/v2/product_types/{prod_type.pk}/",
+                    "url_ui": f"http://localhost:8080/product/type/{prod_type.pk}",
                 },
                 "product": {
                     "id": prod.pk,
                     "name": "notif prod",
+                    "url_api": f"http://localhost:8080/api/v2/products/{prod.pk}/",
+                    "url_ui": f"http://localhost:8080/product/{prod.pk}",
                 },
             })
 
@@ -713,18 +721,25 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": None,
                 "user": None,
-                "url": f"http://localhost:8080/engagement/{eng.pk}",
+                "url_api": f"http://localhost:8080/api/v2/engagements/{eng.pk}/",
+                "url_ui": f"http://localhost:8080/engagement/{eng.pk}",
                 "product_type": {
                     "id": prod_type.pk,
                     "name": "notif prod type",
+                    "url_api": f"http://localhost:8080/api/v2/product_types/{prod_type.pk}/",
+                    "url_ui": f"http://localhost:8080/product/type/{prod_type.pk}",
                 },
                 "product": {
                     "id": prod.pk,
                     "name": "notif prod",
+                    "url_api": f"http://localhost:8080/api/v2/products/{prod.pk}/",
+                    "url_ui": f"http://localhost:8080/product/{prod.pk}",
                 },
                 "engagement": {
                     "id": eng.pk,
                     "name": "notif eng",
+                    "url_api": f"http://localhost:8080/api/v2/engagements/{eng.pk}/",
+                    "url_ui": f"http://localhost:8080/engagement/{eng.pk}",
                 },
             })
 
@@ -735,22 +750,31 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": None,
                 "user": None,
-                "url": f"http://localhost:8080/test/{test.pk}",
+                "url_api": f"http://localhost:8080/api/v2/tests/{test.pk}/",
+                "url_ui": f"http://localhost:8080/test/{test.pk}",
                 "product_type": {
                     "id": prod_type.pk,
                     "name": "notif prod type",
+                    "url_api": f"http://localhost:8080/api/v2/product_types/{prod_type.pk}/",
+                    "url_ui": f"http://localhost:8080/product/type/{prod_type.pk}",
                 },
                 "product": {
                     "id": prod.pk,
                     "name": "notif prod",
+                    "url_api": f"http://localhost:8080/api/v2/products/{prod.pk}/",
+                    "url_ui": f"http://localhost:8080/product/{prod.pk}",
                 },
                 "engagement": {
                     "id": eng.pk,
                     "name": "notif eng",
+                    "url_api": f"http://localhost:8080/api/v2/engagements/{eng.pk}/",
+                    "url_ui": f"http://localhost:8080/engagement/{eng.pk}",
                 },
                 "test": {
                     "id": test.pk,
                     "title": "notif test",
+                    "url_api": f"http://localhost:8080/api/v2/tests/{test.pk}/",
+                    "url_ui": f"http://localhost:8080/test/{test.pk}",
                 },
             })
 
@@ -760,22 +784,31 @@ class TestNotificationWebhooks(DojoTestCase):
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": None,
                 "user": None,
-                "url": f"http://localhost:8080/test/{test.pk}",
+                "url_api": f"http://localhost:8080/api/v2/tests/{test.pk}/",
+                "url_ui": f"http://localhost:8080/test/{test.pk}",
                 "product_type": {
                     "id": prod_type.pk,
                     "name": "notif prod type",
+                    "url_api": f"http://localhost:8080/api/v2/product_types/{prod_type.pk}/",
+                    "url_ui": f"http://localhost:8080/product/type/{prod_type.pk}",
                 },
                 "product": {
                     "id": prod.pk,
                     "name": "notif prod",
+                    "url_api": f"http://localhost:8080/api/v2/products/{prod.pk}/",
+                    "url_ui": f"http://localhost:8080/product/{prod.pk}",
                 },
                 "engagement": {
                     "id": eng.pk,
                     "name": "notif eng",
+                    "url_api": f"http://localhost:8080/api/v2/engagements/{eng.pk}/",
+                    "url_ui": f"http://localhost:8080/engagement/{eng.pk}",
                 },
                 "test": {
                     "id": test.pk,
                     "title": "notif test",
+                    "url_api": f"http://localhost:8080/api/v2/tests/{test.pk}/",
+                    "url_ui": f"http://localhost:8080/test/{test.pk}",
                 },
                 "finding_count": 0,
                 "findings": {
@@ -809,24 +842,28 @@ class TestNotificationWebhooks(DojoTestCase):
                     "id": 232,
                     "title": "New Finding",
                     "severity": "Critical",
-                    "url": "http://localhost:8080/finding/232",
+                    "url_api": "http://localhost:8080/api/v2/findings/232/",
+                    "url_ui": "http://localhost:8080/finding/232",
                 }],
                 "mitigated": [{
                     "id": 233,
                     "title": "Mitigated Finding",
                     "severity": "Medium",
-                    "url": "http://localhost:8080/finding/233",
+                    "url_api": "http://localhost:8080/api/v2/findings/233/",
+                    "url_ui": "http://localhost:8080/finding/233",
                 }],
                 "reactivated": [{
                     "id": 234,
                     "title": "Reactivated Finding",
                     "severity": "Low",
-                    "url": "http://localhost:8080/finding/234",
+                    "url_api": "http://localhost:8080/api/v2/findings/234/",
+                    "url_ui": "http://localhost:8080/finding/234",
                 }],
                 "untouched": [{
                     "id": 235,
                     "title": "Untouched Finding",
                     "severity": "Info",
-                    "url": "http://localhost:8080/finding/235",
+                    "url_api": "http://localhost:8080/api/v2/findings/235/",
+                    "url_ui": "http://localhost:8080/finding/235",
                 }],
             })

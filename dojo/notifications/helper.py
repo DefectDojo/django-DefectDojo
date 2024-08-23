@@ -558,7 +558,7 @@ def log_alert(e, notification_type=None, *args, **kwargs):
 def notify_test_created(test):
     title = "Test created for " + str(test.engagement.product) + ": " + str(test.engagement.name) + ": " + str(test)
     create_notification(event="test_added", title=title, test=test, engagement=test.engagement, product=test.engagement.product,
-                        url=reverse("view_test", args=(test.id,)))
+                        url=reverse("view_test", args=(test.id,)), url_api=reverse("test-detail", args=(test.id,)))
 
 
 def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
@@ -578,4 +578,4 @@ def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[
 
     create_notification(event=event, title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,
-                        url=reverse("view_test", args=(test.id,)))
+                        url=reverse("view_test", args=(test.id,)), url_api=reverse("test-detail", args=(test.id,)))
