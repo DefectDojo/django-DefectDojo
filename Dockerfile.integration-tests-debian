@@ -33,7 +33,8 @@ RUN \
   unzip chrome-linux64.zip && \
   rm -rf chrome-linux64.zip && \
   chmod -R 0755 . && \
-  ln -s /opt/chrome/chrome-linux64/chrome /usr/bin/chrome
+  mv /opt/chrome/chrome-linux64/chrome /opt/chrome/chrome && \
+  ln -s /opt/chrome/chrome /usr/bin/chrome
 
 # Install the dependencies for Google Chrome
 RUN apt-file update
