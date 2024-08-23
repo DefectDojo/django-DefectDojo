@@ -6,6 +6,7 @@ import unittest
 from selenium import webdriver
 from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -82,8 +83,11 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options.set_capability("acceptInsecureCerts", True)
 
             # some extra logging can be turned on if you want to query the browser javascripe console in your tests
-            desired = webdriver.DesiredCapabilities.CHROME
-            desired["goog:loggingPrefs"] = {"browser": "ALL"}
+            dd_driver_options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+            # capabilities = webdriver.DesiredCapabilities.CHROME.copy()
+            # capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
+            # desired = webdriver.DesiredCapabilities.CHROME
+            # desired["goog:loggingPrefs"] = {"browser": "ALL"}
 
             # set automatic downloads to test csv and excel export
             prefs = {"download.default_directory": cls.export_path}
@@ -91,20 +95,25 @@ class BaseTestCase(unittest.TestCase):
 
             # change path of chromedriver according to which directory you have chromedriver.
             logger.info(
-                f"starting chromedriver with options: {vars(dd_driver_options)} {desired}",
+                f"starting chromedriver with options: {vars(dd_driver_options)}",
             )
 
             # TODO - this filter needs to be removed
-            import warnings
-            warnings.filterwarnings("ignore", message="executable_path has been deprecated, please pass in a Service object")
-            warnings.filterwarnings("ignore", message="use options instead of chrome_options")
-            warnings.filterwarnings("ignore", message="desired_capabilities has been deprecated, please pass in a Service object")
-            warnings.filterwarnings("ignore", message="It is deprecated to return a value that is not None from a test case")
+            # import warnings
+            # warnings.filterwarnings("ignore", message="executable_path has been deprecated, please pass in a Service object")
+            # warnings.filterwarnings("ignore", message="use options instead of chrome_options")
+            # warnings.filterwarnings("ignore", message="desired_capabilities has been deprecated, please pass in a Service object")
+            # warnings.filterwarnings("ignore", message="It is deprecated to return a value that is not None from a test case")
+
+            # dd_driver_options.default_capabilities = desired
+
+            dd_driver_service = Service(
+                executable_path=os.environ["CHROME_PATH"],
+            )
 
             dd_driver = webdriver.Chrome(
-                os.environ["CHROMEDRIVER"],
-                chrome_options=dd_driver_options,
-                desired_capabilities=desired,
+                options=dd_driver_options,
+                service=dd_driver_service,
             )
             # best practice is only use explicit waits
             dd_driver.implicitly_wait(1)
