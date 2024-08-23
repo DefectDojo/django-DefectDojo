@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import sys
 import unittest
 
 from selenium import webdriver
@@ -12,8 +13,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 # import time
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
+logging.getLogger("selenium").setLevel(logging.DEBUG)
 
 dd_driver = None
 dd_driver_options = None
@@ -83,7 +85,7 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options.set_capability("acceptInsecureCerts", True)
 
             # some extra logging can be turned on if you want to query the browser javascripe console in your tests
-            dd_driver_options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+            dd_driver_options.set_capability("goog:loggingPrefs", {"browser": "ALL", "driver": "ALL"})
             # capabilities = webdriver.DesiredCapabilities.CHROME.copy()
             # capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
             # desired = webdriver.DesiredCapabilities.CHROME
@@ -109,6 +111,7 @@ class BaseTestCase(unittest.TestCase):
 
             dd_driver_service = Service(
                 executable_path=os.environ["CHROMEDRIVER"],
+                log_output=sys.stderr,
             )
 
             dd_driver = webdriver.Chrome(
