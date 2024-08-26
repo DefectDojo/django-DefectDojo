@@ -1669,8 +1669,9 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["on"].widget = date_input_widget
         self.form.fields["before"].widget = date_input_widget
         self.form.fields["after"].widget = date_input_widget
-        date_mitigated_input_widget = forms.DateInput(attrs={"class": "datepicker", "placeholder": "YYYY-MM-DD"}, format="%Y-%m-%d")
-        self.form.fields["on"].widget = date_mitigated_input_widget
+        self.form.fields["mitigated_on"].widget = date_input_widget
+        self.form.fields["mitigated_before"].widget = date_input_widget
+        self.form.fields["mitigated_after"].widget = date_input_widget        
         self.form.fields["cwe"].choices = cwe_options(self.queryset)
 
 
