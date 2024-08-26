@@ -25,8 +25,13 @@ RUN pip install --no-cache-dir selenium==4.9.0 requests
 
 # Install the latest Google Chrome stable release
 WORKDIR /opt/chrome
+
+# TODO: figure out whatever fix is necessary to use Chrome >= 128 and put this back in the RUN below so we stay
+# up-to-date
+# chrome_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chrome[] | select(.platform == "linux64").url') && \
+
 RUN \
-  chrome_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chrome[] | select(.platform == "linux64").url') && \
+  chrome_url="https://storage.googleapis.com/chrome-for-testing-public/127.0.6533.119/linux64/chrome-linux64.zip" && \
   wget $chrome_url && \
   unzip chrome-linux64.zip && \
   rm -rf chrome-linux64.zip && \
@@ -49,8 +54,12 @@ RUN apt-get install -y libxi6 libgconf-2-4 jq libjq1 libonig5 libxkbcommon0 libx
 
 # Installing the latest stable Google Chrome driver release
 WORKDIR /opt/chrome-driver
+# TODO: figure out whatever fix is necessary to use Chrome >= 128 and put this back in the RUN below so we stay
+# up-to-date
+# chromedriver_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chromedriver[] | select(.platform == "linux64").url') && \
+
 RUN \
-  chromedriver_url=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r '.channels[] | select(.channel == "Stable") | .downloads.chromedriver[] | select(.platform == "linux64").url') && \
+  chromedriver_url="https://storage.googleapis.com/chrome-for-testing-public/127.0.6533.119/linux64/chromedriver-linux64.zip" && \
   wget $chromedriver_url && \
   unzip -j chromedriver-linux64.zip chromedriver-linux64/chromedriver && \
   rm -rf chromedriver-linux64.zip && \
