@@ -1001,6 +1001,15 @@ class EngForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
+        # if this product has findings being asynchronously updated, disable the sla config field
+        async_updating_running = product.async_updating if product else self.instance.product.async_updating
+        if async_updating_running:
+            self.fields["sla_configuration"].disabled = True
+            self.fields["sla_configuration"].widget.attrs["message"] = (
+                "Finding SLA expiration dates are currently being recalculated. "
+                "This field cannot be changed until the calculation is complete."
+            )
+
         if product:
             self.fields["preset"] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
             self.fields["lead"].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
@@ -1084,6 +1093,14 @@ class TestForm(forms.ModelForm):
             product = get_product(obj)
             self.fields["lead"].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
             self.fields["api_scan_configuration"].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
+            # if this product has findings being asynchronously updated, disable the sla config field
+            if product.async_updating:
+                self.fields["sla_configuration"].disabled = True
+                self.fields["sla_configuration"].widget.attrs["message"] = (
+                    "Finding SLA expiration dates are currently being recalculated. "
+                    "This field cannot be changed until the calculation is complete."
+                )
+
         else:
             self.fields["lead"].queryset = get_authorized_users(Permissions.Test_View).filter(is_active=True)
 
@@ -1091,7 +1108,7 @@ class TestForm(forms.ModelForm):
         model = Test
         fields = ["title", "test_type", "target_start", "target_end", "description",
                   "environment", "percent_complete", "tags", "lead", "version", "branch_tag", "build_id", "commit_hash",
-                  "api_scan_configuration"]
+                  "api_scan_configuration", "sla_configuration"]
 
     def clean_tags(self):
         tag_validator(self.cleaned_data.get("tags"))
