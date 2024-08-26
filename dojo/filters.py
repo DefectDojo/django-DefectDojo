@@ -1557,7 +1557,7 @@ class FindingFilterHelper(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
-    mitigated_date = DateFromToRangeFilter(field_name="mitigated", label="Mitigated Date")
+    mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
     mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On")
     mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
     mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After")
