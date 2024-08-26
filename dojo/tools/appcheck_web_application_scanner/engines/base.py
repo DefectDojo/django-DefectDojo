@@ -25,6 +25,21 @@ def strip_markup(value: str) -> str:
     return value
 
 
+def escape_non_printable(s: str) -> str:
+    """
+    Replaces non-printable characters from a string, for some definition of non-printable that probably differs from the
+    uncountable other available definitions of non-printable, with a more-printable version.
+    """
+    def escape_if_needed(x):
+        # Accept isprintable() stuff (which includes space) and common whitespaces that can be rendered
+        if x.isprintable() or x in {"\r", "\n", "\t"}:
+            return x
+        # Anything else -- including other weird whitespaces -- use repr() to give the string representation; also
+        # remove the surrounding single quotes
+        return repr(x)[1:-1]
+    return "".join([escape_if_needed(c) for c in s])
+
+
 #######
 # Field parsing helper classes
 #######
@@ -66,10 +81,10 @@ class Attribute(FieldType):
 
 class DeMarkupedAttribute(Attribute):
     """
-    Class for an Attribute (as above) but whose value is stripped of markup prior to being set.
+    Class for an Attribute (as above) but whose value is stripped of markup and non-printable chars prior to being set.
     """
     def handle(self, engine_class, finding, value):
-        super().handle(engine_class, finding, strip_markup(value))
+        super().handle(engine_class, finding, escape_non_printable(strip_markup(value)))
 
 
 class Method(FieldType):
@@ -209,7 +224,7 @@ class BaseEngineParser:
     # For parsing additional description-related entries (description, notes, and details)
     #####
     def format_additional_description(self, section: str, value: str) -> str:
-        return f"**{section}**: {strip_markup(value)}"
+        return f"**{section}**: {escape_non_printable(strip_markup(value))}"
 
     def append_description(self, finding: Finding, addendum: dict[str, str]) -> None:
         if addendum:
