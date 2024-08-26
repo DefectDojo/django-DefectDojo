@@ -1,6 +1,7 @@
 import binascii
 import calendar as tcalendar
 import hashlib
+import importlib
 import logging
 import mimetypes
 import os
@@ -8,6 +9,7 @@ import re
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+from typing import Callable, Optional
 
 import bleach
 import crum
@@ -295,6 +297,9 @@ def do_dedupe_finding_task(new_finding, *args, **kwargs):
 
 
 def do_dedupe_finding(new_finding, *args, **kwargs):
+    if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
+        return dedupe_method(new_finding, *args, **kwargs)
+
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -2592,6 +2597,23 @@ def get_open_findings_burndown(product):
     past_90_days["y_min"] = running_min
 
     return past_90_days
+
+
+def get_custom_method(setting_name: str) -> Optional[Callable]:
+    """
+    Attempts to load and return the method specified by fully-qualified name at the given setting.
+
+    :param setting_name: The name of the setting that holds the fqname of the Python method we want to load
+    :return: The callable if it was able to be loaded, else None
+    """
+    if fq_name := getattr(settings, setting_name, None):
+        try:
+            mn, _, fn = fq_name.rpartition(".")
+            m = importlib.import_module(mn)
+            return getattr(m, fn)
+        except ModuleNotFoundError:
+            pass
+    return None
 
 
 def generate_file_response(file_object: FileUpload) -> FileResponse:
