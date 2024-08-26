@@ -1465,6 +1465,11 @@ class Engagement(models.Model):
     source_code_management_uri = models.URLField(max_length=600, null=True, blank=True, editable=True, verbose_name=_("Repo"), help_text=_("Resource link to source code"))
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name=_("Orchestration Engine"), help_text=_("Orchestration service responsible for CI/CD test"), null=True, blank=True, related_name="orchestration", on_delete=models.CASCADE)
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name=_("Deduplication within this engagement only"), help_text=_("If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level."))
+    sla_configuration = models.ForeignKey(SLA_Configuration,
+                                          null=True,
+                                          blank=True,
+                                          default=None,
+                                          on_delete=models.RESTRICT)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add."))
     inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
@@ -2059,6 +2064,11 @@ class Test(models.Model):
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text=_("Tag or branch that was tested, a reimport may update this field."), verbose_name=_("Branch/Tag"))
     api_scan_configuration = models.ForeignKey(Product_API_Scan_Configuration, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name=_("API Scan Configuration"))
+    sla_configuration = models.ForeignKey(SLA_Configuration,
+                                          null=True,
+                                          blank=True,
+                                          default=None,
+                                          on_delete=models.RESTRICT)
 
     class Meta:
         indexes = [
