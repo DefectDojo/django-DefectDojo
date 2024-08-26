@@ -222,7 +222,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual(3, len(findings))
 
     def test_appcheck_web_application_scanner_parser_http2(self):
-        with open("unittests/scans/appcheck_web_application_scanner/appcheck_web_application_scanner_http2.json") as testfile:  # noqa: PLW1514
+        with open("unittests/scans/appcheck_web_application_scanner/appcheck_web_application_scanner_http2.json", encoding="utf-8") as testfile:
             parser = AppCheckWebApplicationScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
