@@ -52,6 +52,7 @@ from dojo.models import (
     Finding_Template,
     Note_Type,
     Product_API_Scan_Configuration,
+    SLA_Configuration,
     Stub_Finding,
     Test,
     Test_Import,
@@ -187,6 +188,8 @@ class ViewTest(View):
         available_note_types = None
         if note_type_activation:
             available_note_types = find_available_notetypes(notes)
+        # Set up the SLA to generate the form with
+        sla = SLA_Configuration.objects.filter(id=test.sla_configuration_id).first()
         # Set the current context
         context = {
             "test": test,
@@ -197,6 +200,7 @@ class ViewTest(View):
             "notes": notes,
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
+            "sla": sla,
             "files": test.files.all(),
             "person": request.user.username,
             "request": request,
@@ -292,10 +296,15 @@ def edit_test(request, tid):
     if request.method == "POST":
         form = TestForm(request.POST, instance=test)
         if form.is_valid():
+            initial_sla_config = Test.objects.get(pk=form.instance.id).sla_configuration
             form.save()
+            msg = _("Test saved.")
+            # check if the SLA config was changed, append additional context to message
+            if initial_sla_config != form.instance.sla_configuration:
+                msg += _(" All SLA expiration dates for findings within this product will be recalculated asynchronously for the newly assigned SLA configuration.")
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 _("Test saved."),
+                                 msg,
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_engagement", args=(test.engagement.id,)))
 

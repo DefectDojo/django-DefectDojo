@@ -8,7 +8,7 @@ from django.urls import reverse
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.forms import SLAConfigForm
-from dojo.models import Product, SLA_Configuration, System_Settings
+from dojo.models import Engagement, Product, SLA_Configuration, System_Settings, Test
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -41,8 +41,12 @@ def edit_sla_config(request, slaid):
 
     if request.method == "POST" and request.POST.get("delete"):
         if sla_config.id != 1:
-            if Product.objects.filter(sla_configuration=sla_config).count():
-                msg = f'The "{sla_config}" SLA configuration could not be deleted, as it is currently in use by one or more products.'
+            if (
+                Product.objects.filter(sla_configuration=sla_config).count() or
+                Engagement.objects.filter(sla_configuration=sla_config).count() or
+                Test.objects.filter(sla_configuration=sla_config).count()
+            ):
+                msg = f'The "{sla_config}" SLA configuration could not be deleted, as it is currently in use by one or more products, engagements or tests.'
                 messages.add_message(request,
                                     messages.ERROR,
                                     msg,

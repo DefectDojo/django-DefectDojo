@@ -921,6 +921,64 @@
                     </div>
                 </div>
             {% endif %}
+            <!-- SLA -->
+                {% if system_settings.enable_finding_sla and sla %}
+                <div class="panel panel-default panel-default-secondary">
+                <div class="panel-heading">
+                <h3 class="panel-title"><span class="fa-solid fa-calendar-check fa-fw" aria-hidden="true"></span>&nbsp;Service Level Agreement</h3>
+                </div><div class="panel-body">
+                    <p>{{ sla.name }}</p>
+                    <p>{{ sla.description }}</p>
+                </div>
+                <div class="table-responsive">
+                <table class="table table-striped" >
+                    <tbody>
+                    <tr>
+                        <td style="width: 160px;"><strong>Critical</strong></td>
+                        <td>
+                        {% if sla.enforce_critical %}
+                            {{ sla.critical }} days to remediate
+                        {% else %}
+                            <em class="text-muted">Not Enforced</em>
+                        {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 160px;"><strong>High</strong></td>
+                        <td>
+                        {% if sla.enforce_high %}
+                            {{ sla.high }} days to remediate
+                        {% else %}
+                            <em class="text-muted">Not Enforced</em>
+                        {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 160px;"><strong>Medium</strong></td>
+                        <td>
+                        {% if sla.enforce_medium %}
+                            {{ sla.medium }} days to remediate
+                        {% else %}
+                            <em class="text-muted">Not Enforced</em>
+                        {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 160px;"><strong>Low</strong></td>
+                        <td>
+                        {% if sla.enforce_low %}
+                            {{ sla.low }} days to remediate
+                        {% else %}
+                            <em class="text-muted">Not Enforced</em>
+                        {% endif %}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            {% endif %}
+            <!-- End SLA -->
             {% if system_settings.enable_credentials %}
                 <div>
                     <div class="panel panel-default-secondary">
