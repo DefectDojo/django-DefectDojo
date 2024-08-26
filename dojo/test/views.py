@@ -41,6 +41,7 @@ from dojo.forms import (
     TestForm,
     TypedNoteForm,
 )
+from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
@@ -979,6 +980,15 @@ class ReImportScanResultsView(View):
         context["push_to_jira"] = push_all_jira_issues or (form and form.cleaned_data.get("push_to_jira"))
         return None
 
+    def get_reimporter(
+        self,
+        context: dict,
+    ) -> BaseImporter:
+        """
+        Gets the reimporter to use
+        """
+        return DefaultReImporter(**context)
+
     def reimport_findings(
         self,
         context: dict,
@@ -987,7 +997,7 @@ class ReImportScanResultsView(View):
         Attempt to import with all the supplied information
         """
         try:
-            importer_client = DefaultReImporter(**context)
+            importer_client = self.get_reimporter(context)
             (
                 context["test"],
                 finding_count,
