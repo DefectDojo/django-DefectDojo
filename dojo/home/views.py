@@ -90,10 +90,10 @@ def get_severities_by_month(findings, today):
     # The chart expects a, b, c, d, e instead of Critical, High, ...
     SEVERITY_MAP = {
         "Critical": "a",
-        "High":     "b",  # noqa: E241
-        "Medium":   "c",  # noqa: E241
-        "Low":      "d",  # noqa: E241
-        "Info":     "e",  # noqa: E241
+        "High":     "b",
+        "Medium":   "c",
+        "Low":      "d",
+        "Info":     "e",
     }
 
     results = {}

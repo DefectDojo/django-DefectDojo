@@ -126,10 +126,10 @@ class JIRAConfigEngagementBase:
         }
 
     def get_expected_redirect_engagement(self, engagement):
-        return "/engagement/%i" % engagement.id
+        return f"/engagement/{engagement.id}"
 
     def get_expected_redirect_edit_engagement(self, engagement):
-        return "/engagement/edit/%i" % engagement.id
+        return f"/engagement/edit/{engagement.id}"
 
     def add_engagement_jira(self, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse("new_eng_for_prod", args=(self.product_id, )))
@@ -150,8 +150,7 @@ class JIRAConfigEngagementBase:
             self.assertEqual(response.status_code, 200)
         elif expect_redirect_to:
             self.assertEqual(response.status_code, 302)
-            # print('response: ' + response)
-            # print('url: ' + response.url)
+
             try:
                 engagement = Engagement.objects.get(id=response.url.split("/")[-1])
             except:
@@ -366,5 +365,5 @@ class JIRAConfigEngagementTest_Inheritance(JIRAConfigEngagementTest):
         product = Product.objects.get(id=self.product_id)
         self.assertIsNotNone(jira_helper.get_jira_project(product))
 
-# TODO UI
+# TODO: UI
 # linking / unlinking

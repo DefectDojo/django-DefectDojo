@@ -16,7 +16,7 @@ class DojoAppConfig(AppConfig):
 
     def ready(self):
         # we need to initializer waston here because in models.py is to early if we want add extra fields to index
-        # print('ready(): initializing watson')
+        # logger.info('ready(): initializing watson')
         # commented out ^ as it prints in manage.py dumpdata, docker logs and many other places
         # logger doesn't work yet at this stage
 
@@ -71,15 +71,20 @@ class DojoAppConfig(AppConfig):
 
         # Load any signals here that will be ready for runtime
         # Importing the signals file is good enough if using the reciever decorator
-        import dojo.announcement.signals  # noqa: F401
-        import dojo.endpoint.signals  # noqa: F401
-        import dojo.engagement.signals  # noqa: F401
-        import dojo.finding_group.signals  # noqa: F401
-        import dojo.product.signals  # noqa: F401
-        import dojo.product_type.signals  # noqa: F401
-        import dojo.sla_config.helpers  # noqa: F401
-        import dojo.tags_signals  # noqa: F401
-        import dojo.test.signals  # noqa: F401
+        import dojo.announcement.signals
+        import dojo.benchmark.signals
+        import dojo.cred.signals
+        import dojo.endpoint.signals
+        import dojo.engagement.signals
+        import dojo.finding_group.signals
+        import dojo.notes.signals
+        import dojo.product.signals
+        import dojo.product_type.signals
+        import dojo.risk_acceptance.signals
+        import dojo.sla_config.helpers
+        import dojo.tags_signals
+        import dojo.test.signals
+        import dojo.tool_product.signals  # noqa: F401
 
 
 def get_model_fields_with_extra(model, extra_fields=()):

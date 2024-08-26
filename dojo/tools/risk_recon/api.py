@@ -50,7 +50,7 @@ class RiskReconAPI:
                 name = item.get("toe_short_name", None)
                 if not comps or name in name_list:
                     filters = comps.get(name, None)
-                    self.toe_map[toe_id] = filters if filters else self.data
+                    self.toe_map[toe_id] = filters or self.data
         else:
             msg = f"Unable to query Target of Evaluations due to {response.status_code} - {response.content}"
             raise Exception(msg)

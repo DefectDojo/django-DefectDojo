@@ -267,7 +267,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 self.mitigate_finding(
                     finding,
                     f"Mitigated by {self.test.test_type} re-upload.",
-                    self.findings_groups_enabled,
+                    finding_groups_enabled=self.findings_groups_enabled,
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
@@ -276,6 +276,24 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 jira_helper.push_to_jira(finding_group)
 
         return mitigated_findings
+
+    def parse_findings(
+        self,
+        scan: TemporaryUploadedFile,
+        parser: Parser,
+    ) -> List[Finding]:
+        """
+        Determine how to parse the findings based on the presence of the
+        `get_tests` function on the parser object
+        """
+        # Attempt any preprocessing before generating findings
+        if len(self.parsed_findings) == 0 or self.test is None:
+            scan = self.process_scan_file(scan)
+            if hasattr(parser, "get_tests"):
+                self.parsed_findings = self.parse_findings_dynamic_test_type(scan, parser)
+            else:
+                self.parsed_findings = self.parse_findings_static_test_type(scan, parser)
+        return self.parsed_findings
 
     def parse_findings_static_test_type(
         self,

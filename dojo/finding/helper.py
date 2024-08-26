@@ -23,6 +23,7 @@ from dojo.models import (
     Vulnerability_Id,
     Vulnerability_Id_Template,
 )
+from dojo.notes.helper import delete_related_notes
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed
 
 logger = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwar
     logger.debug("%i: changed status fields pre_save: %s", instance.id or 0, changed_fields)
 
     for field, (old, new) in changed_fields.items():
-        logger.debug("%i: %s changed from %s to %s" % (instance.id or 0, field, old, new))
+        logger.debug("%i: %s changed from %s to %s", instance.id or 0, field, old, new)
         user = None
         if get_current_user() and get_current_user().is_authenticated:
             user = get_current_user()
@@ -247,8 +248,7 @@ def get_group_by_group_name(finding, finding_group_by_option):
         group_name = finding.component_name
     elif finding_group_by_option == "component_name+component_version":
         if finding.component_name or finding.component_version:
-            group_name = "{}:{}".format((finding.component_name if finding.component_name else "None"),
-                (finding.component_version if finding.component_version else "None"))
+            group_name = "{}:{}".format(finding.component_name or "None", finding.component_version or "None")
     elif finding_group_by_option == "file_path":
         if finding.file_path:
             group_name = f"Filepath {finding.file_path}"
@@ -402,8 +402,8 @@ def finding_pre_delete(sender, instance, **kwargs):
     logger.debug("finding pre_delete: %d", instance.id)
     # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
     # https://code.djangoproject.com/ticket/154
-
     instance.found_by.clear()
+    delete_related_notes(instance)
 
 
 def finding_delete(instance, **kwargs):
@@ -573,18 +573,18 @@ def fix_loop_duplicates():
     loop_count = len(candidates)
 
     if loop_count > 0:
-        deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
+        deduplicationLogger.info(f"Identified {len(candidates)} Findings with Loops")
         for find_id in candidates.values_list("id", flat=True):
             removeLoop(find_id, 50)
 
         new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
         for f in new_originals:
-            deduplicationLogger.info("New Original: %d " % f.id)
+            deduplicationLogger.info(f"New Original: {f.id}")
             f.duplicate = False
             super(Finding, f).save()
 
         loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
-        deduplicationLogger.info("%d Finding found which still has Loops, please run fix loop duplicates again" % loop_count)
+        deduplicationLogger.info(f"{loop_count} Finding found which still has Loops, please run fix loop duplicates again")
     return loop_count
 
 

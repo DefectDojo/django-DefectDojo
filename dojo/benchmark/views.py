@@ -43,6 +43,7 @@ def add_benchmark(queryset, product):
         pass
 
 
+@user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
 def update_benchmark(request, pid, _type):
     if request.method == "POST":
         bench_id = request.POST.get("bench_id")
@@ -90,6 +91,7 @@ def update_benchmark(request, pid, _type):
     )
 
 
+@user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
 def update_benchmark_summary(request, pid, _type, summary):
     if request.method == "POST":
         field = request.POST.get("field")

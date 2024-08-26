@@ -1,3 +1,4 @@
+# ruff: noqa: RUF001
 import datetime
 from unittest.mock import patch
 
@@ -11,7 +12,7 @@ class TestCheckmarxParser(DojoTestCase):
     # maxDiff = None
 
     def init(self, reportFilename):
-        my_file_handle = open(reportFilename)
+        my_file_handle = open(reportFilename, encoding="utf-8")
         product = Product()
         engagement = Engagement()
         test = Test()

@@ -1445,7 +1445,7 @@ class ImportReimportMixin:
         test_id = import0["test"]
         test = Test.objects.get(id=test_id)
         findings = Finding.objects.filter(test=test)
-        self.assertEqual(5, len(findings))
+        self.assertEqual(4, len(findings))
         self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].vulnerability_ids[0])
@@ -1463,7 +1463,7 @@ class ImportReimportMixin:
 
         self.reimport_scan_with_params(reimport_test.id, self.anchore_grype_file_name, scan_type=self.anchore_grype_scan_type)
         findings = Finding.objects.filter(test=reimport_test)
-        self.assertEqual(5, len(findings))
+        self.assertEqual(4, len(findings))
         self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].cve)
         self.assertEqual(2, len(findings[3].vulnerability_ids))
         self.assertEqual("GHSA-v6rh-hp5x-86rv", findings[3].vulnerability_ids[0])
@@ -1756,7 +1756,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
     client_ui = Client()
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         ImportReimportMixin.__init__(self, *args, **kwargs)
         # super(ImportReimportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)
@@ -1790,8 +1790,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         logger.debug("import_scan payload %s", payload)
         # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
         response = self.client_ui.post(reverse("import_scan_results", args=(engagement, )), payload)
-        # print(vars(response))
-        # print('url: ' + response.url)
+
         test = Test.objects.get(id=response.url.split("/")[-1])
         # f = open('response.html', 'w+')
         # f.write(str(response.content, 'utf-8'))
@@ -1821,7 +1820,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         elif not verified:
             verifiedPayload = "force_to_false"
 
-        with open(get_unit_tests_path() + filename) as testfile:
+        with open(get_unit_tests_path() + filename, encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": activePayload,
@@ -1861,7 +1860,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         if not verified:
             verifiedPayload = "force_to_false"
 
-        with open(get_unit_tests_path() + filename) as testfile:
+        with open(get_unit_tests_path() + filename, encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": activePayload,

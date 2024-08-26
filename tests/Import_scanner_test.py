@@ -1,3 +1,5 @@
+# ruff: noqa: F821
+import logging
 import os
 import re
 import shutil
@@ -9,6 +11,10 @@ from base_test_class import BaseTestCase
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+logger = logging.getLogger(__name__)
 
 
 class ScannerTest(BaseTestCase):
@@ -42,46 +48,17 @@ class ScannerTest(BaseTestCase):
                 missing_tests += [test]
 
         if len(missing_tests) > 0:
-            print("The following scanners are missing test cases or incorrectly named")
-            print("Names must match those listed in /dojo/tools")
-            print("Test cases can be added/modified here:")
-            print("https://github.com/DefectDojo/sample-scan-files\n")
+            logger.info("The following scanners are missing test cases or incorrectly named")
+            logger.info("Names must match those listed in /dojo/tools")
+            logger.info("Test cases can be added/modified here:")
+            logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in missing_tests:
-                print(test)
-            print()
+                logger.info(test)
         assert len(missing_tests) == 0
-
-    def test_check_for_doc(self):
-        driver = self.driver
-        driver.get("https://documentation.defectdojo.com/integrations/import/")
-        integration_index = integration_text.index("Integrations") + len("Integrations") + 1
-        usage_index = integration_text.index("Usage Examples") - len("Models") - 2
-        integration_text = integration_text[integration_index:usage_index].lower()
-        integration_text = integration_text.replace("_", " ").replace("-", " ").replace(".", "").split("\n")
-        acronyms = []
-        for words in integration_text:
-            acronyms += ["".join(word[0] for word in words.split())]
-
-        missing_docs = []
-        for tool in self.tools:
-            reg = re.compile(".*" + tool.replace("_", " ") + ".*")
-            if len(list(filter(reg.search, integration_text))) < 1:
-                if len(list(filter(reg.search, acronyms))) < 1:
-                    missing_docs += [tool]
-
-        if len(missing_docs) > 0:
-            print("The following scanners are missing documentation")
-            print("Names must match those listed in /dojo/tools")
-            print("Documentation can be added here:")
-            print("https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs\n")
-            for tool in missing_docs:
-                print(tool)
-            print()
-        assert len(missing_docs) == 0
 
     def test_check_for_forms(self):
         forms_path = dir_path[:-5] + "dojo/forms.py"
-        file = open(forms_path, "r+")
+        file = open(forms_path, "r+", encoding="utf-8")
         forms = file.readlines()
         file.close()
 
@@ -108,19 +85,18 @@ class ScannerTest(BaseTestCase):
                     missing_forms += [tool]
 
         if len(missing_forms) > 0:
-            print("The following scanners are missing forms")
-            print("Names must match those listed in /dojo/tools")
-            print("forms can be added here:")
-            print("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/forms.py\n")
+            logger.info("The following scanners are missing forms")
+            logger.info("Names must match those listed in /dojo/tools")
+            logger.info("forms can be added here:")
+            logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/forms.py\n")
             for tool in missing_forms:
-                print(tool)
-            print()
+                logger.info(tool)
         assert len(missing_forms) == 0
 
     @unittest.skip("Deprecated since Dynamic Parser infrastructure")
     def test_check_for_options(self):
         template_path = dir_path[:-5] + "dojo/templates/dojo/import_scan_results.html"
-        file = open(template_path, "r+")
+        file = open(template_path, "r+", encoding="utf-8")
         templates = file.readlines()
         file.close()
 
@@ -149,13 +125,12 @@ class ScannerTest(BaseTestCase):
                     missing_templates += [tool]
 
         if len(missing_templates) > 0:
-            print("The following scanners are missing templates")
-            print("Names must match those listed in /dojo/tools")
-            print("templates can be added here:")
-            print("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/templates/dojo/import_scan_results.html\n")
+            logger.info("The following scanners are missing templates")
+            logger.info("Names must match those listed in /dojo/tools")
+            logger.info("templates can be added here:")
+            logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/templates/dojo/import_scan_results.html\n")
             for tool in missing_templates:
-                print(tool)
-            print()
+                logger.info(tool)
         assert len(missing_templates) == 0
 
     def test_engagement_import_scan_result(self):
@@ -235,13 +210,12 @@ class ScannerTest(BaseTestCase):
                     break
 
         if len(failed_tests) > 0:
-            print("The following scan imports produced errors")
-            print("Names of tests must match those listed in /dojo/tools")
-            print("Tests can be added/modified here:")
-            print("https://github.com/DefectDojo/sample-scan-files\n")
+            logger.info("The following scan imports produced errors")
+            logger.info("Names of tests must match those listed in /dojo/tools")
+            logger.info("Tests can be added/modified here:")
+            logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in failed_tests:
-                print(test)
-            print()
+                logger.info(test)
         assert len(failed_tests) == 0
 
     def tearDown(self):

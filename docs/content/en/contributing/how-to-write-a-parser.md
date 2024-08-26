@@ -94,7 +94,7 @@ class MyToolParser(object):
 
 ## API Parsers
 
-DefectDojo has a limited number of API parsers. While we won’t remove these connectors, adding API connectors has been problematic and thus we cannot accept new API parsers / connectors from the community at this time for supportability reasonsing. To maintain a high quality API connector, it is necessary to have a license to the tool. To get that license requires partnership with the author or vendor. We're close to announcing a new program to help address this and bring API connectors to DefectDojo.
+DefectDojo has a limited number of API parsers. While we won't remove these connectors, adding API connectors has been problematic and thus we cannot accept new API parsers / connectors from the community at this time for supportability reasonsing. To maintain a high quality API connector, it is necessary to have a license to the tool. To get that license requires partnership with the author or vendor. We're close to announcing a new program to help address this and bring API connectors to DefectDojo.
 
 ## Template Generator
 
@@ -141,6 +141,12 @@ Very bad example:
     endpoint = Endpoint(host=u.host)
     finding.unsaved_endpoints = [endpoint]
 ```
+
+### Use the right libraries to parse information
+Various file formats are handled through libraries. In order to keep DefectDojo slim and also don't extend the attack surface, keep the number of libraries used minimal and take other parsers as an example.
+
+#### defusedXML in favour of lxml
+As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library. 
 
 ### Not all attributes are mandatory
 

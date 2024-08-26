@@ -1,12 +1,13 @@
 import csv
 import logging
+import mimetypes
 import operator
 import re
 from datetime import datetime
 from functools import reduce
 from tempfile import NamedTemporaryFile
 from time import strftime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib import messages
@@ -20,6 +21,7 @@ from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseRed
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
@@ -257,6 +259,7 @@ def engagements_all(request):
             "filter_form": filtered.form,
             "name_words": sorted(set(name_words)),
             "eng_words": sorted(set(eng_words)),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         })
 
 
@@ -392,7 +395,7 @@ def copy_engagement(request, eid):
                 messages.SUCCESS,
                 "Engagement Copied successfully.",
                 extra_tags="alert-success")
-            create_notification(event="engagement_copied",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+            create_notification(event="engagement_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                                 title=_("Copying of %s") % engagement.name,
                                 description=f'The engagement "{engagement.name}" was copied by {request.user}',
                                 product=product,
@@ -438,6 +441,8 @@ class ViewEngagement(View):
 
     def get(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by("test_type__name", "-updated")
         default_page_num = 10
         tests_filter = self.get_filtered_tests(request, tests, eng)
@@ -505,8 +510,9 @@ class ViewEngagement(View):
 
     def post(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
+        # Make sure the user is authorized
+        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by("test_type__name", "-updated")
-
         default_page_num = 10
 
         tests_filter = self.get_filtered_tests(request, tests, eng)
@@ -711,8 +717,8 @@ class ImportScanResultsView(View):
     def get_engagement_or_product(
         self,
         user: Dojo_User,
-        engagement_id: int = None,
-        product_id: int = None,
+        engagement_id: Optional[int] = None,
+        product_id: Optional[int] = None,
     ) -> Tuple[Engagement, Product, Product | Engagement]:
         """
         Using the path parameters, either fetch the product or engagement
@@ -820,8 +826,8 @@ class ImportScanResultsView(View):
     def handle_request(
         self,
         request: HttpRequest,
-        engagement_id: int = None,
-        product_id: int = None,
+        engagement_id: Optional[int] = None,
+        product_id: Optional[int] = None,
     ) -> Tuple[HttpRequest, dict]:
         """
         Process the common behaviors between request types, and then return
@@ -1058,8 +1064,8 @@ class ImportScanResultsView(View):
     def get(
         self,
         request: HttpRequest,
-        engagement_id: int = None,
-        product_id: int = None,
+        engagement_id: Optional[int] = None,
+        product_id: Optional[int] = None,
     ) -> HttpResponse:
         """
         Process GET requests for the Import View
@@ -1076,8 +1082,8 @@ class ImportScanResultsView(View):
     def post(
         self,
         request: HttpRequest,
-        engagement_id: int = None,
-        product_id: int = None,
+        engagement_id: Optional[int] = None,
+        product_id: Optional[int] = None,
     ) -> HttpResponse:
         """
         Process POST requests for the Import View
@@ -1430,6 +1436,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             "request": request,
             "add_findings": add_fpage,
             "return_url": get_return_url(request),
+            "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         })
 
 
@@ -1474,12 +1481,11 @@ def delete_risk_acceptance(request, eid, raid):
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def download_risk_acceptance(request, eid, raid):
-    import mimetypes
-
     mimetypes.init()
-
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-
+    # Ensure the risk acceptance is under the supplied engagement
+    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
+        raise PermissionDenied
     response = StreamingHttpResponse(
         FileIterWrapper(
             open(settings.MEDIA_ROOT + "/" + risk_acceptance.path.name, mode="rb")))

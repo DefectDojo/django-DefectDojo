@@ -3,8 +3,10 @@
 This solution is largely based on the Playwright's browser dependencies script at
 https://github.com/microsoft/playwright/blob/main/utils/linux-browser-dependencies/inside_docker/list_dependencies.js
 """
-
+import logging
 import subprocess
+
+logger = logging.getLogger(__name__)
 
 
 def find_packages(library_name):
@@ -16,7 +18,7 @@ def find_packages(library_name):
 
 
 def run_command(cmd, cwd=None, env=None):
-    result = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True)
+    result = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True, check=False)
     return result.stdout
 
 
@@ -25,7 +27,7 @@ def ldd(file_path):
     # For simplicity, I'm assuming if we get an error, the code is non-zero.
     try:
         result = subprocess.run(
-            ["ldd", file_path], capture_output=True, text=True,
+            ["ldd", file_path], capture_output=True, text=True, check=False,
         )
         stdout = result.stdout
         code = result.returncode
@@ -58,4 +60,4 @@ for d in missing_deps:
     for p in packages:
         missing_packages.append(p)
 
-print(" ".join(missing_packages))
+logger.info("missing_packages: " + (" ".join(missing_packages)))

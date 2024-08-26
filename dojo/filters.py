@@ -1839,7 +1839,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
         if self.pid is not None:
             del self.form.fields["test__engagement__product"]
             del self.form.fields["test__engagement__product__prod_type"]
-            # TODO add authorized check to be sure
+            # TODO: add authorized check to be sure
             self.form.fields["test__engagement"].queryset = Engagement.objects.filter(
                 product_id=self.pid,
             ).all()
@@ -2883,6 +2883,7 @@ class EndpointReportFilter(DojoFilter):
 class ReportFindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr="icontains", label="Name")
     date = DateFromToRangeFilter(field_name="date", label="Date Discovered")
+    date_recent = DateRangeFilter(field_name="date", label="Relative Date")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     active = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
@@ -2894,6 +2895,17 @@ class ReportFindingFilterHelper(FilterSet):
     out_of_scope = ReportBooleanFilter()
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
     file_path = CharFilter(lookup_expr="icontains")
+
+    o = OrderingFilter(
+        fields=(
+            ("title", "title"),
+            ("date", "date"),
+            ("numerical_severity", "numerical_severity"),
+            ("epss_score", "epss_score"),
+            ("epss_percentile", "epss_percentile"),
+            ("test__engagement__product__name", "test__engagement__product__name"),
+        ),
+    )
 
     class Meta:
         model = Finding

@@ -55,7 +55,7 @@ EFFORT_FOR_FIXING_CHOICES = (("", ""), ("Low", "Low"), ("Medium", "Medium"), ("H
 # fields returned in statistics, typically all status fields
 STATS_FIELDS = ["active", "verified", "duplicate", "false_p", "out_of_scope", "is_mitigated", "risk_accepted", "total"]
 # default template with all values set to 0
-DEFAULT_STATS = {sev.lower(): {stat_field: 0 for stat_field in STATS_FIELDS} for sev in SEVERITIES}
+DEFAULT_STATS = {sev.lower(): dict.fromkeys(STATS_FIELDS, 0) for sev in SEVERITIES}
 
 IMPORT_CREATED_FINDING = "N"
 IMPORT_CLOSED_FINDING = "C"
@@ -84,7 +84,7 @@ def _get_statistics_for_queryset(qs, annotation_factory):
     # add annotation for each status field
     values = values.annotate(**annotation_factory())
     # make sure sev and total are included
-    stat_fields = ["sev", "total"] + STATS_FIELDS
+    stat_fields = ["sev", "total", *STATS_FIELDS]
     # go for it
     values = values.values(*stat_fields)
 
@@ -514,6 +514,11 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Enable Finding Groups"),
         help_text=_("With this setting turned off, the Finding Groups will be disabled."))
+    enable_ui_table_based_searching = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name=_("Enable UI Table Based Filtering/Sorting"),
+        help_text=_("With this setting enabled, table headings will contain sort buttons for the current page of data in addition to sorting buttons that consider data from all pages."))
     enable_calendar = models.BooleanField(
         default=True,
         blank=False,
@@ -1471,7 +1476,7 @@ class Engagement(models.Model):
         ]
 
     def __str__(self):
-        return "Engagement %i: %s (%s)" % (self.id if id else 0, self.name if self.name else "",
+        return "Engagement {}: {} ({})".format(self.id if id else 0, self.name or "",
                                         self.target_start.strftime(
                                             "%b %d, %Y"))
 
@@ -1616,7 +1621,7 @@ class Endpoint_Status(models.Model):
         else:
             diff = get_current_date() - self.date
         days = diff.days
-        return days if days > 0 else 0
+        return max(0, days)
 
 
 class Endpoint(models.Model):
@@ -1659,7 +1664,7 @@ class Endpoint(models.Model):
             if self.host:
                 dummy_scheme = "dummy-scheme"  # workaround for https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988
                 url = hyperlink.EncodedURL(
-                    scheme=self.protocol if self.protocol else dummy_scheme,
+                    scheme=self.protocol or dummy_scheme,
                     userinfo=self.userinfo or "",
                     host=self.host,
                     port=self.port,
@@ -2239,7 +2244,7 @@ class Test_Import_Finding_Action(TimeStampedModel):
         ordering = ("test_import", "action", "finding")
 
     def __str__(self):
-        return "%i: %s" % (self.finding.id, self.action)
+        return f"{self.finding.id}: {self.action}"
 
 
 class Finding(models.Model):
@@ -2977,7 +2982,7 @@ class Finding(models.Model):
             else:
                 diff = get_current_date() - start_date
             days = diff.days
-        return days if days > 0 else 0
+        return max(0, days)
 
     @property
     def age(self):

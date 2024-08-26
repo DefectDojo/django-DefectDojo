@@ -26,7 +26,7 @@ from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.http import HttpResponseRedirect
+from django.http import FileResponse, HttpResponseRedirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -48,6 +48,7 @@ from dojo.models import (
     Dojo_User,
     Endpoint,
     Engagement,
+    FileUpload,
     Finding,
     Finding_Group,
     Finding_Template,
@@ -668,12 +669,14 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             counts.append(start_of_period.strftime("%b %Y"))
-        counts.append(o_count["zero"])
-        counts.append(o_count["one"])
-        counts.append(o_count["two"])
-        counts.append(o_count["three"])
-        counts.append(total)
-        counts.append(o_count["closed"])
+        counts.extend((
+            o_count["zero"],
+            o_count["one"],
+            o_count["two"],
+            o_count["three"],
+            total,
+            o_count["closed"],
+        ))
 
         stuff.append(counts)
         o_stuff.append(counts[:-1])
@@ -686,11 +689,13 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             a_counts.append(start_of_period.strftime("%b %Y"))
-        a_counts.append(a_count["zero"])
-        a_counts.append(a_count["one"])
-        a_counts.append(a_count["two"])
-        a_counts.append(a_count["three"])
-        a_counts.append(a_total)
+        a_counts.extend((
+            a_count["zero"],
+            a_count["one"],
+            a_count["two"],
+            a_count["three"],
+            a_total,
+        ))
         a_stuff.append(a_counts)
 
 
@@ -783,7 +788,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
-        # reminder: The first week of a year is the one that contains the year’s first Thursday
+        # reminder: The first week of a year is the one that contains the year's first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
         if view == "Finding":
             severities_by_day = objs.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
@@ -856,9 +861,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
-            # print(tick)
             week_data, label = get_week_data(start_of_week, tick, day_counts)
-            # print(week_data, label)
             punchcard.extend(week_data)
             ticks.append(label)
             tick += 1
@@ -876,8 +879,8 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
         return punchcard, ticks
 
-    except Exception as e:
-        logger.exception("Not showing punchcard graph due to exception gathering data", e)
+    except Exception:
+        logger.exception("Not showing punchcard graph due to exception gathering data")
         return None, None
 
 
@@ -1776,13 +1779,11 @@ def is_safe_url(url):
 
 def get_return_url(request):
     return_url = request.POST.get("return_url", None)
-    # print('return_url from POST: ', return_url)
     if return_url is None or not return_url.strip():
         # for some reason using request.GET.get('return_url') never works
         return_url = request.GET["return_url"] if "return_url" in request.GET else None
-        # print('return_url from GET: ', return_url)
 
-    return return_url if return_url else None
+    return return_url or None
 
 
 def redirect_to_return_url_or_else(request, or_else):
@@ -1875,9 +1876,9 @@ def sla_compute_and_notify(*args, **kwargs):
             period = "day"
             if abs_sla_age > 1:
                 period = "days"
-            title += "SLA breached by %d %s! Overdue notice" % (abs_sla_age, period)
+            title += f"SLA breached by {abs_sla_age} {period}! Overdue notice"
         elif kind == "prebreach":
-            title += "SLA pre-breach warning - %d day(s) left" % (sla_age)
+            title += f"SLA pre-breach warning - {sla_age} day(s) left"
         elif kind == "breaching":
             title += "SLA is breaching today"
 
@@ -1968,6 +1969,14 @@ def sla_compute_and_notify(*args, **kwargs):
             for finding in findings:
                 total_count += 1
                 sla_age = finding.sla_days_remaining()
+
+                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
+                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
+                severity, enforce = finding.get_sla_period()
+                if not enforce:
+                    logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
+                    continue
+
                 # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
                 if sla_age is None:
                     sla_age = 0
@@ -2334,7 +2343,7 @@ class async_delete:
             logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + self.get_object_name(model) + "s in chunks")
             chunks = self.chunk_list(model, objects_to_delete)
             for chunk in chunks:
-                print("deleting", len(chunk), self.get_object_name(model))
+                logger.debug(f"deleting {len(chunk)} {self.get_object_name(model)}")
                 self.delete_chunk(chunk)
         self.delete_chunk([object])
         logger.debug("ASYNC_DELETE: Successfully deleted " + self.get_object_name(object) + ": " + str(object))
@@ -2357,33 +2366,22 @@ def log_user_login(sender, request, user, **kwargs):
     # to cover more complex cases:
     # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
 
-    logger.info("login user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("login user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
 
-    logger.info("logout user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)
 def log_user_login_failed(sender, credentials, request, **kwargs):
 
     if "username" in credentials:
-        logger.warning("login failed for: {credentials} via ip: {ip}".format(
-            credentials=credentials["username"],
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.warning("login failed for: %s via ip: %s", credentials["username"], request.META["REMOTE_ADDR"])
     else:
-        logger.error("login failed because of missing username via ip: {ip}".format(
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.error("login failed because of missing username via ip: %s", request.META["REMOTE_ADDR"])
 
 
 def get_password_requirements_string():
@@ -2449,7 +2447,7 @@ def calculate_finding_age(f):
         else:
             diff = timezone.now().date() - start_date
         days = diff.days
-    return days if days > 0 else 0
+    return max(0, days)
 
 
 def get_open_findings_burndown(product):
@@ -2587,3 +2585,28 @@ def get_open_findings_burndown(product):
     past_90_days["y_min"] = running_min
 
     return past_90_days
+
+
+def generate_file_response(file_object: FileUpload) -> FileResponse:
+    """Serve an uploaded file in a uniformed way.
+
+    This function assumes all permissions have previously validated/verified
+    by the caller of this function.
+    """
+    # Quick check to ensure we have the right type of object
+    if not isinstance(file_object, FileUpload):
+        msg = f"FileUpload object expected but type <{type(file_object)}> received."
+        raise TypeError(msg)
+    # Determine the path of the file on disk within the MEDIA_ROOT
+    file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
+    _, file_extension = os.path.splitext(file_path)
+    # Generate the FileResponse
+    response = FileResponse(
+        open(file_path, "rb"),
+        filename=f"{file_object.title}{file_extension}",
+        content_type=f"{mimetypes.guess_type(file_path)}",
+    )
+    # Add some important headers
+    response["Content-Disposition"] = f'attachment; filename="{file_object.title}{file_extension}"'
+    response["Content-Length"] = file_object.file.size
+    return response

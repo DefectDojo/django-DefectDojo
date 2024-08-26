@@ -164,6 +164,7 @@ from dojo.tool_product.queries import get_authorized_tool_product_settings
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
     async_delete,
+    generate_file_response,
     get_setting,
     get_system_setting,
 )
@@ -179,7 +180,7 @@ class DojoOpenApiJsonRenderer(OpenApiJsonRenderer2):
 
 
 class DojoSpectacularAPIView(SpectacularAPIView):
-    renderer_classes = [DojoOpenApiJsonRenderer] + SpectacularAPIView.renderer_classes
+    renderer_classes = [DojoOpenApiJsonRenderer, *SpectacularAPIView.renderer_classes]
 
 
 class DojoModelViewSet(
@@ -646,21 +647,8 @@ class EngagementViewSet(
                 {"error": "File ID not associated with Engagement"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Get the path of the file in media root
-        file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
-        file_handle = open(file_path, "rb")
         # send file
-        response = FileResponse(
-            file_handle,
-            content_type=f"{mimetypes.guess_type(file_path)}",
-            status=status.HTTP_200_OK,
-        )
-        response["Content-Length"] = file_object.file.size
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="{file_object.file.name}"'
-
-        return response
+        return generate_file_response(file_object)
 
 
 class RiskAcceptanceViewSet(
@@ -1156,21 +1144,8 @@ class FindingViewSet(
                 {"error": "File ID not associated with Finding"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Get the path of the file in media root
-        file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
-        file_handle = open(file_path, "rb")
         # send file
-        response = FileResponse(
-            file_handle,
-            content_type=f"{mimetypes.guess_type(file_path)}",
-            status=status.HTTP_200_OK,
-        )
-        response["Content-Length"] = file_object.file.size
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="{file_object.file.name}"'
-
-        return response
+        return generate_file_response(file_object)
 
     @extend_schema(
         request=serializers.FindingNoteSerializer,
@@ -1726,7 +1701,6 @@ class ProductViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     # def list(self, request):
-    #     print(vars(request))
     #     # Note the use of `get_queryset()` instead of `self.queryset`
     #     queryset = self.get_queryset()
     #     serializer = self.serializer_class(queryset, many=True)
@@ -2320,21 +2294,8 @@ class TestsViewSet(
                 {"error": "File ID not associated with Test"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Get the path of the file in media root
-        file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
-        file_handle = open(file_path, "rb")
         # send file
-        response = FileResponse(
-            file_handle,
-            content_type=f"{mimetypes.guess_type(file_path)}",
-            status=status.HTTP_200_OK,
-        )
-        response["Content-Length"] = file_object.file.size
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="{file_object.file.name}"'
-
-        return response
+        return generate_file_response(file_object)
 
 
 # Authorization: authenticated, configuration
@@ -2663,7 +2624,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         # have been created yet
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
-            jira_driver = (engagement if engagement else product if product else None)
+            jira_driver = engagement or (product or None)
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
         logger.debug(f"push_to_jira: {push_to_jira}")
@@ -2832,9 +2793,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         # have been created yet
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
-            jira_driver = (
-                test if test else engagement if engagement else product if product else None
-            )
+            jira_driver = test or (engagement or (product or None))
             if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
         logger.debug(f"push_to_jira: {push_to_jira}")
@@ -3177,7 +3136,7 @@ def report_generate(request, obj, options):
 class SystemSettingsViewSet(
     mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet,
 ):
-    """Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations"""
+    """Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations"""
 
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
     serializer_class = serializers.SystemSettingsSerializer

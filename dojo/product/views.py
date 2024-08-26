@@ -144,14 +144,13 @@ def product(request):
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
     prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
-    # print(prod_list.object_list.explain)
-
     add_breadcrumb(title=_("Product List"), top_level=not len(request.GET), request=request)
 
     return render(request, "dojo/product.html", {
         "prod_list": prod_list,
         "prod_filter": prod_filter,
         "name_words": sorted(set(name_words)),
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         "user": request.user})
 
 
@@ -232,7 +231,6 @@ def view_product(request, pid):
         success_percent = round((float(total_pass) / float(total)) * 100, 2)
         waiting_percent = round((float(total_wait) / float(total)) * 100, 2)
         fail_percent = round(100 - success_percent - waiting_percent, 2)
-        print(fail_percent)
         benchAndPercent.append({
             "id": benchmarks[i].benchmark_type.id,
             "name": benchmarks[i].benchmark_type,
@@ -336,6 +334,7 @@ def view_product_components(request, pid):
         "filter": comp_filter,
         "product_tab": product_tab,
         "result": result,
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         "component_words": sorted(set(component_words)),
     })
 
@@ -793,6 +792,7 @@ def view_engagements(request, pid):
         "queued_engs_filter": queued_engs_filter,
         "inactive_engs": result_inactive_engs,
         "inactive_engs_count": result_inactive_engs.paginator.count,
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         "inactive_engs_filter": inactive_engs_filter,
         "recent_test_day_count": recent_test_day_count,
         "user": request.user})
@@ -1652,7 +1652,6 @@ def edit_notifications(request, pid):
             logger.debug("existing product notifications found")
 
         form = ProductNotificationsForm(request.POST, instance=product_notifications)
-        # print(vars(form))
 
         if form.is_valid():
             form.save()

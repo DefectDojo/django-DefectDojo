@@ -9,7 +9,7 @@ class TestPipAuditParser(DojoTestCase):
         testfiles = ["unittests/scans/pip_audit/empty.json",
                      "unittests/scans/pip_audit/empty_new.json"]
         for path in testfiles:
-            testfile = open(path)
+            testfile = open(path, encoding="utf-8")
             parser = PipAuditParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
@@ -19,7 +19,7 @@ class TestPipAuditParser(DojoTestCase):
         testfiles = ["unittests/scans/pip_audit/zero_vulns.json",
                      "unittests/scans/pip_audit/zero_vulns_new.json"]
         for path in testfiles:
-            testfile = open(path)
+            testfile = open(path, encoding="utf-8")
             parser = PipAuditParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
@@ -29,7 +29,7 @@ class TestPipAuditParser(DojoTestCase):
         testfiles = ["unittests/scans/pip_audit/many_vulns.json",
                      "unittests/scans/pip_audit/many_vulns_new.json"]
         for path in testfiles:
-            testfile = open(path)
+            testfile = open(path, encoding="utf-8")
             parser = PipAuditParser()
             findings = parser.get_findings(testfile, Test())
             testfile.close()
