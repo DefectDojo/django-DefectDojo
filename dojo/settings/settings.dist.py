@@ -309,20 +309,17 @@ env = environ.FileAwareEnv(
 
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
     result_list = []
-    result_list.append(scheme)
-    result_list.append(":")
+    result_list.extend((scheme, ":"))
     if double_slashes:
         result_list.append("//")
     result_list.append(user)
     if len(password) > 0:
-        result_list.append(":")
-        result_list.append(password)
+        result_list.extend((":", password))
     if len(user) > 0 or len(password) > 0:
         result_list.append("@")
     result_list.append(host)
     if port >= 0:
-        result_list.append(":")
-        result_list.append(str(port))
+        result_list.extend((":", str(port)))
     if len(path) > 0 and path[0] != "/":
         result_list.append("/")
     result_list.append(path)
@@ -1090,14 +1087,14 @@ if AUTH_REMOTEUSER_ENABLED:
 # Celery settings
 CELERY_BROKER_URL = env("DD_CELERY_BROKER_URL") \
     if len(env("DD_CELERY_BROKER_URL")) > 0 else generate_url(
-    env("DD_CELERY_BROKER_SCHEME"),
-    True,
-    env("DD_CELERY_BROKER_USER"),
-    env("DD_CELERY_BROKER_PASSWORD"),
-    env("DD_CELERY_BROKER_HOST"),
-    env("DD_CELERY_BROKER_PORT"),
-    env("DD_CELERY_BROKER_PATH"),
-    env("DD_CELERY_BROKER_PARAMS"),
+    scheme=env("DD_CELERY_BROKER_SCHEME"),
+    double_slashes=True,
+    user=env("DD_CELERY_BROKER_USER"),
+    password=env("DD_CELERY_BROKER_PASSWORD"),
+    host=env("DD_CELERY_BROKER_HOST"),
+    port=env("DD_CELERY_BROKER_PORT"),
+    path=env("DD_CELERY_BROKER_PATH"),
+    params=env("DD_CELERY_BROKER_PARAMS"),
 )
 CELERY_TASK_IGNORE_RESULT = env("DD_CELERY_TASK_IGNORE_RESULT")
 CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
@@ -1167,10 +1164,12 @@ PROMETHEUS_EXPORT_MIGRATIONS = False
 # django metrics for monitoring
 if env("DD_DJANGO_METRICS_ENABLED"):
     DJANGO_METRICS_ENABLED = env("DD_DJANGO_METRICS_ENABLED")
-    INSTALLED_APPS = INSTALLED_APPS + ("django_prometheus",)
-    MIDDLEWARE = ["django_prometheus.middleware.PrometheusBeforeMiddleware"] + \
-        MIDDLEWARE + \
-        ["django_prometheus.middleware.PrometheusAfterMiddleware"]
+    INSTALLED_APPS = (*INSTALLED_APPS, "django_prometheus")
+    MIDDLEWARE = [
+        "django_prometheus.middleware.PrometheusBeforeMiddleware",
+        *MIDDLEWARE,
+        "django_prometheus.middleware.PrometheusAfterMiddleware",
+]
     database_engine = DATABASES.get("default").get("ENGINE")
     DATABASES["default"]["ENGINE"] = database_engine.replace("django.", "django_prometheus.", 1)
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
@@ -1755,11 +1754,21 @@ NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
 warnings.filterwarnings("ignore", message="polymorphic.base.ManagerInheritanceWarning.*")
 warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager.*")
 
-# This setting is here to override default renderer of forms (use div-based, instred of table-based).
-# It has effect only on templates that use "{{ form }}" in the body. Only "Delete forms" now.
-# The setting is here to avoid RemovedInDjango50Warning. It is here only for transition period.
-# TODO - Remove this setting in Django 5.0 because DjangoDivFormRenderer will become deprecated and the same class will be used by default DjangoTemplates.
-# More info:
-# - https://docs.djangoproject.com/en/4.1/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
-# - https://docs.djangoproject.com/en/5.0/ref/forms/renderers/#django.forms.renderers.DjangoTemplates
-FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
+
+# The setting is here to avoid RemovedInDjango60Warning. It is here only for transition period.
+# TODO: - Remove this setting in Django 6.0
+# TODO: More info:
+# Context:
+# uwsgi-1  |   File "/app/dojo/forms.py", line 515, in ImportScanForm
+# uwsgi-1  |     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")
+# uwsgi-1  |                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# uwsgi-1  |   File "/usr/local/lib/python3.11/site-packages/django/forms/fields.py", line 769, in __init__
+# uwsgi-1  |     warnings.warn(
+# uwsgi-1  | django.utils.deprecation.RemovedInDjango60Warning: The default scheme will be changed from 'http' to 'https' in Django 6.0. Pass the forms.URLField.assume_scheme argument to silence this warning, or set the FORMS_URLFIELD_ASSUME_HTTPS transitional setting to True to opt into using 'https' as the new default scheme.
+# +
+# uwsgi-1  |   File "/usr/local/lib/python3.11/site-packages/django/conf/__init__.py", line 214, in __init__
+# uwsgi-1  |     warnings.warn(
+# uwsgi-1  | django.utils.deprecation.RemovedInDjango60Warning: The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.
+warnings.filterwarnings("ignore", "The FORMS_URLFIELD_ASSUME_HTTPS transitional setting is deprecated.")
+FORMS_URLFIELD_ASSUME_HTTPS = True
+# Inspired by https://adamj.eu/tech/2023/12/07/django-fix-urlfield-assume-scheme-warnings/

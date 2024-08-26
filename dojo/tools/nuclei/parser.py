@@ -93,7 +93,7 @@ class NucleiParser:
 
             classification = info.get("classification")
             if classification:
-                if "cve-id" in classification and classification["cve-id"]:
+                if classification.get("cve-id"):
                     cve_ids = classification["cve-id"]
                     finding.unsaved_vulnerability_ids = [x.upper() for x in cve_ids]
                 if (
@@ -103,19 +103,13 @@ class NucleiParser:
                 ):
                     cwe = classification["cwe-id"][0]
                     finding.cwe = int(cwe[4:])
-                if (
-                    "cvss-metrics" in classification
-                    and classification["cvss-metrics"]
-                ):
+                if classification.get("cvss-metrics"):
                     cvss_objects = cvss_parser.parse_cvss_from_text(
                         classification["cvss-metrics"],
                     )
                     if len(cvss_objects) > 0:
                         finding.cvssv3 = cvss_objects[0].clean_vector()
-                if (
-                    "cvss-score" in classification
-                    and classification["cvss-score"]
-                ):
+                if classification.get("cvss-score"):
                     finding.cvssv3_score = classification["cvss-score"]
 
             matcher = item.get("matcher-name", item.get("matcher_name"))

@@ -15,7 +15,7 @@ class TestTrustwaveParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        with open(sample_path("many_vulns.csv")) as test_file:
+        with open(sample_path("many_vulns.csv"), encoding="utf-8") as test_file:
             parser = TrustwaveParser()
             findings = parser.get_findings(test_file, test)
             for finding in findings:

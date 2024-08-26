@@ -285,7 +285,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     "This finding has been automatically closed "
                     "as it is not present anymore in recent scans."
                 ),
-                self.findings_groups_enabled,
+                finding_groups_enabled=self.findings_groups_enabled,
             )
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:

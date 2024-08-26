@@ -26,6 +26,19 @@ networkPolicy:
   #  - podSelector:
   #      matchLabels:
   #      app.kubernetes.io/instance: defectdojo-prometheus
+  # For more detailed configuration with ports and peers. It will ignore ingressExtend
+  ingress: []
+  # ingress:
+  #  - from:
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: defectdojo
+  #     - podSelector:
+  #         matchLabels:
+  #           app.kubernetes.io/instance: defectdojo-prometheus
+  #    ports:
+  #    - protocol: TCP
+  #      port: 8443
   egress: []
   # egress:
   # - to:
@@ -42,7 +55,7 @@ database: postgresql
 host: defectdojo.default.minikube.local
 
 # The full URL to your defectdojo instance, depends on the domain where DD is deployed, it also affects links in Jira
-# site_url: 'https://<yourdomain>'
+# siteUrl: 'https://<yourdomain>'
 
 # optional list of alternative hostnames to use that gets appended to
 # DD_ALLOWED_HOSTS. This is necessary when your local hostname does not match
@@ -76,6 +89,13 @@ securityContext:
 
 dbMigrationChecker:
   enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
 
 tests:
   unitTests:
@@ -139,15 +159,15 @@ celery:
         cpu: 2000m
         memory: 512Mi
     tolerations: []
-    app_settings:
-      pool_type: solo
+    appSettings:
+      poolType: solo
       # Performance improved celery worker config when needing to deal with a lot of findings (e.g deduplication ops)
       # Comment out the "solo" line, and uncomment the following lines.
-      # pool_type: prefork
-      # autoscale_min: 2
-      # autoscale_max: 8
+      # poolType: prefork
+      # autoscaleMin: 2
+      # autoscaleMax: 8
       # concurrency: 8
-      # prefetch_multiplier: 128
+      # prefetchMultiplier: 128
 
   # A list of extra volumes to mount. This
   # is useful for bringing in extra data that can be referenced by other configurations
@@ -228,11 +248,11 @@ django:
       limits:
         cpu: 2000m
         memory: 512Mi
-    app_settings:
+    appSettings:
       processes: 2
       threads: 2
-      # max_fd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
-    enable_debug: false  # this also requires DD_DEBUG to be set to True
+      # maxFd: 102400 # Uncomment to set the maximum number of file descriptors. If not set will be detected by uwsgi
+    enableDebug: false  # this also requires DD_DEBUG to be set to True
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
     # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
@@ -434,7 +454,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.36.0
+    tag: 1.37.0
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""

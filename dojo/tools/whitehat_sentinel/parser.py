@@ -219,11 +219,7 @@ class WhiteHatSentinelParser:
             )
             steps = whitehat_vuln["description"].get("description_prepend", "")
             solution = self._parse_solution(whitehat_vuln["solution"])
-            risk_id = (
-                whitehat_vuln.get("custom_risk")
-                if whitehat_vuln.get("custom_risk")
-                else whitehat_vuln.get("risk")
-            )
+            risk_id = whitehat_vuln.get("custom_risk") or whitehat_vuln.get("risk")
             severity = self._convert_whitehat_severity_id_to_dojo_severity(
                 risk_id,
             )

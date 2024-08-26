@@ -243,9 +243,7 @@ class VeracodeXMLParser:
 
         _sast_source_obj = xml_node.attrib.get("functionprototype")
         if isinstance(_sast_source_obj, str):
-            finding.sast_source_object = (
-                _sast_source_obj if _sast_source_obj else None
-            )
+            finding.sast_source_object = _sast_source_obj or None
 
         finding.unsaved_tags = ["sast"]
 
