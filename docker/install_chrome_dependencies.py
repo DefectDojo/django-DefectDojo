@@ -5,7 +5,6 @@ https://github.com/microsoft/playwright/blob/main/utils/linux-browser-dependenci
 """
 import logging
 import subprocess
-from contextlib import suppress
 
 logger = logging.getLogger(__name__)
 
@@ -24,9 +23,7 @@ def run_command(cmd, cwd=None, env=None):
 
 
 def ldd(file_path):
-    with suppress(subprocess.CalledProcessError):
-        return run_command(["ldd", file_path])
-    return "", 1
+    return run_command(["ldd", file_path])
 
 
 raw_deps = ldd("/opt/chrome/chrome")
