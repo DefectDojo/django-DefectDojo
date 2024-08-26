@@ -107,6 +107,7 @@
                     <th>{% trans "Updated" %}</th>
                     {% if test.percent_complete > 0 %}<th>{% trans "Progress" %}</th>{% endif %}
                     <th>{% trans "Version" %}</th>
+                    {% if sla %}<th>SLA</th>{% endif %}
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.test_import_set.all %}
                         <th>
                             {% trans "Reimports" %}
@@ -157,6 +158,45 @@
                         </td>
                     {% endif %}
                     <td>{{ test.version }}</td>
+                    {% if sla %}
+                        <td>
+                            {{ sla.name }}
+                            <i class="fa fa-info-circle has-popover"
+                            title="<i class='fa fa-info-circle'></i> <b>{{ sla.description }}</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                            data-content='
+                                <b>Critical:</b>
+                                {% if sla.enforce_critical %}
+                                    {{ sla.critical }} days to remediate
+                                {% else %}
+                                    <em class="text-muted">Not Enforced</em>
+                                {% endif %}
+                                <br/>
+
+                                <b>High:</b>
+                                {% if sla.enforce_high %}
+                                    {{ sla.high }} days to remediate
+                                {% else %}
+                                    <em class="text-muted">Not Enforced</em>
+                                {% endif %}
+                                <br/>
+
+                                <b>Medium:</b>
+                                {% if sla.enforce_medium %}
+                                    {{ sla.medium }} days to remediate
+                                {% else %}
+                                    <em class="text-muted">Not Enforced</em>
+                                {% endif %}
+                                <br/>
+
+                                <b>Low:</b>
+                                {% if sla.enforce_low %}
+                                    {{ sla.low }} days to remediate
+                                {% else %}
+                                    <em class="text-muted">Not Enforced</em>
+                                {% endif %}
+                            '></i>
+                        </td>
+                    {% endif %}
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
                         <td>{{ test.total_reimport_count }}</td>
                     {% endif %}

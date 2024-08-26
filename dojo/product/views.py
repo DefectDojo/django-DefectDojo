@@ -944,13 +944,13 @@ def edit_product(request, pid):
         if form.is_valid():
             initial_sla_config = Product.objects.get(pk=form.instance.id).sla_configuration
             form.save()
-            msg = "Product updated successfully."
+            msg = _("Product updated successfully.")
             # check if the SLA config was changed, append additional context to message
             if initial_sla_config != form.instance.sla_configuration:
-                msg += " All SLA expiration dates for findings within this product will be recalculated asynchronously for the newly assigned SLA configuration."
+                msg += _(" All SLA expiration dates for findings within this product will be recalculated asynchronously for the newly assigned SLA configuration.")
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 _(msg),
+                                 msg,
                                  extra_tags="alert-success")
 
             success, jform = jira_helper.process_jira_project_form(request, instance=jira_project, product=product)
