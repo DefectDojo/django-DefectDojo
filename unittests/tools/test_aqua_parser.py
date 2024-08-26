@@ -7,13 +7,13 @@ from unittests.dojo_test_case import DojoTestCase
 
 class TestAquaParser(DojoTestCase):
     def test_aqua_parser_has_no_finding(self):
-        with open("unittests/scans/aqua/no_vuln.json") as testfile:
+        with open("unittests/scans/aqua/no_vuln.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_aqua_parser_has_one_finding(self):
-        with open("unittests/scans/aqua/one_vuln.json") as testfile:
+        with open("unittests/scans/aqua/one_vuln.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -30,13 +30,13 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual("CVE-2019-14697", finding.unsaved_vulnerability_ids[0])
 
     def test_aqua_parser_has_many_findings(self):
-        with open("unittests/scans/aqua/many_vulns.json") as testfile:
+        with open("unittests/scans/aqua/many_vulns.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(24, len(findings))
 
     def test_aqua_parser_v2_has_one_finding(self):
-        with open("unittests/scans/aqua/one_v2.json") as testfile:
+        with open("unittests/scans/aqua/one_v2.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -49,13 +49,13 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual("CVE-2019-15601", finding.unsaved_vulnerability_ids[0])
 
     def test_aqua_parser_v2_has_many_findings(self):
-        with open("unittests/scans/aqua/many_v2.json") as testfile:
+        with open("unittests/scans/aqua/many_v2.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
 
     def test_aqua_parser_cvssv3_has_no_finding(self):
-        with open("unittests/scans/aqua/many_v2.json") as testfile:
+        with open("unittests/scans/aqua/many_v2.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             nb_cvssv3 = 0
@@ -66,7 +66,7 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual(0, nb_cvssv3)
 
     def test_aqua_parser_cvssv3_has_many_findings(self):
-        with open("unittests/scans/aqua/many_vulns.json") as testfile:
+        with open("unittests/scans/aqua/many_vulns.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             nb_cvssv3 = 0
@@ -77,7 +77,7 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual(16, nb_cvssv3)
 
     def test_aqua_parser_for_aqua_severity(self):
-        with open("unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
+        with open("unittests/scans/aqua/vulns_with_aqua_severity.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             sevs = []
@@ -93,20 +93,20 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual(7, d["Info"])
 
     def test_aqua_parser_issue_10585(self):
-        with open("unittests/scans/aqua/issue_10585.json") as testfile:
+        with open("unittests/scans/aqua/issue_10585.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_aqua_parser_aqua_devops_issue_10611(self):
-        with open("unittests/scans/aqua/aqua_devops_issue_10611.json") as testfile:
+        with open("unittests/scans/aqua/aqua_devops_issue_10611.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(101, len(findings))
             self.assertEqual("server.key - server.key (/juice-shop/node_modules/node-gyp/test/fixtures/server.key) ", findings[83].title)
 
     def test_aqua_parser_aqua_devops_empty(self):
-        with open("unittests/scans/aqua/empty_aquadevops.json") as testfile:
+        with open("unittests/scans/aqua/empty_aquadevops.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))

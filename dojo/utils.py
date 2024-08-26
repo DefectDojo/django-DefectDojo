@@ -674,12 +674,14 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             counts.append(start_of_period.strftime("%b %Y"))
-        counts.append(o_count["zero"])
-        counts.append(o_count["one"])
-        counts.append(o_count["two"])
-        counts.append(o_count["three"])
-        counts.append(total)
-        counts.append(o_count["closed"])
+        counts.extend((
+            o_count["zero"],
+            o_count["one"],
+            o_count["two"],
+            o_count["three"],
+            total,
+            o_count["closed"],
+        ))
 
         stuff.append(counts)
         o_stuff.append(counts[:-1])
@@ -692,11 +694,13 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             a_counts.append(start_of_period.strftime("%b %Y"))
-        a_counts.append(a_count["zero"])
-        a_counts.append(a_count["one"])
-        a_counts.append(a_count["two"])
-        a_counts.append(a_count["three"])
-        a_counts.append(a_total)
+        a_counts.extend((
+            a_count["zero"],
+            a_count["one"],
+            a_count["two"],
+            a_count["three"],
+            a_total,
+        ))
         a_stuff.append(a_counts)
 
 
@@ -789,7 +793,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
-        # reminder: The first week of a year is the one that contains the year’s first Thursday
+        # reminder: The first week of a year is the one that contains the year's first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
         if view == "Finding":
             severities_by_day = objs.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
@@ -880,8 +884,8 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
         return punchcard, ticks
 
-    except Exception as e:
-        logger.exception("Not showing punchcard graph due to exception gathering data", e)
+    except Exception:
+        logger.exception("Not showing punchcard graph due to exception gathering data")
         return None, None
 
 
@@ -1784,7 +1788,7 @@ def get_return_url(request):
         # for some reason using request.GET.get('return_url') never works
         return_url = request.GET["return_url"] if "return_url" in request.GET else None
 
-    return return_url if return_url else None
+    return return_url or None
 
 
 def redirect_to_return_url_or_else(request, or_else):
@@ -1877,9 +1881,9 @@ def sla_compute_and_notify(*args, **kwargs):
             period = "day"
             if abs_sla_age > 1:
                 period = "days"
-            title += "SLA breached by %d %s! Overdue notice" % (abs_sla_age, period)
+            title += f"SLA breached by {abs_sla_age} {period}! Overdue notice"
         elif kind == "prebreach":
-            title += "SLA pre-breach warning - %d day(s) left" % (sla_age)
+            title += f"SLA pre-breach warning - {sla_age} day(s) left"
         elif kind == "breaching":
             title += "SLA is breaching today"
 
@@ -2367,33 +2371,22 @@ def log_user_login(sender, request, user, **kwargs):
     # to cover more complex cases:
     # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
 
-    logger.info("login user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("login user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
 
-    logger.info("logout user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)
 def log_user_login_failed(sender, credentials, request, **kwargs):
 
     if "username" in credentials:
-        logger.warning("login failed for: {credentials} via ip: {ip}".format(
-            credentials=credentials["username"],
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.warning("login failed for: %s via ip: %s", credentials["username"], request.META["REMOTE_ADDR"])
     else:
-        logger.error("login failed because of missing username via ip: {ip}".format(
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.error("login failed because of missing username via ip: %s", request.META["REMOTE_ADDR"])
 
 
 def get_password_requirements_string():
@@ -2459,7 +2452,7 @@ def calculate_finding_age(f):
         else:
             diff = timezone.now().date() - start_date
         days = diff.days
-    return days if days > 0 else 0
+    return max(0, days)
 
 
 def get_open_findings_burndown(product):
