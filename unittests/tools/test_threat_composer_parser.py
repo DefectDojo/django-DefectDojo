@@ -1,10 +1,13 @@
+import os
+
 from dojo.models import Test
 from dojo.tools.threat_composer.parser import ThreatComposerParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
-import os
+
 
 def sample_path(file_name: str):
     return os.path.join("/scans/threat_composer", file_name)
+
 
 class TestThreatComposerParser(DojoTestCase):
 
