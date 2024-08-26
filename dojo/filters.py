@@ -1559,6 +1559,8 @@ class FindingFilterHelper(FilterSet):
     is_mitigated = ReportBooleanFilter()
     mitigated_date = DateFromToRangeFilter(field_name="mitigated", label="Mitigated Date")
     mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On")
+    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
+    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After")
     planned_remediation_date = DateRangeOmniFilter()
     planned_remediation_version = CharFilter(lookup_expr="icontains", label=_("Planned remediation version"))
     file_path = CharFilter(lookup_expr="icontains")
