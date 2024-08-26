@@ -222,7 +222,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual(3, len(findings))
 
     def test_appcheck_web_application_scanner_parser_http2(self):
-        with open("unittests/scans/appcheck_web_application_scanner/appcheck_web_application_scanner_http2.json") as testfile:
+        with open("unittests/scans/appcheck_web_application_scanner/appcheck_web_application_scanner_http2.json") as testfile:  # noqa: PLW1514
             parser = AppCheckWebApplicationScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -541,7 +541,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             ("'!Test String?'\"\"", "'!Test String?'\"\""),
             ("\r\n\tTest\r\nString\t\r\n", "\r\n\tTest\r\nString\t\r\n"),
             ("\0Test\r\nString\0\n", "\\x00Test\r\nString\\x00\n"),
-            ("\0\0你好，\0我不知道。对马好！\n", "\\x00\\x00你好，\\x00我不知道。对马好！\n"),
+            ("\0\0你好，\0我不知道。对马好！\n", "\\x00\\x00你好，\\x00我不知道。对马好！\n"),  # noqa: RUF001
             ("\u0000", r"\x00"),
             ("\x00", r"\x00"),
             ("\u0000\u0000", r"\x00\x00"),
