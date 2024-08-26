@@ -1671,7 +1671,7 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["after"].widget = date_input_widget
         self.form.fields["mitigated_on"].widget = date_input_widget
         self.form.fields["mitigated_before"].widget = date_input_widget
-        self.form.fields["mitigated_after"].widget = date_input_widget        
+        self.form.fields["mitigated_after"].widget = date_input_widget      
         self.form.fields["cwe"].choices = cwe_options(self.queryset)
 
 
