@@ -2,7 +2,11 @@ from django.test import TestCase
 
 from dojo.models import Finding, Test
 from dojo.tools.appcheck_web_application_scanner.engines.appcheck import AppCheckScanningEngineParser
-from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser, strip_markup
+from dojo.tools.appcheck_web_application_scanner.engines.base import (
+    BaseEngineParser,
+    escape_non_printable,
+    strip_markup,
+)
 from dojo.tools.appcheck_web_application_scanner.engines.nmap import NmapScanningEngineParser
 from dojo.tools.appcheck_web_application_scanner.parser import AppCheckWebApplicationScannerParser
 
@@ -217,6 +221,71 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             # Test has 5 entries, but we should only return 3 findings.
             self.assertEqual(3, len(findings))
 
+    def test_appcheck_web_application_scanner_parser_http2(self):
+        with open("unittests/scans/appcheck_web_application_scanner/appcheck_web_application_scanner_http2.json") as testfile:
+            parser = AppCheckWebApplicationScannerParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(3, len(findings))
+
+            finding = findings[0]
+            self.assertEqual("1c564bddf78f7642468474a49c9be6653f39e9df6b32d658", finding.unique_id_from_tool)
+            self.assertEqual("2024-08-06", finding.date)
+            self.assertEqual("HTTP/2 Supported", finding.title)
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            self.assertTrue("**Messages**" not in finding.description)
+            self.assertTrue("\x00" not in finding.description)
+            self.assertIsNotNone(finding.unsaved_request)
+            self.assertTrue(finding.unsaved_request.startswith(":method  =   GET"))
+            self.assertIsNotNone(finding.unsaved_response)
+            self.assertTrue(finding.unsaved_response.startswith(":status: 200"))
+            endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
+            self.assertEqual("www.xzzvwy.com", endpoint.host)
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual("media/vzdldjmk/pingpong2.jpg", endpoint.path)
+            self.assertEqual("rmode=max&height=500", endpoint.query)
+
+            finding = findings[1]
+            self.assertEqual("4e7c0b570ff6083376b99e1897102a87907effe2199dc8d4", finding.unique_id_from_tool)
+            self.assertEqual("2024-08-06", finding.date)
+            self.assertEqual("HTTP/2 Protocol: Transfer-Encoding Header Accepted", finding.title)
+            self.assertTrue("**Messages**" not in finding.description)
+            self.assertTrue("\x00" not in finding.description)
+            self.assertTrue("**HTTP2 Headers**" in finding.description)
+            self.assertIsNotNone(finding.unsaved_request)
+            self.assertTrue(finding.unsaved_request.startswith(":method  =   POST"))
+            self.assertIsNotNone(finding.unsaved_response)
+            self.assertTrue(finding.unsaved_response.startswith(":status: 200"))
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
+            self.assertEqual("www.xzzvwy.com", endpoint.host)
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual("media/mmzzvwy/pingpong2.jpg", endpoint.path)
+            self.assertEqual("rmode=max&height=500", endpoint.query)
+
+            finding = findings[2]
+            self.assertEqual("2f1fb384e6a866f9ee0c6f7550e3b607e8b1dd2b1ab0fd02", finding.unique_id_from_tool)
+            self.assertEqual("2024-08-06", finding.date)
+            self.assertEqual("HTTP/2 Protocol: Transfer-Encoding Header Accepted", finding.title)
+            self.assertTrue("**Messages**" not in finding.description)
+            self.assertTrue("**HTTP2 Headers**" in finding.description)
+            self.assertTrue("\x00" not in finding.description)
+            self.assertIsNotNone(finding.unsaved_request)
+            self.assertTrue(finding.unsaved_request.startswith(":method  =   POST"))
+            self.assertIsNotNone(finding.unsaved_response)
+            self.assertTrue(finding.unsaved_response.startswith(":status: 200"))
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
+            self.assertEqual("www.zzvwy.com", endpoint.host)
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual("https", endpoint.protocol)
+            self.assertEqual("media/bnhfz2s2/transport-hubs.jpeg", endpoint.path)
+            self.assertEqual("width=768&height=505&mode=crop&format=webp&quality=60", endpoint.query)
+
     def test_appcheck_web_application_scanner_parser_base_engine_parser(self):
         engine = BaseEngineParser()
 
@@ -411,6 +480,14 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             {"Messages": "--->\n\nsome stuff\n\n<--\n\nhere"},
             # Incorrect request starting-marker
             {"Messages": "-->\n\nsome stuff here\n\n<---\n\nhere"},
+            # Missing data
+            {"Messages": "HTTP/2 Request Headers:\n\n\r\nHTTP/2 Response Headers:\n\n"},
+            {"Messages": "HTTP/2 Request Headers:\n\n\r\nHTTP/2 Response Headers:\n\nData"},
+            {"Messages": "HTTP/2 Request Headers:\n\nData\r\nHTTP/2 Response Headers:\n\n"},
+            # No response
+            {"Messages": "HTTP/2 Request Headers:\n\nData\r\n"},
+            # No request
+            {"Messages": "\r\nHTTP/2 Response Headers:\n\nData"},
         ]:
             has_messages_entry = "Messages" in no_rr
             engine.extract_request_response(f, no_rr)
@@ -420,15 +497,28 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             if has_messages_entry:
                 self.assertTrue("Messages" in no_rr)
 
-        for req, res in [
-            ("some stuff", "here"), ("some stuff  <---", "  here"), ("s--->", "here<---"), ("  s   ", "  h  "),
-            ("some stuff... HERE\r\n\r\n", "no, here\n\n"),
-        ]:
-            rr = {"Messages": f"--->\n\n{req}\n\n<---\n\n{res}"}
-            engine.extract_request_response(f, rr)
-            self.assertEqual(req.strip(), f.unsaved_request)
-            self.assertEqual(res.strip(), f.unsaved_response)
-            f.unsaved_request = f.unsaved_response = None
+        for template, test_data in {
+            # HTTP/1
+            "--->\n\n{req}\n\n<---\n\n{res}": [
+                ("some stuff", "here"),
+                ("some stuff  <---", "  here"),
+                ("s--->", "here<---"),
+                ("  s   ", "  h  "),
+                ("some stuff... HERE\r\n\r\n", "no, here\n\n"),
+            ],
+            # HTTP/2
+            "HTTP/2 Request Headers:\n\n{req}\r\nHTTP/2 Response Headers:\n\n{res}": [
+                ("some stuff", "here"),
+                ("    s--->    ", "    here<---    "),
+                ("\x00\x01\u0004\n\r\tdata", "\r\n\x00\x01\x0c\x0bdata"),
+            ],
+        }.items():
+            for req, res in test_data:
+                rr = {"Messages": template.format(req=req, res=res)}
+                engine.extract_request_response(f, rr)
+                self.assertEqual(req.strip(), f.unsaved_request)
+                self.assertEqual(res.strip(), f.unsaved_response)
+                f.unsaved_request = f.unsaved_response = None
 
     def test_appcheck_web_application_scanner_parser_markup_stripper(self):
         for markup, expected in [
@@ -440,3 +530,33 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             ("[[markup]] but with [[urlhere]]", "but with urlhere"),
         ]:
             self.assertEqual(expected, strip_markup(markup))
+
+    def test_appcheck_web_application_scanner_parser_non_printable_escape(self):
+        for test_string, expected in [
+            ("", ""),
+            (
+                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c",
+                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\\x0b\\x0c",
+            ),
+            ("'!Test String?'\"\"", "'!Test String?'\"\""),
+            ("\r\n\tTest\r\nString\t\r\n", "\r\n\tTest\r\nString\t\r\n"),
+            ("\0Test\r\nString\0\n", "\\x00Test\r\nString\\x00\n"),
+            ("\0\0你好，\0我不知道。对马好！\n", "\\x00\\x00你好，\\x00我不知道。对马好！\n"),
+            ("\u0000", r"\x00"),
+            ("\x00", r"\x00"),
+            ("\u0000\u0000", r"\x00\x00"),
+            ("\r\n\t\t\u0000\u0000\n\n", "\r\n\t\t\\x00\\x00\n\n"),
+            (
+                "¡A qÙîçk ΛæzŸ ßrȯωñ Møøβe\nönce \u0000\u202d\u200e Σister's ÞΕ 🜯 ¼ 50¢ «soda¬¿ υϖυ 🤪\u000b…",
+                "¡A qÙîçk ΛæzŸ ßrȯωñ Møøβe\nönce \\x00\\u202d\\u200e Σister's ÞΕ 🜯 ¼ 50¢ «soda¬¿ υϖυ 🤪\\x0b…",
+            ),
+            (
+                "Words: \u0000\u0010ABCD\u0000\u0001\u0001`\u0000jpeg\u0000CC+\u0000\b\u0000\u0003;\u0001\u0002\u00002\u001c\u0000@\u0000i\u0004\\\u0000. Done.",
+                r"Words: \x00\x10ABCD\x00\x01\x01`\x00jpeg\x00CC+\x00\x08\x00\x03;\x01\x02\x002\x1c\x00@\x00i\x04\\x00. Done.",
+            ),
+            (
+                "\u0016\no#bota\u00124&7\r\u0019j9}\t\u0004ef\u202egh\u001c",
+                "\\x16\no#bota\\x124&7\r\\x19j9}\t\\x04ef\\u202egh\\x1c",
+            ),
+        ]:
+            self.assertEqual(expected, escape_non_printable(test_string))

@@ -282,6 +282,9 @@ env = environ.FileAwareEnv(
     # When disabled, existing user tokens will not be removed but it will not be
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
+    # Enable endpoint which allow user to get API token when user+pass is provided
+    # It is useful to disable when non-local authentication (like SAML, Azure, ...) is in place
+    DD_API_TOKEN_AUTH_ENDPOINT_ENABLED=(bool, True),
     # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
     # Set fields used by the hashcode generator for deduplication, via en env variable that contains a JSON string
@@ -749,6 +752,8 @@ DJANGO_ADMIN_ENABLED = env("DD_DJANGO_ADMIN_ENABLED")
 # ------------------------------------------------------------------------------
 
 API_TOKENS_ENABLED = env("DD_API_TOKENS_ENABLED")
+
+API_TOKEN_AUTH_ENDPOINT_ENABLED = env("DD_API_TOKEN_AUTH_ENDPOINT_ENABLED")
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
