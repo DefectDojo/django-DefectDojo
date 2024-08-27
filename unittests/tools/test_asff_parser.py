@@ -31,7 +31,7 @@ class TestAsffParser(DojoTestCase):
             "IpV4Addresses"
         ]
         for endpoint in finding.unsaved_endpoints:
-            self.assertTrue(endpoint, expected_ipv4s)
+            self.assertIn(str(endpoint), expected_ipv4s)
             endpoint.clean()
 
     def test_asff_one_vuln(self):
