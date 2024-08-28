@@ -553,7 +553,7 @@ def get_labels(obj):
         if prod_name_label not in labels:
             labels.append(prod_name_label)
 
-    if system_settings.add_vulnerability_id_to_jira_label or jira_project and jira_project.add_vulnerability_id_to_jira_label:
+    if system_settings.add_vulnerability_id_to_jira_label or (jira_project and jira_project.add_vulnerability_id_to_jira_label):
         if isinstance(obj, Finding) and obj.vulnerability_ids:
             for id in obj.vulnerability_ids:
                 labels.append(id)

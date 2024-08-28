@@ -244,7 +244,7 @@ class DojoTestUtilsMixin:
         }
 
     def get_expected_redirect_product(self, product):
-        return "/product/%i" % product.id
+        return f"/product/{product.id}"
 
     def add_product_jira(self, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse("new_product"))
@@ -413,7 +413,7 @@ class DojoTestUtilsMixin:
         url = instance.url.strip("/") + "/rest/api/latest/issue/" + issue_id
         response = jira._session.get(url).json().get("fields", {})
         epic_link = response.get(epic_link_field, None)
-        if epic_id is None and epic_link is None or issue_in_epic:
+        if (epic_id is None and epic_link is None) or issue_in_epic:
             self.assertEqual(epic_id, epic_link)
         else:
             self.assertNotEqual(epic_id, epic_link)
