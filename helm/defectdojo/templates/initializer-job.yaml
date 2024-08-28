@@ -49,6 +49,26 @@ spec:
           {{- end }}
       {{- end }}
       initContainers:
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        restartPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-verbose={{ .Values.cloudsql.verbose }}"
+        {{- if eq .Values.database "postgresql" }}
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+        {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
+        {{- end }}
+      {{- end }}
       - name: wait-for-db
         command:
         - '/bin/bash'
@@ -67,25 +87,6 @@ spec:
             name: {{ $fullName }}
             optional: true
       containers:
-      {{- if .Values.cloudsql.enabled  }}
-      - name: cloudsql-proxy
-        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
-        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
-        securityContext:
-          runAsNonRoot: true
-        command: ["/cloud_sql_proxy"]
-        args:
-        - "-verbose={{ .Values.cloudsql.verbose }}"
-        {{- if eq .Values.database "postgresql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
-        {{- end }}
-        {{- if .Values.cloudsql.enable_iam_login }}
-        - "-enable_iam_login"
-        {{- end }}
-        {{- if .Values.cloudsql.use_private_ip }}
-        - "-ip_address_types=PRIVATE"
-        {{- end }}
-      {{- end }}
       - name: initializer
         image: "{{ template "initializer.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}

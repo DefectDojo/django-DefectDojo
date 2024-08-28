@@ -68,15 +68,11 @@ spec:
       {{- end }}
       {{- if .Values.dbMigrationChecker.enabled }}
       initContainers:
-      {{$data := dict "fullName" $fullName }}
-      {{- $newContext := merge . (dict "fullName" $fullName) }}
-      {{- include "dbMigrationChecker" $newContext | nindent 6 }}
-      {{- end }}
-      containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        restartPolicy: Always
         securityContext:
           runAsNonRoot: true
         command: ["/cloud_sql_proxy"]
@@ -92,6 +88,11 @@ spec:
         - "-ip_address_types=PRIVATE"
         {{- end }}
       {{- end }}
+      {{$data := dict "fullName" $fullName }}
+      {{- $newContext := merge . (dict "fullName" $fullName) }}
+      {{- include "dbMigrationChecker" $newContext | nindent 6 }}
+      {{- end }}
+      containers:
       - command:
         - /entrypoint-celery-beat.sh
         name: celery
