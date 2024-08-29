@@ -1420,13 +1420,16 @@ class ApiFindingFilter(DojoFilter):
     # DateRangeFilter
     created = DateRangeFilter()
     date = DateRangeFilter()
-    on = DateFilter(field_name="date", lookup_expr="exact")
-    before = DateFilter(field_name="date", lookup_expr="lt")
-    after = DateFilter(field_name="date", lookup_expr="gt")
+    discovered_on = DateFilter(field_name="date", lookup_expr="exact")
+    discovered_before = DateFilter(field_name="date", lookup_expr="lt")
+    discovered_after = DateFilter(field_name="date", lookup_expr="gt")
     jira_creation = DateRangeFilter(field_name="jira_issue__jira_creation")
     jira_change = DateRangeFilter(field_name="jira_issue__jira_change")
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
+    mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact")
+    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt")
+    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt")
     # NumberInFilter
     cwe = NumberInFilter(field_name="cwe", lookup_expr="in")
     defect_review_requested_by = NumberInFilter(field_name="defect_review_requested_by", lookup_expr="in")
@@ -1544,9 +1547,9 @@ class PercentageRangeFilter(RangeFilter):
 class FindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr="icontains")
     date = DateRangeFilter(field_name="date", label="Date Discovered")
-    on = DateFilter(field_name="date", lookup_expr="exact", label="On")
-    before = DateFilter(field_name="date", lookup_expr="lt", label="Before")
-    after = DateFilter(field_name="date", lookup_expr="gt", label="After")
+    on = DateFilter(field_name="date", lookup_expr="exact", label="Discovered On")
+    before = DateFilter(field_name="date", lookup_expr="lt", label="Discovered Before")
+    after = DateFilter(field_name="date", lookup_expr="gt", label="Discovered After")
     last_reviewed = DateRangeFilter()
     last_status_update = DateRangeFilter()
     cwe = MultipleChoiceFilter(choices=[])
@@ -1554,7 +1557,10 @@ class FindingFilterHelper(FilterSet):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
-    mitigated = DateRangeFilter(label="Mitigated Date")
+    mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
+    mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On")
+    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
+    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After")
     planned_remediation_date = DateRangeOmniFilter()
     planned_remediation_version = CharFilter(lookup_expr="icontains", label=_("Planned remediation version"))
     file_path = CharFilter(lookup_expr="icontains")
@@ -1663,6 +1669,9 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["on"].widget = date_input_widget
         self.form.fields["before"].widget = date_input_widget
         self.form.fields["after"].widget = date_input_widget
+        self.form.fields["mitigated_on"].widget = date_input_widget
+        self.form.fields["mitigated_before"].widget = date_input_widget
+        self.form.fields["mitigated_after"].widget = date_input_widget
         self.form.fields["cwe"].choices = cwe_options(self.queryset)
 
 
