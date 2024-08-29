@@ -1026,8 +1026,7 @@ def import_settings_tag(test_import, autoescape=True):
 
     icon = "fa-info-circle"
     color = ""
-
-    return mark_safe(html % (icon, color, icon,
+    return html % (icon, color, icon,
                                 esc(test_import.id),
                                 esc(test_import.import_settings.get("active", None)),
                                 esc(test_import.import_settings.get("verified", None)),
@@ -1035,7 +1034,7 @@ def import_settings_tag(test_import, autoescape=True):
                                 esc(test_import.import_settings.get("close_old_findings", None)),
                                 esc(test_import.import_settings.get("push_to_jira", None)),
                                 esc(test_import.import_settings.get("tags", None)),
-                                esc(test_import.import_settings.get("endpoints", test_import.import_settings.get("endpoint", None)))))
+                                esc(test_import.import_settings.get("endpoints", test_import.import_settings.get("endpoint", None))))
 
 
 @register.filter(needs_autoescape=True)

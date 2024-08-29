@@ -1,8 +1,8 @@
 import abc
 import json
 from collections import OrderedDict
-
 from django import forms
+from django.utils.html import escape
 from django.forms import Widget as form_widget
 from django.forms.utils import flatatt
 from django.http import QueryDict
@@ -143,11 +143,12 @@ class PageBreak(Widget):
         return mark_safe('<div class="report-page-break">Page Break</div>')
 
     def get_option_form(self):
-        return mark_safe(
-            "<div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click "
-            "and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>"
-            + self.get_html() + "</h5><span class='fa-solid fa-up-down-left-right pull-right icon'></span></div></div>"
-            "<form id='page-break'><input type='hidden' name='page-break'/></form></div>")
+        html_content = escape(self.get_html())
+        return f"""
+            <div data-multiple='true'  class='panel panel-available-widget'><div class='panel-heading' title='Click
+            and drag to move' data-toggle='tooltip'><div class='clearfix'><h5 style='width: 90%' class='pull-left'>
+            + {html_content} + </h5><span class='fa-solid fa-up-down-left-right pull-right icon'></span></div></div>
+            <form id='page-break'><input type='hidden' name='page-break'/></form></div>"""
 
 
 class ReportOptions(Widget):
