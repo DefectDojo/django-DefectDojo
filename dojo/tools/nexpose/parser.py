@@ -287,7 +287,7 @@ class NexposeParser:
             for vuln in host["vulns"]:
                 dupe_key = vuln["severity"] + vuln["name"]
 
-                find = self.findings(dupe_key, dupes, test, vuln)
+                find = self.findings(dupe_key, dupes, vuln)
 
                 endpoint = Endpoint(host=host["name"])
                 find.unsaved_endpoints.append(endpoint)
@@ -298,7 +298,7 @@ class NexposeParser:
                 for vuln in service["vulns"]:
                     dupe_key = vuln["severity"] + vuln["name"]
 
-                    find = self.findings(dupe_key, dupes, test, vuln)
+                    find = self.findings(dupe_key, dupes, vuln)
 
                     endpoint = Endpoint(
                         host=host["name"],
@@ -318,7 +318,7 @@ class NexposeParser:
         return list(dupes.values())
 
     @staticmethod
-    def findings(dupe_key, dupes, test, vuln):
+    def findings(dupe_key, dupes, vuln):
         """ """
         if dupe_key in dupes:
             find = dupes[dupe_key]
