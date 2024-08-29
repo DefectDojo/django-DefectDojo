@@ -40,3 +40,14 @@ class TestNpmAudit7PlusParser(DojoTestCase):
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
             self.assertEqual("@vercel/fun", finding.title)
+
+    def test_npm_audit_7_plus_parser_issue_10801(self):
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_7_plus/issue_10801.json"))
+        parser = NpmAudit7PlusParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual(0, finding.cwe)
