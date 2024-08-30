@@ -468,30 +468,42 @@ def not_specified_icon(tooltip):
 
 
 def stars(filled, total, tooltip):
-    code = '<i class="has-popover" data-placement="bottom" data-content="' + tooltip + '">'
-    for i in range(total):
-        if i < filled:
-            code += '<i class="fa-solid fa-star has-popover" aria-hidden="true"></span>'
-        else:
-            code += '<i class="fa-regular fa-star text-muted has-popover" aria-hidden="true"></span>'
-    code += "</i>"
-    return code
+    html_contect = """
+    <i class="has-popover" data-placement="bottom" data-content="{{tooltip}}">
+        {% for i in range %}
+            {% if i < filled %}
+                <i class="fa-solid fa-star has-popover" aria-hidden="true"></span>
+            {% else %}
+                <i class="fa-regular fa-star text-muted has-popover" aria-hidden="true"></span>
+            {% endif %}
+        {% endfor %}
+    </i>
+    """
+
+    context = {
+        "tooltip": tooltip,
+        "filled": filled,
+        "range": range(total)
+    }
+    template_object = template.Template(html_contect)
+    context_object = template.Context(context)
+    return template_object.render(context_object)
 
 
 @register.filter
 def business_criticality_icon(value):
     if value == Product.VERY_HIGH_CRITICALITY:
-        return mark_safe(stars(5, 5, "Very High"))
+        return stars(5, 5, "Very High")
     if value == Product.HIGH_CRITICALITY:
-        return mark_safe(stars(4, 5, "High"))
+        return stars(4, 5, "High")
     if value == Product.MEDIUM_CRITICALITY:
-        return mark_safe(stars(3, 5, "Medium"))
+        return stars(3, 5, "Medium")
     if value == Product.LOW_CRITICALITY:
-        return mark_safe(stars(2, 5, "Low"))
+        return stars(2, 5, "Low")
     if value == Product.VERY_LOW_CRITICALITY:
-        return mark_safe(stars(1, 5, "Very Low"))
+        return stars(1, 5, "Very Low")
     if value == Product.NONE_CRITICALITY:
-        return mark_safe(stars(0, 5, "None"))
+        return stars(0, 5, "None")
     else:
         return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
 
@@ -939,7 +951,11 @@ def status_style_color(status: str):
         "Transfer Expired": f'<span style="color:#D93E14">{status}</span>',
         "Transfer Rejected": f'<span style="color:red">{status}</span>',
     }
-    return mark_safe(dict_style_color.get(status, f'<span>{status}</span>'))
+    html_contect = dict_style_color.get(status, status)
+    template_object = template.Template(html_contect)
+    context = {"status": status}
+    context_object = template.Context(context)
+    return template_object.render(context_object)
 
 
 @register.filter(needs_autoescape=True)
@@ -999,7 +1015,7 @@ def full_name(user):
 
 @register.filter()
 def import_settings_tag(test_import):
-    template_string = """
+    html_contect = """
     <i class="fa {{ icon }} has-popover {{ color }}"
         title="<i class='fa {{ icon }}'></i> <b>Import Settings</b>"
         data-trigger="hover"
@@ -1017,7 +1033,7 @@ def import_settings_tag(test_import):
             <b>Endpoints:</b> {{test_import.import_settings.endpoints|default_if_none:''<br/>">
     </i>
     """
-    template_object = template.Template(template_string)
+    template_object = template.Template(html_contect)
     context = {
         'icon': 'fa-info-circle',
         'color': '',
@@ -1044,7 +1060,7 @@ def import_history(finding):
     for status_change in status_changes:
         list_of_status_changes += "<b>" + status_change.created.strftime("%b %d, %Y, %H:%M:%S") + "</b>: " + status_change.get_action_display() + "<br/>"
 
-    template_string = """
+    html_contect = """
        <i class="fa-solid fa-clock-rotate-left has-popover"
         title="<i class='fa-solid fa-clock-rotate-left'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
         data-content="{{list_of_status_changes}}<br/>Currently only showing status changes made by import/reimport."
@@ -1055,7 +1071,7 @@ def import_history(finding):
     context = {
         "list_of_status_changes": list_of_status_changes
     }
-    template_object = template.Template(template_string)
+    template_object = template.Template(html_contect)
     context_object = template.Context(context)
 
     return template_object.render(context_object)

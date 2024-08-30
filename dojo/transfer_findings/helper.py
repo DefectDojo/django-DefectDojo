@@ -217,6 +217,8 @@ def add_finding_related(
         if (transferfinding_finding.findings == origin_finding):
             if finding_related is None:
                 # Create a new finding related
+                origin_tags=list(origin_finding.tags.all().values_list("name", flat=True))
+                origin_tags.append("Transferred")
                 finding_related = Finding(
                     test=test,
                     title=origin_finding.title,
@@ -231,7 +233,7 @@ def add_finding_related(
                     static_finding=origin_finding.static_finding,
                     dynamic_finding=origin_finding.dynamic_finding,
                     risk_status="Risk Active",
-                    tags="Transferred",
+                    tags=origin_tags
                 )
                 finding_related.save()
                 transferfinding_finding.finding_related = finding_related
