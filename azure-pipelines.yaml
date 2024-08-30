@@ -33,8 +33,8 @@ steps:
       sudo apt install software-properties-common
       sudo add-apt-repository ppa:deadsnakes/ppa
       sudo apt update
-      sudo apt install python3.11 python3.11-venv
-      python3.11 -m venv dojodev
+      sudo apt install python3.12 python3.12-venv
+      python3.12 -m venv dojodev
       source dojodev/bin/activate
 
       echo -e "\033[94m--------python install-----------\033[0m"
@@ -42,7 +42,7 @@ steps:
       sudo apt-get install libmysqlclient-dev 
       sudo apt-get install libmariadb-dev-compat 
       sudo apt-get install libcurl4-gnutls-dev
-      sudo apt-get install python3.11-dev
+      sudo apt-get install python3.12-dev
       sudo apt-get install libgnutls28-dev
       sudo apt-get install libgnutls28-dev
       pip install -r requirements.txt -i $(registry) --trusted-host $(trusted-host)
