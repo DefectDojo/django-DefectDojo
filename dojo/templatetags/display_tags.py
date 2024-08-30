@@ -7,6 +7,7 @@ import dateutil.relativedelta
 import git
 import markdown
 from django import template
+from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -996,56 +997,41 @@ def full_name(user):
     return Dojo_User.generate_full_name(user)
 
 
-@register.filter(needs_autoescape=True)
-def import_settings_tag(test_import, autoescape=True):
-    if not test_import or not test_import.import_settings:
-        return ""
-
-    if autoescape:
-        esc = conditional_escape
-    else:
-        def esc(x):
-            return x
-
-    html = """
-
-    <i class="fa %s has-popover %s"
-        title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+@register.filter()
+def import_settings_tag(test_import):
+    template_string = """
+    <i class="fa {{ icon }} has-popover {{ color }}"
+        title="<i class='fa {{ icon }}'></i> <b>Import Settings</b>"
+        data-trigger="hover"
+        data-container="body"
+        data-html="true"
+        data-placement="bottom"
         data-content="
-            <b>ID:</b> %s<br/>
-            <b>Active:</b> %s<br/>
-            <b>Verified:</b> %s<br/>
-            <b>Minimum Severity:</b> %s<br/>
-            <b>Close Old Findings:</b> %s<br/>
-            <b>Push to jira:</b> %s<br/>
-            <b>Tags:</b> %s<br/>
-            <b>Endpoints:</b> %s<br/>
-        "
+            <b>ID:</b> {{ test_import.id }}<br/>
+            <b>Active:</b> {{ test_import.import_settings.active|default_if_none:'' }}<br/>
+            <b>Verified:</b> {{ test_import.import_settings.verified|default_if_none:'' }}<br/>
+            <b>Minimum Severity:</b> {{ test_import.import_settings.minimum_severity|default_if_none:'' }}<br/>
+            <b>Close Old Findings:</b> {{ test_import.import_settings.close_old_findings|default_if_none:'' }}<br/>
+            <b>Push to jira:</b> {{ test_import.import_settings.push_to_jira|default_if_none:'' }}<br/>
+            <b>Tags:</b> {{ test_import.import_settings.tags|default_if_none:''}}<br/>
+            <b>Endpoints:</b> {{test_import.import_settings.endpoints|default_if_none:''<br/>">
     </i>
     """
+    template_object = template.Template(template_string)
+    context = {
+        'icon': 'fa-info-circle',
+        'color': '',
+        'test_import': test_import,
+    }
+    context_object = template.Context(context)
 
-    icon = "fa-info-circle"
-    color = ""
-    return html % (icon, color, icon,
-                                esc(test_import.id),
-                                esc(test_import.import_settings.get("active", None)),
-                                esc(test_import.import_settings.get("verified", None)),
-                                esc(test_import.import_settings.get("minimum_severity", None)),
-                                esc(test_import.import_settings.get("close_old_findings", None)),
-                                esc(test_import.import_settings.get("push_to_jira", None)),
-                                esc(test_import.import_settings.get("tags", None)),
-                                esc(test_import.import_settings.get("endpoints", test_import.import_settings.get("endpoint", None))))
+    return template_object.render(context_object)
 
 
-@register.filter(needs_autoescape=True)
-def import_history(finding, autoescape=True):
+@register.filter()
+def import_history(finding):
     if not finding or not settings.TRACK_IMPORT_HISTORY:
         return ""
-
-    if autoescape:
-        conditional_escape
-    else:
-        lambda x: x
 
     # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()
@@ -1054,16 +1040,22 @@ def import_history(finding, autoescape=True):
         # assumption is that the first status_change is the initial import
         return ""
 
-    html = """
-
-    <i class="fa-solid fa-clock-rotate-left has-popover"
-        title="<i class='fa-solid fa-clock-rotate-left'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
-        data-content="%s<br/>Currently only showing status changes made by import/reimport."
-    </i>
-    """
-
     list_of_status_changes = ""
     for status_change in status_changes:
         list_of_status_changes += "<b>" + status_change.created.strftime("%b %d, %Y, %H:%M:%S") + "</b>: " + status_change.get_action_display() + "<br/>"
 
-    return mark_safe(html % (list_of_status_changes))
+    template_string = """
+       <i class="fa-solid fa-clock-rotate-left has-popover"
+        title="<i class='fa-solid fa-clock-rotate-left'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
+        data-content="{{list_of_status_changes}}<br/>Currently only showing status changes made by import/reimport."
+        </i>
+        </i>
+        
+        """
+    context = {
+        "list_of_status_changes": list_of_status_changes
+    }
+    template_object = template.Template(template_string)
+    context_object = template.Context(context)
+
+    return template_object.render(context_object)
