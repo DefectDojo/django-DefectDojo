@@ -29,7 +29,7 @@ from polymorphic.base import ManagerInheritanceWarning
 from tagulous.forms import TagField
 
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.finding.queries import get_authorized_findings, get_authorized_findings_by_status
 from dojo.transfer_findings.queries import get_products_for_transfer_findings
@@ -103,7 +103,7 @@ from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types, get_owner_user, get_authorized_contacts_for_product_type
 from dojo.transfer_findings.queries import get_products_for_transfer_findings
 from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_type
-from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type, get_all_user_by_role
+from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type, get_all_user_by_role, get_users_authorized_role_permission
 from dojo.user.utils import get_configuration_permissions_fields
 from dojo.utils import (
     get_password_requirements_string,
@@ -958,8 +958,8 @@ class RiskPendingForm(forms.ModelForm):
     accepted_by = forms.ModelMultipleChoiceField(
         queryset=Dojo_User.objects.none(),
         required=True,
-        widget=forms.widgets.MultipleHiddenInput(),
-        help_text=("select acceptors depending on the severity of the risk"),
+        widget=forms.SelectMultiple(attrs={'disabled': 'disabled'}),
+        help_text=("acceptors depending on the severity of the risk"),
     )
     path = forms.FileField(
         label="Proof",
@@ -2101,7 +2101,7 @@ class ReviewFindingForm(forms.Form):
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
-            users = get_users_for_group('Reviewers')
+            users = get_users_authorized_role_permission(Permissions.Finding_Code_Review, Roles(int(settings.DD_REVIEWERS_ROLE_TAG.get(finding.tags.first().name))))
         else:
             users = get_authorized_users(Permissions.Finding_Edit).filter(
                 is_active=True

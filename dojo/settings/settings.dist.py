@@ -336,6 +336,7 @@ env = environ.FileAwareEnv(
     # Use System notification settings to override user's notification settings
     DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
     DD_CUSTOM_TAG_PARSER=(dict, {}),
+    DD_REVIEWERS_ROLE_TAG=(dict, {}),
     DD_INVALID_ESCAPE_STR=(dict, {}),
     # SES Email
     DD_AWS_SES_EMAIL=(bool, True),
@@ -2049,10 +2050,10 @@ ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
 USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
 DD_CUSTOM_TAG_PARSER = env('DD_CUSTOM_TAG_PARSER')
+DD_REVIEWERS_ROLE_TAG= env('DD_REVIEWERS_ROLE_TAG')
 DD_INVALID_ESCAPE_STR = env('DD_INVALID_ESCAPE_STR')
 # SES Email
 AWS_SES_EMAIL = env('DD_AWS_SES_EMAIL')
-
 
 # Risk Pending
 RISK_PENDING = env("DD_RISK_PENDING")

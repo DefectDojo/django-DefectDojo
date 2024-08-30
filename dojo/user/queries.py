@@ -136,3 +136,10 @@ def get_user(user_name):
         return Dojo_User.objects.get(username=user_name)
     except Dojo_User.DoesNotExist:
         logger.error('User %s does not exist', user_name)
+
+def get_users_authorized_role_permission(permission, role):
+    roles = get_roles_for_permission(permission)
+    if role not in roles:
+        return Dojo_User.objects.none()
+    return Dojo_User.objects.filter(Q(global_role__role=role)).order_by("first_name", "last_name", "username")
+
