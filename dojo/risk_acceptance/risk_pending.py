@@ -448,7 +448,7 @@ def risk_unaccept(finding):
         ra_helper.post_jira_comment(finding, ra_helper.unaccepted_message_creator)
 
 
-def accept_risk_pending_bullk(eng, risk_acceptance, product, product_type, permission_key):
+def accept_risk_pending_bullk(eng, risk_acceptance, product, product_type, permission_key=None):
     for accepted_finding in risk_acceptance.accepted_findings.all():
         logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
         risk_acceptante_pending(eng,
