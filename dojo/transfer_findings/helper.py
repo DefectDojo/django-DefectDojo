@@ -217,19 +217,32 @@ def add_finding_related(
         if (transferfinding_finding.findings == origin_finding):
             if finding_related is None:
                 # Create a new finding related
-                origin_tags=list(origin_finding.tags.all().values_list("name", flat=True))
+                origin_tags = list(origin_finding.tags.all().values_list("name", flat=True))
                 origin_tags.append("Transferred")
                 finding_related = Finding(
                     test=test,
                     title=origin_finding.title,
                     cve=origin_finding.cve,
+                    url=origin_finding.url,
+                    numerical_severity=origin_finding.numerical_severity,
+                    file_path=origin_finding.file_path,
+                    component_name=origin_finding.component_name,
+                    component_version=origin_finding.component_version,
+                    unique_id_from_tool=origin_finding.unique_id_from_tool,
+                    vuln_id_from_tool=origin_finding.vuln_id_from_tool,
+                    sast_source_object=origin_finding.sast_source_object,
+                    sast_sink_object=origin_finding.sast_sink_object,
+                    sast_source_line=origin_finding.sast_source_line,
+                    sast_source_file_path=origin_finding.sast_source_file_path,
+                    nb_occurences=origin_finding.nb_occurences,
+                    publish_date=origin_finding.publish_date,
+                    service=origin_finding.service,
                     severity=origin_finding.severity,
                     verified=origin_finding.verified,
                     description=origin_finding.description,
                     mitigation=origin_finding.mitigation,
                     impact=origin_finding.impact,
                     reporter=origin_finding.reporter,
-                    numerical_severity=origin_finding.numerical_severity,
                     static_finding=origin_finding.static_finding,
                     dynamic_finding=origin_finding.dynamic_finding,
                     risk_status="Risk Active",
