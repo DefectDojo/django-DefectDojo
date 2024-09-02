@@ -1,4 +1,6 @@
 # requirements.txt for DefectDojo using Python 3.x
+py==1.11.0
+decorator==5.1.1
 asteval==1.0.2
 bleach==6.1.0
 bleach[css]
@@ -32,7 +34,7 @@ lxml==5.2.2
 Markdown==3.6
 openpyxl==3.1.5
 Pillow==10.4.0  # required by django-imagekit
-psycopg[c]==3.2.1
+psycopg==3.2.1
 cryptography==43.0.0
 python-dateutil==2.9.0.post0
 pytz==2024.1

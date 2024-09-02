@@ -82,6 +82,7 @@ def update_expiration_risk_accepted(finding: Finding,
 
 
 def handle_from_provider_risk(finding, acceptance_days):
+    logger.info(f'Risk accepting for external provider Id:{finding.id}')
     tag = ra_helper.get_matching_value(list_a=finding.tags.tags, list_b=[settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3])
     if tag is not None:
         logger.info(f"Vulnerability {finding.vuln_id_from_tool} has provider tags")
@@ -447,7 +448,7 @@ def risk_unaccept(finding):
         ra_helper.post_jira_comment(finding, ra_helper.unaccepted_message_creator)
 
 
-def accept_risk_pending_bullk(eng, risk_acceptance, product, product_type, permission_key):
+def accept_risk_pending_bullk(eng, risk_acceptance, product, product_type, permission_key=None):
     for accepted_finding in risk_acceptance.accepted_findings.all():
         logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
         risk_acceptante_pending(eng,
@@ -485,13 +486,14 @@ def validate_list_findings(conf_risk, type, finding, eng):
 
 @app.task
 def expiration_handler(*args, **kwargs):
-    permission_keys = PermissionKey.objects.filter(
-        expiration__date__lte=timezone.now())
+    if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:
+        permission_keys = PermissionKey.objects.filter(
+            expiration__date__lte=timezone.now())
 
-    logger.info(
-        'expiring %i permission_key that are past expiration date',
-        len(permission_keys))
+        logger.info(
+            'expiring %i permission_key that are past expiration date',
+            len(permission_keys))
 
-    for permission_key in permission_keys:
-        permission_key.expire()
-        permission_key.save()
+        for permission_key in permission_keys:
+            permission_key.expire()
+            permission_key.save()
