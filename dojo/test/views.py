@@ -1,10 +1,12 @@
 # #  tests
+from __future__ import annotations
+
 import base64
 import logging
 import operator
 from datetime import datetime
 from functools import reduce
-from typing import Tuple
+from typing import TYPE_CHECKING
 
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -41,7 +43,6 @@ from dojo.forms import (
     TestForm,
     TypedNoteForm,
 )
-from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
@@ -79,6 +80,9 @@ from dojo.utils import (
     process_tag_notifications,
     redirect_to_return_url_or_else,
 )
+
+if TYPE_CHECKING:
+    from dojo.importers.base_importer import BaseImporter
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger("dojo")
@@ -837,7 +841,7 @@ class ReImportScanResultsView(View):
         self,
         request: HttpRequest,
         test: Test,
-    ) -> Tuple[JIRAImportScanForm | None, bool]:
+    ) -> tuple[JIRAImportScanForm | None, bool]:
         """
         Returns a JiraImportScanForm if jira is enabled
         """
@@ -866,7 +870,7 @@ class ReImportScanResultsView(View):
         self,
         request: HttpRequest,
         test_id: int,
-    ) -> Tuple[HttpRequest, dict]:
+    ) -> tuple[HttpRequest, dict]:
         """
         Process the common behaviors between request types, and then return
         the request and context dict back to be rendered

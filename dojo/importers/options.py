@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from functools import wraps
 from pprint import pformat as pp
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable
 
 from django.contrib.auth.models import User
 from django.db.models import Model
@@ -55,19 +57,19 @@ class ImporterOptions:
         self.do_not_reactivate: bool = self.validate_do_not_reactivate(*args, **kwargs)
         self.commit_hash: str = self.validate_commit_hash(*args, **kwargs)
         self.create_finding_groups_for_all_findings: bool = self.validate_create_finding_groups_for_all_findings(*args, **kwargs)
-        self.endpoints_to_add: List[Endpoint] | None = self.validate_endpoints_to_add(*args, **kwargs)
+        self.endpoints_to_add: list[Endpoint] | None = self.validate_endpoints_to_add(*args, **kwargs)
         self.engagement: Engagement | None = self.validate_engagement(*args, **kwargs)
         self.environment: Development_Environment | None = self.validate_environment(*args, **kwargs)
         self.group_by: str = self.validate_group_by(*args, **kwargs)
         self.import_type: str = self.validate_import_type(*args, **kwargs)
         self.lead: Dojo_User | None = self.validate_lead(*args, **kwargs)
         self.minimum_severity: str = self.validate_minimum_severity(*args, **kwargs)
-        self.parsed_findings: List[Finding] | None = self.validate_parsed_findings(*args, **kwargs)
+        self.parsed_findings: list[Finding] | None = self.validate_parsed_findings(*args, **kwargs)
         self.push_to_jira: bool = self.validate_push_to_jira(*args, **kwargs)
         self.scan_date: datetime = self.validate_scan_date(*args, **kwargs)
         self.scan_type: str = self.validate_scan_type(*args, **kwargs)
         self.service: str = self.validate_service(*args, **kwargs)
-        self.tags: List[str] = self.validate_tags(*args, **kwargs)
+        self.tags: list[str] = self.validate_tags(*args, **kwargs)
         self.test: Test | None = self.validate_test(*args, **kwargs)
         self.user: Dojo_User | None = self.validate_user(*args, **kwargs)
         self.test_title: str = self.validate_test_title(*args, **kwargs)
@@ -86,7 +88,7 @@ class ImporterOptions:
 
     def log_translation(
         self,
-        header_message: Optional[str] = None,
+        header_message: str | None = None,
     ):
         if header_message is not None:
             logger.debug(header_message)
@@ -179,7 +181,7 @@ class ImporterOptions:
     def validate(
         self,
         field_name: str,
-        expected_types: List[Callable] = [],
+        expected_types: list[Callable] = [],
         *,
         required: bool = False,
         default: Any = None,

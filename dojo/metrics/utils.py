@@ -1,10 +1,11 @@
+from __future__ import annotations
 
 import operator
 from datetime import date, datetime, timedelta
 from enum import Enum
 from functools import partial
 from math import ceil
-from typing import Any, Callable, NamedTuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, NamedTuple, TypeVar
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -13,7 +14,6 @@ from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce, ExtractDay, Now, TruncMonth, TruncWeek
 from django.db.models.query import QuerySet
-from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -33,6 +33,9 @@ from dojo.utils import (
     get_system_setting,
     queryset_check,
 )
+
+if TYPE_CHECKING:
+    from django.http import HttpRequest
 
 
 def finding_queries(
@@ -249,7 +252,7 @@ class _MetricsPeriodEntry(NamedTuple):
     method used to aggregate around the same timeframe.
     """
     datetime_name: str
-    db_method: Union[TruncWeek, TruncMonth]
+    db_method: TruncWeek | TruncMonth
 
 
 class MetricsPeriod(_MetricsPeriodEntry, Enum):
@@ -336,7 +339,7 @@ def severity_count(
     queryset: MetricsQuerySet,
     method: str,
     expression: str,
-) -> Union[MetricsQuerySet, dict[str, int]]:
+) -> MetricsQuerySet | dict[str, int]:
     """
     Aggregates counts by severity for the given queryset.
 
@@ -383,7 +386,7 @@ def identify_view(
 
 
 def js_epoch(
-    d: Union[date, datetime],
+    d: date | datetime,
 ) -> int:
     """
     Converts a date/datetime object to a JavaScript epoch time (for use in FE charts)

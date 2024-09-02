@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import re
 from itertools import starmap
-from typing import Any, Optional, Tuple, Union
+from typing import Any
 
 import cvss.parser
 import dateutil.parser
@@ -159,7 +161,7 @@ class BaseEngineParser:
     #####
     # For parsing the initial finding datetime to a date format pleasing to Finding
     #####
-    def get_date(self, value: str) -> Optional[str]:
+    def get_date(self, value: str) -> str | None:
         try:
             return str(dateutil.parser.parse(value).date())
         except dateutil.parser.ParserError:
@@ -195,7 +197,7 @@ class BaseEngineParser:
     #####
     # For severity (extracted from cvss vector)
     #####
-    def get_severity(self, value: str) -> Optional[str]:
+    def get_severity(self, value: str) -> str | None:
         if cvss_obj := cvss.parser.parse_cvss_from_text(value):
             if (severity := cvss_obj[0].severities()[0].title()) in Finding.SEVERITIES:
                 return severity
@@ -208,7 +210,7 @@ class BaseEngineParser:
     #####
     # For parsing component data
     #####
-    def parse_cpe(self, cpe_str: str) -> (Optional[str], Optional[str]):
+    def parse_cpe(self, cpe_str: str) -> (str | None, str | None):
         if not cpe_str:
             return None, None
         cpe_obj = CPE(cpe_str)
@@ -236,12 +238,12 @@ class BaseEngineParser:
     def parse_notes(self, finding: Finding, value: str) -> None:
         self.append_description(finding, {"Notes": value})
 
-    def extract_details(self, value: Union[str, dict[str, Union[str, dict[str, [str]]]]]) -> dict[str, str]:
+    def extract_details(self, value: str | dict[str, str | dict[str, [str]]]) -> dict[str, str]:
         if isinstance(value, dict):
             return {k: v for k, v in value.items() if k != "_meta"}
         return {"Details": str(value)}
 
-    def parse_details(self, finding: Finding, value: dict[str, Union[str, dict[str, [str]]]]) -> None:
+    def parse_details(self, finding: Finding, value: dict[str, str | dict[str, [str]]]) -> None:
         self.append_description(finding, self.extract_details(value))
 
     #####
@@ -250,7 +252,7 @@ class BaseEngineParser:
     def get_host(self, item: dict[str, Any]) -> str:
         return item.get("url") or item.get("host") or item.get("ipv4_address") or None
 
-    def parse_port(self, item: Any) -> Optional[int]:
+    def parse_port(self, item: Any) -> int | None:
         try:
             int_val = int(item)
             if 0 < int_val <= 65535:
@@ -259,10 +261,10 @@ class BaseEngineParser:
             pass
         return None
 
-    def get_port(self, item: dict[str, Any]) -> Optional[int]:
+    def get_port(self, item: dict[str, Any]) -> int | None:
         return self.parse_port(item.get("port"))
 
-    def construct_endpoint(self, host: str, port: Optional[int]) -> Endpoint:
+    def construct_endpoint(self, host: str, port: int | None) -> Endpoint:
         endpoint = Endpoint.from_uri(host)
         if endpoint.host:
             if port:
@@ -288,7 +290,7 @@ class BaseEngineParser:
             **BaseEngineParser._COMMON_FIELDS_MAP,
             **self._ENGINE_FIELDS_MAP}
 
-    def get_finding_key(self, finding: Finding) -> Tuple:
+    def get_finding_key(self, finding: Finding) -> tuple:
         return (
             finding.severity,
             finding.title,
@@ -296,7 +298,7 @@ class BaseEngineParser:
             self.SCANNING_ENGINE,
         )
 
-    def parse_finding(self, item: dict[str, Any]) -> Tuple[Finding, Tuple]:
+    def parse_finding(self, item: dict[str, Any]) -> tuple[Finding, tuple]:
         finding = Finding()
         for field, field_handler in self.get_engine_fields().items():
             # Check first whether the field even exists on this item entry; if not, skip it
