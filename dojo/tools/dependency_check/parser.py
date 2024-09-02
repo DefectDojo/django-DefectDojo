@@ -282,7 +282,7 @@ class DependencyCheckParser:
                 ref_name = reference_node.findtext(f"{namespace}name")
                 if ref_url == ref_name:
                     reference_detail += (
-                        f"**Source:** {ref_source}\n" f"**URL:** {ref_url}\n\n"
+                        f"**Source:** {ref_source}\n**URL:** {ref_url}\n\n"
                     )
                 else:
                     reference_detail += (
