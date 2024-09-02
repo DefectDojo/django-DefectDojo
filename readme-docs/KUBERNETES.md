@@ -288,7 +288,6 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
-  --set celery.beat.replicas=3 \
   --set celery.worker.replicas=3 \
   --set redis.replicas=3 \
   --set createSecret=true \
