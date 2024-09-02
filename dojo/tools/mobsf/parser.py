@@ -73,8 +73,8 @@ class MobSFParser:
             if "urls" in data:
                 curl = ""
                 for url in data["urls"]:
-                    for curl in url["urls"]:
-                        curl = f"{curl}\n"
+                    for durl in url["urls"]:
+                        curl = f"{durl}\n"
 
                 if curl:
                     test_description = f"{test_description}\n**URL's:**\n {curl}\n"

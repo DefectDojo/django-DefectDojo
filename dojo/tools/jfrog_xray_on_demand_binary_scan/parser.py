@@ -161,8 +161,8 @@ def get_item_set(vulnerability):
             cvss_v3 = cves[0]["cvss_v3_vector"]
             cvssv3 = CVSS3(cvss_v3).clean_vector()
 
-    for component_name, component in vulnerability.get("components", {}).items():
-        component_name, component_version = get_component_name_version(component_name)
+    for component_name_with_version, component in vulnerability.get("components", {}).items():
+        component_name, component_version = get_component_name_version(component_name_with_version)
         mitigation, impact = process_component(component)
 
         title = clean_title(vulnerability["summary"])

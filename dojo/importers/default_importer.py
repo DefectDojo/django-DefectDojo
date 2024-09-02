@@ -155,9 +155,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("starting import of %i parsed findings.", len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
-        for unsaved_finding in parsed_findings:
+        for non_clean_unsaved_finding in parsed_findings:
             # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(unsaved_finding)
+            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
             # Filter on minimum severity if applicable
             if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding

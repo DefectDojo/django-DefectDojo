@@ -365,12 +365,14 @@ def get_unique_items(
         qid = int(finding.vuln_id_from_tool)
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(
+            final_finding = get_glossary_item(
                 glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
+        else:
+            final_finding = finding
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
-            findings[unique_id] = get_info_item(info_gathered[index], finding)
+            findings[unique_id] = get_info_item(info_gathered[index], final_finding)
     return findings
 
 
@@ -402,12 +404,14 @@ def get_items(
     ).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(
+            final_finding = get_glossary_item(
                 glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
+        else:
+            final_finding = finding
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
-            findings[qid] = get_info_item(info_gathered[index], finding)
+            findings[qid] = get_info_item(info_gathered[index], final_finding)
 
     return findings
 

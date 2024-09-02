@@ -32,12 +32,14 @@ class ScanImportOptionsTest(APITestCase):
     def import_zap_scan(self, upload_empty_scan=False):
         with open("tests/zap_sample.xml", encoding="utf-8") as file:
             if upload_empty_scan:
-                file = SimpleUploadedFile("zap_sample.xml", self.EMPTY_ZAP_SCAN.encode("utf-8"))
+                tested_file = SimpleUploadedFile("zap_sample.xml", self.EMPTY_ZAP_SCAN.encode("utf-8"))
+            else:
+                tested_file = file
 
             self.payload = {
                 "engagement": 1,
                 "scan_type": "ZAP Scan",
-                "file": file,
+                "file": tested_file,
             }
             test_ids = list(Test.objects.values_list("id", flat=True))
             r = self.client.post(reverse("importscan-list"), self.payload)
