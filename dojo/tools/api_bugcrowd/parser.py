@@ -19,9 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class ApiBugcrowdParser:
-    """
-    Import from Bugcrowd API /submissions
-    """
+
+    """Import from Bugcrowd API /submissions"""
 
     def get_scan_types(self):
         return [SCAN_BUGCROWD_API]

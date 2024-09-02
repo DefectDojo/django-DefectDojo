@@ -1603,7 +1603,7 @@ def escape_for_jira(text):
 
 
 def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue) -> bool:
-    """ Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly """
+    """Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly"""
     import dojo.risk_acceptance.helper as ra_helper
     status_changed = False
     resolved = resolution_id is not None

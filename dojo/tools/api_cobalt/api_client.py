@@ -2,9 +2,8 @@ import requests
 
 
 class CobaltAPI:
-    """
-    A simple client for the Cobalt.io API
-    """
+
+    """A simple client for the Cobalt.io API"""
 
     cobalt_api_url = "https://api.cobalt.io"
 

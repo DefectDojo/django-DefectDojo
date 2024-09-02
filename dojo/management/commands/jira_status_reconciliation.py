@@ -190,6 +190,7 @@ def jira_status_reconciliation(*args, **kwargs):
 
 
 class Command(BaseCommand):
+
     """
     Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results.
     Risk Accepted findings are skipped.'

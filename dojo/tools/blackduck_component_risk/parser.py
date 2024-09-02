@@ -5,6 +5,7 @@ from .importer import BlackduckCRImporter
 
 
 class BlackduckComponentRiskParser:
+
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv

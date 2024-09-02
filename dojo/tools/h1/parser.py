@@ -15,14 +15,11 @@ __author__ = "Kirill Gotsman"
 
 
 class HackerOneVulnerabilityDisclosureProgram:
-    """
-    Vulnerability Disclosure Program HackerOne reports
-    """
+
+    """Vulnerability Disclosure Program HackerOne reports"""
 
     def get_vulnerability_disclosure_json_findings(self, tree, test):
-        """
-        Converts a HackerOne reports to a DefectDojo finding
-        """
+        """Converts a HackerOne reports to a DefectDojo finding"""
         # Convert JSON  report to DefectDojo format
         dupes = {}
         for content in tree["data"]:
@@ -147,6 +144,7 @@ class HackerOneVulnerabilityDisclosureProgram:
 
 
 class HackerOneBugBountyProgram:
+
     """Bug Bounty Program HackerOne reports."""
 
     fields_to_label: ClassVar[dict[str, str]] = {
@@ -200,7 +198,8 @@ class HackerOneBugBountyProgram:
         return findings
 
     def determine_status(self, row) -> dict:
-        """Generate a dict of status meta to fully represent that state of the finding
+        """
+        Generate a dict of status meta to fully represent that state of the finding
 
         Possible states currently supported are open and closed. In the event that neither
         of those options are present, the open status will be the default, and returned
@@ -256,9 +255,8 @@ class H1Parser(
     HackerOneVulnerabilityDisclosureProgram,
     HackerOneBugBountyProgram,
 ):
-    """
-    A class that can be used to parse the Get All Reports JSON export from HackerOne API.
-    """
+
+    """A class that can be used to parse the Get All Reports JSON export from HackerOne API."""
 
     def get_scan_types(self):
         return ["HackerOne Cases"]

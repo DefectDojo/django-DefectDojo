@@ -3,7 +3,9 @@ from dojo.tools.nikto.xml_parser import NiktoXMLParser
 
 
 class NiktoParser:
-    """Nikto web server scanner - https://cirt.net/Nikto2
+
+    """
+    Nikto web server scanner - https://cirt.net/Nikto2
 
     The current parser support 3 sources:
      - XML output (old)

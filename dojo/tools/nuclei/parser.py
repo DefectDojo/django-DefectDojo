@@ -11,9 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class NucleiParser:
-    """
-    A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
-    """
+
+    """A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file"""
 
     DEFAULT_SEVERITY = "Low"
 

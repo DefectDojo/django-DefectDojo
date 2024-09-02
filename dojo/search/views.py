@@ -31,7 +31,6 @@ max_results = settings.SEARCH_MAX_RESULTS
 
 
 def simple_search(request):
-
     """
     query:     some keywords
     operators: {}
@@ -69,7 +68,6 @@ def simple_search(request):
     operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
     keywords:  ['jquery']
     """
-
     tests = None
     findings = None
     finding_templates = None

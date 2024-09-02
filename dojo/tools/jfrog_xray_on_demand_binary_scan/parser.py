@@ -7,6 +7,7 @@ from dojo.models import Finding
 
 
 class JFrogXrayOnDemandBinaryScanParser:
+
     """jfrog_xray_scan JSON reports"""
 
     def get_scan_types(self):

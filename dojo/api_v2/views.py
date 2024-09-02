@@ -2360,6 +2360,7 @@ class UserProfileView(GenericAPIView):
 
 # Authorization: authenticated users, DjangoModelPermissions
 class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
     """
     Imports a scan report into an engagement or product.
 
@@ -2423,6 +2424,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 class EndpointMetaImporterView(
     mixins.CreateModelMixin, viewsets.GenericViewSet,
 ):
+
     """
     Imports a CSV file into a product to propagate arbitrary meta and tags on endpoints.
 
@@ -2498,6 +2500,7 @@ class ImportLanguagesView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 # Authorization: object-based
 class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
     """
     Reimports a scan report into an existing test.
 
@@ -2898,6 +2901,7 @@ def report_generate(request, obj, options):
 class SystemSettingsViewSet(
     mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet,
 ):
+
     """Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations"""
 
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)

@@ -15,7 +15,9 @@ CWE_REGEX = r"cwe-\d+"
 
 
 class SarifParser:
-    """OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
+
+    """
+    OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
 
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
     """
@@ -132,7 +134,8 @@ def get_artifacts(run):
 
 
 def get_message_from_multiformatMessageString(data, rule):
-    """Get a message from multimessage struct
+    """
+    Get a message from multimessage struct
 
     See here for the specification: https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317468
     """

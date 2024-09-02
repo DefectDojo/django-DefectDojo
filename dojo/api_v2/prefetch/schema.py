@@ -18,7 +18,8 @@ def _get_path_to_GET_serializer_map(generator):
 
 
 def get_serializer_ref_name(serializer):
-    """Get serializer's ref_name
+    """
+    Get serializer's ref_name
     inspired by https://github.com/axnsan12/drf-yasg/blob/78031f0c189585c30fccb5005a6899f2d34289a9/src/drf_yasg/utils.py#L416
 
     :param serializer: Serializer instance
@@ -37,14 +38,14 @@ def get_serializer_ref_name(serializer):
 
 
 def prefetch_postprocessing_hook(result, generator, request, public):
-    """OpenAPI v3 (drf-spectacular) Some endpoints are using the PrefetchListMixin and PrefetchRetrieveMixin.
+    """
+    OpenAPI v3 (drf-spectacular) Some endpoints are using the PrefetchListMixin and PrefetchRetrieveMixin.
     These have nothing to do with Django prefetch_related.
     The endpoints have an @extend_schema configured with an extra parameter 'prefetch'
     This parameter contains an array of relations to prefetch. These prefetched models
     will be returned in an additional property in the response.
     The below processor ensures the result schema matches this.
     """
-
     serializer_classes = _get_path_to_GET_serializer_map(generator)
 
     paths = result.get("paths", {})

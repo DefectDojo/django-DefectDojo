@@ -1,6 +1,4 @@
-"""
-Tests for metrics database queries
-"""
+"""Tests for metrics database queries"""
 
 from datetime import date, datetime, timezone
 from unittest.mock import patch

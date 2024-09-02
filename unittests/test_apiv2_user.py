@@ -4,9 +4,9 @@ from rest_framework.test import APIClient, APITestCase
 
 
 class UserTest(APITestCase):
-    """
-    Test the User APIv2 endpoint.
-    """
+
+    """Test the User APIv2 endpoint."""
+
     fixtures = ["dojo_testdata.json"]
 
     def setUp(self):

@@ -74,7 +74,8 @@ Helper functions for DefectDojo
 
 
 def do_false_positive_history(finding, *args, **kwargs):
-    """Replicate false positives across product.
+    """
+    Replicate false positives across product.
 
     Mark finding as false positive if the same finding was previously marked
     as false positive in the same product, beyond that, retroactively mark
@@ -134,7 +135,8 @@ def do_false_positive_history(finding, *args, **kwargs):
 
 
 def match_finding_to_existing_findings(finding, product=None, engagement=None, test=None):
-    """Customizable lookup that returns all existing findings for a given finding.
+    """
+    Customizable lookup that returns all existing findings for a given finding.
 
     Takes one finding as an argument and returns all findings that are equal to it
     on the same product, engagement or test. For now, only one custom filter can
@@ -1235,9 +1237,7 @@ def get_cal_event(start_date, end_date, summary, description, uid):
 
 
 def named_month(month_number):
-    """
-    Return the name of the month, given the number.
-    """
+    """Return the name of the month, given the number."""
     return date(1900, month_number, 1).strftime("%B")
 
 
@@ -1250,7 +1250,8 @@ def normalize_query(query_string,
 
 
 def build_query(query_string, search_fields):
-    """ Returns a query, that is a combination of Q objects. That combination
+    """
+    Returns a query, that is a combination of Q objects. That combination
     aims to search keywords within a model by testing the given search fields.
 
     """
@@ -1563,7 +1564,6 @@ def get_work_days(start: date, end: date):
     about specific country holidays or extra working days.
     https://stackoverflow.com/questions/3615375/number-of-days-between-2-dates-excluding-weekends/71977946#71977946
     """
-
     # if the start date is on a weekend, forward the date to next Monday
     if start.weekday() > WEEKDAY_FRIDAY:
         start = start + timedelta(days=7 - start.weekday())
@@ -2154,7 +2154,8 @@ def add_field_errors_to_response(form):
 
 
 def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix=""):
-    """ Using the default for model in queryset can be slow for large querysets. Even
+    """
+    Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
     this process very well if we can process the models ordered by id.
     In that case we don't need LIMIT or OFFSET, but can keep track of the latest id that
@@ -2220,7 +2221,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
 
 def to_str_typed(obj):
-    """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    """for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
     return f"{type(obj)}: {obj}"
 
 
@@ -2603,7 +2604,8 @@ def get_custom_method(setting_name: str) -> Optional[Callable]:
 
 
 def generate_file_response(file_object: FileUpload) -> FileResponse:
-    """Serve an uploaded file in a uniformed way.
+    """
+    Serve an uploaded file in a uniformed way.
 
     This function assumes all permissions have previously validated/verified
     by the caller of this function.

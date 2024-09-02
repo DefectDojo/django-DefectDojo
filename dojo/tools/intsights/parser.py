@@ -6,9 +6,8 @@ from dojo.tools.intsights.json_handler import IntSightsJSONParser
 
 
 class IntSightsParser:
-    """
-    IntSights Threat Intelligence Report
-    """
+
+    """IntSights Threat Intelligence Report"""
 
     _LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +27,6 @@ class IntSightsParser:
             alert: The parsed alert dictionary
         Returns: A markdown formatted description
         """
-
         return "\n".join(
             [
                 alert["description"],
