@@ -159,7 +159,7 @@ class EndpointMetaImportTestAPI(DojoAPITestCase, EndpointMetaImportMixin):
     fixtures = ["dojo_testdata.json"]
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         EndpointMetaImportMixin.__init__(self, *args, **kwargs)
         # super(EndpointMetaImportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)
@@ -178,7 +178,7 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
     client_ui = Client()
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         EndpointMetaImportMixin.__init__(self, *args, **kwargs)
         # super(EndpointMetaImportMixin, self).__init__(*args, **kwargs)
         # super(DojoAPITestCase, self).__init__(*args, **kwargs)
@@ -206,7 +206,7 @@ class EndpointMetaImportTestUI(DojoAPITestCase, EndpointMetaImportMixin):
 
     def endpoint_meta_import_scan_with_params_ui(self, filename, product=1, create_endpoints=True,
                                                  create_tags=True, create_dojo_meta=True, expected_http_status_code=201):
-        with open(get_unit_tests_path() + "/" + filename) as testfile:
+        with open(get_unit_tests_path() + "/" + filename, encoding="utf-8") as testfile:
             payload = {
                 "create_endpoints": create_endpoints,
                 "create_tags": create_tags,

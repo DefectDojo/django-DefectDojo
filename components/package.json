@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "2.37.3",
+  "version": "2.38.0",
   "license" : "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -35,7 +35,7 @@
     "metismenu": "~3.0.7",
     "moment": "^2.30.1",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.2.10",
+    "pdfmake": "^0.2.12",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
   "engines": {

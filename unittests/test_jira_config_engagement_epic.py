@@ -15,7 +15,7 @@ class JIRAConfigEngagementEpicTest(DojoVCRTestCase, JIRAConfigEngagementBase):
     product_id = 999
 
     def __init__(self, *args, **kwargs):
-        # TODO remove __init__ if it does nothing...
+        # TODO: remove __init__ if it does nothing...
         DojoVCRTestCase.__init__(self, *args, **kwargs)
 
     def assert_cassette_played(self):
