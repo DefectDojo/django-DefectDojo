@@ -210,7 +210,7 @@ def get_jira_project(obj, use_inheritance=True):
             return None
 
     if isinstance(obj, Product):
-        # TODO refactor relationships, but now this would brake APIv1 (and v2?)
+        # TODO: refactor relationships, but now this would brake APIv1 (and v2?)
         product = obj
         jira_projects = product.jira_project_set.all()  # first() doesn't work with prefetching
         jira_project = jira_projects[0] if len(jira_projects) > 0 else None
@@ -553,7 +553,7 @@ def get_labels(obj):
         if prod_name_label not in labels:
             labels.append(prod_name_label)
 
-    if system_settings.add_vulnerability_id_to_jira_label or jira_project and jira_project.add_vulnerability_id_to_jira_label:
+    if system_settings.add_vulnerability_id_to_jira_label or (jira_project and jira_project.add_vulnerability_id_to_jira_label):
         if isinstance(obj, Finding) and obj.vulnerability_ids:
             for id in obj.vulnerability_ids:
                 labels.append(id)
@@ -1381,7 +1381,7 @@ def add_comment(obj, note, force_push=False, **kwargs):
                 j_issue = obj.jira_issue
                 jira.add_comment(
                     j_issue.jira_id,
-                    f"({note.author.get_full_name() if note.author.get_full_name() else note.author.username}): {note.entry}")
+                    f"({note.author.get_full_name() or note.author.username}): {note.entry}")
                 return True
             except JIRAError as e:
                 log_jira_generic_alert("Jira Add Comment Error", str(e))

@@ -61,10 +61,10 @@ class GitleaksParser:
         description += "**Reason:** " + reason + "\n"
         description += "**Path:** " + file_path + "\n"
         if "lineNumber" in issue:
-            description += "**Line:** %i\n" % issue["lineNumber"]
+            description += f"**Line:** {issue['lineNumber']}\n"
             line = issue["lineNumber"]
         if "operation" in issue:
-            description += "**Operation:** " + issue["operation"] + "\n"
+            description += f"**Operation:** {issue['operation']}\n"
         if "leakURL" in issue:
             description += (
                 "**Leak URL:** ["
