@@ -274,7 +274,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 self.mitigate_finding(
                     finding,
                     f"Mitigated by {self.test.test_type} re-upload.",
-                    self.findings_groups_enabled,
+                    finding_groups_enabled=self.findings_groups_enabled,
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups

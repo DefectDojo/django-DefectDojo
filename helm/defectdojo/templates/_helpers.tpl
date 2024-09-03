@@ -150,7 +150,7 @@ Create chart name and version as used by the chart label.
       name: {{ .fullName }}-extrasecrets
       optional: true
   env:
-  {{- if .Values.django.uwsgi.enable_debug }}
+  {{- if .Values.django.uwsgi.enableDebug }}
   - name: DD_DEBUG
     value: 'True'
   {{- end }}
@@ -168,5 +168,5 @@ Create chart name and version as used by the chart label.
   {{- toYaml .Values.extraEnv | nindent 2 }}
   {{- end }}
   resources:
-    {{- toYaml .Values.django.uwsgi.resources | nindent 4 }}
+    {{- toYaml .Values.dbMigrationChecker.resources | nindent 4 }}
 {{- end -}}

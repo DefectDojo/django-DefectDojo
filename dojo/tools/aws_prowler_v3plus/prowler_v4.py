@@ -15,8 +15,9 @@ class AWSProwlerV4Parser:
         # https://docs.prowler.com/projects/prowler-open-source/en/latest/tutorials/reporting/#json
         for deserialized in data:
 
+            mute_status = deserialized.get("status")
             status = deserialized.get("status_code")
-            if status.upper() != "FAIL":
+            if (status.upper() != "FAIL") or (status.upper() == "FAIL" and mute_status == "Suppressed"):
                 continue
 
             account_id = deserialized.get("cloud", {}).get("account", {}).get("uid", "")

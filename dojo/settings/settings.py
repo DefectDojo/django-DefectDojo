@@ -12,7 +12,7 @@ include(
     optional("local_settings.py"),
 )
 
-if not (DEBUG or ("collectstatic" in sys.argv)):
+if not (DEBUG or ("collectstatic" in sys.argv)):  # noqa: F821 - not declared DEBUG is acceptable because we are sure it will be loaded from 'include'
     with (Path(__file__).parent / "settings.dist.py").open("rb") as file:
         real_hash = hashlib.sha256(file.read()).hexdigest()
     with (Path(__file__).parent / ".settings.dist.py.sha256sum").open("rb") as file:

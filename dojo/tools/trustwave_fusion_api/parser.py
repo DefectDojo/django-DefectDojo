@@ -134,7 +134,7 @@ def get_item(vuln, test):
             cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
         )
 
-        finding.component_name = component_name if component_name else None
+        finding.component_name = component_name or None
         finding.component_version = (
             cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
         )

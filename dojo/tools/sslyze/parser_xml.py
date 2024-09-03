@@ -7,7 +7,7 @@ from dojo.models import Endpoint, Finding
 
 __author__ = "dr3dd589"
 
-# FIXME discuss this list as maintenance subject
+# TODO: discuss this list as maintenance subject
 WEAK_CIPHER_LIST = [
     "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
     "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",

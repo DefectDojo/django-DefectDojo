@@ -1,4 +1,5 @@
 import re
+from itertools import starmap
 from typing import Any, Optional, Tuple, Union
 
 import cvss.parser
@@ -212,8 +213,8 @@ class BaseEngineParser:
             return None, None
         cpe_obj = CPE(cpe_str)
         return (
-            cpe_obj.get_product() and cpe_obj.get_product()[0] or None,
-            cpe_obj.get_version() and cpe_obj.get_version()[0] or None,
+            (cpe_obj.get_product() and cpe_obj.get_product()[0]) or None,
+            (cpe_obj.get_version() and cpe_obj.get_version()[0]) or None,
         )
 
     def parse_components(self, finding: Finding, value: [str]) -> None:
@@ -230,7 +231,7 @@ class BaseEngineParser:
         if addendum:
             if finding.description:
                 finding.description += "\n\n"
-            finding.description += "\n\n".join([self.format_additional_description(k, v) for k, v in addendum.items()])
+            finding.description += "\n\n".join(list(starmap(self.format_additional_description, addendum.items())))
 
     def parse_notes(self, finding: Finding, value: str) -> None:
         self.append_description(finding, {"Notes": value})
