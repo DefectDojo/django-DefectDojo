@@ -53,7 +53,7 @@ spec:
         command:
         - '/bin/bash'
         - '-c'
-        - '/wait-for-it.sh ${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432} -t 30 -s -- /bin/echo Database is up'
+        - '/wait-for-it.sh ${DD_DATABASE_HOST:-postgres}:${DD_DATABASE_PORT:-5432} -t 300 -s -- /bin/echo Database is up'
         image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
