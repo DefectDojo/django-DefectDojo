@@ -42,7 +42,7 @@ class TestNpmAudit7PlusParser(DojoTestCase):
             self.assertEqual("@vercel/fun", finding.title)
 
     def test_npm_audit_7_plus_parser_issue_10801(self):
-        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_7_plus/issue_10801.json"))
+        testfile = open(path.join(path.dirname(__file__), "../scans/npm_audit_7_plus/issue_10801.json"), encoding="utf-8")
         parser = NpmAudit7PlusParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
