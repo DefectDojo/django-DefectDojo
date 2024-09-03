@@ -26,7 +26,7 @@ def expire_now(risk_acceptance):
                 finding.active = True
                 finding.risk_accepted = False
                 # Update any endpoint statuses on each of the findings
-                update_endpoint_statuses(finding, False)
+                update_endpoint_statuses(finding, accept_risk=False)
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
@@ -68,7 +68,7 @@ def reinstate(risk_acceptance, old_expiration_date):
                 finding.active = False
                 finding.risk_accepted = True
                 # Update any endpoint statuses on each of the findings
-                update_endpoint_statuses(finding, True)
+                update_endpoint_statuses(finding, accept_risk=True)
                 finding.save(dedupe_option=False)
                 reinstated_findings.append(finding)
             else:
@@ -88,7 +88,7 @@ def delete(eng, risk_acceptance):
         finding.active = True
         finding.risk_accepted = False
         # Update any endpoint statuses on each of the findings
-        update_endpoint_statuses(finding, False)
+        update_endpoint_statuses(finding, accept_risk=False)
         finding.save(dedupe_option=False)
 
     # best effort jira integration, no status changes
@@ -108,7 +108,7 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     finding.active = True
     finding.risk_accepted = False
     # Update any endpoint statuses on each of the findings
-    update_endpoint_statuses(finding, False)
+    update_endpoint_statuses(finding, accept_risk=False)
     finding.save(dedupe_option=False)
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
@@ -121,7 +121,7 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
             finding.risk_accepted = True
             finding.save(dedupe_option=False)
             # Update any endpoint statuses on each of the findings
-            update_endpoint_statuses(finding, True)
+            update_endpoint_statuses(finding, accept_risk=True)
             risk_acceptance.accepted_findings.add(finding)
     risk_acceptance.save()
 
@@ -175,30 +175,30 @@ def expiration_handler(*args, **kwargs):
 
 
 def expiration_message_creator(risk_acceptance, heads_up_days=0):
-    return "Risk acceptance [(%s)|%s] with %i findings has expired" % \
-        (escape_for_jira(risk_acceptance.name),
+    return "Risk acceptance [({})|{}] with {} findings has expired".format(
+        escape_for_jira(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
         len(risk_acceptance.accepted_findings.all()))
 
 
 def expiration_warning_message_creator(risk_acceptance, heads_up_days=0):
-    return "Risk acceptance [(%s)|%s] with %i findings will expire in %i days" % \
-        (escape_for_jira(risk_acceptance.name),
+    return "Risk acceptance [({})|{}] with {} findings will expire in {} days".format(
+        escape_for_jira(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
         len(risk_acceptance.accepted_findings.all()), heads_up_days)
 
 
 def reinstation_message_creator(risk_acceptance, heads_up_days=0):
-    return "Risk acceptance [(%s)|%s] with %i findings has been reinstated (expires on %s)" % \
-        (escape_for_jira(risk_acceptance.name),
+    return "Risk acceptance [({})|{}] with {} findings has been reinstated (expires on {})".format(
+        escape_for_jira(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
         len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
 
 
 def accepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
-        return "Finding has been added to risk acceptance [(%s)|%s] with %i findings (expires on %s)" % \
-            (escape_for_jira(risk_acceptance.name),
+        return "Finding has been added to risk acceptance [({})|{}] with {} findings (expires on {})".format(
+            escape_for_jira(risk_acceptance.name),
             get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
             len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
     else:
@@ -276,7 +276,7 @@ def simple_risk_accept(finding, perform_save=True):
     # risk accepted, so finding no longer considered active
     finding.active = False
     # Update any endpoint statuses on each of the findings
-    update_endpoint_statuses(finding, True)
+    update_endpoint_statuses(finding, accept_risk=True)
     if perform_save:
         finding.save(dedupe_option=False)
     # post_jira_comment might reload from database so see unaccepted finding. but the comment
@@ -294,7 +294,7 @@ def risk_unaccept(finding, perform_save=True):
             finding.active = True
         finding.risk_accepted = False
         # Update any endpoint statuses on each of the findings
-        update_endpoint_statuses(finding, False)
+        update_endpoint_statuses(finding, accept_risk=False)
         if perform_save:
             logger.debug("saving unaccepted finding %i:%s", finding.id, finding)
             finding.save(dedupe_option=False)
@@ -309,7 +309,7 @@ def remove_from_any_risk_acceptance(finding):
         r.accepted_findings.remove(finding)
 
 
-def update_endpoint_statuses(finding: Finding, accept_risk: bool) -> None:
+def update_endpoint_statuses(finding: Finding, *, accept_risk: bool) -> None:
     for status in finding.status_finding.all():
         if accept_risk:
             status.active = False

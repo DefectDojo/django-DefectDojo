@@ -75,7 +75,7 @@ class DependencyCheckParser:
                     if purl_parts["name"] and len(purl_parts["name"]) > 0
                     else ""
                 )
-                component_name = component_name if component_name else None
+                component_name = component_name or None
                 component_version = (
                     purl_parts["version"]
                     if purl_parts["version"] and len(purl_parts["version"]) > 0
@@ -107,7 +107,7 @@ class DependencyCheckParser:
                 component_name += (
                     cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
                 )
-                component_name = component_name if component_name else None
+                component_name = component_name or None
                 component_version = (
                     cpe.get_version()[0]
                     if len(cpe.get_version()) > 0
@@ -128,7 +128,7 @@ class DependencyCheckParser:
                     component_version = maven_parts[2]
                     return component_name, component_version
 
-        # TODO what happens when there multiple evidencecollectednodes with
+        # TODO: what happens when there multiple evidencecollectednodes with
         # product or version as type?
         evidence_collected_node = dependency.find(
             namespace + "evidenceCollected",

@@ -373,7 +373,7 @@ def copy_test(request, tid):
                 messages.SUCCESS,
                 "Test Copied successfully.",
                 extra_tags="alert-success")
-            create_notification(event="test_copied",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+            create_notification(event="test_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                                 title=f"Copying of {test.title}",
                                 description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
                                 product=product,
@@ -435,10 +435,17 @@ def test_ics(request, tid):
     cal = get_cal_event(
         start_date,
         end_date,
-        _(f"Test: {test.test_type.name} ({test.engagement.product.name}"),
+        _("Test: %s (%s)") % (
+            test.test_type.name,
+            test.engagement.product.name,
+        ),
         _(
-            f"Set aside for test {test.test_type.name}, on product {test.engagement.product.name}. "
-            f"Additional detail can be found at {request.build_absolute_uri(reverse('view_test', args=(test.id,)))}",
+            "Set aside for test %s, on product %s. "
+            "Additional detail can be found at %s",
+        ) % (
+            test.test_type.name,
+            test.engagement.product.name,
+            request.build_absolute_uri(reverse("view_test", args=(test.id,))),
         ),
         uid,
     )
@@ -625,9 +632,9 @@ class AddFindingView(View):
             # Create a notification
             create_notification(
                 event="finding_added",
-                title=_(f"Addition of {finding.title}"),
+                title=_("Addition of %s") % finding.title,
                 finding=finding,
-                description=_(f'Finding "{finding.title}" was added by {request.user}'),
+                description=_('Finding "%s" was added by %s') % (finding.title, request.user),
                 url=reverse("view_finding", args=(finding.id,)),
                 icon="exclamation-triangle")
             # Add a success message
@@ -876,7 +883,7 @@ class ReImportScanResultsView(View):
         else:
             scan_type = test.test_type.name
         # Set the product tab
-        product_tab = Product_Tab(test.engagement.product, title=_(f"Re-upload a {scan_type}"), tab="engagements")
+        product_tab = Product_Tab(test.engagement.product, title=_("Re-upload a %s") % scan_type, tab="engagements")
         product_tab.setEngagement(test.engagement)
         # Get the import form with some initial data in place
         form = self.get_form(

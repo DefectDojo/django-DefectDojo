@@ -26,16 +26,17 @@ class Command(BaseCommand):
         findings = Finding.objects.filter(verified=True,
                                           active=True).select_related(
             "test__engagement__product")
-        writer = csv.writer(open(file_path, "w"))
+        writer = csv.writer(open(file_path, "w", encoding="utf-8"))
 
-        headers = []
-        headers.append("product_name")
-        headers.append("id")
-        headers.append("title")
-        headers.append("cwe")
-        headers.append("date")
-        headers.append("url")
-        headers.append("severity")
+        headers = [
+            "product_name",
+            "id",
+            "title",
+            "cwe",
+            "date",
+            "url",
+            "severity",
+        ]
 
         # for field in opts.fields:
         #    headers.append(field.name)
