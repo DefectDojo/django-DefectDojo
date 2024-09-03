@@ -106,7 +106,7 @@ class TestAquaParser(DojoTestCase):
             self.assertEqual("server.key - server.key (/juice-shop/node_modules/node-gyp/test/fixtures/server.key) ", findings[83].title)
 
     def test_aqua_parser_aqua_devops_issue_10849(self):
-        with open("unittests/scans/aqua/aqua_devops_issue_10849.json", encoding="utf-8") as testfile:
+        with open("unittests/scans/aqua/issue_10849.json", encoding="utf-8") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0.0006, findings[0].epss_score)
