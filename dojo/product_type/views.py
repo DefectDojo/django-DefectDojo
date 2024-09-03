@@ -27,6 +27,8 @@ from dojo.forms import (
 from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
+    get_authorized_global_groups_for_product_type,
+    get_authorized_global_members_for_product_type,
     get_authorized_groups_for_product_type,
     get_authorized_members_for_product_type,
     get_authorized_product_types,
@@ -117,7 +119,9 @@ def view_product_type(request, ptid):
     page_name = _("View Product Type")
     pt = get_object_or_404(Product_Type, pk=ptid)
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_View)
+    global_members = get_authorized_global_members_for_product_type(pt, Permissions.Product_Type_View)
     groups = get_authorized_groups_for_product_type(pt, Permissions.Product_Type_View)
+    global_groups = get_authorized_global_groups_for_product_type(pt, Permissions.Product_Type_View)
     products = get_authorized_products(Permissions.Product_View).filter(prod_type=pt)
     products = get_page_items(request, products, 25)
     add_breadcrumb(title=page_name, top_level=False, request=request)
@@ -126,7 +130,10 @@ def view_product_type(request, ptid):
         "pt": pt,
         "products": products,
         "groups": groups,
-        "members": members})
+        "members": members,
+        "global_groups": global_groups,
+        "global_members": global_members,
+    })
 
 
 @user_is_authorized(Product_Type, Permissions.Product_Type_Delete, "ptid")
