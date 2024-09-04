@@ -391,11 +391,11 @@ Sample secret template (replace the placeholders with your PostgreSQL credential
 apiversion: v1
 kind: Secret
 metadata:  
-	name: defectdojo-postgresql-specific  
+  name: defectdojo-postgresql-specific  
 type: Opaque
 stringData:  # I chose stringData for better visualization of the credentials for debugging
-postgresql-password: <user-password>
-db-url: psql://<username>:<password>@<hostname>:<port>/<database-name> 
+  postgresql-password: <user-password>
+  db-url: psql://<username>:<password>@<hostname>:<port>/<database-name> 
 ```
 
 #### Step 2.5: Install PostgreSQL (Optional)
