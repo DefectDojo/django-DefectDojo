@@ -402,7 +402,7 @@ stringData:  # I chose stringData for better visualization of the credentials fo
 
 If you need to simulate a PostgreSQL database external to DefectDojo, you can install PostgreSQL using the following Helm command:
 
-```helm
+```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami 
 helm repo update
 helm install defectdojo-postgresql bitnami/postgresql -n defectdojo -f postgresql/values.yaml
