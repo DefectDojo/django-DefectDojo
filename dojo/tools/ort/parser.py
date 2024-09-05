@@ -184,7 +184,7 @@ how to fix : {model.rule_violation['how_to_fix']}"""
     return finding
 
 
-# TODO with python 3.7
+# TODO: with python 3.7
 # @dataclass
 # class RuleViolationModel:
 #     pkg: dict

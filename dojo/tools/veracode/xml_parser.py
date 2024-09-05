@@ -243,9 +243,7 @@ class VeracodeXMLParser:
 
         _sast_source_obj = xml_node.attrib.get("functionprototype")
         if isinstance(_sast_source_obj, str):
-            finding.sast_source_object = (
-                _sast_source_obj if _sast_source_obj else None
-            )
+            finding.sast_source_object = _sast_source_obj or None
 
         finding.unsaved_tags = ["sast"]
 
@@ -279,7 +277,7 @@ class VeracodeXMLParser:
 
     @classmethod
     def __xml_sca_flaw_to_finding(
-        cls, test, report_date, vendor, library, version, xml_node,
+        cls, test, report_date, _vendor, library, version, xml_node,
     ):
         # Defaults
         finding = Finding()

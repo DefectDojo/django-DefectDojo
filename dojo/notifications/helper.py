@@ -153,7 +153,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
             kwargs["description"] = create_description(event, *args, **kwargs)
             notification_message = render_to_string(f"notifications/{notification_type}/other.tpl", kwargs)
 
-    return notification_message if notification_message else ""
+    return notification_message or ""
 
 
 def process_notifications(event, notifications=None, **kwargs):

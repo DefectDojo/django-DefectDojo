@@ -119,7 +119,7 @@ class ApiEndpoints(DojoTestCase):
             if subclass.__module__ == "dojo.models":
                 if (subclass.__name__[:9] == "Tagulous_") and (subclass.__name__[-5:] == "_tags"):
                     continue
-                if subclass.__name__ in ["Alerts"]:
+                if subclass.__name__ == "Alerts":
                     continue
                 with self.subTest(subclass=subclass):
                     if subclass in self.used_models:

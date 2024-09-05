@@ -5,7 +5,7 @@ from unittests.dojo_test_case import DojoTestCase
 
 class TestMozillaObservatoryParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with open("unittests/scans/mozilla_observatory/mozilla_no_vuln.json") as testfile:
+        with open("unittests/scans/mozilla_observatory/mozilla_no_vuln.json", encoding="utf-8") as testfile:
             parser = MozillaObservatoryParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
@@ -19,20 +19,20 @@ class TestMozillaObservatoryParser(DojoTestCase):
                         self.assertIn("Preloaded via the HTTP Strict Transport Security (HSTS) preloading process", finding.description)
 
     def test_parse_file_with_two_vuln_has_two_findings(self):
-        with open("unittests/scans/mozilla_observatory/mozilla_gitlab_two_vuln.json") as testfile:
+        with open("unittests/scans/mozilla_observatory/mozilla_gitlab_two_vuln.json", encoding="utf-8") as testfile:
             parser = MozillaObservatoryParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
-        with open("unittests/scans/mozilla_observatory/mozilla_google_many_vuln.json") as testfile:
+        with open("unittests/scans/mozilla_observatory/mozilla_google_many_vuln.json", encoding="utf-8") as testfile:
             parser = MozillaObservatoryParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(6, len(findings))
 
     def test_parse_file_cli_mozilla_org(self):
         """Test from the CLI"""
-        with open("unittests/scans/mozilla_observatory/mozilla_org.json") as testfile:
+        with open("unittests/scans/mozilla_observatory/mozilla_org.json", encoding="utf-8") as testfile:
             parser = MozillaObservatoryParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
@@ -49,7 +49,7 @@ class TestMozillaObservatoryParser(DojoTestCase):
 
     def test_parse_file_cli_demo(self):
         """Test from the CLI"""
-        with open("unittests/scans/mozilla_observatory/demo.json") as testfile:
+        with open("unittests/scans/mozilla_observatory/demo.json", encoding="utf-8") as testfile:
             parser = MozillaObservatoryParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
@@ -79,7 +79,7 @@ class TestMozillaObservatoryParser(DojoTestCase):
 
     def test_parse_file_cli_juicy(self):
         """Test from the CLI"""
-        with open("unittests/scans/mozilla_observatory/juicy.json") as testfile:
+        with open("unittests/scans/mozilla_observatory/juicy.json", encoding="utf-8") as testfile:
             parser = MozillaObservatoryParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
@@ -120,7 +120,7 @@ class TestMozillaObservatoryParser(DojoTestCase):
 
     def test_parse_file_cli_nmap_scanme(self):
         """Test from the CLI"""
-        with open("unittests/scans/mozilla_observatory/nmap_scanme.json") as testfile:
+        with open("unittests/scans/mozilla_observatory/nmap_scanme.json", encoding="utf-8") as testfile:
             parser = MozillaObservatoryParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
@@ -179,7 +179,7 @@ class TestMozillaObservatoryParser(DojoTestCase):
 
     def test_parse_file_cli_nmap_scanme_no_name_attribute(self):
         """Test from the CLI"""
-        with open("unittests/scans/mozilla_observatory/nmap_scanme_2022.json") as testfile:
+        with open("unittests/scans/mozilla_observatory/nmap_scanme_2022.json", encoding="utf-8") as testfile:
             parser = MozillaObservatoryParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(12, len(findings))
