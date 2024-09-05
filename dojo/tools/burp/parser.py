@@ -163,13 +163,17 @@ def get_item(item_node, test):
     collab_text = ""
     for event in item_node.findall("./collaboratorEvent"):
         collab_details = []
-        collab_details.append(event.findall("interactionType")[0].text)
-        collab_details.append(event.findall("originIp")[0].text)
-        collab_details.append(event.findall("time")[0].text)
+        collab_details.extend((
+            event.findall("interactionType")[0].text,
+            event.findall("originIp")[0].text,
+            event.findall("time")[0].text,
+        ))
 
         if collab_details[0] == "DNS":
-            collab_details.append(event.findall("lookupType")[0].text)
-            collab_details.append(event.findall("lookupHost")[0].text)
+            collab_details.extend((
+                event.findall("lookupType")[0].text,
+                event.findall("lookupHost")[0].text,
+            ))
             collab_text += (
                 "The Collaborator server received a "
                 + collab_details[0]
@@ -273,7 +277,7 @@ def get_item(item_node, test):
     # manage cwes
     cwes = do_clean_cwe(item_node.findall("vulnerabilityClassifications"))
     if len(cwes) > 1:
-        # FIXME support more than one CWE
+        # TODO: support more than one CWE
         logger.debug(
             f"more than one CWE for a finding {cwes}. NOT supported by parser API",
         )

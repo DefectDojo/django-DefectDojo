@@ -28,7 +28,7 @@ def engagement_pre_save(sender, instance, **kwargs):
                                 title=_("Closure of %s") % instance.name,
                                 description=_('The engagement "%s" was closed') % (instance.name),
                                 engagement=instance, url=reverse("engagement_all_findings", args=(instance.id, )))
-        elif instance.status in ["In Progress"] and old.status not in ["Not Started"]:
+        elif instance.status == "In Progress" and old.status != "Not Started":
             create_notification(event="engagement_reopened",
                                 title=_("Reopening of %s") % instance.name,
                                 engagement=instance,

@@ -26,6 +26,16 @@ class AsffParser:
         return """AWS Security Finding Format (ASFF).
         https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
 
+    def get_item_resource_arns(self, item):
+        resource_arns = []
+        if isinstance(item.get("Resources"), list):
+            for resource_block in item["Resources"]:
+                if isinstance(resource_block, dict):
+                    resource_id = resource_block.get("Id")
+                    if resource_id:
+                        resource_arns.append(resource_id)
+        return resource_arns
+
     def get_findings(self, file, test):
         data = json.load(file)
         result = []
@@ -41,9 +51,30 @@ class AsffParser:
             else:
                 active = False
 
+            # Adding the Resources:0/Id value to the description.
+            #
+            # This is needed because every Finding in AWS from Security Hub has an
+            # associated ResourceId that contains the full AWS ARN and without it,
+            # it is much more difficult to track down the specific resource.
+            #
+            # This is different from the Finding Id - as that is from the Security Hub
+            # control and has no information about the offending resource.
+            #
+            # Retrieve the AWS ARN / Resource Id
+            resource_arns = self.get_item_resource_arns(item)
+
+            # Define the control_description
+            control_description = item.get("Description")
+
+            if resource_arns:
+                resource_arn_strings = ", ".join(resource_arns)
+                full_description = f"**AWS resource ARN:** {resource_arn_strings}\n\n{control_description}"
+            else:
+                full_description = control_description
+
             finding = Finding(
                 title=item.get("Title"),
-                description=item.get("Description"),
+                description=full_description,
                 date=dateutil.parser.parse(item.get("CreatedAt")),
                 mitigation=mitigation,
                 references=references,
@@ -87,10 +118,10 @@ class AsffParser:
             return SEVERITY_MAPPING[data.get("Label")]
         elif isinstance(data.get("Normalized"), int):
             # 0 - INFORMATIONAL
-            # 1–39 - LOW
-            # 40–69 - MEDIUM
-            # 70–89 - HIGH
-            # 90–100 - CRITICAL
+            # 1-39 - LOW
+            # 40-69 - MEDIUM
+            # 70-89 - HIGH
+            # 90-100 - CRITICAL
             if data.get("Normalized") > 89:
                 return "Critical"
             elif data.get("Normalized") > 69:
