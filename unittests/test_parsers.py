@@ -1,5 +1,6 @@
 import os
 import re
+from pathlib import Path
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
 
@@ -22,6 +23,7 @@ class TestParsers(DojoTestCase):
 
             if doc_name not in [
                 "checkmarx_osa",  # it is documented in 'checkmarx'
+                "wizcli_common_parsers",  # common class for other wizcli parsers
             ]:
                 with self.subTest(parser=parser_dir.name, category="docs"):
                     doc_file = os.path.join(basedir, "docs", "content", "en", "integrations", "parsers", category, f"{doc_name}.md")
@@ -30,24 +32,23 @@ class TestParsers(DojoTestCase):
                         f"Documentation file '{doc_file}' is missing or using different name",
                                     )
 
-                    with open(doc_file) as file:
-                        content = file.read()
-                        self.assertTrue(re.search("title:", content),
-                                        f"Documentation file '{doc_file}' does not contain a title",
+                    content = Path(doc_file).read_text(encoding="utf-8")
+                    self.assertTrue(re.search("title:", content),
+                                    f"Documentation file '{doc_file}' does not contain a title",
+                                    )
+                    self.assertTrue(re.search("toc_hide: true", content),
+                                    f"Documentation file '{doc_file}' does not contain toc_hide: true",
+                                    )
+                    if category == "file":
+                        self.assertTrue(re.search("### Sample Scan Data", content),
+                                        f"Documentation file '{doc_file}' does not contain ### Sample Scan Data",
                                         )
-                        self.assertTrue(re.search("toc_hide: true", content),
-                                        f"Documentation file '{doc_file}' does not contain toc_hide: true",
+                        self.assertTrue(re.search("https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans", content),
+                                        f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
                                         )
-                        if category == "file":
-                            self.assertTrue(re.search("### Sample Scan Data", content),
-                                            f"Documentation file '{doc_file}' does not contain ### Sample Scan Data",
-                                            )
-                            self.assertTrue(re.search("https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans", content),
-                                            f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
-                                            )
 
-            if parser_dir.name not in [
-                # there is not exception for now
+            if parser_dir.name not in [  # noqa: FURB171
+                "wizcli_common_parsers",  # common class for other wizcli parsers
             ]:
                 with self.subTest(parser=parser_dir.name, category="parser"):
                     parser_test_file = os.path.join(basedir, "unittests", "tools", f"test_{parser_dir.name}_parser.py")
@@ -58,6 +59,7 @@ class TestParsers(DojoTestCase):
 
             if parser_dir.name not in [
                 "vcg",  # content of the sample report is string the directly in unittest
+                "wizcli_common_parsers",  # common class for other wizcli parsers
             ]:
                 with self.subTest(parser=parser_dir.name, category="testfiles"):
                     scan_dir = os.path.join(basedir, "unittests", "scans", parser_dir.name)
@@ -68,8 +70,8 @@ class TestParsers(DojoTestCase):
 
             if category == "api":
                 if parser_dir.name not in [
-                    "api_blackduck",  # TODO
-                    "api_vulners",  # TODO
+                    "api_blackduck",  # TODO: tests should be implemented also for this parser
+                    "api_vulners",  # TODO: tests should be implemented also for this parser
                 ]:
                     with self.subTest(parser=parser_dir.name, category="importer"):
                         importer_test_file = os.path.join(basedir, "unittests", "tools", f"test_{parser_dir.name}_importer.py")
@@ -81,14 +83,15 @@ class TestParsers(DojoTestCase):
                 if file.is_file() and file.name != "__pycache__" and file.name != "__init__.py":
                     f = os.path.join(basedir, "dojo", "tools", parser_dir.name, file.name)
                     read_true = False
-                    with open(f) as f:
-                        for line in f.readlines():
+                    with open(f, encoding="utf-8") as f:
+                        i = 0
+                        for line in f:
                             if read_true is True:
                                 if ('"utf-8"' in str(line) or "'utf-8'" in str(line) or '"utf-8-sig"' in str(line) or "'utf-8-sig'" in str(line)) and i <= 4:
                                     read_true = False
                                     i = 0
                                 elif i > 4:
-                                    self.assertTrue(False, "In file " + str(os.path.join("dojo", "tools", parser_dir.name, file.name)) + " the test is failing because you don't have utf-8 after .read()")
+                                    self.assertTrue(expr=False, msg="In file " + str(os.path.join("dojo", "tools", parser_dir.name, file.name)) + " the test is failing because you don't have utf-8 after .read()")
                                     i = 0
                                     read_true = False
                                 else:

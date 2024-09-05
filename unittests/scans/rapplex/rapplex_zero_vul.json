@@ -1,0 +1,93 @@
+{
+    "ScanId": "a2acd6fe",
+    "Target": "http://testphp.vulnweb.com/",
+    "Description": null,
+    "CreatedDate": "05/02/2024 16:54:25",
+    "StartedDate": "05/02/2024 16:54:25",
+    "ScanTime": 68,
+    "ScanTimeAsStr": "1m 8s",
+    "ScanPolicy": {
+      "Title": "Default",
+      "Scope": {
+        "CrawlDepth": 5,
+        "OnlySameOrigin": true,
+        "EnableParentPath": false,
+        "AllowSubDomain": false,
+        "BaseDomain": null,
+        "InScopeDomains": [],
+        "PreferMobileVersion": false,
+        "MobileDevice": null,
+        "MaximumLinks": 500,
+        "MaximumFilesPerFolder": 30,
+        "MaximumAttackToRecurringParam": 5
+      },
+      "SecurityChecks": "<div class=\"legend\">Q = Query String\r\nP = Post\r\nH = Header\r\nC = Cookie\r\nU = Url\r\nR = Url Rewrite\r\nE = Extra Parameter\r\n</div>Engine              Q    P    H    C    U    R    E\r\n====================================================\r\nBackup Files       [ ]  [ ]  [ ]  [ ]  [X]  [ ]  [ ]\r\nCORS Tests         [ ]  [ ]  [X]  [ ]  [ ]  [ ]  [ ]\r\nDOM based XSS      [ ]  [ ]  [ ]  [ ]  [X]  [ ]  [ ]\r\nFile Upload        [ ]  [X]  [ ]  [ ]  [ ]  [ ]  [ ]\r\nOpen Redirect      [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nShort (8.3) Files  [ ]  [ ]  [ ]  [ ]  [X]  [ ]  [ ]\r\nCommand Injection  [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nHeader Injection   [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nFile Inclusion     [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nCode Injection     [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nSQL Injection      [X]  [X]  [ ]  [ ]  [ ]  [X]  [ ]\r\nHTML Injection     [X]  [X]  [ ]  [ ]  [ ]  [X]  [X]\r\n",
+      "EnabledAuthentication": false,
+      "Connection": {
+        "IsRateLimited": false,
+        "Rate": 100,
+        "Failure": "AutoRetry",
+        "MaxRetryCount": 3
+      }
+    },
+    "Fingerprinting": {
+      "IsEnabled": true,
+      "Groups": [
+        {
+          "Title": "Web Server",
+          "Items": [
+            {
+              "Title": "nginx",
+              "Value": 100
+            }
+          ]
+        },
+        {
+          "Title": "Programming Language",
+          "Items": [
+            {
+              "Title": "PHP",
+              "Value": 100
+            }
+          ]
+        },
+        {
+          "Title": "Operating System",
+          "Items": [
+            {
+              "Title": "Linux",
+              "Value": 100
+            }
+          ]
+        }
+      ]
+    },
+    "Severities": {
+      "Information": {
+        "Name": "Information",
+        "IssueGroups": [],
+        "Total": 0
+      },
+      "Low": {
+        "Name": "Low",
+        "IssueGroups": [],
+        "Total": 0
+      },
+      "Medium": {
+        "Name": "Medium",
+        "IssueGroups": [],
+        "Total": 0
+      },
+      "High": {
+        "Name": "High",
+        "IssueGroups": [],
+        "Total": 0
+      },
+      "Critical": {
+        "Name": "Critical",
+        "IssueGroups": [],
+        "Total": 0
+      }
+    }
+  }
+  

@@ -1,5 +1,7 @@
+import base64
 import datetime
 import logging
+import mimetypes
 from itertools import chain
 
 import bleach
@@ -336,7 +338,7 @@ def datediff_time(date1, date2):
     date_str = ""
     diff = dateutil.relativedelta.relativedelta(date2, date1)
     attrs = ["years", "months", "days"]
-    human_date = ["%d %s" % (getattr(diff, attr), getattr(diff, attr) > 1 and attr or attr[:-1])
+    human_date = [f"{getattr(diff, attr)} {(getattr(diff, attr) > 1 and attr) or attr[:-1]}"
                                     for attr in attrs if getattr(diff, attr)]
     for date_part in human_date:
         date_str = date_str + date_part + " "
@@ -418,6 +420,18 @@ def pic_token(context, image, size):
     token = FileAccessToken(user=user, file=image, size=size)
     token.save()
     return reverse("download_finding_pic", args=[token.token])
+
+
+@register.filter
+def inline_image(image_file):
+    try:
+        if img_type := mimetypes.guess_type(image_file.file.name)[0]:
+            if img_type.startswith("image/"):
+                img_data = base64.b64encode(image_file.file.read())
+                return f"data:{img_type};base64, {img_data.decode('utf-8')}"
+    except:
+        pass
+    return ""
 
 
 @register.filter
@@ -674,11 +688,13 @@ def get_severity_count(id, table):
     total = critical + high + medium + low + info
     display_counts = []
 
-    display_counts.append("Critical: " + str(critical))
-    display_counts.append("High: " + str(high))
-    display_counts.append("Medium: " + str(medium))
-    display_counts.append("Low: " + str(low))
-    display_counts.append("Info: " + str(info))
+    display_counts.extend((
+        "Critical: " + str(critical),
+        "High: " + str(high),
+        "Medium: " + str(medium),
+        "Low: " + str(low),
+        "Info: " + str(info),
+    ))
 
     if table == "test":
         display_counts.append("Total: " + str(total) + " Findings")

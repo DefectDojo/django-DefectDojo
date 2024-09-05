@@ -43,13 +43,16 @@ done
 
 echo "Running docker compose unit tests with profile postgres-redis and test case $TEST_CASE ..."
 
-# Compose V2 integrates compose functions into the Docker platform, continuing to support most of the previous docker-compose features and flags. You can run Compose V2 by replacing the hyphen (-) with a space, using docker compose, instead of docker-compose.
+# Compose V2 integrates compose functions into the Docker platform,
+# continuing to support most of the previous docker-compose features
+# and flags. You can run Compose V2 by replacing the hyphen (-) with
+# a space, using docker compose, instead of docker-compose.
 echo "Building images..."
 ./docker/setEnv.sh integration_tests
 ./dc-build.sh
-echo "Setting up DefectDojo with Postgres and RabbitMQ..."
-DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+echo "Setting up DefectDojo with Postgres and Redis..."
+DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
 echo "Initializing DefectDojo..."
-DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps --exit-code-from initializer initializer
+DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --no-deps --exit-code-from initializer initializer
 echo "Running the integration tests..."
-DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps --exit-code-from integration-tests integration-tests
+DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --no-deps --exit-code-from integration-tests integration-tests

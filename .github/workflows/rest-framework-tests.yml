@@ -35,19 +35,19 @@ jobs:
 
       # phased startup so we can use the exit code from unit test container
       - name: Start Postgres
-        run: docker compose --env-file ./docker/environments/postgres-redis.env up -d postgres
+        run: docker compose up -d postgres
 
       # no celery or initializer needed for unit tests
       - name: Unit tests
         timeout-minutes: 10
-        run: docker compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env up --no-deps --exit-code-from uwsgi uwsgi
+        run: docker compose up --no-deps --exit-code-from uwsgi uwsgi
         env:
           DJANGO_VERSION: ${{ matrix.os }}
 
       - name: Logs
         if: failure()
-        run: docker compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env logs --tail="2500" uwsgi
+        run: docker compose logs --tail="2500" uwsgi
 
       - name: Shutdown
         if: always()
-        run: docker compose --profile postgres-redis --env-file ./docker/environments/postgres-redis.env down
+        run: docker compose down

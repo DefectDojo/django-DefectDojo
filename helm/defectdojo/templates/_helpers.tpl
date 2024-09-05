@@ -33,7 +33,7 @@ Create chart name and version as used by the chart label.
 
 
 {{/*
-  Determine the hostname to use for PostgreSQL/mySQL/Redis.
+  Determine the hostname to use for PostgreSQL/Redis.
 */}}
 {{- define "postgresql.hostname" -}}
 {{- if eq .Values.database "postgresql" -}}
@@ -57,30 +57,12 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 {{- end -}}
 {{- end -}}
-{{- define "mysql.hostname" -}}
-{{- if eq .Values.database "mysql" -}}
-{{- if .Values.mysql.enabled -}}
-{{- printf "%s-%s" .Release.Name "mysql" | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s" .Values.mysql.mysqlServer -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
 {{- define "redis.hostname" -}}
 {{- if eq .Values.celery.broker "redis" -}}
 {{- if .Values.redis.enabled -}}
 {{- printf "%s-%s" .Release.Name "redis-master" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s" (.Values.celery.brokerHost | default .Values.redis.redisServer) -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-{{- define "rabbitmq.hostname" -}}
-{{- if eq .Values.celery.broker "rabbitmq" -}}
-{{- if .Values.rabbitmq.enabled -}}
-{{- printf "%s-%s" .Release.Name "rabbitmq" | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- .Values.celery.brokerHost -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -154,13 +136,12 @@ Create chart name and version as used by the chart label.
   command:
   - sh
   - -c
-  # - tail -f /dev/null
   - while ! /app/manage.py migrate --check; do echo "Database is not migrated to the latest state yet"; sleep 5; done;
   image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
   imagePullPolicy: {{ .Values.imagePullPolicy }}
   {{- if .Values.securityContext.enabled }}
   securityContext:
-    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 4 }}
   {{- end }}
   envFrom:
   - configMapRef:
@@ -169,7 +150,7 @@ Create chart name and version as used by the chart label.
       name: {{ .fullName }}-extrasecrets
       optional: true
   env:
-  {{- if .Values.django.uwsgi.enable_debug }}
+  {{- if .Values.django.uwsgi.enableDebug }}
   - name: DD_DEBUG
     value: 'True'
   {{- end }}
@@ -182,13 +163,10 @@ Create chart name and version as used by the chart label.
         {{- else if eq .Values.database "postgresqlha" }}
           name: {{ .Values.postgresqlha.postgresql.existingSecret | default "defectdojo-postgresql-ha-specific" }}
           key: postgresql-postgres-password
-        {{- else if eq .Values.database "mysql" }}
-          name: {{ .Values.mysql.auth.existingSecret | default "defectdojo-mysql-specific" }}
-          key: {{ .Values.mysql.auth.secretKey | default "mysql-password" }}
         {{- end }}
   {{- if .Values.extraEnv }}
-  {{- toYaml .Values.extraEnv | nindent 8 }}
+  {{- toYaml .Values.extraEnv | nindent 2 }}
   {{- end }}
   resources:
-    {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
+    {{- toYaml .Values.dbMigrationChecker.resources | nindent 4 }}
 {{- end -}}

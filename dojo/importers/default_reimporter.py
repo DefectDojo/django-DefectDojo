@@ -147,6 +147,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             test_import_history,
         )
 
+    def determine_deduplication_algorithm(self) -> str:
+        """
+        Determines what dedupe algorithm to use for the Test being processed.
+        :return: A string representing the dedupe algorithm to use.
+        """
+        return self.test.deduplication_algorithm
+
     def process_findings(
         self,
         parsed_findings: List[Finding],
@@ -160,7 +167,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         at import time
         """
 
-        self.deduplication_algorithm = self.test.deduplication_algorithm
+        self.deduplication_algorithm = self.determine_deduplication_algorithm()
         self.original_items = list(self.test.finding_set.all())
         self.new_items = []
         self.reactivated_items = []
@@ -267,7 +274,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 self.mitigate_finding(
                     finding,
                     f"Mitigated by {self.test.test_type} re-upload.",
-                    self.findings_groups_enabled,
+                    finding_groups_enabled=self.findings_groups_enabled,
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
@@ -469,6 +476,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             self.unchanged_items.append(existing_finding)
             return existing_finding, True
+        # If the finding is risk accepted and inactive in Defectdojo we do not sync the status from the scanner
+        # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
+        # (Risk accepted findings are not set to mitigated by Defectdojo)
+        # We however do not exit the loop as we do want to update the endpoints (in case some endpoints were fixed)
+        elif existing_finding.risk_accepted and not existing_finding.active:
+            self.unchanged_items.append(existing_finding)
+            return existing_finding, False
         # The finding was not an exact match, so we need to add more details about from the
         # new finding to the existing. Return False here to make process further
         return existing_finding, False

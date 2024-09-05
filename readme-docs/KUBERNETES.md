@@ -10,9 +10,11 @@ and [Helm](https://helm.sh/) can be installed locally by following
 this [guide](https://helm.sh/docs/using_helm/#installing-helm).
 
 ## Supported Kubernetes Versions
+
 The tests cover the deployment on the lastest [kubernetes version](https://kubernetes.io/releases/) and the oldest supported [version from AWS](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html#available-versions). The assumption is that version in between do not have significant differences. Current tested versions can looks up in the [github k8s workflow](https://github.com/DefectDojo/django-DefectDojo/blob/master/.github/workflows/k8s-tests.yml).
 
 ## Helm chart
+
 Starting with version 1.14.0, a helm chart will be pushed onto the `helm-charts` branch during the release process. Don't look for a chart museum, we're leveraging the "raw" capabilities of GitHub at this time.
 
 To use it, you can add our repo.
@@ -49,11 +51,14 @@ minikube addons enable ingress
 ```
 
 Helm >= v3
+
 ```zsh
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
 ```
+
 Then pull the dependent charts:
+
 ```zsh
 helm dependency update ./helm/defectdojo
 ```
@@ -61,19 +66,25 @@ helm dependency update ./helm/defectdojo
 Now, install the helm chart into minikube.
 
 If you have setup an ingress controller:
+
 ```zsh
 DJANGO_INGRESS_ENABLED=true
 ```
+
 else:
+
 ```zsh
 DJANGO_INGRESS_ENABLED=false
 ```
 
 If you have configured TLS:
+
 ```zsh
 DJANGO_INGRESS_ACTIVATE_TLS=true
 ```
+
 else:
+
 ```zsh
 DJANGO_INGRESS_ACTIVATE_TLS=false
 ```
@@ -89,17 +100,12 @@ helm install \
   --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
   --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
   --set createSecret=true \
-  --set createRabbitMqSecret=true \
   --set createRedisSecret=true \
-  --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 ```
-Note that you need only one of:
-- postgresql or mysql
-- rabbitmq or redis
 
 It usually takes up to a minute for the services to startup and the
-status of the containers can be viewed by starting up ```minikube dashboard```.
+status of the containers can be viewed by starting up `minikube dashboard`.
 Note: If the containers are not cached locally the services will start once the
 containers have been pulled locally.
 
@@ -139,15 +145,18 @@ If testing containers locally, then set the imagePullPolicy to Never,
 which ensures containers are not pulled from Docker hub.
 
 Use the same commands as before but add:
+
 ```zsh
   --set imagePullPolicy=Never
 ```
 
 ### Installing from a private registry
+
 If you have stored your images in a private registry, you can install defectdojo chart with (helm 3).
 
 - First create a secret named "defectdojoregistrykey" based on the credentials that can pull from the registry: see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 - Then install the chart with the same commands as before but adding:
+
 ```zsh
   --set repositoryPrefix=<myregistry.com/path> \
   --set imagePullSecrets=defectdojoregistrykey
@@ -167,18 +176,10 @@ docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_pr
 docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_proxy=http://myproxy.com:8080 -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 ```
 
-### Debug uWSGI with ptvsd
-
-You can set breakpoints in code that is handled by uWSGI. The feature is meant to be used when you run locally on minikube, and mimics [what can be done with docker-compose](DOCKER.md#run-with-docker-compose-in-development-mode-with-ptvsd-remote-debug).
-
-The port is currently hard-coded to 3000.
-
-* In `values.yaml`, ensure the value for `enable_ptvsd` is set to `true` (the default is `false`). Make sure the change is taken into account in your deployment.
-* Have `DD_DEBUG` set to `True`.
-* Port forward port 3000 to the pod, such as `kubectl port-forward defectdojo-django-7886f49466-7cwm7 3000`.
-
 ### Upgrade the chart
+
 If you want to change kubernetes configuration of use an updated docker image (evolution of defectDojo code), upgrade the application:
+
 ```
 kubectl delete job defectdojo-initializer
 helm upgrade  defectdojo ./helm/defectdojo/ \
@@ -186,11 +187,11 @@ helm upgrade  defectdojo ./helm/defectdojo/ \
    --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS}
 ```
 
-
 ### Re-install the chart
+
 In case of issue or in any other situation where you need to re-install the chart, you can do it and re-use the same secrets.
 
-**Note that when using mysql, this will create a new database, while with postgresql you'll keep the same database (more information below)**
+**Note: With postgresql you'll keep the same database (more information below)**
 
 ```zsh
 # helm 3
@@ -234,7 +235,6 @@ If you want to encrypt the traffic to the nginx server you can use the option `-
 
 Be aware that the traffic to the database and celery broker are unencrypted at the moment.
 
-
 ### Media persistent volume
 
 By default, DefectDojo helm installation doesn't support persistent storage for storing images (dynamically uploaded by users). By default, it uses emptyDir, which is ephemeral by its nature and doesn't support multiple replicas of django pods, so should not be in use for production.
@@ -250,7 +250,7 @@ mediaPersistentVolume:
   type: pvc
   # there are two options to create pvc 1) when you want the chart to create pvc for you, set django.mediaPersistentVolume.persistentVolumeClaim.create to true and do not specify anything for django.mediaPersistentVolume.PersistentVolumeClaim.name  2) when you want to create pvc outside the chart, pass the pvc name via django.mediaPersistentVolume.PersistentVolumeClaim.name and ensure django.mediaPersistentVolume.PersistentVolumeClaim.create is set to false
   persistentVolumeClaim:
-    create: true 
+    create: true
     name:
     size: 5Gi
     accessModes:
@@ -277,12 +277,10 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set createSecret=true \
-  --set createRabbitMqSecret=true \
   --set createRedisSecret=true \
-  --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 
-# For high availability deploy multiple instances of Django, Celery and RabbitMQ
+# For high availability deploy multiple instances of Django, Celery and Redis
 helm install \
   defectdojo \
   ./helm/defectdojo \
@@ -291,14 +289,12 @@ helm install \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
-  --set rabbitmq.replicas=3 \
+  --set redis.replicas=3 \
   --set createSecret=true \
-  --set createRabbitMqSecret=true \
   --set createRedisSecret=true \
-  --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 
-# Run highly available PostgreSQL cluster instead of MySQL - recommended setup
+# Run highly available PostgreSQL cluster
 # for production environment.
 helm install \
   defectdojo \
@@ -307,17 +303,14 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
   --set celery.replicas=3 \
-  --set rabbitmq.replicas=3 \
+  --set redis.replicas=3 \
   --set django.ingress.secretName="minikube-tls" \
-  --set mysql.enabled=false \
   --set database=postgresql \
   --set postgresql.enabled=true \
   --set postgresql.replication.enabled=true \
   --set postgresql.replication.slaveReplicas=3 \
   --set createSecret=true \
-  --set createRabbitMqSecret=true \
   --set createRedisSecret=true \
-  --set createMysqlSecret=true \
   --set createPostgresqlSecret=true
 
 # Note: If you run `helm install defectdojo before, you will get an error
@@ -332,22 +325,6 @@ helm test defectdojo
 # Navigate to <https://defectdojo.default.minikube.local>.
 ```
 
-TODO: The MySQL volumes aren't persistent across `helm uninstall` operations. To
-make them persistent, you need to add an annotation to the persistent volume
-claim:
-
-```zsh
-kubectl --namespace "${K8S_NAMESPACE}" patch pvc defectdojo-mysql -p \
-  '{"metadata": {"annotations": {"\"helm.sh/resource-policy\"": "keep"}}}'
-```
-
-See also
-<https://github.com/helm/charts/blob/master/stable/mysql/templates/pvc.yaml>.
-
-However, that doesn't work and I haven't found out why. In a production
-environment, a redundant PostgreSQL cluster is the better option. As it uses
-statefulsets that are kept by default, the problem doesn't exist there.
-
 ### Prometheus metrics
 
 It's possible to enable Nginx prometheus exporter by setting `--set monitoring.enabled=true` and `--set monitoring.prometheus.enabled=true`. This adds the Nginx exporter sidecar and the standard Prometheus pod annotations to django deployment.
@@ -355,10 +332,12 @@ It's possible to enable Nginx prometheus exporter by setting `--set monitoring.e
 ## Useful stuff
 
 ### Setting your own domain
-The `site_url` in values.yaml controls what domain is configured in Django, and also what the celery workers will put as links in Jira tickets for example.
+
+The `siteUrl` in values.yaml controls what domain is configured in Django, and also what the celery workers will put as links in Jira tickets for example.
 Set this to your `https://<yourdomain>` in values.yaml
 
 ### Multiple Hostnames
+
 Django requires a list of all hostnames that are valid for requests.
 You can add additional hostnames via helm or values file as an array.
 This helps if you have a local service submitting reports to defectDojo using
@@ -375,6 +354,7 @@ This will also work with shell inserted variables:
 You will still need to set a host value as well.
 
 ### Using an existing redis setup with redis-sentinel
+
 If you want to use a redis-sentinel setup as the Celery broker, you will need to set the following.
 
 1. Set redis.scheme to "sentinel" in values.yaml
@@ -382,23 +362,21 @@ If you want to use a redis-sentinel setup as the Celery broker, you will need to
 
 ```yaml
 celery:
-  broker: "redis"
+  broker: 'redis'
 
 redis:
-  redisServer: "PutYourRedisSentinelAddress"
-  scheme: "sentinel"
+  redisServer: 'PutYourRedisSentinelAddress'
+  scheme: 'sentinel'
 
 extraEnv:
   - name: DD_CELERY_BROKER_TRANSPORT_OPTIONS
     value: '{"master_name": "mymaster"}'
   - name: 'DD_CELERY_BROKER_PORT'
-    value: "26379"
+    value: '26379'
 ```
 
-
-
-
 ### kubectl commands
+
 ```zsh
 # View logs of a specific pod
 kubectl logs $(kubectl get pod --selector=defectdojo.org/component=${POD} \
@@ -416,14 +394,17 @@ kubectl exec -it $(kubectl get pod --selector=defectdojo.org/component=${POD} \
 ```
 
 ### Clean up Kubernetes
+
 Helm >= v3
+
 ```
 helm uninstall defectdojo
 ```
 
 To remove persistent objects not removed by uninstall (this will remove any database):
+
 ```
-kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-rabbitmq-specific defectdojo-postgresql-specific defectdojo-mysql-specific
+kubectl delete secrets defectdojo defectdojo-redis-specific defectdojo-postgresql-specific
 kubectl delete serviceAccount defectdojo
-kubectl delete pvc data-defectdojo-rabbitmq-0 data-defectdojo-postgresql-0 data-defectdojo-mysql-0
+kubectl delete pvc data-defectdojo-redis-0 data-defectdojo-postgresql-0
 ```
