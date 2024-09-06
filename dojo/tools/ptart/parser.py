@@ -1,8 +1,7 @@
-import hashlib
 import json
-from urllib.parse import urlparse
-from dojo.models import Endpoint, Finding
 
+from dojo.tools.ptart.retest_parser import PTARTRetestParser
+from dojo.tools.ptart.assessment_parser import PTARTAssessmentParser
 
 class PTARTParser(object):
     """
@@ -18,19 +17,21 @@ class PTARTParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "PTART report file can be imported in JSON format."
 
-    def get_findings(self, file, test):
-        project = json.load(file)
-
-        if project is not None:
-
-
-    def convert_severity(self, num_severity):
-        """Convert severity value"""
-        if num_severity >= -10:
-            return "Low"
-        elif -11 >= num_severity > -26:
-            return "Medium"
-        elif num_severity <= -26:
-            return "High"
+    def get_findings(self, filename, test):
+        data = json.load(filename)
+        assessment_name = test.title
+        if assessment_name.startswith("[RETEST]"):
+            true_name = assessment_name.replace("[RETEST] ", "")
+            findings = PTARTRetestParser().get_findings_for(true_name, data)
         else:
-            return "Info"
+            findings = PTARTAssessmentParser().get_findings_for(assessment_name, data)
+        return findings
+
+    def get_tests(self, scan_type, filename):
+        data = json.load(filename)
+        tests = PTARTAssessmentParser().get_test_data(data)
+        tests.append(PTARTRetestParser().get_test_data(data))
+        return tests
+
+    def requires_file(self, scan_type):
+        return True
