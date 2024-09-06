@@ -67,7 +67,8 @@ class ThreatComposerParser:
                     mitigation_links[linked_id].append(mitigations[mitigation_id])
 
         for threat in data["threats"]:
-            if threat["threatAction"]:
+
+            if "threatAction" in threat:
                 title = threat["threatAction"]
                 severity, impact, comments = self.parse_threat_metadata(threat["metadata"])
                 description = self.to_description_text(threat, comments, assumption_threat_links[threat["id"]])
@@ -85,9 +86,19 @@ class ThreatComposerParser:
                     mitigation=mitigation,
                     impact=impact,
                     tags=tags,
-                    static_finding=False,
+                    static_finding=True,
                     dynamic_finding=False,
                 )
+
+                match threat.get("status", "threatIdentified"):
+                    case "threatResolved":
+                        finding.active = False
+                        finding.is_mitigated = True
+                        finding.false_p = False
+                    case "threatResolvedNotUseful":
+                        finding.active = False
+                        finding.is_mitigated = True
+                        finding.false_p = True
 
                 findings.append(finding)
 
@@ -99,7 +110,7 @@ class ThreatComposerParser:
             mitigation = current["mitigation"]
             assumption_links = current["assumptions"]
             counti = i + 1
-            text += f"**Mitigation {counti} (ID: {mitigation['numericId']})**: {mitigation['content']}"
+            text += f"**Mitigation {counti} (ID: {mitigation['numericId']}, Status: {mitigation.get('status', 'Not defined')})**: {mitigation['content']}"
 
             for item in mitigation["metadata"]:
                 if item["key"] == "Comments":

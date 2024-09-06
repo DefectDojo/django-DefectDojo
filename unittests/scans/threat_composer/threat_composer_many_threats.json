@@ -637,6 +637,7 @@
         "id": "46db1eb4-a451-4d05-afe1-c695491e2387",
         "numericId": 23,
         "statement": "A lorem ipsum lorem ipsum can lorem ipsum, which leads to lorem ipsum, negatively impacting lorem ipsum",
+        "status": "threatResolved",
         "threatSource": "lorem ipsum",
         "prerequisites": "lorem ipsum",
         "threatAction": "lorem ipsum",
@@ -704,7 +705,8 @@
           "mitigations",
           "assumptions"
         ],
-        "statement": "A threat actor that is able to trick a user into installing a malicous userscript extension (e.g. tampermonkey, browser extension) can read the contents of local browser storage, which leads to the exfiltration of the contents of browser storage to an endpoint controlled by the actor, resulting in reduced confidentiality of application metadata, threats, mitigations and assumptions"
+        "statement": "A threat actor that is able to trick a user into installing a malicous userscript extension (e.g. tampermonkey, browser extension) can read the contents of local browser storage, which leads to the exfiltration of the contents of browser storage to an endpoint controlled by the actor, resulting in reduced confidentiality of application metadata, threats, mitigations and assumptions",
+        "status": "threatResolvedNotUseful"
       },
       {
         "id": "2a1052e8-fa0a-499a-9f41-7ae7f860b75e",
@@ -738,7 +740,8 @@
           "mitigations",
           "assumptions"
         ],
-        "statement": "A threat actor that is able to target a user already using a benign userscript extension (e.g. tampermonkey) that integrates directly with local browser storage for quickly viewing a Threat Composer export can trick them into opening a malicious threat model that contains script tags (or similar), which leads to the exfiltration of the contents of browser storage via XSS due to the extension bypassing Threat Composers import validation and sanitisation protection, resulting in reduced confidentiality of application metadata, threats, mitigations and assumptions"
+        "statement": "A threat actor that is able to target a user already using a benign userscript extension (e.g. tampermonkey) that integrates directly with local browser storage for quickly viewing a Threat Composer export can trick them into opening a malicious threat model that contains script tags (or similar), which leads to the exfiltration of the contents of browser storage via XSS due to the extension bypassing Threat Composers import validation and sanitisation protection, resulting in reduced confidentiality of application metadata, threats, mitigations and assumptions",
+        "status": "threatIdentified"
       },
       {
         "id": "7b49bdbd-25e9-446f-b44a-46fa2807e182",
@@ -756,6 +759,9 @@
             ]
           }
         ],
+        "tags": [
+          "Risk Accepted"
+        ],
         "threatSource": "threat actor",
         "prerequisites": "with knowledge of a browser image render vulnerability",
         "threatAction": "trick a user into importing a malicious JSON file containing malicious BASE64 images",
@@ -769,7 +775,8 @@
           "assumptions",
           "application metadata"
         ],
-        "statement": "A threat actor with knowledge of a browser image render vulnerability can trick a user into importing a malicious JSON file containing malicious BASE64 images, which leads to exfiltration the contents of local storage to and end-point controlled by the actor, resulting in reduced confidentiality of threats, mitigations, assumptions and application metadata"
+        "statement": "A threat actor with knowledge of a browser image render vulnerability can trick a user into importing a malicious JSON file containing malicious BASE64 images, which leads to exfiltration the contents of local storage to and end-point controlled by the actor, resulting in reduced confidentiality of threats, mitigations, assumptions and application metadata",
+        "status": "threatResolved"
       },
       {
         "id": "782adefc-b480-4e8f-83ee-64f6d680df0a",
