@@ -27,7 +27,9 @@ class TestPTARTParser(TestCase):
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(1, len(findings))
-            self.assertEqual("Broken Access Control", findings[0].title)
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("Broken Access Control", finding.title)
     #
     #
     # def test_ptart_parser_with_no_vuln_has_no_findings(self):
