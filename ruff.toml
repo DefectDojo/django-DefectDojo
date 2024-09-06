@@ -77,13 +77,16 @@ select = [
    "FAST",
    "AIR",
    "FURB",
-   "RUF1","RUF2",
-   "RUF001","RUF002", "RUF003", "RUF005",
-   "RUF013",
-   "RUF019",
-   "RUF021",
+   "RUF",
 ]
-ignore = ["E501", "E722"]
+ignore = [
+    "E501",
+    "E722",
+    "RUF010",
+    "RUF012",
+    "RUF015",
+    "RUF027",
+]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
