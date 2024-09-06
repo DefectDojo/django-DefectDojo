@@ -88,9 +88,9 @@ class DedupeTest(BaseTestCase):
         text = driver.find_element(By.ID, "no_findings").text
 
         self.assertIsNotNone(text)
-        self.assertTrue("No findings found." in text)
+        self.assertIn("No findings found.", text)
         # check that user was redirect back to url where it came from based on return_url
-        self.assertTrue(driver.current_url.endswith("page=1"))
+        self.assertTrue(driver.current_url.endswith("page=1"), driver.current_url)
 
 # --------------------------------------------------------------------------------------------------------
 # Same scanner deduplication - Deduplication on engagement
