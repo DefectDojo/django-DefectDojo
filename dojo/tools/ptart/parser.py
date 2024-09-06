@@ -30,7 +30,7 @@ class PTARTParser(object):
     def get_tests(self, scan_type, filename):
         data = json.load(filename)
         tests = PTARTAssessmentParser().get_test_data(data)
-        tests.append(PTARTRetestParser().get_test_data(data))
+        tests.extend(PTARTRetestParser().get_test_data(data))
         return tests
 
     def requires_file(self, scan_type):
