@@ -1,2 +1,26 @@
-{"type":"info","data":"No lockfile found."}
-{"type":"auditSummary","data":{"vulnerabilities":{"info":0,"low":0,"moderate":0,"high":0,"critical":0},"dependencies":0,"devDependencies":0,"optionalDependencies":0,"totalDependencies":0}}
+{
+  "name": "Test",
+  "executive_summary": "Mistakes were made",
+  "engagement_overview": "Things were done",
+  "conclusion": "Things should be put right",
+  "scope": "test.example.com",
+  "client": "Test Client",
+  "start_date": "2024-08-11",
+  "end_date": "2024-08-16",
+  "cvss_type": 3,
+  "tools": [
+    "Burp Suite"
+  ],
+  "methodologies": [
+    "OWASP Testing Guide V4.2"
+  ],
+  "pentesters": [
+    {
+      "username": "e100765",
+      "first_name": "",
+      "last_name": ""
+    }
+  ],
+  "assessments": [],
+  "retests": []
+}
