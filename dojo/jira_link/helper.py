@@ -391,7 +391,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         connect_method = get_jira_connect_method()
         jira = connect_method(jira_server, jira_username, jira_password)
 
-        logger.debug("logged in to JIRA ""%s"" successfully", jira_server)
+        logger.debug("logged in to JIRA %s successfully", jira_server)
 
         return jira
     except JIRAError as e:
