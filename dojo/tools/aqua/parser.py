@@ -136,7 +136,10 @@ def get_item(resource, vuln, test):
     )
     if vulnerability_id != "No CVE":
         finding.unsaved_vulnerability_ids = [vulnerability_id]
-
+    if vuln.get("epss_score"):
+        finding.epss_score = vuln.get("epss_score")
+    if vuln.get("epss_percentile"):
+        finding.epss_percentile = vuln.get("epss_percentile")
     return finding
 
 
