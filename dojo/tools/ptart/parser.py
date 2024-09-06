@@ -17,21 +17,11 @@ class PTARTParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "PTART report file can be imported in JSON format."
 
-    def get_findings(self, filename, test):
-        data = json.load(filename)
-        assessment_name = test.title
-        if assessment_name.startswith("[RETEST]"):
-            true_name = assessment_name.replace("[RETEST] ", "")
-            findings = PTARTRetestParser().get_findings_for(true_name, data)
-        else:
-            findings = PTARTAssessmentParser().get_findings_for(assessment_name, data)
+    def get_findings(self, file, test):
+        data = json.load(file)
+        findings = PTARTAssessmentParser().get_test_data(data)
+        findings.extend(PTARTRetestParser().get_test_data(data))
         return findings
-
-    def get_tests(self, scan_type, filename):
-        data = json.load(filename)
-        tests = PTARTAssessmentParser().get_test_data(data)
-        tests.extend(PTARTRetestParser().get_test_data(data))
-        return tests
 
     def requires_file(self, scan_type):
         return True

@@ -13,22 +13,21 @@ class TestPTARTParser(TestCase):
                                description="what a description")
         self.engagement = Engagement(name="sample engagement",
                                      product=self.product)
-        self.test = Test(engagement=self.engagement,
-                         title="Test Assessment")
+        self.test = Test(engagement=self.engagement)
 
-    def test_ptart_parser_with_no_assessments_has_no_tests(self):
+    def test_ptart_parser_with_no_assessments_has_no_findings(self):
         with open("unittests/scans/ptart/ptart_zero_vul.json") as testfile:
             parser = PTARTParser()
-            tests = parser.get_tests("PTART Report", testfile)
-            self.assertEqual(0, len(tests))
-            self.assertEqual([], tests)
+            findings = parser.get_findings(testfile, self.test)
+            self.assertEqual(0, len(findings))
+            self.assertEqual([], findings)
 
-    def test_ptart_parser_with_one_assessment_has_one_test(self):
+    def test_ptart_parser_with_one_assessment_has_one_finding(self):
         with open("unittests/scans/ptart/ptart_one_vul.json") as testfile:
             parser = PTARTParser()
-            tests = parser.get_tests("PTART Report", testfile)
-            self.assertEqual(1, len(tests))
-            self.assertEqual("Test Assessment", tests[0].name)
+            findings = parser.get_findings(testfile, self.test)
+            self.assertEqual(1, len(findings))
+            self.assertEqual("Broken Access Control", findings[0].title)
     #
     #
     # def test_ptart_parser_with_no_vuln_has_no_findings(self):
