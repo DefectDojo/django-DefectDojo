@@ -704,6 +704,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             finding.unsaved_files = finding_from_report.unsaved_files
         self.process_files(finding)
         # Process vulnerability IDs
+        if finding_from_report.unsaved_vulnerability_ids:
+            finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids
         finding = self.process_vulnerability_ids(finding)
 
         return finding

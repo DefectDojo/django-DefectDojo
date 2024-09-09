@@ -1277,6 +1277,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
     "AppCheck Web Application Scanner": ["title", "severity"],
+    "Legitify Scan": ["title", "endpoints", "severity"],
+    "ThreatComposer Scan": ["title", "description"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1499,6 +1501,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
     "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
+    "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
+    "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1532,11 +1536,8 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 )
 
 if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
-    if env("DD_JIRA_EXTRA_ISSUE_TYPES").count(",") > 0:
-        for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
-            JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type)
-    else:
-        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env("DD_JIRA_EXTRA_ISSUE_TYPES"), env("DD_JIRA_EXTRA_ISSUE_TYPES"))
+    for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
+        JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
 

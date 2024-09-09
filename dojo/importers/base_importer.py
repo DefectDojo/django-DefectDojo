@@ -491,6 +491,8 @@ class BaseImporter(ImporterOptions):
         test_type, created = Test_Type.objects.get_or_create(name=test_type_name)
         if created:
             logger.info(f"Created new Test_Type with name {test_type.name} because a report is being imported")
+            test_type.dynamically_generated = True
+            test_type.save()
         return test_type
 
     def verify_tool_configuration_from_test(self):

@@ -461,7 +461,7 @@
           </tr>
           <tr>
             <td><strong>{% trans "Product Type" %}</strong></td>
-            <td>{{ prod.prod_type|notspecified }}</td>
+            <td><a title="{% trans "Product Type" %}" href="{% url 'view_product_type' prod.prod_type.id %}">{{ prod.prod_type }}</a></td>
           </tr>
           <tr>
             <td><strong>{% trans "Platform" %}</strong></td>
