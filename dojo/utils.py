@@ -2183,7 +2183,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
         # get maximum, which is the first due to descending order
         last_id = models.first().id + 1
     else:
-        msg = "order must be ""asc"" or ""desc"""
+        msg = "order must be asc or desc"
         raise ValueError(msg)
     # use filter to make count fast on mysql
     total_count = models.filter(id__gt=0).count()

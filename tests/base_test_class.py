@@ -350,9 +350,9 @@ class BaseTestCase(unittest.TestCase):
             # save settings
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # check if it's enabled after reload
-            self.assertTrue(
-                driver.find_element(By.ID, "id_block_execution").is_selected()
-                == block_execution,
+            self.assertEqual(
+                driver.find_element(By.ID, "id_block_execution").is_selected(),
+                block_execution,
             )
         return driver
 
