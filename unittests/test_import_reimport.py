@@ -1478,6 +1478,24 @@ class ImportReimportMixin:
         self.reimport_scan_with_params(test_id, self.generic_import_1, scan_type=self.scan_type_generic)
         # Passing this test means an exception does not occur
 
+    def test_dynamic_parsing_field_set_to_true(self):
+        # Test that a generic finding import creates a new test type
+        # with the dynamically_generated field set to True
+        import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
+        test_id = import0["test"]
+        # Fetch the test from the DB to access the test type
+        test = Test.objects.get(id=test_id)
+        self.assertTrue(test.test_type.dynamically_generated)
+
+    def test_dynamic_parsing_field_set_to_false(self):
+        # Test that a ZAP import does not create a new test type
+        # and that the dynamically_generated field set to False
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0["test"]
+        # Fetch the test from the DB to access the test type
+        test = Test.objects.get(id=test_id)
+        self.assertFalse(test.test_type.dynamically_generated)
+
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ["dojo_testdata.json"]
