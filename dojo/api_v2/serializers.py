@@ -1411,7 +1411,7 @@ class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test_Type
-        fields = "__all__"
+        exclude = ("dynamically_generated",)
 
 
 class TestToNotesSerializer(serializers.Serializer):
