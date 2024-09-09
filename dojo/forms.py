@@ -285,7 +285,7 @@ class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
 class Test_TypeForm(forms.ModelForm):
     class Meta:
         model = Test_Type
-        exclude = [""]
+        exclude = ["dynamically_generated"]
 
 
 class Development_EnvironmentForm(forms.ModelForm):
