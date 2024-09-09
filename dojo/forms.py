@@ -285,7 +285,7 @@ class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
 class Test_TypeForm(forms.ModelForm):
     class Meta:
         model = Test_Type
-        exclude = [""]
+        exclude = ["dynamically_generated"]
 
 
 class Development_EnvironmentForm(forms.ModelForm):
@@ -321,6 +321,8 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
+        if prod_type_id := getattr(kwargs.get("instance", Product()), "prod_type_id"):  # we are editing existing instance
+            self.fields["prod_type"].queryset |= Product_Type.objects.filter(pk=prod_type_id)  # even if user does not have permission for any other ProdType we need to add at least assign ProdType to make form submittable (otherwise empty list was here which generated invalid form)
 
         # if this product has findings being asynchronously updated, disable the sla config field
         if self.instance.async_updating:
