@@ -1411,7 +1411,7 @@ class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test_Type
-        fields = "__all__"
+        exclude = ("dynamically_generated",)
 
 
 class TestToNotesSerializer(serializers.Serializer):
@@ -1761,10 +1761,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             is_risk_accepted = data.get("risk_accepted", False)
 
         if (is_active or is_verified) and is_duplicate:
-            msg = "Duplicate findings cannot be" " verified or active"
+            msg = "Duplicate findings cannot be verified or active"
             raise serializers.ValidationError(msg)
         if is_false_p and is_verified:
-            msg = "False positive findings cannot " "be verified."
+            msg = "False positive findings cannot be verified."
             raise serializers.ValidationError(msg)
 
         if is_risk_accepted and not self.instance.risk_accepted:

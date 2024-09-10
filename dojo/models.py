@@ -817,6 +817,9 @@ class Test_Type(models.Model):
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
+    dynamically_generated = models.BooleanField(
+        default=False,
+        help_text=_("Set to True for test types that are created at import time"))
 
     class Meta:
         ordering = ("name",)

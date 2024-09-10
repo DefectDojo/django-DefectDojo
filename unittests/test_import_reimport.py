@@ -1115,7 +1115,7 @@ class ImportReimportMixin:
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(0, active_findings_before)
 
-        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1):
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1, untouched=1):
             reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         self.assertEqual(reimport0["test"], test_id)
@@ -1477,6 +1477,24 @@ class ImportReimportMixin:
         # reimport the first report again
         self.reimport_scan_with_params(test_id, self.generic_import_1, scan_type=self.scan_type_generic)
         # Passing this test means an exception does not occur
+
+    def test_dynamic_parsing_field_set_to_true(self):
+        # Test that a generic finding import creates a new test type
+        # with the dynamically_generated field set to True
+        import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
+        test_id = import0["test"]
+        # Fetch the test from the DB to access the test type
+        test = Test.objects.get(id=test_id)
+        self.assertTrue(test.test_type.dynamically_generated)
+
+    def test_dynamic_parsing_field_set_to_false(self):
+        # Test that a ZAP import does not create a new test type
+        # and that the dynamically_generated field set to False
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0["test"]
+        # Fetch the test from the DB to access the test type
+        test = Test.objects.get(id=test_id)
+        self.assertFalse(test.test_type.dynamically_generated)
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
