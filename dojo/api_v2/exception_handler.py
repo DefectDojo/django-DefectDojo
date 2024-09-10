@@ -21,7 +21,7 @@ def custom_exception_handler(exc, context):
     # to get the standard error response.
     response = exception_handler(exc, context)
 
-    if isinstance(exc, ParseError):
+    if isinstance(exc, ParseError) and "JSON parse error" in str(exc):
         response = Response()
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {"message": "JSON request content is malformed"}
