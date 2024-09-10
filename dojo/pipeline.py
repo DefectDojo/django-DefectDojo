@@ -15,6 +15,7 @@ from dojo.product.queries import get_authorized_products
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from dojo.utils import get_remote_json_config
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
@@ -172,10 +173,11 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
         token = soc.extra_data["access_token"]
         group_names = search_azure_groups(kwargs, token, soc)
         logger.debug("detected groups " + str(group_names))
+        groups_validate = settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP.split(',')
         if (
             group_names is not None
             and len(group_names) > 0
-            and any(map(group_names.__contains__, settings.AZURE_DEVOPS_MAIN_SECURITY_GROUP.split(',')))
+            and any(map(group_names.__contains__, groups_validate))
         ):
             user_login = kwargs["details"]["email"]
             request_headers = {"Authorization": "Bearer " + token}
@@ -268,7 +270,13 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                         clean_project_type_user(user_product_types_names, user, user_login)
                 else:
                     clean_project_type_user(user_product_types_names, user, user_login)
-
+        else:
+            message = f"The user is not a member of any of the app's security groups. {groups_validate}"
+            messages.error(
+            backend.strategy.request, message, extra_tags="alert-danger"
+        )
+            raise Exception(message)
+           
 
 def assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned, connection, user_login, user_product_types_names):
     conf_jobs = settings.AZURE_DEVOPS_JOBS_TITLE.split(",")

@@ -50,7 +50,7 @@ from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Product_Type_Member
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
-from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
+from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting, validate_group_role
 from dojo.api_v2 import permissions
 from dojo.authorization import authorization
 
@@ -528,7 +528,14 @@ def add_product_type_member(request, uid):
                         product_type_member.product_type = product_type
                         product_type_member.user = user
                         product_type_member.role = memberform.cleaned_data["role"]
-                        product_type_member.save()
+                        
+                        validate_res = validate_group_role(request, user, uid, "view_user", 
+                                                               memberform.cleaned_data["role"].name, user.usercontactinfo.title)
+                        if validate_res:
+                            return validate_res
+                        else:
+                            product_type_member.save()
+
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     _("Product type members added successfully."),
@@ -556,7 +563,13 @@ def add_product_member(request, uid):
                         product_member.product = product
                         product_member.user = user
                         product_member.role = memberform.cleaned_data["role"]
-                        product_member.save()
+                        validate_res = validate_group_role(request, user, uid, "view_user", 
+                                                               memberform.cleaned_data["role"].name, user.usercontactinfo.title)
+                        if validate_res:
+                            return validate_res
+                        else:
+                            product_member.save()
+                                
             messages.add_message(request,
                                 messages.SUCCESS,
                                 _("Product members added successfully."),

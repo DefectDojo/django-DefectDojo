@@ -137,9 +137,14 @@ def get_user(user_name):
     except Dojo_User.DoesNotExist:
         logger.error('User %s does not exist', user_name)
 
-def get_users_authorized_role_permission(permission, role):
+def get_users_authorized_role_permission(product, permission, role):
     roles = get_roles_for_permission(permission)
     if role not in roles:
         return Dojo_User.objects.none()
-    return Dojo_User.objects.filter(Q(global_role__role=role)).order_by("first_name", "last_name", "username")
+    
+    product_type_members = Product_Type_Member.objects \
+        .filter(product_type=product.prod_type, role__in=[role]) \
+        .select_related("user")
+
+    return Dojo_User.objects.filter(Q(id__in=[ptm.user.id for ptm in product_type_members])).order_by("first_name", "last_name", "username")
 
