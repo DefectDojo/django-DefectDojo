@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0213_system_settings_enable_ui_table_based_searching'),
+        ('dojo', '0214_test_type_dynamically_generated'),
     ]
 
     operations = [
