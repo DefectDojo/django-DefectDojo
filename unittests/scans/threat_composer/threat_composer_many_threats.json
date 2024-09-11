@@ -94,13 +94,8 @@
         "tags": [
           "lorem ipsum"
         ],
-        "metadata": [
-          {
-            "key": "Comments",
-            "value": "lorem ipsum"
-          }
-        ],
-        "displayOrder": 21
+        "displayOrder": 21,
+        "status": "mitigationResolved"
       },
       {
         "id": "11fb1c71-42f0-4004-89a7-09d8bf6f8b11",
