@@ -2672,14 +2672,15 @@ def get_remote_json_config(connection: Connection, path_file: str):
         raise e
     
 def validate_group_role(request, user, ptid, viewname, role, contact_info):
-    valid_group = settings.DD_ROLES_MAP_GROUPS.get(role)
-    contact_info = contact_info if contact_info else ""
-    if (valid_group not in contact_info):
-        messages.add_message(request,
-            messages.WARNING,
-            _("The user %(user)s does not have the group %(valid_group)s.") % {"user": user, "valid_group":valid_group},
-            extra_tags="alert-warning")
-        return HttpResponseRedirect(reverse(viewname, args=(ptid, )))
+    if settings.DD_VALIDATE_ROLE_USER:
+        valid_group = settings.DD_ROLES_MAP_GROUPS.get(role)
+        contact_info = contact_info if contact_info else ""
+        if (valid_group not in contact_info):
+            messages.add_message(request,
+                messages.WARNING,
+                _("The user %(user)s does not have the group %(valid_group)s.") % {"user": user, "valid_group":valid_group},
+                extra_tags="alert-warning")
+            return HttpResponseRedirect(reverse(viewname, args=(ptid, )))
     return None
 
 class Response:

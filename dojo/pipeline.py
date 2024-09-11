@@ -10,7 +10,7 @@ from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 
 from dojo.authorization.roles_permissions import Permissions, Roles
-from dojo.models import Dojo_Group, Dojo_Group_Member, Product, Product_Member, Product_Type,Product_Type_Member,Global_Role, Role
+from dojo.models import Dojo_Group, Dojo_Group_Member, Product, Product_Member, Product_Type,Product_Type_Member,Global_Role, Role, UserContactInfo
 from dojo.product.queries import get_authorized_products
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
@@ -179,6 +179,8 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             and len(group_names) > 0
             and any(map(group_names.__contains__, groups_validate))
         ):
+            if settings.DD_VALIDATE_ROLE_USER:
+                UserContactInfo.objects.filter(user_id=user.id).update(title=", ".join(group_names))
             user_login = kwargs["details"]["email"]
             request_headers = {"Authorization": "Bearer " + token}
             graph_user_request = requests.get(
