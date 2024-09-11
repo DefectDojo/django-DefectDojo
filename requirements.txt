@@ -34,7 +34,7 @@ Pillow==10.4.0  # required by django-imagekit
 psycopg[c]==3.2.1
 cryptography==43.0.1
 python-dateutil==2.9.0.post0
-pytz==2024.1
+pytz==2024.2
 redis==5.0.8
 requests==2.32.3
 sqlalchemy==2.0.34  # Required by Celery broker transport
