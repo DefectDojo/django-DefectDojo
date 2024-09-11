@@ -427,7 +427,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
             logger.debug(f"Sending webhook message to endpoint '{endpoint.name}'")
             res = webhooks_notification_request(endpoint, event, *args, **kwargs)
 
-            if res.status_code in [200, 201]:
+            if 200 <= res.status_code < 300:
                 logger.debug(f"Message sent to endpoint '{endpoint.name}' successfully.")
                 continue
 
