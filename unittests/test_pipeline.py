@@ -60,13 +60,19 @@ class PipelineTest(DojoTestCase):
         handler = logging.StreamHandler(capture)
         logger.addHandler(handler)
 
-        update_product_type_azure_devops(
-            AzureADTenantOAuth2(), None, user, None, None, **kwargs
-        )
+        backend = AzureADTenantOAuth2()
+        backend.strategy.request = mock.Mock()
+
+        with self.assertRaises(Exception) as context:
+            update_product_type_azure_devops(
+                backend, None, user, None, None, **kwargs
+            )
         self.assertIn(
             "Could not call microsoft graph API or save groups to member: Invalid URL ",
             capture.getvalue().strip().split("\n")[0],
         )
+        self.assertIn(str(context.exception), "The user is not a member of any of the app's security groups. ['dummy_group_name']")
+
 
     @mock.patch("dojo.pipeline.search_azure_groups", dummy_search_azure_groups)
     @mock.patch("requests.get")
