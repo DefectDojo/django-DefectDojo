@@ -157,9 +157,9 @@ class NotificationWebhooksView(View):
         **kwargs: dict,
     ) -> NotificationsWebhookForm:
         if request.method == "POST":
-            return NotificationsWebhookForm(request.POST, **kwargs)
+            return NotificationsWebhookForm(request.POST, is_superuser=request.user.is_superuser, **kwargs)
         else:
-            return NotificationsWebhookForm(**kwargs)
+            return NotificationsWebhookForm(is_superuser=request.user.is_superuser, **kwargs)
 
     def preprocess_request(self, request: HttpRequest):
         # Check Webhook notifications are enabled
