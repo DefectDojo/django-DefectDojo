@@ -180,7 +180,7 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             and any(map(group_names.__contains__, groups_validate))
         ):
             if settings.DD_VALIDATE_ROLE_USER:
-                UserContactInfo.objects.filter(user_id=user.id).update(title=", ".join(group_names))
+                UserContactInfo.objects.update_or_create(user=user, defaults={"title": ", ".join(group_names)})
             user_login = kwargs["details"]["email"]
             request_headers = {"Authorization": "Bearer " + token}
             graph_user_request = requests.get(

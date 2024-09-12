@@ -679,6 +679,7 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
+            Permissions.Metrics_Panel_Admin,
         },
     }
 

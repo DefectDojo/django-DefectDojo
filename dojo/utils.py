@@ -2671,10 +2671,12 @@ def get_remote_json_config(connection: Connection, path_file: str):
         logger.error("Error getting remote configuration file: " + str(e))
         raise e
     
-def validate_group_role(request, user, ptid, viewname, role, contact_info):
+def validate_group_role(request, user, ptid, viewname, role):
     if settings.DD_VALIDATE_ROLE_USER:
         valid_group = settings.DD_ROLES_MAP_GROUPS.get(role)
-        contact_info = contact_info if contact_info else ""
+        contact_info = ""
+        if hasattr(user, 'usercontactinfo'):
+            contact_info = user.usercontactinfo.title if user.usercontactinfo.title else ""
         if (valid_group not in contact_info):
             messages.add_message(request,
                 messages.WARNING,

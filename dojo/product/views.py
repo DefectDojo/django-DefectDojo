@@ -1691,7 +1691,7 @@ def add_product_member(request, pid):
                             product_member.role = memberform.cleaned_data["role"]
 
                             validate_res = validate_group_role(request, user, pid, "view_product", 
-                                                               memberform.cleaned_data["role"].name, user.usercontactinfo.title)
+                                                               memberform.cleaned_data["role"].name)
                             if validate_res:
                                 return validate_res
                             else:
@@ -1725,7 +1725,7 @@ def edit_product_member(request, memberid):
                                      extra_tags="alert-warning")
             else:
                 validate_res = validate_group_role(request, member.user, member.product.id, "view_product", 
-                                                               memberform.cleaned_data["role"].name, member.user.usercontactinfo.title)
+                                                               memberform.cleaned_data["role"].name)
                 if validate_res:
                     return validate_res
                 else:

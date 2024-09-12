@@ -254,7 +254,7 @@ def add_product_type_member(request, ptid):
                             product_type_member.role = memberform.cleaned_data["role"]
 
                             validate_res = validate_group_role(request, user, ptid, "view_product_type", 
-                                                               memberform.cleaned_data["role"].name, user.usercontactinfo.title)
+                                                               memberform.cleaned_data["role"].name)
                             if validate_res:
                                 return validate_res
                             else:
@@ -298,7 +298,7 @@ def edit_product_type_member(request, memberid):
             else:
                 
                 validate_res = validate_group_role(request, member.user, member.product_type.id, "view_product_type", 
-                                                               memberform.cleaned_data["role"].name, member.user.usercontactinfo.title)
+                                                               memberform.cleaned_data["role"].name)
                 if validate_res:
                     return validate_res
                 else:
