@@ -27,5 +27,6 @@ python3 manage.py check
 
 exec celery --app=dojo \
     beat \
+  --logfile=stdout \
   --pidfile=/var/run/defectdojo/celery-beat.pid \
   --schedule=/var/run/defectdojo/celerybeat-schedule
