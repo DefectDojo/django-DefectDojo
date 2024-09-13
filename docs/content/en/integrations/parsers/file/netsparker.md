@@ -4,7 +4,7 @@ toc_hide: true
 ---
 Vulnerabilities List - JSON report
 
-[Netsparker has now become Invicti](https://www.invicti.com/blog/news/netsparker-is-now-invicti-signaling-a-new-era-for-modern-appsec/). Please plan to migrate automation scripts to use the [Invicti Scan](../invictic.md)
+[Netsparker has now become Invicti](https://www.invicti.com/blog/news/netsparker-is-now-invicti-signaling-a-new-era-for-modern-appsec/). Please plan to migrate automation scripts to use the [Invicti Scan](../invicti.md)
 
 ### Sample Scan Data
 
