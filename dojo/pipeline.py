@@ -217,7 +217,8 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
             ]
 
             role_assigned = {"role": Role.objects.get(id=Roles.Developer)}
-            if any(any(sub_part in job_title for sub_part in part.split("-")) for part in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[:2]):
+            is_leader = any(any(sub_part in job_title for sub_part in part.split("-")) for part in settings.AZURE_DEVOPS_JOBS_TITLE.split(",")[:2])
+            if is_leader:
                 role_assigned = {"role": Role.objects.get(id=Roles.Leader)}
                 assign_product_type_product_to_leaders(user, job_title, office_location, role_assigned, connection, user_login, user_product_types_names)
 
@@ -269,9 +270,9 @@ def update_product_type_azure_devops(backend, uid, user=None, social=None, *args
                                     "Deleting membership of user %s from product type %s", user, product_type_name
                                 )
                     else:
-                        clean_project_type_user(user_product_types_names, user, user_login)
+                        clean_project_type_user(user_product_types_names, user, user_login, is_leader)
                 else:
-                    clean_project_type_user(user_product_types_names, user, user_login)
+                    clean_project_type_user(user_product_types_names, user, user_login, is_leader)
         else:
             message = f"The user is not a member of any of the app's security groups. {groups_validate}"
             messages.error(
@@ -286,7 +287,7 @@ def assign_product_type_product_to_leaders(user, job_title, office_location, rol
         Product.objects.filter(
             description__contains=re.sub(conf_jobs[2], "", office_location).replace(" ", "-")
         ).update(team_manager=user)
-    elif any(sub_part in job_title for sub_part in conf_jobs[1].split("-")):
+    if any(sub_part in job_title for sub_part in conf_jobs[1].split("-")):
         keys = [
             (key_pt, key_user)
             for key_pt, value in get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[0]).items()
@@ -305,13 +306,10 @@ def assign_product_type_product_to_leaders(user, job_title, office_location, rol
                         pt,
                         role_assigned["role"],
                     )
-            if pt_key in user_product_types_names:
-                user_product_types_names.remove(pt_key)
-        clean_project_type_user(user_product_types_names, user, user_login)
 
 
-def clean_project_type_user(user_product_types_names, user, user_login):
-    if (user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM):
+def clean_project_type_user(user_product_types_names, user, user_login, is_leader):
+    if (user_login.split("@")[0] not in settings.AZURE_DEVOPS_USERS_EXCLUDED_TPM) and is_leader is False:
         for product_type_name in user_product_types_names:
             product_type = Product_Type.objects.get(name=product_type_name)
             Product_Type_Member.objects.filter(product_type=product_type, user=user).delete()
