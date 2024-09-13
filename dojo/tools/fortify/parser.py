@@ -18,5 +18,5 @@ class FortifyParser:
         elif str(filename.name).endswith(".fpr"):
             return FortifyFPRParser().parse_fpr(filename, test)
         else:
-            msg = "Filename extension not recognized. Use .xml .fpr"
+            msg = "Filename extension not recognized. Use .xml or .fpr"
             raise ValueError(msg)
