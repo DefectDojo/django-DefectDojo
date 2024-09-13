@@ -1003,7 +1003,7 @@ class EngagementDirectFilterWithoutObjectLookups(EngagementDirectFilterHelper):
 
 
 class EngagementFilterHelper(FilterSet):
-    name = CharFilter(lookup_expr="icontains", label="Product name contains")
+    name = CharFilter(lookup_expr="icontains", label="Engagement name contains")
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Tag name contains")
     not_tag = CharFilter(field_name="tags__name", lookup_expr="icontains", label="Not tag name contains", exclude=True)
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
@@ -1054,7 +1054,7 @@ class EngagementFilter(EngagementFilterHelper, DojoFilter):
             .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
-        model = Product
+        model = Engagement
         fields = ["name", "prod_type"]
 
 
@@ -1107,7 +1107,7 @@ class EngagementFilterWithoutObjectLookups(EngagementFilterHelper):
         help_text="Search for Product Type names that contain a given pattern")
 
     class Meta:
-        model = Product
+        model = Engagement
         fields = ["name"]
 
 
@@ -1172,6 +1172,7 @@ class ProductEngagementFilterWithoutObjectLookups(ProductEngagementFilterHelper,
 
 
 class ApiEngagementFilter(DojoFilter):
+    name = CharFilter(lookup_expr="icontains", label="Engagement name")
     product__prod_type = NumberInFilter(field_name="product__prod_type", lookup_expr="in")
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
     tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
