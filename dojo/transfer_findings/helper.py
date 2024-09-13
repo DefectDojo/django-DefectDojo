@@ -179,7 +179,8 @@ def transfer_finding(
         add_finding_related(transferfinding_findigns,
                             origin_finding,
                             test,
-                            finding_related=finding_related)
+                            finding_related=finding_related,
+                            transfer_finding=transfer_finding)
 
         if transfer_finding.destination_product_type.name == system_settings.orphan_findings:
             logger.debug("Removed orphan findings {origin_finding.id}")
@@ -202,7 +203,8 @@ def add_finding_related(
     transfer_finding_findings: TransferFindingFinding,
     origin_finding: Finding,
     test: Test,
-    finding_related
+    finding_related: Finding,
+    transfer_finding: TransferFinding
 ):
     """Add new finding related to transferFindingFinding
 
@@ -236,7 +238,7 @@ def add_finding_related(
                     sast_source_file_path=origin_finding.sast_source_file_path,
                     nb_occurences=origin_finding.nb_occurences,
                     publish_date=origin_finding.publish_date,
-                    service=origin_finding.service,
+                    service=transfer_finding.destination_engagement,
                     severity=origin_finding.severity,
                     verified=origin_finding.verified,
                     description=origin_finding.description,
