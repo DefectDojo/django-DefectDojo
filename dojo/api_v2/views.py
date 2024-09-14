@@ -111,6 +111,7 @@ from dojo.models import (
     Network_Locations,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -3332,3 +3333,13 @@ class AnnouncementViewSet(
 
     def get_queryset(self):
         return Announcement.objects.all().order_by("id")
+
+
+class NotificationWebhooksViewSet(
+    PrefetchDojoModelViewSet,
+):
+    serializer_class = serializers.NotificationWebhooksSerializer
+    queryset = Notification_Webhooks.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = "__all__"
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)  # TODO: add permission also for other users
