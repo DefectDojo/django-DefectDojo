@@ -41,7 +41,7 @@ class TestWizParser(DojoTestCase):
             self.assertEqual("High", finding.severity)
             finding = findings[20]
             self.assertEqual(
-                "User/service account with get/list/watch permissions on secrets in an AKS cluster", finding.title
+                "User/service account with get/list/watch permissions on secrets in an AKS cluster", finding.title,
             )
             self.assertEqual("Informational", finding.severity)
 
