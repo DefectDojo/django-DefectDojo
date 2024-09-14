@@ -1,6 +1,7 @@
 import binascii
 import calendar as tcalendar
 import hashlib
+import importlib
 import logging
 import mimetypes
 import os
@@ -8,6 +9,7 @@ import re
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+from typing import Callable, Optional
 
 import bleach
 import crum
@@ -295,6 +297,9 @@ def do_dedupe_finding_task(new_finding, *args, **kwargs):
 
 
 def do_dedupe_finding(new_finding, *args, **kwargs):
+    if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
+        return dedupe_method(new_finding, *args, **kwargs)
+
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -1876,9 +1881,9 @@ def sla_compute_and_notify(*args, **kwargs):
             period = "day"
             if abs_sla_age > 1:
                 period = "days"
-            title += "SLA breached by %d %s! Overdue notice" % (abs_sla_age, period)
+            title += f"SLA breached by {abs_sla_age} {period}! Overdue notice"
         elif kind == "prebreach":
-            title += "SLA pre-breach warning - %d day(s) left" % (sla_age)
+            title += f"SLA pre-breach warning - {sla_age} day(s) left"
         elif kind == "breaching":
             title += "SLA is breaching today"
 
@@ -1969,6 +1974,14 @@ def sla_compute_and_notify(*args, **kwargs):
             for finding in findings:
                 total_count += 1
                 sla_age = finding.sla_days_remaining()
+
+                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
+                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
+                severity, enforce = finding.get_sla_period()
+                if not enforce:
+                    logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
+                    continue
+
                 # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
                 if sla_age is None:
                     sla_age = 0
@@ -2170,7 +2183,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
         # get maximum, which is the first due to descending order
         last_id = models.first().id + 1
     else:
-        msg = "order must be ""asc"" or ""desc"""
+        msg = "order must be asc or desc"
         raise ValueError(msg)
     # use filter to make count fast on mysql
     total_count = models.filter(id__gt=0).count()
@@ -2577,6 +2590,23 @@ def get_open_findings_burndown(product):
     past_90_days["y_min"] = running_min
 
     return past_90_days
+
+
+def get_custom_method(setting_name: str) -> Optional[Callable]:
+    """
+    Attempts to load and return the method specified by fully-qualified name at the given setting.
+
+    :param setting_name: The name of the setting that holds the fqname of the Python method we want to load
+    :return: The callable if it was able to be loaded, else None
+    """
+    if fq_name := getattr(settings, setting_name, None):
+        try:
+            mn, _, fn = fq_name.rpartition(".")
+            m = importlib.import_module(mn)
+            return getattr(m, fn)
+        except ModuleNotFoundError:
+            pass
+    return None
 
 
 def generate_file_response(file_object: FileUpload) -> FileResponse:

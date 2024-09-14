@@ -282,6 +282,9 @@ env = environ.FileAwareEnv(
     # When disabled, existing user tokens will not be removed but it will not be
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
+    # Enable endpoint which allow user to get API token when user+pass is provided
+    # It is useful to disable when non-local authentication (like SAML, Azure, ...) is in place
+    DD_API_TOKEN_AUTH_ENDPOINT_ENABLED=(bool, True),
     # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
     # Set fields used by the hashcode generator for deduplication, via en env variable that contains a JSON string
@@ -1272,6 +1275,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
     "AppCheck Web Application Scanner": ["title", "severity"],
+    "Legitify Scan": ["title", "endpoints", "severity"],
+    "ThreatComposer Scan": ["title", "description"],
     "Checkmarx CxFlow SAST": ["vuln_id_from_tool", "file_path", "line"],
 }
 
@@ -1495,6 +1500,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
     "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
+    "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
+    "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Checkmarx CxFlow SAST": DEDUPE_ALGO_HASH_CODE,
 }
 

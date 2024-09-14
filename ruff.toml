@@ -49,6 +49,7 @@ select = [
    "DJ003", "DJ012", "DJ013",
    "EM",
    "EXE",
+   "ISC001",
    "ICN",
    "LOG",
    "G001", "G002", "G1", "G2",
@@ -59,12 +60,15 @@ select = [
    "Q",
    "RSE",
    "TID",
+   "TCH",
    "INT",
+   "ARG003", "ARG004", "ARG005",
    "PTH2",
    "TD001", "TD004", "TD005",
    "PD",
    "PGH",
    "PLE",
+   "PLW15",
    "TRY003",
    "TRY004",
    "TRY2",
@@ -74,13 +78,16 @@ select = [
    "FAST",
    "AIR",
    "FURB",
-   "RUF1","RUF2",
-   "RUF001","RUF002", "RUF003", "RUF005",
-   "RUF013",
-   "RUF019",
-   "RUF025",
+   "RUF",
 ]
-ignore = ["E501", "E722"]
+ignore = [
+    "E501",
+    "E722",
+    "RUF010",
+    "RUF012",
+    "RUF015",
+    "RUF027",
+]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]

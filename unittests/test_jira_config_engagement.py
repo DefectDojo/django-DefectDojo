@@ -126,10 +126,10 @@ class JIRAConfigEngagementBase:
         }
 
     def get_expected_redirect_engagement(self, engagement):
-        return "/engagement/%i" % engagement.id
+        return f"/engagement/{engagement.id}"
 
     def get_expected_redirect_edit_engagement(self, engagement):
-        return "/engagement/edit/%i" % engagement.id
+        return f"/engagement/edit/{engagement.id}"
 
     def add_engagement_jira(self, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse("new_eng_for_prod", args=(self.product_id, )))

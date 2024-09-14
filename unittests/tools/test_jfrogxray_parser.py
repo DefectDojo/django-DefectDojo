@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase
 class TestJfrogJFrogXrayParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln(self):
-        testfile = open("unittests/scans/jfrogxray/one_vuln.json")
+        testfile = open("unittests/scans/jfrogxray/one_vuln.json", encoding="utf-8")
         parser = JFrogXrayParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -19,14 +19,14 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
         self.assertEqual(787, item.cwe)
 
     def test_parse_file_with_many_vulns(self):
-        testfile = open("unittests/scans/jfrogxray/many_vulns.json")
+        testfile = open("unittests/scans/jfrogxray/many_vulns.json", encoding="utf-8")
         parser = JFrogXrayParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
 
     def test_parse_file_with_many_vulns2(self):
-        testfile = open("unittests/scans/jfrogxray/many_vulns2.json")
+        testfile = open("unittests/scans/jfrogxray/many_vulns2.json", encoding="utf-8")
         parser = JFrogXrayParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

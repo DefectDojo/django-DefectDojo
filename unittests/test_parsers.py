@@ -1,5 +1,4 @@
 import os
-import re
 from pathlib import Path
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
@@ -32,18 +31,18 @@ class TestParsers(DojoTestCase):
                         f"Documentation file '{doc_file}' is missing or using different name",
                                     )
 
-                    content = Path(doc_file).read_text()
-                    self.assertTrue(re.search("title:", content),
+                    content = Path(doc_file).read_text(encoding="utf-8")
+                    self.assertRegex(content, "title:",
                                     f"Documentation file '{doc_file}' does not contain a title",
                                     )
-                    self.assertTrue(re.search("toc_hide: true", content),
+                    self.assertRegex(content, "toc_hide: true",
                                     f"Documentation file '{doc_file}' does not contain toc_hide: true",
                                     )
                     if category == "file":
-                        self.assertTrue(re.search("### Sample Scan Data", content),
+                        self.assertRegex(content, "### Sample Scan Data",
                                         f"Documentation file '{doc_file}' does not contain ### Sample Scan Data",
                                         )
-                        self.assertTrue(re.search("https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans", content),
+                        self.assertRegex(content, "https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
                                         f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
                                         )
 
@@ -83,7 +82,7 @@ class TestParsers(DojoTestCase):
                 if file.is_file() and file.name != "__pycache__" and file.name != "__init__.py":
                     f = os.path.join(basedir, "dojo", "tools", parser_dir.name, file.name)
                     read_true = False
-                    with open(f) as f:
+                    with open(f, encoding="utf-8") as f:
                         i = 0
                         for line in f:
                             if read_true is True:

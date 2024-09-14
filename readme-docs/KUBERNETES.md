@@ -176,16 +176,6 @@ docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_pr
 docker build --build-arg http_proxy=http://myproxy.com:8080 --build-arg https_proxy=http://myproxy.com:8080 -t defectdojo/defectdojo-nginx -f Dockerfile.nginx .
 ```
 
-### Debug uWSGI with ptvsd
-
-You can set breakpoints in code that is handled by uWSGI. The feature is meant to be used when you run locally on minikube, and mimics [what can be done with docker-compose](DOCKER.md#run-with-docker-compose-in-development-mode-with-ptvsd-remote-debug).
-
-The port is currently hard-coded to 3000.
-
-- In `values.yaml`, ensure the value for `enable_ptvsd` is set to `true` (the default is `false`). Make sure the change is taken into account in your deployment.
-- Have `DD_DEBUG` set to `True`.
-- Port forward port 3000 to the pod, such as `kubectl port-forward defectdojo-django-7886f49466-7cwm7 3000`.
-
 ### Upgrade the chart
 
 If you want to change kubernetes configuration of use an updated docker image (evolution of defectDojo code), upgrade the application:
@@ -298,7 +288,7 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
-  --set celery.replicas=3 \
+  --set celery.worker.replicas=3 \
   --set redis.replicas=3 \
   --set createSecret=true \
   --set createRedisSecret=true \
@@ -312,7 +302,7 @@ helm install \
   --namespace="${K8S_NAMESPACE}" \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
-  --set celery.replicas=3 \
+  --set celery.worker.replicas=3 \
   --set redis.replicas=3 \
   --set django.ingress.secretName="minikube-tls" \
   --set database=postgresql \
