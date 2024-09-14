@@ -140,6 +140,11 @@ def display_date():
     return timezone.localtime(timezone.now()).strftime("%b %d, %Y")
 
 
+@register.filter
+def display_date_with_secs(obj):
+    return obj.strftime("%c")
+
+
 @register.simple_tag
 def dojo_docs_url():
     from dojo import __docs__
