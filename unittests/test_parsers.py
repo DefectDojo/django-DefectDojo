@@ -1,5 +1,4 @@
 import os
-import re
 from pathlib import Path
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
@@ -33,17 +32,17 @@ class TestParsers(DojoTestCase):
                                     )
 
                     content = Path(doc_file).read_text(encoding="utf-8")
-                    self.assertTrue(re.search("title:", content),
+                    self.assertRegex(content, "title:",
                                     f"Documentation file '{doc_file}' does not contain a title",
                                     )
-                    self.assertTrue(re.search("toc_hide: true", content),
+                    self.assertRegex(content, "toc_hide: true",
                                     f"Documentation file '{doc_file}' does not contain toc_hide: true",
                                     )
                     if category == "file":
-                        self.assertTrue(re.search("### Sample Scan Data", content),
+                        self.assertRegex(content, "### Sample Scan Data",
                                         f"Documentation file '{doc_file}' does not contain ### Sample Scan Data",
                                         )
-                        self.assertTrue(re.search("https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans", content),
+                        self.assertRegex(content, "https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
                                         f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
                                         )
 

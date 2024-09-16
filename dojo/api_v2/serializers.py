@@ -77,6 +77,7 @@ from dojo.models import (
     Note_Type,
     NoteHistory,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -1761,10 +1762,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             is_risk_accepted = data.get("risk_accepted", False)
 
         if (is_active or is_verified) and is_duplicate:
-            msg = "Duplicate findings cannot be" " verified or active"
+            msg = "Duplicate findings cannot be verified or active"
             raise serializers.ValidationError(msg)
         if is_false_p and is_verified:
-            msg = "False positive findings cannot " "be verified."
+            msg = "False positive findings cannot be verified."
             raise serializers.ValidationError(msg)
 
         if is_risk_accepted and not self.instance.risk_accepted:
@@ -3172,3 +3173,9 @@ class AnnouncementSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(msg)
             else:
                 raise
+
+
+class NotificationWebhooksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification_Webhooks
+        fields = "__all__"

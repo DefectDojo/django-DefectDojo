@@ -353,6 +353,13 @@ class System_Settings(models.Model):
     mail_notifications_to = models.CharField(max_length=200, default="",
                                              blank=True)
 
+    enable_webhooks_notifications = \
+        models.BooleanField(default=False,
+                            verbose_name=_("Enable Webhook notifications"),
+                            blank=False)
+    webhooks_notifications_timeout = models.IntegerField(default=10,
+                                          help_text=_("How many seconds will DefectDojo waits for response from webhook endpoint"))
+
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
             "(EXPERIMENTAL) DefectDojo will automatically mark the finding as a "
@@ -4015,12 +4022,14 @@ class JIRA_Issue(models.Model):
 NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
 NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
 NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
+NOTIFICATION_CHOICE_WEBHOOKS = ("webhooks", "webhooks")
 NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
 
 NOTIFICATION_CHOICES = (
     NOTIFICATION_CHOICE_SLACK,
     NOTIFICATION_CHOICE_MSTEAMS,
     NOTIFICATION_CHOICE_MAIL,
+    NOTIFICATION_CHOICE_WEBHOOKS,
     NOTIFICATION_CHOICE_ALERT,
 )
 
@@ -4107,6 +4116,33 @@ class NotificationsAdmin(admin.ModelAdmin):
         list_fields = ["user", "product"]
         list_fields += [field.name for field in self.model._meta.fields if field.name not in list_fields]
         return list_fields
+
+
+class Notification_Webhooks(models.Model):
+    class Status(models.TextChoices):
+        __STATUS_ACTIVE = "active"
+        __STATUS_INACTIVE = "inactive"
+        STATUS_ACTIVE = f"{__STATUS_ACTIVE}", _("Active")
+        STATUS_ACTIVE_TMP = f"{__STATUS_ACTIVE}_tmp", _("Active but 5xx (or similar) error detected")
+        STATUS_INACTIVE_TMP = f"{__STATUS_INACTIVE}_tmp", _("Temporary inactive because of 5xx (or similar) error")
+        STATUS_INACTIVE_PERMANENT = f"{__STATUS_INACTIVE}_permanent", _("Permanently inactive")
+
+    name = models.CharField(max_length=100, default="", blank=False, unique=True,
+                                    help_text=_("Name of the incoming webhook"))
+    url = models.URLField(max_length=200, default="", blank=False,
+                                    help_text=_("The full URL of the incoming webhook"))
+    header_name = models.CharField(max_length=100, default="", blank=True, null=True,
+                                   help_text=_("Name of the header required for interacting with Webhook endpoint"))
+    header_value = models.CharField(max_length=100, default="", blank=True, null=True,
+                                   help_text=_("Content of the header required for interacting with Webhook endpoint"))
+    status = models.CharField(max_length=20, choices=Status, default="active", blank=False,
+                              help_text=_("Status of the incoming webhook"), editable=False)
+    first_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened first time"), blank=True, null=True, editable=False)
+    last_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened last time"), blank=True, null=True, editable=False)
+    note = models.CharField(max_length=1000, default="", blank=True, null=True, help_text=_("Description of the latest error"), editable=False)
+    owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
+                              help_text=_("Owner/receiver of notification, if empty processed as system notification"))
+    # TODO: Test that `editable` will block editing via API
 
 
 class Tool_Product_Settings(models.Model):
@@ -4581,6 +4617,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Risk_Acceptance)
     auditlog.register(Finding_Template)
     auditlog.register(Cred_User, exclude_fields=["password"])
+    auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
 
 from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
 
@@ -4642,6 +4679,7 @@ admin.site.register(GITHUB_Clone)
 admin.site.register(GITHUB_Details_Cache)
 admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
+admin.site.register(Notification_Webhooks)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
