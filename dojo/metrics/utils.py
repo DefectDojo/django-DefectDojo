@@ -500,7 +500,7 @@ def aggregate_counts_by_period(
         )
         desired_values += ("closed",)
 
-    return severities_by_period.order_by('grouped_date').values(*desired_values)
+    return severities_by_period.order_by("grouped_date").values(*desired_values)
 
 
 def findings_by_product(
