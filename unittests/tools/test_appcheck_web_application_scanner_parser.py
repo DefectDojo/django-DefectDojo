@@ -96,7 +96,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("a25dae3aff97a06b6923b5fc9cc32826e1fd87ab", finding.unique_id_from_tool)
             self.assertEqual("Apache Tomcat < v9.0.0.M10 - External Control of Assumed-Immutable Web Parameter in JSP Servlet (CVE-2016-6796)", finding.title)
             self.assertEqual("2024-06-26", finding.date)
-            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("High", finding.severity)
             self.assertEqual(True, finding.active)
             self.assertEqual("GET Request", finding.unsaved_request)
             self.assertEqual("Response", finding.unsaved_response)
@@ -121,7 +121,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("02769aa244c456f0aad810354748faaa70d089c1129dc9c5", finding.unique_id_from_tool)
             self.assertEqual("Permitted HTTP Methods", finding.title)
             self.assertEqual("2024-06-27", finding.date)
-            self.assertEqual("Low", finding.severity)
+            self.assertEqual("Medium", finding.severity)
             self.assertEqual(True, finding.active)
             self.assertIsNone(finding.unsaved_request)
             self.assertIsNone(finding.unsaved_response)
@@ -334,8 +334,15 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             # Invalid cvss vectors
             ("", None),
             ("AV:N/AC:H", None),
+            ("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", "High"),
+            ("CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:N/I:N/A:N", None),
+            ("CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:L/SI:H/SA:H", "Critical"),
+            ("CVSS:4.0/AV:L/AC:H/AT:P/PR:L/UI:A/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N", "Medium"),
+            ("CVSS:4.0/AV:L/AC:H/AT:P/PR:L/UI:A/VC:H/VI:H/VA:H/SC:H/SI:N/SA:H", "High"),
+            ("CVSS:4.0/AV:L/AC:H/AT:P/PR:L/UI:A/VC:N/VI:N/VA:N/SC:H/SI:N/SA:H", "Low"),
+            ("CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:A/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N", None),
         ]:
-            self.assertEqual(severity, engine.get_severity(cvss_vector))
+            self.assertEqual(severity, engine.parse_severity(cvss_vector))
 
         # Test component parsing
         f = Finding()

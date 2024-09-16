@@ -27,7 +27,7 @@ class AppCheckScanningEngineParser(BaseEngineParser):
                 value.pop("Messages")
                 finding.unsaved_request, finding.unsaved_response = (d.strip() for d in rr_details[0])
 
-    def parse_details(self, finding: Finding, value: dict[str, Union[str, dict[str, [str]]]]) -> None:
+    def parse_details(self, finding: Finding, value: dict[str, Union[str, dict[str, list[str]]]]) -> None:
         self.extract_request_response(finding, value)
         # super's version adds everything else to the description field
         return super().parse_details(finding, value)
