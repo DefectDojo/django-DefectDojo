@@ -72,6 +72,7 @@ from dojo.models import (
     JIRA_Project,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Objects_Product,
     Product,
@@ -2776,6 +2777,32 @@ class NotificationsForm(forms.ModelForm):
     class Meta:
         model = Notifications
         exclude = ["template"]
+
+
+class NotificationsWebhookForm(forms.ModelForm):
+    class Meta:
+        model = Notification_Webhooks
+        exclude = []
+
+    def __init__(self, *args, **kwargs):
+        is_superuser = kwargs.pop("is_superuser", False)
+        super().__init__(*args, **kwargs)
+        if not is_superuser:  # Only superadmins can edit owner
+            self.fields["owner"].disabled = True  # TODO: needs to be tested
+
+
+class DeleteNotificationsWebhookForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].disabled = True
+        self.fields["url"].disabled = True
+
+    class Meta:
+        model = Notification_Webhooks
+        fields = ["id", "name", "url"]
 
 
 class ProductNotificationsForm(forms.ModelForm):
