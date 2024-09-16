@@ -541,6 +541,13 @@
                                                         {% trans "Notifications" %}
                                                     </a>
                                                 </li>
+                                                {% if system_settings.enable_webhooks_notifications and "dojo.view_notification_webhooks"|has_configuration_permission:request %}
+                                                <li>
+                                                    <a href="{% url 'notification_webhooks' %}">
+                                                        {% trans "Notification Webhooks" %}
+                                                    </a>
+                                                </li>
+                                                {% endif %}
                                                 <li>
                                                     <a href="{% url 'regulations' %}">
                                                         {% trans "Regulations" %}

@@ -147,7 +147,7 @@ class SysdigReportsParser:
             if row.k8s_cluster_name != "":
                 finding.dynamic_finding = True
                 finding.static_finding = False
-                finding.description += f"###Runtime Context {row.k8s_cluster_name}"                                        f"\n - **Cluster:** {row.k8s_cluster_name}"
+                finding.description += f"###Runtime Context {row.k8s_cluster_name}\n - **Cluster:** {row.k8s_cluster_name}"
                 finding.description += f"\n - **Namespace:** {row.k8s_namespace_name}"
                 finding.description += f"\n - **Workload Name:** {row.k8s_workload_name} "
                 finding.description += f"\n - **Workload Type:** {row.k8s_workload_type} "
