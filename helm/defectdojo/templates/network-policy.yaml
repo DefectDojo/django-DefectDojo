@@ -13,7 +13,7 @@ spec:
   podSelector:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
-  {{- if .Value.networkPolicy.ingress}}
+  {{- if .Values.networkPolicy.ingress}}
   ingress:
   {{- toYaml .Values.networkPolicy.ingress | nindent 4 }}
   {{- else }}
