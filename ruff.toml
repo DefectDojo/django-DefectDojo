@@ -28,13 +28,11 @@ exclude = [
 ]
 
 [lint]
-# Enable the pycodestyle (`E`) and Pyflakes (`F`) rules by default.
-# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# McCabe complexity (`C901`) by default.
 select = [
    "F",
    "E",
    "W",
+   "C90",
    "I",
    "D3",
    "UP",
@@ -98,3 +96,6 @@ per-file-ignores = {}
 
 [lint.flake8-boolean-trap]
 extend-allowed-calls = ["dojo.utils.get_system_setting"]
+
+[lint.mccabe]
+max-complexity = 70  # value is far from perfect (recommended default is 10). But we will try to decrease it over the time.
