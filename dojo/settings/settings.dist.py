@@ -1282,6 +1282,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "AppCheck Web Application Scanner": ["title", "severity"],
     "Legitify Scan": ["title", "endpoints", "severity"],
     "ThreatComposer Scan": ["title", "description"],
+    "Invicti Scan": ["title", "description", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1498,7 +1499,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OSV Scan": DEDUPE_ALGO_HASH_CODE,
     "Nosey Parker Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Bearer CLI": DEDUPE_ALGO_HASH_CODE,
-    "Wiz Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wiz Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1506,6 +1507,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
     "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
     "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
