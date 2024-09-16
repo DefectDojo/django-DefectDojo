@@ -35,7 +35,7 @@ Markdown==3.6
 openpyxl==3.1.5
 Pillow==10.4.0  # required by django-imagekit
 psycopg==3.2.1
-cryptography==43.0.0
+cryptography==43.0.1
 python-dateutil==2.9.0.post0
 pytz==2024.1
 redis==5.0.8
@@ -151,3 +151,6 @@ jsonschema-specifications==2023.12.1
 googleapis-common-protos==1.63.2
 grpcio==1.65.4
 zipp==3.20.0
+prompt_toolkit==3.0.47
+prometheus_client==0.20.0
+typing_extensions==4.12.2
