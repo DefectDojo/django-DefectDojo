@@ -301,7 +301,7 @@ class BaseEngineParser:
     # For severity (extracted from various cvss vectors)
     #####
     def parse_cvss_vector(self, value: str) -> Optional[str]:
-        # CVSS4 vector's don't parse with the handy-danty parse method :(
+        # CVSS4 vectors don't parse with the handy-danty parse method :(
         try:
             if (severity := cvss.CVSS4(value).severity) in Finding.SEVERITIES:
                 return severity
