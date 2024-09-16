@@ -122,18 +122,20 @@
                                               <i class="fa-solid fa-pen-to-square"></i> Edit Custom Fields
                                             </a>
                                           </li>
-                                          <li role="separator" class="divider"></li>
+                                        {% endif %}
+                                        <li role="separator" class="divider"></li>
+                                        {% if prod|has_object_permission:"Product_API_Scan_Configuration_Edit" %}  
                                           <li role="presentation">
-                                              <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
-                                                  <i class="fa-solid fa-rectangle-list"></i> Add Scan API Configuration
-                                              </a>
-                                          </li>
-                                          <li role="presentation">
-                                              <a title="View API Scan configurations" href="{% url 'view_api_scan_configurations' prod.id %}">
-                                                <i class="fa-solid fa-clock-rotate-left"></i> View Scan API Configurations
-                                              </a>
+                                            <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
+                                              <i class="fa-solid fa-rectangle-list"></i> Add Scan API Configuration
+                                            </a>
                                           </li>
                                         {% endif %}
+                                        <li role="presentation">
+                                            <a title="View API Scan configurations" href="{% url 'view_api_scan_configurations' prod.id %}">
+                                              <i class="fa-solid fa-clock-rotate-left"></i> View Scan API Configurations
+                                            </a>
+                                        </li>
                                         {% if system_settings.enable_product_tracking_files %}
                                           <li role="separator" class="divider"></li>
                                           {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
