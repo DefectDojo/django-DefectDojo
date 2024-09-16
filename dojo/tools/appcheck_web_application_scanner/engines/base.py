@@ -42,6 +42,35 @@ def escape_non_printable(s: str) -> str:
     return "".join([escape_if_needed(c) for c in s])
 
 
+def cvss_score_to_severity(score: float, version: int) -> str:
+    """
+    Maps a CVSS score with a given version to a severity level.
+    Mapping from https://nvd.nist.gov/vuln-metrics/cvss (modified slightly to have "Info" in range [0.0, 0.1) for CVSS
+        v3/v4)
+    """
+    cvss_score = float(score)
+    if version == 2:
+        if cvss_score >= 7.0:
+            severity = "High"
+        elif cvss_score >= 4.0:
+            severity = "Medium"
+        else:
+            severity = "Low"
+    else:
+        if cvss_score >= 9.0:
+            severity = "Critical"
+        elif cvss_score >= 7.0:
+            severity = "High"
+        elif cvss_score >= 4.0:
+            severity = "Medium"
+        elif cvss_score >= 0.1:
+            severity = "Low"
+        else:
+            severity = "Info"
+
+    return severity
+
+
 #######
 # Field parsing helper classes
 #######
@@ -271,7 +300,7 @@ class BaseEngineParser:
     #####
     # For severity (extracted from various cvss vectors)
     #####
-    def parse_severity(self, value: str) -> Optional[str]:
+    def parse_cvss_vector(self, value: str) -> Optional[str]:
         # CVSS4 vector's don't parse with the handy-danty parse method :(
         try:
             if (severity := cvss.CVSS4(value).severity) in Finding.SEVERITIES:
@@ -285,11 +314,22 @@ class BaseEngineParser:
         return None
 
     def set_severity(self, finding: Finding, item: Any) -> None:
+        for base_score_entry, cvss_version in [
+            ("cvss_v4_base_score", 4),
+            ("cvss_v3_base_score", 3),
+            ("cvss_base_score", 2),
+        ]:
+            if base_score := item.get(base_score_entry):
+                finding.severity = cvss_score_to_severity(base_score, cvss_version)
+                return
+
         for vector_type in ["cvss_v4_vector", "cvss_v3_vector", "cvss_vector"]:
             if vector := item.get(vector_type):
-                if severity := self.parse_severity(vector):
+                if severity := self.parse_cvss_vector(vector):
                     finding.severity = severity
-                    break
+                    return
+
+        finding.severity = "Info"
 
     def process_whole_item(self, finding: Finding, item: Any) -> None:
         self.set_severity(finding, item)

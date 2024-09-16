@@ -4,6 +4,7 @@ from dojo.models import Finding, Test
 from dojo.tools.appcheck_web_application_scanner.engines.appcheck import AppCheckScanningEngineParser
 from dojo.tools.appcheck_web_application_scanner.engines.base import (
     BaseEngineParser,
+    cvss_score_to_severity,
     escape_non_printable,
     strip_markup,
 )
@@ -342,7 +343,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             ("CVSS:4.0/AV:L/AC:H/AT:P/PR:L/UI:A/VC:N/VI:N/VA:N/SC:H/SI:N/SA:H", "Low"),
             ("CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:A/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N", None),
         ]:
-            self.assertEqual(severity, engine.parse_severity(cvss_vector))
+            self.assertEqual(severity, engine.parse_cvss_vector(cvss_vector))
 
         # Test component parsing
         f = Finding()
@@ -567,3 +568,24 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             ),
         ]:
             self.assertEqual(expected, escape_non_printable(test_string))
+
+    def test_appcheck_web_application_scanner_parser_cvss_score_mapping(self):
+        for cvss_score, version, expected in [
+            # CVSSv2
+            (0.0, 2, "Low"), (0.09, 2, "Low"), (0.1, 2, "Low"), (3.9, 2, "Low"),
+            (4.0, 2, "Medium"), (5.5, 2, "Medium"), (6.9, 2, "Medium"),
+            (7.0, 2, "High"), (8.3, 2, "High"), (10.0, 2, "High"),
+            # CVSSv3
+            (0.0, 3, "Info"), (0.09, 3, "Info"),
+            (0.1, 3, "Low"), (1.2, 3, "Low"), (3.9, 3, "Low"),
+            (4.0, 3, "Medium"), (5.4, 3, "Medium"), (6.9, 3, "Medium"),
+            (7.0, 3, "High"), (8.3, 3, "High"), (8.9, 3, "High"),
+            (9.0, 3, "Critical"), (9.7, 3, "Critical"), (10.0, 3, "Critical"),
+            # CVSSv4
+            (0.0, 4, "Info"), (0.09, 4, "Info"),
+            (0.1, 4, "Low"), (1.2, 4, "Low"), (3.9, 4, "Low"),
+            (4.0, 4, "Medium"), (5.4, 4, "Medium"), (6.9, 4, "Medium"),
+            (7.0, 4, "High"), (8.3, 4, "High"), (8.9, 4, "High"),
+            (9.0, 4, "Critical"), (9.7, 4, "Critical"), (10.0, 4, "Critical"),
+        ]:
+            self.assertEqual(expected, cvss_score_to_severity(cvss_score, version))
