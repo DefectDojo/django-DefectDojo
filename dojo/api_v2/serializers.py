@@ -77,6 +77,7 @@ from dojo.models import (
     Note_Type,
     NoteHistory,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -1411,7 +1412,7 @@ class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test_Type
-        fields = "__all__"
+        exclude = ("dynamically_generated",)
 
 
 class TestToNotesSerializer(serializers.Serializer):
@@ -3172,3 +3173,9 @@ class AnnouncementSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(msg)
             else:
                 raise
+
+
+class NotificationWebhooksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification_Webhooks
+        fields = "__all__"

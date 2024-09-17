@@ -1142,6 +1142,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
         "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
     },
+    "notification_webhook_status_cleanup": {
+        "task": "dojo.notifications.helper.webhook_status_cleanup",
+        "schedule": timedelta(minutes=1),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1151,7 +1155,6 @@ CELERY_BEAT_SCHEDULE = {
     #     'task': 'dojo.tasks.fix_loop_duplicates_task',
     #     'schedule': timedelta(hours=12)
     # },
-
 
 }
 
@@ -1277,6 +1280,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
     "AppCheck Web Application Scanner": ["title", "severity"],
+    "Legitify Scan": ["title", "endpoints", "severity"],
+    "ThreatComposer Scan": ["title", "description"],
+    "Invicti Scan": ["title", "description", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1493,12 +1499,15 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OSV Scan": DEDUPE_ALGO_HASH_CODE,
     "Nosey Parker Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Bearer CLI": DEDUPE_ALGO_HASH_CODE,
-    "Wiz Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wiz Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
     "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
+    "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
+    "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1532,11 +1541,8 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 )
 
 if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
-    if env("DD_JIRA_EXTRA_ISSUE_TYPES").count(",") > 0:
-        for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
-            JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type)
-    else:
-        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env("DD_JIRA_EXTRA_ISSUE_TYPES"), env("DD_JIRA_EXTRA_ISSUE_TYPES"))
+    for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
+        JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
 
