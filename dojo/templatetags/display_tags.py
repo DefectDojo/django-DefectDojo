@@ -69,10 +69,10 @@ finding_related_action_title_dict = {
     "mark_finding_duplicate": "Mark as duplicate",
 }
 
-supported_file_formats = [
+supported_thumbnail_file_formats = [
     "apng", "avif", "gif", "jpg",
     "jpeg", "jfif", "pjpeg", "pjp",
-    "png", "svg", "webp", "pdf",
+    "png", "svg", "webp",
 ]
 
 
@@ -860,7 +860,7 @@ def jira_change(obj):
 def get_thumbnail(file):
     from pathlib import Path
     file_format = Path(file.file.url).suffix[1:]
-    return file_format in supported_file_formats
+    return file_format in supported_thumbnail_file_formats
 
 
 @register.filter
