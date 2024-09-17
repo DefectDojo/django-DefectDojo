@@ -43,8 +43,7 @@ def endpoint_display_status(endpoint, finding):
         statuses.append("Mitigated")
     if statuses:
         return ", ".join(statuses)
-    else:
-        return "Active"
+    return "Active"
 
 
 @register.filter

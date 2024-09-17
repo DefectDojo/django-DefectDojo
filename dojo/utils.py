@@ -180,7 +180,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             .order_by("id")
         )
 
-    elif deduplication_algorithm == "unique_id_from_tool":
+    if deduplication_algorithm == "unique_id_from_tool":
         return (
             Finding.objects.filter(
                 **custom_filter,
@@ -190,7 +190,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             .order_by("id")
         )
 
-    elif deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+    if deduplication_algorithm == "unique_id_from_tool_or_hash_code":
         query = Finding.objects.filter(
             Q(**custom_filter),
             (
@@ -201,7 +201,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         deduplicationLogger.debug(query.query)
         return query
 
-    elif deduplication_algorithm == "legacy":
+    if deduplication_algorithm == "legacy":
         # This is the legacy reimport behavior. Although it's pretty flawed and
         # doesn't match the legacy algorithm for deduplication, this is left as is for simplicity.
         # Re-writing the legacy deduplication here would be complicated and counter-productive.
@@ -216,9 +216,8 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             ).order_by("id")
         )
 
-    else:
-        logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
-        return None
+    logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
+    return None
 
 
 # true if both findings are on an engagement that have a different "deduplication on engagement" configuration
@@ -321,6 +320,7 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             deduplicate_legacy(new_finding)
     else:
         deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
+    return None
 
 
 def deduplicate_legacy(new_finding):
@@ -713,8 +713,7 @@ def add_breadcrumb(parent=None,
     if clear:
         request.session["dojo_breadcrumbs"] = None
         return
-    else:
-        crumbs = request.session.get("dojo_breadcrumbs", None)
+    crumbs = request.session.get("dojo_breadcrumbs", None)
 
     if top_level or crumbs is None:
         crumbs = [
@@ -842,27 +841,26 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
             if created < start_of_week:
                 raise ValueError("date found outside supported range: " + str(created))
+            if created >= start_of_week and created < start_of_next_week:
+                # add day count to current week data
+                day_counts[day_offset[created.weekday()]] = day_count
+                highest_day_count = max(highest_day_count, day_count)
             else:
-                if created >= start_of_week and created < start_of_next_week:
-                    # add day count to current week data
-                    day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)
-                else:
-                    # created >= start_of_next_week, so store current week, prepare for next
-                    while created >= start_of_next_week:
-                        week_data, label = get_week_data(start_of_week, tick, day_counts)
-                        punchcard.extend(week_data)
-                        ticks.append(label)
-                        tick += 1
+                # created >= start_of_next_week, so store current week, prepare for next
+                while created >= start_of_next_week:
+                    week_data, label = get_week_data(start_of_week, tick, day_counts)
+                    punchcard.extend(week_data)
+                    ticks.append(label)
+                    tick += 1
 
-                        # new week, new values!
-                        day_counts = [0, 0, 0, 0, 0, 0, 0]
-                        start_of_week = start_of_next_week
-                        start_of_next_week += relativedelta(weeks=1)
+                    # new week, new values!
+                    day_counts = [0, 0, 0, 0, 0, 0, 0]
+                    start_of_week = start_of_next_week
+                    start_of_next_week += relativedelta(weeks=1)
 
-                    # finally a day that falls into the week bracket
-                    day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)
+                # finally a day that falls into the week bracket
+                day_counts[day_offset[created.weekday()]] = day_count
+                highest_day_count = max(highest_day_count, day_count)
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
@@ -1217,8 +1215,7 @@ class FileIterWrapper:
         data = self.flo.read(self.chunk_size)
         if data:
             return data
-        else:
-            raise StopIteration
+        raise StopIteration
 
     def __iter__(self):
         return self
@@ -1288,9 +1285,7 @@ def template_search_helper(fields=None, query_string=None):
         return findings
 
     entry_query = build_query(query_string, fields)
-    found_entries = findings.filter(entry_query)
-
-    return found_entries
+    return findings.filter(entry_query)
 
 
 def get_page_items(request, items, page_size, prefix=""):
@@ -1432,8 +1427,7 @@ def decrypt(key, iv, encrypted_text):
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
-    decrypted_text = _unpad_string(decrypted_text)
-    return decrypted_text
+    return _unpad_string(decrypted_text)
 
 
 def _pad_string(value):
@@ -1729,9 +1723,8 @@ def get_full_url(relative_url):
 def get_site_url():
     if settings.SITE_URL:
         return settings.SITE_URL
-    else:
-        logger.warning("SITE URL undefined in settings, full_url cannot be created")
-        return "settings.SITE_URL"
+    logger.warning("SITE URL undefined in settings, full_url cannot be created")
+    return "settings.SITE_URL"
 
 
 @receiver(post_save, sender=User)
@@ -1797,11 +1790,10 @@ def redirect_to_return_url_or_else(request, or_else):
     if return_url:
         # logger.debug('redirecting to %s: ', return_url.strip())
         return redirect(request, return_url.strip())
-    elif or_else:
+    if or_else:
         return redirect(request, or_else)
-    else:
-        messages.add_message(request, messages.ERROR, "Unable to redirect anywhere.", extra_tags="alert-danger")
-        return redirect(request, request.get_full_path())
+    messages.add_message(request, messages.ERROR, "Unable to redirect anywhere.", extra_tags="alert-danger")
+    return redirect(request, request.get_full_path())
 
 
 def redirect(request, redirect_to):
@@ -2248,6 +2240,7 @@ def get_product(obj):
 
     if isinstance(obj, Product):
         return obj
+    return None
 
 
 def prod_name(obj):
