@@ -3,7 +3,6 @@
 This solution is largely based on the Playwright's browser dependencies script at
 https://github.com/microsoft/playwright/blob/main/utils/linux-browser-dependencies/inside_docker/list_dependencies.js
 """
-
 import logging
 import subprocess
 
@@ -47,13 +46,20 @@ def ldd(file_path):
 raw_deps = ldd("/opt/chrome/chrome")
 dependencies = raw_deps[0].splitlines()
 missing_deps = {
-    r[0].strip() for d in dependencies for r in [d.split("=>")] if len(r) == 2 and r[1].strip() == "not found"
+    r[0].strip()
+    for d in dependencies
+    for r in [d.split("=>")]
+    if len(r) == 2 and r[1].strip() == "not found"
 }
 missing_packages = []
 for d in missing_deps:
     all_packages = find_packages(d)
     packages = [
-        p for p in all_packages if not any(p.endswith(suffix) for suffix in ["-dbg", "-test", "tests", "-dev", "-mesa"])
+        p
+        for p in all_packages
+        if not any(
+            p.endswith(suffix) for suffix in ["-dbg", "-test", "tests", "-dev", "-mesa"]
+        )
     ]
     for p in packages:
         missing_packages.append(p)
