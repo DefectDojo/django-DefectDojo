@@ -1269,7 +1269,7 @@
       "mitigated_by": null,
       "reporter": 1,
       "mitigated": null,
-      "active": false,
+      "active": true,
       "line": null,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1316,7 +1316,7 @@
       "mitigated_by": null,
       "reporter": 1,
       "mitigated": null,
-      "active": false,
+      "active": true,
       "line": null,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1326,7 +1326,8 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "last_reviewed": null
+      "last_reviewed": null,
+      "risk_accepted": true
     }
   },
   {
@@ -1363,7 +1364,7 @@
       "mitigated_by": null,
       "reporter": 1,
       "mitigated": null,
-      "active": false,
+      "active": true,
       "line": null,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1373,7 +1374,8 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
-      "last_reviewed": null
+      "last_reviewed": null,
+      "risk_accepted": true
     }
   },
   {
@@ -1422,7 +1424,9 @@
       ],
       "dynamic_finding": false,
       "hash_code": "c89d25e445b088ba339908f68e15e3177b78d22f3039d1bfea51c4be251bf4e0",
-      "last_reviewed": null
+      "last_reviewed": null,
+      "risk_accepted": true,
+      "is_mitigated": true
     }
   },
   {
