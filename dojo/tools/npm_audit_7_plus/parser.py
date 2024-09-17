@@ -44,7 +44,7 @@ class NpmAudit7PlusParser:
     def parse_json(self, json_output):
         """Parse the json format to get findings."""
         if json_output is None:
-            return
+            return None
         try:
             data = json_output.read()
             try:

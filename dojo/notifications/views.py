@@ -158,8 +158,7 @@ class NotificationWebhooksView(View):
     ) -> NotificationsWebhookForm:
         if request.method == "POST":
             return NotificationsWebhookForm(request.POST, is_superuser=request.user.is_superuser, **kwargs)
-        else:
-            return NotificationsWebhookForm(is_superuser=request.user.is_superuser, **kwargs)
+        return NotificationsWebhookForm(is_superuser=request.user.is_superuser, **kwargs)
 
     def preprocess_request(self, request: HttpRequest):
         # Check Webhook notifications are enabled
@@ -182,10 +181,9 @@ class ListNotificationWebhooksView(NotificationWebhooksView):
         }
 
     def get_notification_webhooks(self, request: HttpRequest):
-        nwhs = Notification_Webhooks.objects.all().order_by("name")
+        return Notification_Webhooks.objects.all().order_by("name")
         # TODO: finished pagination
         # TODO: restrict based on user - not only superadmins have access and they see everything
-        return nwhs
 
     def get(self, request: HttpRequest):
         # Run common checks
@@ -377,8 +375,7 @@ class DeleteNotificationWebhooksView(NotificationWebhooksView):
     ) -> NotificationsWebhookForm:
         if request.method == "POST":
             return DeleteNotificationsWebhookForm(request.POST, **kwargs)
-        else:
-            return DeleteNotificationsWebhookForm(**kwargs)
+        return DeleteNotificationsWebhookForm(**kwargs)
 
     def get_initial_context(self, request: HttpRequest, nwh: Notification_Webhooks):
         return {

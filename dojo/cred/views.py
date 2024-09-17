@@ -641,10 +641,8 @@ def delete_cred_controller(request, destination_url, id, ttid):
 
         if destination_url == "cred":
             return HttpResponseRedirect(reverse(destination_url))
-        else:
-            return HttpResponseRedirect(reverse(destination_url, args=(id, )))
-    else:
-        tform = CredMappingForm(instance=cred)
+        return HttpResponseRedirect(reverse(destination_url, args=(id, )))
+    tform = CredMappingForm(instance=cred)
 
     add_breadcrumb(title="Delete Credential", top_level=False, request=request)
     product_tab = None

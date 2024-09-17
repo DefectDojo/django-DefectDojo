@@ -204,6 +204,5 @@ class WizParser(
             return WizParserByTitle().parse_findings(test, reader)
         if all(field in reader.fieldnames for field in ["Name", "DetailedName"]):
             return WizParserByDetailedName().parse_findings(test, reader)
-        else:
-            msg = "This CSV format of Wiz is not supported"
-            raise ValueError(msg)
+        msg = "This CSV format of Wiz is not supported"
+        raise ValueError(msg)

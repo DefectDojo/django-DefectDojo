@@ -597,5 +597,4 @@ def findings_queryset(
     """
     if qs.model is Endpoint_Status:
         return Finding.objects.filter(status_finding__in=qs)
-    else:
-        return qs
+    return qs

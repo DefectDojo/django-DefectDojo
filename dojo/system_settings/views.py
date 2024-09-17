@@ -116,7 +116,7 @@ class SystemSettingsView(View):
             context["celery_msg"] = "Celery needs to have the setting CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite' set in settings.py."
             context["celery_status"] = "Unknown"
 
-        return None
+        return
 
     def get_template(self) -> str:
         return "dojo/system_settings.html"
