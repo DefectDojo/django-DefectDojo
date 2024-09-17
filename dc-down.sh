@@ -7,15 +7,15 @@ if [ $# -eq 0 ]
 then
     echo "Stopping docker compose and removing containers"
     # Compose V2 integrates compose functions into the Docker platform,
-    # continuing to support most of the previous docker compose features
+    # continuing to support most of the previous docker-compose features
     # and flags. You can run Compose V2 by replacing the hyphen (-) with
-    # a space, using docker compose, instead of docker compose.
+    # a space, using docker compose, instead of docker-compose.
     docker compose down
 else
     echo "Stopping docker compose and removing containers with additional parameter $1 ..."
     # Compose V2 integrates compose functions into the Docker platform,
-    # continuing to support most of the previous docker compose features
+    # continuing to support most of the previous docker-compose features
     # and flags. You can run Compose V2 by replacing the hyphen (-) with
-    # a space, using docker compose, instead of docker compose.
+    # a space, using docker compose, instead of docker-compose.
     docker compose down "$1"
 fi

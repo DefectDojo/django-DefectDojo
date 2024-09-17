@@ -41,7 +41,7 @@ The generic upgrade method for docker compose are as follows:
     docker pull defectdojo/defectdojo-nginx:1.10.2-alpine
     ```
 
--   Go to the directory where your docker compose.yml file lives
+-   Go to the directory where your docker-compose.yml file lives
 -   Stop DefectDojo: `./dc-stop.sh`
 -   Re-start DefectDojo, allowing for container recreation:
     `./dc-up-d.sh`
