@@ -3,7 +3,7 @@ import operator
 from datetime import date, datetime, timedelta
 from enum import Enum
 from functools import partial
-from typing import Any, Callable, NamedTuple, TypeVar, Union, Type
+from typing import Any, Callable, NamedTuple, Type, TypeVar, Union
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
