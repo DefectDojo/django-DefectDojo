@@ -297,7 +297,7 @@ class GlobalRoleViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
 class EndPointViewSet(
     PrefetchDojoModelViewSet,
 ):
