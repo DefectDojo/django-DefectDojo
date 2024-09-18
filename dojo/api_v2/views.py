@@ -185,7 +185,7 @@ def schema_with_prefetch() -> dict:
                 ),
             ],
         ),
-        "retrieve":extend_schema(
+        "retrieve": extend_schema(
             parameters=[
                 OpenApiParameter(
                     "prefetch",
