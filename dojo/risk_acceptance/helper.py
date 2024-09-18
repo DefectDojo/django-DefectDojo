@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import PermissionDenied
@@ -134,18 +135,18 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
             # Update any endpoint statuses on each of the findings
             update_endpoint_statuses(finding, accept_risk=True)
             risk_acceptance.accepted_findings.add(finding)
+        # Add a note to reflect that the finding was removed from the risk acceptance
+        if user is not None:
+            finding.notes.add(Notes.objects.create(
+                entry=(
+                    f"{Dojo_User.generate_full_name(user)} added this finding to the risk acceptance: "
+                    f'"{risk_acceptance.name}" ({get_view_risk_acceptance(risk_acceptance)})'
+                ),
+                author=user,
+            ))
     risk_acceptance.save()
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, findings, accepted_message_creator)
-    # Add a note to reflect that the finding was removed from the risk acceptance
-    if user is not None:
-        finding.notes.add(Notes.objects.create(
-            entry=(
-                f"{Dojo_User.generate_full_name(user)} added this finding to the risk acceptance: "
-                f'"{risk_acceptance.name}" ({get_view_risk_acceptance(risk_acceptance)})'
-            ),
-            author=user,
-        ))
 
     return None
 
@@ -197,9 +198,12 @@ def expiration_handler(*args, **kwargs):
 
 def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
     """Return the full qualified URL of the view risk acceptance page."""
-    return get_full_url(
-        reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)),
-    )
+    # Suppressing this error because it does not happen under most circumstances that a risk acceptance does not have engagement
+    with suppress(AttributeError):
+        get_full_url(
+            reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)),
+        )
+    return ""
 
 
 def expiration_message_creator(risk_acceptance, heads_up_days=0):

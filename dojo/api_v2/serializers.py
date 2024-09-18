@@ -1467,7 +1467,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         instance = super().create(validated_data)
-        user = self.context.get("request", {}).get("user", None)
+        user = getattr(self.context.get("request", None), "user", None)
         add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
         return instance
 
@@ -1482,7 +1482,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
         # Make the update in the database
         instance = super().update(instance, validated_data)
-        user = self.context.get("request", {}).get("user", None)
+        user = getattr(self.context.get("request", None), "user", None)
         # Add the new findings
         add_findings_to_risk_acceptance(user, instance, findings_to_add)
         # Remove the ones that were not present in the payload
