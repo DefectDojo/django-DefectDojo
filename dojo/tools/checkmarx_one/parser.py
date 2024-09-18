@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 from typing import List
 
 from dateutil import parser
@@ -23,6 +24,18 @@ class CheckmarxOneParser:
             return parser.parse(value)
         elif isinstance(value, dict) and isinstance(value.get("seconds"), int):
             return datetime.datetime.utcfromtimestamp(value.get("seconds"))
+        else:
+            return None
+
+    def _parse_cwe(self, cwe):
+        if isinstance(cwe, str):
+            cwe_num = re.findall(r"\d+", cwe)
+            if cwe_num:
+                return cwe_num[0]
+            else:
+                return None
+        elif isinstance(cwe, int):
+            return cwe
         else:
             return None
 
@@ -229,7 +242,7 @@ class CheckmarxOneParser:
         for vulnerability in results:
             result_type = vulnerability.get("type")
             date = self._parse_date(vulnerability.get("firstFoundAt"))
-            cwe = vulnerability.get("vulnerabilityDetails", {}).get("cweId", None)
+            cwe = self._parse_cwe(vulnerability.get("vulnerabilityDetails", {}).get("cweId", None))
             finding = None
             if result_type == "sast":
                 finding = self.get_results_sast(test, vulnerability)

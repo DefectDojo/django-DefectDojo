@@ -17,8 +17,7 @@ class MinLengthValidator:
             return None
 
     def get_help_text(self):
-        return gettext("Password must be at least {minimum_length} characters long.".format(
-            minimum_length=get_system_setting("minimum_password_length")))
+        return gettext("Password must be at least %s characters long.") % get_system_setting("minimum_password_length")
 
 
 class MaxLengthValidator:
@@ -31,8 +30,7 @@ class MaxLengthValidator:
             return None
 
     def get_help_text(self):
-        return gettext("Password must be less than {maximum_length} characters long.".format(
-            maximum_length=get_system_setting("maximum_password_length")))
+        return gettext("Password must be less than %s characters long.") % get_system_setting("maximum_password_length")
 
 
 class NumberValidator:

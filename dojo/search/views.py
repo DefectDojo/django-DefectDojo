@@ -94,7 +94,7 @@ def simple_search(request):
             authorized_app_analysis = get_authorized_app_analysis(Permissions.Product_View)
             authorized_vulnerability_ids = get_authorized_vulnerability_ids(Permissions.Finding_View)
 
-            # TODO better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
+            # TODO: better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
 
             findings = authorized_findings
             tests = authorized_tests
@@ -154,7 +154,7 @@ def simple_search(request):
             tags = operators["tags"] if "tags" in operators else keywords
             not_tag = operators["not-tag"] if "not-tag" in operators else keywords
             not_tags = operators["not-tags"] if "not-tags" in operators else keywords
-            if search_tags and tag or tags or not_tag or not_tags:
+            if (search_tags and tag) or tags or not_tag or not_tags:
                 logger.debug("searching tags")
 
                 Q1, Q2, Q3, Q4 = Q(), Q(), Q(), Q()

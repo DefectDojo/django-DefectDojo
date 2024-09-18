@@ -36,10 +36,13 @@ select = [
    "E",
    "W",
    "I",
+   "D3",
    "UP",
    "YTT",
    "ASYNC",
    "S2", "S5", "S7",
+   "FBT001", "FBT003",
+   "A003", "A004", "A006",
    "COM",
    "C4",
    "T10",
@@ -48,7 +51,7 @@ select = [
    "EXE",
    "ICN",
    "LOG",
-   "G1", "G2",
+   "G001", "G002", "G1", "G2",
    "INP",
    "SLOT",
    "PIE",
@@ -56,17 +59,31 @@ select = [
    "Q",
    "RSE",
    "TID",
+   "TCH",
+   "INT",
+   "ARG003", "ARG004", "ARG005",
+   "PTH2",
+   "TD001", "TD004", "TD005",
    "PD",
    "PGH",
+   "PLE",
+   "PLW15",
    "TRY003",
    "TRY004",
    "TRY2",
    "TRY302",
    "FLY",
    "NPY",
+   "FAST",
    "AIR",
+   "FURB",
+   "RUF1","RUF2",
+   "RUF001","RUF002", "RUF003", "RUF005",
+   "RUF013",
+   "RUF019",
+   "RUF021",
 ]
-ignore = ["E501", "E722", "F821"]
+ignore = ["E501", "E722"]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -74,3 +91,6 @@ unfixable = []
 preview = true
 
 per-file-ignores = {}
+
+[lint.flake8-boolean-trap]
+extend-allowed-calls = ["dojo.utils.get_system_setting"]

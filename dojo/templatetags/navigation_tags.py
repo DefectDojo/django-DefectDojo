@@ -116,8 +116,10 @@ def paginate(page, adjacent=2):
 
     # append last element and ellipsis if applicable
     if ellipsis_post:
-        pages.append(PaginationNav(display="..."))
-        pages.append(create_page_nav(page.paginator.num_pages))
+        pages.extend((
+            PaginationNav(display="..."),
+            create_page_nav(page.paginator.num_pages),
+        ))
 
     # determine whether we need a 'previous' link and build it
     if page.has_previous():
