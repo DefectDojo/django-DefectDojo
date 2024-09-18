@@ -49,7 +49,7 @@ ACCEPTED_FINDINGS = [FINDING_9, FINDING_10, FINDING_11]
 
 
 class FindingQueriesTest(DojoTestCase):
-    fixtures = ["dojo_testdata.json"]
+    fixtures = ["dojo_testdata.json", "unit_metrics_additional_data.json"]
 
     def setUp(self):
         user = User.objects.get(username="user1")
