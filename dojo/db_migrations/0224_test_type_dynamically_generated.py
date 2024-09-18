@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0222_system_settings_enable_ui_table_based_searching'),
+        ('dojo', '0223_permissionkey'),
     ]
 
     operations = [
