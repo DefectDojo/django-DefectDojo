@@ -17,13 +17,27 @@ RUN \
     libpq-dev \
     postgresql-client \
     xmlsec1 \
-    git \
     uuid-runtime \
+    curl \
+    autoconf \
+    gettext \
+    zlib1g-dev \
     # libcurl4-openssl-dev is required for installing pycurl python package
     libcurl4-openssl-dev \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
+  # Instalar Git 2.45.1
+  curl -LO https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.45.1.tar.gz && \
+  tar -xzf git-2.45.1.tar.gz && \
+  cd git-2.45.1 && \
+  make clean && \
+  make configure && \
+  ./configure --prefix=/usr/local && \
+  make all && \
+  make install && \
+  cd .. && \
+  rm -rf git-2.45.1* && \  
   true
 COPY requirements.txt ./
 # CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
@@ -47,8 +61,12 @@ RUN \
     libtiff6 \
     dnsutils \
     xmlsec1 \
-    git \
     uuid-runtime \
+    build-essential \
+    curl \
+    autoconf \
+    gettext \
+    zlib1g-dev \
     libpq-dev \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
@@ -57,6 +75,17 @@ RUN \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
+  # Instalar Git 2.45.1
+  curl -LO https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.45.1.tar.gz && \
+  tar -xzf git-2.45.1.tar.gz && \
+  cd git-2.45.1 && \
+  make clean && \
+  make configure && \
+  ./configure --prefix=/usr/local && \
+  make all && \
+  make install && \
+  cd .. && \
+  rm -rf git-2.45.1* && \  
   true
 COPY --from=build /tmp/wheels /tmp/wheels
 COPY requirements.txt ./

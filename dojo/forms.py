@@ -29,7 +29,7 @@ from polymorphic.base import ManagerInheritanceWarning
 from tagulous.forms import TagField
 
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings, get_authorized_findings_by_status
@@ -104,7 +104,7 @@ from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types, get_owner_user, get_authorized_contacts_for_product_type
 from dojo.transfer_findings.queries import get_products_for_transfer_findings
 from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_type
-from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type, get_all_user_by_role
+from dojo.user.queries import get_authorized_users, get_authorized_users_for_product_and_product_type, get_all_user_by_role, get_users_authorized_role_permission
 from dojo.user.utils import get_configuration_permissions_fields
 from dojo.utils import (
     get_password_requirements_string,
@@ -954,7 +954,8 @@ class RiskPendingForm(forms.ModelForm):
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 1}),
-        help_text=('Active, verified findings listed, please select to add findings.'))
+        help_text=('Active, verified findings listed, please select to add findings.'),
+        label="Select Findings to Accept")
     # recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES,
     #                                    initial=Risk_Acceptance.TREATMENT_ACCEPT,
     #                                    widget=forms.RadioSelect, label="Security Recommendation")
@@ -962,7 +963,11 @@ class RiskPendingForm(forms.ModelForm):
         queryset=Dojo_User.objects.none(),
         required=True,
         widget=forms.widgets.MultipleHiddenInput(),
-        help_text=("select acceptors depending on the severity of the risk"),
+        help_text=("acceptors depending on the severity of the risk"),
+    )
+    approvers = forms.CharField(
+        widget=forms.TextInput(attrs={'disabled': 'disabled'}),
+        required=False,
     )
     path = forms.FileField(
         label="Proof",
@@ -981,7 +986,7 @@ class RiskPendingForm(forms.ModelForm):
         model = Risk_Acceptance
         fields = ["name", "accepted_findings",
                   "recommendation_details",
-                  "path", "accepted_by", "path",
+                  "path", "accepted_by", "approvers", "path",
                   "expiration_date", "owner"]
 
     def __init__(self, *args, **kwargs):
@@ -999,13 +1004,18 @@ class RiskPendingForm(forms.ModelForm):
         )
         self.fields["expiration_date"].initial = expiration_date
         self.fields["expiration_date"].disabled = True
+        self.fields['owner'].queryset = get_owner_user()
 
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(severity, product, product_type)
         if category and category in settings.COMPLIANCE_FILTER_RISK:
+            self.fields['approvers'].widget = forms.widgets.HiddenInput()
             self.fields['accepted_by'].widget = forms.widgets.SelectMultiple(attrs={'size': 10})
             self.fields['accepted_by'].queryset = get_users_for_group('Compliance')
-        self.fields['owner'].queryset = get_owner_user()
+        else:
+            users_approvers = self.fields['accepted_by'].queryset if self.fields['owner'].queryset.filter(global_role__role__name="Maintainer").exists() else self.fields['accepted_by'].queryset.filter(~Q(global_role__role__name="Maintainer"))
+            self.fields['approvers'].initial = list(users_approvers.values_list('username', flat=True))
+        
 
     def clean(self):
         data = self.cleaned_data
@@ -2067,11 +2077,11 @@ class ReviewFindingForm(forms.Form):
     findings_review = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 1}),
-        help_text=('Active, verified findings listed, please select to add findings.'))
+        help_text=('Active, verified findings listed, please select to add findings.'),
+        label="Select Findings to Review",)
     reviewers = forms.MultipleChoiceField(
         help_text=(
-            "Select all users who can review Finding. Only users with "
-            "at least write permission to this finding can be selected"
+            "Select all users who can review Finding."
         ),
         required=False,
     )
@@ -2104,7 +2114,8 @@ class ReviewFindingForm(forms.Form):
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
-            users = get_users_for_group('Reviewers')
+            role = Roles(int(settings.DD_REVIEWERS_ROLE_TAG.get(finding.tags.first().name)))
+            users = get_users_authorized_role_permission(finding.test.engagement.product, Permissions.Finding_Code_Review, role) | get_users_for_group(f'Reviewers_{role.name}')
         else:
             users = get_authorized_users(Permissions.Finding_Edit).filter(
                 is_active=True

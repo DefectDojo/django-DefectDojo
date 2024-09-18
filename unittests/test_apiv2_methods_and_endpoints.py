@@ -26,6 +26,9 @@ from dojo.models import (
     Testing_Guide_Category,
     Tool_Product_History,
     UserAnnouncement,
+    TransferFindingFinding,
+    TransferFinding,
+    PermissionKey,
 )
 from dojo.urls import v2_api
 
@@ -112,6 +115,8 @@ class ApiEndpoints(DojoTestCase):
             Benchmark_Product,
             Benchmark_Product_Summary,
             Choice,
+            TransferFindingFinding,
+            PermissionKey,
         ]
 
     def test_is_defined(self):

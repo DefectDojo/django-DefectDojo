@@ -39,6 +39,7 @@ from dojo.utils import (
     get_page_items,
     get_setting,
     is_title_in_breadcrumbs,
+    validate_group_role
 )
 
 logger = logging.getLogger(__name__)
@@ -212,8 +213,8 @@ def edit_product_type(request, ptid):
     if request.method == "POST" and request.POST.get("edit_product_type"):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
+            add_technical_contact_whit_member(pt, pt_form)
             pt = pt_form.save()
-            add_technical_contact_whit_member(pt)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -251,7 +252,14 @@ def add_product_type_member(request, ptid):
                             product_type_member.product_type = pt
                             product_type_member.user = user
                             product_type_member.role = memberform.cleaned_data["role"]
-                            product_type_member.save()
+
+                            validate_res = validate_group_role(request, user, ptid, "view_product_type", 
+                                                               memberform.cleaned_data["role"].name)
+                            if validate_res:
+                                return validate_res
+                            else:
+                                product_type_member.save()
+
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     _("Product type members added successfully."),
@@ -288,7 +296,14 @@ def edit_product_type_member(request, memberid):
                                     "You are not permitted to make users to owners.",
                                     extra_tags="alert-warning")
             else:
-                memberform.save()
+                
+                validate_res = validate_group_role(request, member.user, member.product_type.id, "view_product_type", 
+                                                               memberform.cleaned_data["role"].name)
+                if validate_res:
+                    return validate_res
+                else:
+                    memberform.save()
+                    
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     _("Product type member updated successfully."),

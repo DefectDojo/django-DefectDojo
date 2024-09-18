@@ -5,11 +5,11 @@ import logging
 import os
 import re
 import warnings
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional, Set
 from uuid import uuid4
-
 import hyperlink
+import secrets
 import tagulous.admin
 from auditlog.registry import auditlog
 from cvss import CVSS3
@@ -19,12 +19,13 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError 
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
 from django.db import connection, models
 from django.db.models import Count, JSONField, Q
 from django.db.models.expressions import Case, When
+from django.db import IntegrityError
 from django.db.models.functions import Lower
 from django.urls import reverse
 from django.utils import timezone
@@ -2805,6 +2806,14 @@ class Finding(models.Model):
             return ras[0]
 
         return None
+    
+    @property
+    def transfer_finding(self):
+        if self.findings:
+            tf = self.findings.first().transfer_findings
+            if tf:
+                return tf
+        return None
 
     def compute_hash_code(self):
 
@@ -4751,6 +4760,52 @@ class ChoiceAnswer(Answer):
         else:
             return "No Response"
 
+class PermissionKey(models.Model):
+    token = models.CharField(max_length=100, unique=True, null=True)
+    status = models.BooleanField(default=True)
+    user = models.ForeignKey(Dojo_User, null=True, blank=True, on_delete=models.CASCADE)
+    risk_acceptance = models.ForeignKey(Risk_Acceptance, null=True, blank=True, on_delete=models.CASCADE)
+    transfer_finding = models.ForeignKey(TransferFinding, null=True, blank=True, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now=True)
+    expiration = models.DateTimeField()
+
+    def is_expired(self):
+        return self.status
+    
+    def expire(self):
+        self.status = False
+
+    
+    @classmethod
+    def create_token(
+        cls,
+        lifetime,
+        user,
+        risk_acceptance,
+        transfer_finding
+        ):
+
+        token = secrets.token_urlsafe(64)
+        expiration = timezone.now() + timedelta(minutes=lifetime)
+        try:
+            permissionkey = cls.objects.create(
+                token=token,
+                user=user,
+                risk_acceptance=risk_acceptance,
+                transfer_finding=transfer_finding,
+                expiration=expiration)
+        except IntegrityError:
+            logger.debug("IntegrityError token key duplicated")
+            permissionkey = cls.objects.create(
+                token=secrets.token_urlsafe(64)[0],
+                user=user,
+                risk_acceptance=risk_acceptance,
+                transfer_finding=transfer_finding,
+                expiration=expiration)
+
+        return permissionkey
+            
+
 
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database
@@ -4807,6 +4862,7 @@ admin.site.register(FileAccessToken)
 admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
+admin.site.register(PermissionKey)
 admin.site.register(TransferFinding)
 admin.site.register(TransferFindingFinding)
 admin.site.register(Check_List)

@@ -243,6 +243,7 @@
                     <th>ID</th>
                     <th>Severity</th>
                     <th>EPSS Score / Percentile</th>
+                    <th>Vulnerability Id</th>
                     <th>Name</th>
                     <th>Date</th>
                     <th>Active</th>
@@ -266,11 +267,22 @@
                             /
                             {{ finding.epss_percentile|format_epss }}
                         </td>
+                        <td>
+                            {% for vulnerability_id in finding.vulnerability_ids %}
+                                {% if vulnerability_id|has_vulnerability_url%}
+                                    <a rel="noopener noreferrer" target="_blank" href="{{ vulnerability_id|vulnerability_url }}">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ vulnerability_id }}</a>
+                                {% else %}
+                                    {{ vulnerability_id }}
+                                {% endif %}
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
                         <td><a rel="noopener noreferrer" href="{% url 'view_finding' finding.id %}"
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding.active }}</td>
-                        <td>{{ finding.risk_status|status_style_color}}</td>
+                        <td><span>{{ finding.risk_status|status_style_color}}</span></td>
                         {% comment %} <td><span style="color: {{ finding.risk_status|status_style_color.color }}">{{ finding.risk_status|status_style_color.text }}</span></td> {% endcomment %}
                         <td> <span style="color: green;">{{ finding.accepted_by}} </span></td>
                         <td>

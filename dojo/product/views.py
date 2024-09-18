@@ -124,6 +124,7 @@ from dojo.utils import (
     is_title_in_breadcrumbs,
     queryset_check,
     sum_by_severity_level,
+    validate_group_role
 )
 
 logger = logging.getLogger(__name__)
@@ -1688,7 +1689,14 @@ def add_product_member(request, pid):
                             product_member.product = product
                             product_member.user = user
                             product_member.role = memberform.cleaned_data["role"]
-                            product_member.save()
+
+                            validate_res = validate_group_role(request, user, pid, "view_product", 
+                                                               memberform.cleaned_data["role"].name)
+                            if validate_res:
+                                return validate_res
+                            else:
+                                product_member.save()
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      _("Product members added successfully."),
@@ -1716,7 +1724,13 @@ def edit_product_member(request, memberid):
                                      _("You are not permitted to make users to owners."),
                                      extra_tags="alert-warning")
             else:
-                memberform.save()
+                validate_res = validate_group_role(request, member.user, member.product.id, "view_product", 
+                                                               memberform.cleaned_data["role"].name)
+                if validate_res:
+                    return validate_res
+                else:
+                    memberform.save()
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      _("Product member updated successfully."),

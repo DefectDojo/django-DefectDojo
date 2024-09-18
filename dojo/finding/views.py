@@ -1738,6 +1738,7 @@ def request_finding_review(request, fid):
             new_note.date = now
             new_note.save()
             findings = form.cleaned_data['findings_review']
+
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
             reviewers_string = ", ".join([str(user) for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
@@ -1752,9 +1753,7 @@ def request_finding_review(request, fid):
                 finding.review_requested_by = user
                 finding.last_reviewed = now
                 finding.last_reviewed_by = request.user
-
-                reviewers = form.cleaned_data["reviewers"]
-                finding.reviewers.set(reviewers)
+                finding.reviewers.set(form.cleaned_data["reviewers"])
 
                 # Manage the jira status changes
                 push_to_jira = False

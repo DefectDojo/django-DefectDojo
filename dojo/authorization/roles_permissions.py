@@ -140,6 +140,7 @@ class Permissions(IntEnum):
     
     Metrics_Panel = 2708
     Metrics_DevSecOps = 2709
+    Metrics_Panel_Admin = 2710
 
     Transfer_Finding_View = 2801
     Transfer_Finding_Edit = 2802
@@ -344,6 +345,7 @@ def get_roles_with_permissions():
             Permissions.Test_Edit,
             Permissions.Finding_View,
             Permissions.Finding_Edit,
+            Permissions.Finding_Delete,
             Permissions.Finding_Group_View,
             Permissions.Endpoint_View,
             Permissions.Component_View,
@@ -479,6 +481,7 @@ def get_roles_with_permissions():
             Permissions.Credential_Delete,
             Permissions.Metrics_Panel,
             Permissions.Metrics_DevSecOps,
+            Permissions.Metrics_Panel_Admin,
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Edit,
             Permissions.Transfer_Finding_Delete,
@@ -633,6 +636,7 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_Finding_Edit,
             Permissions.Transfer_Finding_Finding_Delete,
             Permissions.Transfer_Finding_Finding_Add,
+            Permissions.Metrics_Panel_Admin,
         },
         Roles.Cibersecurity: {
             Permissions.Product_Type_View,
@@ -675,6 +679,7 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
+            Permissions.Metrics_Panel_Admin,
         },
     }
 
