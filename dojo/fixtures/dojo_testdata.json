@@ -2492,7 +2492,8 @@
       "notes": [],
       "dynamic_finding": false,
       "hash_code": "6f8d0bf970c14175e597843f4679769a4775742549d90f902ff803de9244c7e1",
-      "last_reviewed": null
+      "last_reviewed": null,
+      "is_mitigated": true
     }
   },
   {
