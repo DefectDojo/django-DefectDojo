@@ -117,7 +117,7 @@ def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_A
     if user is not None:
         finding.notes.add(Notes.objects.create(
             entry=(
-                f"{Dojo_User.generate_full_name(user)} removed this finding from the risk acceptance: "
+                f"{Dojo_User.generate_full_name(user)} ({user.id}) removed this finding from the risk acceptance: "
                 f'"{risk_acceptance.name}" ({get_view_risk_acceptance(risk_acceptance)})'
             ),
             author=user,
@@ -139,7 +139,7 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
         if user is not None:
             finding.notes.add(Notes.objects.create(
                 entry=(
-                    f"{Dojo_User.generate_full_name(user)} added this finding to the risk acceptance: "
+                    f"{Dojo_User.generate_full_name(user)} ({user.id}) added this finding to the risk acceptance: "
                     f'"{risk_acceptance.name}" ({get_view_risk_acceptance(risk_acceptance)})'
                 ),
                 author=user,
@@ -317,7 +317,7 @@ def simple_risk_accept(user: Dojo_User, finding: Finding, perform_save=True) -> 
     # Add a note to reflect that the finding was removed from the risk acceptance
     if user is not None:
         finding.notes.add(Notes.objects.create(
-            entry=(f"{Dojo_User.generate_full_name(user)} has risk accepted this finding"),
+            entry=(f"{Dojo_User.generate_full_name(user)} ({user.id}) has risk accepted this finding"),
             author=user,
         ))
 
@@ -343,7 +343,7 @@ def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True) -> None:
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
             finding.notes.add(Notes.objects.create(
-                entry=(f"{Dojo_User.generate_full_name(user)} removed a risk exception from this finding"),
+                entry=(f"{Dojo_User.generate_full_name(user)} ({user.id}) removed a risk exception from this finding"),
                 author=user,
             ))
 
