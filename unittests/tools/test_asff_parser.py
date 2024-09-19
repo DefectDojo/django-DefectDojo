@@ -18,7 +18,7 @@ class TestAsffParser(DojoTestCase):
         
     def common_check_finding(self, finding, data, index, parser, guarddutydate=False):
         self.assertEqual(finding.title, data[index]["Title"])
-        self.assertEqual(finding.description, data[index]["Description"])
+        self.assertEqual(finding.description, parser.get_description(data[index]))
         if guarddutydate:
             self.assertEqual(finding.date.date(),
                 datetime.strptime(data[0]["CreatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ").date())

@@ -10,7 +10,7 @@ from unittests.dojo_test_case import DojoTestCase
 class TestNucleiParser(DojoTestCase):
 
     def test_parse_no_empty(self):
-        with open("unittests/scans/nuclei/empty.jsonl", encoding="utf-8") as testfile:
+        with open("unittests/scans/nuclei/empty.json", encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
