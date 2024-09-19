@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Finding, Endpoint, FileUpload
 
 
 class PTARTAssessmentParser:
@@ -36,6 +36,16 @@ class PTARTAssessmentParser:
 
         endpoint = Endpoint.from_uri(hit["asset"])
         finding.unsaved_endpoints = [endpoint]
+
+        finding.unsaved_files = [{
+            "title": screenshot["caption"],
+            "data": screenshot["screenshot"]["data"]
+        } for screenshot in hit["screenshots"]]
+
+        finding.unsaved_files.extend([{
+            "title": attachment["title"],
+            "data": attachment["data"]
+        } for attachment in hit["attachments"]])
 
         return finding
 
