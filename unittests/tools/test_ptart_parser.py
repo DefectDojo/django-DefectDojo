@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from django.test import TestCase
 
 from dojo.models import Test, Product, Engagement
@@ -37,6 +35,16 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
+                self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(1345, finding.cwe)
+                self.assertEqual(2, len(finding.unsaved_tags))
+                self.assertEqual([
+                    "A01:2021-Broken Access Control",
+                    "A04:2021-Insecure Design"
+                ], finding.unsaved_tags)
+                self.assertEqual(1, len(finding.unsaved_endpoints))
+                endpoint = finding.unsaved_endpoints[0]
+                self.assertEqual(str(endpoint), "https://test.example.com")
 
 
     def test_ptart_parser_with_one_assessment_has_many_findings(self):
@@ -54,6 +62,8 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
+                self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(1345, finding.cwe)
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("Unrated Hit", finding.title)
@@ -64,6 +74,8 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("PTART-2024-00003", finding.unique_id_from_tool)
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
+                self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(1355, finding.cwe)
 
     #
     #
