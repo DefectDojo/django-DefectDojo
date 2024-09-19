@@ -7,31 +7,14 @@ from dojo.models import Finding
 __author__ = "Kirill Gotsman"
 
 
-class H1Parser:
+class VerboseJSONHackerOneParser:
     """
-    A class that can be used to parse the Get All Reports JSON export from HackerOne API.
+    Verbose JSON format of HackerOne cases
     """
-
-    def get_scan_types(self):
-        return ["HackerOne Cases"]
-
-    def get_label_for_scan_types(self, scan_type):
-        return scan_type
-
-    def get_description_for_scan_types(self, scan_type):
-        return "Import HackerOne cases findings in JSON format."
-
-    def get_findings(self, file, test):
+    def get_findings(self, tree, test):
         """
         Converts a HackerOne reports to a DefectDojo finding
         """
-
-        # Load the contents of the JSON file into a dictionary
-        data = file.read()
-        try:
-            tree = json.loads(str(data, "utf-8"))
-        except Exception:
-            tree = json.loads(data)
         # Convert JSON  report to DefectDojo format
         dupes = {}
         for content in tree["data"]:
@@ -167,3 +150,60 @@ class H1Parser:
             pass
 
         return description
+
+
+class JSONHackerOneParser:
+    """Parse the JSON format"""
+    def get_findings(self, tree, test):
+        return []
+
+
+class CSVHackerOneParser:
+    """Parse the CSV format"""
+    def get_findings(self, file, test):
+        return []
+
+
+class H1Parser:
+    """
+    A class that can be used to parse the Get All Reports JSON export from HackerOne API.
+    """
+
+    def get_scan_types(self):
+        return ["HackerOne Cases"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import HackerOne cases findings in JSON format."
+
+    def get_json_tree(self, file):
+        # Load the contents of the JSON file into a dictionary
+        data = file.read()
+        try:
+            tree = json.loads(str(data, "utf-8"))
+        except Exception:
+            tree = json.loads(data)
+        return tree
+
+    def get_findings(self, file, test):
+        # first determine which format to pase
+        if str(file.name).endswith(".json"):
+            return self.determine_json_format(file, test)
+        elif str(file.name).endswith(".csv"):
+            return CSVHackerOneParser().get_findings(file, test)
+        else:
+            msg = "Filename extension not recognized. Use .json or .csv"
+            raise ValueError(msg)
+
+    def determine_json_format(self, file, test):
+        tree = self.get_json_tree(file)
+        # Check for some root elements
+        if "finding" in tree:
+            return JSONHackerOneParser().get_findings(tree, test)
+        if "data" in tree:
+            return VerboseJSONHackerOneParser().get_findings(tree, test)
+        else:
+            msg = "This JSON format is not supported"
+            raise ValueError(msg)
