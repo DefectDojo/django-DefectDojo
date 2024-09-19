@@ -1,7 +1,8 @@
+from dateutil import parser as date_parser
+
 from dojo.models import Test
 from dojo.tools.h1.parser import H1Parser
 from unittests.dojo_test_case import DojoTestCase
-from dateutil import parser as date_parser
 
 
 class HackerOneVulnerabilityDisclosureProgramTests(DojoTestCase):
