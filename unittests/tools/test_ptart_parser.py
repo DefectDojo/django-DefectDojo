@@ -45,7 +45,13 @@ class TestPTARTParser(TestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual(str(endpoint), "https://test.example.com")
-
+                self.assertEqual(2, len(finding.unsaved_files))
+                screenshot = finding.unsaved_files[0]
+                self.assertEqual("Borked", screenshot["title"])
+                self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
+                attachment = finding.unsaved_files[1]
+                self.assertEqual("License", attachment["title"])
+                self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
 
     def test_ptart_parser_with_one_assessment_has_many_findings(self):
         with open("unittests/scans/ptart/ptart_many_vul.json") as testfile:
