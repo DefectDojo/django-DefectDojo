@@ -238,7 +238,7 @@ def add_finding_related(
                     sast_source_file_path=origin_finding.sast_source_file_path,
                     nb_occurences=origin_finding.nb_occurences,
                     publish_date=origin_finding.publish_date,
-                    service=transfer_finding.destination_engagement,
+                    service=transfer_finding.destination_engagement.name,
                     severity=origin_finding.severity,
                     verified=origin_finding.verified,
                     description=origin_finding.description,
