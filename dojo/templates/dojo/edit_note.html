@@ -3,6 +3,12 @@
 {% block content %}
     {{ block.super }}
     <h3>{% trans "Edit Note" %}</h3><br />
+    {% if system_settings.disclaimer_notes %}
+        <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; margin: 1em">
+            <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
+            <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ system_settings.disclaimer_notes }}</p>
+        </div>
+    {% endif %}
     <form class="form-horizontal" action="{% url 'edit_note' note.id page objid %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
