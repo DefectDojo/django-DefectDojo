@@ -33,6 +33,7 @@ class NotificationsTest(DojoAPITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-notification",
+            "email": "admin@dojo.com",
             "password": password,
         }, format="json")
         return r.json()["id"]
