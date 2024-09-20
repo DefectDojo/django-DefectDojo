@@ -10,7 +10,7 @@ class TestCheckmarxOsaParser(DojoTestCase):
     # maxDiff = None
 
     def init(self, report_filename):
-        my_file_handle = open(report_filename)
+        my_file_handle = open(report_filename, encoding="utf-8")
         product = Product()
         engagement = Engagement()
         test = Test()

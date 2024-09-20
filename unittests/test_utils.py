@@ -80,7 +80,7 @@ class TestUtils(DojoTestCase):
         mock_notifications.return_value = save_mock_notifications
         mock_notifications.objects.get.side_effect = Exception("Mock no templates")
 
-        user_post_save(None, user, True)
+        user_post_save(None, user, created=True)
 
         mock_member.assert_called_with(group=group, user=user, role=role)
         save_mock_member.save.assert_called_once()
@@ -112,7 +112,7 @@ class TestUtils(DojoTestCase):
 
         mock_notifications.objects.get.return_value = template
 
-        user_post_save(None, user, True)
+        user_post_save(None, user, created=True)
 
         mock_member.assert_called_with(group=group, user=user, role=role)
         save_mock_member.save.assert_called_once()
@@ -145,7 +145,7 @@ class TestUtils(DojoTestCase):
         mock_notifications.return_value = save_mock_notifications
         mock_notifications.objects.get.side_effect = Exception("Mock no templates")
 
-        user_post_save(None, user, True)
+        user_post_save(None, user, created=True)
 
         mock_member.assert_called_with(group=group, user=user, role=role)
         save_mock_member.save.assert_called_once()
@@ -175,7 +175,7 @@ class TestUtils(DojoTestCase):
         save_mock_member = Mock(return_value=Dojo_Group_Member())
         mock_member.return_value = save_mock_member
 
-        user_post_save(None, user, True)
+        user_post_save(None, user, created=True)
 
         mock_member.assert_not_called()
         save_mock_member.save.assert_not_called()
@@ -198,9 +198,7 @@ class assertNumOfModelsCreated:
         created_count = self.final_model_count - self.initial_model_count
         self.test_case.assertEqual(
             created_count, self.num,
-            "%i %s objects created, %i expected. query: %s, first 100 objects: %s" % (
-                created_count, self.queryset.model, self.num, self.queryset.query, self.queryset.all().order_by("-id")[:100],
-            ),
+            f"{created_count} {self.queryset.model} objects created, {self.num} expected. query: {self.queryset.query}, first 100 objects: {self.queryset.all().order_by('-id')[:100]}",
         )
 
 

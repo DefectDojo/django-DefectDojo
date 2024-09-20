@@ -7,6 +7,7 @@ import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
 from itertools import chain
+from typing import Optional
 
 from django.conf import settings
 from django.contrib import messages
@@ -267,9 +268,9 @@ class BaseListFindings:
     def __init__(
         self,
         filter_name: str = "All",
-        product_id: int = None,
-        engagement_id: int = None,
-        test_id: int = None,
+        product_id: Optional[int] = None,
+        engagement_id: Optional[int] = None,
+        test_id: Optional[int] = None,
         order_by: str = "-date",
         prefetch_type: str = "all",
     ):
@@ -426,7 +427,7 @@ class ListFindings(View, BaseListFindings):
 
         return request, context
 
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         # Store the product and engagement ids
         self.product_id = product_id
         self.engagement_id = engagement_id
@@ -452,37 +453,37 @@ class ListFindings(View, BaseListFindings):
 
 
 class ListOpenFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Open"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListVerifiedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Verified"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListOutOfScopeFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Out of Scope"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListFalsePositiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "False Positive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListInactiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Inactive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListAcceptedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Accepted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
@@ -494,7 +495,7 @@ class ListTransferFinding(ListFindings):
 
 
 class ListClosedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int = None, engagement_id: int = None):
+    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
         self.filter_name = "Closed"
         self.order_by = "-mitigated"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
@@ -1590,7 +1591,7 @@ def copy_finding(request, fid):
                 extra_tags="alert-success",
             )
             create_notification(
-                event="finding_copied",  # TODO - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
+                event="finding_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
                 title=_("Copying of %s") % finding.title,
                 description=f'The finding "{finding.title}" was copied by {request.user} to {test.title}',
                 product=product,
@@ -2499,7 +2500,7 @@ def edit_template(request, tid):
                 extra_tags="alert-danger",
             )
 
-    count = apply_cwe_mitigation(True, template, False)
+    count = apply_cwe_mitigation(apply_to_findings=True, template=template, update=False)
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(
         request,
@@ -2942,9 +2943,8 @@ def finding_bulk_update_all(request, pid=None):
                     messages.add_message(
                         request,
                         messages.WARNING,
-                        ("Skipped simple risk acceptance of %i findings, "
-                         "simple risk acceptance is disabled on the related products")
-                        % skipped_risk_accept_count,
+                        (f"Skipped simple risk acceptance of {skipped_risk_accept_count} findings, "
+                         "simple risk acceptance is disabled on the related products"),
                         extra_tags="alert-warning",
                     )
 
@@ -3043,8 +3043,7 @@ def finding_bulk_update_all(request, pid=None):
 
                     if grouped:
                         add_success_message_to_response(
-                            "Grouped %d findings into %d (%d newly created) finding groups"
-                            % (grouped, len(finding_groups), groups_created),
+                            f"Grouped {grouped} findings into {len(finding_groups)} ({groups_created} newly created) finding groups",
                         )
 
                     if skipped:
@@ -3122,15 +3121,10 @@ def finding_bulk_update_all(request, pid=None):
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():
-                    add_error_message_to_response(
-                        "%i finding groups could not be pushed to JIRA: %s"
-                        % (error_count, error_message),
-                    )
+                    add_error_message_to_response("{error_count} finding groups could not be pushed to JIRA: {error_message}")
 
                 if success_count > 0:
-                    add_success_message_to_response(
-                        "%i finding groups pushed to JIRA successfully" % success_count,
-                    )
+                    add_success_message_to_response(f"{success_count} finding groups pushed to JIRA successfully")
                     groups_pushed_to_jira = True
 
                 # refresh from db
@@ -3182,15 +3176,10 @@ def finding_bulk_update_all(request, pid=None):
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():
-                    add_error_message_to_response(
-                        "%i findings could not be pushed to JIRA: %s"
-                        % (error_count, error_message),
-                    )
+                    add_error_message_to_response(f"{error_count} findings could not be pushed to JIRA: {error_message}")
 
                 if success_count > 0:
-                    add_success_message_to_response(
-                        "%i findings pushed to JIRA successfully" % success_count,
-                    )
+                    add_success_message_to_response(f"{success_count} findings pushed to JIRA successfully")
 
                 if updated_find_count > 0:
                     messages.add_message(
@@ -3580,34 +3569,32 @@ def calculate_possible_related_actions_for_similar_finding(
         else:
             # similar is not a duplicate yet
             if finding.duplicate or finding.original_finding.all():
-                actions.append(
+                actions.extend((
                     {
                         "action": "mark_finding_duplicate",
                         "reason": "Will mark this finding as duplicate of the root finding in this cluster",
-                    },
-                )
-                actions.append(
-                    {
+                    }, {
                         "action": "set_finding_as_original",
-                        "reason": ("Sets this finding as the Original for the whole cluster. "
-                                   "The existing Original will be downgraded to become a member of the cluster and, "
-                                   "together with the other members, will be marked as duplicate of the new Original."),
+                        "reason": (
+                            "Sets this finding as the Original for the whole cluster. "
+                            "The existing Original will be downgraded to become a member of the cluster and, "
+                            "together with the other members, will be marked as duplicate of the new Original."
+                        ),
                     },
-                )
+                ))
             else:
                 # similar_finding is not an original/root of a cluster as per earlier if clause
-                actions.append(
+                actions.extend((
                     {
                         "action": "mark_finding_duplicate",
                         "reason": "Will mark this finding as duplicate of the finding on this page.",
-                    },
-                )
-                actions.append(
-                    {
+                    }, {
                         "action": "set_finding_as_original",
-                        "reason": ("Sets this finding as the Original marking the finding "
-                                   "on this page as duplicate of this original."),
+                        "reason": (
+                            "Sets this finding as the Original marking the finding "
+                            "on this page as duplicate of this original."
+                        ),
                     },
-                )
+                ))
 
     return actions

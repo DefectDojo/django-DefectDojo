@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase
 class TestNetsparkerParser(DojoTestCase):
 
     def test_parse_file_with_one_finding(self):
-        with open("unittests/scans/netsparker/netsparker_one_finding.json") as testfile:
+        with open("unittests/scans/netsparker/netsparker_one_finding.json", encoding="utf-8") as testfile:
             parser = NetsparkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -26,7 +26,7 @@ class TestNetsparkerParser(DojoTestCase):
                 self.assertEqual(str(endpoint), "http://php.testsparker.com/auth/login.php")
 
     def test_parse_file_with_multiple_finding(self):
-        with open("unittests/scans/netsparker/netsparker_many_findings.json") as testfile:
+        with open("unittests/scans/netsparker/netsparker_many_findings.json", encoding="utf-8") as testfile:
             parser = NetsparkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(16, len(findings))
@@ -70,7 +70,7 @@ class TestNetsparkerParser(DojoTestCase):
                 self.assertEqual(str(endpoint), "http://php.testsparker.com")
 
     def test_parse_file_issue_9816(self):
-        with open("unittests/scans/netsparker/issue_9816.json") as testfile:
+        with open("unittests/scans/netsparker/issue_9816.json", encoding="utf-8") as testfile:
             parser = NetsparkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -84,7 +84,7 @@ class TestNetsparkerParser(DojoTestCase):
                 self.assertEqual("03/02/2019", finding.date.strftime("%d/%m/%Y"))
 
     def test_parse_file_issue_10311(self):
-        with open("unittests/scans/netsparker/issue_10311.json") as testfile:
+        with open("unittests/scans/netsparker/issue_10311.json", encoding="utf-8") as testfile:
             parser = NetsparkerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))

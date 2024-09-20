@@ -61,7 +61,7 @@ class TenableCSVParser:
         if val is None or val == "":
             return None
         cpe_match = re.findall(r"cpe:/[^\n\ ]+", val)
-        return cpe_match if cpe_match else None
+        return cpe_match or None
 
     def detect_delimiter(self, content: str):
         """Detect the delimiter of the CSV file"""
@@ -140,7 +140,7 @@ class TenableCSVParser:
                 # manage CPE data
                 detected_cpe = self._format_cpe(str(row.get("CPE", row.get("definition.cpe", ""))))
                 if detected_cpe:
-                    # FIXME support more than one CPE in Nessus CSV parser
+                    # TODO: support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
                         LOGGER.debug(
                             "more than one CPE for a finding. NOT supported by Nessus CSV parser",

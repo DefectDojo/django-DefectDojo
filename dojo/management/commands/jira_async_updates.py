@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from jira.exceptions import JIRAError
 
+import dojo.jira_link.helper as jira_helper
 from dojo.models import Dojo_User, Finding, Notes, User
 
 """

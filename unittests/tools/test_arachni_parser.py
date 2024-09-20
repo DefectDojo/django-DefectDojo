@@ -8,7 +8,7 @@ from unittests.dojo_test_case import DojoTestCase
 class TestArachniParser(DojoTestCase):
 
     def test_parser_has_one_finding(self):
-        with open("unittests/scans/arachni/arachni.afr.json") as testfile:
+        with open("unittests/scans/arachni/arachni.afr.json", encoding="utf-8") as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -23,7 +23,7 @@ class TestArachniParser(DojoTestCase):
             self.assertEqual(datetime.datetime(2017, 11, 14, 2, 57, 29, tzinfo=datetime.timezone.utc), finding.date)
 
     def test_parser_has_many_finding(self):
-        with open("unittests/scans/arachni/dd.com.afr.json") as testfile:
+        with open("unittests/scans/arachni/dd.com.afr.json", encoding="utf-8") as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -54,7 +54,7 @@ class TestArachniParser(DojoTestCase):
             self.assertIn("server", finding.unsaved_tags)
 
     def test_parser_has_many_finding2(self):
-        with open("unittests/scans/arachni/js.com.afr.json") as testfile:
+        with open("unittests/scans/arachni/js.com.afr.json", encoding="utf-8") as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

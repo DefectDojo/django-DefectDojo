@@ -4,6 +4,7 @@ import pathlib
 from collections import OrderedDict
 from enum import Enum
 from json import dumps
+from pathlib import Path
 
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import ANY, MagicMock, call, patch
@@ -219,7 +220,7 @@ class SchemaChecker:
 
         for required_field in required_fields:
             # passwords are writeOnly, but this is not supported by Swagger / OpenAPIv2
-            # TODO check this for OpenAPI3
+            # TODO: check this for OpenAPI3
             if required_field != "password":
                 # print('checking field: ', required_field)
                 field = f"{self._get_prefix()}#{required_field}"
@@ -227,7 +228,7 @@ class SchemaChecker:
 
     def _check_type(self, schema, obj):
         if "type" not in schema:
-            # TODO implement OneOf / AllOff  (enums)
+            # TODO: implement OneOf / AllOff  (enums)
             # Engagement
             # "status": {
             #     "nullable": true,
@@ -276,7 +277,7 @@ class SchemaChecker:
             _check_helper(isinstance(obj, str))
         else:
             # Default case
-            _check_helper(False)
+            _check_helper(check=False)
 
         # print('_check_type ok for: %s: %s' % (schema, obj))
 
@@ -311,8 +312,8 @@ class SchemaChecker:
                         _check(prop, obj_child)
 
                 for child_name in obj.keys():
-                    # TODO prefetch mixins not picked up by spectcular?
-                    if child_name not in ["prefetch"]:
+                    # TODO: prefetch mixins not picked up by spectcular?
+                    if child_name != "prefetch":
                         if not properties or child_name not in properties.keys():
                             self._has_failed = True
                             self._register_error(f'unexpected property "{child_name}" found')
@@ -322,7 +323,7 @@ class SchemaChecker:
                 for name, obj_child in obj.items():
                     self._with_prefix(f"additionalProp<{name}>", _check, additional_properties, obj_child)
 
-            # TODO implement support for enum / OneOff / AllOff
+            # TODO: implement support for enum / OneOff / AllOff
             if "type" in schema and schema["type"] is TYPE_ARRAY:
                 items_schema = schema["items"]
                 for index in range(len(obj)):
@@ -425,7 +426,7 @@ class BaseClass:
                 for value in values:
                     self.assertIn(value, obj["prefetch"][field])
 
-            # TODO add schema check
+            # TODO: add schema check
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_object_not_authorized(self):
@@ -519,7 +520,7 @@ class BaseClass:
                             value = value["id"]
                         self.assertIn(value, objs["prefetch"][field])
 
-            # TODO add schema check
+            # TODO: add schema check
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list_object_not_authorized(self):
@@ -1110,7 +1111,7 @@ class FilesTest(DojoAPITestCase):
         # Test the creation
         for level in self.url_levels.keys():
             length = FileUpload.objects.count()
-            with open(f"{str(self.path)}/scans/acunetix/one_finding.xml") as testfile:
+            with open(f"{str(self.path)}/scans/acunetix/one_finding.xml", encoding="utf-8") as testfile:
                 payload = {
                     "title": level,
                     "file": testfile,
@@ -1122,8 +1123,7 @@ class FilesTest(DojoAPITestCase):
                 self.url_levels[level] = response.data.get("id")
 
         #  Test the download
-        with open(f"{str(self.path)}/scans/acunetix/one_finding.xml") as file:
-            file_data = file.read()
+        file_data = Path(f"{str(self.path)}/scans/acunetix/one_finding.xml").read_text(encoding="utf-8")
         for level, file_id in self.url_levels.items():
             response = self.client.get(f"/api/v2/{level}/files/download/{file_id}/")
             self.assertEqual(200, response.status_code)
@@ -1774,7 +1774,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         self.viewname = "importscan"
         self.viewset = ImportScanView
 
-        testfile = open("tests/zap_sample.xml")
+        testfile = open("tests/zap_sample.xml", encoding="utf-8")
         self.payload = {
             "minimum_severity": "Low",
             "active": False,
@@ -1801,7 +1801,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1831,7 +1831,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1862,7 +1862,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1894,7 +1894,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1928,7 +1928,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1963,7 +1963,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1995,7 +1995,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2037,7 +2037,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             length = Test.objects.all().count()
             response = self.client.post(
                 reverse("reimportscan-list"), {
@@ -2051,7 +2051,7 @@ class ReimportScanTest(DojoAPITestCase):
                 })
             self.assertEqual(length, Test.objects.all().count())
             self.assertEqual(201, response.status_code, response.content[:1000])
-            # TODO add schema check
+            # TODO: add schema check
             importer_mock.assert_not_called()
             reimporter_mock.assert_called_once()
 
@@ -2063,7 +2063,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2093,7 +2093,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2126,7 +2126,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2162,7 +2162,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2194,7 +2194,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2225,7 +2225,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": "Low",
                     "active": True,
@@ -2253,7 +2253,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2284,7 +2284,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2316,7 +2316,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2347,7 +2347,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2375,7 +2375,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2709,7 +2709,7 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
         self.viewset = ImportLanguagesView
         self.payload = {
             "product": 1,
-            "file": open("unittests/files/defectdojo_cloc.json"),
+            "file": open("unittests/files/defectdojo_cloc.json", encoding="utf-8"),
         }
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages
