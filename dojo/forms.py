@@ -844,7 +844,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         help_text=("Active, verified findings listed, please select to add findings."))
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
-                            label="Notes")
+                            label="Notes")  # TODO: here as well?
 
     class Meta:
         model = Risk_Acceptance
@@ -1562,7 +1562,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = TagField(required=False, autocomplete_tags=Finding.tags.tag_model.objects.all().order_by("name"))
-    notes = forms.CharField(required=False, max_length=1024, widget=forms.TextInput(attrs={"class": "form-control"}))
+    notes = forms.CharField(required=False, max_length=1024, widget=forms.TextInput(attrs={"class": "form-control"}))  # TODO: Here as well?
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1706,11 +1706,16 @@ class DeleteEndpointForm(forms.ModelForm):
 
 class NoteForm(forms.ModelForm):
     entry = forms.CharField(max_length=2400, widget=forms.Textarea(attrs={"rows": 4, "cols": 15}),
-                            label="Notes:")
+                            label="Notes:")  # TODO: Here
 
     class Meta:
         model = Notes
         fields = ["entry", "private"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class TypedNoteForm(NoteForm):
@@ -1740,7 +1745,7 @@ class CloseFindingForm(forms.ModelForm):
         widget=forms.Textarea, label="Notes:",
         error_messages={"required": ("The reason for closing a finding is "
                                      "required, please use the text area "
-                                     "below to provide documentation.")})
+                                     "below to provide documentation.")})  # TODO: here as well
 
     mitigated = forms.DateField(required=False, help_text="Date and time when the flaw has been fixed", widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
@@ -1809,7 +1814,7 @@ class DefectFindingForm(forms.ModelForm):
         widget=forms.Textarea, label="Notes:",
         error_messages={"required": ("The reason for closing a finding is "
                                      "required, please use the text area "
-                                     "below to provide documentation.")})
+                                     "below to provide documentation.")})  # TODO: Here as well
 
     class Meta:
         model = Notes
@@ -1823,7 +1828,7 @@ class ClearFindingReviewForm(forms.ModelForm):
         widget=forms.Textarea, label="Notes:",
         error_messages={"required": ("The reason for clearing a review is "
                                      "required, please use the text area "
-                                     "below to provide documentation.")})
+                                     "below to provide documentation.")})  # TODO: here as well?
 
     class Meta:
         model = Finding
@@ -1843,7 +1848,7 @@ class ReviewFindingForm(forms.Form):
         widget=forms.Textarea, label="Notes:",
         error_messages={"required": ("The reason for requesting a review is "
                                      "required, please use the text area "
-                                     "below to provide documentation.")})
+                                     "below to provide documentation.")})  # TODO: here as well?
     allow_all_reviewers = forms.BooleanField(
         required=False,
         label="Allow All Eligible Reviewers",
@@ -2308,7 +2313,7 @@ class ReportOptionsForm(forms.Form):
         if get_system_setting("disclaimer_reports_forced"):
             self.fields["include_disclaimer"].disabled = True
             self.fields["include_disclaimer"].initial = "1"  # represents yes
-            self.fields["include_disclaimer"].help_text="Administrator of the system enforced placement of disclaimer in all reports. You are not able exclude disclaimer from this report."
+            self.fields["include_disclaimer"].help_text = "Administrator of the system enforced placement of disclaimer in all reports. You are not able exclude disclaimer from this report."
 
 
 class CustomReportOptionsForm(forms.Form):
@@ -2736,7 +2741,7 @@ class CredMappingFormProd(forms.ModelForm):
 class EngagementPresetsForm(forms.ModelForm):
 
     notes = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False, help_text="Description of what needs to be tested or setting up environment for testing")
+                                  required=False, help_text="Description of what needs to be tested or setting up environment for testing")  # TODO: here as well?
 
     scope = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Scope of Engagement testing, IP's/Resources/URL's)")

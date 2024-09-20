@@ -16,6 +16,13 @@
     {{ field }}
 {% endfor %}
 
+{% if form.disclaimer %}
+<div style="background-color:#DADCE2; border:1px #003333; padding:.8em; margin:.8em; ">
+    <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
+    <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ form.disclaimer }}</p>
+</div>
+{% endif %}
+
 {% for field in form.visible_fields %}
     <div class="form-group{% if field.errors %} has-error{% endif %}">
         {% if field|is_checkbox %}
