@@ -462,7 +462,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
             ).values(),
         )
 
-    return items
+    return list(items)
 
 
 class QualysWebAppParser:

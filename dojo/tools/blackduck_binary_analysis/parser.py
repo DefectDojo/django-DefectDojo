@@ -32,6 +32,10 @@ class BlackduckBinaryAnalysisParser:
         findings = sorted(
             importer.parse_findings(filename), key=lambda f: f.cve,
         )
+
+        print("\n\n")
+        print("findings", findings, type(findings))
+        print("\n\n")
         return findings
 
     def ingest_findings(self, sorted_findings, test):
@@ -104,7 +108,7 @@ class BlackduckBinaryAnalysisParser:
 
                 findings[unique_finding_key] = finding
 
-        return findings.values()
+        return list(findings.values())
 
     def format_title(self, i):
         title = f"{i.object_name}: {i.component} {i.version} Vulnerable"
