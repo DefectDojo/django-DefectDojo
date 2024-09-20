@@ -2303,6 +2303,13 @@ class ReportOptionsForm(forms.Form):
     include_disclaimer = forms.ChoiceField(choices=yes_no, label="Disclaimer")
     report_type = forms.ChoiceField(choices=(("HTML", "HTML"),))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if get_system_setting("disclaimer_reports_forced"):
+            self.fields["include_disclaimer"].disabled = True
+            self.fields["include_disclaimer"].initial = "1"  # represents yes
+            self.fields["include_disclaimer"].help_text="Administrator of the system enforced placement of disclaimer in all reports. You are not able exclude disclaimer from this report."
+
 
 class CustomReportOptionsForm(forms.Form):
     yes_no = (("0", "No"), ("1", "Yes"))

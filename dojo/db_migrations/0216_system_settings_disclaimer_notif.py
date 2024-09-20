@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0214_test_type_dynamically_generated'),
+        ('dojo', '0215_webhooks_notifications'),
     ]
 
     operations = [
