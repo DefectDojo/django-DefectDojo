@@ -1709,7 +1709,9 @@ class UsersTest(BaseClass.BaseClassTest):
         self.assertEqual(self.endpoint_model.objects.count(), length + 1)
 
     def test_create_user_with_non_configuration_permissions(self):
-        payload = self.payload.copy()
+        payload = self.payload.copy() | {
+            "password": "testTEST1234!@#$",
+        }
         payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, 400)
