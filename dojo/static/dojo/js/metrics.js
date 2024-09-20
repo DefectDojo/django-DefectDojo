@@ -103,11 +103,16 @@ function homepage_severity_plot(critical, high, medium, low) {
         dashboard-metrics.html
 */
 
+function getTicks(critical, high, medium, low) {
+    return [...new Set(critical.concat(high, medium, low).map(x => x[0]))]
+}
+
 function opened_per_month(critical, high, medium, low) {
     var options = {
         xaxes: [{
             mode: 'time',
-            timeformat: "%m/%y"
+            timeformat: "%m/%y",
+            ticks: getTicks(critical, high, medium, low),
         }],
         yaxes: [{
             min: 0
@@ -153,7 +158,8 @@ function accepted_per_month(critical, high, medium, low) {
     var options = {
         xaxes: [{
             mode: 'time',
-            timeformat: "%m/%y"
+            timeformat: "%m/%y",
+            ticks: getTicks(critical, high, medium, low),
         }],
         yaxes: [{
             min: 0
@@ -199,7 +205,8 @@ function opened_per_week(critical, high, medium, low) {
     var options = {
         xaxes: [{
             mode: 'time',
-            timeformat: "%m/%d/%Y"
+            timeformat: "%m/%d/%Y",
+            ticks: getTicks(critical, high, medium, low),
         }],
         yaxes: [{
             min: 0
@@ -245,7 +252,8 @@ function accepted_per_week(critical, high, medium, low) {
     var options = {
         xaxes: [{
             mode: 'time',
-            timeformat: "%m/%d/%Y"
+            timeformat: "%m/%d/%Y",
+            ticks: getTicks(critical, high, medium, low),
         }],
         yaxes: [{
             min: 0
