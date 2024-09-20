@@ -285,8 +285,8 @@ def product_endpoint_report(request, pid):
     include_finding_images = int(request.GET.get("include_finding_images", 0))
     include_executive_summary = int(request.GET.get("include_executive_summary", 0))
     include_table_of_contents = int(request.GET.get("include_table_of_contents", 0))
-    include_disclaimer = int(request.GET.get("include_disclaimer", 0))
-    disclaimer = get_system_setting("disclaimer")
+    include_disclaimer = int(request.GET.get("include_disclaimer", 0)) or (get_system_setting("disclaimer_reports_forced", 0))
+    disclaimer = get_system_setting("disclaimer_reports")
     if include_disclaimer and len(disclaimer) == 0:
         disclaimer = "Please configure in System Settings."
     generate = "_generate" in request.GET
@@ -363,8 +363,8 @@ def generate_report(request, obj, host_view=False):
     include_finding_images = int(request.GET.get("include_finding_images", 0))
     include_executive_summary = int(request.GET.get("include_executive_summary", 0))
     include_table_of_contents = int(request.GET.get("include_table_of_contents", 0))
-    include_disclaimer = int(request.GET.get("include_disclaimer", 0))
-    disclaimer = get_system_setting("disclaimer")
+    include_disclaimer = int(request.GET.get("include_disclaimer", 0)) or (get_system_setting("disclaimer_reports_forced", 0))
+    disclaimer = get_system_setting("disclaimer_reports")
 
     if include_disclaimer and len(disclaimer) == 0:
         disclaimer = "Please configure in System Settings."
