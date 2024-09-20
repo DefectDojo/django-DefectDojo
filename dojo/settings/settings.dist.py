@@ -139,7 +139,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, "https://gitlab.com"),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid"]),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid", "read_api", "read_repository"]),
     DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ""),
     DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ""),
@@ -750,6 +750,8 @@ DJANGO_ADMIN_ENABLED = env("DD_DJANGO_ADMIN_ENABLED")
 
 API_TOKENS_ENABLED = env("DD_API_TOKENS_ENABLED")
 
+API_TOKEN_AUTH_ENDPOINT_ENABLED = env("DD_API_TOKEN_AUTH_ENDPOINT_ENABLED")
+
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -1140,6 +1142,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
         "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
     },
+    "notification_webhook_status_cleanup": {
+        "task": "dojo.notifications.helper.webhook_status_cleanup",
+        "schedule": timedelta(minutes=1),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1149,7 +1155,6 @@ CELERY_BEAT_SCHEDULE = {
     #     'task': 'dojo.tasks.fix_loop_duplicates_task',
     #     'schedule': timedelta(hours=12)
     # },
-
 
 }
 
@@ -1277,6 +1282,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "AppCheck Web Application Scanner": ["title", "severity"],
     "Legitify Scan": ["title", "endpoints", "severity"],
     "ThreatComposer Scan": ["title", "description"],
+    "Invicti Scan": ["title", "description", "severity"],
     "Checkmarx CxFlow SAST": ["vuln_id_from_tool", "file_path", "line"],
 }
 
@@ -1494,7 +1500,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OSV Scan": DEDUPE_ALGO_HASH_CODE,
     "Nosey Parker Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Bearer CLI": DEDUPE_ALGO_HASH_CODE,
-    "Wiz Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wiz Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1502,6 +1508,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
     "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
     "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
     "Checkmarx CxFlow SAST": DEDUPE_ALGO_HASH_CODE,
 }
 
@@ -1536,11 +1543,8 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 )
 
 if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
-    if env("DD_JIRA_EXTRA_ISSUE_TYPES").count(",") > 0:
-        for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
-            JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type)
-    else:
-        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env("DD_JIRA_EXTRA_ISSUE_TYPES"), env("DD_JIRA_EXTRA_ISSUE_TYPES"))
+    for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
+        JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
 

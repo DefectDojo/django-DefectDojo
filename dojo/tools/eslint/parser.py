@@ -16,10 +16,9 @@ class ESLintParser:
     def _convert_eslint_severity_to_dojo_severity(self, eslint_severity):
         if eslint_severity == 2:
             return "High"
-        elif eslint_severity == 1:
+        if eslint_severity == 1:
             return "Medium"
-        else:
-            return "Info"
+        return "Info"
 
     def get_findings(self, filename, test):
         tree = filename.read()

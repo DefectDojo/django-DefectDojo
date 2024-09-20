@@ -122,9 +122,7 @@ class TestApplyFindingTemplate(DojoTestCase):
         else:
             request = FindingTemplateTestUtil.create_get_request(user, self.apply_template_url)
 
-        v = views.apply_template_to_finding(request, finding_id, template_id)
-
-        return v
+        return views.apply_template_to_finding(request, finding_id, template_id)
 
     def test_apply_template_to_finding_with_data_does_not_display_error_success(self):
         result = self.make_request(user_is_staff=True, finding_id=1, template_id=1,
@@ -236,9 +234,7 @@ class TestFindTemplateToApply(DojoTestCase):
         else:
             request = FindingTemplateTestUtil.create_get_request(user, self.choose_template_url)
 
-        v = views.find_template_to_apply(request, finding_id)
-
-        return v
+        return views.find_template_to_apply(request, finding_id)
 
     def test_unauthorized_find_template_to_apply_fails(self):
         result = self.make_request(user_is_staff=False, finding_id=1)
@@ -275,9 +271,7 @@ class TestChooseFindingTemplateOptions(DojoTestCase):
         else:
             request = FindingTemplateTestUtil.create_get_request(user, self.finding_template_options_url)
 
-        v = views.choose_finding_template_options(request, finding_id, template_id)
-
-        return v
+        return views.choose_finding_template_options(request, finding_id, template_id)
 
     def test_unauthorized_choose_finding_template_options_fails(self):
         result = self.make_request(user_is_staff=False, finding_id=1, template_id=1)

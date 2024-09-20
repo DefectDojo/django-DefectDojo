@@ -1865,9 +1865,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
             if service is not None:
                 payload["service"] = service
 
-            result = self.import_scan_ui(engagement, payload)
-
-            return result
+            return self.import_scan_ui(engagement, payload)
 
     def reimport_scan_with_params_ui(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
         # Mimic old functionality for active/verified to avoid breaking tests
@@ -1898,8 +1896,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
             if scan_date is not None:
                 payload["scan_date"] = scan_date
 
-            result = self.reimport_scan_ui(test_id, payload)
-            return result
+            return self.reimport_scan_ui(test_id, payload)
 
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....

@@ -22,22 +22,19 @@ class CheckmarxOneParser:
     def _parse_date(self, value):
         if isinstance(value, str):
             return parser.parse(value)
-        elif isinstance(value, dict) and isinstance(value.get("seconds"), int):
+        if isinstance(value, dict) and isinstance(value.get("seconds"), int):
             return datetime.datetime.utcfromtimestamp(value.get("seconds"))
-        else:
-            return None
+        return None
 
     def _parse_cwe(self, cwe):
         if isinstance(cwe, str):
             cwe_num = re.findall(r"\d+", cwe)
             if cwe_num:
                 return cwe_num[0]
-            else:
-                return None
-        elif isinstance(cwe, int):
-            return cwe
-        else:
             return None
+        if isinstance(cwe, int):
+            return cwe
+        return None
 
     def parse_vulnerabilities_from_scan_list(
         self,
@@ -114,8 +111,7 @@ class CheckmarxOneParser:
         cwe_store: list,
     ) -> List[Finding]:
         # Not implemented yet
-        findings = []
-        return findings
+        return []
 
     def parse_sast_vulnerabilities(
         self,

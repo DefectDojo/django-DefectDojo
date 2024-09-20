@@ -70,12 +70,12 @@ class ThreatComposerParser:
 
             if "threatAction" in threat:
                 title = threat["threatAction"]
-                severity, impact, comments = self.parse_threat_metadata(threat["metadata"])
+                severity, impact, comments = self.parse_threat_metadata(threat.get("metadata", []))
                 description = self.to_description_text(threat, comments, assumption_threat_links[threat["id"]])
                 mitigation = self.to_mitigation_text(mitigation_links[threat["id"]])
                 unique_id_from_tool = threat["id"]
                 vuln_id_from_tool = threat["numericId"]
-                tags = threat["tags"] if "tags" in threat else []
+                tags = threat.get("tags", [])
 
                 finding = Finding(
                     title=title,
@@ -112,14 +112,12 @@ class ThreatComposerParser:
             counti = i + 1
             text += f"**Mitigation {counti} (ID: {mitigation['numericId']}, Status: {mitigation.get('status', 'Not defined')})**: {mitigation['content']}"
 
-            for item in mitigation["metadata"]:
+            for item in mitigation.get("metadata", []):
                 if item["key"] == "Comments":
                     text += f"\n*Comments*: {item['value'].replace(linesep, ' ')} "
                     break
 
-            for j, assumption in enumerate(assumption_links):
-                countj = j + 1
-                text += f"\n- *Assumption {countj} (ID: {assumption['numericId']})*: {assumption['content'].replace(linesep, ' ')}"
+            text += self.to_assumption_text(assumption_links)
 
             text += "\n"
 
@@ -145,8 +143,19 @@ class ThreatComposerParser:
         if comments:
             text += f"\n*Comments*: {comments}"
 
+        text += self.to_assumption_text(assumption_links)
+
+        return text
+
+    def to_assumption_text(self, assumption_links):
+        text = ""
         for i, assumption in enumerate(assumption_links):
             counti = i + 1
             text += f"\n- *Assumption {counti} (ID: {assumption['numericId']})*: {assumption['content'].replace(linesep, ' ')}"
+
+            for item in assumption.get("metadata", []):
+                if item["key"] == "Comments":
+                    text += f"\n&nbsp;&nbsp;*Comments*: {item['value'].replace(linesep, ' ')} "
+                    break
 
         return text

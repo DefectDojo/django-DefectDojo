@@ -53,10 +53,9 @@ class CheckmarxCXFlowSastParser:
     def get_findings(self, file, test):
         if file.name.strip().lower().endswith(".json"):
             return self._get_findings_json(file, test)
-        else:
-            # TODO: support CxXML format
-            logger.warning(f"Not supported file format ${file}")
-            return []
+        # TODO: support CxXML format
+        logger.warning(f"Not supported file format ${file}")
+        return []
 
     def _get_findings_json(self, file, test):
         data = json.load(file)

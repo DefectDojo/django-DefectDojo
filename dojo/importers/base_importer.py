@@ -255,11 +255,10 @@ class BaseImporter(ImporterOptions):
                 parsed_findings,
                 **kwargs,
             )
-        else:
-            return self.sync_process_findings(
-                parsed_findings,
-                **kwargs,
-            )
+        return self.sync_process_findings(
+            parsed_findings,
+            **kwargs,
+        )
 
     def update_test_meta(self):
         """
@@ -276,7 +275,7 @@ class BaseImporter(ImporterOptions):
         if not self.commit_hash.isspace():
             self.test.commit_hash = self.commit_hash
 
-        return None
+        return
 
     def update_timestamps(self):
         """
@@ -510,7 +509,7 @@ class BaseImporter(ImporterOptions):
             # Return early as there is no value in validating further
             return
         # Validate that the test has a value
-        elif self.test is not None:
+        if self.test is not None:
             # Make sure the Tool_Configuration is connected to the product that the test is
             if self.api_scan_configuration.product != self.test.engagement.product:
                 msg = "API Scan Configuration has to be from same product as the Test"
@@ -536,7 +535,7 @@ class BaseImporter(ImporterOptions):
             # Return early as there is no value in validating further
             return
         # Validate that the engagement has a value
-        elif self.engagement is not None:
+        if self.engagement is not None:
             # Make sure the Tool_Configuration is connected to the engagement that the test is
             if self.api_scan_configuration.product != self.engagement.product:
                 msg = "API Scan Configuration has to be from same product as the Engagement"
