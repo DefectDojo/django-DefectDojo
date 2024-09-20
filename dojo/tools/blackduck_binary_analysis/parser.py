@@ -33,9 +33,6 @@ class BlackduckBinaryAnalysisParser:
             importer.parse_findings(filename), key=lambda f: f.cve,
         )
 
-        print("\n\n")
-        print("findings", findings, type(findings))
-        print("\n\n")
         return findings
 
     def ingest_findings(self, sorted_findings, test):
