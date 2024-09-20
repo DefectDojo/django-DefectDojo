@@ -1280,6 +1280,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Legitify Scan": ["title", "endpoints", "severity"],
     "ThreatComposer Scan": ["title", "description"],
     "Invicti Scan": ["title", "description", "severity"],
+    "KrakenD Audit Scan": ["description", "mitigation", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1505,6 +1506,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
     "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
+    "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
