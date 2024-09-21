@@ -161,4 +161,4 @@ class MendParser:
             if dupe_key not in dupes:
                 dupes[dupe_key] = finding
 
-        return dupes.values()
+        return list(dupes.values())
