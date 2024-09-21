@@ -654,7 +654,7 @@ class RiskAcceptanceViewSet(
         instance = self.get_object()
         # Remove any findings on the risk acceptance
         for finding in instance.accepted_findings.all():
-            remove_finding_from_risk_acceptance(instance, finding)
+            remove_finding_from_risk_acceptance(request.user, instance, finding)
         # return the response of the object being deleted
         return super().destroy(request, pk=pk)
 
