@@ -1280,6 +1280,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Legitify Scan": ["title", "endpoints", "severity"],
     "ThreatComposer Scan": ["title", "description"],
     "Invicti Scan": ["title", "description", "severity"],
+    "HackerOne Cases": ["title", "severity"],
     "KrakenD Audit Scan": ["description", "mitigation", "severity"],
 }
 
