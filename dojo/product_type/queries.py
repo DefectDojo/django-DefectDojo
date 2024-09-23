@@ -9,7 +9,7 @@ from dojo.authorization.authorization import (
 )
 from dojo.authorization.roles_permissions import Permissions
 from dojo.group.queries import get_authorized_groups
-from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member
+from dojo.models import Global_Role, Product_Type, Product_Type_Group, Product_Type_Member
 
 
 def get_authorized_product_types(permission):
@@ -43,7 +43,15 @@ def get_authorized_members_for_product_type(product_type, permission):
 
     if user.is_superuser or user_has_permission(user, product_type, permission):
         return Product_Type_Member.objects.filter(product_type=product_type).order_by("user__first_name", "user__last_name").select_related("role", "product_type", "user")
-    return None
+    return Product_Type_Member.objects.none()
+
+
+def get_authorized_global_members_for_product_type(product_type, permission):
+    user = get_current_user()
+
+    if user.is_superuser or user_has_permission(user, product_type, permission):
+        return Global_Role.objects.filter(group=None, role__isnull=False).order_by("user__first_name", "user__last_name").select_related("role", "user")
+    return Global_Role.objects.none()
 
 
 def get_authorized_groups_for_product_type(product_type, permission):
@@ -52,7 +60,15 @@ def get_authorized_groups_for_product_type(product_type, permission):
     if user.is_superuser or user_has_permission(user, product_type, permission):
         authorized_groups = get_authorized_groups(Permissions.Group_View)
         return Product_Type_Group.objects.filter(product_type=product_type, group__in=authorized_groups).order_by("group__name").select_related("role", "group")
-    return None
+    return Product_Type_Group.objects.none()
+
+
+def get_authorized_global_groups_for_product_type(product_type, permission):
+    user = get_current_user()
+
+    if user.is_superuser or user_has_permission(user, product_type, permission):
+        return Global_Role.objects.filter(user=None, role__isnull=False).order_by("group__name").select_related("role", "group")
+    return Global_Role.objects.none()
 
 
 def get_authorized_product_type_members(permission):

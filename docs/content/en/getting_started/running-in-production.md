@@ -5,7 +5,7 @@ draft: false
 weight: 4
 ---
 
-## Production use with docker-compose
+## Production use with docker compose
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment.
 
@@ -76,7 +76,7 @@ Dockerfile.django-* for in-file references.
 
 You can execute the following command to see the configuration:
 
-`docker-compose exec celerybeat bash -c "celery -A dojo inspect stats"`
+`docker compose exec celerybeat bash -c "celery -A dojo inspect stats"`
 and see what is in effect.
 
 #### Asynchronous Import

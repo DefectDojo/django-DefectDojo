@@ -70,4 +70,4 @@ class IntSightsParser:
             duplicates[dupe_key] = alert
             if dupe_key not in duplicates:
                 duplicates[dupe_key] = True
-        return duplicates.values()
+        return list(duplicates.values())

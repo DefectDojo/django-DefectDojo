@@ -297,7 +297,7 @@
                 {% endif %}
             </div>
         </div>
-        {% if product_members or product_type_members %}
+        {% if product_members or product_type_members or global_product_members %}
             <div class="table-responsive">
                 <table class="tablesorter-bootstrap table table-condensed table-striped">
                     <thead>
@@ -350,6 +350,15 @@
                             <td>{{ member.role }}</td>
                         </tr>
                     {% endfor %}
+                    {% for member in global_product_members %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td>{{ member.user.get_full_name }}</td>
+                            <td>Global role</td>
+                            <td>{{ member.role }}</td>
+                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -385,7 +394,7 @@
                   {% endif %}
               </div>
           </div>
-          {% if product_groups or product_type_groups %}
+          {% if product_groups or product_type_groups or global_product_groups %}
           <div class="table-responsive">
               <table class="tablesorter-bootstrap table table-condensed table-striped">
                   <thead>
@@ -434,6 +443,14 @@
                               {{ type_group.product_type }}
                           </a>
                       </td>
+                      <td>{{ type_group.role }}</td>
+                  </tr>
+                  {% endfor %}
+                  {% for type_group in global_product_groups %}
+                  <tr>
+                      <td></td>
+                      <td>{{ type_group.group.name }}</td>
+                      <td>Global role</td>
                       <td>{{ type_group.role }}</td>
                   </tr>
                   {% endfor %}

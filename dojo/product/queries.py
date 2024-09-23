@@ -13,6 +13,7 @@ from dojo.models import (
     App_Analysis,
     DojoMeta,
     Engagement_Presets,
+    Global_Role,
     Languages,
     Product,
     Product_API_Scan_Configuration,
@@ -69,7 +70,15 @@ def get_authorized_members_for_product(product, permission):
 
     if user.is_superuser or user_has_permission(user, product, permission):
         return Product_Member.objects.filter(product=product).order_by("user__first_name", "user__last_name").select_related("role", "user")
-    return None
+    return Product_Member.objects.none()
+
+
+def get_authorized_global_members_for_product(product, permission):
+    user = get_current_user()
+
+    if user.is_superuser or user_has_permission(user, product, permission):
+        return Global_Role.objects.filter(group=None, role__isnull=False).order_by("user__first_name", "user__last_name").select_related("role", "user")
+    return Global_Role.objects.none()
 
 
 def get_authorized_groups_for_product(product, permission):
@@ -78,7 +87,15 @@ def get_authorized_groups_for_product(product, permission):
     if user.is_superuser or user_has_permission(user, product, permission):
         authorized_groups = get_authorized_groups(Permissions.Group_View)
         return Product_Group.objects.filter(product=product, group__in=authorized_groups).order_by("group__name").select_related("role")
-    return None
+    return Product_Group.objects.none()
+
+
+def get_authorized_global_groups_for_product(product, permission):
+    user = get_current_user()
+
+    if user.is_superuser or user_has_permission(user, product, permission):
+        return Global_Role.objects.filter(user=None, role__isnull=False).order_by("group__name").select_related("role")
+    return Global_Role.objects.none()
 
 
 def get_authorized_product_members(permission):
