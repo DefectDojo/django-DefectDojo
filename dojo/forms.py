@@ -2168,8 +2168,9 @@ class ChangePasswordForm(forms.Form):
 
 
 class AddDojoUserForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
     password = forms.CharField(widget=forms.PasswordInput,
-        required=False,
+        required=True,
         validators=[validate_password],
         help_text="")
 
@@ -2186,6 +2187,7 @@ class AddDojoUserForm(forms.ModelForm):
 
 
 class EditDojoUserForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
 
     class Meta:
         model = Dojo_User

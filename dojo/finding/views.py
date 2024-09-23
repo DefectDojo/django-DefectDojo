@@ -991,10 +991,10 @@ class EditFinding(View):
             # Handle risk exception related things
             if "risk_accepted" in context["form"].cleaned_data and context["form"]["risk_accepted"].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
-                    ra_helper.simple_risk_accept(new_finding, perform_save=False)
+                    ra_helper.simple_risk_accept(request.user, new_finding, perform_save=False)
             else:
                 if new_finding.risk_accepted:
-                    ra_helper.risk_unaccept(new_finding, perform_save=False)
+                    ra_helper.risk_unaccept(request.user, new_finding, perform_save=False)
             # Save and add new endpoints
             finding_helper.add_endpoints(new_finding, context["form"])
             # Remove unrelated endpoints
@@ -1270,7 +1270,7 @@ def close_finding(request, fid):
                     status.last_modified = timezone.now()
                     status.save()
                 # Clear the risk acceptance, if present
-                ra_helper.risk_unaccept(finding)
+                ra_helper.risk_unaccept(request.user, finding)
 
                 # Manage the jira status changes
                 push_to_jira = False
@@ -1446,7 +1446,7 @@ def reopen_finding(request, fid):
         status.last_modified = timezone.now()
         status.save()
     # Clear the risk acceptance, if present
-    ra_helper.risk_unaccept(finding)
+    ra_helper.risk_unaccept(request.user, finding)
 
     # Manage the jira status changes
     push_to_jira = False
@@ -1626,7 +1626,7 @@ def simple_risk_accept(request, fid):
     if not finding.test.engagement.product.enable_simple_risk_acceptance:
         raise PermissionDenied
 
-    ra_helper.simple_risk_accept(finding)
+    ra_helper.simple_risk_accept(request.user, finding)
 
     messages.add_message(
         request, messages.WARNING, "Finding risk accepted.", extra_tags="alert-success",
@@ -1640,7 +1640,7 @@ def simple_risk_accept(request, fid):
 @user_is_authorized(Finding, Permissions.Risk_Acceptance, "fid")
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    ra_helper.risk_unaccept(finding)
+    ra_helper.risk_unaccept(request.user, finding)
 
     messages.add_message(
         request,
@@ -2851,9 +2851,9 @@ def finding_bulk_update_all(request, pid=None):
                                 ):
                                     skipped_risk_accept_count += 1
                                 else:
-                                    ra_helper.simple_risk_accept(finding)
+                                    ra_helper.simple_risk_accept(request.user, finding)
                             elif form.cleaned_data["risk_unaccept"]:
-                                ra_helper.risk_unaccept(finding)
+                                ra_helper.risk_unaccept(request.user, finding)
 
                     for prod in prods:
                         calculate_grade(prod)

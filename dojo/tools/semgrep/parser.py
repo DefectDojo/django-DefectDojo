@@ -130,13 +130,16 @@ class SemgrepParser:
         return list(dupes.values())
 
     def convert_severity(self, val):
-        if "CRITICAL" == val.upper():
+        upper_value = val.upper()
+        if upper_value == "CRITICAL":
             return "Critical"
-        elif "WARNING" == val.upper():
+        elif upper_value in ["WARNING", "MEDIUM"]:
             return "Medium"
-        elif "ERROR" == val.upper() or "HIGH" == val.upper():
+        elif upper_value in ["ERROR", "HIGH"]:
             return "High"
-        elif "INFO" == val.upper():
+        elif upper_value == "LOW":
+            return "Low"
+        elif upper_value == "INFO":
             return "Info"
         else:
             msg = f"Unknown value for severity: {val}"

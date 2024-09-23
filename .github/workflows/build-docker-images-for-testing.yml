@@ -45,9 +45,7 @@ jobs:
           tags: defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
           file: Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}_img
-          cache-from: type=gha,scope=${{ matrix.docker-image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
-  
+
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
         timeout-minutes: 10

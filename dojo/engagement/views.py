@@ -1250,7 +1250,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
             findings = form.cleaned_data["accepted_findings"]
 
-            risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+            risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
             messages.add_message(
                 request,
@@ -1360,7 +1360,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             finding = get_object_or_404(
                 Finding, pk=request.POST["remove_finding_id"])
 
-            ra_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
+            ra_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
 
             messages.add_message(
                 request,
@@ -1391,7 +1391,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             if not errors:
                 findings = add_findings_form.cleaned_data["accepted_findings"]
 
-                ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
                 messages.add_message(
                     request,
