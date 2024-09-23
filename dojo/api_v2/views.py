@@ -173,6 +173,33 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 
 
+def schema_with_prefetch() -> dict:
+    return {
+        "list": extend_schema(
+            parameters=[
+                OpenApiParameter(
+                    "prefetch",
+                    OpenApiTypes.STR,
+                    OpenApiParameter.QUERY,
+                    required=False,
+                    description="List of fields for which to prefetch model instances and add those to the response",
+                ),
+            ],
+        ),
+        "retrieve": extend_schema(
+            parameters=[
+                OpenApiParameter(
+                    "prefetch",
+                    OpenApiTypes.STR,
+                    OpenApiParameter.QUERY,
+                    required=False,
+                    description="List of fields for which to prefetch model instances and add those to the response",
+                ),
+            ],
+        ),
+    }
+
+
 class DojoOpenApiJsonRenderer(OpenApiJsonRenderer2):
     def get_indent(self, accepted_media_type, renderer_context):
         if accepted_media_type and "indent" in accepted_media_type:
@@ -212,30 +239,7 @@ class RoleViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class DojoGroupViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -253,30 +257,7 @@ class DojoGroupViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class DojoGroupMemberViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -302,6 +283,7 @@ class DojoGroupMemberViewSet(
 
 
 # Authorization: superuser
+@extend_schema_view(**schema_with_prefetch())
 class GlobalRoleViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -316,6 +298,7 @@ class GlobalRoleViewSet(
 
 
 # Authorization: object-based
+# @extend_schema_view(**schema_with_prefetch())
 class EndPointViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -371,6 +354,7 @@ class EndPointViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class EndpointStatusViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -399,6 +383,7 @@ class EndpointStatusViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class EngagementViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -652,6 +637,7 @@ class EngagementViewSet(
         return generate_file_response(file_object)
 
 
+@extend_schema_view(**schema_with_prefetch())
 class RiskAcceptanceViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -669,7 +655,7 @@ class RiskAcceptanceViewSet(
         instance = self.get_object()
         # Remove any findings on the risk acceptance
         for finding in instance.accepted_findings.all():
-            remove_finding_from_risk_acceptance(instance, finding)
+            remove_finding_from_risk_acceptance(request.user, instance, finding)
         # return the response of the object being deleted
         return super().destroy(request, pk=pk)
 
@@ -717,6 +703,7 @@ class RiskAcceptanceViewSet(
 
 # These are technologies in the UI and the API!
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class AppAnalysisViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -735,6 +722,7 @@ class AppAnalysisViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class CredentialsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -748,6 +736,7 @@ class CredentialsViewSet(
 
 
 # Authorization: configuration
+@extend_schema_view(**schema_with_prefetch())
 class CredentialsMappingViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1484,6 +1473,7 @@ class JiraInstanceViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class JiraIssuesViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1509,6 +1499,7 @@ class JiraIssuesViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class JiraProjectViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1571,6 +1562,7 @@ class SonarqubeIssueTransitionViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class ProductAPIScanConfigurationViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1597,30 +1589,7 @@ class ProductAPIScanConfigurationViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class DojoMetaViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1644,30 +1613,7 @@ class DojoMetaViewSet(
         return get_authorized_dojo_meta(Permissions.Product_View)
 
 
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
@@ -1743,30 +1689,7 @@ class ProductViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductMemberViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1794,30 +1717,7 @@ class ProductMemberViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductGroupViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1845,30 +1745,7 @@ class ProductGroupViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductTypeViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1953,30 +1830,7 @@ class ProductTypeViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductTypeMemberViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2018,30 +1872,7 @@ class ProductTypeMemberViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductTypeGroupViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2069,6 +1900,7 @@ class ProductTypeGroupViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class StubFindingsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2106,6 +1938,7 @@ class DevelopmentEnvironmentViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class TestsViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -2312,30 +2145,7 @@ class TestTypesViewSet(
         return Test_Type.objects.all().order_by("id")
 
 
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class TestImportViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2394,6 +2204,7 @@ class TestImportViewSet(
 
 
 # Authorization: configurations
+@extend_schema_view(**schema_with_prefetch())
 class ToolConfigurationsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2414,6 +2225,7 @@ class ToolConfigurationsViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class ToolProductSettingsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2498,30 +2310,7 @@ class UsersViewSet(
 
 
 # Authorization: superuser
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class UserContactInfoViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2676,30 +2465,7 @@ class LanguageTypeViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class LanguageViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -3143,30 +2909,7 @@ class SystemSettingsViewSet(
 
 
 # Authorization: superuser
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class NotificationsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -3180,6 +2923,7 @@ class NotificationsViewSet(
         return Notifications.objects.all().order_by("id")
 
 
+@extend_schema_view(**schema_with_prefetch())
 class EngagementPresetsViewset(
     PrefetchDojoModelViewSet,
 ):
@@ -3299,6 +3043,7 @@ class QuestionnaireEngagementSurveyViewSet(
         return Engagement_Survey.objects.all().order_by("id")
 
 
+@extend_schema_view(**schema_with_prefetch())
 class QuestionnaireAnsweredSurveyViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,

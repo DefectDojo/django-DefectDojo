@@ -92,6 +92,8 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.product.queries import (
+    get_authorized_global_groups_for_product,
+    get_authorized_global_members_for_product,
     get_authorized_groups_for_product,
     get_authorized_members_for_product,
     get_authorized_products,
@@ -213,8 +215,10 @@ def view_product(request, pid):
                                       .prefetch_related("prod_type__members")
     prod = get_object_or_404(prod_query, id=pid)
     product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
+    global_product_members = get_authorized_global_members_for_product(prod, Permissions.Product_View)
     product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     product_groups = get_authorized_groups_for_product(prod, Permissions.Product_View)
+    global_product_groups = get_authorized_global_groups_for_product(prod, Permissions.Product_View)
     product_type_groups = get_authorized_groups_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
@@ -291,8 +295,10 @@ def view_product(request, pid):
         "benchmarks_percents": benchAndPercent,
         "benchmarks": benchmarks,
         "product_members": product_members,
+        "global_product_members": global_product_members,
         "product_type_members": product_type_members,
         "product_groups": product_groups,
+        "global_product_groups": global_product_groups,
         "product_type_groups": product_type_groups,
         "personal_notifications_form": personal_notifications_form,
         "enabled_notifications": get_enabled_notifications_list(),
