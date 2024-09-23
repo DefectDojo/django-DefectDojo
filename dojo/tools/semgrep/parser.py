@@ -139,7 +139,7 @@ class SemgrepParser:
             return "High"
         if upper_value == "LOW":
             return "Low"
-        elif upper_value == "INFO":
+        if upper_value == "INFO":
             if "WARNING" == val.upper():
                 return "Medium"
             if "ERROR" == val.upper() or "HIGH" == val.upper():
