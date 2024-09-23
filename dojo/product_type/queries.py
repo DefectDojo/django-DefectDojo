@@ -53,6 +53,7 @@ def get_authorized_global_members_for_product_type(product_type, permission):
         return Global_Role.objects.filter(group=None, role__isnull=False).order_by("user__first_name", "user__last_name").select_related("role", "user")
     return Global_Role.objects.none()
 
+
 def get_authorized_groups_for_product_type(product_type, permission):
     user = get_current_user()
 

@@ -123,7 +123,7 @@ def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_A
             author=user,
         ))
 
-    return None
+    return
 
 
 def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Acceptance, findings: list[Finding]) -> None:
@@ -148,7 +148,7 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, findings, accepted_message_creator)
 
-    return None
+    returnß
 
 
 @app.task
