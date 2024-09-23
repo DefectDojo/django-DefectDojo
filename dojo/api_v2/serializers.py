@@ -555,7 +555,6 @@ class UserSerializer(serializers.ModelSerializer):
         if self.context["request"].method == "POST" and "password" not in data:
             msg = "Passwords must be supplied for new users"
             raise ValidationError(msg)
-        
         return super().validate(data)
 
 

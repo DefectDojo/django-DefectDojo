@@ -148,7 +148,7 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, findings, accepted_message_creator)
 
-    returnß
+    return
 
 
 @app.task

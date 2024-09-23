@@ -277,7 +277,6 @@ class H1Parser(
             return self.determine_json_format(file, test)
         if str(file_name).endswith(".csv"):
             return self.determine_csv_format(file, test)
-        
         msg = "Filename extension not recognized. Use .json or .csv"
         raise ValueError(msg)
 
@@ -298,7 +297,6 @@ class H1Parser(
             return self.get_bug_bounty_program_json_findings(tree.get("findings", []), test)
         if "data" in tree:
             return self.get_vulnerability_disclosure_json_findings(tree, test)
-        
         msg = "This JSON format is not supported"
         raise ValueError(msg)
 
@@ -317,6 +315,5 @@ class H1Parser(
         # Check for some root elements
         if "bounty" in reader.fieldnames:
             return self.get_bug_bounty_program_csv_findings(reader, test)
-         
         msg = "This CSV format is not supported"
         raise ValueError(msg)
