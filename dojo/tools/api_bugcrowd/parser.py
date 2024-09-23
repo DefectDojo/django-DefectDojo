@@ -195,13 +195,12 @@ class ApiBugcrowdParser:
 
         if entry["attributes"]["state"] in allowed_states:
             return True
-        else:
-            msg = (
-                "{} not in allowed bugcrowd submission states".format(
-                    entry["attributes"]["state"],
-                )
+        msg = (
+            "{} not in allowed bugcrowd submission states".format(
+                entry["attributes"]["state"],
             )
-            raise ValueError(msg)
+        )
+        raise ValueError(msg)
 
     def convert_log_timestamp(self, timestamp):
         """Convert a log entry's timestamp to a DefectDojo date"""
@@ -212,16 +211,15 @@ class ApiBugcrowdParser:
         """Convert severity value"""
         if bugcrowd_severity == 5:
             return "Info"
-        elif bugcrowd_severity == 4:
+        if bugcrowd_severity == 4:
             return "Low"
-        elif bugcrowd_severity == 3:
+        if bugcrowd_severity == 3:
             return "Medium"
-        elif bugcrowd_severity == 2:
+        if bugcrowd_severity == 2:
             return "High"
-        elif bugcrowd_severity == 1:
+        if bugcrowd_severity == 1:
             return "Critical"
-        else:
-            return "Info"
+        return "Info"
 
     def is_active(self, bugcrowd_state):
         return (bugcrowd_state == "unresolved") or not (

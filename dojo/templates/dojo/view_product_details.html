@@ -687,7 +687,7 @@
               {% endif %}
             </td>
             {% for pk,c in field.field.widget.choices %}
-            {% if c != "msteams" and c in enabled_notifications %}
+            {% if c != "msteams" and c != "webhooks" and c in enabled_notifications %}
             <td class="centered"><input id="{{ field.name }}_{{ c }}" type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/></td>
             {% endif %}
             {% endfor %}

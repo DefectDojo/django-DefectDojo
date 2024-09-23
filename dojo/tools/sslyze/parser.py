@@ -22,8 +22,7 @@ class SslyzeParser:
 
         if filename.name.lower().endswith(".xml"):
             return SSLyzeXMLParser().get_findings(filename, test)
-        elif filename.name.lower().endswith(".json"):
+        if filename.name.lower().endswith(".json"):
             return SSLyzeJSONParser().get_findings(filename, test)
-        else:
-            msg = "Unknown File Format"
-            raise ValueError(msg)
+        msg = "Unknown File Format"
+        raise ValueError(msg)

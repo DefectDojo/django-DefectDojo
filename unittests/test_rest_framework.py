@@ -53,6 +53,7 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     NotificationsViewSet,
+    NotificationWebhooksViewSet,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -107,6 +108,7 @@ from dojo.models import (
     Languages,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -263,21 +265,28 @@ class SchemaChecker:
 
         if obj is None:
             self._check_or_fail(is_nullable, f"{self._get_prefix()} is not nullable yet the value returned was null")
-        elif schema_type == TYPE_BOOLEAN:
+            return None
+        if schema_type == TYPE_BOOLEAN:
             _check_helper(isinstance(obj, bool))
-        elif schema_type == TYPE_INTEGER:
+            return None
+        if schema_type == TYPE_INTEGER:
             _check_helper(isinstance(obj, int))
-        elif schema_type == TYPE_NUMBER:
+            return None
+        if schema_type == TYPE_NUMBER:
             _check_helper(obj.isdecimal())
-        elif schema_type == TYPE_ARRAY:
+            return None
+        if schema_type == TYPE_ARRAY:
             _check_helper(isinstance(obj, list))
-        elif schema_type == TYPE_OBJECT:
+            return None
+        if schema_type == TYPE_OBJECT:
             _check_helper(isinstance(obj, OrderedDict) or isinstance(obj, dict))
-        elif schema_type == TYPE_STRING:
+            return None
+        if schema_type == TYPE_STRING:
             _check_helper(isinstance(obj, str))
-        else:
-            # Default case
-            _check_helper(check=False)
+            return None
+        # Default case
+        _check_helper(check=False)
+        return None
 
         # print('_check_type ok for: %s: %s' % (schema, obj))
 
@@ -3008,3 +3017,24 @@ class AnnouncementTest(BaseClass.BaseClassTest):
 
     def test_create(self):
         self.skipTest("Only one Announcement can exists")
+
+
+class NotificationWebhooksTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Notification_Webhooks
+        self.endpoint_path = "notification_webhooks"
+        self.viewname = "notification_webhooks"
+        self.viewset = NotificationWebhooksViewSet
+        self.payload = {
+            "name": "My endpoint",
+            "url": "http://webhook.endpoint:8080/post",
+        }
+        self.update_fields = {
+            "header_name": "Auth",
+            "header_value": "token x",
+        }
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

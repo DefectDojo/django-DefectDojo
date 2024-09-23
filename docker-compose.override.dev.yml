@@ -53,3 +53,5 @@ services:
         published: 8025
         protocol: tcp
         mode: host
+  "webhook.endpoint":
+    image: mccutchen/go-httpbin:v2.15.0@sha256:24528cf5229d0b70065ac27e6c9e4d96f5452a84a3ce4433e56573c18d96827a

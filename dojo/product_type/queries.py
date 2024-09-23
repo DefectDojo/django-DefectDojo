@@ -35,9 +35,7 @@ def get_authorized_product_types(permission):
     product_types = Product_Type.objects.annotate(
         member=Exists(authorized_roles),
         authorized_group=Exists(authorized_groups)).order_by("name")
-    product_types = product_types.filter(Q(member=True) | Q(authorized_group=True))
-
-    return product_types
+    return product_types.filter(Q(member=True) | Q(authorized_group=True))
 
 
 def get_authorized_members_for_product_type(product_type, permission):
@@ -54,7 +52,6 @@ def get_authorized_global_members_for_product_type(product_type, permission):
     if user.is_superuser or user_has_permission(user, product_type, permission):
         return Global_Role.objects.filter(group=None, role__isnull=False).order_by("user__first_name", "user__last_name").select_related("role", "user")
     return Global_Role.objects.none()
-
 
 def get_authorized_groups_for_product_type(product_type, permission):
     user = get_current_user()
