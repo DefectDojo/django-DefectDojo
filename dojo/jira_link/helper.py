@@ -1623,7 +1623,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                     owner=finding.reporter,
                 )
                 finding.test.engagement.risk_acceptance.add(ra)
-                ra_helper.add_findings_to_risk_acceptance(ra, [finding])
+                ra_helper.add_findings_to_risk_acceptance(User.objects.get_or_create(username="JIRA")[0], ra, [finding])
                 status_changed = True
         elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
             if not finding.false_p:
@@ -1633,7 +1633,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.mitigated = None
                 finding.is_mitigated = False
                 finding.false_p = True
-                ra_helper.risk_unaccept(finding)
+                ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
                 status_changed = True
         else:
             # Mitigated by default as before
@@ -1645,7 +1645,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.mitigated_by, _created = User.objects.get_or_create(username="JIRA")
                 finding.endpoints.clear()
                 finding.false_p = False
-                ra_helper.risk_unaccept(finding)
+                ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
                 status_changed = True
     else:
         if not finding.active:
@@ -1655,7 +1655,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
             finding.mitigated = None
             finding.is_mitigated = False
             finding.false_p = False
-            ra_helper.risk_unaccept(finding)
+            ra_helper.risk_unaccept(User.objects.get_or_create(username="JIRA")[0], finding)
             status_changed = True
 
     # for findings in a group, there is no jira_issue attached to the finding

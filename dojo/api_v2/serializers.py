@@ -429,6 +429,7 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.DateTimeField(read_only=True)
     last_login = serializers.DateTimeField(read_only=True, allow_null=True)
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(
         write_only=True,
         style={"input_type": "password"},
@@ -549,11 +550,11 @@ class UserSerializer(serializers.ModelSerializer):
             msg = "Only superusers are allowed to add or edit superusers."
             raise ValidationError(msg)
 
-        if (
-            self.context["request"].method in ["PATCH", "PUT"]
-            and "password" in data
-        ):
+        if self.context["request"].method in ["PATCH", "PUT"] and "password" in data:
             msg = "Update of password though API is not allowed"
+            raise ValidationError(msg)
+        if self.context["request"].method == "POST" and "password" not in data:
+            msg = "Passwords must be supplied for new users"
             raise ValidationError(msg)
         else:
             return super().validate(data)
@@ -1467,7 +1468,8 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         instance = super().create(validated_data)
-        add_findings_to_risk_acceptance(instance, instance.accepted_findings.all())
+        user = getattr(self.context.get("request", None), "user", None)
+        add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
         return instance
 
     def update(self, instance, validated_data):
@@ -1481,11 +1483,12 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
         # Make the update in the database
         instance = super().update(instance, validated_data)
+        user = getattr(self.context.get("request", None), "user", None)
         # Add the new findings
-        add_findings_to_risk_acceptance(instance, findings_to_add)
+        add_findings_to_risk_acceptance(user, instance, findings_to_add)
         # Remove the ones that were not present in the payload
         for finding in findings_to_remove:
-            remove_finding_from_risk_acceptance(instance, finding)
+            remove_finding_from_risk_acceptance(user, instance, finding)
         return instance
 
     @extend_schema_field(serializers.CharField())

@@ -3,10 +3,16 @@ import sys
 
 from rest_framework.serializers import ModelSerializer
 
+from dojo.models import FileUpload
+
 from . import utils
 
 # Reduce the scope of search for serializers.
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"
+
+preferred_serializers = {
+    FileUpload: "FileSerializer",
+}
 
 
 class _Prefetcher:
@@ -31,7 +37,11 @@ class _Prefetcher:
 
         for _, serializer in available_serializers:
             model = serializer.Meta.model
-            serializers[model] = serializer
+            if model in preferred_serializers:
+                if serializer.__name__ == preferred_serializers[model]:
+                    serializers[model] = serializer
+            else:
+                serializers[model] = serializer
         # We add object->None to have a more uniform processing later on
         serializers[object] = None
 

@@ -78,7 +78,7 @@ class BlackduckParser:
 
                 dupes[dupe_key] = finding
 
-        return dupes.values()
+        return list(dupes.values())
 
     def format_title(self, i):
         if i.channel_version_origin_id is not None:
