@@ -100,7 +100,7 @@ class HackerOneVulnerabilityDisclosureProgram:
                 )
                 finding.unsaved_endpoints = []
                 dupes[dupe_key] = finding
-        return dupes.values()
+        return list(dupes.values())
 
     def build_description(self, content):
         date = content["attributes"]["created_at"]

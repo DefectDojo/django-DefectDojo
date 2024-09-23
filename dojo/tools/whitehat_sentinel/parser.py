@@ -268,4 +268,4 @@ class WhiteHatSentinelParser:
                 finding.unsaved_endpoints = endpoints
                 dupes[dupe_key] = finding
 
-        return dupes.values()
+        return list(dupes.values())
