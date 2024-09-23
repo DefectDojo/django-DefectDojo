@@ -159,9 +159,8 @@ def convert_confidence(issue):
     value = issue.get("confidence", "undefined").lower()
     if "certain" == value:
         return 2
-    elif "firm" == value:
+    if "firm" == value:
         return 3
-    elif "tentative" == value:
+    if "tentative" == value:
         return 6
-    else:
-        return None
+    return None

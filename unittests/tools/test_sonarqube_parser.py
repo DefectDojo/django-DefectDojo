@@ -227,7 +227,7 @@ class TestSonarQubeParser(DojoTestCase):
         )
         self.assertEqual(str, type(item.references))
         self.assertMultiLineEqual(
-            "squid:S2975\n" "Copy Constructor versus Cloning\n" "S2157\n" "S1182",
+            "squid:S2975\nCopy Constructor versus Cloning\nS2157\nS1182",
             item.references,
         )
         self.assertEqual(str, type(item.file_path))
@@ -444,7 +444,7 @@ class TestSonarQubeParser(DojoTestCase):
         )
         self.assertEqual(str, type(item.references))
         self.assertMultiLineEqual(
-            "squid:S2975\n" "Copy Constructor versus Cloning\n" "S2157\n" "S1182",
+            "squid:S2975\nCopy Constructor versus Cloning\nS2157\nS1182",
             item.references,
         )
         self.assertEqual(str, type(item.file_path))

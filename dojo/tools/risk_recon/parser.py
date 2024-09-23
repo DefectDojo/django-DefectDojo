@@ -36,6 +36,7 @@ class RiskReconParser:
                 findings = data.get("findings")
 
             return self._get_findings_internal(findings, test)
+        return None
 
     def _get_findings_internal(self, findings, test):
         dupes = {}

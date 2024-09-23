@@ -124,8 +124,7 @@ class ContrastParser:
             + row.get("Vulnerability Name")
             + "\n"
         )
-        description = description + "**Status:** " + row.get("Status") + "\n"
-        return description
+        return description + "**Status:** " + row.get("Status") + "\n"
 
     def format_cwe(self, url):
         # Get the last path

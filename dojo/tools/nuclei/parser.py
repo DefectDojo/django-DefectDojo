@@ -33,7 +33,7 @@ class NucleiParser:
         data = []
         if filecontent == "" or len(filecontent) == 0:
             return []
-        elif filecontent[0] == "[":
+        if filecontent[0] == "[":
             content = json.loads(filecontent)
             for template in content:
                 data.append(template)
