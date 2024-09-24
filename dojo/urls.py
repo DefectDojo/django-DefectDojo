@@ -84,6 +84,7 @@ from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
 from dojo.transfer_findings.urls import urlpatterns as transfer_finding_url
+from dojo.engine_tools.urls import urlpatterns as engine_tools_url
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.group.urls import urlpatterns as group_urls
@@ -187,6 +188,7 @@ ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls
 ur += transfer_finding_url
+ur += engine_tools_url
 ur += finding_group_urls
 ur += home_urls
 ur += metrics_urls

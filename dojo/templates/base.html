@@ -513,6 +513,27 @@
                                                 </li>
                                             {% endif %}
                                         {% endif %}
+                                        {% if True %}
+                                            {% if "dojo.view_engagement_survey"|has_configuration_permission:request or True%}
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="#">
+                                                        <i class="fa-solid fa fa-wrench fa-fw"></i>
+                                                        <span>{% trans "Engine Tools" %}</span>
+                                                        <span class="glyphicon arrow"></span>
+                                                    </a>
+                                                    <ul class="nav nav-second-level">
+                                                        {% if "dojo.view_engagement_survey"|has_configuration_permission:request%}
+                                                            <li>
+                                                                <a rel="noopener noreferrer" href="{% url 'finding_exclusion' %}">
+                                                                    {% trans "Exclusion" %}
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                    </ul>
+                                                    <!-- /.nav-second-level -->
+                                                </li>
+                                            {% endif %}
+                                        {% endif %}
                                         <li id="menu_configuration">
                                             <a rel="noopener noreferrer" href="#" aria-expanded="false" aria-label="Configuration">
                                                 <i class="fa-solid fa-gear fa-fw"></i>

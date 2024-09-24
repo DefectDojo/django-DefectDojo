@@ -42,6 +42,7 @@ from polymorphic.models import PolymorphicModel
 from pytz import all_timezones
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager
+from dojo.engine_tools.models import *
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -4805,7 +4806,6 @@ class PermissionKey(models.Model):
 
         return permissionkey
             
-
 
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database

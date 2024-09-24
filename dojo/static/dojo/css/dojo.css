@@ -1351,8 +1351,8 @@ div.custom-search-form {
 .panel-default > .panel-heading {
     color: white;
     font-size: 16px;
-    background-color: rgba(32, 166, 216, 0.75);
-    border-color: #A1C0D7;
+    background-color: rgba(0, 0, 0, 0.75);
+    border-color: #3f4346;
 }
 
 .panel-default > .panel-heading a,

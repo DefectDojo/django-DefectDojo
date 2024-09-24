@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load authorization_tags %}
+{% load event_tags %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-2">
+            <div class="panel panel-default filters">
+                {% if filtered.form %}
+                    <div class="panel-heading">Filters</div>
+                    <form method="get" class="panel-body">
+                        {% for field in filtered.form.visible_fields %}
+                            <div class="form-group">
+                                {{ field.errors }}
+                                <label for="{{ field.auto_id }}" style="display: block;">{{ field.label }}</label>
+                                {% with placeholder="placeholder:"|add:field.label %}
+                                    {{ field|addcss:"class:form-control input-sm"|addcss:placeholder }}
+                                {% endwith %}
+                            </div>
+                        {% endfor %}
+                        <div class="centered">
+                            <input type="submit" class="btn btn-secondary inline top" label="submit" value="Apply"/><br/><br/>
+                            <a href="{% url 'finding_exclusion' %}"> [Clear Filters] </a>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    <div class="col-md-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Black List
+                {% if "dojo.add_engagement_survey"|has_configuration_permission:request %}
+                <a title="Add Exclusion" class="pull-right btn btn-sm btn-primary" href="{% url 'create_finding_exclusion' %}"><span class="fa-solid fa-plus"></span></a>
+                {% endif %}
+                {{ name }}
+            </div>
+        </div>
+        {% if exclusions %}
+        <div class="panel panel-default table-responsive">
+            <table id="groups" class="tablesorter-bootstrap table table-condensed table-striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Create Date</th>
+                        <th>Expired Date</th>
+                        <th>User History</th>
+                        <th>Product</th>
+                        <th>Reason</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                    <tbody>
+                        {% for exclusion in exclusions %}
+                            <tr>
+                                <td>{{exclusion.unique_id_from_tool}}</td>
+                                <td>{{exclusion.create_date}}</td>
+                                <td>{{exclusion.expiration_date}}</td>
+                                <td>{{exclusion.user_history}}</td>
+                                <td>{{exclusion.product}}</td>
+                                <td>{{exclusion.reason}}</td>
+                                <td>{{exclusion.type}}</td>
+                                {% if exclusion.status == "Pending"%}
+                                        <td><span style="background-color: #1B30DE;" class="pass_fail Pass">{{exclusion.status}}</span></td>
+                                    {% elif exclusion.status == "Accepted"%}
+                                            <td><span style="background-color: #096C11;" class="pass_fail Pass">{{exclusion.status}}</span></td>
+                                    {% elif exclusion.status == "Rejected"%}
+                                        <td><span style="background-color: #b97a0c;" class="pass_fail Pass">{{exclusion.status}}</span></td>
+                                {%else%}
+                                    <td>{{exclusion.status}}</td>
+                                {%endif%}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="clearfix">
+                {% include "dojo/paging_snippet.html" with page=surveys page_size=True %}
+            </div>
+        {% else %}
+            No questionnaires found.
+        {% endif %}
+    
+    
+    </div>
+
+    </div>   
+{% endblock %}
