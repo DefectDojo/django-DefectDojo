@@ -133,4 +133,4 @@ class TestAwsSecurityHubParser(DojoTestCase):
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual(0.00239, finding.epss_score)
+            self.assertEqual("0.00239", finding.epss_score)
