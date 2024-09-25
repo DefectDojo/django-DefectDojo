@@ -128,7 +128,7 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual("This is a GuardDuty Finding\nAPIs commonly used in Discovery tactics were invoked by user AssumedRole : 123123123, under anomalous circumstances. Such activity is not typically seen from this user.\n**AWS Finding ARN:** arn:aws:guardduty:us-east-1:123456789012:detector/123456789/finding/2123123123123\n**SourceURL:** [https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=2123123123123](https://us-east-1.console.aws.amazon.com/guardduty/home?region=us-east-1#/findings?macros=current&fId=2123123123123)\n**AwsAccountId:** 123456789012\n**Region:** us-east-1\n**Generator ID:** arn:aws:guardduty:us-east-1:123456789012:detector/123456789\n", finding.description)
 
     def test_issue_10956(self):
-        with open(get_unit_tests_path() + sample_path("10956.json"), encoding="utf-8") as test_file:
+        with open(get_unit_tests_path() + sample_path("issue_10956.json"), encoding="utf-8") as test_file:
             parser = AwsSecurityHubParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(1, len(findings))
