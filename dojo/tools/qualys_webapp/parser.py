@@ -37,8 +37,7 @@ def get_cwe(cwe):
     cweSearch = re.search("CWE-([0-9]*)", cwe, re.IGNORECASE)
     if cweSearch:
         return cweSearch.group(1)
-    else:
-        return 0
+    return 0
 
 
 def attach_unique_extras(
@@ -171,8 +170,7 @@ def decode_tag(tag):
     if tag is not None:
         if tag.get("base64") == "true":
             return base64.b64decode(tag.text).decode("utf8", "replace")
-        else:
-            return tag.text
+        return tag.text
     return ""
 
 
@@ -462,7 +460,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
             ).values(),
         )
 
-    return items
+    return list(items)
 
 
 class QualysWebAppParser:

@@ -20,32 +20,28 @@ class RemoteUserAuthentication(OriginalRemoteUserAuthentication):
             self.header = settings.AUTH_REMOTEUSER_USERNAME_HEADER
             if self.header in request.META:
                 return super().authenticate(request)
-            else:
-                return None
-        else:
-            logger.debug("Requested came from untrusted proxy %s; This is list of trusted proxies: %s",
-                IPAddress(request.META["REMOTE_ADDR"]),
-                settings.AUTH_REMOTEUSER_TRUSTED_PROXY)
             return None
+        logger.debug("Requested came from untrusted proxy %s; This is list of trusted proxies: %s",
+            IPAddress(request.META["REMOTE_ADDR"]),
+            settings.AUTH_REMOTEUSER_TRUSTED_PROXY)
+        return None
 
 
 class RemoteUserMiddleware(OriginalRemoteUserMiddleware):
     def process_request(self, request):
         if not settings.AUTH_REMOTEUSER_ENABLED:
-            return
+            return None
 
         # process only if request is comming from the trusted proxy node
         if IPAddress(request.META["REMOTE_ADDR"]) in settings.AUTH_REMOTEUSER_TRUSTED_PROXY:
             self.header = settings.AUTH_REMOTEUSER_USERNAME_HEADER
             if self.header in request.META:
                 return super().process_request(request)
-            else:
-                return
-        else:
-            logger.debug("Requested came from untrusted proxy %s; This is list of trusted proxies: %s",
-                IPAddress(request.META["REMOTE_ADDR"]),
-                settings.AUTH_REMOTEUSER_TRUSTED_PROXY)
-            return
+            return None
+        logger.debug("Requested came from untrusted proxy %s; This is list of trusted proxies: %s",
+            IPAddress(request.META["REMOTE_ADDR"]),
+            settings.AUTH_REMOTEUSER_TRUSTED_PROXY)
+        return None
 
 
 class PersistentRemoteUserMiddleware(RemoteUserMiddleware):

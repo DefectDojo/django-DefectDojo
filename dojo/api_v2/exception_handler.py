@@ -2,6 +2,7 @@ import logging
 
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import RestrictedError
+from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
@@ -20,7 +21,11 @@ def custom_exception_handler(exc, context):
     # to get the standard error response.
     response = exception_handler(exc, context)
 
-    if isinstance(exc, RestrictedError):
+    if isinstance(exc, ParseError) and "JSON parse error" in str(exc):
+        response = Response()
+        response.status_code = HTTP_400_BAD_REQUEST
+        response.data = {"message": "JSON request content is malformed"}
+    elif isinstance(exc, RestrictedError):
         # An object cannot be deleted because it has dependent objects.
         response = Response()
         response.status_code = HTTP_409_CONFLICT

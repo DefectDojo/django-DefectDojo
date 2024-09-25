@@ -66,9 +66,8 @@ class BanditParser:
     def convert_confidence(self, value):
         if "high" == value.lower():
             return 2
-        elif "medium" == value.lower():
+        if "medium" == value.lower():
             return 3
-        elif "low" == value.lower():
+        if "low" == value.lower():
             return 6
-        else:
-            return None
+        return None

@@ -102,8 +102,7 @@ def delete_tool_product(request, pid, ttid):
             _("Tool Product Successfully Deleted."),
             extra_tags="alert-success")
         return HttpResponseRedirect(reverse("all_tool_product", args=(pid, )))
-    else:
-        tform = ToolProductSettingsForm(instance=tool_product)
+    tform = ToolProductSettingsForm(instance=tool_product)
 
     product_tab = Product_Tab(product, title=_("Delete Product Tool Configuration"), tab="settings")
 

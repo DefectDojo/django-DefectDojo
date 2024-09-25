@@ -41,19 +41,21 @@
                         <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit Custom Fields" %}
                     </a>
                   </li>
-                  <li role="separator" class="divider"></li>
+                {% endif %}
+                <li role="separator" class="divider"></li>
+                {% if prod|has_object_permission:"Product_API_Scan_Configuration_Add" %}
                   <li role="presentation">
-                      <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
-                          <i class="fa-solid fa-plus"></i>{% trans "Add API Scan Configuration" %}
-                      </a>
-                  </li>
-                  <li role="presentation">
-                      <a title="View API Scan Configurations"
-                         href="{% url 'view_api_scan_configurations' prod.id %}">
-                          <i class="fa-solid fa-rectangle-list"></i>{% trans "View API Scan Configurations" %}
-                      </a>
+                    <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
+                      <i class="fa-solid fa-plus"></i>{% trans "Add API Scan Configuration" %}
+                    </a>
                   </li>
                 {% endif %}
+                <li role="presentation">
+                    <a title="View API Scan Configurations"
+                        href="{% url 'view_api_scan_configurations' prod.id %}">
+                        <i class="fa-solid fa-rectangle-list"></i>{% trans "View API Scan Configurations" %}
+                    </a>
+                </li>
                 {% if system_settings.enable_product_tracking_files %}
                   <li role="separator" class="divider"></li>
                   {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
@@ -295,7 +297,7 @@
                 {% endif %}
             </div>
         </div>
-        {% if product_members or product_type_members %}
+        {% if product_members or product_type_members or global_product_members %}
             <div class="table-responsive">
                 <table class="tablesorter-bootstrap table table-condensed table-striped">
                     <thead>
@@ -348,6 +350,15 @@
                             <td>{{ member.role }}</td>
                         </tr>
                     {% endfor %}
+                    {% for member in global_product_members %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td>{{ member.user.get_full_name }}</td>
+                            <td>Global role</td>
+                            <td>{{ member.role }}</td>
+                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -383,7 +394,7 @@
                   {% endif %}
               </div>
           </div>
-          {% if product_groups or product_type_groups %}
+          {% if product_groups or product_type_groups or global_product_groups %}
           <div class="table-responsive">
               <table class="tablesorter-bootstrap table table-condensed table-striped">
                   <thead>
@@ -432,6 +443,14 @@
                               {{ type_group.product_type }}
                           </a>
                       </td>
+                      <td>{{ type_group.role }}</td>
+                  </tr>
+                  {% endfor %}
+                  {% for type_group in global_product_groups %}
+                  <tr>
+                      <td></td>
+                      <td>{{ type_group.group.name }}</td>
+                      <td>Global role</td>
                       <td>{{ type_group.role }}</td>
                   </tr>
                   {% endfor %}
@@ -668,7 +687,7 @@
               {% endif %}
             </td>
             {% for pk,c in field.field.widget.choices %}
-            {% if c != "msteams" and c in enabled_notifications %}
+            {% if c != "msteams" and c != "webhooks" and c in enabled_notifications %}
             <td class="centered"><input id="{{ field.name }}_{{ c }}" type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/></td>
             {% endif %}
             {% endfor %}

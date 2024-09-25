@@ -514,7 +514,7 @@
             "cvss_score": 0.0,
             "type": "WEB_APP",
             "web_app": "https://example.x73zjffz.com",
-            "cvss_v4_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
+            "cvss_v4_vector": "CVSS:4.0/AV:L/AC:H/AT:P/PR:L/UI:A/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N",
             "mss_confirmed": false,
             "category": "web_app",
             "description": "[[markup]]This is simply a report of HTTP request methods supported by the web application.",

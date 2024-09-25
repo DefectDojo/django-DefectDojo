@@ -42,7 +42,7 @@ class WhiteHatSentinelParser:
 
         # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo
         # findings
-        dojo_findings = self._convert_whitehat_sentinel_vulns_to_dojo_finding(
+        return self._convert_whitehat_sentinel_vulns_to_dojo_finding(
             findings_collection["collection"], test,
         )
 
@@ -51,7 +51,6 @@ class WhiteHatSentinelParser:
         #
         #     # Append DefectDojo findings to list
         #     dojo_findings.append(dojo_finding)
-        return dojo_findings
 
     def _convert_whitehat_severity_id_to_dojo_severity(
         self, whitehat_severity_id: int,
@@ -87,6 +86,7 @@ class WhiteHatSentinelParser:
         for tag in whitehat_sentinel_tags:
             if tag.startswith("CWE-"):
                 return tag.split("-")[1]
+        return None
 
     def _parse_description(self, whitehat_sentinel_description: dict):
         """
@@ -268,4 +268,4 @@ class WhiteHatSentinelParser:
                 finding.unsaved_endpoints = endpoints
                 dupes[dupe_key] = finding
 
-        return dupes.values()
+        return list(dupes.values())

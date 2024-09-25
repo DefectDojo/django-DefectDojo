@@ -352,18 +352,15 @@ class DojoTestUtilsMixin:
 
     def get_jira_issue_status(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
-        updated = jira_helper.get_jira_status(finding)
-        return updated
+        return jira_helper.get_jira_status(finding)
 
     def get_jira_issue_updated(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
-        updated = jira_helper.get_jira_updated(finding)
-        return updated
+        return jira_helper.get_jira_updated(finding)
 
     def get_jira_comments(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
-        comments = jira_helper.get_jira_comments(finding)
-        return comments
+        return jira_helper.get_jira_comments(finding)
 
     def get_jira_issue_updated_map(self, test_id):
         findings = Test.objects.get(id=test_id).finding_set.all()
@@ -710,12 +707,10 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return response.data
 
     def put_finding_remove_tags_api(self, finding_id, tags, *args, **kwargs):
-        response = self.do_finding_remove_tags_api(self.client.put, finding_id, tags, *args, **kwargs)
-        return response
+        return self.do_finding_remove_tags_api(self.client.put, finding_id, tags, *args, **kwargs)
 
     def patch_finding_remove_tags_api(self, finding_id, tags, *args, **kwargs):
-        response = self.do_finding_remove_tags_api(self.client.patch, finding_id, tags, *args, **kwargs)
-        return response
+        return self.do_finding_remove_tags_api(self.client.patch, finding_id, tags, *args, **kwargs)
 
     def do_finding_notes_api(self, http_method, finding_id, note=None):
         data = None

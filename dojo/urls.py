@@ -40,6 +40,7 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     NotificationsViewSet,
+    NotificationWebhooksViewSet,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -145,6 +146,7 @@ v2_api.register(r"network_locations", NetworkLocationsViewset, basename="network
 v2_api.register(r"notes", NotesViewSet, basename="notes")
 v2_api.register(r"note_type", NoteTypeViewSet, basename="note_type")
 v2_api.register(r"notifications", NotificationsViewSet, basename="notifications")
+v2_api.register(r"notification_webhooks", NotificationWebhooksViewSet)
 v2_api.register(r"products", ProductViewSet, basename="product")
 v2_api.register(r"product_api_scan_configurations", ProductAPIScanConfigurationViewSet, basename="product_api_scan_configuration")
 v2_api.register(r"product_groups", ProductGroupViewSet, basename="product_group")

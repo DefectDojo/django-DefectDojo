@@ -5,6 +5,7 @@ from typing import Any, Optional, Tuple, Union
 import cvss.parser
 import dateutil.parser
 from cpe import CPE
+from cvss.exceptions import CVSSError
 from django.core.exceptions import ImproperlyConfigured
 
 from dojo.models import Endpoint, Finding
@@ -39,6 +40,35 @@ def escape_non_printable(s: str) -> str:
         # remove the surrounding single quotes
         return repr(x)[1:-1]
     return "".join([escape_if_needed(c) for c in s])
+
+
+def cvss_score_to_severity(score: float, version: int) -> str:
+    """
+    Maps a CVSS score with a given version to a severity level.
+    Mapping from https://nvd.nist.gov/vuln-metrics/cvss (modified slightly to have "Info" in range [0.0, 0.1) for CVSS
+        v3/v4)
+    """
+    cvss_score = float(score)
+    if version == 2:
+        if cvss_score >= 7.0:
+            severity = "High"
+        elif cvss_score >= 4.0:
+            severity = "Medium"
+        else:
+            severity = "Low"
+    else:
+        if cvss_score >= 9.0:
+            severity = "Critical"
+        elif cvss_score >= 7.0:
+            severity = "High"
+        elif cvss_score >= 4.0:
+            severity = "Medium"
+        elif cvss_score >= 0.1:
+            severity = "Low"
+        else:
+            severity = "Info"
+
+    return severity
 
 
 #######
@@ -122,7 +152,6 @@ class BaseEngineParser:
         * status -> active/false_p/risk_accepted (depending on value)
         * cves -> unsaved_vulnerability_ids (vulnerability_ids)
         * cpe -> component name/version
-        * cvss_vector -> severity (determined using CVSS package)
         * notes -> appended to Finding description
         * details -> appended to Finding description
 
@@ -143,7 +172,6 @@ class BaseEngineParser:
         "status": Method("parse_status"),
         "cves": Method("parse_cves"),
         "cpe": Method("parse_components"),
-        "cvss_vector": Method("parse_severity"),
         # These should be listed after the 'description' entry; they append to it
         "notes": Method("parse_notes"),
         "details": Method("parse_details")}
@@ -176,7 +204,7 @@ class BaseEngineParser:
     def is_cve(self, c: str) -> bool:
         return bool(c and isinstance(c, str) and self.CVE_PATTERN.fullmatch(c))
 
-    def parse_cves(self, finding: Finding, value: [str]) -> None:
+    def parse_cves(self, finding: Finding, value: list[str]) -> None:
         finding.unsaved_vulnerability_ids = [c.upper() for c in value if self.is_cve(c)]
 
     #####
@@ -193,19 +221,6 @@ class BaseEngineParser:
             finding.risk_accepted = True
 
     #####
-    # For severity (extracted from cvss vector)
-    #####
-    def get_severity(self, value: str) -> Optional[str]:
-        if cvss_obj := cvss.parser.parse_cvss_from_text(value):
-            if (severity := cvss_obj[0].severities()[0].title()) in Finding.SEVERITIES:
-                return severity
-        return None
-
-    def parse_severity(self, finding: Finding, value: str) -> None:
-        if severity := self.get_severity(value):
-            finding.severity = severity
-
-    #####
     # For parsing component data
     #####
     def parse_cpe(self, cpe_str: str) -> (Optional[str], Optional[str]):
@@ -217,7 +232,7 @@ class BaseEngineParser:
             (cpe_obj.get_version() and cpe_obj.get_version()[0]) or None,
         )
 
-    def parse_components(self, finding: Finding, value: [str]) -> None:
+    def parse_components(self, finding: Finding, value: list[str]) -> None:
         # Only use the first entry
         finding.component_name, finding.component_version = self.parse_cpe(value[0])
 
@@ -236,12 +251,12 @@ class BaseEngineParser:
     def parse_notes(self, finding: Finding, value: str) -> None:
         self.append_description(finding, {"Notes": value})
 
-    def extract_details(self, value: Union[str, dict[str, Union[str, dict[str, [str]]]]]) -> dict[str, str]:
+    def extract_details(self, value: Union[str, dict[str, Union[str, dict[str, list[str]]]]]) -> dict[str, str]:
         if isinstance(value, dict):
             return {k: v for k, v in value.items() if k != "_meta"}
         return {"Details": str(value)}
 
-    def parse_details(self, finding: Finding, value: dict[str, Union[str, dict[str, [str]]]]) -> None:
+    def parse_details(self, finding: Finding, value: dict[str, Union[str, dict[str, list[str]]]]) -> None:
         self.append_description(finding, self.extract_details(value))
 
     #####
@@ -282,6 +297,44 @@ class BaseEngineParser:
         endpoints = self.parse_endpoints(item)
         finding.unsaved_endpoints.extend(endpoints)
 
+    #####
+    # For severity (extracted from various cvss vectors)
+    #####
+    def parse_cvss_vector(self, value: str) -> Optional[str]:
+        # CVSS4 vectors don't parse with the handy-danty parse method :(
+        try:
+            if (severity := cvss.CVSS4(value).severity) in Finding.SEVERITIES:
+                return severity
+        except CVSSError:
+            pass
+
+        if cvss_obj := cvss.parser.parse_cvss_from_text(value):
+            if (severity := cvss_obj[0].severities()[0].title()) in Finding.SEVERITIES:
+                return severity
+        return None
+
+    def set_severity(self, finding: Finding, item: Any) -> None:
+        for base_score_entry, cvss_version in [
+            ("cvss_v4_base_score", 4),
+            ("cvss_v3_base_score", 3),
+            ("cvss_base_score", 2),
+        ]:
+            if base_score := item.get(base_score_entry):
+                finding.severity = cvss_score_to_severity(base_score, cvss_version)
+                return
+
+        for vector_type in ["cvss_v4_vector", "cvss_v3_vector", "cvss_vector"]:
+            if vector := item.get(vector_type):
+                if severity := self.parse_cvss_vector(vector):
+                    finding.severity = severity
+                    return
+
+        finding.severity = "Info"
+
+    def process_whole_item(self, finding: Finding, item: Any) -> None:
+        self.set_severity(finding, item)
+        self.set_endpoints(finding, item)
+
     # Returns the complete field processing map: common fields plus any engine-specific
     def get_engine_fields(self) -> dict[str, FieldType]:
         return {
@@ -302,7 +355,7 @@ class BaseEngineParser:
             # Check first whether the field even exists on this item entry; if not, skip it
             if value := item.get(field):
                 field_handler(self, finding, value)
-        self.set_endpoints(finding, item)
+        self.process_whole_item(finding, item)
         # Make a note of what scanning engine was used for this Finding
         self.append_description(finding, {"Scanning Engine": self.SCANNING_ENGINE})
         return finding, self.get_finding_key(finding)

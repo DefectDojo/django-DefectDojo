@@ -166,15 +166,13 @@ def get_filtered_engagements(request, view):
 
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EngagementDirectFilterWithoutObjectLookups if filter_string_matching else EngagementDirectFilter
-    engagements = filter_class(request.GET, queryset=engagements)
-
-    return engagements
+    return filter_class(request.GET, queryset=engagements)
 
 
 def get_test_counts(engagements):
     # Get the test counts per engagement. As a separate query, this is much
     # faster than annotating the above `engagements` query.
-    engagement_test_counts = {
+    return {
         test["engagement"]: test["test_count"]
         for test in Test.objects.filter(
             engagement__in=engagements,
@@ -184,7 +182,6 @@ def get_test_counts(engagements):
             test_count=Count("engagement"),
         )
     }
-    return engagement_test_counts
 
 
 def engagements(request, view):
@@ -304,9 +301,8 @@ def edit_engagement(request, eid):
                 if "_Add Tests" in request.POST:
                     return HttpResponseRedirect(
                         reverse("add_tests", args=(engagement.id, )))
-                else:
-                    return HttpResponseRedirect(
-                        reverse("view_engagement", args=(engagement.id, )))
+                return HttpResponseRedirect(
+                    reverse("view_engagement", args=(engagement.id, )))
         else:
             logger.debug(form.errors)
 
@@ -404,12 +400,11 @@ def copy_engagement(request, eid):
                                 recipients=[engagement.lead],
                                 icon="exclamation-triangle")
             return redirect_to_return_url_or_else(request, reverse("view_engagements", args=(product.id, )))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Unable to copy engagement, please try again.",
-                extra_tags="alert-danger")
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Unable to copy engagement, please try again.",
+            extra_tags="alert-danger")
 
     product_tab = Product_Tab(product, title="Copy Engagement", tab="engagements")
     return render(request, "dojo/copy_object.html", {
@@ -427,8 +422,7 @@ class ViewEngagement(View):
         return "dojo/view_eng.html"
 
     def get_risks_accepted(self, eng):
-        risks_accepted = eng.risk_acceptance.all().select_related("owner").annotate(accepted_findings_count=Count("accepted_findings__id"))
-        return risks_accepted
+        return eng.risk_acceptance.all().select_related("owner").annotate(accepted_findings_count=Count("accepted_findings__id"))
 
     def get_filtered_tests(
         self,
@@ -673,10 +667,10 @@ def add_tests(request, eid):
             if "_Add Another Test" in request.POST:
                 return HttpResponseRedirect(
                     reverse("add_tests", args=(eng.id, )))
-            elif "_Add Findings" in request.POST:
+            if "_Add Findings" in request.POST:
                 return HttpResponseRedirect(
                     reverse("add_findings", args=(new_test.id, )))
-            elif "_Finished" in request.POST:
+            if "_Finished" in request.POST:
                 return HttpResponseRedirect(
                     reverse("view_engagement", args=(eng.id, )))
     else:
@@ -751,8 +745,7 @@ class ImportScanResultsView(View):
         """
         if request.method == "POST":
             return ImportScanForm(request.POST, request.FILES, **kwargs)
-        else:
-            return ImportScanForm(**kwargs)
+        return ImportScanForm(**kwargs)
 
     def get_credential_form(
         self,
@@ -766,18 +759,17 @@ class ImportScanResultsView(View):
         """
         if request.method == "POST":
             return CredMappingForm(request.POST)
-        else:
-            # If the engagement is not present, return an empty form
-            if engagement is None:
-                return CredMappingForm()
-            # Otherwise get all creds in the associated engagement
-            return CredMappingForm(
-                initial={
-                    "cred_user_queryset": Cred_Mapping.objects.filter(
-                        engagement=engagement,
-                    ).order_by("cred_id"),
-                },
-            )
+        # If the engagement is not present, return an empty form
+        if engagement is None:
+            return CredMappingForm()
+        # Otherwise get all creds in the associated engagement
+        return CredMappingForm(
+            initial={
+                "cred_user_queryset": Cred_Mapping.objects.filter(
+                    engagement=engagement,
+                ).order_by("cred_id"),
+            },
+        )
 
     def get_jira_form(
         self,
@@ -1250,7 +1242,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
             findings = form.cleaned_data["accepted_findings"]
 
-            risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+            risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
             messages.add_message(
                 request,
@@ -1360,7 +1352,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             finding = get_object_or_404(
                 Finding, pk=request.POST["remove_finding_id"])
 
-            ra_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
+            ra_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
 
             messages.add_message(
                 request,
@@ -1391,7 +1383,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             if not errors:
                 findings = add_findings_form.cleaned_data["accepted_findings"]
 
-                ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
                 messages.add_message(
                     request,
@@ -1401,8 +1393,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if not errors:
             logger.debug("redirecting to return_url")
             return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
-        else:
-            logger.error("errors found")
+        logger.error("errors found")
 
     else:
         if edit_mode:
@@ -1549,8 +1540,7 @@ def upload_threatmodel(request, eid):
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
-    response = FileResponse(open(eng.tmodel_path, "rb"))
-    return response
+    return FileResponse(open(eng.tmodel_path, "rb"))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
@@ -1589,9 +1579,8 @@ def get_engagements(request):
     if not url:
         msg = "Please use the export button when exporting engagements"
         raise ValidationError(msg)
-    else:
-        if url.startswith("url="):
-            url = url[4:]
+    if url.startswith("url="):
+        url = url[4:]
 
     path_items = list(filter(None, re.split(r"/|\?", url)))
 

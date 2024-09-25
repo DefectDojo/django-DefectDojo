@@ -75,5 +75,4 @@ class CloudsploitParser:
             return "Medium"
         if status == "FAIL":
             return "Critical"
-        else:
-            return "Info"
+        return "Info"
