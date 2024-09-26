@@ -12,7 +12,10 @@ class Inspector:
         impact = []
         references = []
         unsaved_vulnerability_ids = []
-        epss_score = None
+        if finding.get("EpssScore") is not None:
+            epss_score = finding.get("EpssScore")
+        else:
+            epss_score = None
         description = f"This is an Inspector Finding\n{finding.get('Description', '')}" + "\n"
         description += f"**AWS Finding ARN:** {finding_id}\n"
         description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
