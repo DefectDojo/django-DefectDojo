@@ -133,9 +133,9 @@ class VeracodeJSONParser:
         # Fill in extra info based on the scan type
         if scan_type == "STATIC":
             return self.add_static_details(finding, finding_details, backup_title=cwe_title)
-        elif scan_type == "DYNAMIC":
+        if scan_type == "DYNAMIC":
             return self.add_dynamic_details(finding, finding_details, backup_title=cwe_title)
-        elif scan_type == "SCA":
+        if scan_type == "SCA":
             return self.add_sca_details(finding, finding_details, backup_title=cwe_title)
 
         return None

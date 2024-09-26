@@ -35,9 +35,7 @@ def get_authorized_product_types(permission):
     product_types = Product_Type.objects.annotate(
         member=Exists(authorized_roles),
         authorized_group=Exists(authorized_groups)).order_by("name")
-    product_types = product_types.filter(Q(member=True) | Q(authorized_group=True))
-
-    return product_types
+    return product_types.filter(Q(member=True) | Q(authorized_group=True))
 
 
 def get_authorized_members_for_product_type(product_type, permission):

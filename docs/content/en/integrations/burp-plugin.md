@@ -2,7 +2,7 @@
 title: "Defect Dojo Burp plugin"
 description: "Export findings directly from Burp to DefectDojo."
 draft: false
-weight: 8
+weight: 9
 ---
 
 **Please note: The DefectDojo Burp Plugin has been sunset and is no longer a supported feature.**

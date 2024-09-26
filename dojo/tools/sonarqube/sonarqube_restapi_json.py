@@ -233,12 +233,11 @@ class SonarQubeRESTAPIJSON:
     def severitytranslator(self, severity):
         if severity == "BLOCKER":
             return "High"
-        elif severity == "MAJOR":
+        if severity == "MAJOR":
             return "Medium"
-        elif severity == "MINOR":
+        if severity == "MINOR":
             return "Low"
-        else:
-            return severity.lower().capitalize()
+        return severity.lower().capitalize()
 
     def returncomponent(self, json_content, key):
         components = json_content.get("components")

@@ -29,9 +29,8 @@ class BlackduckCRImporter:
             report = Path(report.temporary_file_path())
         if zipfile.is_zipfile(str(report)):
             return self._process_zipfile(report)
-        else:
-            msg = f"File {report} not a zip!"
-            raise ValueError(msg)
+        msg = f"File {report} not a zip!"
+        raise ValueError(msg)
 
     def _process_zipfile(self, report: Path) -> (dict, dict, dict):
         """
