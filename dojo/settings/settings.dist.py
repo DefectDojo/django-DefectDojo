@@ -304,6 +304,8 @@ env = environ.FileAwareEnv(
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
     # Use System notification settings to override user's notification settings
     DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
+    # When enabled, force the password field to be required for creating/updating users
+    DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
 )
 
 
@@ -527,6 +529,7 @@ SOCIAL_AUTH_PIPELINE = (
 
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
+REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
