@@ -22,9 +22,7 @@ def get_banner_conf(attribute):
                     value,
                     attributes=allowed_attributes,
                     css_sanitizer=CSSSanitizer(allowed_css_properties=["color", "font-weight"])))
-            else:
-                return value
-        else:
-            return False
+            return value
+        return False
     except Exception:
         return False

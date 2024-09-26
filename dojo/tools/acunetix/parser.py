@@ -17,5 +17,6 @@ class AcunetixParser:
     def get_findings(self, filename, test):
         if ".xml" in str(filename):
             return AcunetixXMLParser().get_findings(filename, test)
-        elif ".json" in str(filename):
+        if ".json" in str(filename):
             return AcunetixJSONParser().get_findings(filename, test)
+        return None

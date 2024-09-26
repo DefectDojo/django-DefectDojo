@@ -37,8 +37,7 @@ from dojo.utils import (
 def get_metrics_finding_filter_class() -> Type[Union[MetricsFindingFilter, MetricsFindingFilterWithoutObjectLookups]]:
     if get_system_setting("filter_string_matching", False):
         return MetricsFindingFilterWithoutObjectLookups
-    else:
-        return MetricsFindingFilter
+    return MetricsFindingFilter
 
 
 def finding_queries(
@@ -599,5 +598,4 @@ def findings_queryset(
     """
     if qs.model is Endpoint_Status:
         return Finding.objects.filter(status_finding__in=qs)
-    else:
-        return qs
+    return qs

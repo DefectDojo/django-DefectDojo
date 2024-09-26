@@ -25,14 +25,13 @@ class AuditJSParser:
         cvss = float(cvss)
         if cvss > 0 and cvss < 4:
             return "Low"
-        elif cvss >= 4 and cvss < 7:
+        if cvss >= 4 and cvss < 7:
             return "Medium"
-        elif cvss >= 7 and cvss < 9:
+        if cvss >= 7 and cvss < 9:
             return "High"
-        elif cvss >= 9:
+        if cvss >= 9:
             return "Critical"
-        else:
-            return "Informational"
+        return "Informational"
 
     def get_findings(self, filename, test):
         try:

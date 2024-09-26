@@ -16,7 +16,7 @@ def engagement_post_save(sender, instance, created, **kwargs):
     if created:
         title = _('Engagement created for "%(product)s": %(name)s') % {"product": instance.product, "name": instance.name}
         create_notification(event="engagement_added", title=title, engagement=instance, product=instance.product,
-                            url=reverse("view_engagement", args=(instance.id,)))
+                            url=reverse("view_engagement", args=(instance.id,)), url_api=reverse("engagement-detail", args=(instance.id,)))
 
 
 @receiver(pre_save, sender=Engagement)
