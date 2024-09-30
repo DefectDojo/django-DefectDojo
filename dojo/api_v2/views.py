@@ -299,6 +299,7 @@ class GlobalRoleViewSet(
 
 # Authorization: object-based
 # @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class EndPointViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -354,7 +355,8 @@ class EndPointViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class EndpointStatusViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -383,7 +385,8 @@ class EndpointStatusViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class EngagementViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -637,7 +640,8 @@ class EngagementViewSet(
         return generate_file_response(file_object)
 
 
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class RiskAcceptanceViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -736,7 +740,8 @@ class CredentialsViewSet(
 
 
 # Authorization: configuration
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class CredentialsMappingViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1473,7 +1478,8 @@ class JiraInstanceViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class JiraIssuesViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1589,7 +1595,8 @@ class ProductAPIScanConfigurationViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class DojoMetaViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1900,7 +1907,8 @@ class ProductTypeGroupViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class StubFindingsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1938,7 +1946,8 @@ class DevelopmentEnvironmentViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class TestsViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -2145,7 +2154,8 @@ class TestTypesViewSet(
         return Test_Type.objects.all().order_by("id")
 
 
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class TestImportViewSet(
     PrefetchDojoModelViewSet,
 ):
