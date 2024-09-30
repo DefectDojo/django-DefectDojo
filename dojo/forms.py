@@ -2164,7 +2164,7 @@ class ChangePasswordForm(forms.Form):
 class AddDojoUserForm(forms.ModelForm):
     email = forms.EmailField(required=True)
     password = forms.CharField(widget=forms.PasswordInput,
-        required=True,
+        required=settings.REQUIRE_PASSWORD_ON_USER,
         validators=[validate_password],
         help_text="")
 
