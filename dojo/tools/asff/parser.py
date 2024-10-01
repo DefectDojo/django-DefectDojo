@@ -81,6 +81,7 @@ class AsffParser:
                 severity=self.get_severity(item.get("Severity")),
                 active=active,
                 unique_id_from_tool=item.get("Id"),
+                impact=resource_arn_strings,
             )
 
             if "Resources" in item:

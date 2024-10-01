@@ -22,6 +22,7 @@ class TestAsffParser(DojoTestCase):
         resource_arn_strings = ", ".join(resource_arns)
         control_description = data[index].get("Description", "")
         full_description = f"**AWS resource ARN:** {resource_arn_strings}\n\n{control_description}"
+        impact = resource_arn_strings
         self.assertEqual(finding.title, data[index]["Title"])
         self.assertEqual(finding.description, full_description)
         if guarddutydate:
