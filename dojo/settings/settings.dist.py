@@ -552,7 +552,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                'options': f"-c search_path={env('DD_SCHEMA_DB')}"
+                "options": "-c search_path=public"
             },
             "NAME": secret_database["dbname"],
             "TEST": {
@@ -568,9 +568,6 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         REPLICA_TABLES_DEFAULT = env("DD_TABLES_REPLICA_DEFAULT")
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
-            "OPTIONS": {
-                'options': f"-c search_path={env('DD_SCHEMA_DB')}"
-            },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
             "PASSWORD": secret_database["password"],
@@ -586,7 +583,7 @@ else:
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
                 "OPTIONS": {
-                    'options': f"-c search_path={env('DD_SCHEMA_DB')}"
+                    "options": "-c search_path=public"
                 },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
