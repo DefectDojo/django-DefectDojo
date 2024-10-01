@@ -2289,13 +2289,16 @@ class Component(models.Model):
                                          max_length=100,
                                          verbose_name=_("Component version"),
                                          help_text=_("Version of the component."))
+    date = models.DateField(default=get_current_date,
+                        verbose_name=_("Date"),
+                        help_text=_("The date the flaw was discovered."))
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ("-date", "title")
+        ordering = ("-date", "name")
 
     def __str__(self):
-        return f"{self.id} - {self.name[:80] + '...' if len(self.title) > 80 else self.title}"
+        return f"{self.id} - {self.name[:80] + '...' if len(self.name) > 80 else self.name}"
 
 class Finding(models.Model):
 
