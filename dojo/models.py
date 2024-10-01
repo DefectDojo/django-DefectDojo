@@ -2278,6 +2278,25 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return f"{self.finding.id}: {self.action}"
 
 
+class Component(models.Model):
+    name = models.CharField(null=False,
+                                      blank=True,
+                                      max_length=500,
+                                      verbose_name=_("Component name"),
+                                      help_text=_("Name of the affected component (library name, part of a system, ...)."))
+    version = models.CharField(null=False,
+                                         blank=True,
+                                         max_length=100,
+                                         verbose_name=_("Component version"),
+                                         help_text=_("Version of the component."))
+    engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ("-date", "title")
+
+    def __str__(self):
+        return f"{self.id} - {self.name[:80] + '...' if len(self.title) > 80 else self.title}"
+
 class Finding(models.Model):
 
     STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
