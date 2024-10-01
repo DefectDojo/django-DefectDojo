@@ -116,6 +116,7 @@ env = environ.FileAwareEnv(
     DD_DATABASE_USER=(str, "defectdojo"),
     DD_DATABASE_REPLICA=(bool, False),
     DD_TABLES_REPLICA_DEFAULT=(list, []),
+    DD_SCHEMA_DB=(str, 'public'),
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_AUTHENTICATE_ADDITIONAL_DATA_KEY=(str, "."),
@@ -550,6 +551,9 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     DATABASES = {
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
+            "OPTIONS": {
+                'options': f"-c search_path={env('DD_SCHEMA_DB')}"
+            },
             "NAME": secret_database["dbname"],
             "TEST": {
                 "NAME": env("DD_TEST_DATABASE_NAME"),
@@ -564,6 +568,9 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         REPLICA_TABLES_DEFAULT = env("DD_TABLES_REPLICA_DEFAULT")
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
+            "OPTIONS": {
+                'options': f"-c search_path={env('DD_SCHEMA_DB')}"
+            },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
             "PASSWORD": secret_database["password"],
@@ -578,6 +585,9 @@ else:
         DATABASES = {
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
+                "OPTIONS": {
+                    'options': f"-c search_path={env('DD_SCHEMA_DB')}"
+                },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
                     "NAME": env("DD_TEST_DATABASE_NAME"),
@@ -721,7 +731,8 @@ SOCIAL_AUTH_PIPELINE = (
     "dojo.pipeline.update_product_access",
     "dojo.pipeline.update_product_type_azure_devops",
 )
-
+# Settings database
+SCHEMA_DB = env('DD_SCHEMA_DB')
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
