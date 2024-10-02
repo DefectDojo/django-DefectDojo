@@ -83,16 +83,14 @@ def update_expiration_risk_accepted(finding: Finding,
 
 def handle_from_provider_risk(finding, acceptance_days):
     logger.info(f'Risk accepting for external provider Id:{finding.id}')
-    tag = ra_helper.get_matching_value(list_a=finding.tags.tags, list_b=[settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3])
+    tag = ra_helper.get_matching_value(list_a=finding.tags.tags, list_b=settings.PROVIDERS.split('//'))
+    endpoints = json.loads(settings.PROVIDERS_ENDPOINT_MAPPING)
     if tag is not None:
         logger.info(f"Vulnerability {finding.vuln_id_from_tool} has provider tags")
-        if tag.name == settings.PROVIDER3:
-            finding_id = finding.unique_id_from_tool
-        else:
-            finding_id = finding.vuln_id_from_tool
+        finding_id = finding.vuln_id_from_tool
         ra_helper.risk_accept_provider(
             finding_id=finding_id,
-            provider=tag.name,
+            provider=endpoints[tag],
             acceptance_days=acceptance_days,
             url=settings.PROVIDER_URL,
             header=settings.PROVIDER_HEADER,

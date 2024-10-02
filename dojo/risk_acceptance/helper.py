@@ -22,7 +22,6 @@ from dojo.utils import get_full_url, get_system_setting, get_remote_json_config
 
 logger = logging.getLogger(__name__)
 
-
 def expire_now(risk_acceptance):
     logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
@@ -396,21 +395,29 @@ def risk_accept_provider(
         token: str
     ):
     logger.info(f"Making risk accept for {finding_id} provider: {provider}")
-    formatted_url = url + f'{provider}?vulnerabilityId={finding_id}&acceptanceDays={acceptance_days}'
+    formatted_url = url + f'{provider}'
     headers = {}
+    headers['Content-Type'] = 'application/json'
+    body = {}
     headers[header] = token
+    body["event"] = "DD_RISK_ACCEPTANCE"
+    body["id_vulnerability"] = finding_id
+    body["acceptanceDays"] = acceptance_days
+    print(formatted_url)
     try:
-        response = requests.post(url=formatted_url, headers=headers, verify=False)
+        response = requests.post(url=formatted_url, headers=headers, data=body, verify=False)
     except Exception as ex:
         logger.error(ex)
         raise(ex)
+    print(response.status_code)
     if response.status_code == 200:
         logger.info(f"Risk accept response from provider: {provider}, response: {response.text}")
-    logger.error(f"Error for provider: {provider}, response: {response.text}")
+    else:
+        logger.error(f"Error for provider: {provider}, response: {response.text}")
 
 
 def get_matching_value(list_a, list_b):
-    matches = [item for item in list_a if item in list_b]
+    matches = [item.name for item in list_a if item in list_b]
     return matches[0] if matches else None
 
 
