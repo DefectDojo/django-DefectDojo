@@ -552,7 +552,7 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
             "OPTIONS": {
-                "options": "-c search_path=public"
+                "options": "-c search_path=schvtckd"
             },
             "NAME": secret_database["dbname"],
             "TEST": {
@@ -583,7 +583,7 @@ else:
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
                 "OPTIONS": {
-                    "options": "-c search_path=public"
+                    "options": "-c search_path=schvtckd"
                 },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
