@@ -388,14 +388,15 @@ def update_endpoint_statuses(finding: Finding, *, accept_risk: bool) -> None:
 @retry(tries=100, delay=10)
 def risk_accept_provider(
         finding_id: str,
-        provider: str,
+        provider_endpoint: str,
+        provider_tag: str,
         acceptance_days: int,
         url: str,
         header: str,
         token: str
     ):
-    logger.info(f"Making risk accept for {finding_id} provider: {provider}")
-    formatted_url = url + f'{provider}'
+    logger.info(f"Making risk accept for {finding_id} provider: {provider_tag}")
+    formatted_url = url + f'{provider_endpoint}'
     headers = {}
     headers['Content-Type'] = 'application/json'
     body = {}
@@ -403,7 +404,7 @@ def risk_accept_provider(
     body["event"] = "DD_RISK_ACCEPTANCE"
     body["id_vulnerability"] = finding_id
     body["acceptanceDays"] = acceptance_days
-    body["provider_to_accept"] = provider
+    body["provider_to_accept"] = provider_tag
     print(formatted_url)
     try:
         response = requests.post(url=formatted_url, headers=headers, data=body, verify=False)
