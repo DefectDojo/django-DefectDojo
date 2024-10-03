@@ -569,6 +569,9 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         REPLICA_TABLES_DEFAULT = env("DD_TABLES_REPLICA_DEFAULT")
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
+            "OPTIONS": {
+                "options": f"-c search_path={SCHEMA_DB}"
+            },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
             "PASSWORD": secret_database["password"],
