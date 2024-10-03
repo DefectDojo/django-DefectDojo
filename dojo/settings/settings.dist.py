@@ -362,9 +362,8 @@ env = environ.FileAwareEnv(
     # System user for automated resource creation
     DD_SYSTEM_USER=(str, "admin"),
     # These variables are the params of providers name
-    DD_PROVIDER1=(str, ""),
-    DD_PROVIDER2=(str, ""),
-    DD_PROVIDER3=(str, ""),
+    DD_PROVIDERS=(str, ""),
+    DD_PROVIDER_ENDPOINT_MAPPING=(str, ""),
     # The variable that sets the provider risk accept api and credentials
     DD_PROVIDER_URL=(str, ""),
     DD_PROVIDER_HEADER=(str, ""),
@@ -2074,9 +2073,8 @@ HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
 # System user for automated resource creation
 SYSTEM_USER = env("DD_SYSTEM_USER")
 # Engine Backend
-PROVIDER1 = env("DD_PROVIDER1")
-PROVIDER2 = env("DD_PROVIDER2")
-PROVIDER3 = env("DD_PROVIDER3")
+PROVIDERS = env("DD_PROVIDERS")
+PROVIDERS_ENDPOINT_MAPPING = env("DD_PROVIDER_ENDPOINT_MAPPING")
 PROVIDER_URL = env("DD_PROVIDER_URL")
 PROVIDER_HEADER = env("DD_PROVIDER_HEADER")
 # Abuse Control
