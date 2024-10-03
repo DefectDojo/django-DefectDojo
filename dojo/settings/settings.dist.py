@@ -116,6 +116,7 @@ env = environ.FileAwareEnv(
     DD_DATABASE_USER=(str, "defectdojo"),
     DD_DATABASE_REPLICA=(bool, False),
     DD_TABLES_REPLICA_DEFAULT=(list, []),
+    DD_SCHEMA_DB=(str, 'public'),
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_AUTHENTICATE_ADDITIONAL_DATA_KEY=(str, "."),
@@ -538,6 +539,7 @@ DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
 MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
+SCHEMA_DB = env('DD_SCHEMA_DB')
 
 # ------------------------------------------------------------------------------
 # DATABASE
@@ -549,6 +551,9 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     DATABASES = {
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
+            "OPTIONS": {
+                "options": f"-c search_path={SCHEMA_DB}"
+            },
             "NAME": secret_database["dbname"],
             "TEST": {
                 "NAME": env("DD_TEST_DATABASE_NAME"),
@@ -577,6 +582,9 @@ else:
         DATABASES = {
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
+                "OPTIONS": {
+                    "options": f"-c search_path={SCHEMA_DB}"
+                },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
                     "NAME": env("DD_TEST_DATABASE_NAME"),
