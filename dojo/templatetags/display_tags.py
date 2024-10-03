@@ -796,10 +796,7 @@ def first_vulnerability_id(finding):
 def additional_vulnerability_ids(finding):
     vulnerability_ids = finding.vulnerability_ids
     if vulnerability_ids and len(vulnerability_ids) > 1:
-        references = []
-        for vulnerability_id in vulnerability_ids[1:]:
-            references.append(vulnerability_id)
-        return references
+        return vulnerability_ids[1:]
     return None
 
 

@@ -82,7 +82,7 @@ class NpmAudit7PlusParser:
         """Return the individual items found in report."""
         items = {}
 
-        for key, node in tree.items():
+        for node in tree.values():
             item = get_item(node, tree, test)
             unique_key = item.title + item.severity
             items[unique_key] = item
@@ -143,9 +143,10 @@ def get_item(item_node, tree, test):
             and len(item_node["via"]) > 1):
         # we have a multiple CWE vuln which we will capture in the
         # vulnerability_ids and references
-        for vuln in item_node["via"][1:]:  # have to decide if str or object
-            if isinstance(vuln, dict):
-                references.append(vuln["url"])
+        references.extend([vuln["url"]
+            for vuln in item_node["via"][1:]  # have to decide if str or object
+                if isinstance(vuln, dict)
+        ])
 
     dojo_finding = Finding(
         title=title,
