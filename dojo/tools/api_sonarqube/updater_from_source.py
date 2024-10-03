@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiUpdaterFromSource:
+
     """
     The responsibility of this class is to update the Finding status if current SonarQube issue status doesn't match.
 

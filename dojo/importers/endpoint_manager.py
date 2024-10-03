@@ -28,9 +28,7 @@ class EndpointManager:
         endpoints: List[Endpoint],
         **kwargs: dict,
     ) -> None:
-        """
-        Creates Endpoint objects for a single finding and creates the link via the endpoint status
-        """
+        """Creates Endpoint objects for a single finding and creates the link via the endpoint status"""
         logger.debug(f"IMPORT_SCAN: Adding {len(endpoints)} endpoints to finding: {finding}")
         self.clean_unsaved_endpoints(endpoints)
         for endpoint in endpoints:
@@ -67,9 +65,7 @@ class EndpointManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        """
-        Mitigates all endpoint status objects that are supplied
-        """
+        """Mitigates all endpoint status objects that are supplied"""
         now = timezone.now()
         for endpoint_status in endpoint_status_list:
             # Only mitigate endpoints that are actually active
@@ -88,9 +84,7 @@ class EndpointManager:
         endpoint_status_list: List[Endpoint_Status],
         **kwargs: dict,
     ) -> None:
-        """
-        Reactivate all endpoint status objects that are supplied
-        """
+        """Reactivate all endpoint status objects that are supplied"""
         for endpoint_status in endpoint_status_list:
             # Only reactivate endpoints that are actually mitigated
             if endpoint_status.mitigated:
@@ -216,9 +210,7 @@ class EndpointManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        """
-        Update the list of endpoints from the new finding with the list that is in the old finding
-        """
+        """Update the list of endpoints from the new finding with the list that is in the old finding"""
         # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
         # So we only need to mitigate endpoints that are no longer present
         # using `.all()` will mark as mitigated also `endpoint_status` with flags `false_positive`, `out_of_scope` and `risk_accepted`. This is a known issue. This is not a bug. This is a future.

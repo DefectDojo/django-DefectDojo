@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class GitleaksParser:
-    """
-    A class that can be used to parse the Gitleaks JSON report files
-    """
+
+    """A class that can be used to parse the Gitleaks JSON report files"""
 
     def get_scan_types(self):
         return ["Gitleaks Scan"]
@@ -19,9 +18,7 @@ class GitleaksParser:
         return "Import Gitleaks Scan findings in JSON format."
 
     def get_findings(self, filename, test):
-        """
-        Converts a Gitleaks report to DefectDojo findings
-        """
+        """Converts a Gitleaks report to DefectDojo findings"""
         issues = json.load(filename)
         # empty report are just null object
         if issues is None:

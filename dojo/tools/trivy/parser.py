@@ -1,6 +1,4 @@
-"""
-Parser for Aquasecurity trivy (https://github.com/aquasecurity/trivy) Docker images scaner
-"""
+"""Parser for Aquasecurity trivy (https://github.com/aquasecurity/trivy) Docker images scaner"""
 
 import json
 import logging

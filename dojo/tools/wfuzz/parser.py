@@ -7,9 +7,8 @@ from dojo.models import Endpoint, Finding
 
 
 class WFuzzParser:
-    """
-    A class that can be used to parse the WFuzz JSON report files
-    """
+
+    """A class that can be used to parse the WFuzz JSON report files"""
 
     # match HTTP error code and severity
     def severity_mapper(self, input):

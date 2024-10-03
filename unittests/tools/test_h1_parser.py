@@ -167,4 +167,5 @@ class TestHackerOneParser(
     HackerOneVulnerabilityDisclosureProgramTests,
     HackerOneBugBountyProgramTests,
 ):
+
     """Combined unit test runner."""

@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiImporter:
+
     """
     This class imports from SonarQube (SQ) all open/confirmed SQ issues related to the project related to the test as
      findings.

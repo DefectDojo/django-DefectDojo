@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class WapitiParser:
-    """The web-application vulnerability scanner
+
+    """
+    The web-application vulnerability scanner
 
     see: https://wapiti.sourceforge.io/
     """

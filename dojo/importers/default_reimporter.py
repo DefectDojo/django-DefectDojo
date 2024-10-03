@@ -51,6 +51,7 @@ class DefaultReImporterOptions(ImporterOptions):
 
 
 class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
+
     """
     The classic reimporter process used by DefectDojo
 
@@ -58,6 +59,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     vulnerabilities is the ultimate tool for getting a current
     point time view of security of a given product
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(
             self,
@@ -166,7 +168,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         the finding may be appended to a new or existing group based upon user selection
         at import time
         """
-
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         self.original_items = list(self.test.finding_set.all())
         self.new_items = []
@@ -388,9 +389,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> List[Finding]:
-        """
-        Matches a single new finding to N existing findings and then returns those matches
-        """
+        """Matches a single new finding to N existing findings and then returns those matches"""
         # This code should match the logic used for deduplication out of the re-import feature.
         # See utils.py deduplicate_* functions
         deduplicationLogger.debug("return findings bases on algorithm: %s", self.deduplication_algorithm)
@@ -644,9 +643,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> Finding:
-        """
-        Create a new finding from the one parsed from the report
-        """
+        """Create a new finding from the one parsed from the report"""
         # Set some explicit settings
         unsaved_finding.reporter = self.user
         unsaved_finding.last_reviewed = self.now

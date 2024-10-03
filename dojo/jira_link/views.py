@@ -168,46 +168,46 @@ def webhook(request, secret=None):
 
 def check_for_and_create_comment(parsed_json):
     """
-        example incoming requests from JIRA Server 8.14.0
-        {
-        "timestamp":1610269967824,
-        "webhookEvent":"comment_created",
-        "comment":{
-            "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
-            "id":"466578",
-            "author":{
-                "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                "name":"defect.dojo",
-                "key":"defect.dojo", # seems to be only present on JIRA Server, not on Cloud
-                "avatarUrls":{
-                    "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                    "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                    "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                    "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                },
-                "displayName":"Defect Dojo",
-                "active":true,
-                "timeZone":"Europe/Amsterdam"
+    example incoming requests from JIRA Server 8.14.0
+    {
+    "timestamp":1610269967824,
+    "webhookEvent":"comment_created",
+    "comment":{
+        "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
+        "id":"466578",
+        "author":{
+            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+            "name":"defect.dojo",
+            "key":"defect.dojo", # seems to be only present on JIRA Server, not on Cloud
+            "avatarUrls":{
+                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
             },
-            "body":"(Valentijn Scholten):test4",
-            "updateAuthor":{
-                "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                "name":"defect.dojo",
-                "key":"defect.dojo",
-                "avatarUrls":{
-                    "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                    "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                    "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                    "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                },
-                "displayName":"Defect Dojo",
-                "active":true,
-                "timeZone":"Europe/Amsterdam"
+            "displayName":"Defect Dojo",
+            "active":true,
+            "timeZone":"Europe/Amsterdam"
+        },
+        "body":"(Valentijn Scholten):test4",
+        "updateAuthor":{
+            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+            "name":"defect.dojo",
+            "key":"defect.dojo",
+            "avatarUrls":{
+                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
             },
-            "created":"2021-01-10T10:12:47.824+0100",
-            "updated":"2021-01-10T10:12:47.824+0100"
-        }
-        }
+            "displayName":"Defect Dojo",
+            "active":true,
+            "timeZone":"Europe/Amsterdam"
+        },
+        "created":"2021-01-10T10:12:47.824+0100",
+        "updated":"2021-01-10T10:12:47.824+0100"
+    }
+    }
     """
     comment = parsed_json.get("comment", None)
     if comment is None:

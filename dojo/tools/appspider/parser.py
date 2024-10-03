@@ -5,6 +5,7 @@ from dojo.models import Endpoint, Finding
 
 
 class AppSpiderParser:
+
     """Parser for Rapid7 AppSpider reports"""
 
     def get_scan_types(self):

@@ -10,9 +10,8 @@ SCAN_COBALTIO_API = "Cobalt.io API Import"
 
 
 class ApiCobaltParser:
-    """
-    Import from Cobalt.io API /findings
-    """
+
+    """Import from Cobalt.io API /findings"""
 
     def get_scan_types(self):
         return [SCAN_COBALTIO_API]

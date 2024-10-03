@@ -7,10 +7,12 @@ from dojo.models import Finding, Test, Test_Type
 
 
 class ScanImportOptionsTest(APITestCase):
+
     """
     Test the options `skip_duplicates` and `close_old_findings` for the scan
     import APIv2 endpoint with ZAP
     """
+
     fixtures = ["dojo_testdata.json"]
     EMPTY_ZAP_SCAN = """<?xml version="1.0"?>
 <OWASPZAPReport version="2.7.0" generated="Tue, 17 Apr 2018 07:18:05">
@@ -50,15 +52,11 @@ class ScanImportOptionsTest(APITestCase):
                    .order_by("id").values_list("id", flat=True))
 
     def test_epmty_scan(self):
-        """
-        Import the ZAP scan without a test file.
-        """
+        """Import the ZAP scan without a test file."""
         test = self.import_zap_scan(upload_empty_scan=False)
         self.assertNotEqual(len(self.get_all_finding_ids(active=True, test__test_type=test.test_type)), 0)
 
     def test_full_scan(self):
-        """
-        Import the ZAP scan with a test file.
-        """
+        """Import the ZAP scan with a test file."""
         test = self.import_zap_scan(upload_empty_scan=True)
         self.assertNotEqual(len(self.get_all_finding_ids(active=True, test__test_type=test.test_type)), 0)

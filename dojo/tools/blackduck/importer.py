@@ -68,9 +68,7 @@ class BlackduckImporter(Importer):
     def _process_project_findings(
         self, project_ids, security_issues, files=None,
     ):
-        """
-        Process findings per projects and return a BlackduckFinding object per the model
-        """
+        """Process findings per projects and return a BlackduckFinding object per the model"""
         for project_id in project_ids:
             locations = set()
             if files is not None:
