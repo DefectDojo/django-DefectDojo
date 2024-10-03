@@ -250,35 +250,39 @@ MetricsQuerySet = TypeVar("MetricsQuerySet", QuerySet[Finding], QuerySet[Endpoin
 
 
 class _MetricsPeriodEntry(NamedTuple):
+
     """
     Class for holding information for a metrics period. Allows us to store a kwarg for date manipulation alongside a DB
     method used to aggregate around the same timeframe.
     """
+
     datetime_name: str
     db_method: Union[TruncWeek, TruncMonth]
 
 
 class MetricsPeriod(_MetricsPeriodEntry, Enum):
-    """
-    Enum for the two metrics periods supported: by week and month
-    """
+
+    """Enum for the two metrics periods supported: by week and month"""
+
     WEEK = ("weeks", TruncWeek)
     MONTH = ("months", TruncMonth)
 
 
 class _MetricsTypeEntry(NamedTuple):
+
     """
     Class for holding information for a metrics type. Allows us to store relative queryset lookups for severities
     alongside relative lookups for closed statuses.
     """
+
     severity_lookup: str
     closed_lookup: str
 
 
 class MetricsType(_MetricsTypeEntry, Enum):
-    """
-    Enum for the two metrics types supported: by Findings and by Endpoints (Endpoint_Status)
-    """
+
+    """Enum for the two metrics types supported: by Findings and by Endpoints (Endpoint_Status)"""
+
     FINDING = ("severity", "is_mitigated")
     ENDPOINT = ("finding__severity", "mitigated")
 
@@ -482,7 +486,6 @@ def aggregate_counts_by_period(
     :param include_closed: A boolean dictating whether 'closed' finding/status aggregates should be included
     :return: A queryset with aggregate severity counts grouped by period
     """
-
     desired_values = ("grouped_date", "critical", "high", "medium", "low", "info", "total")
 
     severities_by_period = severity_count(

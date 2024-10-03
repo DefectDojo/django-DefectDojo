@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class DependencyTrackParser:
+
     """
     A class that can be used to parse the JSON Finding Packaging Format (FPF) export from OWASP Dependency Track.
 

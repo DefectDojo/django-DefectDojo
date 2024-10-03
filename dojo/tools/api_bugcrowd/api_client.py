@@ -4,9 +4,8 @@ import requests
 
 
 class BugcrowdAPI:
-    """
-    A simple client for the bugcrowd.io API
-    """
+
+    """A simple client for the bugcrowd.io API"""
 
     bugcrowd_api_url = "https://api.bugcrowd.com"
     default_headers = {

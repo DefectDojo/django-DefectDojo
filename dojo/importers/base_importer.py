@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 class Parser:
+
     """
     This class is used as an alias to a given parser
     and is purely for the sake of type hinting
@@ -52,11 +53,13 @@ class Parser:
 
 
 class BaseImporter(ImporterOptions):
+
     """
     A collection of utilities used by various importers within DefectDojo.
     Some of these commonalities may be fully used by children importers,
     or even extended
     """
+
     def __init__(
         self,
         *args: list,
@@ -166,9 +169,7 @@ class BaseImporter(ImporterOptions):
         scan: TemporaryUploadedFile,
         parser: Parser,
     ) -> List[Test]:
-        """
-        Use the API configuration object to get the tests to be used by the parser
-        """
+        """Use the API configuration object to get the tests to be used by the parser"""
         try:
             return parser.get_tests(self.scan_type, scan)
         except ValueError as e:
@@ -322,9 +323,7 @@ class BaseImporter(ImporterOptions):
         reactivated_findings: List[Finding] = [],
         untouched_findings: List[Finding] = [],
     ) -> Test_Import:
-        """
-        Creates a record of the import or reimport operation that has occurred.
-        """
+        """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
         if settings.TRACK_IMPORT_HISTORY is False:
             return None

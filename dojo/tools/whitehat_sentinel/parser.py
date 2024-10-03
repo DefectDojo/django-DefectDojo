@@ -9,6 +9,7 @@ from dojo.models import Endpoint, Finding
 
 
 class WhiteHatSentinelParser:
+
     """
     A class to parse WhiteHat Sentinel vulns from the WhiteHat Sentinel API vuln?query_site=[
     SITE_ID]&format=json&display_attack_vectors=all&display_custom_risk=1&display_risk=1&display_description=custom
@@ -95,7 +96,6 @@ class WhiteHatSentinelParser:
             whitehat_sentinel_description: The description section of the WhiteHat Sentinel vulnerability dict
         Returns: A dict with description and reference link
         """
-
         description_ref = {"description": "", "reference_link": ""}
 
         # The references section is always between <h2> or <strong> tags
@@ -149,7 +149,6 @@ class WhiteHatSentinelParser:
             text_to_search: The text string to search for an anchor tag
         Returns:
         """
-
         links = ""
 
         for match in re.findall(r'(<a href=")(https://\S+)">', text_to_search):
@@ -163,7 +162,6 @@ class WhiteHatSentinelParser:
             html_string: The HMTL string to remove <p> </p> tags from
         Returns: The original string stipped of paragraph tags
         """
-
         return re.sub(r"<p>|</p>", "", html_string)
 
     def _convert_attack_vectors_to_endpoints(
@@ -176,7 +174,6 @@ class WhiteHatSentinelParser:
             attack_vectors: The list of Attack Vector dictionaries
         Returns: A list of Defect Dojo Endpoints
         """
-
         endpoints_list = []
 
         # This should be in the Endpoint class should it not?

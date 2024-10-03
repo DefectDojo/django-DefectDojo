@@ -4,9 +4,8 @@ from dojo.models import Finding
 
 
 class WhispersParser:
-    """
-    Identify hardcoded secrets in static structured text
-    """
+
+    """Identify hardcoded secrets in static structured text"""
 
     SEVERITY_MAP = {
         # Whispers 2.1

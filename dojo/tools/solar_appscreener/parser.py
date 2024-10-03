@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class SolarAppscreenerParser:
-    """
-    SAST scanner
-    """
+
+    """SAST scanner"""
 
     def get_scan_types(self):
         return ["Solar Appscreener Scan"]

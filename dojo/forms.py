@@ -140,6 +140,7 @@ class MultipleSelectWithPop(forms.SelectMultiple):
 
 
 class MonthYearWidget(Widget):
+
     """
     A Widget that splits date input into two <select> boxes for month and year,
     with 'day' defaulting to the first of the month.
@@ -148,6 +149,7 @@ class MonthYearWidget(Widget):
 
     django/trunk/django/forms/extras/widgets.py
     """
+
     none_value = (0, "---")
     month_field = "%s_month"
     year_field = "%s_year"
@@ -3176,8 +3178,8 @@ class AnnouncementRemoveForm(AnnouncementCreateForm):
 # Show in admin a multichoice list of validator names
 # pass this to form using field_name='validator_name' ?
 class QuestionForm(forms.Form):
-    """ Base class for a Question
-    """
+
+    """Base class for a Question"""
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()

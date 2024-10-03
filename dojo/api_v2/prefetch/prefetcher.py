@@ -18,7 +18,8 @@ preferred_serializers = {
 class _Prefetcher:
     @staticmethod
     def _build_serializers():
-        """Returns a map model -> serializer where model is a django model and serializer is the corresponding
+        """
+        Returns a map model -> serializer where model is a django model and serializer is the corresponding
         serializer used to serialize the model
 
         Returns:
@@ -52,7 +53,8 @@ class _Prefetcher:
         self._prefetch_data = {}
 
     def _find_serializer(self, field_type):
-        """Find the best suited serializer for the given type.
+        """
+        Find the best suited serializer for the given type.
 
         Args:
             field_type (django.db.models.fields): the field type for which we need to find a serializer
@@ -72,7 +74,8 @@ class _Prefetcher:
         return self._find_serializer(parent_class)
 
     def _prefetch(self, entry, fields_to_fetch):
-        """Apply prefetching for the given field on the given entry
+        """
+        Apply prefetching for the given field on the given entry
 
         Args:
             entry (ModelInstance): Instance of a model as returned by a django queryset

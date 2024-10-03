@@ -367,7 +367,8 @@ class MobSFParser:
         return list(dupes.values())
 
     def getSeverityForPermission(self, status):
-        """Convert status for permission detection to severity
+        """
+        Convert status for permission detection to severity
 
         In MobSF there is only 4 know values for permission,
          we map them as this:

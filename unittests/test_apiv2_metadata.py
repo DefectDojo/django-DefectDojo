@@ -4,9 +4,9 @@ from rest_framework.test import APIClient, APITestCase
 
 
 class MetadataTest(APITestCase):
-    """
-    Test the metadata APIv2 endpoint.
-    """
+
+    """Test the metadata APIv2 endpoint."""
+
     fixtures = ["dojo_testdata.json"]
 
     def setUp(self):

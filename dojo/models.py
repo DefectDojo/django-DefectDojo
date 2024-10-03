@@ -125,6 +125,7 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
 
 @deconstructible
 class UniqueUploadNameProvider:
+
     """
     A callable to be passed as upload_to parameter to FileField.
 
@@ -215,9 +216,7 @@ class Dojo_User(User):
 
     @staticmethod
     def generate_full_name(user):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
+        """Returns the first_name plus the last_name, with a space in between."""
         full_name = f"{user.first_name} {user.last_name} ({user.username})"
         return full_name.strip()
 
@@ -736,14 +735,17 @@ class FileUpload(models.Model):
 
 
 class Product_Type(models.Model):
-    """Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
-`
+
+    """
+    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
+    `
        Examples:
          * IAM Team
          * Internal / 3rd Party
          * Main company / Acquisition
          * San Francisco / New York offices
     """
+
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
@@ -2175,7 +2177,7 @@ class Test(models.Model):
 
     @property
     def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        """Queries the database, no prefetching, so could be slow for lists of model instances"""
         return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
 
     def inherit_tags(self, potentially_existing_tags):
@@ -2221,7 +2223,7 @@ class Test_Import(TimeStampedModel):
 
     @property
     def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        """Queries the database, no prefetching, so could be slow for lists of model instances"""
         stats = {}
         for action in IMPORT_ACTIONS:
             stats[action[1].lower()] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=action[0]), _get_annotations_for_statistics)
@@ -3701,9 +3703,13 @@ class Risk_Acceptance(models.Model):
 
 
 class FileAccessToken(models.Model):
-    """This will allow reports to request the images without exposing the
+
+    """
+    This will allow reports to request the images without exposing the
     media root to the world without
-    authentication"""
+    authentication
+    """
+
     user = models.ForeignKey(Dojo_User, null=False, blank=False, on_delete=models.CASCADE)
     file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
@@ -4402,9 +4408,8 @@ class Benchmark_Product_Summary(models.Model):
 # ==============================
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Question(PolymorphicModel, TimeStampedModel):
-        """
-            Represents a question.
-        """
+
+        """Represents a question."""
 
         class Meta:
             ordering = ["order"]
@@ -4425,23 +4430,20 @@ with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning
 
 
 class TextQuestion(Question):
-    """
-    Question with a text answer
-    """
+
+    """Question with a text answer"""
+
     objects = PolymorphicManager()
 
     def get_form(self):
-        """
-        Returns the form for this model
-        """
+        """Returns the form for this model"""
         from .forms import TextQuestionForm
         return TextQuestionForm
 
 
 class Choice(TimeStampedModel):
-    """
-    Model to store the choices for multi choice questions
-    """
+
+    """Model to store the choices for multi choice questions"""
 
     order = models.PositiveIntegerField(default=1)
 
@@ -4455,6 +4457,7 @@ class Choice(TimeStampedModel):
 
 
 class ChoiceQuestion(Question):
+
     """
     Question with answers that are chosen from a list of choices defined
     by the user.
@@ -4466,10 +4469,7 @@ class ChoiceQuestion(Question):
     objects = PolymorphicManager()
 
     def get_form(self):
-        """
-        Returns the form for this model
-        """
-
+        """Returns the form for this model"""
         from .forms import ChoiceQuestionForm
         return ChoiceQuestionForm
 
@@ -4534,8 +4534,9 @@ class General_Survey(models.Model):
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Answer(PolymorphicModel, TimeStampedModel):
-        """ Base Answer model
-        """
+
+        """Base Answer model"""
+
         question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
         answered_survey = models.ForeignKey(Answered_Survey,

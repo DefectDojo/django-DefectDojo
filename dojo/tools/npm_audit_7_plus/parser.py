@@ -22,6 +22,7 @@ is added to each
 
 
 class NpmAudit7PlusParser:
+
     """Represents the parser class."""
 
     def get_scan_types(self):

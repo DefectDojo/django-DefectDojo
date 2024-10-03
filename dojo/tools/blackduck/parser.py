@@ -6,6 +6,7 @@ from .importer import BlackduckImporter
 
 
 class BlackduckParser:
+
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv and files.csv

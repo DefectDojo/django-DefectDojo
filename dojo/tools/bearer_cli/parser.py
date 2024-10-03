@@ -4,9 +4,8 @@ from dojo.models import Finding
 
 
 class BearerCLIParser:
-    """
-    Bearer CLI tool is a SAST scanner for multiple languages
-    """
+
+    """Bearer CLI tool is a SAST scanner for multiple languages"""
 
     def get_scan_types(self):
         return ["Bearer CLI"]

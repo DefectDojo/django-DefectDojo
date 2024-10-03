@@ -5,9 +5,8 @@ import requests
 
 
 class EdgescanAPI:
-    """
-    A simple client for the Edgescan API
-    """
+
+    """A simple client for the Edgescan API"""
 
     DEFAULT_URL = "https://live.edgescan.com"
 

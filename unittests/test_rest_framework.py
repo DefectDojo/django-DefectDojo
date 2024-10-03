@@ -1941,9 +1941,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
     @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
-        """
-        Test creating a new engagement should also check for import scan permission in the product
-        """
+        """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
@@ -2139,9 +2137,7 @@ class ReimportScanTest(DojoAPITestCase):
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
     @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
-        """
-        Test creating a new engagement should also check for import scan permission in the product
-        """
+        """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
