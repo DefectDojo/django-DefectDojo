@@ -729,7 +729,6 @@ SOCIAL_AUTH_PIPELINE = (
     "dojo.pipeline.update_product_access",
     "dojo.pipeline.update_product_type_azure_devops",
 )
-# Settings database
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
