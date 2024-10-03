@@ -3912,7 +3912,7 @@ class JIRA_Project(models.Model):
                                                              verbose_name=_("Add vulnerability Id as a JIRA label"),
                                                              blank=False)
     push_all_issues = models.BooleanField(default=False, blank=True,
-         help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
+         help_text=_("Automatically create JIRA tickets for verified findings. Once linked, the JIRA ticket will continue to sync, regardless of status in DefectDojo."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))
