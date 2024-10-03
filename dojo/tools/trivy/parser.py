@@ -91,7 +91,7 @@ class TrivyParser:
             if schema_version == 2:
                 results = data.get("Results", [])
                 return self.get_result_items(test, results, artifact_name=artifact_name)
-            elif cluster_name:
+            elif cluster_name is not None:
                 findings = []
                 vulnerabilities = data.get("Vulnerabilities", [])
                 for service in vulnerabilities:
