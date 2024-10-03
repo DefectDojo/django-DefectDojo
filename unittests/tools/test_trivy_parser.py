@@ -227,8 +227,7 @@ Number  Content
             self.assertEqual("Low", finding.severity)
 
     def test_issue_10991(self):
-      with open(sample_path("issue_10991.json"), encoding="utf-8") as test_file:
-        parser = TrivyParser()
-        findings = parser.get_findings(test_file, Test())
-        self.assertEqual(len(findings), 37)
-
+        with open(sample_path("issue_10991.json"), encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 37)
