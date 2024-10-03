@@ -403,6 +403,7 @@ def risk_accept_provider(
     body["event"] = "DD_RISK_ACCEPTANCE"
     body["id_vulnerability"] = finding_id
     body["acceptanceDays"] = acceptance_days
+    body["provider_to_accept"] = provider
     print(formatted_url)
     try:
         response = requests.post(url=formatted_url, headers=headers, data=body, verify=False)
