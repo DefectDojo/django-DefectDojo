@@ -325,12 +325,12 @@ def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
     if request.method == "POST":
-        for key, value in request.POST.items():
+        for key, orig_value in request.POST.items():
             if key.startswith("cfv_"):
                 cfv_id = int(key.split("_")[1])
                 cfv = get_object_or_404(DojoMeta, id=cfv_id)
 
-                value = value.strip()
+                value = orig_value.strip()
                 if value:
                     cfv.value = value
                     cfv.save()

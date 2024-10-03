@@ -526,8 +526,10 @@ class BaseClass:
 
                     for value in values:
                         if not isinstance(value, int):
-                            value = value["id"]
-                        self.assertIn(value, objs["prefetch"][field])
+                            clean_value = value["id"]
+                        else:
+                            clean_value = value
+                        self.assertIn(clean_value, objs["prefetch"][field])
 
             # TODO: add schema check
 
@@ -610,12 +612,14 @@ class BaseClass:
                 if key not in ["push_to_jira", "ssh", "password", "api_key"]:
                     # Convert data to sets to avoid problems with lists
                     if isinstance(value, list):
-                        value = set(value)
+                        clean_value = set(value)
+                    else:
+                        clean_value = value
                     if isinstance(response.data[key], list):
                         response_data = set(response.data[key])
                     else:
                         response_data = response.data[key]
-                    self.assertEqual(value, response_data)
+                    self.assertEqual(clean_value, response_data)
 
             self.assertNotIn("push_to_jira", response.data)
             self.assertNotIn("ssh", response.data)
