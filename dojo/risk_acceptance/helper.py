@@ -405,7 +405,6 @@ def risk_accept_provider(
     body["id_vulnerability"] = finding_id
     body["acceptanceDays"] = acceptance_days
     body["provider_to_accept"] = provider_tag
-    print(formatted_url)
     try:
         response = requests.post(url=formatted_url, headers=headers, data=body, verify=False)
     except Exception as ex:
@@ -413,9 +412,9 @@ def risk_accept_provider(
         raise(ex)
     print(response.status_code)
     if response.status_code == 200:
-        logger.info(f"Risk accept response from provider: {provider}, response: {response.text}")
+        logger.info(f"Risk accept response from provider: {provider_tag}, response: {response.text}")
     else:
-        logger.error(f"Error for provider: {provider}, response: {response.text}")
+        logger.error(f"Error for provider: {provider_tag}, response: {response.text}")
 
 
 def get_matching_value(list_a, list_b):
