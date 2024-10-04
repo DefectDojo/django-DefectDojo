@@ -71,6 +71,7 @@ class AsffParser:
                 full_description = f"**AWS resource ARN:** {resource_arn_strings}\n\n{control_description}"
             else:
                 full_description = control_description
+                impact = None
 
             finding = Finding(
                 title=item.get("Title"),
