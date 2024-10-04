@@ -92,7 +92,6 @@ class MendParser:
                     logger.exception("Error handling topFix node.")
 
             filepaths = []
-            locations = []
             if "sourceFiles" in node:
                 try:
                     sourceFiles_node = node.get("sourceFiles")
@@ -103,6 +102,7 @@ class MendParser:
                         "Error handling local paths for vulnerability.",
                     )
 
+            locations = []
             if "locations" in node:
                 try:
                     locations_node = node.get("locations", [])
@@ -117,6 +117,8 @@ class MendParser:
 
             if locations:
                 filepaths = locations
+            else:
+                filepaths = filepaths
 
             new_finding = Finding(
                 title=title,
