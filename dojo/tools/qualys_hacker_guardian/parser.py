@@ -7,6 +7,7 @@ from dojo.models import Endpoint, Finding
 
 
 class QualysHackerGuardianParser:
+
     """Parser for Qualys HackerGuardian"""
 
     # Severity mapping taken from

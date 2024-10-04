@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class DockleParser:
-    """
-    A class that can be used to parse the Dockle JSON report files
-    """
+
+    """A class that can be used to parse the Dockle JSON report files"""
 
     # table to match Dockle severity to DefectDojo severity
     SEVERITY = {

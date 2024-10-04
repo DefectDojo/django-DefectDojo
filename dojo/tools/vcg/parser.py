@@ -196,6 +196,7 @@ class VCGCsvParser:
 
 
 class VCGParser:
+
     """VCG (VisualCodeGrepper) support CSV and XML"""
 
     def get_scan_types(self):

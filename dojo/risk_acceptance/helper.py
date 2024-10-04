@@ -160,7 +160,6 @@ def expiration_handler(*args, **kwargs):
     If configured also sends a JIRA comment in both case to each jira issue.
     This is per finding.
     """
-
     try:
         system_settings = System_Settings.objects.get()
     except System_Settings.DoesNotExist:

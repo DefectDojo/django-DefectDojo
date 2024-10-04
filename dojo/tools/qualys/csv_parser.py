@@ -19,7 +19,6 @@ def parse_csv(csv_file) -> [Finding]:
         csv_file:
     Returns:
     """
-
     content = csv_file.read()
     if isinstance(content, bytes):
         content = content.decode("utf-8")
@@ -40,7 +39,6 @@ def get_report_findings(csv_reader) -> [dict]:
     Returns:
 
     """
-
     report_findings = []
 
     for row in csv_reader:
@@ -63,7 +61,6 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
     Returns:
         A CVSS3 Vector including both Base and Temporal if available
     """
-
     vector_pattern = r"^\d{1,2}.\d \((.*)\)"
     cvss_vector = "CVSS:3.0/"
 

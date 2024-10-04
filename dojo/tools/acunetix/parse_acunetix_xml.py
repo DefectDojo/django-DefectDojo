@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class AcunetixXMLParser:
+
     """This parser is written for Acunetix XML reports"""
+
     def get_findings(self, filename, test):
         dupes = {}
         root = parse(filename).getroot()

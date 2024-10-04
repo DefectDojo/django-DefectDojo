@@ -140,6 +140,7 @@ class MultipleSelectWithPop(forms.SelectMultiple):
 
 
 class MonthYearWidget(Widget):
+
     """
     A Widget that splits date input into two <select> boxes for month and year,
     with 'day' defaulting to the first of the month.
@@ -148,6 +149,7 @@ class MonthYearWidget(Widget):
 
     django/trunk/django/forms/extras/widgets.py
     """
+
     none_value = (0, "---")
     month_field = "%s_month"
     year_field = "%s_year"
@@ -2381,8 +2383,10 @@ def get_jira_issue_template_dir_choices():
 
         for dirname in dirnames:
             if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
-                base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
-            template_dir_list.append((os.path.join(base_dir, dirname), dirname))
+                clean_base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
+            else:
+                clean_base_dir = base_dir
+            template_dir_list.append((os.path.join(clean_base_dir, dirname), dirname))
 
     logger.debug("templates: %s", template_dir_list)
     return template_dir_list
@@ -3176,8 +3180,8 @@ class AnnouncementRemoveForm(AnnouncementCreateForm):
 # Show in admin a multichoice list of validator names
 # pass this to form using field_name='validator_name' ?
 class QuestionForm(forms.Form):
-    """ Base class for a Question
-    """
+
+    """Base class for a Question"""
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()

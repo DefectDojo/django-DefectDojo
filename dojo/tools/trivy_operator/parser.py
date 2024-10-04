@@ -1,6 +1,4 @@
-"""
-Parser for Aquasecurity trivy-operator (https://github.com/aquasecurity/trivy-operator)
-"""
+"""Parser for Aquasecurity trivy-operator (https://github.com/aquasecurity/trivy-operator)"""
 
 import json
 

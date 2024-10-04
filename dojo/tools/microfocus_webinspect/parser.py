@@ -8,6 +8,7 @@ from dojo.models import Endpoint, Finding
 
 
 class MicrofocusWebinspectParser:
+
     """Micro Focus Webinspect XML report parser"""
 
     def get_scan_types(self):

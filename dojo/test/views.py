@@ -808,9 +808,7 @@ def search(request, tid):
 
 class ReImportScanResultsView(View):
     def get_template(self) -> str:
-        """
-        Returns the template that will be presented to the user
-        """
+        """Returns the template that will be presented to the user"""
         return "dojo/import_scan_results.html"
 
     def get_form(
@@ -819,9 +817,7 @@ class ReImportScanResultsView(View):
         test: Test,
         **kwargs: dict,
     ) -> ReImportScanForm:
-        """
-        Returns the default import form for importing findings
-        """
+        """Returns the default import form for importing findings"""
         if request.method == "POST":
             return ReImportScanForm(request.POST, request.FILES, test=test, **kwargs)
         return ReImportScanForm(test=test, **kwargs)
@@ -831,9 +827,7 @@ class ReImportScanResultsView(View):
         request: HttpRequest,
         test: Test,
     ) -> Tuple[JIRAImportScanForm | None, bool]:
-        """
-        Returns a JiraImportScanForm if jira is enabled
-        """
+        """Returns a JiraImportScanForm if jira is enabled"""
         jira_form = None
         push_all_jira_issues = False
         # Decide if we need to present the Push to JIRA form
@@ -926,9 +920,7 @@ class ReImportScanResultsView(View):
         form: ReImportScanForm,
         context: dict,
     ) -> str | None:
-        """
-        Process the form and manipulate the input in any way that is appropriate
-        """
+        """Process the form and manipulate the input in any way that is appropriate"""
         # Update the running context dict with cleaned form input
         context.update({
             "scan": request.FILES.get("file", None),
@@ -984,18 +976,14 @@ class ReImportScanResultsView(View):
         self,
         context: dict,
     ) -> BaseImporter:
-        """
-        Gets the reimporter to use
-        """
+        """Gets the reimporter to use"""
         return DefaultReImporter(**context)
 
     def reimport_findings(
         self,
         context: dict,
     ) -> str | None:
-        """
-        Attempt to import with all the supplied information
-        """
+        """Attempt to import with all the supplied information"""
         try:
             importer_client = self.get_reimporter(context)
             (
@@ -1026,18 +1014,14 @@ class ReImportScanResultsView(View):
         self,
         context: dict,
     ) -> HttpResponseRedirect:
-        """
-        Redirect the user to a place that indicates a successful import
-        """
+        """Redirect the user to a place that indicates a successful import"""
         return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
 
     def failure_redirect(
         self,
         context: dict,
     ) -> HttpResponseRedirect:
-        """
-        Redirect the user to a place that indicates a failed import
-        """
+        """Redirect the user to a place that indicates a failed import"""
         return HttpResponseRedirect(reverse(
             "re_import_scan_results",
             args=(context.get("test").id, ),
@@ -1048,9 +1032,7 @@ class ReImportScanResultsView(View):
         request: HttpRequest,
         test_id: int,
     ) -> HttpResponse:
-        """
-        Process GET requests for the ReImport View
-        """
+        """Process GET requests for the ReImport View"""
         # process the request and path parameters
         request, context = self.handle_request(
             request,
@@ -1064,9 +1046,7 @@ class ReImportScanResultsView(View):
         request: HttpRequest,
         test_id: int,
     ) -> HttpResponse:
-        """
-        Process POST requests for the ReImport View
-        """
+        """Process POST requests for the ReImport View"""
         # process the request and path parameters
         request, context = self.handle_request(
             request,

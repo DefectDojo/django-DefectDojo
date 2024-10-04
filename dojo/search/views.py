@@ -31,7 +31,6 @@ max_results = settings.SEARCH_MAX_RESULTS
 
 
 def simple_search(request):
-
     """
     query:     some keywords
     operators: {}
@@ -69,7 +68,6 @@ def simple_search(request):
     operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
     keywords:  ['jquery']
     """
-
     tests = None
     findings = None
     finding_templates = None
@@ -500,15 +498,15 @@ def apply_tag_filters(qs, operators, skip_relations=False):
 
     # negative search based on not- prefix (not-tags, not-test-tags, not-engagement-tags, not-product-tags, etc)
 
-    for tag_filter in tag_filters:
-        tag_filter = "not-" + tag_filter
+    for base_tag_filter in tag_filters:
+        tag_filter = "not-" + base_tag_filter
         if tag_filter in operators:
             value = operators[tag_filter]
             value = ",".join(value)  # contains needs a single value
             qs = qs.exclude(**{"{}tags__name__contains".format(tag_filters[tag_filter.replace("not-", "")]): value})
 
-    for tag_filter in tag_filters:
-        tag_filter = "not-" + tag_filter
+    for base_tag_filter in tag_filters:
+        tag_filter = "not-" + base_tag_filter
         if tag_filter + "s" in operators:
             value = operators[tag_filter + "s"]
             qs = qs.exclude(**{"{}tags__name__in".format(tag_filters[tag_filter.replace("not-", "")]): value})

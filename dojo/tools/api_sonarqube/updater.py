@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiUpdater:
+
     """
     This class updates in SonarQube, a SonarQube issue previously imported as a DefectDojo Findings.
      This class maps the finding status to a SQ issue status and later on it transitions the issue

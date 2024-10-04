@@ -78,7 +78,8 @@ class TestZapParser(DojoTestCase):
                     endpoint.clean()
 
     def test_parse_issue4360(self):
-        """Report from GitHub issue 4360
+        """
+        Report from GitHub issue 4360
         see: https://github.com/DefectDojo/django-DefectDojo/issues/4360
         """
         with open("unittests/scans/zap/dvwa_baseline_dojo.xml", encoding="utf-8") as testfile:
@@ -112,7 +113,8 @@ class TestZapParser(DojoTestCase):
                 endpoint = finding.unsaved_endpoints[0]
 
     def test_parse_issue4697(self):
-        """Report from GitHub issue 4697
+        """
+        Report from GitHub issue 4697
         see: https://github.com/DefectDojo/django-DefectDojo/issues/4697
         """
         with open("unittests/scans/zap/zap-results-first-scan.xml", encoding="utf-8") as testfile:

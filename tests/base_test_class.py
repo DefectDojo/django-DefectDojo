@@ -407,7 +407,6 @@ class BaseTestCase(unittest.TestCase):
         {'level': 'WARNING', 'message': 'http://localhost:8080/product/type/4/edit 562:16 "warning"', 'source': 'console-api', 'timestamp': 1583952828410}
         {'level': 'SEVERE', 'message': 'http://localhost:8080/product/type/4/edit 563:16 "error"', 'source': 'console-api', 'timestamp': 1583952828410}
         """
-
         for entry in WebdriverOnlyNewLogFacade(self.driver).get_log("browser"):
             """
             Images are now working after https://github.com/DefectDojo/django-DefectDojo/pull/3954,

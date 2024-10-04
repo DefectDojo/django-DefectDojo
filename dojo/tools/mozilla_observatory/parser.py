@@ -4,7 +4,9 @@ from dojo.models import Finding
 
 
 class MozillaObservatoryParser:
-    """Mozilla Observatory
+
+    """
+    Mozilla Observatory
 
     See: https://observatory.mozilla.org
 
