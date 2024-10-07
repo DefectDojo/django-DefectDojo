@@ -69,8 +69,10 @@ class AsffParser:
             if resource_arns:
                 resource_arn_strings = ", ".join(resource_arns)
                 full_description = f"**AWS resource ARN:** {resource_arn_strings}\n\n{control_description}"
+                impact = resource_arn_strings
             else:
                 full_description = control_description
+                impact = None
 
             finding = Finding(
                 title=item.get("Title"),
@@ -81,6 +83,7 @@ class AsffParser:
                 severity=self.get_severity(item.get("Severity")),
                 active=active,
                 unique_id_from_tool=item.get("Id"),
+                impact=impact,
             )
 
             if "Resources" in item:
