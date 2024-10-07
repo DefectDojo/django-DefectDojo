@@ -54,6 +54,8 @@ class SSHAuditParser:
                         description="\n".join(description),
                         severity=severity,
                         static_finding=False)
+                finding.unsaved_vulnerability_ids = []
+                finding.unsaved_vulnerability_ids.append(cvename)
                 items.append(finding)
                 finding.unsaved_endpoints = []
                 endpoint = Endpoint(host=data["target"].split(":")[0], port=data["target"].split(":")[1])
