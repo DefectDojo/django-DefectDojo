@@ -139,7 +139,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, "https://gitlab.com"),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid"]),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid", "read_api", "read_repository"]),
     DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ""),
     DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ""),
@@ -1145,6 +1145,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
         "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
     },
+    "notification_webhook_status_cleanup": {
+        "task": "dojo.notifications.helper.webhook_status_cleanup",
+        "schedule": timedelta(minutes=1),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1154,7 +1158,6 @@ CELERY_BEAT_SCHEDULE = {
     #     'task': 'dojo.tasks.fix_loop_duplicates_task',
     #     'schedule': timedelta(hours=12)
     # },
-
 
 }
 
@@ -1729,6 +1732,7 @@ VULNERABILITY_URLS = {
     "RHBA": "https://access.redhat.com/errata/",
     "RHEA": "https://access.redhat.com/errata/",
     "FEDORA": "https://bodhi.fedoraproject.org/updates/",
+    "ALSA": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")

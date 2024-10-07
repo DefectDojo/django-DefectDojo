@@ -12,7 +12,8 @@ class InvictiParser(NetsparkerParser):
         return "Invicti JSON format."
 
     def get_findings(self, filename, test):
-        """Extended the NetSparker Parser since the Invicti is the a renamed version of Netsparker.
+        """
+        Extended the NetSparker Parser since the Invicti is the a renamed version of Netsparker.
 
         If there are deviations from the two report formats in the future, then this
         function can be implemented then.

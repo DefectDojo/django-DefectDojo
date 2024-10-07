@@ -38,8 +38,7 @@ class Crunch42Parser:
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
             return temp
-        else:
-            return self.process_tree(reportTree, test)
+        return self.process_tree(reportTree, test)
 
     def get_items(self, tree, test):
         items = {}
@@ -72,7 +71,7 @@ class Crunch42Parser:
         else:
             severity = "Critical"
         # create the finding object
-        finding = Finding(
+        return Finding(
             unique_id_from_tool=fingerprint,
             title=title,
             test=test,
@@ -87,4 +86,3 @@ class Crunch42Parser:
             static_finding=True,
             dynamic_finding=False,
         )
-        return finding

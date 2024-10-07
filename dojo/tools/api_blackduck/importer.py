@@ -6,9 +6,8 @@ from .api_client import BlackduckAPI
 
 
 class BlackduckApiImporter:
-    """
-    Import from BlackDuck API
-    """
+
+    """Import from BlackDuck API"""
 
     config_id = "BlackDuck API"
 

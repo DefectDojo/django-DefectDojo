@@ -8,7 +8,9 @@ from dojo.models import Endpoint, Finding
 
 
 class ArachniParser:
-    """Arachni Web Scanner (http://arachni-scanner.com/wiki)
+
+    """
+    Arachni Web Scanner (http://arachni-scanner.com/wiki)
 
     Reports are generated with arachni_reporter tool:
     `./arachni_reporter --reporter 'json' js.com.afr`

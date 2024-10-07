@@ -23,6 +23,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class AutoCreateContextManager:
+
     """
     Management of safely fetching and creating resources used in the import
     and reimport processes. Resources managed by this class are:
@@ -31,6 +32,7 @@ class AutoCreateContextManager:
     - Engagements
     - Tests
     """
+
     """
     ===================================
     ----------- Validators ------------
@@ -229,16 +231,15 @@ class AutoCreateContextManager:
         # Look for an existing object
         if product_type := self.get_target_product_type_if_exists(product_type_name=product_type_name):
             return product_type
-        else:
-            with transaction.atomic():
-                product_type, created = Product_Type.objects.select_for_update().get_or_create(name=product_type_name)
-                if created:
-                    Product_Type_Member.objects.create(
-                        user=get_current_user(),
-                        product_type=product_type,
-                        role=Role.objects.get(is_owner=True),
-                    )
-                return product_type
+        with transaction.atomic():
+            product_type, created = Product_Type.objects.select_for_update().get_or_create(name=product_type_name)
+            if created:
+                Product_Type_Member.objects.create(
+                    user=get_current_user(),
+                    product_type=product_type,
+                    role=Role.objects.get(is_owner=True),
+                )
+            return product_type
 
     def get_or_create_product(
         self,
@@ -287,9 +288,7 @@ class AutoCreateContextManager:
         target_end: Optional[datetime] = None,
         **kwargs: dict,
     ) -> Engagement:
-        """
-        Fetches an engagement by name or ID if one already exists.
-        """
+        """Fetches an engagement by name or ID if one already exists."""
         # try to find the engagement (and product)
         product = self.get_target_product_if_exists(
             product_name=product_name,

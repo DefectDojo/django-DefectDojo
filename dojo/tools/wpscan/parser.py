@@ -6,6 +6,7 @@ from dojo.models import Endpoint, Finding
 
 
 class WpscanParser:
+
     """WPScan - WordPress Security Scanner"""
 
     def get_scan_types(self):
@@ -185,7 +186,8 @@ class WpscanParser:
         return references
 
     def _get_scanner_confidence(self, val):
-        """Confidence value are from 0 (wrong) to 100 (certain)
+        """
+        Confidence value are from 0 (wrong) to 100 (certain)
         So we divide by 10 and invert axis
         """
         if val is None:

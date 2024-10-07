@@ -17,8 +17,7 @@ class VeracodeParser:
     def get_findings(self, filename, test):
         if filename.name.lower().endswith(".xml"):
             return VeracodeXMLParser().get_findings(filename, test)
-        elif filename.name.lower().endswith(".json"):
+        if filename.name.lower().endswith(".json"):
             return VeracodeJSONParser().get_findings(filename, test)
-        else:
-            msg = "Filename extension not recognized. Use .xml or .json"
-            raise ValueError(msg)
+        msg = "Filename extension not recognized. Use .xml or .json"
+        raise ValueError(msg)

@@ -4,6 +4,7 @@ from dojo.models import Finding
 
 
 class GitlabAPIFuzzingParser:
+
     """
     GitLab API Fuzzing Report
 

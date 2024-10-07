@@ -102,7 +102,7 @@ class HCLAppScanParser:
                         case "port":
                             port = self.xmltreehelper(item)
                             description = description + "Port:" + port + "\n"
-                finding = Finding(
+                prepared_finding = Finding(
                     title=title,
                     description=description,
                     severity=severity,
@@ -111,13 +111,12 @@ class HCLAppScanParser:
                     dynamic_finding=True,
                     static_finding=False,
                 )
-                findings.append(finding)
+                findings.append(prepared_finding)
                 try:
-                    finding.unsaved_endpoints = []
+                    prepared_finding.unsaved_endpoints = []
                     endpoint = Endpoint(host=host, port=port)
-                    finding.unsaved_endpoints.append(endpoint)
+                    prepared_finding.unsaved_endpoints.append(endpoint)
                 except UnboundLocalError:
                     pass
             return findings
-        else:
-            return findings
+        return findings
