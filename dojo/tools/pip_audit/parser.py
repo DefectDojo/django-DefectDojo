@@ -5,6 +5,7 @@ from dojo.models import Finding
 
 
 class PipAuditParser:
+
     """Represents a file parser capable of ingesting pip-audit results."""
 
     def get_scan_types(self):

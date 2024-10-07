@@ -15,14 +15,11 @@ __author__ = "Kirill Gotsman"
 
 
 class HackerOneVulnerabilityDisclosureProgram:
-    """
-    Vulnerability Disclosure Program HackerOne reports
-    """
+
+    """Vulnerability Disclosure Program HackerOne reports"""
 
     def get_vulnerability_disclosure_json_findings(self, tree, test):
-        """
-        Converts a HackerOne reports to a DefectDojo finding
-        """
+        """Converts a HackerOne reports to a DefectDojo finding"""
         # Convert JSON  report to DefectDojo format
         dupes = {}
         for content in tree["data"]:
@@ -147,6 +144,7 @@ class HackerOneVulnerabilityDisclosureProgram:
 
 
 class HackerOneBugBountyProgram:
+
     """Bug Bounty Program HackerOne reports."""
 
     fields_to_label: ClassVar[dict[str, str]] = {
@@ -200,7 +198,8 @@ class HackerOneBugBountyProgram:
         return findings
 
     def determine_status(self, row) -> dict:
-        """Generate a dict of status meta to fully represent that state of the finding
+        """
+        Generate a dict of status meta to fully represent that state of the finding
 
         Possible states currently supported are open and closed. In the event that neither
         of those options are present, the open status will be the default, and returned
@@ -256,9 +255,8 @@ class H1Parser(
     HackerOneVulnerabilityDisclosureProgram,
     HackerOneBugBountyProgram,
 ):
-    """
-    A class that can be used to parse the Get All Reports JSON export from HackerOne API.
-    """
+
+    """A class that can be used to parse the Get All Reports JSON export from HackerOne API."""
 
     def get_scan_types(self):
         return ["HackerOne Cases"]
@@ -275,11 +273,10 @@ class H1Parser(
         file_name = file.name
         if str(file_name).endswith(".json"):
             return self.determine_json_format(file, test)
-        elif str(file_name).endswith(".csv"):
+        if str(file_name).endswith(".csv"):
             return self.determine_csv_format(file, test)
-        else:
-            msg = "Filename extension not recognized. Use .json or .csv"
-            raise ValueError(msg)
+        msg = "Filename extension not recognized. Use .json or .csv"
+        raise ValueError(msg)
 
     def get_json_tree(self, file: TemporaryUploadedFile) -> dict:
         """Extract the CSV file into a iterable that represents a dict."""
@@ -298,9 +295,8 @@ class H1Parser(
             return self.get_bug_bounty_program_json_findings(tree.get("findings", []), test)
         if "data" in tree:
             return self.get_vulnerability_disclosure_json_findings(tree, test)
-        else:
-            msg = "This JSON format is not supported"
-            raise ValueError(msg)
+        msg = "This JSON format is not supported"
+        raise ValueError(msg)
 
     def get_csv_reader(self, file: TemporaryUploadedFile) -> csv.DictReader:
         """Extract the CSV file into a iterable that represents a dict."""
@@ -317,6 +313,5 @@ class H1Parser(
         # Check for some root elements
         if "bounty" in reader.fieldnames:
             return self.get_bug_bounty_program_csv_findings(reader, test)
-        else:
-            msg = "This CSV format is not supported"
-            raise ValueError(msg)
+        msg = "This CSV format is not supported"
+        raise ValueError(msg)

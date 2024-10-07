@@ -5,6 +5,7 @@ from dojo.models import Endpoint, Finding
 
 
 class AppSpiderParser:
+
     """Parser for Rapid7 AppSpider reports"""
 
     def get_scan_types(self):
@@ -18,7 +19,7 @@ class AppSpiderParser:
 
     def get_findings(self, filename, test):
         if filename is None:
-            return
+            return None
 
         vscan = ElementTree.parse(filename)
         root = vscan.getroot()

@@ -23,8 +23,7 @@ class SnykCodeParser:
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
             return temp
-        else:
-            return self.process_tree(reportTree, test)
+        return self.process_tree(reportTree, test)
 
     def process_tree(self, tree, test):
         return list(self.get_items(tree, test)) if tree else []
@@ -235,7 +234,7 @@ class SnykCodeParser:
         else:
             severity = "Critical"
         # create the finding object
-        finding = Finding(
+        return Finding(
             vuln_id_from_tool=ruleId,
             file_path=locations_uri,
             title=ruleId + "_" + locations_uri,
@@ -258,4 +257,3 @@ class SnykCodeParser:
             static_finding=True,
             dynamic_finding=False,
         )
-        return finding

@@ -6,9 +6,8 @@ from dojo.models import Finding
 
 
 class ThreatComposerParser:
-    """
-    Threat Composer JSON can be imported. See here for more info on this JSON format.
-    """
+
+    """Threat Composer JSON can be imported. See here for more info on this JSON format."""
 
     PRIORITY_VALUES = ["Low", "Medium", "High"]
     STRIDE_VALUES = {

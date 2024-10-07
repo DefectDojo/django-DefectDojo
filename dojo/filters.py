@@ -331,8 +331,7 @@ def get_tags_model_from_field_name(field):
 def get_tags_label_from_model(model):
     if model:
         return f"Tags ({model.__name__.title()})"
-    else:
-        return "Tags (Unknown)"
+    return "Tags (Unknown)"
 
 
 def get_finding_filterset_fields(metrics=False, similar=False, filter_string_matching=False):
@@ -780,6 +779,7 @@ class MetricsDateRangeFilter(ChoiceFilter):
             self.start_date = _truncate(start_date - timedelta(days=1))
             self.end_date = _truncate(now() + timedelta(days=1))
             return qs.all()
+        return None
 
     def current_month(self, qs, name):
         self.start_date = local_tz.localize(
@@ -1927,8 +1927,7 @@ class SimilarFindingHelper(FilterSet):
     def filter_queryset(self, *args: list, **kwargs: dict):
         queryset = super().filter_queryset(*args, **kwargs)
         queryset = get_authorized_findings(Permissions.Finding_View, queryset, self.user)
-        queryset = queryset.exclude(pk=self.finding.pk)
-        return queryset
+        return queryset.exclude(pk=self.finding.pk)
 
 
 class SimilarFindingFilter(FindingFilter, SimilarFindingHelper):
