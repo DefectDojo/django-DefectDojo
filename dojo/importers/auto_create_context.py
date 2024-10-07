@@ -102,6 +102,8 @@ class AutoCreateContextManager:
         self.process_object_name("product_type_name", data)
         # Validate the product_name
         self.process_object_name("product_name", data)
+        # Validate the product_scm_type
+        self.process_object_name("product_scm_type", data)
         # Validate the engagement_name
         self.process_object_name("engagement_name", data)
         # Validate the test_title

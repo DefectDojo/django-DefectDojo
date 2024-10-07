@@ -2076,7 +2076,6 @@ class ImportScanSerializer(serializers.Serializer):
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
     product_scm_type = serializers.CharField(required=False)
-    scan_type = serializers.ChoiceField(choices=get_choices_sorted())
     engagement_name = serializers.CharField(required=False)
     engagement_end_date = serializers.DateField(
         required=False,
