@@ -28,9 +28,7 @@ class EndpointManager:
         endpoints: List[Endpoint],
         **kwargs: dict,
     ) -> None:
-        """
-        Creates Endpoint objects for a single finding and creates the link via the endpoint status
-        """
+        """Creates Endpoint objects for a single finding and creates the link via the endpoint status"""
         logger.debug(f"IMPORT_SCAN: Adding {len(endpoints)} endpoints to finding: {finding}")
         self.clean_unsaved_endpoints(endpoints)
         for endpoint in endpoints:
@@ -57,7 +55,7 @@ class EndpointManager:
                 endpoint=ep,
                 defaults={"date": finding.date})
         logger.debug(f"IMPORT_SCAN: {len(endpoints)} imported")
-        return None
+        return
 
     @dojo_async_task
     @app.task()
@@ -67,9 +65,7 @@ class EndpointManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        """
-        Mitigates all endpoint status objects that are supplied
-        """
+        """Mitigates all endpoint status objects that are supplied"""
         now = timezone.now()
         for endpoint_status in endpoint_status_list:
             # Only mitigate endpoints that are actually active
@@ -79,7 +75,7 @@ class EndpointManager:
                 endpoint_status.mitigated_by = user
                 endpoint_status.mitigated = True
                 endpoint_status.save()
-        return None
+        return
 
     @dojo_async_task
     @app.task()
@@ -88,9 +84,7 @@ class EndpointManager:
         endpoint_status_list: List[Endpoint_Status],
         **kwargs: dict,
     ) -> None:
-        """
-        Reactivate all endpoint status objects that are supplied
-        """
+        """Reactivate all endpoint status objects that are supplied"""
         for endpoint_status in endpoint_status_list:
             # Only reactivate endpoints that are actually mitigated
             if endpoint_status.mitigated:
@@ -100,7 +94,7 @@ class EndpointManager:
                 endpoint_status.mitigated = False
                 endpoint_status.last_modified = timezone.now()
                 endpoint_status.save()
-        return None
+        return
 
     def chunk_endpoints(
         self,
@@ -158,7 +152,7 @@ class EndpointManager:
                 endpoint.clean()
             except ValidationError as e:
                 logger.warning(f"DefectDojo is storing broken endpoint because cleaning wasn't successful: {e}")
-        return None
+        return
 
     def chunk_endpoints_and_reactivate(
         self,
@@ -182,7 +176,7 @@ class EndpointManager:
                 self.reactivate_endpoint_status(endpoint_status_list, sync=False)
         else:
             self.reactivate_endpoint_status(endpoint_status_list, sync=True)
-        return None
+        return
 
     def chunk_endpoints_and_mitigate(
         self,
@@ -207,7 +201,7 @@ class EndpointManager:
                 self.mitigate_endpoint_status(endpoint_status_list, user, sync=False)
         else:
             self.mitigate_endpoint_status(endpoint_status_list, user, sync=True)
-        return None
+        return
 
     def update_endpoint_status(
         self,
@@ -216,9 +210,7 @@ class EndpointManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        """
-        Update the list of endpoints from the new finding with the list that is in the old finding
-        """
+        """Update the list of endpoints from the new finding with the list that is in the old finding"""
         # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
         # So we only need to mitigate endpoints that are no longer present
         # using `.all()` will mark as mitigated also `endpoint_status` with flags `false_positive`, `out_of_scope` and `risk_accepted`. This is a known issue. This is not a bug. This is a future.
@@ -242,4 +234,4 @@ class EndpointManager:
             )
             self.chunk_endpoints_and_reactivate(endpoint_status_to_reactivate)
         self.chunk_endpoints_and_mitigate(endpoint_status_to_mitigate, user)
-        return None
+        return

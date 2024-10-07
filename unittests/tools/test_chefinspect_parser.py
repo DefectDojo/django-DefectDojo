@@ -21,4 +21,4 @@ class TestChefInspectParser(DojoTestCase):
         with open("unittests/scans/chefinspect/many_findings.log", encoding="utf-8") as testfile:
             parser = ChefInspectParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertTrue(10, len(findings))
+            self.assertEqual(10, len(findings))

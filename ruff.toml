@@ -28,15 +28,13 @@ exclude = [
 ]
 
 [lint]
-# Enable the pycodestyle (`E`) and Pyflakes (`F`) rules by default.
-# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# McCabe complexity (`C901`) by default.
 select = [
    "F",
    "E",
    "W",
+   "C90",
    "I",
-   "D3",
+   "D2", "D3",
    "UP",
    "YTT",
    "ASYNC",
@@ -49,15 +47,17 @@ select = [
    "DJ003", "DJ012", "DJ013",
    "EM",
    "EXE",
+   "ISC001",
    "ICN",
    "LOG",
    "G001", "G002", "G1", "G2",
    "INP",
-   "SLOT",
+   "RET",
    "PIE",
    "T20",
    "Q",
    "RSE",
+   "SLOT",
    "TID",
    "TCH",
    "INT",
@@ -67,7 +67,8 @@ select = [
    "PD",
    "PGH",
    "PLE",
-   "PLW15",
+   "PLR0915",
+   "PLW1", "PLW2", "PLW3",
    "TRY003",
    "TRY004",
    "TRY2",
@@ -77,13 +78,19 @@ select = [
    "FAST",
    "AIR",
    "FURB",
-   "RUF1","RUF2",
-   "RUF001","RUF002", "RUF003", "RUF005",
-   "RUF013",
-   "RUF019",
-   "RUF021",
+   "RUF",
 ]
-ignore = ["E501", "E722"]
+ignore = [
+    "E501",
+    "E722",
+    "RUF010",
+    "RUF012",
+    "RUF015",
+    "RUF027",
+    "D205",
+    "D211",  # `one-blank-line-before-class` (D203) and `no-blank-line-before-class` (D211) are incompatible.
+    "D212",  # `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line` (D213) are incompatible.
+]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -94,3 +101,9 @@ per-file-ignores = {}
 
 [lint.flake8-boolean-trap]
 extend-allowed-calls = ["dojo.utils.get_system_setting"]
+
+[lint.pylint]
+max-statements = 234
+
+[lint.mccabe]
+max-complexity = 70  # value is far from perfect (recommended default is 10). But we will try to decrease it over the time.

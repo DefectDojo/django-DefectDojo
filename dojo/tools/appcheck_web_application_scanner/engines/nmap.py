@@ -5,12 +5,14 @@ from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineP
 
 
 class NmapScanningEngineParser(BaseEngineParser):
+
     """
     Parser for data from the Nmap scanning engine.
 
     Nmap engine results include a list of ports in a 'port_table' data entry that we use to generate several endpoints
     under the same Finding.
     """
+
     SCANNING_ENGINE = "NMapScanner"
 
     def is_port_table_entry(self, entry) -> bool:

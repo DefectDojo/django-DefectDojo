@@ -50,7 +50,6 @@ class DrHeaderParser:
                 for finding in item["report"]:
                     items.append(self.return_finding(test=test, finding=finding, url=url))
             return items
-        else:
-            for finding in data:
-                items.append(self.return_finding(test=test, finding=finding))
-            return items
+        for finding in data:
+            items.append(self.return_finding(test=test, finding=finding))
+        return items

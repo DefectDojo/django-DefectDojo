@@ -81,12 +81,11 @@ def dismiss_announcement(request):
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect("dashboard")
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                _("Failed to remove announcement."),
-                extra_tags="alert-danger",
-            )
-            return render(request, "dojo/dismiss_announcement.html")
+        messages.add_message(
+            request,
+            messages.ERROR,
+            _("Failed to remove announcement."),
+            extra_tags="alert-danger",
+        )
+        return render(request, "dojo/dismiss_announcement.html")
     return render(request, "dojo/dismiss_announcement.html")

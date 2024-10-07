@@ -23,11 +23,10 @@ class AWSProwlerParser:
     def get_findings(self, file, test):
         if file.name.lower().endswith(".csv"):
             return self.process_csv(file, test)
-        elif file.name.lower().endswith(".json"):
+        if file.name.lower().endswith(".json"):
             return self.process_json(file, test)
-        else:
-            msg = "Unknown file format"
-            raise ValueError(msg)
+        msg = "Unknown file format"
+        raise ValueError(msg)
 
     def process_csv(self, file, test):
         content = file.read()
@@ -218,8 +217,7 @@ class AWSProwlerParser:
     def formatview(self, depth):
         if depth > 1:
             return "* "
-        else:
-            return ""
+        return ""
 
     # Criticality rating
     def getCriticalityRating(self, result, level, severity):
@@ -233,10 +231,9 @@ class AWSProwlerParser:
                 if severity == "Informational":
                     return "Low"
                 return severity
+            if level == "Level 1":
+                criticality = "Critical"
             else:
-                if level == "Level 1":
-                    criticality = "Critical"
-                else:
-                    criticality = "High"
+                criticality = "High"
 
         return criticality

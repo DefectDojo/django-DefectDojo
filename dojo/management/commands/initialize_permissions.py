@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    """
-    This management command creates non-standard Django permissions
-    """
+
+    """This management command creates non-standard Django permissions"""
+
     help = "Usage: manage.py initialize_permissions"
 
     def handle(self, *args, **options):

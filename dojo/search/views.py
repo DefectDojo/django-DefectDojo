@@ -31,6 +31,43 @@ max_results = settings.SEARCH_MAX_RESULTS
 
 
 def simple_search(request):
+    """
+    query:     some keywords
+    operators: {}
+    keywords:  ['some', 'keywords']
+
+    query:     some key-word
+    operators: {}
+    keywords:  ['some', 'key-word']
+
+    query:     keyword with "space inside"
+    operators: {}
+    keywords:  ['keyword', 'with', 'space inside']
+
+    query:     tag:anchore word tags:php
+    operators: {'tag': ['anchore'], 'tags': ['php']}
+    keywords:  ['word']
+
+    query:     tags:php,magento
+    operators: {'tags': ['php,magento']}
+    keywords:  []
+
+    query:     tags:php tags:magento
+    operators: {'tags': ['php', 'magento']}
+    keywords:  []
+
+    query:     tags:"php, magento"
+    operators: {'tags': ['php, magento']}
+    keywords:  []
+
+    query:     tags:anchorse some "space inside"
+    operators: {'tags': ['anchorse']}
+    keywords:  ['some', 'space inside']
+
+    query:     tags:anchore vulnerability_id:CVE-2020-1234 jquery
+    operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
+    keywords:  ['jquery']
+    """
     tests = None
     findings = None
     finding_templates = None
@@ -364,44 +401,6 @@ def simple_search(request):
         response.delete_cookie("highlight", path="/")
     return response
 
-    """
-    query:     some keywords
-    operators: {}
-    keywords:  ['some', 'keywords']
-
-    query:     some key-word
-    operators: {}
-    keywords:  ['some', 'key-word']
-
-    query:     keyword with "space inside"
-    operators: {}
-    keywords:  ['keyword', 'with', 'space inside']
-
-    query:     tag:anchore word tags:php
-    operators: {'tag': ['anchore'], 'tags': ['php']}
-    keywords:  ['word']
-
-    query:     tags:php,magento
-    operators: {'tags': ['php,magento']}
-    keywords:  []
-
-    query:     tags:php tags:magento
-    operators: {'tags': ['php', 'magento']}
-    keywords:  []
-
-    query:     tags:"php, magento"
-    operators: {'tags': ['php, magento']}
-    keywords:  []
-
-    query:     tags:anchorse some "space inside"
-    operators: {'tags': ['anchorse']}
-    keywords:  ['some', 'space inside']
-
-    query:     tags:anchore vulnerability_id:CVE-2020-1234 jquery
-    operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
-    keywords:  ['jquery']
-    """
-
 
 # it's not google grade parsing, but let's do some basic stuff right
 def parse_search_query(clean_query):
@@ -448,8 +447,7 @@ def vulnerability_id_fix(keyword):
 
     if vulnerability_ids:
         return " ".join(vulnerability_ids)
-    else:
-        return keyword
+    return keyword
 
 
 def apply_tag_filters(qs, operators, skip_relations=False):
@@ -500,15 +498,15 @@ def apply_tag_filters(qs, operators, skip_relations=False):
 
     # negative search based on not- prefix (not-tags, not-test-tags, not-engagement-tags, not-product-tags, etc)
 
-    for tag_filter in tag_filters:
-        tag_filter = "not-" + tag_filter
+    for base_tag_filter in tag_filters:
+        tag_filter = "not-" + base_tag_filter
         if tag_filter in operators:
             value = operators[tag_filter]
             value = ",".join(value)  # contains needs a single value
             qs = qs.exclude(**{"{}tags__name__contains".format(tag_filters[tag_filter.replace("not-", "")]): value})
 
-    for tag_filter in tag_filters:
-        tag_filter = "not-" + tag_filter
+    for base_tag_filter in tag_filters:
+        tag_filter = "not-" + base_tag_filter
         if tag_filter + "s" in operators:
             value = operators[tag_filter + "s"]
             qs = qs.exclude(**{"{}tags__name__in".format(tag_filters[tag_filter.replace("not-", "")]): value})

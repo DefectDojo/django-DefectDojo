@@ -133,17 +133,21 @@ class SemgrepParser:
         upper_value = val.upper()
         if upper_value == "CRITICAL":
             return "Critical"
-        elif upper_value in ["WARNING", "MEDIUM"]:
+        if upper_value in ["WARNING", "MEDIUM"]:
             return "Medium"
-        elif upper_value in ["ERROR", "HIGH"]:
+        if upper_value in ["ERROR", "HIGH"]:
             return "High"
-        elif upper_value == "LOW":
+        if upper_value == "LOW":
             return "Low"
-        elif upper_value == "INFO":
-            return "Info"
-        else:
-            msg = f"Unknown value for severity: {val}"
-            raise ValueError(msg)
+        if upper_value == "INFO":
+            if "WARNING" == val.upper():
+                return "Medium"
+            if "ERROR" == val.upper() or "HIGH" == val.upper():
+                return "High"
+            if "INFO" == val.upper():
+                return "Info"
+        msg = f"Unknown value for severity: {val}"
+        raise ValueError(msg)
 
     def get_description(self, item):
         description = ""
