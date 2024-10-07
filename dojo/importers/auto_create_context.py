@@ -13,6 +13,7 @@ from dojo.models import (
     Product_Member,
     Product_Type,
     Product_Type_Member,
+    DojoMeta,
     Role,
     Test,
 )
@@ -245,6 +246,7 @@ class AutoCreateContextManager:
         self,
         product_name: Optional[str] = None,
         product_type_name: Optional[str] = None,
+        product_scm_type: Optional[str] = None,
         *,
         auto_create_context: bool = False,
         **kwargs: dict,
@@ -272,7 +274,9 @@ class AutoCreateContextManager:
                     product=product,
                     role=Role.objects.get(is_owner=True),
                 )
-
+                # Create scm-type for product
+                if product_scm_type:
+                    DojoMeta.objects.select_for_update().get_or_create(name='scm-type', value=product_scm_type, product=product)
         return product
 
     def get_or_create_engagement(
@@ -281,6 +285,7 @@ class AutoCreateContextManager:
         engagement_name: Optional[str] = None,
         product_name: Optional[str] = None,
         product_type_name: Optional[str] = None,
+        product_scm_type: Optional[str] = None,
         *,
         auto_create_context: bool = False,
         deduplication_on_engagement: bool = False,
@@ -310,6 +315,7 @@ class AutoCreateContextManager:
         product = self.get_or_create_product(
             product_name=product_name,
             product_type_name=product_type_name,
+            product_scm_type=product_scm_type,
             auto_create_context=auto_create_context,
         )
         # Get the target start date in order
