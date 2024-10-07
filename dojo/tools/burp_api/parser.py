@@ -16,6 +16,7 @@ DESCRIPTION_TEMPLATE = """**{title}**
 
 
 class BurpApiParser:
+
     """Parser that can load data from Burp API"""
 
     def get_scan_types(self):
@@ -123,7 +124,8 @@ class BurpApiParser:
 
 
 def convert_severity(issue):
-    """According to OpenAPI definition of the API
+    """
+    According to OpenAPI definition of the API
 
     "Severity":{
              "type":"string",
@@ -144,7 +146,8 @@ def convert_severity(issue):
 
 
 def convert_confidence(issue):
-    """According to OpenAPI definition:
+    """
+    According to OpenAPI definition:
 
     "Confidence":{
              "type":"string",
@@ -159,9 +162,8 @@ def convert_confidence(issue):
     value = issue.get("confidence", "undefined").lower()
     if "certain" == value:
         return 2
-    elif "firm" == value:
+    if "firm" == value:
         return 3
-    elif "tentative" == value:
+    if "tentative" == value:
         return 6
-    else:
-        return None
+    return None

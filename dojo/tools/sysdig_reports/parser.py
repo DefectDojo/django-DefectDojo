@@ -8,9 +8,8 @@ from dojo.tools.sysdig_reports.sysdig_csv_parser import CSVParser
 
 
 class SysdigReportsParser:
-    """
-    Sysdig Report Importer - Runtime CSV
-    """
+
+    """Sysdig Report Importer - Runtime CSV"""
 
     def get_scan_types(self):
         return ["Sysdig Vulnerability Report"]
@@ -27,15 +26,14 @@ class SysdigReportsParser:
         if filename.name.lower().endswith(".csv"):
             arr_data = CSVParser().parse(filename=filename)
             return self.parse_csv(arr_data=arr_data, test=test)
-        elif filename.name.lower().endswith(".json"):
+        if filename.name.lower().endswith(".json"):
             scan_data = filename.read()
             try:
                 data = json.loads(str(scan_data, "utf-8"))
             except Exception:
                 data = json.loads(scan_data)
             return self.parse_json(data=data, test=test)
-        else:
-            return ()
+        return ()
 
     def parse_json(self, data, test):
         vulnerability = data.get("data", None)
@@ -147,7 +145,7 @@ class SysdigReportsParser:
             if row.k8s_cluster_name != "":
                 finding.dynamic_finding = True
                 finding.static_finding = False
-                finding.description += f"###Runtime Context {row.k8s_cluster_name}"                                        f"\n - **Cluster:** {row.k8s_cluster_name}"
+                finding.description += f"###Runtime Context {row.k8s_cluster_name}\n - **Cluster:** {row.k8s_cluster_name}"
                 finding.description += f"\n - **Namespace:** {row.k8s_namespace_name}"
                 finding.description += f"\n - **Workload Name:** {row.k8s_workload_name} "
                 finding.description += f"\n - **Workload Type:** {row.k8s_workload_type} "

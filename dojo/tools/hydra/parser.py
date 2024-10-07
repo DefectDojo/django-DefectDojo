@@ -22,9 +22,8 @@ class HydraScanMetadata:
 
 
 class HydraParser:
-    """
-    Weak password findings from THC-Hydra (https://github.com/vanhauser-thc/thc-hydra)
-    """
+
+    """Weak password findings from THC-Hydra (https://github.com/vanhauser-thc/thc-hydra)"""
 
     def get_scan_types(self):
         return ["Hydra Scan"]
@@ -39,9 +38,7 @@ class HydraParser:
         report = self.__parse_json(json_output)
 
         metadata = HydraScanMetadata(report["generator"])
-        findings = self.__extract_findings(report["results"], metadata, test)
-
-        return findings
+        return self.__extract_findings(report["results"], metadata, test)
 
     def __extract_findings(
         self, raw_findings, metadata: HydraScanMetadata, test,

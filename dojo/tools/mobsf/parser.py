@@ -73,8 +73,8 @@ class MobSFParser:
             if "urls" in data:
                 curl = ""
                 for url in data["urls"]:
-                    for curl in url["urls"]:
-                        curl = f"{curl}\n"
+                    for durl in url["urls"]:
+                        curl = f"{durl}\n"
 
                 if curl:
                     test_description = f"{test_description}\n**URL's:**\n {curl}\n"
@@ -367,7 +367,8 @@ class MobSFParser:
         return list(dupes.values())
 
     def getSeverityForPermission(self, status):
-        """Convert status for permission detection to severity
+        """
+        Convert status for permission detection to severity
 
         In MobSF there is only 4 know values for permission,
          we map them as this:
@@ -378,8 +379,7 @@ class MobSFParser:
         """
         if "dangerous" == status:
             return "High"
-        else:
-            return "Info"
+        return "Info"
 
     # Criticality rating
     def getCriticalityRating(self, rating):

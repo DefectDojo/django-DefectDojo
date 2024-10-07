@@ -280,7 +280,7 @@ class FindingTest(BaseTestCase):
         # This will throw exception if the test fails due to invalid xpath
         post_status = driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(pre_status != post_status)
+        self.assertNotEqual(pre_status, post_status)
 
     def test_open_finding(self):
         driver = self.driver
@@ -303,7 +303,7 @@ class FindingTest(BaseTestCase):
         # This will throw exception if the test fails due to invalid xpath
         post_status = driver.find_element(By.XPATH, '//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(pre_status != post_status)
+        self.assertNotEqual(pre_status, post_status)
 
     @on_exception_html_source_logger
     def test_simple_accept_finding(self):
@@ -328,7 +328,7 @@ class FindingTest(BaseTestCase):
         # This will throw exception if the test fails due to invalid xpath
         # TODO: risk acceptance doesn't mitigate endpoints currently
         # post_status = driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
-        # self.assertTrue(pre_status != post_status)
+        # self.assertNotEqual(pre_status, post_status)
 
     def test_unaccept_finding(self):
         driver = self.driver
@@ -352,7 +352,7 @@ class FindingTest(BaseTestCase):
         # This will throw exception if the test fails due to invalid xpath
         # TODO: risk acceptance doesn't mitigate endpoints currently
         # post_status = driver.find_element(By.XPATH, '//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
-        # self.assertTrue(pre_status != post_status)
+        # self.assertNotEqual(pre_status, post_status)
 
     def test_make_finding_a_template(self):
         driver = self.driver

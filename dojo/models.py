@@ -125,6 +125,7 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
 
 @deconstructible
 class UniqueUploadNameProvider:
+
     """
     A callable to be passed as upload_to parameter to FileField.
 
@@ -215,9 +216,7 @@ class Dojo_User(User):
 
     @staticmethod
     def generate_full_name(user):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
+        """Returns the first_name plus the last_name, with a space in between."""
         full_name = f"{user.first_name} {user.last_name} ({user.username})"
         return full_name.strip()
 
@@ -352,6 +351,13 @@ class System_Settings(models.Model):
     enable_mail_notifications = models.BooleanField(default=False, blank=False)
     mail_notifications_to = models.CharField(max_length=200, default="",
                                              blank=True)
+
+    enable_webhooks_notifications = \
+        models.BooleanField(default=False,
+                            verbose_name=_("Enable Webhook notifications"),
+                            blank=False)
+    webhooks_notifications_timeout = models.IntegerField(default=10,
+                                          help_text=_("How many seconds will DefectDojo waits for response from webhook endpoint"))
 
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
@@ -729,14 +735,17 @@ class FileUpload(models.Model):
 
 
 class Product_Type(models.Model):
-    """Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
-`
+
+    """
+    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
+    `
        Examples:
          * IAM Team
          * Internal / 3rd Party
          * Main company / Acquisition
          * San Francisco / New York offices
     """
+
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
@@ -757,9 +766,8 @@ class Product_Type(models.Model):
         return reverse("product_type", args=[str(self.id)])
 
     def get_breadcrumbs(self):
-        bc = [{"title": str(self),
+        return [{"title": str(self),
                "url": reverse("edit_product_type", args=(self.id,))}]
-        return bc
 
     @cached_property
     def critical_present(self):
@@ -767,6 +775,7 @@ class Product_Type(models.Model):
             test__engagement__product__prod_type=self, severity="Critical")
         if c_findings.count() > 0:
             return True
+        return None
 
     @cached_property
     def high_present(self):
@@ -774,6 +783,7 @@ class Product_Type(models.Model):
             test__engagement__product__prod_type=self, severity="High")
         if c_findings.count() > 0:
             return True
+        return None
 
     @cached_property
     def calc_health(self):
@@ -791,8 +801,7 @@ class Product_Type(models.Model):
             health = health - ((h_findings.count() - 1) * 2)
         if health < 5:
             return 5
-        else:
-            return health
+        return health
 
     # only used by bulk risk acceptance api
     @property
@@ -828,9 +837,8 @@ class Test_Type(models.Model):
         return self.name
 
     def get_breadcrumbs(self):
-        bc = [{"title": str(self),
+        return [{"title": str(self),
                "url": None}]
-        return bc
 
 
 class DojoMeta(models.Model):
@@ -1173,8 +1181,7 @@ class Product(models.Model):
         for e in endpoints:
             if e.host in hosts:
                 continue
-            else:
-                hosts.append(e.host)
+            hosts.append(e.host)
 
         return len(hosts)
 
@@ -1189,53 +1196,51 @@ class Product(models.Model):
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
             return {}
-        else:
-            critical = Finding.objects.filter(test__engagement__product=self,
-                                              mitigated__isnull=True,
-                                              verified=True,
-                                              false_p=False,
-                                              duplicate=False,
-                                              out_of_scope=False,
-                                              severity="Critical",
-                                              date__range=[start_date,
-                                                           end_date]).count()
-            high = Finding.objects.filter(test__engagement__product=self,
+        critical = Finding.objects.filter(test__engagement__product=self,
                                           mitigated__isnull=True,
                                           verified=True,
                                           false_p=False,
                                           duplicate=False,
                                           out_of_scope=False,
-                                          severity="High",
+                                          severity="Critical",
                                           date__range=[start_date,
                                                        end_date]).count()
-            medium = Finding.objects.filter(test__engagement__product=self,
-                                            mitigated__isnull=True,
-                                            verified=True,
-                                            false_p=False,
-                                            duplicate=False,
-                                            out_of_scope=False,
-                                            severity="Medium",
-                                            date__range=[start_date,
-                                                         end_date]).count()
-            low = Finding.objects.filter(test__engagement__product=self,
-                                         mitigated__isnull=True,
-                                         verified=True,
-                                         false_p=False,
-                                         duplicate=False,
-                                         out_of_scope=False,
-                                         severity="Low",
-                                         date__range=[start_date,
-                                                      end_date]).count()
-            return {"Critical": critical,
-                    "High": high,
-                    "Medium": medium,
-                    "Low": low,
-                    "Total": (critical + high + medium + low)}
+        high = Finding.objects.filter(test__engagement__product=self,
+                                      mitigated__isnull=True,
+                                      verified=True,
+                                      false_p=False,
+                                      duplicate=False,
+                                      out_of_scope=False,
+                                      severity="High",
+                                      date__range=[start_date,
+                                                   end_date]).count()
+        medium = Finding.objects.filter(test__engagement__product=self,
+                                        mitigated__isnull=True,
+                                        verified=True,
+                                        false_p=False,
+                                        duplicate=False,
+                                        out_of_scope=False,
+                                        severity="Medium",
+                                        date__range=[start_date,
+                                                     end_date]).count()
+        low = Finding.objects.filter(test__engagement__product=self,
+                                     mitigated__isnull=True,
+                                     verified=True,
+                                     false_p=False,
+                                     duplicate=False,
+                                     out_of_scope=False,
+                                     severity="Low",
+                                     date__range=[start_date,
+                                                  end_date]).count()
+        return {"Critical": critical,
+                "High": high,
+                "Medium": medium,
+                "Low": low,
+                "Total": (critical + high + medium + low)}
 
     def get_breadcrumbs(self):
-        bc = [{"title": str(self),
+        return [{"title": str(self),
                "url": reverse("view_product", args=(self.id,))}]
-        return bc
 
     @property
     def get_product_type(self):
@@ -1693,9 +1698,8 @@ class Endpoint(models.Model):
                         msg = "hyperlink lib did not create URL as was expected"
                         raise ValueError(msg)
                 return clean_url
-            else:
-                msg = "Missing host"
-                raise ValueError(msg)
+            msg = "Missing host"
+            raise ValueError(msg)
         except:
             url = ""
             if self.protocol:
@@ -1807,11 +1811,9 @@ class Endpoint(models.Model):
                 products_match = (self.product) == other.product
                 # Check if the contents match
                 return products_match and contents_match
-            else:
-                return contents_match
+            return contents_match
 
-        else:
-            return NotImplemented
+        return NotImplemented
 
     @property
     def is_broken(self):
@@ -1822,8 +1824,7 @@ class Endpoint(models.Model):
         else:
             if self.product:
                 return False
-            else:
-                return True
+            return True
 
     @property
     def mitigated(self):
@@ -1844,7 +1845,7 @@ class Endpoint(models.Model):
         return self.findings.all().count()
 
     def active_findings(self):
-        findings = self.findings.filter(
+        return self.findings.filter(
             active=True,
             out_of_scope=False,
             mitigated__isnull=True,
@@ -1854,10 +1855,9 @@ class Endpoint(models.Model):
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
         ).order_by("numerical_severity")
-        return findings
 
     def active_verified_findings(self):
-        findings = self.findings.filter(
+        return self.findings.filter(
             active=True,
             verified=True,
             out_of_scope=False,
@@ -1868,7 +1868,6 @@ class Endpoint(models.Model):
             status_finding__out_of_scope=False,
             status_finding__risk_accepted=False,
         ).order_by("numerical_severity")
-        return findings
 
     @property
     def active_findings_count(self):
@@ -1912,7 +1911,7 @@ class Endpoint(models.Model):
         return self.host_findings().count()
 
     def host_active_findings(self):
-        findings = Finding.objects.filter(
+        return Finding.objects.filter(
             active=True,
             out_of_scope=False,
             mitigated__isnull=True,
@@ -1923,10 +1922,9 @@ class Endpoint(models.Model):
             status_finding__risk_accepted=False,
             endpoints__in=self.host_endpoints(),
         ).order_by("numerical_severity")
-        return findings
 
     def host_active_verified_findings(self):
-        findings = Finding.objects.filter(
+        return Finding.objects.filter(
             active=True,
             verified=True,
             out_of_scope=False,
@@ -1938,7 +1936,6 @@ class Endpoint(models.Model):
             status_finding__risk_accepted=False,
             endpoints__in=self.host_endpoints(),
         ).order_by("numerical_severity")
-        return findings
 
     @property
     def host_active_findings_count(self):
@@ -2180,7 +2177,7 @@ class Test(models.Model):
 
     @property
     def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        """Queries the database, no prefetching, so could be slow for lists of model instances"""
         return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
 
     def inherit_tags(self, potentially_existing_tags):
@@ -2213,8 +2210,7 @@ class Test_Import(TimeStampedModel):
         super_query = super_query.annotate(created_findings_count=Count("findings", filter=Q(test_import_finding_action__action=IMPORT_CREATED_FINDING)))
         super_query = super_query.annotate(closed_findings_count=Count("findings", filter=Q(test_import_finding_action__action=IMPORT_CLOSED_FINDING)))
         super_query = super_query.annotate(reactivated_findings_count=Count("findings", filter=Q(test_import_finding_action__action=IMPORT_REACTIVATED_FINDING)))
-        super_query = super_query.annotate(untouched_findings_count=Count("findings", filter=Q(test_import_finding_action__action=IMPORT_UNTOUCHED_FINDING)))
-        return super_query
+        return super_query.annotate(untouched_findings_count=Count("findings", filter=Q(test_import_finding_action__action=IMPORT_UNTOUCHED_FINDING)))
 
     class Meta:
         ordering = ("-id",)
@@ -2227,7 +2223,7 @@ class Test_Import(TimeStampedModel):
 
     @property
     def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        """Queries the database, no prefetching, so could be slow for lists of model instances"""
         stats = {}
         for action in IMPORT_ACTIONS:
             stats[action[1].lower()] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=action[0]), _get_annotations_for_statistics)
@@ -2871,53 +2867,47 @@ class Finding(models.Model):
     def duplicate_finding_set(self):
         if self.duplicate:
             if self.duplicate_finding is not None:
-                originals = Finding.objects.get(
+                return Finding.objects.get(
                     id=self.duplicate_finding.id).original_finding.all().order_by("title")
-                return originals  # we need to add the duplicate_finding  here as well
-            else:
-                return []
-        else:
-            return self.original_finding.all().order_by("title")
+            return []
+        return self.original_finding.all().order_by("title")
 
     def get_scanner_confidence_text(self):
         if self.scanner_confidence and isinstance(self.scanner_confidence, int):
             if self.scanner_confidence <= 2:
                 return "Certain"
-            elif self.scanner_confidence >= 3 and self.scanner_confidence <= 5:
+            if self.scanner_confidence >= 3 and self.scanner_confidence <= 5:
                 return "Firm"
-            else:
-                return "Tentative"
+            return "Tentative"
         return ""
 
     @staticmethod
     def get_numerical_severity(severity):
         if severity == "Critical":
             return "S0"
-        elif severity == "High":
+        if severity == "High":
             return "S1"
-        elif severity == "Medium":
+        if severity == "Medium":
             return "S2"
-        elif severity == "Low":
+        if severity == "Low":
             return "S3"
-        elif severity == "Info":
+        if severity == "Info":
             return "S4"
-        else:
-            return "S5"
+        return "S5"
 
     @staticmethod
     def get_number_severity(severity):
         if severity == "Critical":
             return 4
-        elif severity == "High":
+        if severity == "High":
             return 3
-        elif severity == "Medium":
+        if severity == "Medium":
             return 2
-        elif severity == "Low":
+        if severity == "Low":
             return 1
-        elif severity == "Info":
+        if severity == "Info":
             return 0
-        else:
-            return 5
+        return 5
 
     @staticmethod
     def get_severity(num_severity):
@@ -2991,8 +2981,7 @@ class Finding(models.Model):
     def get_sla_start_date(self):
         if self.sla_start_date:
             return self.sla_start_date
-        else:
-            return self.date
+        return self.date
 
     def get_sla_period(self):
         sla_configuration = SLA_Configuration.objects.filter(id=self.test.engagement.product.sla_configuration_id).first()
@@ -3003,7 +2992,7 @@ class Finding(models.Model):
     def set_sla_expiration_date(self):
         system_settings = System_Settings.objects.get()
         if not system_settings.enable_finding_sla:
-            return None
+            return
 
         days_remaining = None
         sla_period, enforce_period = self.get_sla_period()
@@ -3011,7 +3000,7 @@ class Finding(models.Model):
             days_remaining = sla_period - self.sla_age
         else:
             self.sla_expiration_date = Finding().sla_expiration_date
-            return None
+            return
 
         if days_remaining:
             if self.mitigated:
@@ -3029,8 +3018,7 @@ class Finding(models.Model):
                 if isinstance(mitigated_date, datetime):
                     mitigated_date = self.mitigated.date()
                 return (self.sla_expiration_date - mitigated_date).days
-            else:
-                return (self.sla_expiration_date - get_current_date()).days
+            return (self.sla_expiration_date - get_current_date()).days
         return None
 
     def sla_deadline(self):
@@ -3072,9 +3060,8 @@ class Finding(models.Model):
 
     @cached_property
     def finding_group(self):
-        group = self.finding_group_set.all().first()
+        return self.finding_group_set.all().first()
         # logger.debug('finding.finding_group: %s', group)
-        return group
 
     @cached_property
     def has_jira_group_issue(self):
@@ -3124,12 +3111,10 @@ class Finding(models.Model):
         # Get a list of all req/resp pairs
         all_req_resps = self.burprawrequestresponse_set.all()
         # Filter away those that do not have any contents
-        valid_req_resps = all_req_resps.exclude(
+        return all_req_resps.exclude(
             burpRequestBase64__exact=empty_value,
             burpResponseBase64__exact=empty_value,
         )
-
-        return valid_req_resps
 
     def get_report_requests(self):
         # Get the list of request response pairs that are non empty
@@ -3137,8 +3122,9 @@ class Finding(models.Model):
         # Determine how many to return
         if request_response_pairs.count() >= 3:
             return request_response_pairs[0:3]
-        elif request_response_pairs.count() > 0:
+        if request_response_pairs.count() > 0:
             return request_response_pairs
+        return None
 
     def get_request(self):
         # Get the list of request response pairs that are non empty
@@ -3156,8 +3142,7 @@ class Finding(models.Model):
             reqres = request_response_pairs.first()
         res = base64.b64decode(reqres.burpResponseBase64)
         # Removes all blank lines
-        res = re.sub(r"\n\s*\n", "\n", res)
-        return res
+        return re.sub(r"\n\s*\n", "\n", res)
 
     def latest_note(self):
         if self.notes.all():
@@ -3243,8 +3228,7 @@ class Finding(models.Model):
         project = parts_project[0]
         if project.startswith("~"):
             return parts_scm[0] + "/users/" + parts_project[0][1:] + "/repos/" + parts_project[1] + "/browse"
-        else:
-            return parts_scm[0] + "/projects/" + parts_project[0] + "/repos/" + parts_project[1] + "/browse"
+        return parts_scm[0] + "/projects/" + parts_project[0] + "/repos/" + parts_project[1] + "/browse"
 
     def bitbucket_standalone_prepare_scm_link(self, uri):
         # if commit hash or branch/tag is set for engagement/test -
@@ -3329,9 +3313,7 @@ class Finding(models.Model):
             vulnerability_ids = [self.cve]
 
         # Remove duplicates
-        vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
-
-        return vulnerability_ids
+        return list(dict.fromkeys(vulnerability_ids))
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -3519,9 +3501,8 @@ class Finding_Template(models.Model):
         return reverse("edit_template", args=[str(self.id)])
 
     def get_breadcrumbs(self):
-        bc = [{"title": str(self),
+        return [{"title": str(self),
                "url": reverse("view_template", args=(self.id,))}]
-        return bc
 
     @cached_property
     def vulnerability_ids(self):
@@ -3542,9 +3523,7 @@ class Finding_Template(models.Model):
             vulnerability_ids = [self.cve]
 
         # Remove duplicates
-        vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
-
-        return vulnerability_ids
+        return list(dict.fromkeys(vulnerability_ids))
 
 
 class Vulnerability_Id_Template(models.Model):
@@ -3592,10 +3571,9 @@ class Check_List(models.Model):
     def get_status(pass_fail):
         if pass_fail == "Pass":
             return "success"
-        elif pass_fail == "Fail":
+        if pass_fail == "Fail":
             return "danger"
-        else:
-            return "warning"
+        return "warning"
 
     def get_breadcrumb(self):
         bc = self.engagement.get_breadcrumb()
@@ -3616,8 +3594,7 @@ class BurpRawRequestResponse(models.Model):
     def get_response(self):
         res = str(base64.b64decode(self.burpResponseBase64), errors="ignore")
         # Removes all blank lines
-        res = re.sub(r"\n\s*\n", "\n", res)
-        return res
+        return re.sub(r"\n\s*\n", "\n", res)
 
 
 class Risk_Acceptance(models.Model):
@@ -3726,9 +3703,13 @@ class Risk_Acceptance(models.Model):
 
 
 class FileAccessToken(models.Model):
-    """This will allow reports to request the images without exposing the
+
+    """
+    This will allow reports to request the images without exposing the
     media root to the world without
-    authentication"""
+    authentication
+    """
+
     user = models.ForeignKey(Dojo_User, null=False, blank=False, on_delete=models.CASCADE)
     file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
@@ -3873,16 +3854,15 @@ class JIRA_Instance(models.Model):
     def get_priority(self, status):
         if status == "Info":
             return self.info_mapping_severity
-        elif status == "Low":
+        if status == "Low":
             return self.low_mapping_severity
-        elif status == "Medium":
+        if status == "Medium":
             return self.medium_mapping_severity
-        elif status == "High":
+        if status == "High":
             return self.high_mapping_severity
-        elif status == "Critical":
+        if status == "Critical":
             return self.critical_mapping_severity
-        else:
-            return "N/A"
+        return "N/A"
 
 
 # declare form here as we can't import forms.py due to circular imports not even locally
@@ -3932,7 +3912,7 @@ class JIRA_Project(models.Model):
                                                              verbose_name=_("Add vulnerability Id as a JIRA label"),
                                                              blank=False)
     push_all_issues = models.BooleanField(default=False, blank=True,
-         help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
+         help_text=_("Automatically create JIRA tickets for verified findings. Once linked, the JIRA ticket will continue to sync, regardless of status in DefectDojo."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))
@@ -4015,12 +3995,14 @@ class JIRA_Issue(models.Model):
 NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
 NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
 NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
+NOTIFICATION_CHOICE_WEBHOOKS = ("webhooks", "webhooks")
 NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
 
 NOTIFICATION_CHOICES = (
     NOTIFICATION_CHOICE_SLACK,
     NOTIFICATION_CHOICE_MSTEAMS,
     NOTIFICATION_CHOICE_MAIL,
+    NOTIFICATION_CHOICE_WEBHOOKS,
     NOTIFICATION_CHOICE_ALERT,
 )
 
@@ -4107,6 +4089,33 @@ class NotificationsAdmin(admin.ModelAdmin):
         list_fields = ["user", "product"]
         list_fields += [field.name for field in self.model._meta.fields if field.name not in list_fields]
         return list_fields
+
+
+class Notification_Webhooks(models.Model):
+    class Status(models.TextChoices):
+        __STATUS_ACTIVE = "active"
+        __STATUS_INACTIVE = "inactive"
+        STATUS_ACTIVE = f"{__STATUS_ACTIVE}", _("Active")
+        STATUS_ACTIVE_TMP = f"{__STATUS_ACTIVE}_tmp", _("Active but 5xx (or similar) error detected")
+        STATUS_INACTIVE_TMP = f"{__STATUS_INACTIVE}_tmp", _("Temporary inactive because of 5xx (or similar) error")
+        STATUS_INACTIVE_PERMANENT = f"{__STATUS_INACTIVE}_permanent", _("Permanently inactive")
+
+    name = models.CharField(max_length=100, default="", blank=False, unique=True,
+                                    help_text=_("Name of the incoming webhook"))
+    url = models.URLField(max_length=200, default="", blank=False,
+                                    help_text=_("The full URL of the incoming webhook"))
+    header_name = models.CharField(max_length=100, default="", blank=True, null=True,
+                                   help_text=_("Name of the header required for interacting with Webhook endpoint"))
+    header_value = models.CharField(max_length=100, default="", blank=True, null=True,
+                                   help_text=_("Content of the header required for interacting with Webhook endpoint"))
+    status = models.CharField(max_length=20, choices=Status, default="active", blank=False,
+                              help_text=_("Status of the incoming webhook"), editable=False)
+    first_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened first time"), blank=True, null=True, editable=False)
+    last_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened last time"), blank=True, null=True, editable=False)
+    note = models.CharField(max_length=1000, default="", blank=True, null=True, help_text=_("Description of the latest error"), editable=False)
+    owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
+                              help_text=_("Owner/receiver of notification, if empty processed as system notification"))
+    # TODO: Test that `editable` will block editing via API
 
 
 class Tool_Product_Settings(models.Model):
@@ -4399,9 +4408,8 @@ class Benchmark_Product_Summary(models.Model):
 # ==============================
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Question(PolymorphicModel, TimeStampedModel):
-        """
-            Represents a question.
-        """
+
+        """Represents a question."""
 
         class Meta:
             ordering = ["order"]
@@ -4422,23 +4430,20 @@ with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning
 
 
 class TextQuestion(Question):
-    """
-    Question with a text answer
-    """
+
+    """Question with a text answer"""
+
     objects = PolymorphicManager()
 
     def get_form(self):
-        """
-        Returns the form for this model
-        """
+        """Returns the form for this model"""
         from .forms import TextQuestionForm
         return TextQuestionForm
 
 
 class Choice(TimeStampedModel):
-    """
-    Model to store the choices for multi choice questions
-    """
+
+    """Model to store the choices for multi choice questions"""
 
     order = models.PositiveIntegerField(default=1)
 
@@ -4452,6 +4457,7 @@ class Choice(TimeStampedModel):
 
 
 class ChoiceQuestion(Question):
+
     """
     Question with answers that are chosen from a list of choices defined
     by the user.
@@ -4463,10 +4469,7 @@ class ChoiceQuestion(Question):
     objects = PolymorphicManager()
 
     def get_form(self):
-        """
-        Returns the form for this model
-        """
-
+        """Returns the form for this model"""
         from .forms import ChoiceQuestionForm
         return ChoiceQuestionForm
 
@@ -4531,8 +4534,9 @@ class General_Survey(models.Model):
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Answer(PolymorphicModel, TimeStampedModel):
-        """ Base Answer model
-        """
+
+        """Base Answer model"""
+
         question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
         answered_survey = models.ForeignKey(Answered_Survey,
@@ -4563,8 +4567,7 @@ class ChoiceAnswer(Answer):
     def __str__(self):
         if len(self.answer.all()):
             return str(self.answer.all()[0])
-        else:
-            return "No Response"
+        return "No Response"
 
 
 if settings.ENABLE_AUDITLOG:
@@ -4581,6 +4584,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Risk_Acceptance)
     auditlog.register(Finding_Template)
     auditlog.register(Cred_User, exclude_fields=["password"])
+    auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
 
 from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
 
@@ -4642,6 +4646,7 @@ admin.site.register(GITHUB_Clone)
 admin.site.register(GITHUB_Details_Cache)
 admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
+admin.site.register(Notification_Webhooks)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
