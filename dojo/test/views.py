@@ -4,7 +4,6 @@ import logging
 import operator
 from datetime import datetime
 from functools import reduce
-from typing import Tuple
 
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -826,7 +825,7 @@ class ReImportScanResultsView(View):
         self,
         request: HttpRequest,
         test: Test,
-    ) -> Tuple[JIRAImportScanForm | None, bool]:
+    ) -> tuple[JIRAImportScanForm | None, bool]:
         """Returns a JiraImportScanForm if jira is enabled"""
         jira_form = None
         push_all_jira_issues = False
@@ -853,7 +852,7 @@ class ReImportScanResultsView(View):
         self,
         request: HttpRequest,
         test_id: int,
-    ) -> Tuple[HttpRequest, dict]:
+    ) -> tuple[HttpRequest, dict]:
         """
         Process the common behaviors between request types, and then return
         the request and context dict back to be rendered
