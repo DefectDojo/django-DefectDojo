@@ -238,7 +238,7 @@ class TestPTARTParser(TestCase):
             self.assertEqual(1, len(tests))
             test = tests[0]
             self.assertEqual("Test Report", test.name)
-            self.assertEqual("Pen Test", test.type)
+            self.assertEqual("Test Report", test.type)
             self.assertEqual("", test.version)
             self.assertEqual("Mistakes were made\n\nThings were done\n\nThings should be put right", test.description)
             self.assertEqual("2024-08-11", test.target_start.strftime("%Y-%m-%d"))
