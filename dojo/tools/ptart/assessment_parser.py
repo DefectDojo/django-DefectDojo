@@ -36,12 +36,11 @@ class PTARTAssessmentParser:
             finding.mitigation=hit["remediation"]
 
         if "id" in hit:
-            finding.unique_id_from_tool=hit.get("id"),
-
+            finding.unique_id_from_tool=hit.get("id")
 
         cvss_vector = ptart_tools.parse_cvss_vector(hit, self.cvss_type)
         if cvss_vector:
-            finding.cvssv3=cvss_vector,
+            finding.cvssv3=cvss_vector
 
         finding.unsaved_tags=hit["labels"]
 
