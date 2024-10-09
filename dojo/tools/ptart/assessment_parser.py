@@ -44,7 +44,7 @@ class PTARTAssessmentParser:
 
         finding.unsaved_tags=hit["labels"]
 
-        if hit["asset"]:
+        if "asset" in hit and hit["asset"]:
             endpoint = Endpoint.from_uri(hit["asset"])
             finding.unsaved_endpoints = [endpoint]
 
