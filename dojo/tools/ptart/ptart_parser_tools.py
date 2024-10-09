@@ -56,3 +56,13 @@ def parse_cvss_vector(hit, cvss_type):
         else:
             return None
     return None
+
+def parse_retest_fix_status(status):
+    fix_status_mapping = {
+        'F': 'Fixed',
+        'NF': 'Not Fixed',
+        'PF': 'Partially Fixed',
+        'NA': 'Not Applicable',
+        'NT': 'Not Tested'
+    }
+    return fix_status_mapping.get(status, None)

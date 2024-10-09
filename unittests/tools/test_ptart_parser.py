@@ -60,7 +60,7 @@ class TestPTARTParser(TestCase):
         with self.subTest("Non-blank Title and Blank id"):
             self.assertEqual("Test Title", parse_title_from_hit({"title": "Test Title", "id": ""}))
 
-    def test_cvss_vector_acquisition(self):
+    def test_ptart_parser_tools_cvss_vector_acquisition(self):
         from dojo.tools.ptart.ptart_parser_tools import parse_cvss_vector
         with self.subTest("Test CVSSv3 Vector"):
             hit = {
@@ -95,6 +95,23 @@ class TestPTARTParser(TestCase):
                 "cvss_vector": ""
             }
             self.assertEqual(None, parse_cvss_vector(hit, 3))
+
+    def test_ptart_parser_tools_retest_fix_status_parse(self):
+        from dojo.tools.ptart.ptart_parser_tools import parse_retest_fix_status
+        with self.subTest("Fixed"):
+            self.assertEqual("Fixed", parse_retest_fix_status("F"))
+        with self.subTest("Not Fixed"):
+            self.assertEqual("Not Fixed", parse_retest_fix_status("NF"))
+        with self.subTest("Partially Fixed"):
+            self.assertEqual("Partially Fixed", parse_retest_fix_status("PF"))
+        with self.subTest("Not Applicable"):
+            self.assertEqual("Not Applicable", parse_retest_fix_status("NA"))
+        with self.subTest("Not Tested"):
+            self.assertEqual("Not Tested", parse_retest_fix_status("NT"))
+        with self.subTest("Unknown"):
+            self.assertEqual(None, parse_retest_fix_status("U"))
+        with self.subTest("Empty"):
+            self.assertEqual(None, parse_retest_fix_status(""))
 
     def test_ptart_parser_with_empty_json_throws_error(self):
         with self.assertRaises(ValueError) as context:
@@ -269,6 +286,62 @@ class TestPTARTParser(TestCase):
             attachment = finding.unsaved_files[1]
             self.assertEqual("License", attachment["title"])
             self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+
+    def test_ptart_parser_with_retest_campaign(self):
+        with open("unittests/scans/ptart/ptart_vuln_plus_retest.json") as testfile:
+            parser = PTARTParser()
+            findings = parser.get_findings(testfile, self.test)
+            self.assertEqual(3, len(findings))
+            with self.subTest("Test Assessment: Broken Access Control"):
+                finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00002"), None)
+                self.assertEqual("PTART-2024-00002: Broken Access Control", finding.title)
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.", finding.description)
+                self.assertEqual("Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.", finding.mitigation)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
+                self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
+                self.assertEqual("Low", finding.effort_for_fixing)
+                self.assertEqual("Test Assessment", finding.component_name)
+                self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(1, len(finding.unsaved_endpoints))
+                endpoint = finding.unsaved_endpoints[0]
+                self.assertEqual(str(endpoint), "https://test.example.com")
+                self.assertEqual(2, len(finding.unsaved_files))
+                screenshot = finding.unsaved_files[0]
+                self.assertEqual("Borked.png", screenshot["title"])
+                self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
+                attachment = finding.unsaved_files[1]
+                self.assertEqual("License", attachment["title"])
+                self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+            with self.subTest("Test Assessment: Unrated Hit"):
+                finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00003"), None)
+                self.assertEqual("PTART-2024-00003: Unrated Hit", finding.title)
+                self.assertEqual("Info", finding.severity)
+                self.assertEqual("Some hits are not rated.", finding.description)
+                self.assertEqual("They can be informational or not related to a direct attack", finding.mitigation)
+                self.assertEqual(None, finding.cvssv3)
+                self.assertEqual("PTART-2024-00003", finding.unique_id_from_tool)
+                self.assertEqual("Low", finding.effort_for_fixing)
+                self.assertEqual("Test Assessment", finding.component_name)
+                self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+            with self.subTest("Retest: Broken Access Control"):
+                finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00002-RT"), None)
+                self.assertEqual("PTART-2024-00002-RT: Broken Access Control (Not Fixed)", finding.title)
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("Still borked", finding.description)
+                self.assertEqual("Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.", finding.mitigation)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
+                self.assertEqual("PTART-2024-00002-RT", finding.unique_id_from_tool)
+                self.assertEqual("Low", finding.effort_for_fixing)
+                self.assertEqual("Test Retest", finding.component_name)
+                self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(1, len(finding.unsaved_endpoints))
+                endpoint = finding.unsaved_endpoints[0]
+                self.assertEqual(str(endpoint), "https://test.example.com")
+                self.assertEqual(1, len(finding.unsaved_files))
+                screenshot = finding.unsaved_files[0]
+                self.assertEqual("Yet another Screenshot.png", screenshot["title"])
+                self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
 
     #
     #
