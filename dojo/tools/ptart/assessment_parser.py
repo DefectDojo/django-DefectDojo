@@ -1,14 +1,16 @@
-from datetime import datetime
+import pathlib
 
-from dojo.models import Finding, Endpoint, FileUpload
+from dojo.models import Finding, Endpoint
+import dojo.tools.ptart.ptart_parser_tools as ptart_tools
 
 
 class PTARTAssessmentParser:
     def __init__(self):
-        self.PTART_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
+        self.cvss_type = None
 
     def get_test_data(self, tree):
         if "assessments" in tree:
+            self.cvss_type = tree.get("cvss_type", None)
             assessments = tree["assessments"]
         else:
             raise ValueError("Parse Error: assessments key not found in the report")
@@ -20,25 +22,35 @@ class PTARTAssessmentParser:
 
     def get_finding(self, assessment, hit):
         finding = Finding(
-            title=hit["title"],
-            description=hit["body"],
-            severity=self.parse_severity(hit["severity"]),
-            mitigation=hit["remediation"],
-            cvssv3=hit["cvss_vector"],
-            unique_id_from_tool=hit["id"],
-            effort_for_fixing=self.parse_fix_effort(hit["fix_complexity"]),
-            component_name=assessment["title"],
-            date=(datetime.strptime(hit["added"], self.PTART_DATETIME_FORMAT).date()),
-            cwe=self.parse_cwe(hit),
+            title=ptart_tools.parse_title_from_hit(hit),
+            severity=ptart_tools.parse_ptart_severity(hit.get("severity", 5)),
+            effort_for_fixing=ptart_tools.parse_ptart_fix_effort(hit.get("fix_complexity", 3)),
+            component_name=assessment.get("title", "Unknown Component"),
+            date=ptart_tools.parse_date_added_from_hit(hit),
         )
+
+        if "body" in hit:
+            finding.description=hit["body"]
+
+        if "remediation" in hit:
+            finding.mitigation=hit["remediation"]
+
+        if "id" in hit:
+            finding.unique_id_from_tool=hit.get("id"),
+
+
+        cvss_vector = ptart_tools.parse_cvss_vector(hit, self.cvss_type)
+        if cvss_vector:
+            finding.cvssv3=cvss_vector,
 
         finding.unsaved_tags=hit["labels"]
 
-        endpoint = Endpoint.from_uri(hit["asset"])
-        finding.unsaved_endpoints = [endpoint]
+        if hit["asset"]:
+            endpoint = Endpoint.from_uri(hit["asset"])
+            finding.unsaved_endpoints = [endpoint]
 
         finding.unsaved_files = [{
-            "title": screenshot["caption"],
+            "title": f"{screenshot['caption']}{pathlib.Path(screenshot['screenshot']['filename']).suffix}",
             "data": screenshot["screenshot"]["data"]
         } for screenshot in hit["screenshots"]]
 
@@ -48,38 +60,3 @@ class PTARTAssessmentParser:
         } for attachment in hit["attachments"]])
 
         return finding
-
-    def parse_severity(self, severity):
-        severity_mapping = {
-            1: "Critical",
-            2: "High",
-            3: "Medium",
-            4: "Low"
-        }
-        return severity_mapping.get(severity, "Info")  # Default severity
-
-    def parse_fix_effort(self, effort):
-        effort_mapping = {
-            1: "High",
-            2: "Medium",
-            3: "Low"
-        }
-        return effort_mapping.get(effort, "")
-
-    def parse_cwe(self, hit):
-        top10mapping = {
-            "A01:2021-Broken Access Control": 1345,
-            "A02:2021-Cryptographic Failures": 1346,
-            "A03:2021-Injection": 1347,
-            "A04:2021-Insecure Design": 1348,
-            "A05:2021-Security Misconfiguration": 1349,
-            "A06:2021-Vulnerable and Outdated Components": 1352,
-            "A07:2021-Identification and Authentication Failures": 1353,
-            "A08:2021-Software and Data Integrity Failures": 1354,
-            "A09:2021-Security Logging and Monitoring Failures": 1355,
-            "A10:2021-Server-Side Request Forgery": 1356
-        }
-        if hit['labels']:
-            return top10mapping.get(hit['labels'][0], None)
-        else:
-            return None
