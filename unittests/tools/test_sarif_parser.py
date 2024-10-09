@@ -64,7 +64,7 @@ add_core(ptr, offset, val);
 3. collections/list.h:L25\t-\tadd_core(ptr, offset, val)
 \tUninitialized variable `ptr` passed to method `add_core`."""
             self.assertEqual(description, item.description)
-            self.assertEqual(datetime.datetime(2016, 7, 16, 14, 19, 1, tzinfo=datetime.timezone.utc), item.date)
+            self.assertEqual(datetime.datetime(2016, 7, 16, 14, 19, 1, tzinfo=datetime.UTC), item.date)
             for finding in findings:
                 self.common_checks(finding)
 
@@ -175,7 +175,7 @@ add_core(ptr, offset, val);
                 item.file_path,
             )
             self.assertIsNone(item.unsaved_vulnerability_ids)
-            self.assertEqual(datetime.datetime(2021, 3, 8, 15, 39, 40, tzinfo=datetime.timezone.utc), item.date)
+            self.assertEqual(datetime.datetime(2021, 3, 8, 15, 39, 40, tzinfo=datetime.UTC), item.date)
             # finding 6
             with self.subTest(i=6):
                 finding = findings[6]
@@ -207,7 +207,7 @@ add_core(ptr, offset, val);
                     item.file_path,
                 )
                 self.assertIsNone(item.unsaved_vulnerability_ids)
-                self.assertEqual(datetime.datetime(2021, 3, 8, 15, 46, 16, tzinfo=datetime.timezone.utc), item.date)
+                self.assertEqual(datetime.datetime(2021, 3, 8, 15, 46, 16, tzinfo=datetime.UTC), item.date)
                 self.assertEqual(
                     "scanFileHash:4bc9f13947613303|scanPrimaryLocationHash:1a8bbb28fe7380df|scanTagsHash:21de8f8d0eb8d9b2",
                     finding.unique_id_from_tool,
@@ -246,7 +246,7 @@ add_core(ptr, offset, val);
                 finding.file_path,
             )
             self.assertIsNone(finding.unsaved_vulnerability_ids)
-            self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.timezone.utc), finding.date)
+            self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.UTC), finding.date)
             self.assertEqual(327, finding.cwe)
             # finding 1
             finding = findings[1]
@@ -255,7 +255,7 @@ add_core(ptr, offset, val);
                 finding.file_path,
             )
             self.assertEqual(235, finding.line)
-            self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.timezone.utc), finding.date)
+            self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.UTC), finding.date)
             self.assertEqual(798, finding.cwe)
             for finding in findings:
                 self.common_checks(finding)
