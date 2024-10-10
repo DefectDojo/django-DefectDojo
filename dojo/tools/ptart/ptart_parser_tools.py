@@ -3,6 +3,8 @@ from datetime import datetime
 
 import cvss
 
+from dojo.models import Endpoint
+
 
 def parse_ptart_severity(severity):
     severity_mapping = {
@@ -13,6 +15,7 @@ def parse_ptart_severity(severity):
     }
     return severity_mapping.get(severity, "Info")  # Default severity
 
+
 def parse_ptart_fix_effort(effort):
     effort_mapping = {
         1: "High",
@@ -20,6 +23,7 @@ def parse_ptart_fix_effort(effort):
         3: "Low"
     }
     return effort_mapping.get(effort, None)
+
 
 def parse_title_from_hit(hit):
     hit_title = hit.get("title", None)
@@ -35,6 +39,7 @@ def parse_date_added_from_hit(hit):
     date_added = hit.get("added", None)
     return parse_date(date_added, PTART_DATETIME_FORMAT)
 
+
 def parse_date(date, format):
     try:
         if date:
@@ -43,6 +48,7 @@ def parse_date(date, format):
             return datetime.now()
     except ValueError:
         return datetime.now()
+
 
 def parse_cvss_vector(hit, cvss_type):
     cvss_vector = hit.get("cvss_vector", None)
@@ -58,6 +64,7 @@ def parse_cvss_vector(hit, cvss_type):
             return None
     return None
 
+
 def parse_retest_fix_status(status):
     fix_status_mapping = {
         "F": "Fixed",
@@ -68,8 +75,9 @@ def parse_retest_fix_status(status):
     }
     return fix_status_mapping.get(status, None)
 
+
 def parse_screenshots_from_hit(hit):
-    if "screenshots" in hit and hit["screenshots"]:
+    if "screenshots" in hit:
         return [ss for ss in [parse_screenshot_data(screenshot) for screenshot in hit["screenshots"]] if ss is not None]
     else:
         return []
@@ -77,7 +85,7 @@ def parse_screenshots_from_hit(hit):
 
 def parse_screenshot_data(screenshot):
     try:
-        title = f"{screenshot.get('caption', 'screenshot')}{get_file_suffix_from_screenshot(screenshot)}"
+        title = get_screenshot_title(screenshot)
         data = get_screenshot_data(screenshot)
         return {
             "title": title,
@@ -85,6 +93,15 @@ def parse_screenshot_data(screenshot):
         }
     except ValueError:
         return None
+
+
+def get_screenshot_title(screenshot):
+    caption = screenshot.get('caption', 'screenshot') \
+        if "caption" in screenshot and screenshot["caption"] \
+        else "screenshot"
+    title = f"{caption}{get_file_suffix_from_screenshot(screenshot)}"
+    return title
+
 
 def get_screenshot_data(screenshot):
     if "screenshot" in screenshot and "data" in screenshot["screenshot"] and screenshot["screenshot"]["data"]:
@@ -98,3 +115,33 @@ def get_file_suffix_from_screenshot(screenshot):
         return pathlib.Path(screenshot['screenshot']['filename']).suffix
     else:
         return ""
+
+
+def parse_attachment_from_hit(hit):
+    if "attachments" in hit:
+        return [f for f in [parse_attachment_data(attachment) for attachment in hit["attachments"]] if f is not None]
+    else:
+        return []
+
+
+def parse_attachment_data(attachment):
+    if "data" in attachment and attachment["data"]:
+        return {
+            "title": get_attachement_title(attachment),
+            "data": attachment["data"]
+        }
+    else:
+        # No data in attachment, let's not import this file.
+        return None
+
+
+def get_attachement_title(attachment):
+    return attachment.get("title", "attachment") if "title" in attachment and attachment["title"] else "attachment"
+
+
+def parse_endpoints_from_hit(hit):
+    if "asset" in hit and hit["asset"]:
+        endpoint = Endpoint.from_uri(hit["asset"])
+        return [endpoint]
+    else:
+        return []

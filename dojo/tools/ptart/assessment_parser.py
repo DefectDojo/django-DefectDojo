@@ -1,5 +1,5 @@
 import dojo.tools.ptart.ptart_parser_tools as ptart_tools
-from dojo.models import Finding, Endpoint
+from dojo.models import Finding
 
 
 class PTARTAssessmentParser:
@@ -28,29 +28,24 @@ class PTARTAssessmentParser:
         )
 
         if "body" in hit:
-            finding.description=hit["body"]
+            finding.description = hit["body"]
 
         if "remediation" in hit:
-            finding.mitigation=hit["remediation"]
+            finding.mitigation = hit["remediation"]
 
         if "id" in hit:
-            finding.unique_id_from_tool=hit.get("id")
+            finding.unique_id_from_tool = hit.get("id")
 
         cvss_vector = ptart_tools.parse_cvss_vector(hit, self.cvss_type)
         if cvss_vector:
-            finding.cvssv3=cvss_vector
+            finding.cvssv3 = cvss_vector
 
-        finding.unsaved_tags=hit["labels"]
+        finding.unsaved_tags = hit["labels"]
 
-        if "asset" in hit and hit["asset"]:
-            endpoint = Endpoint.from_uri(hit["asset"])
-            finding.unsaved_endpoints = [endpoint]
+        finding.unsaved_endpoints = ptart_tools.parse_endpoints_from_hit(hit)
 
         finding.unsaved_files = ptart_tools.parse_screenshots_from_hit(hit)
 
-        finding.unsaved_files.extend([{
-            "title": attachment["title"],
-            "data": attachment["data"]
-        } for attachment in hit["attachments"]])
+        finding.unsaved_files.extend(ptart_tools.parse_attachment_from_hit(hit))
 
         return finding
