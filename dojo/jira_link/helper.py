@@ -120,7 +120,7 @@ def can_be_pushed_to_jira(obj, form=None):
         return False, f"{to_str_typed(obj)} cannot be pushed to jira as there is no jira project configuration for this product.", "error_no_jira_project"
 
     if not jira_project.enabled:
-        return False, f"{to_str_typed(obj)} cannot be pushed to jira as there is the jira project is not enabled.", "error_no_jira_project"
+        return False, f"{to_str_typed(obj)} cannot be pushed to jira as the jira project is not enabled.", "error_no_jira_project"
 
     if not hasattr(obj, "has_jira_issue"):
         return False, f"{to_str_typed(obj)} cannot be pushed to jira as there is no jira_issue attribute.", "error_no_jira_issue_attribute"
