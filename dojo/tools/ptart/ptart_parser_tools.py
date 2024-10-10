@@ -61,7 +61,7 @@ def parse_cvss_vector(hit, cvss_type):
     return None
 
 
-def parse_retest_fix_status(status):
+def parse_retest_status(status):
     fix_status_mapping = {
         "F": "Fixed",
         "NF": "Not Fixed",
@@ -75,7 +75,8 @@ def parse_retest_fix_status(status):
 def parse_screenshots_from_hit(hit):
     if "screenshots" not in hit:
         return []
-    screenshots = [parse_screenshot_data(screenshot) for screenshot in hit["screenshots"]]
+    screenshots = [parse_screenshot_data(screenshot)
+                   for screenshot in hit["screenshots"]]
     return [ss for ss in screenshots if ss is not None]
 
 
@@ -100,21 +101,25 @@ def get_screenshot_title(screenshot):
 
 
 def get_screenshot_data(screenshot):
-    if "screenshot" not in screenshot or "data" not in screenshot["screenshot"] or not screenshot["screenshot"]["data"]:
+    if ("screenshot" not in screenshot
+            or "data" not in screenshot["screenshot"]
+            or not screenshot["screenshot"]["data"]):
         raise ValueError("Screenshot data not found")
     return screenshot["screenshot"]["data"]
 
 
 def get_file_suffix_from_screenshot(screenshot):
     return pathlib.Path(screenshot['screenshot']['filename']).suffix \
-        if "screenshot" in screenshot and "filename" in screenshot['screenshot'] \
+        if ("screenshot" in screenshot
+            and "filename" in screenshot['screenshot']) \
         else ""
 
 
 def parse_attachment_from_hit(hit):
     if "attachments" not in hit:
         return []
-    files = [parse_attachment_data(attachment) for attachment in hit["attachments"]]
+    files = [parse_attachment_data(attachment)
+             for attachment in hit["attachments"]]
     return [f for f in files if f is not None]
 
 
@@ -138,7 +143,9 @@ def get_attachment_data(attachment):
 
 
 def get_attachement_title(attachment):
-    return attachment.get("title", "attachment") if "title" in attachment and attachment["title"] else "attachment"
+    return attachment.get("title", "attachment") \
+        if "title" in attachment and attachment["title"] \
+        else "attachment"
 
 
 def parse_endpoints_from_hit(hit):
@@ -148,7 +155,10 @@ def parse_endpoints_from_hit(hit):
     return [endpoint]
 
 
-def generate_test_description_from_report_base(data):
+def generate_test_description_from_report(data):
     keys = ["executive_summary", "engagement_overview", "conclusion"]
-    description = "\n\n".join(data[key] for key in keys if key in data and data[key])
+    description = "\n\n".join(data[key]
+                              for key in keys
+                              if key in data and data[key]
+                              )
     return description if description else None
