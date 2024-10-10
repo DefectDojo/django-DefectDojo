@@ -5,13 +5,16 @@ import cvss
 
 from dojo.models import Endpoint
 
+ATTACHMENT_ERROR = "Attachment data not found"
+SCREENSHOT_ERROR = "Screenshot data not found"
+
 
 def parse_ptart_severity(severity):
     severity_mapping = {
         1: "Critical",
         2: "High",
         3: "Medium",
-        4: "Low"
+        4: "Low",
     }
     return severity_mapping.get(severity, "Info")  # Default severity
 
@@ -20,7 +23,7 @@ def parse_ptart_fix_effort(effort):
     effort_mapping = {
         1: "High",
         2: "Medium",
-        3: "Low"
+        3: "Low",
     }
     return effort_mapping.get(effort, None)
 
@@ -67,7 +70,7 @@ def parse_retest_status(status):
         "NF": "Not Fixed",
         "PF": "Partially Fixed",
         "NA": "Not Applicable",
-        "NT": "Not Tested"
+        "NT": "Not Tested",
     }
     return fix_status_mapping.get(status, None)
 
@@ -86,32 +89,31 @@ def parse_screenshot_data(screenshot):
         data = get_screenshot_data(screenshot)
         return {
             "title": title,
-            "data": data
+            "data": data,
         }
     except ValueError:
         return None
 
 
 def get_screenshot_title(screenshot):
-    caption = screenshot.get('caption', 'screenshot') \
-        if "caption" in screenshot and screenshot["caption"] \
-        else "screenshot"
-    title = f"{caption}{get_file_suffix_from_screenshot(screenshot)}"
-    return title
+    caption = screenshot.get("caption", "screenshot")
+    if not caption:
+        caption = "screenshot"
+    return f"{caption}{get_file_suffix_from_screenshot(screenshot)}"
 
 
 def get_screenshot_data(screenshot):
     if ("screenshot" not in screenshot
             or "data" not in screenshot["screenshot"]
             or not screenshot["screenshot"]["data"]):
-        raise ValueError("Screenshot data not found")
+        raise ValueError(SCREENSHOT_ERROR)
     return screenshot["screenshot"]["data"]
 
 
 def get_file_suffix_from_screenshot(screenshot):
-    return pathlib.Path(screenshot['screenshot']['filename']).suffix \
+    return pathlib.Path(screenshot["screenshot"]["filename"]).suffix \
         if ("screenshot" in screenshot
-            and "filename" in screenshot['screenshot']) \
+            and "filename" in screenshot["screenshot"]) \
         else ""
 
 
@@ -129,7 +131,7 @@ def parse_attachment_data(attachment):
         data = get_attachment_data(attachment)
         return {
             "title": title,
-            "data": data
+            "data": data,
         }
     except ValueError:
         # No data in attachment, let's not import this file.
@@ -138,14 +140,15 @@ def parse_attachment_data(attachment):
 
 def get_attachment_data(attachment):
     if "data" not in attachment or not attachment["data"]:
-        raise ValueError("Attachment data not found")
+        raise ValueError(ATTACHMENT_ERROR)
     return attachment["data"]
 
 
 def get_attachement_title(attachment):
-    return attachment.get("title", "attachment") \
-        if "title" in attachment and attachment["title"] \
-        else "attachment"
+    title = attachment.get("title", "attachment")
+    if not title:
+        title = "attachment"
+    return title
 
 
 def parse_endpoints_from_hit(hit):
@@ -157,8 +160,6 @@ def parse_endpoints_from_hit(hit):
 
 def generate_test_description_from_report(data):
     keys = ["executive_summary", "engagement_overview", "conclusion"]
-    description = "\n\n".join(data[key]
-                              for key in keys
-                              if key in data and data[key]
-                              )
-    return description if description else None
+    clauses = [clause for clause in [data.get(key) for key in keys] if clause]
+    description = "\n\n".join(clauses)
+    return description or None
