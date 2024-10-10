@@ -1,11 +1,14 @@
 import os
 from pathlib import Path
 
+from django.test import tag as test_tag
+
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
 
 basedir = os.path.join(get_unit_tests_path(), "..")
 
 
+@test_tag("parser-supplement-tests")
 class TestParsers(DojoTestCase):
     def test_file_existence(self):
         for parser_dir in os.scandir(os.path.join(basedir, "dojo", "tools")):
