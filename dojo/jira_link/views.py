@@ -302,7 +302,7 @@ class ExpressJiraView(View):
         if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
-        add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
+        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
         return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
@@ -402,7 +402,7 @@ class NewJiraView(View):
         if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
-        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
+        add_breadcrumb(title="New Jira Configuration (Advanced)", top_level=False, request=request)
         return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
