@@ -58,6 +58,7 @@ class JIRAConfigEngagementEpicTest(DojoVCRTestCase, JIRAConfigEngagementBase):
             "jira-project-form-jira_instance": 2,
             "jira-project-form-project_key": "NTEST",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-enable_engagement_epic_mapping": "on",
             "jira-epic-form-push_to_jira": "on",
