@@ -7,11 +7,12 @@ class PTARTAssessmentParser:
         self.cvss_type = None
 
     def get_test_data(self, tree):
+        # Check that the report is valid, If we have no assessments, then return an empty list
         if "assessments" in tree:
             self.cvss_type = tree.get("cvss_type", None)
             assessments = tree["assessments"]
         else:
-            raise ValueError("Parse Error: assessments key not found in the report")
+            return []
 
         return [finding for assessment in assessments for finding in self.parse_assessment(assessment)]
 
