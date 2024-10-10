@@ -1,0 +1,227 @@
+{
+  "Generated": "2024-10-08 02:33 PM",
+  "Target": {
+    "Duration": "00:00:38.3663144",
+    "Initiated": "2024-10-08 12:33 PM",
+    "ScanId": "93d4edbae56145ef001ab203020d164c",
+    "Url": "http://php.testsparker.com/auth/login.php"
+  },
+  "Vulnerabilities": [
+    {
+      "Certainty": 90,
+      "Classification": {
+        "Iso27001": "A.18.1.3",
+        "Capec": "170",
+        "Cvss": null,
+        "Cvss31": null,
+        "Cvss40": null,
+        "Cwe": "205",
+        "Hipaa": "164.306(a), 164.308(a)",
+        "Owasp": "A5",
+        "OwaspProactiveControls": "",
+        "Pci32": "",
+        "Wasc": "13",
+        "Asvs40": "14.3.3",
+        "Nistsp80053": "AC-22",
+        "DisaStig": "V-16814",
+        "OwaspApiTop10": "API7",
+        "OwaspTopTen2021": "A05",
+        "OwaspTopTen2023": "API8",
+        "PciDss40": ""
+      },
+      "Confirmed": false,
+      "Description": "<p>Invicti Enterprise identified a version disclosure (PHP) in the target web server's HTTP response.</p>\n<p>This information can help an attacker gain a greater understanding of the systems in use and potentially develop further attacks targeted at the specific version of PHP.</p>",
+      "ExploitationSkills": "",
+      "ExternalReferences": "",
+      "ExtraInformation": [
+        {
+          "Name": "Extracted Version",
+          "Value": "5.2.6"
+        }
+      ],
+      "FirstSeenDate": "2024-07-23 05:32 PM",
+      "HttpRequest": {
+        "Content": "GET /auth/login.php HTTP/1.1\r\nHost: php.testsparker.com\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\r\nAccept-Language: en-us,en;q=0.5\r\nCache-Control: no-cache\r\nCookie: PHPSESSID=e6ab62571859a3d766d49945296f081d\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.140 Safari/537.36\r\n\r\n",
+        "Method": "GET",
+        "Parameters": []
+      },
+      "HttpResponse": {
+        "Content": "HTTP/1.1 200 OK\r\nServer: Apache/2.2.8 (Win32) PHP/5.2.6\r\nContent-Length: 3058\r\nX-Powered-By: PHP/5.2.6\r\nPragma: no-cache\r\nExpires: Thu, 19 Nov 1981 08:52:00 GMT\r\nKeep-Alive: timeout=5, max=150\r\nConnection: Keep-Alive\r\nContent-Type: text/html\r\nDate: Tue, 08 Oct 2024 09:37:09 GMT\r\nCache-Control: no-store, must-revalidate, no-cache, post-check=0, pre-check=0\r\n\r\n\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta name=\"keywords\" content=\"\" />\n<meta name=\"description\" content=\"\" />\n<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n<title>Invicti Test Web Site -  PHP</title>\n<link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\" media=\"screen\" />\n</head><body>\n<div id=\"wrapper\">\n        \n\t<div id=\"menu\">\n\t\t<ul>\n\t\t\t<li><a href=\"/process.php?file=Generics/index.nsp\">Home</a></li>\n\t\t\t<li><a href=\"/hello.php?name=Visitor\">Hello</a></li>\n\t\t\t<li><a href=\"/products.php?pro=url\">Products</a></li>\n\t\t\t<li><a href=\"/process.php?file=Generics/about.nsp\">About</a></li>\n\t\t\t<li><a href=\"/process.php?file=Generics/contact.nsp\">Contact</a></li>\n\t\t\t<li><a href=\"/auth/\">Login</a></li>\n\t\t</ul>\n\t</div>\n\t<!-- end #menu -->\n\t<div id=\"header\">\n\n\t</div>\n\t<!-- end #header -->\t<div id=\"page\">\n\t<div id=\"page-bgtop\">\n\t<div id=\"page-bgbtm\">\n\t\t<div id=\"content\">\n\t\t\t<div class=\"post\">\n\t\t\t\t\t\t\t\t<h1 class=\"title\"><a href=\"#\">Login Area</a></h1>\n\t\t\t\t\t<p>\n                    Enter your credentials (admin / admin123456)\n    <br/>\n    <form method=\"POST\" action=\"/auth/control.php\">\n      Username: <input type=\"text\" name=\"username\"/>\n      <br/>\n      Password:&nbsp;&nbsp;<input type=\"password\" name=\"password\"/>\n<!-- Test credentials -->\n<!-- Password: admin123456 -->\n      <br/>\n\t  <input type=\"hidden\" name=\"token\" value=\"9466\">\n      <br/>\n      <input type=\"submit\" value=\"SUBMIT\">\n    </form>\n                    </p>\n\n\t\t\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t\t\t\t<div class=\"entry\">\n\n\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t\t</div>\n\t\t<!-- end #content -->\n\t        \n\t<div id=\"sidebar\">\n\t\t\t<ul>\n\t\t\t\t<li>\n\t\t\t\t\t<div id=\"search\" >\n\t\t\t\t\t\t<form method=\"get\" action=\"../artist.php\">\n\t\t\t\t\t\t\t<div>\n\t\t\t\t\t\t\t\t<input type=\"text\" name=\"s\" id=\"search-text\" value=\"\" />\n\t\t\t\t\t\t\t\t<input type=\"submit\" id=\"search-submit\" value=\"GO\" />\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</form>\n\t\t\t\t\n\t\t\t\t\t</div>\n\t\t\t\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<h2>Tags</h2>\n\t\t\t\t\t<p>netsparker xss web-application-security false-positive-free automated-exploitation sql-injection local/remote-file-inclusion</p>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<h2>Inner Pages</h2>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li><a href=\"/artist.php?id=test\">Artist Search</a></li>\n\t\t\t\t\t\t<li><a href=\"/nslookup.php\">Lookup Service</a></li>\n\t\t\t\t\t</ul>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<h2>Links</h2>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li><a href=\"http://aspnet.testsparker.com/\">Aspnet Testsparker</a></li>\n\t\t\t\t\t\t<li><a href=\"http://aspnet.testsparker.com/administrator/\">Aspnet Testsparker Login</a></li>\n\t\t\t\t\t</ul>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\n\t\t\t</ul>\n\t\t</div>\t\t<!-- end #sidebar -->\n\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t</div>\n\t</div>\n\t</div>\n\t<!-- end #page -->\n</div>\nv\n<div id=\"footer\">\n\t\t<p>Copyright (c) 2010 testsparker.com. All rights reserved. Design by <a href=\"http://www.freecsstemplates.org/\">Free CSS Templates</a>.</p>\n\t</div>\t<!-- end #footer -->\n</body>\n</html>\n",
+        "Duration": 458.7166,
+        "StatusCode": 200
+      },
+      "LookupId": "bfc0a79b-e3dc-45af-0195-b1a1030bc008",
+      "Impact": "<div>An attacker might use the disclosed information to harvest specific security vulnerabilities for the version identified.</div>",
+      "KnownVulnerabilities": [],
+      "LastSeenDate": "2024-10-08 12:37 PM",
+      "Name": "Version Disclosure (PHP)",
+      "ProofOfConcept": "",
+      "RemedialActions": "",
+      "RemedialProcedure": "<div>Configure your web server to prevent information leakage from the <code>SERVER</code> header of its HTTP response.</div>",
+      "RemedyReferences": "",
+      "Severity": "Low",
+      "State": "Present, Scanning",
+      "Type": "PhpVersionDisclosure",
+      "Url": "http://php.testsparker.com/auth/login.php",
+      "Tags": []
+    },
+    {
+      "Certainty": 90,
+      "Classification": {
+        "Iso27001": "A.14.1.2",
+        "Capec": "310",
+        "Cvss": null,
+        "Cvss31": null,
+        "Cvss40": null,
+        "Cwe": "1035, 937",
+        "Hipaa": "164.308(a)(1)(i)",
+        "Owasp": "A9",
+        "OwaspProactiveControls": "C1",
+        "Pci32": "6.2",
+        "Wasc": "",
+        "Asvs40": "1.14.3",
+        "Nistsp80053": "CM-6",
+        "DisaStig": "V-16836",
+        "OwaspApiTop10": "",
+        "OwaspTopTen2021": "A06",
+        "OwaspTopTen2023": "API8",
+        "PciDss40": "6.3.3"
+      },
+      "Confirmed": false,
+      "Description": "<p>Invicti Enterprise identified you are using an out-of-date version of Apache.</p>",
+      "ExploitationSkills": "",
+      "ExternalReferences": "",
+      "ExtraInformation": [
+        {
+          "Name": "Identified Version",
+          "Value": "2.2.8"
+        },
+        {
+          "Name": "Latest Version",
+          "Value": "2.2.34 (in this branch)"
+        },
+        {
+          "Name": "Overall Latest Version",
+          "Value": "2.4.62"
+        },
+        {
+          "Name": "Branch Status",
+          "Value": "This branch has stopped receiving updates since 7/11/2017."
+        },
+        {
+          "Name": "Vulnerability Database",
+          "Value": "Result is based on 10/01/2024 18:00:00 vulnerability database content."
+        }
+      ],
+      "FirstSeenDate": "2024-07-23 05:32 PM",
+      "HttpRequest": {
+        "Content": "GET /auth/login.php HTTP/1.1\r\nHost: php.testsparker.com\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\r\nAccept-Language: en-us,en;q=0.5\r\nCache-Control: no-cache\r\nCookie: PHPSESSID=e6ab62571859a3d766d49945296f081d\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.140 Safari/537.36\r\n\r\n",
+        "Method": "GET",
+        "Parameters": []
+      },
+      "HttpResponse": {
+        "Content": "HTTP/1.1 200 OK\r\nServer: Apache/2.2.8 (Win32) PHP/5.2.6\r\nContent-Length: 3058\r\nX-Powered-By: PHP/5.2.6\r\nPragma: no-cache\r\nExpires: Thu, 19 Nov 1981 08:52:00 GMT\r\nKeep-Alive: timeout=5, max=150\r\nConnection: Keep-Alive\r\nContent-Type: text/html\r\nDate: Tue, 08 Oct 2024 09:37:09 GMT\r\nCache-Control: no-store, must-revalidate, no-cache, post-check=0, pre-check=0\r\n\r\n\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta name=\"keywords\" content=\"\" />\n<meta name=\"description\" content=\"\" />\n<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n<title>Invicti Test Web Site -  PHP</title>\n<link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\" media=\"screen\" />\n</head><body>\n<div id=\"wrapper\">\n        \n\t<div id=\"menu\">\n\t\t<ul>\n\t\t\t<li><a href=\"/process.php?file=Generics/index.nsp\">Home</a></li>\n\t\t\t<li><a href=\"/hello.php?name=Visitor\">Hello</a></li>\n\t\t\t<li><a href=\"/products.php?pro=url\">Products</a></li>\n\t\t\t<li><a href=\"/process.php?file=Generics/about.nsp\">About</a></li>\n\t\t\t<li><a href=\"/process.php?file=Generics/contact.nsp\">Contact</a></li>\n\t\t\t<li><a href=\"/auth/\">Login</a></li>\n\t\t</ul>\n\t</div>\n\t<!-- end #menu -->\n\t<div id=\"header\">\n\n\t</div>\n\t<!-- end #header -->\t<div id=\"page\">\n\t<div id=\"page-bgtop\">\n\t<div id=\"page-bgbtm\">\n\t\t<div id=\"content\">\n\t\t\t<div class=\"post\">\n\t\t\t\t\t\t\t\t<h1 class=\"title\"><a href=\"#\">Login Area</a></h1>\n\t\t\t\t\t<p>\n                    Enter your credentials (admin / admin123456)\n    <br/>\n    <form method=\"POST\" action=\"/auth/control.php\">\n      Username: <input type=\"text\" name=\"username\"/>\n      <br/>\n      Password:&nbsp;&nbsp;<input type=\"password\" name=\"password\"/>\n<!-- Test credentials -->\n<!-- Password: admin123456 -->\n      <br/>\n\t  <input type=\"hidden\" name=\"token\" value=\"9466\">\n      <br/>\n      <input type=\"submit\" value=\"SUBMIT\">\n    </form>\n                    </p>\n\n\t\t\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t\t\t\t<div class=\"entry\">\n\n\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t\t</div>\n\t\t<!-- end #content -->\n\t        \n\t<div id=\"sidebar\">\n\t\t\t<ul>\n\t\t\t\t<li>\n\t\t\t\t\t<div id=\"search\" >\n\t\t\t\t\t\t<form method=\"get\" action=\"../artist.php\">\n\t\t\t\t\t\t\t<div>\n\t\t\t\t\t\t\t\t<input type=\"text\" name=\"s\" id=\"search-text\" value=\"\" />\n\t\t\t\t\t\t\t\t<input type=\"submit\" id=\"search-submit\" value=\"GO\" />\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</form>\n\t\t\t\t\n\t\t\t\t\t</div>\n\t\t\t\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<h2>Tags</h2>\n\t\t\t\t\t<p>netsparker xss web-application-security false-positive-free automated-exploitation sql-injection local/remote-file-inclusion</p>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<h2>Inner Pages</h2>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li><a href=\"/artist.php?id=test\">Artist Search</a></li>\n\t\t\t\t\t\t<li><a href=\"/nslookup.php\">Lookup Service</a></li>\n\t\t\t\t\t</ul>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<h2>Links</h2>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li><a href=\"http://aspnet.testsparker.com/\">Aspnet Testsparker</a></li>\n\t\t\t\t\t\t<li><a href=\"http://aspnet.testsparker.com/administrator/\">Aspnet Testsparker Login</a></li>\n\t\t\t\t\t</ul>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\n\t\t\t</ul>\n\t\t</div>\t\t<!-- end #sidebar -->\n\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t</div>\n\t</div>\n\t</div>\n\t<!-- end #page -->\n</div>\nv\n<div id=\"footer\">\n\t\t<p>Copyright (c) 2010 testsparker.com. All rights reserved. Design by <a href=\"http://www.freecsstemplates.org/\">Free CSS Templates</a>.</p>\n\t</div>\t<!-- end #footer -->\n</body>\n</html>\n",
+        "Duration": 458.7166,
+        "StatusCode": 200
+      },
+      "LookupId": "e3f86681-1ae6-49e8-0186-b1a1030bbbb1",
+      "Impact": "<div>Since this is an old version of the software, it may be vulnerable to attacks.</div>",
+      "KnownVulnerabilities": [
+        {
+          "Severity": "Critical",
+          "Title": "Apache HTTP Server Out-of-bounds Read Vulnerability"
+        }
+      ],
+      "LastSeenDate": "2024-10-08 12:37 PM",
+      "Name": "Out-of-date Version (Apache)",
+      "ProofOfConcept": "",
+      "RemedialActions": "",
+      "RemedialProcedure": "<div>\n<p>Please upgrade your installation of Apache to the latest stable version.</p>\n</div>",
+      "RemedyReferences": "<div><ul><li><a target='_blank' href='https://httpd.apache.org/download.cgi'><i class='icon-external-link'></i>Downloading the Apache HTTP Server</a></li></ul></div>",
+      "Severity": "Critical",
+      "State": "Present, Scanning",
+      "Type": "ApacheOutOfDate",
+      "Url": "http://php.testsparker.com/auth/login.php",
+      "Tags": []
+    },
+    {
+      "Certainty": 90,
+      "Classification": {
+        "Iso27001": "A.14.1.2",
+        "Capec": "310",
+        "Cvss": null,
+        "Cvss31": null,
+        "Cvss40": null,
+        "Cwe": "1035, 937",
+        "Hipaa": "164.308(a)(1)(i)",
+        "Owasp": "A9",
+        "OwaspProactiveControls": "C1",
+        "Pci32": "6.2",
+        "Wasc": "",
+        "Asvs40": "1.14.3",
+        "Nistsp80053": "CM-6",
+        "DisaStig": "V-16836",
+        "OwaspApiTop10": "",
+        "OwaspTopTen2021": "A06",
+        "OwaspTopTen2023": "API8",
+        "PciDss40": "6.3.3"
+      },
+      "Confirmed": false,
+      "Description": "<p>Invicti Enterprise identified you are using an out-of-date version of PHP.</p>",
+      "ExploitationSkills": "",
+      "ExternalReferences": "",
+      "ExtraInformation": [
+        {
+          "Name": "Identified Version",
+          "Value": "5.2.6"
+        },
+        {
+          "Name": "Latest Version",
+          "Value": "5.2.17 (in this branch)"
+        },
+        {
+          "Name": "Overall Latest Version",
+          "Value": "8.3.12"
+        },
+        {
+          "Name": "Branch Status",
+          "Value": "This branch has stopped receiving updates since 1/6/2011."
+        },
+        {
+          "Name": "Vulnerability Database",
+          "Value": "Result is based on 10/01/2024 18:00:00 vulnerability database content."
+        }
+      ],
+      "FirstSeenDate": "2024-07-23 05:32 PM",
+      "HttpRequest": {
+        "Content": "GET /auth/login.php HTTP/1.1\r\nHost: php.testsparker.com\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8\r\nAccept-Language: en-us,en;q=0.5\r\nCache-Control: no-cache\r\nCookie: PHPSESSID=e6ab62571859a3d766d49945296f081d\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.140 Safari/537.36\r\n\r\n",
+        "Method": "GET",
+        "Parameters": []
+      },
+      "HttpResponse": {
+        "Content": "HTTP/1.1 200 OK\r\nServer: Apache/2.2.8 (Win32) PHP/5.2.6\r\nContent-Length: 3058\r\nX-Powered-By: PHP/5.2.6\r\nPragma: no-cache\r\nExpires: Thu, 19 Nov 1981 08:52:00 GMT\r\nKeep-Alive: timeout=5, max=150\r\nConnection: Keep-Alive\r\nContent-Type: text/html\r\nDate: Tue, 08 Oct 2024 09:37:09 GMT\r\nCache-Control: no-store, must-revalidate, no-cache, post-check=0, pre-check=0\r\n\r\n\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta name=\"keywords\" content=\"\" />\n<meta name=\"description\" content=\"\" />\n<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n<title>Invicti Test Web Site -  PHP</title>\n<link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\" media=\"screen\" />\n</head><body>\n<div id=\"wrapper\">\n        \n\t<div id=\"menu\">\n\t\t<ul>\n\t\t\t<li><a href=\"/process.php?file=Generics/index.nsp\">Home</a></li>\n\t\t\t<li><a href=\"/hello.php?name=Visitor\">Hello</a></li>\n\t\t\t<li><a href=\"/products.php?pro=url\">Products</a></li>\n\t\t\t<li><a href=\"/process.php?file=Generics/about.nsp\">About</a></li>\n\t\t\t<li><a href=\"/process.php?file=Generics/contact.nsp\">Contact</a></li>\n\t\t\t<li><a href=\"/auth/\">Login</a></li>\n\t\t</ul>\n\t</div>\n\t<!-- end #menu -->\n\t<div id=\"header\">\n\n\t</div>\n\t<!-- end #header -->\t<div id=\"page\">\n\t<div id=\"page-bgtop\">\n\t<div id=\"page-bgbtm\">\n\t\t<div id=\"content\">\n\t\t\t<div class=\"post\">\n\t\t\t\t\t\t\t\t<h1 class=\"title\"><a href=\"#\">Login Area</a></h1>\n\t\t\t\t\t<p>\n                    Enter your credentials (admin / admin123456)\n    <br/>\n    <form method=\"POST\" action=\"/auth/control.php\">\n      Username: <input type=\"text\" name=\"username\"/>\n      <br/>\n      Password:&nbsp;&nbsp;<input type=\"password\" name=\"password\"/>\n<!-- Test credentials -->\n<!-- Password: admin123456 -->\n      <br/>\n\t  <input type=\"hidden\" name=\"token\" value=\"9466\">\n      <br/>\n      <input type=\"submit\" value=\"SUBMIT\">\n    </form>\n                    </p>\n\n\t\t\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t\t\t\t<div class=\"entry\">\n\n\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t\t</div>\n\t\t<!-- end #content -->\n\t        \n\t<div id=\"sidebar\">\n\t\t\t<ul>\n\t\t\t\t<li>\n\t\t\t\t\t<div id=\"search\" >\n\t\t\t\t\t\t<form method=\"get\" action=\"../artist.php\">\n\t\t\t\t\t\t\t<div>\n\t\t\t\t\t\t\t\t<input type=\"text\" name=\"s\" id=\"search-text\" value=\"\" />\n\t\t\t\t\t\t\t\t<input type=\"submit\" id=\"search-submit\" value=\"GO\" />\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</form>\n\t\t\t\t\n\t\t\t\t\t</div>\n\t\t\t\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<h2>Tags</h2>\n\t\t\t\t\t<p>netsparker xss web-application-security false-positive-free automated-exploitation sql-injection local/remote-file-inclusion</p>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<h2>Inner Pages</h2>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li><a href=\"/artist.php?id=test\">Artist Search</a></li>\n\t\t\t\t\t\t<li><a href=\"/nslookup.php\">Lookup Service</a></li>\n\t\t\t\t\t</ul>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<h2>Links</h2>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li><a href=\"http://aspnet.testsparker.com/\">Aspnet Testsparker</a></li>\n\t\t\t\t\t\t<li><a href=\"http://aspnet.testsparker.com/administrator/\">Aspnet Testsparker Login</a></li>\n\t\t\t\t\t</ul>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\n\t\t\t</ul>\n\t\t</div>\t\t<!-- end #sidebar -->\n\t\t<div style=\"clear: both;\">&nbsp;</div>\n\t</div>\n\t</div>\n\t</div>\n\t<!-- end #page -->\n</div>\nv\n<div id=\"footer\">\n\t\t<p>Copyright (c) 2010 testsparker.com. All rights reserved. Design by <a href=\"http://www.freecsstemplates.org/\">Free CSS Templates</a>.</p>\n\t</div>\t<!-- end #footer -->\n</body>\n</html>\n",
+        "Duration": 458.7166,
+        "StatusCode": 200
+      },
+      "LookupId": "c609abb8-f7c6-4646-0190-b1a1030bbeb1",
+      "Impact": "<div>Since this is an old version of the software, it may be vulnerable to attacks.</div>",
+      "KnownVulnerabilities": [
+        {
+          "Severity": "Critical",
+          "Title": "PHP Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection') Vulnerability"
+        }
+      ],
+      "LastSeenDate": "2024-10-08 12:37 PM",
+      "Name": "Out-of-date Version (PHP)",
+      "ProofOfConcept": "",
+      "RemedialActions": "",
+      "RemedialProcedure": "<div>Please upgrade your installation of PHP to the latest stable version.</div>",
+      "RemedyReferences": "<div><ul><li><a target='_blank' href='https://php.net/downloads.php'><i class='icon-external-link'></i>Downloading PHP</a></li></ul></div>",
+      "Severity": "Critical",
+      "State": "Present, Scanning",
+      "Type": "PhpOutOfDate",
+      "Url": "http://php.testsparker.com/auth/login.php",
+      "Tags": []
+    }
+  ]
+}
