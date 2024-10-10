@@ -22,7 +22,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_configuration_permission
 
 # Local application/library imports
-from dojo.forms import DeleteJIRAInstanceForm, AdvancedJIRAForm, JIRAForm
+from dojo.forms import AdvancedJIRAForm, DeleteJIRAInstanceForm, JIRAForm
 from dojo.models import JIRA_Instance, JIRA_Issue, Notes, System_Settings, User
 from dojo.notifications.helper import create_notification
 from dojo.utils import add_breadcrumb, add_error_message_to_response, get_setting
