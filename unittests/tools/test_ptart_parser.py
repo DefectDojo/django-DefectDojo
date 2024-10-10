@@ -134,33 +134,36 @@ class TestPTARTParser(TestCase):
             self.assertEqual(1, len(screenshots))
             screenshot = screenshots[0]
             self.assertEqual("One.png", screenshot["title"])
-            self.assertTrue(screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk", "Invalid Screenshot Data")
+            self.assertTrue(screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                            "Invalid Screenshot Data")
         with self.subTest("Two Screenshots"):
             hit = {
-                    "screenshots": [{
-                        "caption": "One",
-                        "order": 0,
-                        "screenshot": {
-                            "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
-                            "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
-                        }
-                    },{
-                        "caption": "Two",
-                        "order": 1,
-                        "screenshot": {
-                            "filename": "screenshots/123e4567-e89b-12d3-a456-426614174000.png",
-                            "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
-                        }
-                    }]
+                "screenshots": [{
+                    "caption": "One",
+                    "order": 0,
+                    "screenshot": {
+                        "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
+                    }
+                }, {
+                    "caption": "Two",
+                    "order": 1,
+                    "screenshot": {
+                        "filename": "screenshots/123e4567-e89b-12d3-a456-426614174000.png",
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
+                    }
+                }]
             }
             screenshots = parse_screenshots_from_hit(hit)
             self.assertEqual(2, len(screenshots))
             first_screenshot = screenshots[0]
             self.assertEqual("One.png", first_screenshot["title"])
-            self.assertTrue(first_screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk", "Invalid Screenshot Data")
+            self.assertTrue(first_screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                            "Invalid Screenshot Data")
             second_screenshot = screenshots[1]
             self.assertEqual("Two.png", second_screenshot["title"])
-            self.assertTrue(second_screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk", "Invalid Screenshot Data")
+            self.assertTrue(second_screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                            "Invalid Screenshot Data")
         with self.subTest("Empty Screenshot"):
             hit = {
                 "screenshots": [{
@@ -174,6 +177,116 @@ class TestPTARTParser(TestCase):
             }
             screenshots = parse_screenshots_from_hit(hit)
             self.assertEqual(0, len(screenshots))
+        with self.subTest("Screenshot with No Caption"):
+            hit = {
+                "screenshots": [{
+                    "order": 0,
+                    "screenshot": {
+                        "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
+                    }
+                }]
+            }
+            screenshots = parse_screenshots_from_hit(hit)
+            self.assertEqual(1, len(screenshots))
+            screenshot = screenshots[0]
+            self.assertEqual("screenshot.png", screenshot["title"])
+            self.assertTrue(screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                            "Invalid Screenshot Data")
+        with self.subTest("Screenshot with Blank Caption"):
+            hit = {
+                "screenshots": [{
+                    "caption": "",
+                    "order": 0,
+                    "screenshot": {
+                        "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
+                    }
+                }]
+            }
+            screenshots = parse_screenshots_from_hit(hit)
+            self.assertEqual(1, len(screenshots))
+            screenshot = screenshots[0]
+            self.assertEqual("screenshot.png", screenshot["title"])
+            self.assertTrue(screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                            "Invalid Screenshot Data")
+
+    def test_ptart_parser_tools_parse_attachment_from_hit(self):
+        from dojo.tools.ptart.ptart_parser_tools import parse_attachment_from_hit
+        with self.subTest("No Attachments"):
+            hit = {}
+            attachments = parse_attachment_from_hit(hit)
+            self.assertEqual([], attachments)
+        with self.subTest("One Attachment"):
+            hit = {
+                "attachments": [{
+                    "title": "License",
+                    "data": "TUlUIExpY2Vuc2UKCkNvcHl"
+                }]
+            }
+            attachments = parse_attachment_from_hit(hit)
+            self.assertEqual(1, len(attachments))
+            attachment = attachments[0]
+            self.assertEqual("License", attachment["title"])
+            self.assertTrue(attachment["data"] == "TUlUIExpY2Vuc2UKCkNvcHl", "Invalid Attachment Data")
+        with self.subTest("Two Attachments"):
+            hit = {
+                "attachments": [{
+                    "title": "License",
+                    "data": "TUlUIExpY2Vuc2UKCkNvcHl"
+                }, {
+                    "title": "Readme",
+                    "data": "UkVBRERtZQoK"
+                }]
+            }
+            attachments = parse_attachment_from_hit(hit)
+            self.assertEqual(2, len(attachments))
+            first_attachment = attachments[0]
+            self.assertEqual("License", first_attachment["title"])
+            self.assertTrue(first_attachment["data"] == "TUlUIExpY2Vuc2UKCkNvcHl", "Invalid Attachment Data")
+            second_attachment = attachments[1]
+            self.assertEqual("Readme", second_attachment["title"])
+            self.assertTrue(second_attachment["data"] == "UkVBRERtZQoK", "Invalid Attachment Data")
+        with self.subTest("Empty Attachment"):
+            hit = {
+                "attachments": [{
+                    "title": "License",
+                    "data": ""
+                }]
+            }
+            attachments = parse_attachment_from_hit(hit)
+            self.assertEqual(0, len(attachments))
+        with self.subTest("No Data Attachment"):
+            hit = {
+                "attachments": [{
+                    "title": "License"
+                }]
+            }
+            attachments = parse_attachment_from_hit(hit)
+            self.assertEqual(0, len(attachments))
+        with self.subTest("Attachement with no Title"):
+            hit = {
+                "attachments": [{
+                    "data": "TUlUIExpY2Vuc2UKCkNvcHl"
+                }]
+            }
+            attachments = parse_attachment_from_hit(hit)
+            self.assertEqual(1, len(attachments))
+            attachment = attachments[0]
+            self.assertEqual("attachment", attachment["title"])
+            self.assertTrue(attachment["data"] == "TUlUIExpY2Vuc2UKCkNvcHl", "Invalid Attachment Data")
+        with self.subTest("Attachment with Blank Title"):
+            hit = {
+                "attachments": [{
+                    "title": "",
+                    "data": "TUlUIExpY2Vuc2UKCkNvcHl"
+                }]
+            }
+            attachments = parse_attachment_from_hit(hit)
+            self.assertEqual(1, len(attachments))
+            attachment = attachments[0]
+            self.assertEqual("attachment", attachment["title"])
+            self.assertTrue(attachment["data"] == "TUlUIExpY2Vuc2UKCkNvcHl", "Invalid Attachment Data")
 
     def test_ptart_parser_with_empty_json_throws_error(self):
         with self.assertRaises(ValueError) as context:
@@ -421,8 +534,8 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
                 self.assertEqual("PTART-2024-00002-RT", finding.unique_id_from_tool)
                 self.assertEqual("Low", finding.effort_for_fixing)
-                self.assertEqual("Test Retest", finding.component_name)
-                self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual("Retest: Test Retest", finding.component_name)
+                self.assertEqual("2024-09-08", finding.date.strftime("%Y-%m-%d"))
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual(str(endpoint), "https://test.example.com")
