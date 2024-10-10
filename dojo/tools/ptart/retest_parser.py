@@ -1,6 +1,5 @@
 import dojo.tools.ptart.ptart_parser_tools as ptart_tools
 from dojo.models import Finding
-from dojo.tools.ptart.ptart_parser_tools import parse_title_from_hit
 
 
 def generate_retest_hit_title(hit, original_hit):
@@ -13,8 +12,7 @@ def generate_retest_hit_title(hit, original_hit):
         "title": title,
         "id": hit_id,
     }
-    finding_title = parse_title_from_hit(fake_retest_hit)
-    return finding_title
+    return ptart_tools.parse_title_from_hit(fake_retest_hit)
 
 
 class PTARTRetestParser:
@@ -59,31 +57,31 @@ class PTARTRetestParser:
         finding = Finding(
             title=finding_title,
             severity=ptart_tools.parse_ptart_severity(
-                original_hit.get("severity")
+                original_hit.get("severity"),
             ),
             effort_for_fixing=ptart_tools.parse_ptart_fix_effort(
-                original_hit.get("fix_complexity")
+                original_hit.get("fix_complexity"),
             ),
             component_name=f"Retest: {retest.get('name', 'Retest')}",
             date=ptart_tools.parse_date(
                 retest.get("start_date"),
-                "%Y-%m-%d"
+                "%Y-%m-%d",
             ),
         )
 
         # Don't add the fields if they are blank.
-        if "body" in hit and hit["body"]:
-            finding.description = hit["body"]
+        if hit["body"]:
+            finding.description = hit.get("body")
 
-        if "remediation" in original_hit and original_hit["remediation"]:
-            finding.mitigation = original_hit["remediation"]
+        if original_hit["remediation"]:
+            finding.mitigation = original_hit.get("remediation")
 
-        if "id" in hit and hit["id"]:
+        if hit["id"]:
             finding.unique_id_from_tool = hit.get("id")
 
         cvss_vector = ptart_tools.parse_cvss_vector(
             original_hit,
-            self.cvss_type
+            self.cvss_type,
         )
         if cvss_vector:
             finding.cvssv3 = cvss_vector
@@ -92,7 +90,7 @@ class PTARTRetestParser:
             finding.unsaved_tags = original_hit["labels"]
 
         finding.unsaved_endpoints = ptart_tools.parse_endpoints_from_hit(
-            original_hit
+            original_hit,
         )
 
         # We only have screenshots in a retest. Refer to the original hit for
