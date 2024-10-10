@@ -113,6 +113,68 @@ class TestPTARTParser(TestCase):
         with self.subTest("Empty"):
             self.assertEqual(None, parse_retest_fix_status(""))
 
+    def test_ptart_parser_tools_parse_screenshots_from_hit(self):
+        from dojo.tools.ptart.ptart_parser_tools import parse_screenshots_from_hit
+        with self.subTest("No Screenshots"):
+            hit = {}
+            screenshots = parse_screenshots_from_hit(hit)
+            self.assertEqual([], screenshots)
+        with self.subTest("One Screenshot"):
+            hit = {
+                "screenshots": [{
+                    "caption": "One",
+                    "order": 0,
+                    "screenshot": {
+                        "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
+                    }
+                }]
+            }
+            screenshots = parse_screenshots_from_hit(hit)
+            self.assertEqual(1, len(screenshots))
+            screenshot = screenshots[0]
+            self.assertEqual("One.png", screenshot["title"])
+            self.assertTrue(screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk", "Invalid Screenshot Data")
+        with self.subTest("Two Screenshots"):
+            hit = {
+                    "screenshots": [{
+                        "caption": "One",
+                        "order": 0,
+                        "screenshot": {
+                            "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
+                            "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
+                        }
+                    },{
+                        "caption": "Two",
+                        "order": 1,
+                        "screenshot": {
+                            "filename": "screenshots/123e4567-e89b-12d3-a456-426614174000.png",
+                            "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
+                        }
+                    }]
+            }
+            screenshots = parse_screenshots_from_hit(hit)
+            self.assertEqual(2, len(screenshots))
+            first_screenshot = screenshots[0]
+            self.assertEqual("One.png", first_screenshot["title"])
+            self.assertTrue(first_screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk", "Invalid Screenshot Data")
+            second_screenshot = screenshots[1]
+            self.assertEqual("Two.png", second_screenshot["title"])
+            self.assertTrue(second_screenshot["data"] == "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk", "Invalid Screenshot Data")
+        with self.subTest("Empty Screenshot"):
+            hit = {
+                "screenshots": [{
+                    "caption": "Borked",
+                    "order": 0,
+                    "screenshot": {
+                        "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
+                        "data": ""
+                    }
+                }]
+            }
+            screenshots = parse_screenshots_from_hit(hit)
+            self.assertEqual(0, len(screenshots))
+
     def test_ptart_parser_with_empty_json_throws_error(self):
         with self.assertRaises(ValueError) as context:
             with open("unittests/scans/ptart/empty_with_error.json") as testfile:
@@ -136,8 +198,12 @@ class TestPTARTParser(TestCase):
                 finding = findings[0]
                 self.assertEqual("PTART-2024-00002: Broken Access Control", finding.title)
                 self.assertEqual("High", finding.severity)
-                self.assertEqual("Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.", finding.description)
-                self.assertEqual("Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.", finding.mitigation)
+                self.assertEqual(
+                    "Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.",
+                    finding.description)
+                self.assertEqual(
+                    "Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.",
+                    finding.mitigation)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
                 self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
                 self.assertEqual("Low", finding.effort_for_fixing)
@@ -168,8 +234,12 @@ class TestPTARTParser(TestCase):
                 finding = findings[0]
                 self.assertEqual("PTART-2024-00002: Broken Access Control", finding.title)
                 self.assertEqual("High", finding.severity)
-                self.assertEqual("Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.", finding.description)
-                self.assertEqual("Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.", finding.mitigation)
+                self.assertEqual(
+                    "Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.",
+                    finding.description)
+                self.assertEqual(
+                    "Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.",
+                    finding.mitigation)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
                 self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
                 self.assertEqual("Low", finding.effort_for_fixing)
@@ -206,8 +276,12 @@ class TestPTARTParser(TestCase):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00002"), None)
                 self.assertEqual("PTART-2024-00002: Broken Access Control", finding.title)
                 self.assertEqual("High", finding.severity)
-                self.assertEqual("Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.", finding.description)
-                self.assertEqual("Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.", finding.mitigation)
+                self.assertEqual(
+                    "Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.",
+                    finding.description)
+                self.assertEqual(
+                    "Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.",
+                    finding.mitigation)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
                 self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
                 self.assertEqual("Low", finding.effort_for_fixing)
@@ -238,8 +312,12 @@ class TestPTARTParser(TestCase):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00004"), None)
                 self.assertEqual("PTART-2024-00004: HTML Injection", finding.title)
                 self.assertEqual("Low", finding.severity)
-                self.assertEqual("HTML injection is a type of injection issue that occurs when a user is able to control an input point and is able to inject arbitrary HTML code into a vulnerable web page. This vulnerability can have many consequences, like disclosure of a user's session cookies that could be used to impersonate the victim, or, more generally, it can allow the attacker to modify the page content seen by the victims.", finding.description)
-                self.assertEqual("Preventing HTML injection is trivial in some cases but can be much harder depending on the complexity of the application and the ways it handles user-controllable data.\n\nIn general, effectively preventing HTML injection vulnerabilities is likely to involve a combination of the following measures:\n\n* **Filter input on arrival**. At the point where user input is received, filter as strictly as possible based on what is expected or valid input.\n* **Encode data on output**. At the point where user-controllable data is output in HTTP responses, encode the output to prevent it from being interpreted as active content. Depending on the output context, this might require applying combinations of HTML, URL, JavaScript, and CSS encoding.", finding.mitigation)
+                self.assertEqual(
+                    "HTML injection is a type of injection issue that occurs when a user is able to control an input point and is able to inject arbitrary HTML code into a vulnerable web page. This vulnerability can have many consequences, like disclosure of a user's session cookies that could be used to impersonate the victim, or, more generally, it can allow the attacker to modify the page content seen by the victims.",
+                    finding.description)
+                self.assertEqual(
+                    "Preventing HTML injection is trivial in some cases but can be much harder depending on the complexity of the application and the ways it handles user-controllable data.\n\nIn general, effectively preventing HTML injection vulnerabilities is likely to involve a combination of the following measures:\n\n* **Filter input on arrival**. At the point where user input is received, filter as strictly as possible based on what is expected or valid input.\n* **Encode data on output**. At the point where user-controllable data is output in HTTP responses, encode the output to prevent it from being interpreted as active content. Depending on the output context, this might require applying combinations of HTML, URL, JavaScript, and CSS encoding.",
+                    finding.mitigation)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N", finding.cvssv3)
                 self.assertEqual("PTART-2024-00004", finding.unique_id_from_tool)
                 self.assertEqual("Medium", finding.effort_for_fixing)
@@ -264,8 +342,12 @@ class TestPTARTParser(TestCase):
             finding = test.findings[0]
             self.assertEqual("PTART-2024-00002: Broken Access Control", finding.title)
             self.assertEqual("High", finding.severity)
-            self.assertEqual("Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.", finding.description)
-            self.assertEqual("Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.", finding.mitigation)
+            self.assertEqual(
+                "Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.",
+                finding.description)
+            self.assertEqual(
+                "Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.",
+                finding.mitigation)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
             self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
             self.assertEqual("Low", finding.effort_for_fixing)
@@ -296,8 +378,12 @@ class TestPTARTParser(TestCase):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00002"), None)
                 self.assertEqual("PTART-2024-00002: Broken Access Control", finding.title)
                 self.assertEqual("High", finding.severity)
-                self.assertEqual("Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.", finding.description)
-                self.assertEqual("Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.", finding.mitigation)
+                self.assertEqual(
+                    "Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification or destruction of all data, or performing a business function outside of the limits of the user.",
+                    finding.description)
+                self.assertEqual(
+                    "Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.",
+                    finding.mitigation)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
                 self.assertEqual("PTART-2024-00002", finding.unique_id_from_tool)
                 self.assertEqual("Low", finding.effort_for_fixing)
@@ -329,7 +415,9 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("PTART-2024-00002-RT: Broken Access Control (Not Fixed)", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("Still borked", finding.description)
-                self.assertEqual("Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.", finding.mitigation)
+                self.assertEqual(
+                    "Access control vulnerabilities can generally be prevented by taking a defense-in-depth approach and applying the following principles:\n\n* Never rely on obfuscation alone for access control.\n* Unless a resource is intended to be publicly accessible, deny access by default.\n* Wherever possible, use a single application-wide mechanism for enforcing access controls.\n* At the code level, make it mandatory for developers to declare the access that is allowed for each resource, and deny access by default.\n* Thoroughly audit and test access controls to ensure they are working as designed.",
+                    finding.mitigation)
                 self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
                 self.assertEqual("PTART-2024-00002-RT", finding.unique_id_from_tool)
                 self.assertEqual("Low", finding.effort_for_fixing)
