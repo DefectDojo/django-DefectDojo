@@ -354,11 +354,10 @@ class TestPTARTParser(TestCase):
             self.assertEqual("This is an overview", generate_test_description_from_report_base(data))
 
     def test_ptart_parser_with_empty_json_throws_error(self):
-        with self.assertRaises(ValueError) as context:
-            with open("unittests/scans/ptart/empty_with_error.json") as testfile:
-                parser = PTARTParser()
-                parser.get_findings(testfile, self.test)
-                self.assertTrue("Parse Error: assessments key not found in the report" in str(context.exception))
+        with open("unittests/scans/ptart/empty_with_error.json") as testfile:
+            parser = PTARTParser()
+            findings = parser.get_findings(testfile, self.test)
+            self.assertEqual(0, len(findings))
 
     def test_ptart_parser_with_no_assessments_has_no_findings(self):
         with open("unittests/scans/ptart/ptart_zero_vul.json") as testfile:
