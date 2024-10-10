@@ -31,20 +31,28 @@ class PTARTRetestParser:
         return [finding for retest in retests for finding in self.parse_retest(retest)]
 
     def parse_retest(self, retest):
-        return [finding for finding in [self.get_finding(retest, hit) for hit in retest.get("hits", [])] if finding is not None]
+        hits = retest.get("hits", [])
+        # Get all the potential findings, valid or not.
+        all_findings = [self.get_finding(retest, hit) for hit in hits]
+        # We want to make sure we include only valid findings for a retest.
+        return [finding for finding in all_findings if finding is not None]
 
     def get_finding(self, retest, hit):
 
-        # Get the original hit from the retest
-        if "original_hit" in hit and hit["original_hit"]:
-            original_hit = hit["original_hit"]
-        else:
-            # Guard
-            # Hit is invalid in a retest if not linked to an original.
+        # The negatives are a bit confusing, but we want to skip hits that don't have an original hit.
+        # Hit is invalid in a retest if not linked to an original.
+        if "original_hit" not in hit or not hit["original_hit"]:
             return None
 
+        # Get the original hit from the retest
+        original_hit = hit["original_hit"]
+
+        # Set the Finding title to the original hit title with the retest status if available
+        # We don't really have any other places to set this field.
         finding_title = generate_retest_hit_title(hit, original_hit)
 
+        # As the retest hit doesn't have a date added, use the start of the retest campaign as something that's
+        # close enough.
         finding = Finding(
             title=finding_title,
             severity=ptart_tools.parse_ptart_severity(original_hit.get("severity", 5)),
@@ -53,23 +61,26 @@ class PTARTRetestParser:
             date=ptart_tools.parse_date(retest.get("start_date"), "%Y-%m-%d"),
         )
 
-        if "body" in hit:
+        # Don't add the fields if they are blank.
+        if "body" in hit and hit["body"]:
             finding.description = hit["body"]
 
-        if "remediation" in original_hit:
+        if "remediation" in original_hit and original_hit["remediation"]:
             finding.mitigation = original_hit["remediation"]
 
-        if "id" in hit:
+        if "id" in hit and hit["id"]:
             finding.unique_id_from_tool = hit.get("id")
 
         cvss_vector = ptart_tools.parse_cvss_vector(original_hit, self.cvss_type)
         if cvss_vector:
             finding.cvssv3 = cvss_vector
 
-        finding.unsaved_tags = original_hit["labels"]
+        if "labels" in original_hit:
+            finding.unsaved_tags = original_hit["labels"]
 
         finding.unsaved_endpoints = ptart_tools.parse_endpoints_from_hit(original_hit)
 
+        # We only have screenshots in a retest. Refer to the original hit for the attachments.
         finding.unsaved_files = ptart_tools.parse_screenshots_from_hit(hit)
 
         return finding
