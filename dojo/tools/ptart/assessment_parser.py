@@ -57,4 +57,6 @@ class PTARTAssessmentParser:
         finding.unsaved_files = ptart_tools.parse_screenshots_from_hit(hit)
         finding.unsaved_files.extend(ptart_tools.parse_attachment_from_hit(hit))
 
+        finding.references = ptart_tools.parse_references_from_hit(hit)
+
         return finding
