@@ -6,7 +6,6 @@ import os
 import re
 import warnings
 from datetime import datetime
-from typing import Dict, Optional, Set
 from uuid import uuid4
 
 import hyperlink
@@ -3409,7 +3408,7 @@ class Finding_Group(TimeStampedModel):
 
     @cached_property
     def components(self):
-        components: Dict[str, Set[Optional[str]]] = {}
+        components: dict[str, set[str | None]] = {}
         for finding in self.findings.all():
             if finding.component_name is not None:
                 components.setdefault(finding.component_name, set()).add(finding.component_version)

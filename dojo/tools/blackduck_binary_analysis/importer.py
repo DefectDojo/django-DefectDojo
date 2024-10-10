@@ -1,8 +1,8 @@
 import csv
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .model import BlackduckBinaryAnalysisFinding
 

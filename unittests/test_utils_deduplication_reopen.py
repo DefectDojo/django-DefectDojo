@@ -17,7 +17,7 @@ class TestDuplicationReopen(DojoTestCase):
         self.finding_a = Finding.objects.get(id=2)
         self.finding_a.pk = None
         self.finding_a.duplicate = False
-        self.finding_a.mitigated = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)
+        self.finding_a.mitigated = datetime.datetime(1970, 1, 1, tzinfo=datetime.UTC)
         self.finding_a.is_mitigated = True
         self.finding_a.false_p = True
         self.finding_a.active = False
