@@ -8,12 +8,12 @@ from django.http.request import QueryDict
 from django.utils import timezone
 
 from dojo.models import (
+    DojoMeta,
     Engagement,
     Product,
     Product_Member,
     Product_Type,
     Product_Type_Member,
-    DojoMeta,
     Role,
     Test,
 )
@@ -278,7 +278,7 @@ class AutoCreateContextManager:
                 )
                 # Create scm-type for product
                 if product_scm_type:
-                    DojoMeta.objects.select_for_update().get_or_create(name='scm-type', value=product_scm_type, product=product)
+                    DojoMeta.objects.select_for_update().get_or_create(name="scm-type", value=product_scm_type, product=product)
         return product
 
     def get_or_create_engagement(
