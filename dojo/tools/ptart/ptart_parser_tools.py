@@ -145,3 +145,14 @@ def parse_endpoints_from_hit(hit):
         return [endpoint]
     else:
         return []
+
+
+def generate_test_description_from_report_base(data):
+    description = []
+    if "executive_summary" in data and data["executive_summary"]:
+        description.append(data["executive_summary"])
+    if "engagement_overview" in data and data["engagement_overview"]:
+        description.append(data["engagement_overview"])
+    if "conclusion" in data and data["conclusion"]:
+        description.append(data["conclusion"])
+    return "\n\n".join(description) if description else None

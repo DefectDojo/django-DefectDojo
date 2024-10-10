@@ -1,7 +1,5 @@
-from datetime import datetime
-
 import dojo.tools.ptart.ptart_parser_tools as ptart_tools
-from dojo.models import Finding, Endpoint
+from dojo.models import Finding
 from dojo.tools.ptart.ptart_parser_tools import parse_title_from_hit
 
 
