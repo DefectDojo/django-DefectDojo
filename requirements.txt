@@ -11,7 +11,7 @@ django-environ==0.11.2
 django-filter==24.3
 django-imagekit==5.0.0
 django-multiselectfield==0.1.13
-django-polymorphic==3.1.0
+git+https://github.com/jazzband/django-polymorphic.git@v4.0.0a#egg=django-polymorphic
 django-crispy-forms==2.3
 django_extensions==3.2.3
 django-slack==5.19.0
