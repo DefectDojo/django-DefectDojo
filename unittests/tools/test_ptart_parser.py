@@ -402,6 +402,7 @@ class TestPTARTParser(TestCase):
                 attachment = finding.unsaved_files[1]
                 self.assertEqual("License", attachment["title"])
                 self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+                self.assertEqual("Reference: https://ref.example.com", finding.references)
 
     def test_ptart_parser_with_one_assessment_has_many_findings(self):
         with open("unittests/scans/ptart/ptart_many_vul.json", encoding="utf-8") as testfile:
@@ -435,6 +436,7 @@ class TestPTARTParser(TestCase):
                 attachment = finding.unsaved_files[1]
                 self.assertEqual("License", attachment["title"])
                 self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+                self.assertEqual(None, finding.references)
             with self.subTest("Test Assessment: Unrated Hit"):
                 finding = findings[1]
                 self.assertEqual("PTART-2024-00003: Unrated Hit", finding.title)
@@ -448,6 +450,7 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(None, finding.references)
 
     def test_ptart_parser_with_multiple_assessments_has_many_findings_correctly_grouped(self):
         with open("unittests/scans/ptart/ptart_vulns_with_mult_assessments.json", encoding="utf-8") as testfile:
@@ -481,6 +484,7 @@ class TestPTARTParser(TestCase):
                 attachment = finding.unsaved_files[1]
                 self.assertEqual("License", attachment["title"])
                 self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+                self.assertEqual(None, finding.references)
             with self.subTest("Test Assessment: Unrated Hit"):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00003"), None)
                 self.assertEqual("PTART-2024-00003: Unrated Hit", finding.title)
@@ -494,6 +498,7 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(None, finding.references)
             with self.subTest("New Api: HTML Injection"):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00004"), None)
                 self.assertEqual("PTART-2024-00004: HTML Injection", finding.title)
@@ -513,6 +518,7 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
                 self.assertEqual(0, len(finding.unsaved_endpoints))
                 self.assertEqual(0, len(finding.unsaved_files))
+                self.assertEqual(None, finding.references)
 
     def test_ptart_parser_with_single_vuln_on_import_test(self):
         with open("unittests/scans/ptart/ptart_one_vul.json", encoding="utf-8") as testfile:
@@ -558,6 +564,7 @@ class TestPTARTParser(TestCase):
             attachment = finding.unsaved_files[1]
             self.assertEqual("License", attachment["title"])
             self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+            self.assertEqual("Reference: https://ref.example.com", finding.references)
 
     def test_ptart_parser_with_retest_campaign(self):
         with open("unittests/scans/ptart/ptart_vuln_plus_retest.json", encoding="utf-8") as testfile:
@@ -591,6 +598,7 @@ class TestPTARTParser(TestCase):
                 attachment = finding.unsaved_files[1]
                 self.assertEqual("License", attachment["title"])
                 self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
+                self.assertEqual(None, finding.references)
             with self.subTest("Test Assessment: Unrated Hit"):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00003"), None)
                 self.assertEqual("PTART-2024-00003: Unrated Hit", finding.title)
@@ -604,6 +612,7 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("Low", finding.effort_for_fixing)
                 self.assertEqual("Test Assessment", finding.component_name)
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
+                self.assertEqual(None, finding.references)
             with self.subTest("Retest: Broken Access Control"):
                 finding = next((f for f in findings if f.unique_id_from_tool == "PTART-2024-00002-RT"), None)
                 self.assertEqual("PTART-2024-00002-RT: Broken Access Control (Not Fixed)", finding.title)
