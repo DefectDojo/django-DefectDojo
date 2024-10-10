@@ -163,3 +163,23 @@ def generate_test_description_from_report(data):
     clauses = [clause for clause in [data.get(key) for key in keys] if clause]
     description = "\n\n".join(clauses)
     return description or None
+
+
+def parse_references_from_hit(hit):
+    if "references" not in hit:
+        return None
+
+    references = hit.get("references", [])
+    all_refs = [get_transformed_reference(ref) for ref in references]
+    clean_refs = [tref for tref in all_refs if tref]
+    return "\n".join(clean_refs)
+
+
+def get_transformed_reference(reference):
+    title = reference.get("name", "Reference")
+    url = reference.get("url", None)
+    if not url:
+        if not title:
+            return url
+        return None
+    return f"{title}: {url}"
