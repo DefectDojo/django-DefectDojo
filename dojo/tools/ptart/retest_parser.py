@@ -26,23 +26,22 @@ class PTARTRetestParser:
             self.cvss_type = tree.get("cvss_type", None)
             retests = tree["retests"]
         else:
-            raise ValueError("Parse Error: retests key not found in the report")
+            return []
 
         return [finding for retest in retests for finding in self.parse_retest(retest)]
 
     def parse_retest(self, retest):
-        return [self.get_finding(retest, hit) for hit in retest.get("hits", [])]
+        return [finding for finding in [self.get_finding(retest, hit) for hit in retest.get("hits", [])] if finding is not None]
 
     def get_finding(self, retest, hit):
 
         # Get the original hit from the retest
-        original_hit = None
-        if "original_hit" in hit:
+        if "original_hit" in hit and hit["original_hit"]:
             original_hit = hit["original_hit"]
-
-        # Guard
-        if original_hit is None:
-            raise ValueError("Parse Error: original_hit key not found in the report")
+        else:
+            # Guard
+            # Hit is invalid in a retest if not linked to an original.
+            return None
 
         finding_title = generate_retest_hit_title(hit, original_hit)
 
