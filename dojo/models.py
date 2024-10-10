@@ -3919,7 +3919,11 @@ class JIRA_Project(models.Model):
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
-    enabled = models.BooleanField(default=True, blank=True, verbose_name=_("Enable Connection With Jira Project"))
+    enabled = models.BooleanField(
+        verbose_name=_("Enable Connection With Jira Project"),
+        help_text=_("When disabled, Findings will no longer be pushed to Jira, even if they have already been pushed previously."),
+        default=True,
+        blank=True)
 
     def __str__(self):
         value = f"{self.id}: {self.project_key} ({self.jira_instance.url if self.jira_instance else 'None'})"

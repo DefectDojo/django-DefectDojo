@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jira_project',
             name='enabled',
-            field=models.BooleanField(blank=True, default=True, verbose_name='Enable Connection With Jira Project'),
+            field=models.BooleanField(blank=True, default=True, help_text='When disabled, Findings will no longer be pushed to Jira, even if they have already been pushed previously.', verbose_name='Enable Connection With Jira Project'),
         ),
     ]
