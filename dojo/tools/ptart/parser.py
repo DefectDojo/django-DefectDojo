@@ -1,7 +1,6 @@
 import json
 
 import dojo.tools.ptart.ptart_parser_tools as ptart_tools
-from dojo.models import Test
 from dojo.tools.parser_test import ParserTest
 from dojo.tools.ptart.assessment_parser import PTARTAssessmentParser
 from dojo.tools.ptart.retest_parser import PTARTRetestParser
@@ -34,16 +33,7 @@ class PTARTParser(object):
             test.name = data["name"] + " Report"
             test.type = data["name"] + " Report"
 
-        description = ""
-        if "executive_summary" in data:
-            description += data["executive_summary"] + '\n\n'
-
-        if "engagement_overview" in data:
-            description += data["engagement_overview"] + '\n\n'
-
-        if "conclusion" in data:
-            description += data["conclusion"]
-
+        description = ptart_tools.generate_test_description_from_report_base(data)
         if description:
             test.description = description
 

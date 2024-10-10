@@ -286,7 +286,72 @@ class TestPTARTParser(TestCase):
             self.assertEqual(1, len(attachments))
             attachment = attachments[0]
             self.assertEqual("attachment", attachment["title"])
+
             self.assertTrue(attachment["data"] == "TUlUIExpY2Vuc2UKCkNvcHl", "Invalid Attachment Data")
+
+    def test_ptart_parser_tools_get_description_from_report_base(self):
+        from dojo.tools.ptart.ptart_parser_tools import generate_test_description_from_report_base
+        with self.subTest("No Description"):
+            data = {}
+            self.assertEqual(None, generate_test_description_from_report_base(data))
+        with self.subTest("Description from Executive Summary Only"):
+            data = {
+                "executive_summary": "This is a summary"
+            }
+            self.assertEqual("This is a summary", generate_test_description_from_report_base(data))
+        with self.subTest("Description from Engagement Overview Only"):
+            data = {
+                "engagement_overview": "This is an overview"
+            }
+            self.assertEqual("This is an overview", generate_test_description_from_report_base(data))
+        with self.subTest("Description from Conclusion Only"):
+            data = {
+                "conclusion": "This is a conclusion"
+            }
+            self.assertEqual("This is a conclusion", generate_test_description_from_report_base(data))
+        with self.subTest("Description from All Sections"):
+            data = {
+                "executive_summary": "This is a summary",
+                "engagement_overview": "This is an overview",
+                "conclusion": "This is a conclusion"
+            }
+            self.assertEqual("This is a summary\n\nThis is an overview\n\nThis is a conclusion",
+                             generate_test_description_from_report_base(data))
+        with self.subTest("Description from Executive Summary and Conclusion"):
+            data = {
+                "executive_summary": "This is a summary",
+                "conclusion": "This is a conclusion"
+            }
+            self.assertEqual("This is a summary\n\nThis is a conclusion",
+                             generate_test_description_from_report_base(data))
+        with self.subTest("Description from Executive Summary and Engagement Overview"):
+            data = {
+                "executive_summary": "This is a summary",
+                "engagement_overview": "This is an overview"
+            }
+            self.assertEqual("This is a summary\n\nThis is an overview",
+                             generate_test_description_from_report_base(data))
+        with self.subTest("Description from Engagement Overview and Conclusion"):
+            data = {
+                "engagement_overview": "This is an overview",
+                "conclusion": "This is a conclusion"
+            }
+            self.assertEqual("This is an overview\n\nThis is a conclusion",
+                             generate_test_description_from_report_base(data))
+        with self.subTest("Description from All Sections with Empty Strings"):
+            data = {
+                "executive_summary": "",
+                "engagement_overview": "",
+                "conclusion": ""
+            }
+            self.assertEqual(None, generate_test_description_from_report_base(data))
+        with self.subTest("Description with Some Blank Strings"):
+            data = {
+                "executive_summary": "",
+                "engagement_overview": "This is an overview",
+                "conclusion": ""
+            }
+            self.assertEqual("This is an overview", generate_test_description_from_report_base(data))
 
     def test_ptart_parser_with_empty_json_throws_error(self):
         with self.assertRaises(ValueError) as context:
