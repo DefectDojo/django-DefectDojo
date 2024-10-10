@@ -2387,6 +2387,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     - Provide `product_name`
     - Provide `engagement_name`
     - Optionally provide `product_type_name`
+    - Optionally provide `product_scm_type`
 
     In this scenario Defect Dojo will look up the Engagement by the provided details.
 
