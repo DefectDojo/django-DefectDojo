@@ -662,7 +662,7 @@ def add_issues_to_epic(jira, obj, epic_id, issue_keys, ignore_epics=True):
     try:
         return jira.add_issues_to_epic(epic_id=epic_id, issue_keys=issue_keys, ignore_epics=ignore_epics)
     except JIRAError as e:
-        logger.error("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
+        logger.exception("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
         logger.exception(e)
         log_jira_alert(e.text, obj)
         return False
@@ -1025,7 +1025,7 @@ def get_jira_issue_from_jira(find):
 
     except JIRAError as e:
         logger.exception(e)
-        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+        logger.exception("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
         log_jira_alert(e.text, find)
         return None
 
