@@ -1,3 +1,4 @@
+import pathlib
 from datetime import datetime
 
 import cvss
@@ -59,10 +60,41 @@ def parse_cvss_vector(hit, cvss_type):
 
 def parse_retest_fix_status(status):
     fix_status_mapping = {
-        'F': 'Fixed',
-        'NF': 'Not Fixed',
-        'PF': 'Partially Fixed',
-        'NA': 'Not Applicable',
-        'NT': 'Not Tested'
+        "F": "Fixed",
+        "NF": "Not Fixed",
+        "PF": "Partially Fixed",
+        "NA": "Not Applicable",
+        "NT": "Not Tested"
     }
     return fix_status_mapping.get(status, None)
+
+def parse_screenshots_from_hit(hit):
+    if "screenshots" in hit and hit["screenshots"]:
+        return [ss for ss in [parse_screenshot_data(screenshot) for screenshot in hit["screenshots"]] if ss is not None]
+    else:
+        return []
+
+
+def parse_screenshot_data(screenshot):
+    try:
+        title = f"{screenshot.get('caption', 'screenshot')}{get_file_suffix_from_screenshot(screenshot)}"
+        data = get_screenshot_data(screenshot)
+        return {
+            "title": title,
+            "data": data
+        }
+    except ValueError:
+        return None
+
+def get_screenshot_data(screenshot):
+    if "screenshot" in screenshot and "data" in screenshot["screenshot"] and screenshot["screenshot"]["data"]:
+        return screenshot["screenshot"]["data"]
+    else:
+        raise ValueError("Screenshot data not found")
+
+
+def get_file_suffix_from_screenshot(screenshot):
+    if "screenshot" in screenshot and "filename" in screenshot['screenshot']:
+        return pathlib.Path(screenshot['screenshot']['filename']).suffix
+    else:
+        return ""

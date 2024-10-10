@@ -1,7 +1,5 @@
-import pathlib
-
-from dojo.models import Finding, Endpoint
 import dojo.tools.ptart.ptart_parser_tools as ptart_tools
+from dojo.models import Finding, Endpoint
 
 
 class PTARTAssessmentParser:
@@ -48,10 +46,7 @@ class PTARTAssessmentParser:
             endpoint = Endpoint.from_uri(hit["asset"])
             finding.unsaved_endpoints = [endpoint]
 
-        finding.unsaved_files = [{
-            "title": f"{screenshot['caption']}{pathlib.Path(screenshot['screenshot']['filename']).suffix}",
-            "data": screenshot["screenshot"]["data"]
-        } for screenshot in hit["screenshots"]]
+        finding.unsaved_files = ptart_tools.parse_screenshots_from_hit(hit)
 
         finding.unsaved_files.extend([{
             "title": attachment["title"],
