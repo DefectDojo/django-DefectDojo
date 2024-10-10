@@ -40,6 +40,8 @@ class PTARTAssessmentParser:
 
         if hit["id"]:
             finding.unique_id_from_tool = hit.get("id")
+            finding.vuln_id_from_tool = hit.get("id")
+            finding.cve = hit.get("id")
 
         # Clean up and parse the CVSS vector
         cvss_vector = ptart_tools.parse_cvss_vector(hit, self.cvss_type)
