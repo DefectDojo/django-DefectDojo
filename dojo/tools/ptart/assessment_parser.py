@@ -22,24 +22,23 @@ class PTARTAssessmentParser:
         return [self.get_finding(assessment, hit) for hit in hits]
 
     def get_finding(self, assessment, hit):
+        effort = ptart_tools.parse_ptart_fix_effort(hit.get("fix_complexity"))
         finding = Finding(
             title=ptart_tools.parse_title_from_hit(hit),
-            severity=ptart_tools.parse_ptart_severity(hit.get("severity", 5)),
-            effort_for_fixing=ptart_tools.parse_ptart_fix_effort(
-                hit.get("fix_complexity", 3)
-            ),
+            severity=ptart_tools.parse_ptart_severity(hit.get("severity")),
+            effort_for_fixing=effort,
             component_name=assessment.get("title", "Unknown Component"),
             date=ptart_tools.parse_date_added_from_hit(hit),
         )
 
         # Don't add fields if they are blank
-        if "body" in hit and hit["body"]:
-            finding.description = hit["body"]
+        if hit["body"]:
+            finding.description = hit.get("body")
 
-        if "remediation" in hit and hit["remediation"]:
-            finding.mitigation = hit["remediation"]
+        if hit["remediation"]:
+            finding.mitigation = hit.get("remediation")
 
-        if "id" in hit and hit["id"]:
+        if hit["id"]:
             finding.unique_id_from_tool = hit.get("id")
 
         # Clean up and parse the CVSS vector
@@ -54,8 +53,6 @@ class PTARTAssessmentParser:
 
         # Add screenshots to files, and add other attachments as well.
         finding.unsaved_files = ptart_tools.parse_screenshots_from_hit(hit)
-        finding.unsaved_files.extend(
-            ptart_tools.parse_attachment_from_hit(hit)
-        )
+        finding.unsaved_files.extend(ptart_tools.parse_attachment_from_hit(hit))
 
         return finding

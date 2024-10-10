@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from dojo.models import Test, Product, Engagement
+from dojo.models import Engagement, Product, Test
 from dojo.tools.ptart.parser import PTARTParser
 
 
@@ -64,22 +64,22 @@ class TestPTARTParser(TestCase):
         from dojo.tools.ptart.ptart_parser_tools import parse_cvss_vector
         with self.subTest("Test CVSSv3 Vector"):
             hit = {
-                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
             }
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", parse_cvss_vector(hit, 3))
         with self.subTest("Test CVSSv4 Vector"):
             hit = {
-                "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N"
+                "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
             }
             self.assertEqual(None, parse_cvss_vector(hit, 4))
         with self.subTest("Test CVSSv3 Vector with CVSSv4 Request"):
             hit = {
-                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
             }
             self.assertEqual(None, parse_cvss_vector(hit, 4))
         with self.subTest("Test CVSSv4 Vector with CVSSv3 Request"):
             hit = {
-                "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N"
+                "cvss_vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:N/SA:N",
             }
             self.assertEqual(None, parse_cvss_vector(hit, 3))
         with self.subTest("Test No CVSS Vector"):
@@ -87,12 +87,12 @@ class TestPTARTParser(TestCase):
             self.assertEqual(None, parse_cvss_vector(hit, 3))
         with self.subTest("Test CVSSv2 Vector"):
             hit = {
-                "cvss_vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:C/I:C/A:C"
+                "cvss_vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:C/I:C/A:C",
             }
             self.assertEqual(None, parse_cvss_vector(hit, 2))
         with self.subTest("Test Blank CVSS Vector"):
             hit = {
-                "cvss_vector": ""
+                "cvss_vector": "",
             }
             self.assertEqual(None, parse_cvss_vector(hit, 3))
 
@@ -126,9 +126,9 @@ class TestPTARTParser(TestCase):
                     "order": 0,
                     "screenshot": {
                         "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
-                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
-                    }
-                }]
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                    },
+                }],
             }
             screenshots = parse_screenshots_from_hit(hit)
             self.assertEqual(1, len(screenshots))
@@ -143,16 +143,16 @@ class TestPTARTParser(TestCase):
                     "order": 0,
                     "screenshot": {
                         "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
-                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
-                    }
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                    },
                 }, {
                     "caption": "Two",
                     "order": 1,
                     "screenshot": {
                         "filename": "screenshots/123e4567-e89b-12d3-a456-426614174000.png",
-                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
-                    }
-                }]
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                    },
+                }],
             }
             screenshots = parse_screenshots_from_hit(hit)
             self.assertEqual(2, len(screenshots))
@@ -171,9 +171,9 @@ class TestPTARTParser(TestCase):
                     "order": 0,
                     "screenshot": {
                         "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
-                        "data": ""
-                    }
-                }]
+                        "data": "",
+                    },
+                }],
             }
             screenshots = parse_screenshots_from_hit(hit)
             self.assertEqual(0, len(screenshots))
@@ -183,9 +183,9 @@ class TestPTARTParser(TestCase):
                     "order": 0,
                     "screenshot": {
                         "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
-                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
-                    }
-                }]
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                    },
+                }],
             }
             screenshots = parse_screenshots_from_hit(hit)
             self.assertEqual(1, len(screenshots))
@@ -200,9 +200,9 @@ class TestPTARTParser(TestCase):
                     "order": 0,
                     "screenshot": {
                         "filename": "screenshots/a78bebcc-6da7-4c25-86a3-441435ea68d0.png",
-                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk"
-                    }
-                }]
+                        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABzElEQVR42mNk",
+                    },
+                }],
             }
             screenshots = parse_screenshots_from_hit(hit)
             self.assertEqual(1, len(screenshots))
@@ -221,8 +221,8 @@ class TestPTARTParser(TestCase):
             hit = {
                 "attachments": [{
                     "title": "License",
-                    "data": "TUlUIExpY2Vuc2UKCkNvcHl"
-                }]
+                    "data": "TUlUIExpY2Vuc2UKCkNvcHl",
+                }],
             }
             attachments = parse_attachment_from_hit(hit)
             self.assertEqual(1, len(attachments))
@@ -233,11 +233,11 @@ class TestPTARTParser(TestCase):
             hit = {
                 "attachments": [{
                     "title": "License",
-                    "data": "TUlUIExpY2Vuc2UKCkNvcHl"
+                    "data": "TUlUIExpY2Vuc2UKCkNvcHl",
                 }, {
                     "title": "Readme",
-                    "data": "UkVBRERtZQoK"
-                }]
+                    "data": "UkVBRERtZQoK",
+                }],
             }
             attachments = parse_attachment_from_hit(hit)
             self.assertEqual(2, len(attachments))
@@ -251,24 +251,24 @@ class TestPTARTParser(TestCase):
             hit = {
                 "attachments": [{
                     "title": "License",
-                    "data": ""
-                }]
+                    "data": "",
+                }],
             }
             attachments = parse_attachment_from_hit(hit)
             self.assertEqual(0, len(attachments))
         with self.subTest("No Data Attachment"):
             hit = {
                 "attachments": [{
-                    "title": "License"
-                }]
+                    "title": "License",
+                }],
             }
             attachments = parse_attachment_from_hit(hit)
             self.assertEqual(0, len(attachments))
         with self.subTest("Attachement with no Title"):
             hit = {
                 "attachments": [{
-                    "data": "TUlUIExpY2Vuc2UKCkNvcHl"
-                }]
+                    "data": "TUlUIExpY2Vuc2UKCkNvcHl",
+                }],
             }
             attachments = parse_attachment_from_hit(hit)
             self.assertEqual(1, len(attachments))
@@ -279,8 +279,8 @@ class TestPTARTParser(TestCase):
             hit = {
                 "attachments": [{
                     "title": "",
-                    "data": "TUlUIExpY2Vuc2UKCkNvcHl"
-                }]
+                    "data": "TUlUIExpY2Vuc2UKCkNvcHl",
+                }],
             }
             attachments = parse_attachment_from_hit(hit)
             self.assertEqual(1, len(attachments))
@@ -296,45 +296,45 @@ class TestPTARTParser(TestCase):
             self.assertEqual(None, generate_test_description_from_report(data))
         with self.subTest("Description from Executive Summary Only"):
             data = {
-                "executive_summary": "This is a summary"
+                "executive_summary": "This is a summary",
             }
             self.assertEqual("This is a summary", generate_test_description_from_report(data))
         with self.subTest("Description from Engagement Overview Only"):
             data = {
-                "engagement_overview": "This is an overview"
+                "engagement_overview": "This is an overview",
             }
             self.assertEqual("This is an overview", generate_test_description_from_report(data))
         with self.subTest("Description from Conclusion Only"):
             data = {
-                "conclusion": "This is a conclusion"
+                "conclusion": "This is a conclusion",
             }
             self.assertEqual("This is a conclusion", generate_test_description_from_report(data))
         with self.subTest("Description from All Sections"):
             data = {
                 "executive_summary": "This is a summary",
                 "engagement_overview": "This is an overview",
-                "conclusion": "This is a conclusion"
+                "conclusion": "This is a conclusion",
             }
             self.assertEqual("This is a summary\n\nThis is an overview\n\nThis is a conclusion",
                              generate_test_description_from_report(data))
         with self.subTest("Description from Executive Summary and Conclusion"):
             data = {
                 "executive_summary": "This is a summary",
-                "conclusion": "This is a conclusion"
+                "conclusion": "This is a conclusion",
             }
             self.assertEqual("This is a summary\n\nThis is a conclusion",
                              generate_test_description_from_report(data))
         with self.subTest("Description from Executive Summary and Engagement Overview"):
             data = {
                 "executive_summary": "This is a summary",
-                "engagement_overview": "This is an overview"
+                "engagement_overview": "This is an overview",
             }
             self.assertEqual("This is a summary\n\nThis is an overview",
                              generate_test_description_from_report(data))
         with self.subTest("Description from Engagement Overview and Conclusion"):
             data = {
                 "engagement_overview": "This is an overview",
-                "conclusion": "This is a conclusion"
+                "conclusion": "This is a conclusion",
             }
             self.assertEqual("This is an overview\n\nThis is a conclusion",
                              generate_test_description_from_report(data))
@@ -342,32 +342,32 @@ class TestPTARTParser(TestCase):
             data = {
                 "executive_summary": "",
                 "engagement_overview": "",
-                "conclusion": ""
+                "conclusion": "",
             }
             self.assertEqual(None, generate_test_description_from_report(data))
         with self.subTest("Description with Some Blank Strings"):
             data = {
                 "executive_summary": "",
                 "engagement_overview": "This is an overview",
-                "conclusion": ""
+                "conclusion": "",
             }
             self.assertEqual("This is an overview", generate_test_description_from_report(data))
 
     def test_ptart_parser_with_empty_json_throws_error(self):
-        with open("unittests/scans/ptart/empty_with_error.json") as testfile:
+        with open("unittests/scans/ptart/empty_with_error.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(0, len(findings))
 
     def test_ptart_parser_with_no_assessments_has_no_findings(self):
-        with open("unittests/scans/ptart/ptart_zero_vul.json") as testfile:
+        with open("unittests/scans/ptart/ptart_zero_vul.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(0, len(findings))
             self.assertEqual([], findings)
 
     def test_ptart_parser_with_one_assessment_has_one_finding(self):
-        with open("unittests/scans/ptart/ptart_one_vul.json") as testfile:
+        with open("unittests/scans/ptart/ptart_one_vul.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(1, len(findings))
@@ -389,7 +389,7 @@ class TestPTARTParser(TestCase):
                 self.assertEqual(2, len(finding.unsaved_tags))
                 self.assertEqual([
                     "A01:2021-Broken Access Control",
-                    "A04:2021-Insecure Design"
+                    "A04:2021-Insecure Design",
                 ], finding.unsaved_tags)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
@@ -403,7 +403,7 @@ class TestPTARTParser(TestCase):
                 self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
 
     def test_ptart_parser_with_one_assessment_has_many_findings(self):
-        with open("unittests/scans/ptart/ptart_many_vul.json") as testfile:
+        with open("unittests/scans/ptart/ptart_many_vul.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(2, len(findings))
@@ -445,7 +445,7 @@ class TestPTARTParser(TestCase):
                 self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
 
     def test_ptart_parser_with_multiple_assessments_has_many_findings_correctly_grouped(self):
-        with open("unittests/scans/ptart/ptart_vulns_with_mult_assessments.json") as testfile:
+        with open("unittests/scans/ptart/ptart_vulns_with_mult_assessments.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(3, len(findings))
@@ -504,7 +504,7 @@ class TestPTARTParser(TestCase):
                 self.assertEqual(0, len(finding.unsaved_files))
 
     def test_ptart_parser_with_single_vuln_on_import_test(self):
-        with open("unittests/scans/ptart/ptart_one_vul.json") as testfile:
+        with open("unittests/scans/ptart/ptart_one_vul.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             tests = parser.get_tests("PTART Report", testfile)
             self.assertEqual(1, len(tests))
@@ -533,7 +533,7 @@ class TestPTARTParser(TestCase):
             self.assertEqual(2, len(finding.unsaved_tags))
             self.assertEqual([
                 "A01:2021-Broken Access Control",
-                "A04:2021-Insecure Design"
+                "A04:2021-Insecure Design",
             ], finding.unsaved_tags)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
@@ -547,7 +547,7 @@ class TestPTARTParser(TestCase):
             self.assertTrue(attachment["data"].startswith("TUlUIExpY2Vuc2UKCkNvcHl"), "Invalid Attachment Data")
 
     def test_ptart_parser_with_retest_campaign(self):
-        with open("unittests/scans/ptart/ptart_vuln_plus_retest.json") as testfile:
+        with open("unittests/scans/ptart/ptart_vuln_plus_retest.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
             findings = parser.get_findings(testfile, self.test)
             self.assertEqual(3, len(findings))
