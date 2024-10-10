@@ -97,21 +97,21 @@ class TestPTARTParser(TestCase):
             self.assertEqual(None, parse_cvss_vector(hit, 3))
 
     def test_ptart_parser_tools_retest_fix_status_parse(self):
-        from dojo.tools.ptart.ptart_parser_tools import parse_retest_fix_status
+        from dojo.tools.ptart.ptart_parser_tools import parse_retest_status
         with self.subTest("Fixed"):
-            self.assertEqual("Fixed", parse_retest_fix_status("F"))
+            self.assertEqual("Fixed", parse_retest_status("F"))
         with self.subTest("Not Fixed"):
-            self.assertEqual("Not Fixed", parse_retest_fix_status("NF"))
+            self.assertEqual("Not Fixed", parse_retest_status("NF"))
         with self.subTest("Partially Fixed"):
-            self.assertEqual("Partially Fixed", parse_retest_fix_status("PF"))
+            self.assertEqual("Partially Fixed", parse_retest_status("PF"))
         with self.subTest("Not Applicable"):
-            self.assertEqual("Not Applicable", parse_retest_fix_status("NA"))
+            self.assertEqual("Not Applicable", parse_retest_status("NA"))
         with self.subTest("Not Tested"):
-            self.assertEqual("Not Tested", parse_retest_fix_status("NT"))
+            self.assertEqual("Not Tested", parse_retest_status("NT"))
         with self.subTest("Unknown"):
-            self.assertEqual(None, parse_retest_fix_status("U"))
+            self.assertEqual(None, parse_retest_status("U"))
         with self.subTest("Empty"):
-            self.assertEqual(None, parse_retest_fix_status(""))
+            self.assertEqual(None, parse_retest_status(""))
 
     def test_ptart_parser_tools_parse_screenshots_from_hit(self):
         from dojo.tools.ptart.ptart_parser_tools import parse_screenshots_from_hit
@@ -290,25 +290,25 @@ class TestPTARTParser(TestCase):
             self.assertTrue(attachment["data"] == "TUlUIExpY2Vuc2UKCkNvcHl", "Invalid Attachment Data")
 
     def test_ptart_parser_tools_get_description_from_report_base(self):
-        from dojo.tools.ptart.ptart_parser_tools import generate_test_description_from_report_base
+        from dojo.tools.ptart.ptart_parser_tools import generate_test_description_from_report
         with self.subTest("No Description"):
             data = {}
-            self.assertEqual(None, generate_test_description_from_report_base(data))
+            self.assertEqual(None, generate_test_description_from_report(data))
         with self.subTest("Description from Executive Summary Only"):
             data = {
                 "executive_summary": "This is a summary"
             }
-            self.assertEqual("This is a summary", generate_test_description_from_report_base(data))
+            self.assertEqual("This is a summary", generate_test_description_from_report(data))
         with self.subTest("Description from Engagement Overview Only"):
             data = {
                 "engagement_overview": "This is an overview"
             }
-            self.assertEqual("This is an overview", generate_test_description_from_report_base(data))
+            self.assertEqual("This is an overview", generate_test_description_from_report(data))
         with self.subTest("Description from Conclusion Only"):
             data = {
                 "conclusion": "This is a conclusion"
             }
-            self.assertEqual("This is a conclusion", generate_test_description_from_report_base(data))
+            self.assertEqual("This is a conclusion", generate_test_description_from_report(data))
         with self.subTest("Description from All Sections"):
             data = {
                 "executive_summary": "This is a summary",
@@ -316,42 +316,42 @@ class TestPTARTParser(TestCase):
                 "conclusion": "This is a conclusion"
             }
             self.assertEqual("This is a summary\n\nThis is an overview\n\nThis is a conclusion",
-                             generate_test_description_from_report_base(data))
+                             generate_test_description_from_report(data))
         with self.subTest("Description from Executive Summary and Conclusion"):
             data = {
                 "executive_summary": "This is a summary",
                 "conclusion": "This is a conclusion"
             }
             self.assertEqual("This is a summary\n\nThis is a conclusion",
-                             generate_test_description_from_report_base(data))
+                             generate_test_description_from_report(data))
         with self.subTest("Description from Executive Summary and Engagement Overview"):
             data = {
                 "executive_summary": "This is a summary",
                 "engagement_overview": "This is an overview"
             }
             self.assertEqual("This is a summary\n\nThis is an overview",
-                             generate_test_description_from_report_base(data))
+                             generate_test_description_from_report(data))
         with self.subTest("Description from Engagement Overview and Conclusion"):
             data = {
                 "engagement_overview": "This is an overview",
                 "conclusion": "This is a conclusion"
             }
             self.assertEqual("This is an overview\n\nThis is a conclusion",
-                             generate_test_description_from_report_base(data))
+                             generate_test_description_from_report(data))
         with self.subTest("Description from All Sections with Empty Strings"):
             data = {
                 "executive_summary": "",
                 "engagement_overview": "",
                 "conclusion": ""
             }
-            self.assertEqual(None, generate_test_description_from_report_base(data))
+            self.assertEqual(None, generate_test_description_from_report(data))
         with self.subTest("Description with Some Blank Strings"):
             data = {
                 "executive_summary": "",
                 "engagement_overview": "This is an overview",
                 "conclusion": ""
             }
-            self.assertEqual("This is an overview", generate_test_description_from_report_base(data))
+            self.assertEqual("This is an overview", generate_test_description_from_report(data))
 
     def test_ptart_parser_with_empty_json_throws_error(self):
         with open("unittests/scans/ptart/empty_with_error.json") as testfile:
