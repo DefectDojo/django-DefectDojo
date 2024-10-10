@@ -2265,11 +2265,6 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name=_("CWE"),
                               help_text=_("The CWE number associated with this flaw."))
-    cve = models.CharField(max_length=50,
-                           null=True,
-                           blank=False,
-                           verbose_name=_("Vulnerability Id"),
-                           help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
     epss_score = models.FloatField(default=None, null=True, blank=True,
                               verbose_name=_("EPSS Score"),
                               help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."),
@@ -3301,16 +3296,6 @@ class Finding(models.Model):
         for vulnerability_id in vulnerability_ids_model:
             vulnerability_ids.append(vulnerability_id.vulnerability_id)
 
-        # Synchronize the cve field with the unsaved_vulnerability_ids
-        # We do this to be as flexible as possible to handle the fields until
-        # the cve field is not needed anymore and can be removed.
-        if vulnerability_ids and self.cve:
-            # Make sure the first entry of the list is the value of the cve field
-            vulnerability_ids.insert(0, self.cve)
-        elif not vulnerability_ids and self.cve:
-            # If there is no list, make one with the value of the cve field
-            vulnerability_ids = [self.cve]
-
         # Remove duplicates
         return list(dict.fromkeys(vulnerability_ids))
 
@@ -3510,16 +3495,6 @@ class Finding_Template(models.Model):
         vulnerability_ids = []
         for vulnerability_id in vulnerability_ids_model:
             vulnerability_ids.append(vulnerability_id.vulnerability_id)
-
-        # Synchronize the cve field with the unsaved_vulnerability_ids
-        # We do this to be as flexible as possible to handle the fields until
-        # the cve field is not needed anymore and can be removed.
-        if vulnerability_ids and self.cve:
-            # Make sure the first entry of the list is the value of the cve field
-            vulnerability_ids.insert(0, self.cve)
-        elif not vulnerability_ids and self.cve:
-            # If there is no list, make one with the value of the cve field
-            vulnerability_ids = [self.cve]
 
         # Remove duplicates
         return list(dict.fromkeys(vulnerability_ids))
