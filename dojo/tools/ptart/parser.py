@@ -6,7 +6,8 @@ from dojo.tools.ptart.assessment_parser import PTARTAssessmentParser
 from dojo.tools.ptart.retest_parser import PTARTRetestParser
 
 
-class PTARTParser(object):
+class PTARTParser:
+
     """
     Imports JSON reports from the PTART reporting tool
     (https://github.com/certmichelin/PTART)
@@ -48,13 +49,13 @@ class PTARTParser(object):
         # Perhaps in a future version of DefectDojo?
         if "start_date" in data:
             test.target_start = ptart_tools.parse_date(
-                data["start_date"],
-                "%Y-%m-%d"
+                data["start_date"], "%Y-%m-%d",
             )
 
         if "end_date" in data:
-            test.target_end = ptart_tools.parse_date(data["end_date"],
-                                                     "%Y-%m-%d")
+            test.target_end = ptart_tools.parse_date(
+                data["end_date"], "%Y-%m-%d",
+            )
 
         findings = self.get_items(data)
         test.findings = findings
