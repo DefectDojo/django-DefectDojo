@@ -78,6 +78,8 @@ class PTARTRetestParser:
 
         if hit["id"]:
             finding.unique_id_from_tool = hit.get("id")
+            finding.vuln_id_from_tool = original_hit.get("id")
+            finding.cve = original_hit.get("id")
 
         cvss_vector = ptart_tools.parse_cvss_vector(
             original_hit,
