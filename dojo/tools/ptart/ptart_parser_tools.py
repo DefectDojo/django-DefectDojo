@@ -29,9 +29,9 @@ def parse_title_from_hit(hit):
     hit_title = hit.get("title", None)
     hit_id = hit.get("id", None)
 
-    if hit_title and hit_id:
-        return f"{hit_id}: {hit_title}"
-    return (hit_title or hit_id) or "Unknown Hit"
+    return f"{hit_id}: {hit_title}" \
+        if hit_title and hit_id \
+        else (hit_title or hit_id or "Unknown Hit")
 
 
 def parse_date_added_from_hit(hit):
@@ -42,10 +42,7 @@ def parse_date_added_from_hit(hit):
 
 def parse_date(date, format):
     try:
-        if date:
-            return datetime.strptime(date, format)
-        else:
-            return datetime.now()
+        return datetime.strptime(date, format) if date else datetime.now()
     except ValueError:
         return datetime.now()
 
@@ -54,14 +51,13 @@ def parse_cvss_vector(hit, cvss_type):
     cvss_vector = hit.get("cvss_vector", None)
     # Defect Dojo Only supports CVSS v3 for now.
     if cvss_vector:
+        # Similar application once CVSS v4 is supported
         if cvss_type == 3:
             try:
                 c = cvss.CVSS3(cvss_vector)
                 return c.clean_vector()
             except cvss.CVSS3Error:
                 return None
-        else:
-            return None
     return None
 
 
@@ -77,10 +73,10 @@ def parse_retest_fix_status(status):
 
 
 def parse_screenshots_from_hit(hit):
-    if "screenshots" in hit:
-        return [ss for ss in [parse_screenshot_data(screenshot) for screenshot in hit["screenshots"]] if ss is not None]
-    else:
+    if "screenshots" not in hit:
         return []
+    screenshots = [parse_screenshot_data(screenshot) for screenshot in hit["screenshots"]]
+    return [ss for ss in screenshots if ss is not None]
 
 
 def parse_screenshot_data(screenshot):
@@ -104,35 +100,41 @@ def get_screenshot_title(screenshot):
 
 
 def get_screenshot_data(screenshot):
-    if "screenshot" in screenshot and "data" in screenshot["screenshot"] and screenshot["screenshot"]["data"]:
-        return screenshot["screenshot"]["data"]
-    else:
+    if "screenshot" not in screenshot or "data" not in screenshot["screenshot"] or not screenshot["screenshot"]["data"]:
         raise ValueError("Screenshot data not found")
+    return screenshot["screenshot"]["data"]
 
 
 def get_file_suffix_from_screenshot(screenshot):
-    if "screenshot" in screenshot and "filename" in screenshot['screenshot']:
-        return pathlib.Path(screenshot['screenshot']['filename']).suffix
-    else:
-        return ""
+    return pathlib.Path(screenshot['screenshot']['filename']).suffix \
+        if "screenshot" in screenshot and "filename" in screenshot['screenshot'] \
+        else ""
 
 
 def parse_attachment_from_hit(hit):
-    if "attachments" in hit:
-        return [f for f in [parse_attachment_data(attachment) for attachment in hit["attachments"]] if f is not None]
-    else:
+    if "attachments" not in hit:
         return []
+    files = [parse_attachment_data(attachment) for attachment in hit["attachments"]]
+    return [f for f in files if f is not None]
 
 
 def parse_attachment_data(attachment):
-    if "data" in attachment and attachment["data"]:
+    try:
+        title = get_attachement_title(attachment)
+        data = get_attachment_data(attachment)
         return {
-            "title": get_attachement_title(attachment),
-            "data": attachment["data"]
+            "title": title,
+            "data": data
         }
-    else:
+    except ValueError:
         # No data in attachment, let's not import this file.
         return None
+
+
+def get_attachment_data(attachment):
+    if "data" not in attachment or not attachment["data"]:
+        raise ValueError("Attachment data not found")
+    return attachment["data"]
 
 
 def get_attachement_title(attachment):
@@ -140,19 +142,13 @@ def get_attachement_title(attachment):
 
 
 def parse_endpoints_from_hit(hit):
-    if "asset" in hit and hit["asset"]:
-        endpoint = Endpoint.from_uri(hit["asset"])
-        return [endpoint]
-    else:
+    if "asset" not in hit or not hit["asset"]:
         return []
+    endpoint = Endpoint.from_uri(hit["asset"])
+    return [endpoint]
 
 
 def generate_test_description_from_report_base(data):
-    description = []
-    if "executive_summary" in data and data["executive_summary"]:
-        description.append(data["executive_summary"])
-    if "engagement_overview" in data and data["engagement_overview"]:
-        description.append(data["engagement_overview"])
-    if "conclusion" in data and data["conclusion"]:
-        description.append(data["conclusion"])
-    return "\n\n".join(description) if description else None
+    keys = ["executive_summary", "engagement_overview", "conclusion"]
+    description = "\n\n".join(data[key] for key in keys if key in data and data[key])
+    return description if description else None
