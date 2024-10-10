@@ -1080,8 +1080,7 @@
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                                                     <li role="presentation">
-                                                                        <a href
-                                                                        {% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}>
+                                                                        <a href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                             <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
                                                                         </a>
                                                                     </li>
