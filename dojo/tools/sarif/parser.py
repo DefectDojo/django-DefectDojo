@@ -342,11 +342,11 @@ def get_severity(result, rule):
         if "defaultConfiguration" in rule:
             severity = rule["defaultConfiguration"].get("level")
 
-    if "note" == severity:
+    if severity == "note":
         return "Info"
-    if "warning" == severity:
+    if severity == "warning":
         return "Medium"
-    if "error" == severity:
+    if severity == "error":
         return "High"
     return "Medium"
 

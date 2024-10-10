@@ -174,13 +174,11 @@ def get_jira_project(obj, use_inheritance=True):
         if obj.jira_project:
             return obj.jira_project
         # some old jira_issue records don't have a jira_project, so try to go via the finding instead
-        if hasattr(obj, "finding") and obj.finding:
-            return get_jira_project(obj.finding, use_inheritance=use_inheritance)
-        if hasattr(obj, "engagement") and obj.engagement:
+        if (hasattr(obj, "finding") and obj.finding) or (hasattr(obj, "engagement") and obj.engagement):
             return get_jira_project(obj.finding, use_inheritance=use_inheritance)
         return None
 
-    if isinstance(obj, Finding) or isinstance(obj, Stub_Finding):
+    if isinstance(obj, (Finding, Stub_Finding)):
         finding = obj
         return get_jira_project(finding.test)
 
@@ -264,10 +262,7 @@ def get_jira_issue_url(issue):
 
 def get_jira_project_url(obj):
     logger.debug("getting jira project url")
-    if not isinstance(obj, JIRA_Project):
-        jira_project = get_jira_project(obj)
-    else:
-        jira_project = obj
+    jira_project = get_jira_project(obj) if not isinstance(obj, JIRA_Project) else obj
 
     if jira_project:
         logger.debug("getting jira project url2")
@@ -323,14 +318,14 @@ def get_jira_issue_template(obj):
 
 
 def get_jira_creation(obj):
-    if isinstance(obj, Finding) or isinstance(obj, Engagement) or isinstance(obj, Finding_Group):
+    if isinstance(obj, (Finding, Engagement, Finding_Group)):
         if obj.has_jira_issue:
             return obj.jira_issue.jira_creation
     return None
 
 
 def get_jira_change(obj):
-    if isinstance(obj, Finding) or isinstance(obj, Engagement) or isinstance(obj, Finding_Group):
+    if isinstance(obj, (Finding, Engagement, Finding_Group)):
         if obj.has_jira_issue:
             return obj.jira_issue.jira_change
     else:
@@ -350,7 +345,7 @@ def has_jira_issue(obj):
 
 
 def get_jira_issue(obj):
-    if isinstance(obj, Finding) or isinstance(obj, Engagement) or isinstance(obj, Finding_Group):
+    if isinstance(obj, (Finding, Engagement, Finding_Group)):
         try:
             return obj.jira_issue
         except JIRA_Issue.DoesNotExist:
@@ -571,7 +566,7 @@ def get_labels(obj):
 def get_tags(obj):
     # Update Label with system setttings label
     tags = []
-    if isinstance(obj, Finding) or isinstance(obj, Engagement):
+    if isinstance(obj, (Finding, Engagement)):
         obj_tags = obj.tags.all()
         if obj_tags:
             for tag in obj_tags:
@@ -1051,11 +1046,8 @@ def issue_from_jira_is_active(issue_from_jira):
     if not issue_from_jira.fields.resolution:
         return True
 
-    if issue_from_jira.fields.resolution == "None":
-        return True
-
     # some kind of resolution is present that is not null or None
-    return False
+    return issue_from_jira.fields.resolution == "None"
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, save=False):

@@ -20,20 +20,11 @@ logger = logging.getLogger(__name__)
 def endpoint_filter(**kwargs):
     qs = Endpoint.objects.all()
 
-    if kwargs.get("protocol"):
-        qs = qs.filter(protocol__iexact=kwargs["protocol"])
-    else:
-        qs = qs.filter(protocol__isnull=True)
+    qs = qs.filter(protocol__iexact=kwargs["protocol"]) if kwargs.get("protocol") else qs.filter(protocol__isnull=True)
 
-    if kwargs.get("userinfo"):
-        qs = qs.filter(userinfo__exact=kwargs["userinfo"])
-    else:
-        qs = qs.filter(userinfo__isnull=True)
+    qs = qs.filter(userinfo__exact=kwargs["userinfo"]) if kwargs.get("userinfo") else qs.filter(userinfo__isnull=True)
 
-    if kwargs.get("host"):
-        qs = qs.filter(host__iexact=kwargs["host"])
-    else:
-        qs = qs.filter(host__isnull=True)
+    qs = qs.filter(host__iexact=kwargs["host"]) if kwargs.get("host") else qs.filter(host__isnull=True)
 
     if kwargs.get("port"):
         if (kwargs.get("protocol")) and \
@@ -48,20 +39,11 @@ def endpoint_filter(**kwargs):
         else:
             qs = qs.filter(port__isnull=True)
 
-    if kwargs.get("path"):
-        qs = qs.filter(path__exact=kwargs["path"])
-    else:
-        qs = qs.filter(path__isnull=True)
+    qs = qs.filter(path__exact=kwargs["path"]) if kwargs.get("path") else qs.filter(path__isnull=True)
 
-    if kwargs.get("query"):
-        qs = qs.filter(query__exact=kwargs["query"])
-    else:
-        qs = qs.filter(query__isnull=True)
+    qs = qs.filter(query__exact=kwargs["query"]) if kwargs.get("query") else qs.filter(query__isnull=True)
 
-    if kwargs.get("fragment"):
-        qs = qs.filter(fragment__exact=kwargs["fragment"])
-    else:
-        qs = qs.filter(fragment__isnull=True)
+    qs = qs.filter(fragment__exact=kwargs["fragment"]) if kwargs.get("fragment") else qs.filter(fragment__isnull=True)
 
     if kwargs.get("product"):
         qs = qs.filter(product__exact=kwargs["product"])
@@ -267,12 +249,11 @@ def validate_endpoints_to_add(endpoints_to_add):
     endpoints = endpoints_to_add.split()
     for endpoint in endpoints:
         try:
-            if "://" in endpoint:  # is it full uri?
-                endpoint_ins = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
-            else:
-                # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
-                # format doesn't follow RFC 3986 but users use it
-                endpoint_ins = Endpoint.from_uri("//" + endpoint)
+            # is it full uri?
+            # 1. from_uri validate URI format + split to components
+            # 2. from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
+            #    format doesn't follow RFC 3986 but users use it
+            endpoint_ins = Endpoint.from_uri(endpoint) if "://" in endpoint else Endpoint.from_uri("//" + endpoint)
             endpoint_ins.clean()
             endpoint_list.append([
                 endpoint_ins.protocol,

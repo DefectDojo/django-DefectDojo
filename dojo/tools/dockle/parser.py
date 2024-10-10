@@ -33,10 +33,7 @@ class DockleParser:
             title = item["title"]
             if dockle_severity == "IGNORE":
                 continue
-            if dockle_severity in self.SEVERITY:
-                severity = self.SEVERITY[dockle_severity]
-            else:
-                severity = "Medium"
+            severity = self.SEVERITY.get(dockle_severity, "Medium")
             description = sorted(item.get("alerts", []))
             description = "\n".join(description)
             dupe_key = hashlib.sha256(
