@@ -35,3 +35,11 @@ class TestMendParser(DojoTestCase):
             parser = MendParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(20, len(findings))
+
+    def test_parse_file_with_one_sca_vuln_finding(self):
+        with open("unittests/scans/mend/mend_sca_vuln.json", encoding="utf-8") as testfile:
+            parser = MendParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = list(findings)[0]
+            self.assertEqual("D:\\MendRepo\\test-product\\test-project\\test-project-subcomponent\\path\\to\\the\\Java\\commons-codec-1.6_donotuse.jar", finding.file_path)
