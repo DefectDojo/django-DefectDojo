@@ -410,7 +410,6 @@ class TestPTARTParser(TestCase):
             }
             self.assertEqual("Reference1: https://ref.example.com\nReference: https://ref3.example.com", parse_references_from_hit(hit))
 
-
     def test_ptart_parser_with_empty_json_throws_error(self):
         with open("unittests/scans/ptart/empty_with_error.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
