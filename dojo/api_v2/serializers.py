@@ -2177,7 +2177,7 @@ class ImportScanSerializer(serializers.Serializer):
         context["scan"] = data.pop("file", None)
 
         if context.get("auto_create_context"):
-            environment = Development_Environment.objects.get_or_create(name=data.get("environment"))[0]
+            environment = Development_Environment.objects.get_or_create(name=data.get("environment", "Development"))[0]
         else:
             try:
                 environment = Development_Environment.objects.get(name=data.get("environment", "Development"))
@@ -2464,7 +2464,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         context["scan"] = data.get("file", None)
 
         if context.get("auto_create_context"):
-            environment = Development_Environment.objects.get_or_create(name=data.get("environment"))[0]
+            environment = Development_Environment.objects.get_or_create(name=data.get("environment", "Development"))[0]
         else:
             try:
                 environment = Development_Environment.objects.get(name=data.get("environment", "Development"))
