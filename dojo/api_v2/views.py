@@ -1517,6 +1517,7 @@ class JiraProjectViewSet(
         "jira_instance",
         "product",
         "engagement",
+        "enabled",
         "component",
         "project_key",
         "push_all_issues",
