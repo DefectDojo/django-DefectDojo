@@ -134,3 +134,9 @@ class TestAwsSecurityHubParser(DojoTestCase):
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual("0.00239", finding.epss_score)
+
+    def test_missing_account_id(self):
+        with open(get_unit_tests_path() + sample_path("missing_account_id.json"), encoding="utf-8") as test_file:
+            parser = AwsSecurityHubParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(1, len(findings))
