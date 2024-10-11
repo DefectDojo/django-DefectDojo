@@ -34,7 +34,7 @@ RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 FROM base AS django-alpine
 WORKDIR /app
 ARG uid=1001
-ARG gid=1337
+ARG gid=4242
 ARG appuser=defectdojo
 ENV appuser=${appuser}
 RUN \
