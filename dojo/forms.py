@@ -2422,7 +2422,7 @@ class BaseJiraForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class JIRAForm(BaseJiraForm):
+class AdvancedJIRAForm(BaseJiraForm):
     issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
                                        help_text="Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.")
@@ -2442,8 +2442,11 @@ class JIRAForm(BaseJiraForm):
         exclude = [""]
 
 
-class ExpressJIRAForm(BaseJiraForm):
+class JIRAForm(BaseJiraForm):
     issue_key = forms.CharField(required=True, help_text="A valid issue ID is required to gather the necessary information.")
+    issue_template_dir = forms.ChoiceField(required=False,
+                                       choices=JIRA_TEMPLATE_CHOICES,
+                                       help_text="Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.")
 
     class Meta:
         model = JIRA_Instance
