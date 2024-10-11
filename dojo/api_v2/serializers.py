@@ -2175,9 +2175,12 @@ class ImportScanSerializer(serializers.Serializer):
         context = dict(data)
         # update some vars
         context["scan"] = data.pop("file", None)
-        context["environment"] = Development_Environment.objects.get(
+        # The assumption below is that a Development environment will be gotten or created, whether of the one provided or the Development environment
+        # because the Development environment always exists...
+        # If this fails, there are bigger problems.
+        context["environment"] = Development_Environment.objects.get_or_create(
             name=data.get("environment", "Development"),
-        )
+        )[0]
         # Set the active/verified status based upon the overrides
         if "active" in self.initial_data:
             context["active"] = data.get("active")
@@ -2454,9 +2457,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         context = dict(data)
         # update some vars
         context["scan"] = data.get("file", None)
-        context["environment"] = Development_Environment.objects.get(
+        # The assumption below is that a Development environment will be gotten or created, whether of the one provided or the Development environment
+        # because the Development environment always exists...
+        # If this fails, there are bigger problems.
+        context["environment"] = Development_Environment.objects.get_or_create(
             name=data.get("environment", "Development"),
-        )
+        )[0]
         # Set the active/verified status based upon the overrides
         if "active" in self.initial_data:
             context["active"] = data.get("active")
