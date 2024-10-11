@@ -353,6 +353,64 @@ class TestPTARTParser(TestCase):
             }
             self.assertEqual("This is an overview", generate_test_description_from_report(data))
 
+    def test_ptart_parser_tools_parse_references_from_hit(self):
+        from dojo.tools.ptart.ptart_parser_tools import parse_references_from_hit
+        with self.subTest("No References"):
+            hit = {}
+            self.assertEqual(None, parse_references_from_hit(hit))
+        with self.subTest("One Reference"):
+            hit = {
+                "references": [{
+                    "name": "Reference",
+                    "url": "https://ref.example.com",
+                }],
+            }
+            self.assertEqual("Reference: https://ref.example.com", parse_references_from_hit(hit))
+        with self.subTest("Two References"):
+            hit = {
+                "references": [{
+                    "name": "Reference1",
+                    "url": "https://ref.example.com",
+                }, {
+                    "name": "Reference2",
+                    "url": "https://ref2.example.com",
+                }],
+            }
+            self.assertEqual("Reference1: https://ref.example.com\nReference2: https://ref2.example.com",
+                             parse_references_from_hit(hit))
+        with self.subTest("No Data Reference"):
+            hit = {
+                "references": [],
+            }
+            self.assertEqual(None, parse_references_from_hit(hit))
+        with self.subTest("Reference with No Name"):
+            hit = {
+                "references": [{
+                    "url": "https://ref.example.com",
+                }],
+            }
+            self.assertEqual("Reference: https://ref.example.com", parse_references_from_hit(hit))
+        with self.subTest("Reference with No URL"):
+            hit = {
+                "references": [{
+                    "name": "Reference",
+                }],
+            }
+            self.assertEqual(None, parse_references_from_hit(hit))
+        with self.subTest("Mixed bag of valid and invalid references"):
+            hit = {
+                "references": [{
+                    "name": "Reference1",
+                    "url": "https://ref.example.com",
+                }, {
+                    "name": "Reference2",
+                }, {
+                    "url": "https://ref3.example.com",
+                }],
+            }
+            self.assertEqual("Reference1: https://ref.example.com\nReference: https://ref3.example.com", parse_references_from_hit(hit))
+
+
     def test_ptart_parser_with_empty_json_throws_error(self):
         with open("unittests/scans/ptart/empty_with_error.json", encoding="utf-8") as testfile:
             parser = PTARTParser()
