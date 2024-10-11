@@ -1733,6 +1733,7 @@ VULNERABILITY_URLS = {
     "RHEA": "https://access.redhat.com/errata/",
     "FEDORA": "https://bodhi.fedoraproject.org/updates/",
     "ALSA": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
+    "USN": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
