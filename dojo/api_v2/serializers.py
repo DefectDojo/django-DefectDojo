@@ -2175,12 +2175,17 @@ class ImportScanSerializer(serializers.Serializer):
         context = dict(data)
         # update some vars
         context["scan"] = data.pop("file", None)
-        # The assumption below is that a Development environment will be gotten or created, whether of the one provided or the Development environment
-        # because the Development environment always exists...
-        # If this fails, there are bigger problems.
-        context["environment"] = Development_Environment.objects.get_or_create(
-            name=data.get("environment", "Development"),
-        )[0]
+
+        if context.get("auto_create_context"):
+            environment = Development_Environment.objects.get_or_create(name=data.get("environment"))[0]
+        else:
+            try:
+                environment = Development_Environment.objects.get(name=data.get("environment", "Development"))
+            except:
+                msg = "Environment named " + data.get("environment") + " does not exist."
+                raise ValidationError(msg)
+
+        context["environment"] = environment
         # Set the active/verified status based upon the overrides
         if "active" in self.initial_data:
             context["active"] = data.get("active")
@@ -2457,12 +2462,18 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         context = dict(data)
         # update some vars
         context["scan"] = data.get("file", None)
-        # The assumption below is that a Development environment will be gotten or created, whether of the one provided or the Development environment
-        # because the Development environment always exists...
-        # If this fails, there are bigger problems.
-        context["environment"] = Development_Environment.objects.get_or_create(
-            name=data.get("environment", "Development"),
-        )[0]
+
+        if context.get("auto_create_context"):
+            environment = Development_Environment.objects.get_or_create(name=data.get("environment"))[0]
+        else:
+            try:
+                environment = Development_Environment.objects.get(name=data.get("environment", "Development"))
+            except:
+                msg = "Environment named " + data.get("environment") + " does not exist."
+                raise ValidationError(msg)
+
+        context["environment"] = environment
+
         # Set the active/verified status based upon the overrides
         if "active" in self.initial_data:
             context["active"] = data.get("active")
