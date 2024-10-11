@@ -172,6 +172,8 @@ def parse_references_from_hit(hit):
     references = hit.get("references", [])
     all_refs = [get_transformed_reference(ref) for ref in references]
     clean_refs = [tref for tref in all_refs if tref]
+    if not clean_refs:
+        return None
     return "\n".join(clean_refs)
 
 
