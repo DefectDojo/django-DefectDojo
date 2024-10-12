@@ -292,7 +292,7 @@ class AutoCreateContextManager:
         auto_create_context: bool = False,
         deduplication_on_engagement: bool = False,
         source_code_management_uri: str | None = None,
-        target_end: Optional[datetime] = None,
+        target_end: datetime | None = None,
         **kwargs: dict,
     ) -> Engagement:
         """Fetches an engagement by name or ID if one already exists."""
