@@ -21,6 +21,7 @@ class MobSFParser:
     def get_findings(self, filename, test):
 
         tree = filename.read()
+
         try:
             data = json.loads(str(tree, "utf-8"))
         except:
@@ -52,7 +53,7 @@ class MobSFParser:
         for field in appsec_fields_for_test_desc:
             if field in data.get("appsec",{}):
                 test_description = "{}  **{}:** {}\n".format(test_description, field, data["appsec"][field])
-        
+
         for field in main_fields_for_test_desc:
             if field in data:
                 test_description = "{}  **{}:** {}\n".format(test_description, field, data[field])
@@ -74,7 +75,7 @@ class MobSFParser:
                 for mobsf_finding in data["appsec"][finding_severity]:
 
                     unique_key = f"{finding_severity} - {mobsf_finding["section"]} - {mobsf_finding["title"]} - {mobsf_finding["description"]}"
-       
+
                     finding = Finding(
                             title=mobsf_finding["title"],
                             cwe=919,  # Weaknesses in Mobile Applications
@@ -87,7 +88,7 @@ class MobSFParser:
                             dynamic_finding=False,
                             nb_occurences=1,
                         )
-                    
+
                     dd_findings[unique_key] = finding        
 
         return list(dd_findings.values())
