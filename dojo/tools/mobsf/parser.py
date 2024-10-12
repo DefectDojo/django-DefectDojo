@@ -2,8 +2,6 @@
 import json
 from datetime import datetime
 
-from html2text import html2text
-
 from dojo.models import Finding
 
 
