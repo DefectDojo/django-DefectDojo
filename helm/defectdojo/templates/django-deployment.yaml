@@ -126,7 +126,7 @@ spec:
           timeoutSeconds: 5
       {{- end }}
       - name: uwsgi
-        image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
+        image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.django-tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
@@ -222,7 +222,7 @@ spec:
         resources:
           {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
       - name: nginx
-        image: '{{ template "django.nginx.repository" . }}:{{ .Values.tag }}'
+        image: '{{ template "django.nginx.repository" . }}:{{ .Values.nginx-tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:

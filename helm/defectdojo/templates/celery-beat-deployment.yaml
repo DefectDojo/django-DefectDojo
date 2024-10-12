@@ -95,7 +95,7 @@ spec:
       - command:
         - /entrypoint-celery-beat.sh
         name: celery
-        image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
+        image: "{{ template "celery.repository" . }}:{{ .Values.django-tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
