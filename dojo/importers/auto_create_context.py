@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Optional
+from typing import Any
 
 from crum import get_current_user
 from django.db import transaction
@@ -116,7 +116,7 @@ class AutoCreateContextManager:
     """
     def get_target_product_type_if_exists(
         self,
-        product_type_name: Optional[str] = None,
+        product_type_name: str | None = None,
         **kwargs: dict,
     ) -> Product_Type | None:
         """
@@ -131,8 +131,8 @@ class AutoCreateContextManager:
 
     def get_target_product_if_exists(
         self,
-        product_name: Optional[str] = None,
-        product_type_name: Optional[str] = None,
+        product_name: str | None = None,
+        product_type_name: str | None = None,
         **kwargs: dict,
     ) -> Product | None:
         """
@@ -171,7 +171,7 @@ class AutoCreateContextManager:
     def get_target_engagement_if_exists(
         self,
         engagement_id: int = 0,
-        engagement_name: Optional[str] = None,
+        engagement_name: str | None = None,
         product: Product = None,
         **kwargs: dict,
     ) -> Engagement | None:
@@ -194,8 +194,8 @@ class AutoCreateContextManager:
     def get_target_test_if_exists(
         self,
         test_id: int = 0,
-        test_title: Optional[str] = None,
-        scan_type: Optional[str] = None,
+        test_title: str | None = None,
+        scan_type: str | None = None,
         engagement: Engagement = None,
         **kwargs: dict,
     ) -> Test | None:
@@ -223,7 +223,7 @@ class AutoCreateContextManager:
     """
     def get_or_create_product_type(
         self,
-        product_type_name: Optional[str] = None,
+        product_type_name: str | None = None,
         **kwargs: dict,
     ) -> Product_Type:
         """
