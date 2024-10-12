@@ -403,8 +403,7 @@ metadata:
   name: defectdojo-postgresql-specific  
 type: Opaque
 stringData:  # I chose stringData for better visualization of the credentials for debugging
-  postgresql-password: <user-password>
-  db-url: psql://<username>:<password>@<hostname>:<port>/<database-name> 
+  password: <user-password>
 ```
 
 #### Step 2.5: Install PostgreSQL (Optional)
@@ -435,18 +434,27 @@ auth:
 Before installing the DefectDojo Helm chart, it's important to customize the `values.yaml` file. Key areas to modify include specifying the PostgreSQL connection details & the extraEnv block:
 
 ```yaml
-database: postgresql
-postgresql:
-  postgresServer: "defectdojo-postgresql" # point to the hostname of your postgresql server
-  enabled: false
+database: postgresql # refer to the following configuration
 
-# Specify the postgresql DB connection url for the external postgresql server
+postgresql:
+  enabled: false # Disable the creation of the database in the cluster
+  postgresServer: "127.0.0.1" # Required to skip certains tests not useful on external instances
+  auth:
+    username: defectdojo # your database user
+    database: defectdojo # your database name
+    secretKeys: 
+      adminPasswordKey: password # the name of the field containing the password value
+      userPasswordKey: password # the name of the field containing the password value
+      replicationPasswordKey: password # the name of the field containing the password value
+    existingSecret: defectdojo-postgresql-specific # the secret containing your database password
+
 extraEnv:
-  - name: DD_DATABASE_URL
-    valueFrom:
-      secretKeyRef:
-        name: defectdojo-postgresql-specific
-        key: db-url
+# Overwrite the database endpoint
+- name: DD_DATABASE_HOST
+  value: <YOUR_POSTGRES_HOST>
+# Overwrite the database port
+- name: DD_DATABASE_PORT
+  value: <YOUR_POSTGRES_PORT>
 ```
 
 #### Step 4: Deploy DefectDojo
