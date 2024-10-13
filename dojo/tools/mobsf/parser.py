@@ -71,7 +71,7 @@ class MobSFParser:
             if finding_severity in data.get("appsec",{}):
                 for mobsf_finding in data["appsec"][finding_severity]:
 
-                    unique_key = f"{finding_severity} - {mobsf_finding["section"]} - {mobsf_finding["title"]} - {mobsf_finding["description"]}"
+                    unique_key = finding_severity + mobsf_finding["section"] + mobsf_finding["title"] + mobsf_finding["description"]
 
                     finding = Finding(
                             title=mobsf_finding["title"],
