@@ -109,7 +109,7 @@ class TestCopyFindingModel(DojoTestCase):
         product = self.create_product("test_deuplicate_finding", prod_type=product_type)
         engagement = self.create_engagement("eng", product)
         test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
-        endpoint = Endpoint.from_uri("0.0.0.0")
+        endpoint = Endpoint.from_uri("0.0.0.0")  # noqa: S104
         endpoint.save()
         finding = Finding.objects.create(test=test, reporter=user)
         endpoint_status = Endpoint_Status.objects.create(finding=finding, endpoint=endpoint)
