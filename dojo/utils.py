@@ -88,6 +88,7 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     Args:
         finding (:model:`dojo.Finding`): Finding to be replicated
+
     """
     to_mark_as_fp = set()
 
@@ -149,6 +150,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         product (:model:`dojo.Product`, optional): Product to filter findings by
         engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
         test (:model:`dojo.Test`, optional): Test to filter findings by
+
     """
     if product:
         custom_filter_type = "product"

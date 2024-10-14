@@ -60,6 +60,7 @@ class WhiteHatSentinelParser:
         Args:
             whitehat_severity_id: The WhiteHat Severity ID (called risk_id in the API)
         Returns: A DefectDojo severity if a mapping can be found; otherwise a null value is returned
+
         """
         severities = [
             "Informational",
@@ -82,6 +83,7 @@ class WhiteHatSentinelParser:
         Args:
             whitehat_sentinel_tags: The Tags list from the WhiteHat vuln
         Returns: The first CWE ID in the list, if it exists
+
         """
         for tag in whitehat_sentinel_tags:
             if tag.startswith("CWE-"):
@@ -94,6 +96,7 @@ class WhiteHatSentinelParser:
         Args:
             whitehat_sentinel_description: The description section of the WhiteHat Sentinel vulnerability dict
         Returns: A dict with description and reference link
+
         """
         description_ref = {"description": "", "reference_link": ""}
 
@@ -147,6 +150,7 @@ class WhiteHatSentinelParser:
         Args:
             text_to_search: The text string to search for an anchor tag
         Returns:
+
         """
         links = ""
 
@@ -160,6 +164,7 @@ class WhiteHatSentinelParser:
         Args:
             html_string: The HMTL string to remove <p> </p> tags from
         Returns: The original string stipped of paragraph tags
+
         """
         return re.sub(r"<p>|</p>", "", html_string)
 
@@ -193,6 +198,7 @@ class WhiteHatSentinelParser:
             whitehat_sentinel_vulns: The vuln dictionary from WhiteHat Sentinel vuln API
             test: The test ID that the DefectDojo finding should be associated with
         Returns: A DefectDojo Finding object
+
         """
         dupes = {}
 
