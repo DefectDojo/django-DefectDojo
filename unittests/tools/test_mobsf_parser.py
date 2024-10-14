@@ -14,14 +14,13 @@ class TestMobSFParser(DojoTestCase):
 
         # Android
         with open("unittests/scans/mobsf/dvba_4_0_7_android_empty.json", encoding="utf-8") as android_empty_file:
-            android_empty_findings = parser.get_findings(android_empty_file, test)
 
+            android_empty_findings = parser.get_findings(android_empty_file, test)
             self.assertEqual(0, len(android_empty_findings))
 
-
         with open("unittests/scans/mobsf/dvba_4_0_7_android_one.json", encoding="utf-8") as android_one_file:
-            android_one_findings = parser.get_findings(android_one_file, test)
 
+            android_one_findings = parser.get_findings(android_one_file, test)
             self.assertEqual(1, len(android_one_findings))
 
             item = android_one_findings[0]
@@ -29,8 +28,8 @@ class TestMobSFParser(DojoTestCase):
             self.assertEqual("High", item.severity)
 
         with open("unittests/scans/mobsf/dvba_4_0_7_android_full.json", encoding="utf-8") as android_full_file:
-            android_full_findings = parser.get_findings(android_full_file, test)
 
+            android_full_findings = parser.get_findings(android_full_file, test)
             self.assertEqual(18, len(android_full_findings))
 
             item = android_full_findings[2]
