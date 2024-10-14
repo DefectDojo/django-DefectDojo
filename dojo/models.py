@@ -3568,9 +3568,9 @@ class Check_List(models.Model):
 
     @staticmethod
     def get_status(pass_fail):
-        if pass_fail == "Pass":
+        if pass_fail == "Pass":  # noqa: S105
             return "success"
-        if pass_fail == "Fail":
+        if pass_fail == "Fail":  # noqa: S105
             return "danger"
         return "warning"
 
