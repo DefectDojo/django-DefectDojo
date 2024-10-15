@@ -48,12 +48,18 @@ class MobSFParser:
         test_description = ""
 
         for field in appsec_fields_for_test_desc:
-            if field in data.get("appsec", {}):
-                test_description = "%s  **%s:** %s\n" % (test_description, field, data["appsec"][field])
+
+            field_value = str(data.get("appsec", {}).get(field, ""))
+
+            if field_value:
+                test_description = "%s  **%s:** %s\n" % (test_description, field, field_value)
 
         for field in main_fields_for_test_desc:
-            if field in data:
-                test_description = "%s  **%s:** \n" % (test_description, field, data[field])
+
+            field_value = str(data.get(field, ""))
+            
+            if field_value:
+                test_description = "%s  **%s:** \n" % (test_description, field, field_value)
 
         test.description = test_description
 
@@ -71,13 +77,17 @@ class MobSFParser:
             if finding_severity in data.get("appsec", {}):
                 for mobsf_finding in data["appsec"][finding_severity]:
 
-                    unique_key = "%s - %s - %s - %s" % (finding_severity, mobsf_finding["section"], mobsf_finding["title"], mobsf_finding["description"])
+                    section = str(mobsf_finding.get("section", ""))
+                    title = str(mobsf_finding.get("title", ""))
+                    description = str(mobsf_finding.get("description", ""))
+
+                    unique_key = "%s - %s - %s - %s" % (finding_severity, section, title, description)
 
                     finding = Finding(
-                            title=mobsf_finding["title"],
+                            title=title,
                             cwe=919,  # Weaknesses in Mobile Applications
                             test=test,
-                            description="**Category:** %s\n\n%s" % (mobsf_finding["section"], mobsf_finding["description"]),
+                            description="**Category:** %s\n\n%s" % (section, description),
                             severity=finding_severities[finding_severity],
                             references=None,
                             date=find_date,
