@@ -49,11 +49,11 @@ class MobSFParser:
 
         for field in appsec_fields_for_test_desc:
             if field in data.get("appsec", {}):
-                test_description = f"{test_description}  **{field}:** {data["appsec"][field]}\n"
+                test_description = "%s  **%s:** %s\n" % (test_description, field, data["appsec"][field])
 
         for field in main_fields_for_test_desc:
             if field in data:
-                test_description = f"{test_description}  **{field}:** {data[field]}\n"
+                test_description = "%s  **%s:** \n" % (test_description, field, data[field])
 
         test.description = test_description
 
@@ -71,13 +71,13 @@ class MobSFParser:
             if finding_severity in data.get("appsec", {}):
                 for mobsf_finding in data["appsec"][finding_severity]:
 
-                    unique_key = finding_severity + mobsf_finding["section"] + mobsf_finding["title"] + mobsf_finding["description"]
+                    unique_key = "%s - %s - %s - %s" % (finding_severity, mobsf_finding["section"], mobsf_finding["title"], mobsf_finding["description"])
 
                     finding = Finding(
                             title=mobsf_finding["title"],
                             cwe=919,  # Weaknesses in Mobile Applications
                             test=test,
-                            description=f"**Category:** {mobsf_finding["section"]}\n\n{mobsf_finding["description"]}",
+                            description="**Category:** %s\n\n%s" % (mobsf_finding["section"], mobsf_finding["description"]),
                             severity=finding_severities[finding_severity],
                             references=None,
                             date=find_date,
