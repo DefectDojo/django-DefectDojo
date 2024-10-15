@@ -71,11 +71,12 @@ def is_jira_configured_and_enabled(obj):
     if not is_jira_enabled():
         return False
 
-    if get_jira_project(obj) is None:
+    jira_project = get_jira_project(obj)
+    if jira_project is None:
         logger.debug('JIRA project not found for: "%s" not doing anything', obj)
         return False
 
-    return True
+    return jira_project.enabled
 
 
 def is_push_to_jira(instance, push_to_jira_parameter=None):
@@ -88,6 +89,10 @@ def is_push_to_jira(instance, push_to_jira_parameter=None):
     if push_to_jira_parameter is not None:
         return push_to_jira_parameter
 
+    # Check to see if jira project is disabled to prevent pushing findings
+    if not jira_project.enabled:
+        return False
+
     # push_to_jira was not specified, so look at push_all_issues in JIRA_Project
     return jira_project.push_all_issues
 
@@ -96,8 +101,10 @@ def is_push_all_issues(instance):
     if not is_jira_configured_and_enabled(instance):
         return False
 
-    jira_project = get_jira_project(instance)
-    if jira_project:
+    if jira_project := get_jira_project(instance):
+        # Check to see if jira project is disabled to prevent pushing findings
+        if not jira_project.enabled:
+            return None
         return jira_project.push_all_issues
     return None
 
@@ -108,8 +115,12 @@ def is_push_all_issues(instance):
 # returns True/False, error_message, error_code
 def can_be_pushed_to_jira(obj, form=None):
     # logger.debug('can be pushed to JIRA: %s', finding_or_form)
-    if not get_jira_project(obj):
+    jira_project = get_jira_project(obj)
+    if not jira_project:
         return False, f"{to_str_typed(obj)} cannot be pushed to jira as there is no jira project configuration for this product.", "error_no_jira_project"
+
+    if not jira_project.enabled:
+        return False, f"{to_str_typed(obj)} cannot be pushed to jira as the jira project is not enabled.", "error_no_jira_project"
 
     if not hasattr(obj, "has_jira_issue"):
         return False, f"{to_str_typed(obj)} cannot be pushed to jira as there is no jira_issue attribute.", "error_no_jira_issue_attribute"
@@ -1389,6 +1400,13 @@ def add_comment(obj, note, force_push=False, **kwargs):
 
 def add_simple_jira_comment(jira_instance, jira_issue, comment):
     try:
+        jira_project = get_jira_project(jira_issue)
+
+        # Check to see if jira project is disabled to prevent pushing findings
+        if not jira_project.enabled:
+            log_jira_generic_alert("JIRA Project is disabled", "Push to JIRA for Epic skipped because JIRA Project is disabled")
+            return False
+
         jira = get_jira_connection(jira_instance)
 
         jira.add_comment(
@@ -1403,9 +1421,13 @@ def add_simple_jira_comment(jira_instance, jira_issue, comment):
 def finding_link_jira(request, finding, new_jira_issue_key):
     logger.debug("linking existing jira issue %s for finding %i", new_jira_issue_key, finding.id)
 
-    existing_jira_issue = jira_get_issue(get_jira_project(finding), new_jira_issue_key)
-
     jira_project = get_jira_project(finding)
+    existing_jira_issue = jira_get_issue(jira_project, new_jira_issue_key)
+
+    # Check to see if jira project is disabled to prevent pushing findings
+    if not jira_project.enabled:
+        add_error_message_to_response("Push to JIRA for finding skipped because JIRA Project is disabled")
+        return False
 
     if not existing_jira_issue:
         raise ValueError("JIRA issue not found or cannot be retrieved: " + new_jira_issue_key)
@@ -1433,9 +1455,13 @@ def finding_link_jira(request, finding, new_jira_issue_key):
 def finding_group_link_jira(request, finding_group, new_jira_issue_key):
     logger.debug("linking existing jira issue %s for finding group %i", new_jira_issue_key, finding_group.id)
 
-    existing_jira_issue = jira_get_issue(get_jira_project(finding_group), new_jira_issue_key)
-
     jira_project = get_jira_project(finding_group)
+    existing_jira_issue = jira_get_issue(jira_project, new_jira_issue_key)
+
+    # Check to see if jira project is disabled to prevent pushing findings
+    if not jira_project.enabled:
+        add_error_message_to_response("Push to JIRA for group skipped because JIRA Project is disabled")
+        return False
 
     if not existing_jira_issue:
         raise ValueError("JIRA issue not found or cannot be retrieved: " + new_jira_issue_key)
