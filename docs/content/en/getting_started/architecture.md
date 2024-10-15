@@ -21,7 +21,7 @@ dynamic content.
 ## Message Broker
 
 The application server sends tasks to a [Message Broker](https://docs.celeryproject.org/en/stable/getting-started/brokers/index.html)
-for asynchronous execution.
+for asynchronous execution. The celery currently only supports to use [Redis](https://redis.io/solutions/messaging/) as a broker. 
 
 ## Celery Worker
 
