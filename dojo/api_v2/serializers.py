@@ -2297,7 +2297,7 @@ class ImportScanSerializer(CommonImportScanSerializer):
         self,
         data: dict,
     ) -> dict:
-        context = self.setup_common_context(dict)
+        context = self.setup_common_context(data)
         # Process the auto create context inputs
         self.process_auto_create_create_context(context)
 
