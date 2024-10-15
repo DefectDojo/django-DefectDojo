@@ -22,7 +22,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_configuration_permission
 
 # Local application/library imports
-from dojo.forms import DeleteJIRAInstanceForm, ExpressJIRAForm, JIRAForm
+from dojo.forms import AdvancedJIRAForm, DeleteJIRAInstanceForm, JIRAForm
 from dojo.models import JIRA_Instance, JIRA_Issue, Notes, System_Settings, User
 from dojo.notifications.helper import create_notification
 from dojo.utils import add_breadcrumb, add_error_message_to_response, get_setting
@@ -285,24 +285,24 @@ def get_custom_field(jira, label):
     return field
 
 
-class ExpressJiraView(View):
+class NewJiraView(View):
     def get_template(self):
-        return "dojo/express_new_jira.html"
-
-    def get_fallback_template(self):
         return "dojo/new_jira.html"
 
+    def get_fallback_template(self):
+        return "dojo/new_jira_advanced.html"
+
     def get_form_class(self):
-        return ExpressJIRAForm
+        return JIRAForm
 
     def get_fallback_form_class(self):
-        return JIRAForm
+        return AdvancedJIRAForm
 
     def get(self, request):
         if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
-        add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
+        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
         return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
@@ -391,18 +391,18 @@ class ExpressJiraView(View):
         return render(request, self.get_template(), {"jform": jform})
 
 
-class NewJiraView(View):
+class AdvancedJiraView(View):
     def get_template(self):
-        return "dojo/new_jira.html"
+        return "dojo/new_jira_advanced.html"
 
     def get_form_class(self):
-        return JIRAForm
+        return AdvancedJIRAForm
 
     def get(self, request):
         if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
-        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
+        add_breadcrumb(title="New Jira Configuration (Advanced)", top_level=False, request=request)
         return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
@@ -442,7 +442,7 @@ class EditJiraView(View):
         return "dojo/edit_jira.html"
 
     def get_form_class(self):
-        return JIRAForm
+        return AdvancedJIRAForm
 
     def get(self, request, jid=None):
         if not user_has_configuration_permission(request.user, "dojo.change_jira_instance"):
