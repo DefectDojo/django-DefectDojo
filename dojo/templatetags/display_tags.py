@@ -780,6 +780,8 @@ def vulnerability_url(vulnerability_id):
 
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
+            if "&&" in settings.VULNERABILITY_URLS[key]:
+                return settings.VULNERABILITY_URLS[key].split("&&")[0] + str(vulnerability_id) + settings.VULNERABILITY_URLS[key].split("&&")[1]
             return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
     return ""
 
