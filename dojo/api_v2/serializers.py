@@ -3,7 +3,6 @@ import logging
 import os
 import re
 from datetime import datetime
-from typing import List
 
 import six
 import tagulous
@@ -551,8 +550,7 @@ class UserSerializer(serializers.ModelSerializer):
         if self.context["request"].method in ["PATCH", "PUT"] and "password" in data:
             msg = "Update of password though API is not allowed"
             raise ValidationError(msg)
-
-        if self.context["request"].method == "POST" and "password" not in data:
+        if self.context["request"].method == "POST" and "password" not in data and settings.REQUIRE_PASSWORD_ON_USER:
             msg = "Passwords must be supplied for new users"
             raise ValidationError(msg)
         return super().validate(data)
@@ -1518,7 +1516,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        def validate_findings_have_same_engagement(finding_objects: List[Finding]):
+        def validate_findings_have_same_engagement(finding_objects: list[Finding]):
             engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
             if engagements > 1:
                 msg = "You are not permitted to add findings from multiple engagements"
@@ -1930,6 +1928,8 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("cve",)
 
     def create(self, validated_data):
+        to_be_tagged, validated_data = self._pop_tags(validated_data)
+
         # Save vulnerability ids and pop them
         if "vulnerability_id_template_set" in validated_data:
             vulnerability_id_set = validated_data.pop(
@@ -1952,6 +1952,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             )
             new_finding_template.save()
 
+        self._save_tags(new_finding_template, to_be_tagged)
         return new_finding_template
 
     def update(self, instance, validated_data):
@@ -2041,7 +2042,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.findings_count
 
     # TODO: maybe extend_schema_field is needed here?
-    def get_findings_list(self, obj) -> List[int]:
+    def get_findings_list(self, obj) -> list[int]:
         return obj.open_findings_list
 
 

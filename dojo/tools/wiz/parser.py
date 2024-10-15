@@ -12,10 +12,12 @@ logger = logging.getLogger(__name__)
 
 
 class WizParserByTitle:
+
     """Parser the CSV where the "Title" field is the match for a finding title."""
 
     def parse_findings(self, test: Test, reader: csv.DictReader) -> list[Finding]:
-        """Parse the CSV with the assumed format of the link below.
+        """
+        Parse the CSV with the assumed format of the link below.
 
         test file: https://github.com/DefectDojo/django-DefectDojo/blob/master/unittests/scans/wiz/multiple_findings.csv
         """
@@ -74,10 +76,12 @@ class WizParserByTitle:
 
 
 class WizParserByDetailedName:
+
     """Parser the CSV where the "DetailedName" and "Name" fields are the match for a finding title."""
 
     def parse_findings(self, test: Test, reader: csv.DictReader) -> list[Finding]:
-        """Parse the CSV with the assumed format of the link below.
+        """
+        Parse the CSV with the assumed format of the link below.
 
         test file: Coming soon!
         """
@@ -151,7 +155,8 @@ class WizParserByDetailedName:
         return return_string
 
     def _parse_tags(self, tags: str) -> list[str]:
-        """parse the Tag string dict, and convert to a list of strings.
+        """
+        parse the Tag string dict, and convert to a list of strings.
 
         The format of the tags is is "{""key"":""value""}" format
         """
@@ -168,7 +173,8 @@ class WizParserByDetailedName:
         return severity
 
     def _convert_status(self, row: dict) -> dict:
-        """Convert the "FindingStatus" column to a dict of Finding statuses.
+        """
+        Convert the "FindingStatus" column to a dict of Finding statuses.
 
         - Open-> Active = True
         - Other statuses that may exist...

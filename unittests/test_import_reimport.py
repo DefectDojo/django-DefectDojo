@@ -1347,11 +1347,11 @@ class ImportReimportMixin:
         self.assertEqual(engagement_findings_count, 4)
 
     def test_import_reimport_generic(self):
-        """This test do a basic import and re-import of a generic JSON report
+        """
+        This test do a basic import and re-import of a generic JSON report
 
         This test is useful because some features are only activated in generic JSON format
         """
-
         import0 = self.import_scan_with_params(self.generic_filename_with_file, scan_type="Generic Findings Import")
 
         test_id = import0["test"]
@@ -1376,12 +1376,12 @@ class ImportReimportMixin:
         self.assert_finding_count_json(1, findings)
 
     def test_import_nuclei_emptyc(self):
-        """This test do a basic import of Nuclei report with no vulnerability
+        """
+        This test do a basic import of Nuclei report with no vulnerability
 
         This test is useful because Nuclei use jsonl for his format so it can generate empty files.
         It tests the condition limit of loading an empty file.
         """
-
         import0 = self.import_scan_with_params(self.nuclei_empty, scan_type="Nuclei Scan")
 
         test_id = import0["test"]
@@ -1456,8 +1456,8 @@ class ImportReimportMixin:
             engagement=test.engagement,
             test_type=test_type,
             scan_type=self.anchore_grype_scan_type,
-            target_start=datetime.datetime.now(datetime.timezone.utc),
-            target_end=datetime.datetime.now(datetime.timezone.utc),
+            target_start=datetime.datetime.now(datetime.UTC),
+            target_end=datetime.datetime.now(datetime.UTC),
         )
         reimport_test.save()
 

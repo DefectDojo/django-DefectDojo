@@ -8,6 +8,7 @@ from dojo.models import Endpoint, Finding
 
 
 class ContrastParser:
+
     """Contrast Scanner CSV Report"""
 
     def get_scan_types(self):

@@ -102,6 +102,24 @@ class MendParser:
                         "Error handling local paths for vulnerability.",
                     )
 
+            locations = []
+            if "locations" in node:
+                try:
+                    locations_node = node.get("locations", [])
+                    for location in locations_node:
+                        path = location.get("path")
+                        if path is not None:
+                            locations.append(path)
+                except Exception:
+                    logger.exception(
+                        "Error handling local paths for vulnerability.",
+                    )
+
+            if locations:
+                filepaths = locations
+            else:
+                filepaths = filepaths
+
             new_finding = Finding(
                 title=title,
                 test=test,
@@ -147,9 +165,7 @@ class MendParser:
                 findings.append(_build_common_output(node))
 
         def create_finding_key(f: Finding) -> str:
-            """
-            Hashes the finding's description and title to retrieve a key for deduplication.
-            """
+            """Hashes the finding's description and title to retrieve a key for deduplication."""
             return hashlib.md5(
                 f.description.encode("utf-8")
                 + f.title.encode("utf-8"),

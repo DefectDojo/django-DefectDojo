@@ -16,9 +16,8 @@ class StackHawkScanMetadata:
 
 
 class StackHawkParser:
-    """
-    DAST findings from StackHawk
-    """
+
+    """DAST findings from StackHawk"""
 
     def get_scan_types(self):
         return ["StackHawk HawkScan"]

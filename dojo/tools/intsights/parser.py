@@ -6,9 +6,8 @@ from dojo.tools.intsights.json_handler import IntSightsJSONParser
 
 
 class IntSightsParser:
-    """
-    IntSights Threat Intelligence Report
-    """
+
+    """IntSights Threat Intelligence Report"""
 
     _LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +27,6 @@ class IntSightsParser:
             alert: The parsed alert dictionary
         Returns: A markdown formatted description
         """
-
         return "\n".join(
             [
                 alert["description"],
@@ -55,7 +53,7 @@ class IntSightsParser:
             raise ValueError(msg)
         for alert in alerts:
             dupe_key = alert["alert_id"]
-            alert = Finding(
+            uniq_alert = Finding(
                 title=alert["title"],
                 test=test,
                 active=False if alert["status"] == "Closed" else True,
@@ -67,7 +65,7 @@ class IntSightsParser:
                 dynamic_finding=True,
                 unique_id_from_tool=alert["alert_id"],
             )
-            duplicates[dupe_key] = alert
+            duplicates[dupe_key] = uniq_alert
             if dupe_key not in duplicates:
                 duplicates[dupe_key] = True
         return list(duplicates.values())

@@ -5,9 +5,9 @@ from dojo.models import Endpoint, Finding
 
 
 class MSDefenderParser:
-    """
-    Import from MSDefender findings
-    """
+
+    """Import from MSDefender findings"""
+
     def __init__(self):
         self.findings = []
 

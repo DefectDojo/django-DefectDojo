@@ -299,6 +299,7 @@ class GlobalRoleViewSet(
 
 # Authorization: object-based
 # @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class EndPointViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -354,7 +355,8 @@ class EndPointViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class EndpointStatusViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -383,7 +385,8 @@ class EndpointStatusViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class EngagementViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -637,7 +640,8 @@ class EngagementViewSet(
         return generate_file_response(file_object)
 
 
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class RiskAcceptanceViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -736,7 +740,8 @@ class CredentialsViewSet(
 
 
 # Authorization: configuration
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class CredentialsMappingViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1473,7 +1478,8 @@ class JiraInstanceViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class JiraIssuesViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1511,6 +1517,7 @@ class JiraProjectViewSet(
         "jira_instance",
         "product",
         "engagement",
+        "enabled",
         "component",
         "project_key",
         "push_all_issues",
@@ -1589,7 +1596,8 @@ class ProductAPIScanConfigurationViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class DojoMetaViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1900,7 +1908,8 @@ class ProductTypeGroupViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class StubFindingsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1938,7 +1947,8 @@ class DevelopmentEnvironmentViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class TestsViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -2145,7 +2155,8 @@ class TestTypesViewSet(
         return Test_Type.objects.all().order_by("id")
 
 
-@extend_schema_view(**schema_with_prefetch())
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class TestImportViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2360,6 +2371,7 @@ class UserProfileView(GenericAPIView):
 
 # Authorization: authenticated users, DjangoModelPermissions
 class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
     """
     Imports a scan report into an engagement or product.
 
@@ -2423,6 +2435,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 class EndpointMetaImporterView(
     mixins.CreateModelMixin, viewsets.GenericViewSet,
 ):
+
     """
     Imports a CSV file into a product to propagate arbitrary meta and tags on endpoints.
 
@@ -2498,6 +2511,7 @@ class ImportLanguagesView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 # Authorization: object-based
 class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
     """
     Reimports a scan report into an existing test.
 
@@ -2898,6 +2912,7 @@ def report_generate(request, obj, options):
 class SystemSettingsViewSet(
     mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet,
 ):
+
     """Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations"""
 
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)

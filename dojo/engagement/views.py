@@ -7,7 +7,6 @@ from datetime import datetime
 from functools import reduce
 from tempfile import NamedTemporaryFile
 from time import strftime
-from typing import List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib import messages
@@ -427,7 +426,7 @@ class ViewEngagement(View):
     def get_filtered_tests(
         self,
         request: HttpRequest,
-        queryset: List[Test],
+        queryset: list[Test],
         engagement: Engagement,
     ):
         filter_string_matching = get_system_setting("filter_string_matching", False)
@@ -693,9 +692,7 @@ def add_tests(request, eid):
 
 class ImportScanResultsView(View):
     def get_template(self) -> str:
-        """
-        Returns the template that will be presented to the user
-        """
+        """Returns the template that will be presented to the user"""
         return "dojo/import_scan_results.html"
 
     def get_development_environment(
@@ -712,12 +709,10 @@ class ImportScanResultsView(View):
     def get_engagement_or_product(
         self,
         user: Dojo_User,
-        engagement_id: Optional[int] = None,
-        product_id: Optional[int] = None,
-    ) -> Tuple[Engagement, Product, Product | Engagement]:
-        """
-        Using the path parameters, either fetch the product or engagement
-        """
+        engagement_id: int | None = None,
+        product_id: int | None = None,
+    ) -> tuple[Engagement, Product, Product | Engagement]:
+        """Using the path parameters, either fetch the product or engagement"""
         engagement = product = engagement_or_product = None
         # Get the product if supplied
         # Get the engagement if supplied
@@ -740,9 +735,7 @@ class ImportScanResultsView(View):
         request: HttpRequest,
         **kwargs: dict,
     ) -> ImportScanForm:
-        """
-        Returns the default import form for importing findings
-        """
+        """Returns the default import form for importing findings"""
         if request.method == "POST":
             return ImportScanForm(request.POST, request.FILES, **kwargs)
         return ImportScanForm(**kwargs)
@@ -775,10 +768,8 @@ class ImportScanResultsView(View):
         self,
         request: HttpRequest,
         engagement_or_product: Engagement | Product,
-    ) -> Tuple[JIRAImportScanForm | None, bool]:
-        """
-        Returns a JiraImportScanForm if jira is enabled
-        """
+    ) -> tuple[JIRAImportScanForm | None, bool]:
+        """Returns a JiraImportScanForm if jira is enabled"""
         jira_form = None
         push_all_jira_issues = False
         # Determine if jira issues should be pushed automatically
@@ -802,7 +793,7 @@ class ImportScanResultsView(View):
         self,
         product: Product,
         engagement: Engagement,
-    ) -> Tuple[Product_Tab, dict]:
+    ) -> tuple[Product_Tab, dict]:
         """
         Determine how the product tab will be rendered, and what tab will be selected
         as currently active
@@ -819,9 +810,9 @@ class ImportScanResultsView(View):
     def handle_request(
         self,
         request: HttpRequest,
-        engagement_id: Optional[int] = None,
-        product_id: Optional[int] = None,
-    ) -> Tuple[HttpRequest, dict]:
+        engagement_id: int | None = None,
+        product_id: int | None = None,
+    ) -> tuple[HttpRequest, dict]:
         """
         Process the common behaviors between request types, and then return
         the request and context dict back to be rendered
@@ -919,18 +910,14 @@ class ImportScanResultsView(View):
         self,
         context: dict,
     ) -> BaseImporter:
-        """
-        Gets the importer to use
-        """
+        """Gets the importer to use"""
         return DefaultImporter(**context)
 
     def import_findings(
         self,
         context: dict,
     ) -> str | None:
-        """
-        Attempt to import with all the supplied information
-        """
+        """Attempt to import with all the supplied information"""
         try:
             importer_client = self.get_importer(context)
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
@@ -952,9 +939,7 @@ class ImportScanResultsView(View):
         form: ImportScanForm,
         context: dict,
     ) -> str | None:
-        """
-        Process the form and manipulate the input in any way that is appropriate
-        """
+        """Process the form and manipulate the input in any way that is appropriate"""
         # Update the running context dict with cleaned form input
         context.update({
             "scan": request.FILES.get("file", None),
@@ -1024,9 +1009,7 @@ class ImportScanResultsView(View):
         form: CredMappingForm,
         context: dict,
     ) -> str | None:
-        """
-        Process the credentials form by creating
-        """
+        """Process the credentials form by creating"""
         if cred_user := form.cleaned_data["cred_user"]:
             # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
             cred_user = Cred_Mapping.objects.filter(
@@ -1046,18 +1029,14 @@ class ImportScanResultsView(View):
         self,
         context: dict,
     ) -> HttpResponseRedirect:
-        """
-        Redirect the user to a place that indicates a successful import
-        """
+        """Redirect the user to a place that indicates a successful import"""
         return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
 
     def failure_redirect(
         self,
         context: dict,
     ) -> HttpResponseRedirect:
-        """
-        Redirect the user to a place that indicates a failed import
-        """
+        """Redirect the user to a place that indicates a failed import"""
         return HttpResponseRedirect(reverse(
             "import_scan_results",
             args=(context.get("engagement", context.get("product")).id, ),
@@ -1066,12 +1045,10 @@ class ImportScanResultsView(View):
     def get(
         self,
         request: HttpRequest,
-        engagement_id: Optional[int] = None,
-        product_id: Optional[int] = None,
+        engagement_id: int | None = None,
+        product_id: int | None = None,
     ) -> HttpResponse:
-        """
-        Process GET requests for the Import View
-        """
+        """Process GET requests for the Import View"""
         # process the request and path parameters
         request, context = self.handle_request(
             request,
@@ -1084,12 +1061,10 @@ class ImportScanResultsView(View):
     def post(
         self,
         request: HttpRequest,
-        engagement_id: Optional[int] = None,
-        product_id: Optional[int] = None,
+        engagement_id: int | None = None,
+        product_id: int | None = None,
     ) -> HttpResponse:
-        """
-        Process POST requests for the Import View
-        """
+        """Process POST requests for the Import View"""
         # process the request and path parameters
         request, context = self.handle_request(
             request,
@@ -1579,8 +1554,7 @@ def get_engagements(request):
     if not url:
         msg = "Please use the export button when exporting engagements"
         raise ValidationError(msg)
-    if url.startswith("url="):
-        url = url[4:]
+    url = url.removeprefix("url=")
 
     path_items = list(filter(None, re.split(r"/|\?", url)))
 

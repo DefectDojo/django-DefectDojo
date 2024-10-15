@@ -1,9 +1,10 @@
 
 import operator
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from enum import Enum
 from functools import partial
-from typing import Any, Callable, NamedTuple, Type, TypeVar, Union
+from typing import Any, NamedTuple, TypeVar
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -34,7 +35,7 @@ from dojo.utils import (
 )
 
 
-def get_metrics_finding_filter_class() -> Type[Union[MetricsFindingFilter, MetricsFindingFilterWithoutObjectLookups]]:
+def get_metrics_finding_filter_class() -> type[MetricsFindingFilter | MetricsFindingFilterWithoutObjectLookups]:
     if get_system_setting("filter_string_matching", False):
         return MetricsFindingFilterWithoutObjectLookups
     return MetricsFindingFilter
@@ -250,35 +251,39 @@ MetricsQuerySet = TypeVar("MetricsQuerySet", QuerySet[Finding], QuerySet[Endpoin
 
 
 class _MetricsPeriodEntry(NamedTuple):
+
     """
     Class for holding information for a metrics period. Allows us to store a kwarg for date manipulation alongside a DB
     method used to aggregate around the same timeframe.
     """
+
     datetime_name: str
-    db_method: Union[TruncWeek, TruncMonth]
+    db_method: TruncWeek | TruncMonth
 
 
 class MetricsPeriod(_MetricsPeriodEntry, Enum):
-    """
-    Enum for the two metrics periods supported: by week and month
-    """
+
+    """Enum for the two metrics periods supported: by week and month"""
+
     WEEK = ("weeks", TruncWeek)
     MONTH = ("months", TruncMonth)
 
 
 class _MetricsTypeEntry(NamedTuple):
+
     """
     Class for holding information for a metrics type. Allows us to store relative queryset lookups for severities
     alongside relative lookups for closed statuses.
     """
+
     severity_lookup: str
     closed_lookup: str
 
 
 class MetricsType(_MetricsTypeEntry, Enum):
-    """
-    Enum for the two metrics types supported: by Findings and by Endpoints (Endpoint_Status)
-    """
+
+    """Enum for the two metrics types supported: by Findings and by Endpoints (Endpoint_Status)"""
+
     FINDING = ("severity", "is_mitigated")
     ENDPOINT = ("finding__severity", "mitigated")
 
@@ -342,7 +347,7 @@ def severity_count(
     queryset: MetricsQuerySet,
     method: str,
     expression: str,
-) -> Union[MetricsQuerySet, dict[str, int]]:
+) -> MetricsQuerySet | dict[str, int]:
     """
     Aggregates counts by severity for the given queryset.
 
@@ -389,7 +394,7 @@ def identify_view(
 
 
 def js_epoch(
-    d: Union[date, datetime],
+    d: date | datetime,
 ) -> int:
     """
     Converts a date/datetime object to a JavaScript epoch time (for use in FE charts)
@@ -482,7 +487,6 @@ def aggregate_counts_by_period(
     :param include_closed: A boolean dictating whether 'closed' finding/status aggregates should be included
     :return: A queryset with aggregate severity counts grouped by period
     """
-
     desired_values = ("grouped_date", "critical", "high", "medium", "low", "info", "total")
 
     severities_by_period = severity_count(

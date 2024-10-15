@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
@@ -25,12 +24,10 @@ class EndpointManager:
     def add_endpoints_to_unsaved_finding(
         self,
         finding: Finding,
-        endpoints: List[Endpoint],
+        endpoints: list[Endpoint],
         **kwargs: dict,
     ) -> None:
-        """
-        Creates Endpoint objects for a single finding and creates the link via the endpoint status
-        """
+        """Creates Endpoint objects for a single finding and creates the link via the endpoint status"""
         logger.debug(f"IMPORT_SCAN: Adding {len(endpoints)} endpoints to finding: {finding}")
         self.clean_unsaved_endpoints(endpoints)
         for endpoint in endpoints:
@@ -63,13 +60,11 @@ class EndpointManager:
     @app.task()
     def mitigate_endpoint_status(
         self,
-        endpoint_status_list: List[Endpoint_Status],
+        endpoint_status_list: list[Endpoint_Status],
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        """
-        Mitigates all endpoint status objects that are supplied
-        """
+        """Mitigates all endpoint status objects that are supplied"""
         now = timezone.now()
         for endpoint_status in endpoint_status_list:
             # Only mitigate endpoints that are actually active
@@ -85,12 +80,10 @@ class EndpointManager:
     @app.task()
     def reactivate_endpoint_status(
         self,
-        endpoint_status_list: List[Endpoint_Status],
+        endpoint_status_list: list[Endpoint_Status],
         **kwargs: dict,
     ) -> None:
-        """
-        Reactivate all endpoint status objects that are supplied
-        """
+        """Reactivate all endpoint status objects that are supplied"""
         for endpoint_status in endpoint_status_list:
             # Only reactivate endpoints that are actually mitigated
             if endpoint_status.mitigated:
@@ -104,9 +97,9 @@ class EndpointManager:
 
     def chunk_endpoints(
         self,
-        endpoint_list: List[Endpoint],
+        endpoint_list: list[Endpoint],
         chunk_size: int = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE,
-    ) -> List[List[Endpoint]]:
+    ) -> list[list[Endpoint]]:
         """
         Split a single large list into a list of lists of size `chunk_size`.
         For Example
@@ -123,7 +116,7 @@ class EndpointManager:
     def chunk_endpoints_and_disperse(
         self,
         finding: Finding,
-        endpoints: List[Endpoint],
+        endpoints: list[Endpoint],
         **kwargs: dict,
     ) -> None:
         """
@@ -147,7 +140,7 @@ class EndpointManager:
 
     def clean_unsaved_endpoints(
         self,
-        endpoints: List[Endpoint],
+        endpoints: list[Endpoint],
     ) -> None:
         """
         Clean endpoints that are supplied. For any endpoints that fail this validation
@@ -162,7 +155,7 @@ class EndpointManager:
 
     def chunk_endpoints_and_reactivate(
         self,
-        endpoint_status_list: List[Endpoint_Status],
+        endpoint_status_list: list[Endpoint_Status],
         **kwargs: dict,
     ) -> None:
         """
@@ -186,7 +179,7 @@ class EndpointManager:
 
     def chunk_endpoints_and_mitigate(
         self,
-        endpoint_status_list: List[Endpoint_Status],
+        endpoint_status_list: list[Endpoint_Status],
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
@@ -216,9 +209,7 @@ class EndpointManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        """
-        Update the list of endpoints from the new finding with the list that is in the old finding
-        """
+        """Update the list of endpoints from the new finding with the list that is in the old finding"""
         # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
         # So we only need to mitigate endpoints that are no longer present
         # using `.all()` will mark as mitigated also `endpoint_status` with flags `false_positive`, `out_of_scope` and `risk_accepted`. This is a known issue. This is not a bug. This is a future.

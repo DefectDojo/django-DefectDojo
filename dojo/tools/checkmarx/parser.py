@@ -129,7 +129,8 @@ class CheckmarxParser:
         result,
         find_date,
     ):
-        """Process one result = one pathId for default "Checkmarx Scan"
+        """
+        Process one result = one pathId for default "Checkmarx Scan"
         Create the finding and add it into the dupes list
         If a vuln with the same file_path was found before, updates the description
         """
@@ -226,7 +227,8 @@ class CheckmarxParser:
     def _process_result_detailed(
         self, test, dupes, findingdetail, query, result, find_date,
     ):
-        """Process one result = one pathId for scanner "Checkmarx Scan detailed"
+        """
+        Process one result = one pathId for scanner "Checkmarx Scan detailed"
         Create the finding and add it into the dupes list
         """
         name, cwe, categories, queryId = self.getQueryElements(query)

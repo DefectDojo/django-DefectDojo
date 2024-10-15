@@ -4,8 +4,8 @@ import re
 import zipfile
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .model import BlackduckFinding
 
@@ -68,9 +68,7 @@ class BlackduckImporter(Importer):
     def _process_project_findings(
         self, project_ids, security_issues, files=None,
     ):
-        """
-        Process findings per projects and return a BlackduckFinding object per the model
-        """
+        """Process findings per projects and return a BlackduckFinding object per the model"""
         for project_id in project_ids:
             locations = set()
             if files is not None:

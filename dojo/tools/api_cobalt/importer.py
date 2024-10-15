@@ -10,9 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class CobaltApiImporter:
-    """
-    Import from Cobalt.io API
-    """
+
+    """Import from Cobalt.io API"""
 
     def get_findings(self, test):
         client, config = self.prepare_client(test)

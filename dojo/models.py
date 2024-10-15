@@ -6,7 +6,6 @@ import os
 import re
 import warnings
 from datetime import datetime
-from typing import Dict, Optional, Set
 from uuid import uuid4
 
 import hyperlink
@@ -125,6 +124,7 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
 
 @deconstructible
 class UniqueUploadNameProvider:
+
     """
     A callable to be passed as upload_to parameter to FileField.
 
@@ -215,9 +215,7 @@ class Dojo_User(User):
 
     @staticmethod
     def generate_full_name(user):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
+        """Returns the first_name plus the last_name, with a space in between."""
         full_name = f"{user.first_name} {user.last_name} ({user.username})"
         return full_name.strip()
 
@@ -736,14 +734,17 @@ class FileUpload(models.Model):
 
 
 class Product_Type(models.Model):
-    """Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
-`
+
+    """
+    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
+    `
        Examples:
          * IAM Team
          * Internal / 3rd Party
          * Main company / Acquisition
          * San Francisco / New York offices
     """
+
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
@@ -2175,7 +2176,7 @@ class Test(models.Model):
 
     @property
     def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        """Queries the database, no prefetching, so could be slow for lists of model instances"""
         return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
 
     def inherit_tags(self, potentially_existing_tags):
@@ -2221,7 +2222,7 @@ class Test_Import(TimeStampedModel):
 
     @property
     def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        """Queries the database, no prefetching, so could be slow for lists of model instances"""
         stats = {}
         for action in IMPORT_ACTIONS:
             stats[action[1].lower()] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=action[0]), _get_annotations_for_statistics)
@@ -3407,7 +3408,7 @@ class Finding_Group(TimeStampedModel):
 
     @cached_property
     def components(self):
-        components: Dict[str, Set[Optional[str]]] = {}
+        components: dict[str, set[str | None]] = {}
         for finding in self.findings.all():
             if finding.component_name is not None:
                 components.setdefault(finding.component_name, set()).add(finding.component_version)
@@ -3701,9 +3702,13 @@ class Risk_Acceptance(models.Model):
 
 
 class FileAccessToken(models.Model):
-    """This will allow reports to request the images without exposing the
+
+    """
+    This will allow reports to request the images without exposing the
     media root to the world without
-    authentication"""
+    authentication
+    """
+
     user = models.ForeignKey(Dojo_User, null=False, blank=False, on_delete=models.CASCADE)
     file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
@@ -3906,16 +3911,24 @@ class JIRA_Project(models.Model):
                                                              verbose_name=_("Add vulnerability Id as a JIRA label"),
                                                              blank=False)
     push_all_issues = models.BooleanField(default=False, blank=True,
-         help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
+         help_text=_("Automatically create JIRA tickets for verified findings. Once linked, the JIRA ticket will continue to sync, regardless of status in DefectDojo."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
+    enabled = models.BooleanField(
+        verbose_name=_("Enable Connection With Jira Project"),
+        help_text=_("When disabled, Findings will no longer be pushed to Jira, even if they have already been pushed previously."),
+        default=True,
+        blank=True)
 
     def __str__(self):
-        return ("%s: " + self.project_key + "(%s)") % (str(self.id), str(self.jira_instance.url) if self.jira_instance else "None")
+        value = f"{self.id}: {self.project_key} ({self.jira_instance.url if self.jira_instance else 'None'})"
+        if not self.enabled:
+            value += " - Not Connected"
+        return value
 
     def clean(self):
         if not self.jira_instance:
@@ -4402,9 +4415,8 @@ class Benchmark_Product_Summary(models.Model):
 # ==============================
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Question(PolymorphicModel, TimeStampedModel):
-        """
-            Represents a question.
-        """
+
+        """Represents a question."""
 
         class Meta:
             ordering = ["order"]
@@ -4425,23 +4437,20 @@ with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning
 
 
 class TextQuestion(Question):
-    """
-    Question with a text answer
-    """
+
+    """Question with a text answer"""
+
     objects = PolymorphicManager()
 
     def get_form(self):
-        """
-        Returns the form for this model
-        """
+        """Returns the form for this model"""
         from .forms import TextQuestionForm
         return TextQuestionForm
 
 
 class Choice(TimeStampedModel):
-    """
-    Model to store the choices for multi choice questions
-    """
+
+    """Model to store the choices for multi choice questions"""
 
     order = models.PositiveIntegerField(default=1)
 
@@ -4455,6 +4464,7 @@ class Choice(TimeStampedModel):
 
 
 class ChoiceQuestion(Question):
+
     """
     Question with answers that are chosen from a list of choices defined
     by the user.
@@ -4466,10 +4476,7 @@ class ChoiceQuestion(Question):
     objects = PolymorphicManager()
 
     def get_form(self):
-        """
-        Returns the form for this model
-        """
-
+        """Returns the form for this model"""
         from .forms import ChoiceQuestionForm
         return ChoiceQuestionForm
 
@@ -4534,8 +4541,9 @@ class General_Survey(models.Model):
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Answer(PolymorphicModel, TimeStampedModel):
-        """ Base Answer model
-        """
+
+        """Base Answer model"""
+
         question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
         answered_survey = models.ForeignKey(Answered_Survey,
