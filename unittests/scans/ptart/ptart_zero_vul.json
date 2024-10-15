@@ -1,0 +1,26 @@
+{
+  "name": "Test",
+  "executive_summary": "Mistakes were made",
+  "engagement_overview": "Things were done",
+  "conclusion": "Things should be put right",
+  "scope": "test.example.com",
+  "client": "Test Client",
+  "start_date": "2024-08-11",
+  "end_date": "2024-08-16",
+  "cvss_type": 3,
+  "tools": [
+    "Burp Suite"
+  ],
+  "methodologies": [
+    "OWASP Testing Guide V4.2"
+  ],
+  "pentesters": [
+    {
+      "username": "hydragyrum",
+      "first_name": "",
+      "last_name": ""
+    }
+  ],
+  "assessments": [],
+  "retests": []
+}
