@@ -59,7 +59,7 @@ class MobSFParser:
             field_value = str(data.get(field, ""))
 
             if field_value:
-                test_description = "%s  **%s:** \n" % (test_description, field, field_value)
+                test_description = "%s  **%s:** %s\n" % (test_description, field, field_value)
 
         test.description = test_description
 
