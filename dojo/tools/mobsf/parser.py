@@ -52,14 +52,14 @@ class MobSFParser:
             field_value = str(data.get("appsec", {}).get(field, ""))
 
             if field_value:
-                test_description = "{0}  **{1}:** {2}\n".format(test_description, field, field_value)
+                test_description = f"{test_description}  **{field}:** {field_value}\n"
 
         for field in main_fields_for_test_desc:
 
             field_value = str(data.get(field, ""))
 
             if field_value:
-                test_description = "{0}  **{1}:** {2}\n".format(test_description, field, field_value)
+                test_description = f"{test_description}  **{field}:** {field_value}\n"
 
         test.description = test_description
 
@@ -81,13 +81,13 @@ class MobSFParser:
                     title = str(mobsf_finding.get("title", ""))
                     description = str(mobsf_finding.get("description", ""))
 
-                    unique_key = "{0} - {1} - {2} - {3}".format(finding_severity, section, title, description)
+                    unique_key = f"{finding_severity}-{section}-{title}-{description}"
 
                     finding = Finding(
                             title=title,
                             cwe=919,  # Weaknesses in Mobile Applications
                             test=test,
-                            description="**Category:** {0}\n\n{1}".format(section, description),
+                            description=f"**Category:** {section}\n\n{description}",
                             severity=finding_severities[finding_severity],
                             references=None,
                             date=find_date,
