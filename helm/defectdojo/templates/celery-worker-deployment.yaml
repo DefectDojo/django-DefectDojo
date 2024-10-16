@@ -64,8 +64,9 @@ spec:
           path: {{ .hostPath }}
           {{- end }}
       {{- end }}
-      {{- if .Values.dbMigrationChecker.enabled }}
+      {{- if or .Values.dbMigrationChecker.enabled .Values.cloudsql.enabled }}
       initContainers:
+      {{- end }}
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
@@ -86,6 +87,7 @@ spec:
         - "-ip_address_types=PRIVATE"
         {{- end }}
       {{- end }}
+      {{- if .Values.dbMigrationChecker.enabled }}
       {{$data := dict "fullName" $fullName }}
       {{- $newContext := merge . (dict "fullName" $fullName) }}
       {{- include "dbMigrationChecker" $newContext | nindent 6 }}
