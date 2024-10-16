@@ -115,6 +115,7 @@ class SonarQubeRESTAPIJSON:
                         component_version=component_version,
                         cwe=cwe,
                         cvssv3_score=cvss,
+                        file_path=component,
                         tags=["vulnerability"],
                     )
                     vulnids = []
@@ -183,6 +184,7 @@ class SonarQubeRESTAPIJSON:
                         severity=self.severitytranslator(issue.get("severity")),
                         static_finding=True,
                         dynamic_finding=False,
+                        file_path=component,
                         tags=["code_smell"],
                     )
                 items.append(item)
@@ -225,6 +227,7 @@ class SonarQubeRESTAPIJSON:
                     severity=self.severitytranslator(hotspot.get("vulnerabilityProbability")),
                     static_finding=True,
                     dynamic_finding=False,
+                    file_path=component,
                     tags=["hotspot"],
                 )
                 items.append(item)

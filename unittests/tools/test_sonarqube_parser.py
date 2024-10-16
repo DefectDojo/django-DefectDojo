@@ -642,6 +642,7 @@ class TestSonarQubeParser(DojoTestCase):
         item = findings[0]
         self.assertEqual(str, type(item.description))
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("testapplication", item.file_path)
         self.assertEqual("Medium", item.severity)
         item = findings[3]
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwo1123efijo", item.title)
