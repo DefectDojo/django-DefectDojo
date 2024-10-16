@@ -91,7 +91,7 @@ spec:
         {{- end }}
       {{- end }}
       - name: celery
-        image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
+        image: "{{ template "celery.repository" . }}:{{ .Values.django-tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
         securityContext:
