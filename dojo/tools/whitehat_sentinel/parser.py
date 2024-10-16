@@ -57,6 +57,7 @@ class WhiteHatSentinelParser:
     ) -> str | None:
         """
         Converts a WhiteHat Sentinel numerical severity to a DefectDojo severity.
+
         Args:
             whitehat_severity_id: The WhiteHat Severity ID (called risk_id in the API)
         Returns: A DefectDojo severity if a mapping can be found; otherwise a null value is returned
@@ -79,6 +80,7 @@ class WhiteHatSentinelParser:
     def _parse_cwe_from_tags(self, whitehat_sentinel_tags) -> str:
         """
         Some Vulns include the CWE ID as a tag. This is used to pull it out of that list and return only the ID.
+
         Args:
             whitehat_sentinel_tags: The Tags list from the WhiteHat vuln
         Returns: The first CWE ID in the list, if it exists
@@ -91,6 +93,7 @@ class WhiteHatSentinelParser:
     def _parse_description(self, whitehat_sentinel_description: dict):
         """
         Manually converts the HTML description to a DefectDojo-friendly format.
+
         Args:
             whitehat_sentinel_description: The description section of the WhiteHat Sentinel vulnerability dict
         Returns: A dict with description and reference link
@@ -144,6 +147,7 @@ class WhiteHatSentinelParser:
     def __get_href_url(self, text_to_search):
         """
         Searches for the anchor targets within a string that includes an anchor tag.
+
         Args:
             text_to_search: The text string to search for an anchor tag
         Returns:
@@ -157,6 +161,7 @@ class WhiteHatSentinelParser:
     def __remove_paragraph_tags(self, html_string):
         """
         Manually remove <p> tags from HTML strings to avoid importing yet-another-library.
+
         Args:
             html_string: The HMTL string to remove <p> </p> tags from
         Returns: The original string stipped of paragraph tags
