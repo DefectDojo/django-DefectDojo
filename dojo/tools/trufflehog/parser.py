@@ -112,7 +112,7 @@ class TruffleHogParser:
             source = {}
             source_data = {}
             if metadata:
-                source = list(metadata.keys())[0]
+                source = next(iter(metadata.keys()))
                 source_data = metadata.get(source)
 
             file = source_data.get("file", "")

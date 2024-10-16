@@ -58,7 +58,7 @@ class BurpEnterpriseParser:
                         if elem.text is not None:
                             s += elem.text + "\n"
                     elif elem.text.isspace():
-                        s += list(elem.itertext())[0]
+                        s += next(iter(elem.itertext()))
                     elif elem.tag == "div" or elem.tag == "span":
                         s += elem.text.strip() + "\n"
                     else:
