@@ -2636,7 +2636,7 @@ class Finding(models.Model):
                 # use the environmental score, which is the most refined score
                 self.cvssv3_score = cvss_object.scores()[2]
             except Exception as ex:
-                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
+                logger.exception("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
 
         self.set_hash_code(dedupe_option)
 

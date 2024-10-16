@@ -95,7 +95,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
                     logger.debug("Skipping group " + group_name + " due to AZUREAD_TENANT_OAUTH2_GROUPS_FILTER " + settings.AZUREAD_TENANT_OAUTH2_GROUPS_FILTER)
                     continue
             except Exception as e:
-                logger.error(f"Could not call microsoft graph API or save groups to member: {e}")
+                logger.exception(f"Could not call microsoft graph API or save groups to member: {e}")
         if len(group_names) > 0:
             assign_user_to_groups(user, group_names, Dojo_Group.AZURE)
         if settings.AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS:
