@@ -948,6 +948,7 @@ class ExcelExportView(View):
                     except Exception as exc:
                         logger.error("Error in attribute: " + str(exc))
                         cell = worksheet.cell(row=row_num, column=col_num, value=key)
+                        col_num += 1
                         continue
                 cell = worksheet.cell(row=row_num, column=col_num, value="found_by")
                 cell.font = font_bold
@@ -999,6 +1000,7 @@ class ExcelExportView(View):
                     except Exception as exc:
                         logger.error("Error in attribute: " + str(exc))
                         worksheet.cell(row=row_num, column=col_num, value="Value not supported")
+                        col_num += 1
                         continue
                 worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
                 col_num += 1
