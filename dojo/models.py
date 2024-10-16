@@ -6,7 +6,6 @@ import os
 import re
 import warnings
 from datetime import datetime
-from typing import Dict, Optional, Set
 from uuid import uuid4
 
 import hyperlink
@@ -3409,7 +3408,7 @@ class Finding_Group(TimeStampedModel):
 
     @cached_property
     def components(self):
-        components: Dict[str, Set[Optional[str]]] = {}
+        components: dict[str, set[str | None]] = {}
         for finding in self.findings.all():
             if finding.component_name is not None:
                 components.setdefault(finding.component_name, set()).add(finding.component_version)
@@ -3919,9 +3918,17 @@ class JIRA_Project(models.Model):
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
+    enabled = models.BooleanField(
+        verbose_name=_("Enable Connection With Jira Project"),
+        help_text=_("When disabled, Findings will no longer be pushed to Jira, even if they have already been pushed previously."),
+        default=True,
+        blank=True)
 
     def __str__(self):
-        return ("%s: " + self.project_key + "(%s)") % (str(self.id), str(self.jira_instance.url) if self.jira_instance else "None")
+        value = f"{self.id}: {self.project_key} ({self.jira_instance.url if self.jira_instance else 'None'})"
+        if not self.enabled:
+            value += " - Not Connected"
+        return value
 
     def clean(self):
         if not self.jira_instance:
