@@ -20,7 +20,7 @@ steps:
       docker volume create defectdojo_data_unit_tests
 
       echo "docker run"
-      docker run -d -p 5432:5432/tcp -e POSTGRES_DB=test_defectdojo -e POSTGRES_USER=defectdojo -e POSTGRES_PASSWORD=defectdojo -v defectdojo_data_unit_tests:/var/lib/postgresql/data $(image)
+      docker run -d -p 5432:5432/tcp -e POSTGRES_DB=test_defectdojo -e POSTGRES_USER=$(user_pg) -e POSTGRES_PASSWORD=$(password_pg) -v defectdojo_data_unit_tests:/var/lib/postgresql/data $(image)
       docker ps
     displayName: "Start DB"
 
