@@ -6,9 +6,8 @@ from dojo.models import Finding
 
 
 class PopeyeParser:
-    """
-    Popeye is a kubernetes cluster resource analyzer.
-    """
+
+    """Popeye is a kubernetes cluster resource analyzer."""
 
     def get_scan_types(self):
         return ["Popeye Scan"]
@@ -78,15 +77,13 @@ class PopeyeParser:
     def get_popeye_level_string(self, level):
         if level == 1:
             return "Info"
-        elif level == 2:
+        if level == 2:
             return "Warning"
-        else:
-            return "Error"
+        return "Error"
 
     def get_defect_dojo_severity(self, level):
         if level == 1:
             return "Info"
-        elif level == 2:
+        if level == 2:
             return "Low"
-        else:
-            return "High"
+        return "High"

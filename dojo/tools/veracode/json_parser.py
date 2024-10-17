@@ -9,7 +9,9 @@ from dojo.models import Endpoint, Finding
 
 
 class VeracodeJSONParser:
-    """This parser is written for Veracode REST Findings.
+
+    """
+    This parser is written for Veracode REST Findings.
 
     API endpoints to use: https://docs.veracode.com/r/c_findings_v2_examples
 
@@ -128,14 +130,14 @@ class VeracodeJSONParser:
                     finding.cvssv3 = CVSS3(str(uncleaned_cvss)).clean_vector(output_prefix=True)
                 elif not uncleaned_cvss.startswith("CVSS"):
                     finding.cvssv3 = CVSS3(f"CVSS:3.1/{str(uncleaned_cvss)}").clean_vector(output_prefix=True)
-            elif isinstance(uncleaned_cvss, (float, int)):
+            elif isinstance(uncleaned_cvss, float | int):
                 finding.cvssv3_score = float(uncleaned_cvss)
         # Fill in extra info based on the scan type
         if scan_type == "STATIC":
             return self.add_static_details(finding, finding_details, backup_title=cwe_title)
-        elif scan_type == "DYNAMIC":
+        if scan_type == "DYNAMIC":
             return self.add_dynamic_details(finding, finding_details, backup_title=cwe_title)
-        elif scan_type == "SCA":
+        if scan_type == "SCA":
             return self.add_sca_details(finding, finding_details, backup_title=cwe_title)
 
         return None

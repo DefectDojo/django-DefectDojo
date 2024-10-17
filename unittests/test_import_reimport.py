@@ -1347,11 +1347,11 @@ class ImportReimportMixin:
         self.assertEqual(engagement_findings_count, 4)
 
     def test_import_reimport_generic(self):
-        """This test do a basic import and re-import of a generic JSON report
+        """
+        This test do a basic import and re-import of a generic JSON report
 
         This test is useful because some features are only activated in generic JSON format
         """
-
         import0 = self.import_scan_with_params(self.generic_filename_with_file, scan_type="Generic Findings Import")
 
         test_id = import0["test"]
@@ -1376,12 +1376,12 @@ class ImportReimportMixin:
         self.assert_finding_count_json(1, findings)
 
     def test_import_nuclei_emptyc(self):
-        """This test do a basic import of Nuclei report with no vulnerability
+        """
+        This test do a basic import of Nuclei report with no vulnerability
 
         This test is useful because Nuclei use jsonl for his format so it can generate empty files.
         It tests the condition limit of loading an empty file.
         """
-
         import0 = self.import_scan_with_params(self.nuclei_empty, scan_type="Nuclei Scan")
 
         test_id = import0["test"]
@@ -1456,8 +1456,8 @@ class ImportReimportMixin:
             engagement=test.engagement,
             test_type=test_type,
             scan_type=self.anchore_grype_scan_type,
-            target_start=datetime.datetime.now(datetime.timezone.utc),
-            target_end=datetime.datetime.now(datetime.timezone.utc),
+            target_start=datetime.datetime.now(datetime.UTC),
+            target_end=datetime.datetime.now(datetime.UTC),
         )
         reimport_test.save()
 
@@ -1477,6 +1477,24 @@ class ImportReimportMixin:
         # reimport the first report again
         self.reimport_scan_with_params(test_id, self.generic_import_1, scan_type=self.scan_type_generic)
         # Passing this test means an exception does not occur
+
+    def test_dynamic_parsing_field_set_to_true(self):
+        # Test that a generic finding import creates a new test type
+        # with the dynamically_generated field set to True
+        import0 = self.import_scan_with_params(self.generic_import_1, scan_type=self.scan_type_generic)
+        test_id = import0["test"]
+        # Fetch the test from the DB to access the test type
+        test = Test.objects.get(id=test_id)
+        self.assertTrue(test.test_type.dynamically_generated)
+
+    def test_dynamic_parsing_field_set_to_false(self):
+        # Test that a ZAP import does not create a new test type
+        # and that the dynamically_generated field set to False
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0["test"]
+        # Fetch the test from the DB to access the test type
+        test = Test.objects.get(id=test_id)
+        self.assertFalse(test.test_type.dynamically_generated)
 
 
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
@@ -1847,9 +1865,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
             if service is not None:
                 payload["service"] = service
 
-            result = self.import_scan_ui(engagement, payload)
-
-            return result
+            return self.import_scan_ui(engagement, payload)
 
     def reimport_scan_with_params_ui(self, test_id, filename, scan_type="ZAP Scan", minimum_severity="Low", active=True, verified=False, push_to_jira=None, tags=None, close_old_findings=True, scan_date=None):
         # Mimic old functionality for active/verified to avoid breaking tests
@@ -1880,8 +1896,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
             if scan_date is not None:
                 payload["scan_date"] = scan_date
 
-            result = self.reimport_scan_ui(test_id, payload)
-            return result
+            return self.reimport_scan_ui(test_id, payload)
 
 # Observations:
 # - When reopening a mitigated finding, almost no fields are updated such as title, description, severity, impact, references, ....

@@ -3,7 +3,6 @@ import logging
 import os
 import re
 from datetime import datetime
-from typing import List
 
 import six
 import tagulous
@@ -77,6 +76,7 @@ from dojo.models import (
     Note_Type,
     NoteHistory,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -226,9 +226,7 @@ class TagListSerializerField(serializers.ListField):
             substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
             data_safe.extend(substrings)
 
-        internal_value = tagulous.utils.render_tags(data_safe)
-
-        return internal_value
+        return tagulous.utils.render_tags(data_safe)
 
     def to_representation(self, value):
         if not isinstance(value, list):
@@ -304,8 +302,7 @@ class RequestResponseDict(list):
             return json.dumps(
                 self, sort_keys=True, indent=4, separators=(",", ": "),
             )
-        else:
-            return json.dumps(self)
+        return json.dumps(self)
 
 
 class RequestResponseSerializerField(serializers.ListSerializer):
@@ -429,6 +426,7 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.DateTimeField(read_only=True)
     last_login = serializers.DateTimeField(read_only=True, allow_null=True)
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(
         write_only=True,
         style={"input_type": "password"},
@@ -549,14 +547,13 @@ class UserSerializer(serializers.ModelSerializer):
             msg = "Only superusers are allowed to add or edit superusers."
             raise ValidationError(msg)
 
-        if (
-            self.context["request"].method in ["PATCH", "PUT"]
-            and "password" in data
-        ):
+        if self.context["request"].method in ["PATCH", "PUT"] and "password" in data:
             msg = "Update of password though API is not allowed"
             raise ValidationError(msg)
-        else:
-            return super().validate(data)
+        if self.context["request"].method == "POST" and "password" not in data and settings.REQUIRE_PASSWORD_ON_USER:
+            msg = "Passwords must be supplied for new users"
+            raise ValidationError(msg)
+        return super().validate(data)
 
 
 class UserContactInfoSerializer(serializers.ModelSerializer):
@@ -821,6 +818,7 @@ class FileSerializer(serializers.ModelSerializer):
                     )
                 raise ValidationError(msg)
             return data
+        return None
 
 
 class RawFileSerializer(serializers.ModelSerializer):
@@ -1073,8 +1071,7 @@ class EngagementToFilesSerializer(serializers.Serializer):
                     "title": file.title,
                 },
             )
-        new_data = {"engagement_id": engagement.id, "files": new_files}
-        return new_data
+        return {"engagement_id": engagement.id, "files": new_files}
 
 
 class EngagementCheckListSerializer(serializers.ModelSerializer):
@@ -1146,8 +1143,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
             if "finding, endpoint must make a unique set" in str(exc):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg) from exc
-            else:
-                raise
+            raise
 
     def create(self, validated_data):
         endpoint = validated_data.get("endpoint")
@@ -1160,8 +1156,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
             if "finding, endpoint must make a unique set" in str(ie):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg)
-            else:
-                raise
+            raise
         status.mitigated = validated_data.get("mitigated", False)
         status.false_positive = validated_data.get("false_positive", False)
         status.out_of_scope = validated_data.get("out_of_scope", False)
@@ -1177,8 +1172,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
             if "finding, endpoint must make a unique set" in str(ie):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg)
-            else:
-                raise
+            raise
 
 
 class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1411,7 +1405,7 @@ class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test_Type
-        fields = "__all__"
+        exclude = ("dynamically_generated",)
 
 
 class TestToNotesSerializer(serializers.Serializer):
@@ -1439,8 +1433,7 @@ class TestToFilesSerializer(serializers.Serializer):
                     "title": file.title,
                 },
             )
-        new_data = {"test_id": test.id, "files": new_files}
-        return new_data
+        return {"test_id": test.id, "files": new_files}
 
 
 class TestImportFindingActionSerializer(serializers.ModelSerializer):
@@ -1467,7 +1460,8 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         instance = super().create(validated_data)
-        add_findings_to_risk_acceptance(instance, instance.accepted_findings.all())
+        user = getattr(self.context.get("request", None), "user", None)
+        add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
         return instance
 
     def update(self, instance, validated_data):
@@ -1481,11 +1475,12 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
         # Make the update in the database
         instance = super().update(instance, validated_data)
+        user = getattr(self.context.get("request", None), "user", None)
         # Add the new findings
-        add_findings_to_risk_acceptance(instance, findings_to_add)
+        add_findings_to_risk_acceptance(user, instance, findings_to_add)
         # Remove the ones that were not present in the payload
         for finding in findings_to_remove:
-            remove_finding_from_risk_acceptance(instance, finding)
+            remove_finding_from_risk_acceptance(user, instance, finding)
         return instance
 
     @extend_schema_field(serializers.CharField())
@@ -1521,7 +1516,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        def validate_findings_have_same_engagement(finding_objects: List[Finding]):
+        def validate_findings_have_same_engagement(finding_objects: list[Finding]):
             engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
             if engagements > 1:
                 msg = "You are not permitted to add findings from multiple engagements"
@@ -1696,8 +1691,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             return FindingRelatedFieldsSerializer(
                 required=False,
             ).to_representation(obj)
-        else:
-            return None
+        return None
 
     def get_display_status(self, obj) -> str:
         return obj.status()
@@ -1741,8 +1735,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         # not sure why we are returning a tag_object, but don't want to change
         # too much now as we're just fixing a bug
-        tag_object = self._save_tags(instance, to_be_tagged)
-        return tag_object
+        return self._save_tags(instance, to_be_tagged)
 
     def validate(self, data):
         if self.context["request"].method == "PATCH":
@@ -1761,10 +1754,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             is_risk_accepted = data.get("risk_accepted", False)
 
         if (is_active or is_verified) and is_duplicate:
-            msg = "Duplicate findings cannot be" " verified or active"
+            msg = "Duplicate findings cannot be verified or active"
             raise serializers.ValidationError(msg)
         if is_false_p and is_verified:
-            msg = "False positive findings cannot " "be verified."
+            msg = "False positive findings cannot be verified."
             raise serializers.ValidationError(msg)
 
         if is_risk_accepted and not self.instance.risk_accepted:
@@ -1878,8 +1871,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         # not sure why we are returning a tag_object, but don't want to change
         # too much now as we're just fixing a bug
-        tag_object = self._save_tags(new_finding, to_be_tagged)
-        return tag_object
+        return self._save_tags(new_finding, to_be_tagged)
 
     def validate(self, data):
         if "reporter" not in data:
@@ -1936,6 +1928,8 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("cve",)
 
     def create(self, validated_data):
+        to_be_tagged, validated_data = self._pop_tags(validated_data)
+
         # Save vulnerability ids and pop them
         if "vulnerability_id_template_set" in validated_data:
             vulnerability_id_set = validated_data.pop(
@@ -1958,6 +1952,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             )
             new_finding_template.save()
 
+        self._save_tags(new_finding_template, to_be_tagged)
         return new_finding_template
 
     def update(self, instance, validated_data):
@@ -2047,7 +2042,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.findings_count
 
     # TODO: maybe extend_schema_field is needed here?
-    def get_findings_list(self, obj) -> List[int]:
+    def get_findings_list(self, obj) -> list[int]:
         return obj.open_findings_list
 
 
@@ -2795,8 +2790,7 @@ class FindingToFilesSerializer(serializers.Serializer):
                     "title": file.title,
                 },
             )
-        new_data = {"finding_id": finding.id, "files": new_files}
-        return new_data
+        return {"finding_id": finding.id, "files": new_files}
 
 
 class FindingCloseSerializer(serializers.ModelSerializer):
@@ -3053,10 +3047,9 @@ class QuestionnaireQuestionSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         if isinstance(instance, TextQuestion):
             return TextQuestionSerializer(instance=instance).data
-        elif isinstance(instance, ChoiceQuestion):
+        if isinstance(instance, ChoiceQuestion):
             return ChoiceQuestionSerializer(instance=instance).data
-        else:
-            return QuestionSerializer(instance=instance).data
+        return QuestionSerializer(instance=instance).data
 
     class Meta:
         model = Question
@@ -3093,10 +3086,9 @@ class QuestionnaireAnswerSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         if isinstance(instance, TextAnswer):
             return TextAnswerSerializer(instance=instance).data
-        elif isinstance(instance, ChoiceAnswer):
+        if isinstance(instance, ChoiceAnswer):
             return ChoiceAnswerSerializer(instance=instance).data
-        else:
-            return AnswerSerializer(instance=instance).data
+        return AnswerSerializer(instance=instance).data
 
     class Meta:
         model = Answer
@@ -3170,5 +3162,10 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             if 'duplicate key value violates unique constraint "dojo_announcement_pkey"' in str(e):
                 msg = "No more than one Announcement is allowed"
                 raise serializers.ValidationError(msg)
-            else:
-                raise
+            raise
+
+
+class NotificationWebhooksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification_Webhooks
+        fields = "__all__"

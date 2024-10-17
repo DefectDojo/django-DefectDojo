@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class BlackduckCRImporter:
+
     """
     Importer for blackduck. V3 is different in that it creates a Finding in defect dojo
     for each vulnerable component version used in a project, for each license that is
@@ -29,9 +30,8 @@ class BlackduckCRImporter:
             report = Path(report.temporary_file_path())
         if zipfile.is_zipfile(str(report)):
             return self._process_zipfile(report)
-        else:
-            msg = f"File {report} not a zip!"
-            raise ValueError(msg)
+        msg = f"File {report} not a zip!"
+        raise ValueError(msg)
 
     def _process_zipfile(self, report: Path) -> (dict, dict, dict):
         """

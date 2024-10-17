@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class TerrascanParser:
-    """
-    A class that can be used to parse the terrascan JSON report file
-    """
+
+    """A class that can be used to parse the terrascan JSON report file"""
 
     # table to match tfsec severity to DefectDojo severity
     SEVERITY = {

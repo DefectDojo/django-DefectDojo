@@ -1,6 +1,5 @@
 import base64
 import logging
-from typing import List, Tuple
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -36,12 +35,13 @@ logger = logging.getLogger(__name__)
 
 
 class Parser:
+
     """
     This class is used as an alias to a given parser
     and is purely for the sake of type hinting
     """
 
-    def get_findings(scan_type: str, test: Test) -> List[Finding]:
+    def get_findings(scan_type: str, test: Test) -> list[Finding]:
         """
         Stub function to make the hinting happier. The actual class
         is loosely obligated to have this function defined.
@@ -52,11 +52,13 @@ class Parser:
 
 
 class BaseImporter(ImporterOptions):
+
     """
     A collection of utilities used by various importers within DefectDojo.
     Some of these commonalities may be fully used by children importers,
     or even extended
     """
+
     def __init__(
         self,
         *args: list,
@@ -86,7 +88,7 @@ class BaseImporter(ImporterOptions):
         scan: TemporaryUploadedFile,
         *args: list,
         **kwargs: dict,
-    ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
+    ) -> tuple[Test, int, int, int, int, int, Test_Import]:
         """
         A helper method that executes the entire import process in a single method.
         This includes parsing the file, processing the findings, and returning the
@@ -96,9 +98,9 @@ class BaseImporter(ImporterOptions):
 
     def process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Make the conversion from unsaved Findings in memory to Findings that are saved in the
         database with and ID associated with them. This processor will also save any associated
@@ -108,9 +110,9 @@ class BaseImporter(ImporterOptions):
 
     def close_old_findings(
         self,
-        findings: List[Finding],
+        findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Identify any findings that have been imported before,
         but are no longer present in later reports so that
@@ -144,7 +146,7 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Parse the scan report submitted with the parser class and generate some findings
         that are not saved to the database yet. This step is crucial in determining if
@@ -165,10 +167,8 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Test]:
-        """
-        Use the API configuration object to get the tests to be used by the parser
-        """
+    ) -> list[Test]:
+        """Use the API configuration object to get the tests to be used by the parser"""
         try:
             return parser.get_tests(self.scan_type, scan)
         except ValueError as e:
@@ -177,8 +177,8 @@ class BaseImporter(ImporterOptions):
 
     def parse_dynamic_test_type_findings_from_tests(
         self,
-        tests: List[Test],
-    ) -> List[Finding]:
+        tests: list[Test],
+    ) -> list[Finding]:
         """
         currently we only support import one Test
         so for parser that support multiple tests (like SARIF)
@@ -193,7 +193,7 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Use the API configuration object to get the tests to be used by the parser
         to dump findings into
@@ -207,7 +207,7 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Determine how to parse the findings based on the presence of the
         `get_tests` function on the parser object
@@ -220,9 +220,9 @@ class BaseImporter(ImporterOptions):
 
     def sync_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> Tuple[List[Finding], List[Finding], List[Finding], List[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Processes findings in a synchronous manner such that all findings
         will be processed in a worker/process/thread
@@ -231,9 +231,9 @@ class BaseImporter(ImporterOptions):
 
     def async_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Processes findings in chunks within N number of processes. The
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
@@ -243,9 +243,9 @@ class BaseImporter(ImporterOptions):
 
     def determine_process_method(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Determines whether to process the scan iteratively, or in chunks,
         based upon the ASYNC_FINDING_IMPORT setting
@@ -255,11 +255,10 @@ class BaseImporter(ImporterOptions):
                 parsed_findings,
                 **kwargs,
             )
-        else:
-            return self.sync_process_findings(
-                parsed_findings,
-                **kwargs,
-            )
+        return self.sync_process_findings(
+            parsed_findings,
+            **kwargs,
+        )
 
     def update_test_meta(self):
         """
@@ -276,7 +275,7 @@ class BaseImporter(ImporterOptions):
         if not self.commit_hash.isspace():
             self.test.commit_hash = self.commit_hash
 
-        return None
+        return
 
     def update_timestamps(self):
         """
@@ -318,14 +317,12 @@ class BaseImporter(ImporterOptions):
 
     def update_import_history(
         self,
-        new_findings: List[Finding] = [],
-        closed_findings: List[Finding] = [],
-        reactivated_findings: List[Finding] = [],
-        untouched_findings: List[Finding] = [],
+        new_findings: list[Finding] = [],
+        closed_findings: list[Finding] = [],
+        reactivated_findings: list[Finding] = [],
+        untouched_findings: list[Finding] = [],
     ) -> Test_Import:
-        """
-        Creates a record of the import or reimport operation that has occurred.
-        """
+        """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
         if settings.TRACK_IMPORT_HISTORY is False:
             return None
@@ -449,9 +446,9 @@ class BaseImporter(ImporterOptions):
 
     def chunk_findings(
         self,
-        finding_list: List[Finding],
+        finding_list: list[Finding],
         chunk_size: int = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE,
-    ) -> List[List[Finding]]:
+    ) -> list[list[Finding]]:
         """
         Split a single large list into a list of lists of size `chunk_size`.
         For Example
@@ -491,6 +488,8 @@ class BaseImporter(ImporterOptions):
         test_type, created = Test_Type.objects.get_or_create(name=test_type_name)
         if created:
             logger.info(f"Created new Test_Type with name {test_type.name} because a report is being imported")
+            test_type.dynamically_generated = True
+            test_type.save()
         return test_type
 
     def verify_tool_configuration_from_test(self):
@@ -508,7 +507,7 @@ class BaseImporter(ImporterOptions):
             # Return early as there is no value in validating further
             return
         # Validate that the test has a value
-        elif self.test is not None:
+        if self.test is not None:
             # Make sure the Tool_Configuration is connected to the product that the test is
             if self.api_scan_configuration.product != self.test.engagement.product:
                 msg = "API Scan Configuration has to be from same product as the Test"
@@ -534,7 +533,7 @@ class BaseImporter(ImporterOptions):
             # Return early as there is no value in validating further
             return
         # Validate that the engagement has a value
-        elif self.engagement is not None:
+        if self.engagement is not None:
             # Make sure the Tool_Configuration is connected to the engagement that the test is
             if self.api_scan_configuration.product != self.engagement.product:
                 msg = "API Scan Configuration has to be from same product as the Engagement"
@@ -627,7 +626,7 @@ class BaseImporter(ImporterOptions):
     def process_endpoints(
         self,
         finding: Finding,
-        endpoints_to_add: List[Endpoint],
+        endpoints_to_add: list[Endpoint],
     ) -> None:
         """
         Process any endpoints to add to the finding. Endpoints could come from two places

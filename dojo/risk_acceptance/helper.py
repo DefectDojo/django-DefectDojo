@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import PermissionDenied
@@ -8,7 +9,7 @@ from django.utils import timezone
 import dojo.jira_link.helper as jira_helper
 from dojo.celery import app
 from dojo.jira_link.helper import escape_for_jira
-from dojo.models import Finding, Risk_Acceptance, System_Settings
+from dojo.models import Dojo_User, Finding, Notes, Risk_Acceptance, System_Settings
 from dojo.notifications.helper import create_notification
 from dojo.utils import get_full_url, get_system_setting
 
@@ -102,7 +103,7 @@ def delete(eng, risk_acceptance):
     risk_acceptance.delete()
 
 
-def remove_finding_from_risk_acceptance(risk_acceptance, finding):
+def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Acceptance, finding: Finding) -> None:
     logger.debug("removing finding %i from risk acceptance %i", finding.id, risk_acceptance.id)
     risk_acceptance.accepted_findings.remove(finding)
     finding.active = True
@@ -112,9 +113,20 @@ def remove_finding_from_risk_acceptance(risk_acceptance, finding):
     finding.save(dedupe_option=False)
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
+    # Add a note to reflect that the finding was removed from the risk acceptance
+    if user is not None:
+        finding.notes.add(Notes.objects.create(
+            entry=(
+                f"{Dojo_User.generate_full_name(user)} ({user.id}) removed this finding from the risk acceptance: "
+                f'"{risk_acceptance.name}" ({get_view_risk_acceptance(risk_acceptance)})'
+            ),
+            author=user,
+        ))
+
+    return
 
 
-def add_findings_to_risk_acceptance(risk_acceptance, findings):
+def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Acceptance, findings: list[Finding]) -> None:
     for finding in findings:
         if not finding.duplicate or finding.risk_accepted:
             finding.active = False
@@ -123,10 +135,20 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
             # Update any endpoint statuses on each of the findings
             update_endpoint_statuses(finding, accept_risk=True)
             risk_acceptance.accepted_findings.add(finding)
+        # Add a note to reflect that the finding was removed from the risk acceptance
+        if user is not None:
+            finding.notes.add(Notes.objects.create(
+                entry=(
+                    f"{Dojo_User.generate_full_name(user)} ({user.id}) added this finding to the risk acceptance: "
+                    f'"{risk_acceptance.name}" ({get_view_risk_acceptance(risk_acceptance)})'
+                ),
+                author=user,
+            ))
     risk_acceptance.save()
-
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, findings, accepted_message_creator)
+
+    return
 
 
 @app.task
@@ -138,7 +160,6 @@ def expiration_handler(*args, **kwargs):
     If configured also sends a JIRA comment in both case to each jira issue.
     This is per finding.
     """
-
     try:
         system_settings = System_Settings.objects.get()
     except System_Settings.DoesNotExist:
@@ -174,6 +195,16 @@ def expiration_handler(*args, **kwargs):
             risk_acceptance.save()
 
 
+def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
+    """Return the full qualified URL of the view risk acceptance page."""
+    # Suppressing this error because it does not happen under most circumstances that a risk acceptance does not have engagement
+    with suppress(AttributeError):
+        get_full_url(
+            reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)),
+        )
+    return ""
+
+
 def expiration_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has expired".format(
         escape_for_jira(risk_acceptance.name),
@@ -201,16 +232,14 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
             escape_for_jira(risk_acceptance.name),
             get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
             len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
-    else:
-        return "Finding has been risk accepted"
+    return "Finding has been risk accepted"
 
 
 def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
         return "finding was unaccepted/deleted from risk acceptance [({})|{}]".format(escape_for_jira(risk_acceptance.name),
             get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))))
-    else:
-        return "Finding is no longer risk accepted"
+    return "Finding is no longer risk accepted"
 
 
 def post_jira_comment(finding, message_factory, heads_up_days=0):
@@ -267,7 +296,7 @@ def prefetch_for_expiration(risk_acceptances):
                                              )
 
 
-def simple_risk_accept(finding, perform_save=True):
+def simple_risk_accept(user: Dojo_User, finding: Finding, perform_save=True) -> None:
     if not finding.test.engagement.product.enable_simple_risk_acceptance:
         raise PermissionDenied
 
@@ -282,9 +311,15 @@ def simple_risk_accept(finding, perform_save=True):
     # post_jira_comment might reload from database so see unaccepted finding. but the comment
     # only contains some text so that's ok
     post_jira_comment(finding, accepted_message_creator)
+    # Add a note to reflect that the finding was removed from the risk acceptance
+    if user is not None:
+        finding.notes.add(Notes.objects.create(
+            entry=(f"{Dojo_User.generate_full_name(user)} ({user.id}) has risk accepted this finding"),
+            author=user,
+        ))
 
 
-def risk_unaccept(finding, perform_save=True):
+def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True) -> None:
     logger.debug("unaccepting finding %i:%s if it is currently risk accepted", finding.id, finding)
     if finding.risk_accepted:
         logger.debug("unaccepting finding %i:%s", finding.id, finding)
@@ -302,6 +337,12 @@ def risk_unaccept(finding, perform_save=True):
         # post_jira_comment might reload from database so see unaccepted finding. but the comment
         # only contains some text so that's ok
         post_jira_comment(finding, unaccepted_message_creator)
+        # Add a note to reflect that the finding was removed from the risk acceptance
+        if user is not None:
+            finding.notes.add(Notes.objects.create(
+                entry=(f"{Dojo_User.generate_full_name(user)} ({user.id}) removed a risk exception from this finding"),
+                author=user,
+            ))
 
 
 def remove_from_any_risk_acceptance(finding):

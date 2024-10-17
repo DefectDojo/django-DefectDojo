@@ -139,7 +139,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, "https://gitlab.com"),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid"]),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid", "read_api", "read_repository"]),
     DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ""),
     DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ""),
@@ -304,6 +304,8 @@ env = environ.FileAwareEnv(
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
     # Use System notification settings to override user's notification settings
     DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
+    # When enabled, force the password field to be required for creating/updating users
+    DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
 )
 
 
@@ -527,6 +529,7 @@ SOCIAL_AUTH_PIPELINE = (
 
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
+REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
@@ -1142,6 +1145,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
         "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
     },
+    "notification_webhook_status_cleanup": {
+        "task": "dojo.notifications.helper.webhook_status_cleanup",
+        "schedule": timedelta(minutes=1),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1151,7 +1158,6 @@ CELERY_BEAT_SCHEDULE = {
     #     'task': 'dojo.tasks.fix_loop_duplicates_task',
     #     'schedule': timedelta(hours=12)
     # },
-
 
 }
 
@@ -1277,6 +1283,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
     "AppCheck Web Application Scanner": ["title", "severity"],
+    "Legitify Scan": ["title", "endpoints", "severity"],
+    "ThreatComposer Scan": ["title", "description"],
+    "Invicti Scan": ["title", "description", "severity"],
+    "HackerOne Cases": ["title", "severity"],
+    "KrakenD Audit Scan": ["description", "mitigation", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1493,12 +1504,16 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OSV Scan": DEDUPE_ALGO_HASH_CODE,
     "Nosey Parker Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Bearer CLI": DEDUPE_ALGO_HASH_CODE,
-    "Wiz Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wiz Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
     "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
+    "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
+    "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
+    "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1532,11 +1547,8 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 )
 
 if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
-    if env("DD_JIRA_EXTRA_ISSUE_TYPES").count(",") > 0:
-        for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
-            JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type)
-    else:
-        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env("DD_JIRA_EXTRA_ISSUE_TYPES"), env("DD_JIRA_EXTRA_ISSUE_TYPES"))
+    for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
+        JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
 
@@ -1720,6 +1732,9 @@ VULNERABILITY_URLS = {
     "RHBA": "https://access.redhat.com/errata/",
     "RHEA": "https://access.redhat.com/errata/",
     "FEDORA": "https://bodhi.fedoraproject.org/updates/",
+    "ALSA": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
+    "USN": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "DLA": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/DLA-3917-1
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")

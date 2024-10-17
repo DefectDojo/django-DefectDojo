@@ -11,9 +11,8 @@ SCANTYPE_EDGESCAN = "Edgescan Scan"
 
 
 class ApiEdgescanParser:
-    """
-    Import from Edgescan API or JSON file
-    """
+
+    """Import from Edgescan API or JSON file"""
 
     def get_scan_types(self):
         return [SCANTYPE_EDGESCAN]

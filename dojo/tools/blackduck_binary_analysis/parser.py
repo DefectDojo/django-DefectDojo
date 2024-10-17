@@ -8,6 +8,7 @@ from .importer import BlackduckBinaryAnalysisImporter
 
 
 class BlackduckBinaryAnalysisParser:
+
     """
     Report type(s) from Blackduck Binary Analysis compatible with DefectDojo:
     - Single CSV file containing vulnerable components
@@ -29,10 +30,9 @@ class BlackduckBinaryAnalysisParser:
     def sort_findings(self, filename):
         importer = BlackduckBinaryAnalysisImporter()
 
-        findings = sorted(
+        return sorted(
             importer.parse_findings(filename), key=lambda f: f.cve,
         )
-        return findings
 
     def ingest_findings(self, sorted_findings, test):
         findings = {}
@@ -104,7 +104,7 @@ class BlackduckBinaryAnalysisParser:
 
                 findings[unique_finding_key] = finding
 
-        return findings.values()
+        return list(findings.values())
 
     def format_title(self, i):
         title = f"{i.object_name}: {i.component} {i.version} Vulnerable"
@@ -138,9 +138,7 @@ class BlackduckBinaryAnalysisParser:
         return description
 
     def format_mitigation(self, i):
-        mitigation = f"Upgrade {str(i.component)} to latest version: {str(i.latest_version)}.\n"
-
-        return mitigation
+        return f"Upgrade {str(i.component)} to latest version: {str(i.latest_version)}.\n"
 
     def format_impact(self, i):
         impact = "The use of vulnerable third-party open source software in applications can have numerous negative impacts:\n\n"

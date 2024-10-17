@@ -1,7 +1,6 @@
 import datetime
 import json
 import re
-from typing import List
 
 from dateutil import parser
 from django.conf import settings
@@ -22,28 +21,25 @@ class CheckmarxOneParser:
     def _parse_date(self, value):
         if isinstance(value, str):
             return parser.parse(value)
-        elif isinstance(value, dict) and isinstance(value.get("seconds"), int):
+        if isinstance(value, dict) and isinstance(value.get("seconds"), int):
             return datetime.datetime.utcfromtimestamp(value.get("seconds"))
-        else:
-            return None
+        return None
 
     def _parse_cwe(self, cwe):
         if isinstance(cwe, str):
             cwe_num = re.findall(r"\d+", cwe)
             if cwe_num:
                 return cwe_num[0]
-            else:
-                return None
-        elif isinstance(cwe, int):
-            return cwe
-        else:
             return None
+        if isinstance(cwe, int):
+            return cwe
+        return None
 
     def parse_vulnerabilities_from_scan_list(
         self,
         test: Test,
         data: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         cwe_store = data.get("vulnerabilityDetails", [])
         # SAST
@@ -62,7 +58,7 @@ class CheckmarxOneParser:
         test: Test,
         results: list,
         cwe_store: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         for technology in results:
             # Set the name aside for use in the title
@@ -112,17 +108,16 @@ class CheckmarxOneParser:
         test: Test,
         results: list,
         cwe_store: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         # Not implemented yet
-        findings = []
-        return findings
+        return []
 
     def parse_sast_vulnerabilities(
         self,
         test: Test,
         results: list,
         cwe_store: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         def get_cwe_store_entry(cwe_store: list, cwe: int) -> dict:
             # Quick base case
             if cwe is None:
@@ -201,7 +196,7 @@ class CheckmarxOneParser:
         self,
         test: Test,
         results: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         for result in results:
             id = result.get("identifiers")[0].get("value")
@@ -237,7 +232,7 @@ class CheckmarxOneParser:
         self,
         test: Test,
         results: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         for vulnerability in results:
             result_type = vulnerability.get("type")

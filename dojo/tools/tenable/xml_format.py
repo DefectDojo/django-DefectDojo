@@ -51,7 +51,7 @@ class TenableXMLParser:
                 return None
             if isinstance(element_text, str):
                 return element_text if len(element_text) > 0 else None
-            if isinstance(element_text, (int, float)):
+            if isinstance(element_text, int | float):
                 return element_text or None
         return None
 
