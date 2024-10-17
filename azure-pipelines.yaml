@@ -55,6 +55,8 @@ steps:
       export DD_DATABASE_HOST=127.0.0.1
       export DD_DATABASE_PORT=5432
       export DD_DATABASE_NAME=test_defectdojo
+      export DD_DATABASE_USER=$(user_pg)
+      export DD_DATABASE_PASSWORD=$(password_pg)
       export DD_SECRET_KEY='.'
       export DD_PROVIDER_TOKEN='.'
       export DD_CUSTOM_TAG_PARSER="asff_regex=."
