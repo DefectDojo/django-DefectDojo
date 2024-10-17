@@ -111,9 +111,9 @@ env = environ.FileAwareEnv(
     DD_DATABASE_NAME=(str, "defectdojo"),
     # default django database name for testing is test_<dbname>
     DD_TEST_DATABASE_NAME=(str, "test_defectdojo"),
-    DD_DATABASE_PASSWORD=(str, "defectdojo"),
+    DD_DATABASE_PASSWORD=(str, None),
     DD_DATABASE_PORT=(int, 3306),
-    DD_DATABASE_USER=(str, "defectdojo"),
+    DD_DATABASE_USER=(str, None),
     DD_DATABASE_REPLICA=(bool, False),
     DD_TABLES_REPLICA_DEFAULT=(list, []),
     DD_SCHEMA_DB=(str, 'public'),
