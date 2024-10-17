@@ -35,12 +35,16 @@ class LoginRequiredMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        assert hasattr(request, "user"), "The Login Required middleware\
- requires authentication middleware to be installed. Edit your\
- MIDDLEWARE_CLASSES setting to insert\
- 'django.contrib.auth.middleware.AuthenticationMiddleware'. If that doesn't\
- work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes\
- 'django.core.context_processors.auth'."
+        if not hasattr(request, "user"):
+            msg = (
+                "The Login Required middleware "
+                "requires authentication middleware to be installed. Edit your "
+                "MIDDLEWARE_CLASSES setting to insert "
+                "'django.contrib.auth.middleware.AuthenticationMiddleware'. If that doesn't "
+                "work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes "
+                "'django.core.context_processors.auth'."
+            )
+            raise AttributeError(msg)
         if not request.user.is_authenticated:
             path = request.path_info.lstrip("/")
             if not any(m.match(path) for m in EXEMPT_URLS):

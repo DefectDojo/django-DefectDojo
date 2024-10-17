@@ -342,7 +342,8 @@ class SchemaChecker:
         self._errors = []
         self._prefix = []
         _check(schema, obj)
-        assert not self._has_failed, "\n" + "\n".join(self._errors) + "\nFailed with " + str(len(self._errors)) + " errors"
+        if self._has_failed:
+            raise AssertionError("\n" + "\n".join(self._errors) + "\nFailed with " + str(len(self._errors)) + " errors")
 
 
 class TestType(Enum):
@@ -1207,15 +1208,15 @@ class FindingsTest(BaseClass.BaseClassTest):
         result = self.client.get(self.url + "2/")
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not check new duplicate")
         result_json = result.json()
-        assert result_json["duplicate"]
-        assert result_json["duplicate_finding"] == 3
+        self.assertTrue(result_json["duplicate"])
+        self.assertEqual(result_json["duplicate_finding"], 3)
 
         # Check duplicate status
         result = self.client.get(self.url + "3/duplicate/")
-        assert result.status_code == status.HTTP_200_OK, "Could not check duplicate status"
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not check duplicate status")
         result_json = result.json()
         # Should return all duplicates for id=3
-        assert set(x["id"] for x in result_json) == {2, 4, 5, 6}  # noqa: C401
+        self.assertEqual({x["id"] for x in result_json}, {2, 4, 5, 6})
 
         # Reset duplicate
         result = self.client.post(self.url + "2/duplicate/reset/")
@@ -1223,44 +1224,44 @@ class FindingsTest(BaseClass.BaseClassTest):
         new_result = self.client.get(self.url + "2/")
         self.assertEqual(result.status_code, status.HTTP_204_NO_CONTENT, "Could not check reset duplicate status")
         result_json = new_result.json()
-        assert not result_json["duplicate"]
-        assert result_json["duplicate_finding"] is None
+        self.assertFalse(result_json["duplicate"])
+        self.assertIsNone(result_json["duplicate_finding"])
 
     def test_filter_steps_to_reproduce(self):
         # Confirm initial data
         result = self.client.get(self.url + "?steps_to_reproduce=lorem")
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not filter on steps_to_reproduce")
         result_json = result.json()
-        assert result_json["count"] == 0
+        self.assertEqual(result_json["count"], 0)
 
         # Set steps to reproduce
         result = self.client.patch(self.url + "2/", data={"steps_to_reproduce": "Lorem ipsum dolor sit amet"})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
-        assert result.json()["steps_to_reproduce"] == "Lorem ipsum dolor sit amet"
+        self.assertEqual(result.json()["steps_to_reproduce"], "Lorem ipsum dolor sit amet")
         result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": "Ut enim ad minim veniam"})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
-        assert result.json()["steps_to_reproduce"] == "Ut enim ad minim veniam"
+        self.assertEqual(result.json()["steps_to_reproduce"], "Ut enim ad minim veniam")
 
         # Test
         result = self.client.get(self.url + "?steps_to_reproduce=lorem")
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not filter on steps_to_reproduce")
         result_json = result.json()
-        assert result_json["count"] == 1
-        assert result_json["results"][0]["id"] == 2
-        assert result_json["results"][0]["steps_to_reproduce"] == "Lorem ipsum dolor sit amet"
+        self.assertEqual(result_json["count"], 1)
+        self.assertEqual(result_json["results"][0]["id"], 2)
+        self.assertEqual(result_json["results"][0]["steps_to_reproduce"], "Lorem ipsum dolor sit amet")
 
         # Set steps to reproduce
         result = self.client.patch(self.url + "2/", data={"steps_to_reproduce": ""})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
-        assert result.json()["steps_to_reproduce"] == ""
+        self.assertEqual(result.json()["steps_to_reproduce"], "")
         result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": ""})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
-        assert result.json()["steps_to_reproduce"] == ""
+        self.assertEqual(result.json()["steps_to_reproduce"], "")
 
     def test_severity_validation(self):
         result = self.client.patch(self.url + "2/", data={"severity": "Not a valid choice"})
         self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
-        assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
+        self.assertEqual(result.json()["severity"], ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"])
 
 
 class FindingMetadataTest(BaseClass.BaseClassTest):
@@ -1295,33 +1296,38 @@ class FindingMetadataTest(BaseClass.BaseClassTest):
         self.assertEqual(200, response.status_code, response.data)
 
         results = self.client.get(self.base_url).data
+        correct = False
         for result in results:
             if result["name"] == "test_meta2" and result["value"] == "40":
+                correct = True
                 return
 
-        assert False, "Metadata was not created correctly"
+        self.assertTrue(correct, "Metadata was not created correctly")
 
     def test_create_duplicate(self):
         result = self.client.post(self.base_url, data={"name": "test_meta", "value": "40"})
-        assert result.status_code == status.HTTP_400_BAD_REQUEST, "Metadata creation did not failed on duplicate"
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Metadata creation did not failed on duplicate")
 
     def test_get(self):
         results = self.client.get(self.base_url, format="json").data
+        correct = False
         for result in results:
             if result["name"] == "test_meta" and result["value"] == "20":
+                correct = True
                 return
 
-        assert False, "Metadata was not created correctly"
+        self.assertTrue(correct, "Metadata was not created correctly")
 
     def test_update(self):
         self.client.put(self.base_url + "?name=test_meta", data={"name": "test_meta", "value": "40"})
         result = self.client.get(self.base_url).data[0]
-        assert result["name"] == "test_meta" and result["value"] == "40", "Metadata not edited correctly"
+        self.assertEqual(result["name"], "test_meta", "Metadata not edited correctly")
+        self.assertEqual(result["value"], "40", "Metadata not edited correctly")
 
     def test_delete(self):
         self.client.delete(self.base_url + "?name=test_meta")
         result = self.client.get(self.base_url).data
-        assert len(result) == 0, "Metadata not deleted correctly"
+        self.assertEqual(len(result), 0, "Metadata not deleted correctly")
 
 
 class FindingTemplatesTest(BaseClass.BaseClassTest):
@@ -1543,7 +1549,7 @@ class StubFindingsTest(BaseClass.BaseClassTest):
     def test_severity_validation(self):
         result = self.client.patch(self.url + "2/", data={"severity": "Not a valid choice"})
         self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
-        assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
+        self.assertEqual(result.json()["severity"], ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"])
 
 
 class TestsTest(BaseClass.BaseClassTest):
