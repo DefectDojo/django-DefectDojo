@@ -75,7 +75,6 @@ select = [
    "TRY003",
    "TRY004",
    "TRY2",
-   "TRY302",
    "FLY",
    "NPY",
    "FAST",
