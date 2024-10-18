@@ -66,10 +66,7 @@ class WapitiParser:
                 title = category + ": " + entry.findtext("info")
                 # get numerical severity.
                 num_severity = entry.findtext("level")
-                if num_severity in severity_mapping:
-                    severity = severity_mapping[num_severity]
-                else:
-                    severity = "Info"
+                severity = severity_mapping.get(num_severity, "Info")
 
                 finding = Finding(
                     title=title,

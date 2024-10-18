@@ -138,10 +138,7 @@ class DependencyTrackParser:
             component_version = dependency_track_finding["component"]["version"]
         else:
             component_version = None
-        if component_version is not None:
-            version_description = component_version
-        else:
-            version_description = ""
+        version_description = component_version if component_version is not None else ""
 
         title = f"{component_name}:{version_description} affected by: {vuln_id} ({source})"
 
@@ -212,18 +209,12 @@ class DependencyTrackParser:
 
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
         analysis = dependency_track_finding.get("analysis")
-        is_false_positive = True if analysis is not None and analysis.get("state") == "FALSE_POSITIVE" else False
+        is_false_positive = bool(analysis is not None and analysis.get("state") == "FALSE_POSITIVE")
 
         # Get the EPSS details
-        if "epssPercentile" in dependency_track_finding["vulnerability"]:
-            epss_percentile = dependency_track_finding["vulnerability"]["epssPercentile"]
-        else:
-            epss_percentile = None
+        epss_percentile = dependency_track_finding["vulnerability"].get("epssPercentile", None)
 
-        if "epssScore" in dependency_track_finding["vulnerability"]:
-            epss_score = dependency_track_finding["vulnerability"]["epssScore"]
-        else:
-            epss_score = None
+        epss_score = dependency_track_finding["vulnerability"].get("epssScore", None)
 
         # Build and return Finding model
         finding = Finding(

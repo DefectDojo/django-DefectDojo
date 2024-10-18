@@ -46,12 +46,9 @@ class GitlabDepScanParser:
         return list(items.values())
 
     def get_item(self, vuln, test, scan):
-        if "id" in vuln:
-            unique_id_from_tool = vuln["id"]
-        else:
-            # If the new unique id is not provided, fall back to deprecated
-            # "cve" fingerprint (old version)
-            unique_id_from_tool = vuln["cve"]
+        # If the new unique id is not provided, fall back to deprecated
+        # "cve" fingerprint (old version)
+        unique_id_from_tool = vuln["id"] if "id" in vuln else vuln["cve"]
 
         title = ""
         if "name" in vuln:
@@ -74,21 +71,17 @@ class GitlabDepScanParser:
             description += f"{vuln['description']}\n"
 
         location = vuln["location"]
-        file_path = location["file"] if "file" in location else None
+        file_path = location.get("file", None)
 
         component_name = None
         component_version = None
         if "dependency" in location:
             component_version = (
-                location["dependency"]["version"]
-                if "version" in location["dependency"]
-                else None
+                location["dependency"].get("version", None)
             )
             if "package" in location["dependency"]:
                 component_name = (
-                    location["dependency"]["package"]["name"]
-                    if "name" in location["dependency"]["package"]
-                    else None
+                    location["dependency"]["package"].get("name", None)
                 )
 
         severity = vuln["severity"]
