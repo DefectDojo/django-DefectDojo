@@ -1,6 +1,6 @@
-from collections import namedtuple
+from typing import NamedTuple
 
-BlackduckBinaryAnalysisFinding = namedtuple(
+BlackduckBinaryAnalysisFinding = NamedTuple(
     "BlackduckBinaryAnalysisFinding",
     [
         "report_name",
