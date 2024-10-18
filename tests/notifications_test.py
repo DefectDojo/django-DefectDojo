@@ -41,11 +41,13 @@ class NotificationTest(BaseTestCase):
 
         self.disable_notification()
         driver.get(self.base_url + "notifications")
+        in_place = False
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert False
+            in_place = True
         except NoSuchElementException:
-            assert True
+            in_place = False
+        self.assertFalse(in_place)
 
     def test_enable_personal_notification(self):
         # Login to the site. Password will have to be modified
@@ -56,13 +58,9 @@ class NotificationTest(BaseTestCase):
         driver.get(self.base_url + "notifications")
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert True
         except NoSuchElementException:
-            if self.type == "msteams":
-                # msteam should be not in personal notifications
-                assert True
-            else:
-                assert False
+            # msteam should be not in personal notifications
+            self.assertEqual(self.type, "msteams")
 
     def test_disable_system_notification(self):
         # Login to the site. Password will have to be modified
@@ -72,11 +70,13 @@ class NotificationTest(BaseTestCase):
 
         self.disable_notification()
         driver.get(self.base_url + "notifications/system")
+        in_place = False
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert False
+            in_place = True
         except NoSuchElementException:
-            assert True
+            in_place = False
+        self.assertFalse(in_place)
 
     def test_enable_system_notification(self):
         # Login to the site. Password will have to be modified
@@ -84,12 +84,13 @@ class NotificationTest(BaseTestCase):
         driver = self.driver
 
         self.enable_notification()
-        driver.get(self.base_url + "notifications/system")
+        in_place = False
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert True
+            in_place = True
         except NoSuchElementException:
-            assert False
+            in_place = False
+        self.assertFalse(in_place)
 
     def test_disable_template_notification(self):
         # Login to the site. Password will have to be modified
@@ -99,11 +100,13 @@ class NotificationTest(BaseTestCase):
 
         self.disable_notification()
         driver.get(self.base_url + "notifications/template")
+        in_place = False
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert False
+            in_place = True
         except NoSuchElementException:
-            assert True
+            in_place = False
+        self.assertFalse(in_place)
 
     def test_enable_template_notification(self):
         # Login to the site. Password will have to be modified
@@ -114,13 +117,9 @@ class NotificationTest(BaseTestCase):
         driver.get(self.base_url + "notifications/template")
         try:
             driver.find_element(By.XPATH, f"//input[@name='product_added' and @value='{self.type}']")
-            assert True
         except NoSuchElementException:
-            if self.type == "msteams":
-                # msteam should be not in personal notifications
-                assert True
-            else:
-                assert False
+            # msteam should be not in personal notifications
+            self.assertEqual(self.type, "msteams")
 
     def test_user_mail_notifications_change(self):
         # Login to the site. Password will have to be modified
