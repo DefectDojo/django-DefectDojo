@@ -2001,8 +2001,8 @@ def sla_compute_and_notify(*args, **kwargs):
                             # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
                             product_jira_sla_comment_enabled = jira_helper.get_jira_project(finding).product_jira_sla_notification
                         except Exception as e:
-                            logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
-                            logger.error(f"Error is: {e}")
+                            logger.exception("The product is not linked to a JIRA configuration! Something is weird here.")
+                            logger.exception(f"Error is: {e}")
 
                         jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
 
