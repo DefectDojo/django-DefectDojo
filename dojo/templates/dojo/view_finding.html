@@ -920,7 +920,7 @@
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_desc" class="panel-body finding-description collapse in">
-              <pre>{{ finding.description|markdown_render|default_if_none:"" }}</pre>
+              {{ finding.description|markdown_render|default_if_none:"" }}
             </div>
         </div>
 
@@ -968,7 +968,7 @@
                         class="glyphicon glyphicon-chevron-{% if finding.mitigation %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_mitigation" class="panel-body collapse {% if finding.mitigation %}in{%endif%}">
-                <pre>{{ finding.mitigation|markdown_render|default_if_none:"" }}</pre>
+                {{ finding.mitigation|markdown_render|default_if_none:"" }}
             </div>
         </div>
         {% if finding.burprawrequestresponse_set.all %}
@@ -986,7 +986,7 @@
                                         <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
                             </div>
                             <div id="vuln_req_{{ forloop.counter }}" class="panel-body collapse">
-                                <pre>{{ req_resp.get_request }}</pre>
+                                {{ req_resp.get_request }}
                             </div>
                         </div>
                         <div class="panel panel-default">
@@ -997,7 +997,7 @@
                             </div>
 
                             <div id="vuln_res_{{ forloop.counter }}" class="panel-body collapse">
-                                <pre>{{ req_resp.get_response }}</pre>
+                                {{ req_resp.get_response }}
                             </div>
                         </div>
                     {% endfor %}
@@ -1010,7 +1010,7 @@
                         class="glyphicon glyphicon-chevron-{% if finding.impact %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_impact" class="panel-body collapse {% if finding.impact %}in{%endif%}">
-                <pre>{{ finding.impact|markdown_render|default_if_none:"" }}</pre>
+                {{ finding.impact|markdown_render|default_if_none:"" }}
             </div>
         </div>
 
@@ -1020,7 +1020,7 @@
                         class="glyphicon glyphicon-chevron-{% if finding.steps_to_reproduce %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_reproduce" class="panel-body collapse {% if finding.steps_to_reproduce %}in{%endif%}">
-                <pre>{{ finding.steps_to_reproduce|markdown_render|default_if_none:"" }}</pre>
+                {{ finding.steps_to_reproduce|markdown_render|default_if_none:"" }}
             </div>
         </div>
 
@@ -1030,7 +1030,7 @@
                         class="glyphicon glyphicon-chevron-{% if finding.severity_justification %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="sev_just" class="panel-body collapse {% if finding.severity_justification %}in{%endif%}">
-                <pre>{{ finding.severity_justification|markdown_render|default_if_none:"" }}</pre>
+                {{ finding.severity_justification|markdown_render|default_if_none:"" }}
             </div>
         </div>
 
@@ -1040,7 +1040,7 @@
                         class="glyphicon glyphicon-chevron-{% if finding.references %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_refs" class="panel-body collapse {% if finding.references %}in{%endif%}">
-                <pre>{{ finding.get_references_with_links|markdown_render|default_if_none:"" }}</pre>
+                {{ finding.get_references_with_links|markdown_render|default_if_none:"" }}
             </div>
         </div>
 
