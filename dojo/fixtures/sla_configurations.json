@@ -18,7 +18,6 @@
     },
     {
         "model": "dojo.sla_configuration",
-        "pk": 100,
         "fields": {
             "name": "No SLA Enforced",
             "description": "No SLA is enforced for a product which uses this SLA configuration.",
