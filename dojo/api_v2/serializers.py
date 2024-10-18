@@ -2074,6 +2074,7 @@ class ImportScanSerializer(serializers.Serializer):
     file = serializers.FileField(allow_empty_file=True, required=False)
     product_type_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
+    product_scm_type = serializers.CharField(required=False)
     engagement_name = serializers.CharField(required=False)
     engagement_end_date = serializers.DateField(
         required=False,
