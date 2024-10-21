@@ -110,6 +110,7 @@ from dojo.models import (
     get_current_date,
     TransferFinding,
     TransferFindingFinding,
+    Component,
 )
 from dojo.risk_acceptance.helper import add_findings_to_risk_acceptance, remove_finding_from_risk_acceptance
 from dojo.tools.factory import (
@@ -3262,3 +3263,25 @@ class AnnouncementSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(msg)
             else:
                 raise
+
+class ComponentSerializer(serializers.ModelSerializer):
+    engagement_id = serializers.IntegerField()
+
+    class Meta:
+        model = Component
+        fields = ['id', 'name', 'version', 'date', 'engagement_id']
+
+    def create(self, validated_data):
+        engagement_id = validated_data.pop("engagement_id")
+        engagement = Engagement.objects.get(id=engagement_id)
+        component = Component.objects.create(engagement=engagement, **validated_data)
+        return component
+
+    def update(self, instance, validated_data):
+        engagement_id = validated_data.pop('engagement_id', None)
+        if engagement_id:
+            instance.engagement = Engagement.objects.get(id=engagement_id)
+        instance.name = validated_data.get('name', instance.name)
+        instance.version = validated_data.get('version', instance.version)
+        instance.save()
+        return instance

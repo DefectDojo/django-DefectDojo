@@ -906,6 +906,9 @@ class ComponentFilter(ProductComponentFilter):
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
+    engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.none(),
+        label="Engagement")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -913,6 +916,8 @@ class ComponentFilter(ProductComponentFilter):
             "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
         self.form.fields[
             "test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
+        self.form.fields[
+            "engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class EngagementDirectFilterHelper(FilterSet):

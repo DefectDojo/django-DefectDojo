@@ -73,6 +73,7 @@ from dojo.api_v2.views import (
     UserContactInfoViewSet,
     UserProfileView,
     UsersViewSet,
+    ComponentViewSet,
 )
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.banner.urls import urlpatterns as banner_urls
@@ -121,6 +122,7 @@ handler400 = "dojo.views.custom_bad_request_view"
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
 v2_api.register(r"announcements", AnnouncementViewSet, basename="announcement")
+v2_api.register(r"components", ComponentViewSet, basename="components")
 v2_api.register(r"configuration_permissions", ConfigurationPermissionViewSet, basename="permission")
 v2_api.register(r"credential_mappings", CredentialsMappingViewSet, basename="cred_mapping")
 v2_api.register(r"credentials", CredentialsViewSet, basename="cred_user")
