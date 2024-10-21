@@ -100,7 +100,7 @@ class TenableCSVParser:
             severity = self._convert_severity(raw_severity)
             # Other text fields
             description = row.get("Synopsis", row.get("definition.synopsis", "N/A"))
-            mitigation = str(row.get("Solution", row.get("definition.solution", "N/A")))
+            mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
             impact = row.get("Description", row.get("definition.description", "N/A"))
             references = row.get("See Also", row.get("definition.see_also", "N/A"))
             # Determine if the current row has already been processed
