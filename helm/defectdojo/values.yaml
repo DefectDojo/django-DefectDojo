@@ -16,6 +16,9 @@ createPostgresqlHaPgpoolSecret: false
 # - enabled, enables tracking configuration changes based on SHA256
 # trackConfig: disabled
 
+# extraLabels: {}
+# Add extra labels for k8s
+
 # Enables application network policy
 # For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/
 networkPolicy:
