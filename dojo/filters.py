@@ -2393,7 +2393,11 @@ class EndpointFilterHelper(FilterSet):
         fields=(
             ("product", "product"),
             ("host", "host"),
+            ("findings_count", "findings_count"),
         ),
+        field_labels={
+            "findings_count": "Findings Count ",
+        }
     )
 
 

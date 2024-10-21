@@ -49,8 +49,9 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
     else:
         endpoints = Endpoint.objects.all()
 
-    endpoints = endpoints.prefetch_related("product", "product__tags", "tags").distinct()
+    endpoints = endpoints.prefetch_related("product", "product__tags", "tags", "findings").distinct()
     endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
+    endpoints = endpoints.annotate(findings_count=Count("findings", filter=Q(findings__active=True)))
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
     if host_view:
