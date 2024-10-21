@@ -9,6 +9,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+{{- if .Values.extraLabels }}
+{{- toYaml .Values.extraLabels | trim | nindent 4 }}
+{{- end }}
 spec:
   podSelector:
     matchLabels:
@@ -40,6 +43,9 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+{{- if .Values.extraLabels }}
+{{- toYaml .Values.extraLabels | trim | nindent 4 }}
+{{- end }}
 spec:
   podSelector:
     matchLabels:
