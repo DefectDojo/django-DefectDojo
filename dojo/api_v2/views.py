@@ -33,6 +33,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
+from dojo import engagement
 import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
@@ -146,6 +147,7 @@ from dojo.models import (
     Tool_Type,
     User,
     UserContactInfo,
+    Component,
 )
 from dojo.product.queries import (
     get_authorized_app_analysis,
@@ -1509,6 +1511,23 @@ class FindingViewSet(
         return Response(
             {"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class ComponentViewSet(viewsets.ModelViewSet):
+    queryset = Component.objects.none()
+    serializer_class = serializers.ComponentSerializer
+
+    def get_queryset(self):
+        engagement_id = self.request.GET.get('engagement_id')
+        if engagement_id:
+            return Component.objects.filter(engagement_id=engagement_id)
+        return Component.objects.all()
+    
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def perform_update(self, serializer):
+        serializer.save()
 
 
 # Authorization: configuration
