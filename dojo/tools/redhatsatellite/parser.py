@@ -62,7 +62,10 @@ class RedHatSatelliteParser:
             description += "**hosts_applicable_count:** " + str(hosts_applicable_count) + "\n"
             description += "**installable:** " + str(installable) + "\n"
             if bugs != []:
-                description += "**bugs:** " + str(bugs) + "\n"
+                description += "**bugs:** "
+                for bug in bugs[:-1]:
+                    description += "[" + bug.get("bug_id") + "](" + bug.get("href") + ")" + ", "
+                description += "[" + bugs[-1].get("bug_id") + "](" + bugs[-1].get("href") + ")" + "\n"
             if module_streams != []:
                 description += "**module_streams:** " + str(module_streams) + "\n"
             description += "**packages:** " + ", ".join(packages)
