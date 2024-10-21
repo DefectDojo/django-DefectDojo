@@ -193,7 +193,7 @@ class ImporterOptions:
         and ensures it is the correct type before returning it
         """
         # Get the value from the kwargs
-        value = kwargs.get(field_name, None)
+        value = kwargs.get(field_name)
         # Make sure we have something if we need it
         if required is True:
             if value is None:

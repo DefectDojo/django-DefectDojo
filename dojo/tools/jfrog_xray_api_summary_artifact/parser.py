@@ -1,3 +1,4 @@
+import contextlib
 import hashlib
 import json
 import re
@@ -65,10 +66,7 @@ def get_item(
     impact_path = ImpactPath("", "", "")
 
     if "severity" in vulnerability:
-        if vulnerability["severity"] == "Unknown":
-            severity = "Informational"
-        else:
-            severity = vulnerability["severity"].title()
+        severity = "Informational" if vulnerability["severity"] == "Unknown" else vulnerability["severity"].title()
     else:
         severity = "Informational"
 
@@ -81,12 +79,10 @@ def get_item(
             cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
         if "cvss_v3" in cves[0]:
             cvss_v3 = cves[0]["cvss_v3"]
-            try:
+            # Note: Xray sometimes takes over malformed cvss scores like `5.9` that can not be parsed.
+            #       Without the try-except block here the whole import of all findings would fail.
+            with contextlib.suppress(CVSS3RHScoreDoesNotMatch, CVSS3RHMalformedError):
                 cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
-            except (CVSS3RHScoreDoesNotMatch, CVSS3RHMalformedError):
-                # Note: Xray sometimes takes over malformed cvss scores like `5.9` that can not be parsed.
-                #       Without the try-except block here the whole import of all findings would fail.
-                pass
 
     impact_paths = vulnerability.get("impact_path", [])
     if len(impact_paths) > 0:

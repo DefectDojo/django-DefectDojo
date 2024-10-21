@@ -864,10 +864,7 @@ class ReImportScanResultsView(View):
         # by default we keep a trace of the scan_type used to create the test
         # if it's not here, we use the "name" of the test type
         # this feature exists to provide custom label for tests for some parsers
-        if test.scan_type:
-            scan_type = test.scan_type
-        else:
-            scan_type = test.test_type.name
+        scan_type = test.scan_type or test.test_type.name
         # Set the product tab
         product_tab = Product_Tab(test.engagement.product, title=_("Re-upload a %s") % scan_type, tab="engagements")
         product_tab.setEngagement(test.engagement)

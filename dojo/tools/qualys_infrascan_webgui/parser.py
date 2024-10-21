@@ -31,10 +31,7 @@ def issue_r(raw_row, vuln, scan_date):
     _port = raw_row.get("port")
 
     # Create Endpoint
-    if issue_row["fqdn"]:
-        ep = Endpoint(host=issue_row["fqdn"])
-    else:
-        ep = Endpoint(host=issue_row["ip_address"])
+    ep = Endpoint(host=issue_row["fqdn"]) if issue_row["fqdn"] else Endpoint(host=issue_row["ip_address"])
 
     # OS NAME
     issue_row["os"] = raw_row.findtext("OS")
@@ -112,15 +109,15 @@ def issue_r(raw_row, vuln, scan_date):
 
 def qualys_convert_severity(raw_val):
     val = str(raw_val).strip()
-    if "1" == val:
+    if val == "1":
         return "Info"
-    if "2" == val:
+    if val == "2":
         return "Low"
-    if "3" == val:
+    if val == "3":
         return "Medium"
-    if "4" == val:
+    if val == "4":
         return "High"
-    if "5" == val:
+    if val == "5":
         return "Critical"
     return "Info"
 
