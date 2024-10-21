@@ -1839,15 +1839,9 @@ class Endpoint(models.Model):
             risk_accepted=False,
         ).count() > 0
 
-    @cached_property
+    @property
     def findings_count(self):
-        try:
-            # if prefetched, it's already there
-            return self.active_finding_count
-        except AttributeError:
-            # ideally it's always prefetched and we can remove this code in the future
-            self.active_finding_count = self.findings.all().count()
-            return self.active_finding_count
+        return self.findings.all().count()
 
     def active_findings(self):
         return self.findings.filter(
