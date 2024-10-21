@@ -27,7 +27,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         {{- if .Values.podLabels }}
         {{- toYaml .Values.podLabels | nindent 8 }}
-        {{- end }}        
+        {{- end }}
       annotations:
       {{- with .Values.django.annotations }}
         {{- toYaml . | nindent 8 }}
@@ -260,23 +260,10 @@ spec:
           value: '{{ .Values.django.nginx.tls.enabled }}'
         - name: GENERATE_TLS_CERTIFICATE
           value: '{{ .Values.django.nginx.tls.generateCertificate }}'
+        {{- if .Values.django.uwsgi.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
             path: /nginx_health
-            port: http
-            {{- if .Values.django.nginx.tls.enabled }}
-            scheme: HTTPS
-            {{- end }}
-            httpHeaders:
-            - name: Host
-              value: {{ .Values.host }}
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          failureThreshold: 6
-        {{- if .Values.django.uwsgi.livenessProbe.enabled }}
-        readinessProbe:
-          httpGet:
-            path: /uwsgi_health
             port: http
             {{- if .Values.django.nginx.tls.enabled }}
             scheme: HTTPS
@@ -289,6 +276,40 @@ spec:
           periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
           successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
           timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.django.uwsgi.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /uwsgi_health
+            port: http
+            {{- if .Values.django.nginx.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+            httpHeaders:
+            - name: Host
+              value: {{ .Values.host }}
+          failureThreshold: {{ .Values.django.uwsgi.readinessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.readinessProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.readinessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.readinessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.django.uwsgi.startupProbe.enabled }}
+        startupProbe:
+          httpGet:
+            path: /uwsgi_health
+            port: http
+            {{- if .Values.django.nginx.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+            httpHeaders:
+            - name: Host
+              value: {{ .Values.host }}
+          failureThreshold: {{ .Values.django.uwsgi.startupProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.startupProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.startupProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.startupProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.startupProbe.timeoutSeconds }}
         {{- end }}
         resources:
           {{- toYaml .Values.django.nginx.resources | nindent 10 }}
