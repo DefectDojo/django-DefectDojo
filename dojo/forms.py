@@ -844,7 +844,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
         help_text=("Active, verified findings listed, please select to add findings."))
     notes = forms.CharField(required=False, max_length=2400,
                             widget=forms.Textarea,
-                            label="Notes")  # TODO: here as well?
+                            label="Notes")
 
     class Meta:
         model = Risk_Acceptance
@@ -860,6 +860,8 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
             self.fields["expiration_date"].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
         self.fields["accepted_findings"].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class BaseManageFileFormSet(forms.BaseModelFormSet):
@@ -1562,13 +1564,15 @@ class FindingBulkUpdateForm(forms.ModelForm):
     # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
     tags = TagField(required=False, autocomplete_tags=Finding.tags.tag_model.objects.all().order_by("name"))
-    notes = forms.CharField(required=False, max_length=1024, widget=forms.TextInput(attrs={"class": "form-control"}))  # TODO: Here as well?
+    notes = forms.CharField(required=False, max_length=1024, widget=forms.TextInput(attrs={"class": "form-control"}))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["severity"].required = False
         # we need to defer initialization to prevent multiple initializations if other forms are shown
         self.fields["tags"].widget.tag_options = tagulous.models.options.TagOptions(autocomplete_settings={"width": "200px", "defer": True})
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1706,7 +1710,7 @@ class DeleteEndpointForm(forms.ModelForm):
 
 class NoteForm(forms.ModelForm):
     entry = forms.CharField(max_length=2400, widget=forms.Textarea(attrs={"rows": 4, "cols": 15}),
-                            label="Notes:")  # TODO: Here
+                            label="Notes:")
 
     class Meta:
         model = Notes
@@ -1745,7 +1749,7 @@ class CloseFindingForm(forms.ModelForm):
         widget=forms.Textarea, label="Notes:",
         error_messages={"required": ("The reason for closing a finding is "
                                      "required, please use the text area "
-                                     "below to provide documentation.")})  # TODO: here as well
+                                     "below to provide documentation.")})
 
     mitigated = forms.DateField(required=False, help_text="Date and time when the flaw has been fixed", widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
@@ -1768,6 +1772,8 @@ class CloseFindingForm(forms.ModelForm):
             self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Test_Edit)
             self.fields["mitigated"].initial = self.instance.mitigated
             self.fields["mitigated_by"].initial = self.instance.mitigated_by
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
     def _post_clean(self):
         super()._post_clean()
@@ -1814,11 +1820,16 @@ class DefectFindingForm(forms.ModelForm):
         widget=forms.Textarea, label="Notes:",
         error_messages={"required": ("The reason for closing a finding is "
                                      "required, please use the text area "
-                                     "below to provide documentation.")})  # TODO: Here as well
+                                     "below to provide documentation.")})
 
     class Meta:
         model = Notes
         fields = ["entry"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class ClearFindingReviewForm(forms.ModelForm):
@@ -1828,11 +1839,16 @@ class ClearFindingReviewForm(forms.ModelForm):
         widget=forms.Textarea, label="Notes:",
         error_messages={"required": ("The reason for clearing a review is "
                                      "required, please use the text area "
-                                     "below to provide documentation.")})  # TODO: here as well?
+                                     "below to provide documentation.")})
 
     class Meta:
         model = Finding
         fields = ["active", "verified", "false_p", "out_of_scope", "duplicate", "is_mitigated"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class ReviewFindingForm(forms.Form):
@@ -1848,7 +1864,7 @@ class ReviewFindingForm(forms.Form):
         widget=forms.Textarea, label="Notes:",
         error_messages={"required": ("The reason for requesting a review is "
                                      "required, please use the text area "
-                                     "below to provide documentation.")})  # TODO: here as well?
+                                     "below to provide documentation.")})
     allow_all_reviewers = forms.BooleanField(
         required=False,
         label="Allow All Eligible Reviewers",
@@ -1871,6 +1887,8 @@ class ReviewFindingForm(forms.Form):
         self.reviewer_queryset = users
         # Set the users in the form
         self.fields["reviewers"].choices = self._get_choices(self.reviewer_queryset)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
     @staticmethod
     def _get_choices(queryset):
@@ -2741,7 +2759,7 @@ class CredMappingFormProd(forms.ModelForm):
 class EngagementPresetsForm(forms.ModelForm):
 
     notes = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=False, help_text="Description of what needs to be tested or setting up environment for testing")  # TODO: here as well?
+                                  required=False, help_text="Description of what needs to be tested or setting up environment for testing")
 
     scope = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Scope of Engagement testing, IP's/Resources/URL's)")
@@ -2749,6 +2767,11 @@ class EngagementPresetsForm(forms.ModelForm):
     class Meta:
         model = Engagement_Presets
         exclude = ["product"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if disclaimer := get_system_setting("disclaimer_notes"):
+            self.disclaimer = disclaimer.strip()
 
 
 class DeleteEngagementPresetsForm(forms.ModelForm):
