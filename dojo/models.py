@@ -2280,18 +2280,18 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
 class Component(models.Model):
     name = models.CharField(null=False,
-                                      blank=True,
-                                      max_length=500,
-                                      verbose_name=_("Component name"),
-                                      help_text=_("Name of the affected component (library name, part of a system, ...)."))
+                            blank=True,
+                            max_length=500,
+                            verbose_name=_("Component name"),
+                            help_text=_("Name of the component (library name, part of a system, ...)."))
     version = models.CharField(null=False,
-                                         blank=True,
-                                         max_length=100,
-                                         verbose_name=_("Component version"),
-                                         help_text=_("Version of the component."))
+                                blank=True,
+                                max_length=100,
+                                verbose_name=_("Component version"),
+                                help_text=_("Version of the component."))
     date = models.DateField(default=get_current_date,
-                        verbose_name=_("Date"),
-                        help_text=_("The date the flaw was discovered."))
+                            verbose_name=_("Date"),
+                            help_text=_("The date the flaw was discovered."))
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
 
     class Meta:
@@ -2558,6 +2558,11 @@ class Finding(models.Model):
                                          max_length=100,
                                          verbose_name=_("Component version"),
                                          help_text=_("Version of the affected component."))
+    component = models.ForeignKey(Component, 
+                                  on_delete=models.SET_NULL, 
+                                  blank=True, 
+                                  null=True,
+                                  help_text=_("Reference to the component"))
     found_by = models.ManyToManyField(Test_Type,
                                       editable=False,
                                       verbose_name=_("Found by"),
