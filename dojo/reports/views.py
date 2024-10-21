@@ -132,6 +132,10 @@ class CustomReport(View):
         self.host = report_url_resolver(request)
         self.selected_widgets = self.get_selected_widgets(request)
         self.widgets = list(self.selected_widgets.values())
+        self.include_disclaimer = get_system_setting("disclaimer_reports_forced", 0)
+        self.disclaimer = get_system_setting("disclaimer_reports")
+        if self.include_disclaimer and len(self.disclaimer) == 0:
+            self.disclaimer = "Please configure in System Settings."
 
     def get_selected_widgets(self, request):
         selected_widgets = report_widget_factory(json_data=request.POST["json"], request=request, host=self.host,
@@ -164,7 +168,10 @@ class CustomReport(View):
             "host": self.host,
             "finding_notes": self.finding_notes,
             "finding_images": self.finding_images,
-            "user_id": self.request.user.id}
+            "user_id": self.request.user.id,
+            "include_disclaimer": self.include_disclaimer,
+            "disclaimer": self.disclaimer,
+        }
 
 
 def report_findings(request):
