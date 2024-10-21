@@ -12,6 +12,7 @@ def _is_many_to_many_relation(field):
 
     Returns:
         bool: true if the field is a many-to-many relationship
+
     """
     return isinstance(field, related.ManyToManyDescriptor)
 
@@ -27,6 +28,7 @@ def _is_one_to_one_relation(field):
 
     Returns:
         bool: true if the field is a one-to-one relationship
+
     """
     return isinstance(field, related.ForwardManyToOneDescriptor)
 
@@ -38,6 +40,7 @@ def _get_prefetchable_fields(serializer):
 
     Args:
         serializer (Serializer): [description]
+
     """
 
     def _is_field_prefetchable(field):
