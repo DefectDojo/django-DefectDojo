@@ -34,6 +34,7 @@ python3 manage.py check
 
 exec celery --app=dojo \
     worker \
+  --logfile=stdout \
   --loglevel="${DD_CELERY_LOG_LEVEL}" \
   --pool="${DD_CELERY_WORKER_POOL_TYPE}" \
   --concurrency="${DD_CELERY_WORKER_CONCURRENCY:-1}" \
