@@ -654,12 +654,6 @@ def save_vulnerability_ids(finding, vulnerability_ids):
     for vulnerability_id in vulnerability_ids:
         Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
 
-    # Set CVE
-    if vulnerability_ids:
-        finding.cve = vulnerability_ids[0]
-    else:
-        finding.cve = None
-
 
 def save_vulnerability_ids_template(finding_template, vulnerability_ids):
     # Remove duplicates
@@ -671,9 +665,3 @@ def save_vulnerability_ids_template(finding_template, vulnerability_ids):
     # Save new vulnerability ids
     for vulnerability_id in vulnerability_ids:
         Vulnerability_Id_Template(finding_template=finding_template, vulnerability_id=vulnerability_id).save()
-
-    # Set CVE
-    if vulnerability_ids:
-        finding_template.cve = vulnerability_ids[0]
-    else:
-        finding_template.cve = None
