@@ -162,7 +162,7 @@
             $(".chosen-select").chosen({disable_search_threshold: 10});
             $('#notification-scope').val('{{ scope }}');
             $('.chosen-select').trigger('chosen:updated');
-            $('#notification-scope').change(function() { window.location = '/notifications/' + $(this).val(); });
+            $('#notification-scope').change(function() { window.location = '{% url 'notifications' %}/' + $(this).val(); });
         });
     </script>
 {% endblock postscript %}
