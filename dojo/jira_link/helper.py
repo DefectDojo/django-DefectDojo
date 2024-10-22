@@ -145,9 +145,11 @@ def can_be_pushed_to_jira(obj, form=None):
 
         logger.debug("can_be_pushed_to_jira: %s, %s, %s", active, verified, severity)
 
-        if not active or not verified:
-            logger.debug("Findings must be active and verified to be pushed to JIRA")
-            return False, "Findings must be active and verified to be pushed to JIRA", "not_active_or_verified"
+        isenforced = get_system_setting("enforce_verified_status", True)
+
+        if not active or (not verified and isenforced):
+            logger.debug("Findings must be active and verified, if enforced by system settings, to be pushed to JIRA")
+            return False, "Findings must be active and verified, if enforced by system settings, to be pushed to JIRA", "not_active_or_verified"
 
         jira_minimum_threshold = None
         if System_Settings.objects.get().jira_minimum_severity:

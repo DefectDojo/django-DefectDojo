@@ -109,7 +109,10 @@ def finding_queries(
     weekly_counts = query_counts_for_period(MetricsPeriod.WEEK, weeks_between)
 
     top_ten = get_authorized_products(Permissions.Product_View)
-    top_ten = top_ten.filter(engagement__test__finding__verified=True,
+    isverified = get_system_setting("enforce_verified_status", True)
+    if not isverified:
+        isverified = None
+    top_ten = top_ten.filter(engagement__test__finding__verified=isverified,
                              engagement__test__finding__false_p=False,
                              engagement__test__finding__duplicate=False,
                              engagement__test__finding__out_of_scope=False,
