@@ -1,12 +1,11 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from django.utils import get_system_setting
 from jira.exceptions import JIRAError
 
 import dojo.jira_link.helper as jira_helper
 from dojo.models import Dojo_User, Finding, Notes, User
-from dojo.utils import timezone
+from dojo.utils import get_system_setting, timezone
 
 """
 Author: Aaron Weaver

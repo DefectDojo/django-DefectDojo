@@ -359,7 +359,7 @@ class System_Settings(models.Model):
                                           help_text=_("How many seconds will DefectDojo waits for response from webhook endpoint"))
 
     enforce_verified_status = models.BooleanField(
-        default=True, 
+        default=True,
         verbose_name=_("Enforce Verified Status"),
         help_text=_("When enabled, features such as product grading, jira "
                     "integration, metrics, and reports will only interact "

@@ -1522,7 +1522,7 @@ def calculate_grade(product, *args, **kwargs):
     if not isverified:
         isverified = None
     if system_settings.enable_product_grade:
-        logger.debug("calculating product grade for %s:%s", product.id, product.name)        
+        logger.debug("calculating product grade for %s:%s", product.id, product.name)
         severity_values = Finding.objects.filter(
             ~Q(severity="Info"),
             active=True,
