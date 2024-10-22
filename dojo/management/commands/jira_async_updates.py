@@ -22,10 +22,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         findings = Finding.objects.exclude(jira_issue__isnull=True)
-        isverified = get_system_setting("enforce_verified_status", True)
-        if not isverified:
-            isverified = None
-        findings = findings.filter(verified=isverified, active=True)
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True, active=True)
+        else:
+            findings = findings.filter(active=True)
+
         findings = findings.prefetch_related("jira_issue")
         # finding = Finding.objects.get(id=1)
         for finding in findings:
