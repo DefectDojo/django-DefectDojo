@@ -7,7 +7,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.risk_acceptance.risk_pending import is_permissions_risk_acceptance 
 from dojo.utils import get_product
 from dojo.request_cache import cache_for_request
-import dojo.transfer_findings.helper as helper_tf
+import dojo.risk_acceptance.helper as helper_ra
 
 register = template.Library()
 
@@ -87,7 +87,7 @@ def user_can_clear_peer_review(finding, user):
 @register.filter
 def enable_button(finding, button):
     button_dict = {
-        "Add Risk Acceptance": helper_tf.enable_flow_transfer_finding
+        "Add Risk Acceptance": helper_ra.enable_flow_accept_risk
     }
     if button in button_dict and isinstance(button, str):
         function_action = button_dict[button]

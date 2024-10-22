@@ -426,3 +426,10 @@ def get_config_risk():
     credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
     connection = Connection(base_url=settings.AZURE_DEVOPS_ORGANIZATION_URL, creds=credentials)
     return get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[1])
+
+def enable_flow_accept_risk(**kwargs):
+    # add rule custom if necessary
+    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
+    and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra")).exists()):
+        return True
+    return False
