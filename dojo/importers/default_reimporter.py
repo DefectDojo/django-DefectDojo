@@ -179,6 +179,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
+        if not self.engagement:
+            self.engagement = self.test.engagement
+
         for unsaved_finding in parsed_findings:
             # make sure the severity is something is digestible
             unsaved_finding = self.sanitize_severity(unsaved_finding)
