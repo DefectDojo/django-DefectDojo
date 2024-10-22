@@ -3,6 +3,7 @@ import logging
 import re
 from datetime import datetime
 from tempfile import NamedTemporaryFile
+from typing import List
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
