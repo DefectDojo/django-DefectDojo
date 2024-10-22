@@ -189,11 +189,8 @@ def simple_metrics(request):
         total_opened = []
         findings_broken_out = {}
 
-        isverified = get_system_setting("enforce_verified_status", True)
-        if not isverified:
-            isverified = None
         total = Finding.objects.filter(test__engagement__product__prod_type=pt,
-                                       verified=isverified,
+                                       verified=True,
                                        false_p=False,
                                        duplicate=False,
                                        out_of_scope=False,
@@ -307,12 +304,8 @@ def product_type_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))["total"]
 
-            isverified = get_system_setting("enforce_verified_status", True)
-            if not isverified:
-                isverified = None
-
             overall_in_pt = Finding.objects.filter(date__lt=end_date,
-                                                   verified=isverified,
+                                                   verified=True,
                                                    false_p=False,
                                                    duplicate=False,
                                                    out_of_scope=False,
@@ -322,7 +315,7 @@ def product_type_counts(request):
                 "numerical_severity").annotate(Count("numerical_severity")).order_by("numerical_severity")
 
             total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                         verified=isverified,
+                                                         verified=True,
                                                          false_p=False,
                                                          duplicate=False,
                                                          out_of_scope=False,
@@ -335,7 +328,7 @@ def product_type_counts(request):
                          output_field=IntegerField())))["total"]
 
             all_current_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                       verified=isverified,
+                                                       verified=True,
                                                        false_p=False,
                                                        duplicate=False,
                                                        out_of_scope=False,
@@ -350,7 +343,7 @@ def product_type_counts(request):
                 "numerical_severity")
 
             top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                             engagement__test__finding__verified=isverified,
+                                             engagement__test__finding__verified=True,
                                              engagement__test__finding__false_p=False,
                                              engagement__test__finding__duplicate=False,
                                              engagement__test__finding__out_of_scope=False,
@@ -466,11 +459,8 @@ def product_tag_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))["total"]
 
-            isverified = get_system_setting("enforce_verified_status", True)
-            if not isverified:
-                isverified = None
             overall_in_pt = Finding.objects.filter(date__lt=end_date,
-                                                   verified=isverified,
+                                                   verified=True,
                                                    false_p=False,
                                                    duplicate=False,
                                                    out_of_scope=False,
@@ -481,7 +471,7 @@ def product_tag_counts(request):
                 "numerical_severity").annotate(Count("numerical_severity")).order_by("numerical_severity")
 
             total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                         verified=isverified,
+                                                         verified=True,
                                                          false_p=False,
                                                          duplicate=False,
                                                          out_of_scope=False,
@@ -495,7 +485,7 @@ def product_tag_counts(request):
                          output_field=IntegerField())))["total"]
 
             all_current_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                       verified=isverified,
+                                                       verified=True,
                                                        false_p=False,
                                                        duplicate=False,
                                                        out_of_scope=False,
@@ -511,7 +501,7 @@ def product_tag_counts(request):
                 "numerical_severity")
 
             top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                             engagement__test__finding__verified=isverified,
+                                             engagement__test__finding__verified=True,
                                              engagement__test__finding__false_p=False,
                                              engagement__test__finding__duplicate=False,
                                              engagement__test__finding__out_of_scope=False,
@@ -596,10 +586,7 @@ def view_engineer(request, eid):
         raise PermissionDenied
     now = timezone.now()
 
-    isverified = get_system_setting("enforce_verified_status", True)
-    if not isverified:
-        isverified = None
-    findings = Finding.objects.filter(reporter=user, verified=isverified)
+    findings = Finding.objects.filter(reporter=user, verified=True)
     closed_findings = Finding.objects.filter(mitigated_by=user)
     open_findings = findings.exclude(mitigated__isnull=False)
     open_month = findings.filter(date__year=now.year, date__month=now.month)

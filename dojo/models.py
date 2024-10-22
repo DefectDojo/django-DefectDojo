@@ -359,15 +359,6 @@ class System_Settings(models.Model):
     webhooks_notifications_timeout = models.IntegerField(default=10,
                                           help_text=_("How many seconds will DefectDojo waits for response from webhook endpoint"))
 
-    enforce_verified_status = models.BooleanField(
-        default=True, 
-        verbose_name=_("Enforce Verified Status"),
-        help_text=_("When enabled, features such as product grading, jira "
-                    "integration, metrics, and reports will only interact "
-                    "with verified findings.",
-        ),
-    )
-
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
             "(EXPERIMENTAL) DefectDojo will automatically mark the finding as a "
@@ -1205,14 +1196,9 @@ class Product(models.Model):
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
             return {}
-        isverified = True
-        from dojo.utils import get_system_setting
-        if not get_system_setting("enforce_verified_status", True):
-            isverified = None
-
         critical = Finding.objects.filter(test__engagement__product=self,
                                           mitigated__isnull=True,
-                                          verified=isverified,
+                                          verified=True,
                                           false_p=False,
                                           duplicate=False,
                                           out_of_scope=False,
@@ -1221,7 +1207,7 @@ class Product(models.Model):
                                                        end_date]).count()
         high = Finding.objects.filter(test__engagement__product=self,
                                       mitigated__isnull=True,
-                                      verified=isverified,
+                                      verified=True,
                                       false_p=False,
                                       duplicate=False,
                                       out_of_scope=False,
@@ -1230,7 +1216,7 @@ class Product(models.Model):
                                                    end_date]).count()
         medium = Finding.objects.filter(test__engagement__product=self,
                                         mitigated__isnull=True,
-                                        verified=isverified,
+                                        verified=True,
                                         false_p=False,
                                         duplicate=False,
                                         out_of_scope=False,
@@ -1239,7 +1225,7 @@ class Product(models.Model):
                                                      end_date]).count()
         low = Finding.objects.filter(test__engagement__product=self,
                                      mitigated__isnull=True,
-                                     verified=isverified,
+                                     verified=True,
                                      false_p=False,
                                      duplicate=False,
                                      out_of_scope=False,
@@ -1558,11 +1544,7 @@ class Engagement(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        from dojo.utils import get_system_setting
-        isverified = get_system_setting("enforce_verified_status", True)
-        if not isverified:
-            isverified = None
-        return Finding.objects.filter(risk_accepted=False, active=True, verified=isverified, duplicate=False, test__engagement=self)
+        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test__engagement=self)
 
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
@@ -2132,11 +2114,7 @@ class Test(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        from dojo.utils import get_system_setting
-        isverified = get_system_setting("enforce_verified_status", True)
-        if not isverified:
-            isverified = None
-        return Finding.objects.filter(risk_accepted=False, active=True, verified=isverified, duplicate=False, test=self)
+        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test=self)
 
     def accept_risks(self, accepted_risks):
         self.engagement.risk_acceptance.add(*accepted_risks)
@@ -2760,11 +2738,7 @@ class Finding(models.Model):
     # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
-        from dojo.utils import get_system_setting
-        isverified = get_system_setting("enforce_verified_status", True)
-        if not isverified:
-            isverified = None
-        return cls.objects.filter(active=True, verified=isverified, duplicate=False, risk_accepted=False)
+        return cls.objects.filter(active=True, verified=True, duplicate=False, risk_accepted=False)
 
     @property
     def risk_acceptance(self):
@@ -3938,7 +3912,7 @@ class JIRA_Project(models.Model):
                                                              verbose_name=_("Add vulnerability Id as a JIRA label"),
                                                              blank=False)
     push_all_issues = models.BooleanField(default=False, blank=True,
-         help_text=_("Automatically create JIRA tickets for verified findings, assuming enforce_verified_status is True, or for all findings otherwise. Once linked, the JIRA ticket will continue to sync, regardless of status in DefectDojo."))
+         help_text=_("Automatically create JIRA tickets for verified findings. Once linked, the JIRA ticket will continue to sync, regardless of status in DefectDojo."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))

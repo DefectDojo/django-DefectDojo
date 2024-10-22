@@ -23,10 +23,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         findings = Finding.objects.exclude(jira_issue__isnull=True)
-        isverified = get_system_setting("enforce_verified_status", True)
-        if not isverified:
-            isverified = None
-        findings = findings.filter(verified=isverified, active=True)
+        findings = findings.filter(verified=True, active=True)
 
         for finding in findings:
             logger.info("Checking issue:" + str(finding.id))
