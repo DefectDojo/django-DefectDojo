@@ -2396,8 +2396,8 @@ class EndpointFilterHelper(FilterSet):
             ("findings_count", "findings_count"),
         ),
         field_labels={
-            "findings_count": "Findings Count ",
-        }
+            "findings_count": "Active Findings Count ",
+        },
     )
 
 

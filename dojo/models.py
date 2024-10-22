@@ -1839,9 +1839,15 @@ class Endpoint(models.Model):
             risk_accepted=False,
         ).count() > 0
 
-    @property
+    @cached_property
     def findings_count(self):
-        return self.findings.all().count()
+        try: 
+            # If prefetched/annotated (used for ordering based on active findings count)
+            return self.active_finding_count
+        except AttributeError:
+            self.active_finding_count = self.findings.all().count()
+            return self.active_finding_count
+
 
     def active_findings(self):
         return self.findings.filter(
@@ -1868,9 +1874,13 @@ class Endpoint(models.Model):
             status_finding__risk_accepted=False,
         ).order_by("numerical_severity")
 
-    @property
+    @cached_property
     def active_findings_count(self):
-        return self.active_findings().count()
+        try: 
+            return self.active_finding_count
+        except AttributeError:
+            self.active_finding_count = self.active_findings().count()
+            return self.active_finding_count
 
     @property
     def active_verified_findings_count(self):
