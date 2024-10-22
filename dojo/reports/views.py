@@ -84,8 +84,11 @@ class ReportBuilder(View):
         return filter_class(self.request.GET, queryset=findings)
 
     def get_endpoints(self, request: HttpRequest):
+        isverified = get_system_setting("enforce_verified_status", True)
+        if not isverified:
+            isverified = None
         endpoints = Endpoint.objects.filter(finding__active=True,
-                                            finding__verified=True,
+                                            finding__verified=isverified,
                                             finding__false_p=False,
                                             finding__duplicate=False,
                                             finding__out_of_scope=False,
@@ -186,8 +189,11 @@ def report_findings(request):
 
 
 def report_endpoints(request):
+    isverified = get_system_setting("enforce_verified_status", True)
+    if not isverified:
+        isverified = None
     endpoints = Endpoint.objects.filter(finding__active=True,
-                                        finding__verified=True,
+                                        finding__verified=isverified,
                                         finding__false_p=False,
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
@@ -261,9 +267,12 @@ def endpoint_host_report(request, eid):
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
+    isverified = get_system_setting("enforce_verified_status", True)
+    if not isverified:
+        isverified = None
     endpoint_ids = Endpoint.objects.filter(product=product,
                                            finding__active=True,
-                                           finding__verified=True,
+                                           finding__verified=isverified,
                                            finding__false_p=False,
                                            finding__duplicate=False,
                                            finding__out_of_scope=False,

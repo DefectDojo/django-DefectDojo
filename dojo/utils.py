@@ -1136,10 +1136,13 @@ def opened_in_period(start_date, end_date, **kwargs):
         end_date.month,
         end_date.day,
         tzinfo=timezone.get_current_timezone())
+    isverified = get_system_setting("enforce_verified_status", True)
+    if not isverified:
+        isverified = None
     opened_in_period = Finding.objects.filter(
         date__range=[start_date, end_date],
         **kwargs,
-        verified=True,
+        verified=isverified,
         false_p=False,
         duplicate=False,
         out_of_scope=False,
@@ -1151,7 +1154,7 @@ def opened_in_period(start_date, end_date, **kwargs):
     total_opened_in_period = Finding.objects.filter(
         date__range=[start_date, end_date],
         **kwargs,
-        verified=True,
+        verified=isverified,
         false_p=False,
         duplicate=False,
         out_of_scope=False,
@@ -1193,7 +1196,7 @@ def opened_in_period(start_date, end_date, **kwargs):
         "to_date_total":
         Finding.objects.filter(
             date__lte=end_date.date(),
-            verified=True,
+            verified=isverified,
             false_p=False,
             duplicate=False,
             out_of_scope=False,
@@ -1515,13 +1518,16 @@ def calculate_grade(product, *args, **kwargs):
         logger.warning("ignoring calculate product for product None!")
         return
 
+    isverified = get_system_setting("enforce_verified_status", True)
+    if not isverified:
+        isverified = None
     if system_settings.enable_product_grade:
-        logger.debug("calculating product grade for %s:%s", product.id, product.name)
+        logger.debug("calculating product grade for %s:%s", product.id, product.name)        
         severity_values = Finding.objects.filter(
             ~Q(severity="Info"),
             active=True,
             duplicate=False,
-            verified=True,
+            verified=isverified,
             false_p=False,
             test__engagement__product=product).values("severity").annotate(
                 Count("numerical_severity")).order_by()
