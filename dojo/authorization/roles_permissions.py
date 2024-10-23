@@ -660,7 +660,8 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance_Bullk,
-            Permissions.Finding_Code_Review
+            Permissions.Finding_Code_Review,
+            Permissions.Metrics_Panel_Admin,
         },
         Roles.Risk: {
             Permissions.Product_Type_View,
