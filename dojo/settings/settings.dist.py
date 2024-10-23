@@ -364,7 +364,7 @@ env = environ.FileAwareEnv(
     DD_SYSTEM_USER=(str, "admin"),
     # These variables are the params of providers name
     DD_PROVIDERS=(str, ""),
-    DD_PROVIDER_ENDPOINT_MAPPING=(str, ""),
+    DD_PROVIDER_ENDPOINT_MAPPING=(str, "{\"provider-1\": \"event-provider-1\", \"provider-2\": \"event-provider-2\"}"),
     # The variable that sets the provider risk accept api and credentials
     DD_PROVIDER_URL=(str, ""),
     DD_PROVIDER_HEADER=(str, ""),
