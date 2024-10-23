@@ -1,6 +1,7 @@
 import logging
 import crum
 import requests
+import json
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from django.conf import settings
@@ -188,6 +189,8 @@ def add_findings_to_risk_acceptance(risk_acceptance: Risk_Acceptance, findings):
                 notes=f"The finding was accepted by the user {user.username} and for finding parent id: {finding.id}(policies for the transfer of findings)",
                 send_notification=False
             )
+            acceptance_days = (risk_acceptance.expiration_date.date() - timezone.now().date()).days
+            handle_from_provider_risk(finding, acceptance_days)
             # Update any endpoint statuses on each of the findings
             update_endpoint_statuses(finding, accept_risk=True)
             risk_acceptance.accepted_findings.add(finding)
@@ -384,6 +387,22 @@ def update_endpoint_statuses(finding: Finding, *, accept_risk: bool) -> None:
             status.risk_accepted = False
         status.last_modified = timezone.now()
         status.save()
+
+def handle_from_provider_risk(finding, acceptance_days):
+    logger.info(f'Risk accepting for external provider Id:{finding.id}')
+    tag = get_matching_value(list_a=finding.tags.tags, list_b=settings.PROVIDERS.split('//'))
+    endpoints = json.loads(settings.PROVIDERS_ENDPOINT_MAPPING)
+    if tag is not None:
+        logger.info(f"Vulnerability {finding.vuln_id_from_tool} has provider tags")
+        finding_id = finding.vuln_id_from_tool
+        risk_accept_provider(
+            finding_id=finding_id,
+            provider_endpoint=endpoints[tag],
+            provider_tag=tag,
+            acceptance_days=acceptance_days,
+            url=settings.PROVIDER_URL,
+            header=settings.PROVIDER_HEADER,
+            token=settings.PROVIDER_TOKEN)
 
 @retry(tries=100, delay=10)
 def risk_accept_provider(
