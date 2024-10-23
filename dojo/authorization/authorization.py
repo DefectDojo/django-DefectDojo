@@ -28,6 +28,7 @@ from dojo.models import (
     TransferFinding,
     Test,
     TransferFindingFinding,
+    Risk_Acceptance
 )
 from dojo.request_cache import cache_for_request
 logger = logging.getLogger(__name__)
@@ -111,6 +112,8 @@ def user_has_permission(user, obj, permission):
         return custom_permissions_transfer_findings(user, obj, permission)
     elif (isinstance(obj, TransferFindingFinding) and permission in Permissions.get_transfer_finding_finding_permissions()):
         return user_has_permission(user, obj.transfer_findings, permission)
+    elif (isinstance(obj, Risk_Acceptance) and permission in Permissions.get_engagement_permissions()):
+        return user_has_permission(user, obj.engagement, permission)
     elif (
         isinstance(obj, Finding_Group)
         and permission in Permissions.get_finding_group_permissions()

@@ -1410,11 +1410,20 @@ def add_risk_acceptance_pending(request, eid, fid):
             return post_risk_acceptance_pending(request, finding, eng, eid, product, product_type)
         else:
             form = get_risk_acceptance_pending(request, finding, eng, product, product_type)
-        finding_choices = Finding.objects.filter(duplicate=False,
-                                                 test__engagement=eng,
-                                                 active=True,
-                                                 risk_status__in=["Risk Active", "Risk Expired"],
-                                                 severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        finding_choices = (
+            Finding.objects.filter(
+                duplicate=False,
+                test__engagement=eng,
+                active=True,
+                risk_status__in=["Risk Active", "Risk Expired"],
+                severity=finding.severity,
+            )
+            .filter(
+                NOT_ACCEPTED_FINDINGS_QUERY
+                & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-"))
+            )
+            .order_by("title")
+        )
         if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
             finding_choices = finding_choices.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
         form.fields['accepted_findings'].queryset = finding_choices
@@ -1790,7 +1799,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                                                      active=True,
                                                      risk_accepted=False,
                                                      severity=risk_acceptance.severity,
-                                                     duplicate=False)
+                                                     duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-")))
         if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
             unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
     else:

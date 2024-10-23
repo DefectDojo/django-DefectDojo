@@ -27,11 +27,11 @@
                                     </li>
                                 {% endif %}
 
-                                <li role="presentation">
+                                <!-- <li role="presentation">
                                     <a rel="noopener noreferrer" href="{% url 'product_findings_report' %}">
                                         <i class="fa-solid fa-file-lines"></i> Findings Report
                                     </a>
-                                </li>
+                                </li> -->
                             </ul>
                         </div>
                     </h3>
@@ -154,11 +154,11 @@
                                           {% endif %}
                                         {% endif %}
                                         <li role="separator" class="divider"></li>
-                                        <li role="presentation">
+                                        <!-- <li role="presentation">
                                           <a rel="noopener noreferrer" href="{% url 'product_report' prod.id %}">
                                             <i class="fa-solid fa-file-lines"></i> Product Report
                                           </a>
-                                        </li>
+                                        </li> -->
                                         {% if prod|has_object_permission:"Benchmark_Edit" %}
                                           {% if system_settings.enable_benchmark and benchmark_type %}
                                             <li role="separator" class="divider"></li>

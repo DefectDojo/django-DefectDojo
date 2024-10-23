@@ -1008,7 +1008,8 @@ class RiskPendingForm(forms.ModelForm):
 
         self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
         self.fields['accepted_by'].queryset = get_authorized_contacts_for_product_type(severity, product, product_type)
-        if category and category in settings.COMPLIANCE_FILTER_RISK:
+        owner_username = self.fields['owner'].queryset.first().username
+        if (category and category in settings.COMPLIANCE_FILTER_RISK) and not self.fields['accepted_by'].queryset.filter(username=owner_username).exists():
             self.fields['approvers'].widget = forms.widgets.HiddenInput()
             self.fields['accepted_by'].widget = forms.widgets.SelectMultiple(attrs={'size': 10})
             self.fields['accepted_by'].queryset = get_users_for_group('Compliance')
