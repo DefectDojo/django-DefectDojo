@@ -94,7 +94,7 @@ class TruffleHogParser:
                     dynamic_finding=False,
                     static_finding=True,
                     nb_occurences=1,
-                    vuln_id_from_tool= "SECRET_SCANNING"
+                    vuln_id_from_tool= json_data.get("Id", "SECRET_SCANNING")
                 )
                 finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")]
                 dupes[dupe_key] = finding
@@ -195,7 +195,7 @@ class TruffleHogParser:
                     dynamic_finding=False,
                     static_finding=True,
                     nb_occurences=1,
-                    vuln_id_from_tool= "SECRET_SCANNING"
+                    vuln_id_from_tool= json_data.get("Id", "SECRET_SCANNING")
                 )
                 finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")]
                 dupes[dupe_key] = finding
