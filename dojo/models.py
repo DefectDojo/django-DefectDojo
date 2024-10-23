@@ -1204,78 +1204,23 @@ class Product(models.Model):
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
             return {}
-        isverified = True
+
         from dojo.utils import get_system_setting
+        findings = Finding.objects.filter(test__engagement__product=self,
+                                        mitigated__isnull=True,
+                                        false_p=False,
+                                        duplicate=False,
+                                        out_of_scope=False,
+                                        date__range=[start_date,
+                                                    end_date])
+
         if get_system_setting("enforce_verified_status", True):
-            critical = Finding.objects.filter(test__engagement__product=self,
-                                            mitigated__isnull=True,
-                                            verified=isverified,
-                                            false_p=False,
-                                            duplicate=False,
-                                            out_of_scope=False,
-                                            severity="Critical",
-                                            date__range=[start_date,
-                                                        end_date]).count()
-            high = Finding.objects.filter(test__engagement__product=self,
-                                        mitigated__isnull=True,
-                                        verified=isverified,
-                                        false_p=False,
-                                        duplicate=False,
-                                        out_of_scope=False,
-                                        severity="High",
-                                        date__range=[start_date,
-                                                    end_date]).count()
-            medium = Finding.objects.filter(test__engagement__product=self,
-                                            mitigated__isnull=True,
-                                            verified=isverified,
-                                            false_p=False,
-                                            duplicate=False,
-                                            out_of_scope=False,
-                                            severity="Medium",
-                                            date__range=[start_date,
-                                                        end_date]).count()
-            low = Finding.objects.filter(test__engagement__product=self,
-                                        mitigated__isnull=True,
-                                        verified=isverified,
-                                        false_p=False,
-                                        duplicate=False,
-                                        out_of_scope=False,
-                                        severity="Low",
-                                        date__range=[start_date,
-                                                    end_date]).count()
-        else:
-            critical = Finding.objects.filter(test__engagement__product=self,
-                                            mitigated__isnull=True,
-                                            false_p=False,
-                                            duplicate=False,
-                                            out_of_scope=False,
-                                            severity="Critical",
-                                            date__range=[start_date,
-                                                        end_date]).count()
-            high = Finding.objects.filter(test__engagement__product=self,
-                                        mitigated__isnull=True,
-                                        false_p=False,
-                                        duplicate=False,
-                                        out_of_scope=False,
-                                        severity="High",
-                                        date__range=[start_date,
-                                                    end_date]).count()
-            medium = Finding.objects.filter(test__engagement__product=self,
-                                            mitigated__isnull=True,
-                                            false_p=False,
-                                            duplicate=False,
-                                            out_of_scope=False,
-                                            severity="Medium",
-                                            date__range=[start_date,
-                                                        end_date]).count()
-            low = Finding.objects.filter(test__engagement__product=self,
-                                        mitigated__isnull=True,
-                                        false_p=False,
-                                        duplicate=False,
-                                        out_of_scope=False,
-                                        severity="Low",
-                                        date__range=[start_date,
-                                                    end_date]).count()
+            findings = findings.filter(verified=True)
+
+        critical = findings.filter(severity="Critical").count()
+        high = findings.filter(severity="High").count()
+        medium = findings.filter(severity="Medium").count()
+        low = findings.filter(severity="Low").count()
 
         return {"Critical": critical,
                 "High": high,
@@ -1591,10 +1536,11 @@ class Engagement(models.Model):
     def unaccepted_open_findings(self):
         from dojo.utils import get_system_setting
 
+        findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
         if get_system_setting("enforce_verified_status", True):
-            return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test__engagement=self)
+            findings = findings.filter(verified=True)
 
-        return Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
+        return findings
 
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
@@ -2165,10 +2111,11 @@ class Test(models.Model):
     @property
     def unaccepted_open_findings(self):
         from dojo.utils import get_system_setting
+        findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
         if get_system_setting("enforce_verified_status", True):
-            return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test=self)
+            findings = findings.filter(verified=True)
 
-        return Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
+        return findings
 
     def accept_risks(self, accepted_risks):
         self.engagement.risk_acceptance.add(*accepted_risks)
@@ -2793,10 +2740,11 @@ class Finding(models.Model):
     @classmethod
     def unaccepted_open_findings(cls):
         from dojo.utils import get_system_setting
+        results = cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
         if get_system_setting("enforce_verified_status", True):
-            return cls.objects.filter(active=True, verified=True, duplicate=False, risk_accepted=False)
+            results = results.filter(verified=True)
 
-        return cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
+        return results
 
     @property
     def risk_acceptance(self):

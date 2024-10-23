@@ -1579,25 +1579,19 @@ def calculate_grade(product, *args, **kwargs):
         logger.warning("ignoring calculate product for product None!")
         return
 
-    
     if system_settings.enable_product_grade:
         logger.debug("calculating product grade for %s:%s", product.id, product.name)
+        findings = Finding.objects.filter(
+                ~Q(severity="Info"),
+                active=True,
+                duplicate=False,
+                false_p=False,
+                test__engagement__product=product)
+
         if get_system_setting("enforce_verified_status", True):
-            severity_values = Finding.objects.filter(
-                ~Q(severity="Info"),
-                active=True,
-                duplicate=False,
-                verified=True,
-                false_p=False,
-                test__engagement__product=product).values("severity").annotate(
-                    Count("numerical_severity")).order_by()
-        else:
-            severity_values = Finding.objects.filter(
-                ~Q(severity="Info"),
-                active=True,
-                duplicate=False,
-                false_p=False,
-                test__engagement__product=product).values("severity").annotate(
+            findings = findings.filter(verified=True)
+
+        severity_values = findings.values("severity").annotate(
                     Count("numerical_severity")).order_by()
 
         low = 0

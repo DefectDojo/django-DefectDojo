@@ -60,6 +60,7 @@ class DojoTestUtilsMixin:
         ss.disable_jira_webhook_secret = disable_jira_webhook_secret
         ss.jira_webhook_secret = jira_webhook_secret
         ss.enable_product_tag_inheritance = enable_product_tag_inehritance
+        ss.enforce_verified_status = False  # TODO: Remove this before checking in....this for test case only
         ss.save()
 
     def create_product_type(self, name, *args, description="dummy description", **kwargs):

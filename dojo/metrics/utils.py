@@ -110,15 +110,9 @@ def finding_queries(
 
     top_ten = get_authorized_products(Permissions.Product_View)
     if get_system_setting("enforce_verified_status", True):
-        top_ten = top_ten.filter(engagement__test__finding__verified=True,
-                             engagement__test__finding__false_p=False,
-                             engagement__test__finding__duplicate=False,
-                             engagement__test__finding__out_of_scope=False,
-                             engagement__test__finding__mitigated__isnull=True,
-                             engagement__test__finding__severity__in=("Critical", "High", "Medium", "Low"),
-                             prod_type__in=prod_type)
-    else:
-        top_ten = top_ten.filter(engagement__test__finding__false_p=False,
+        top_ten = top_ten.filter(engagement__test__finding__verified=True)
+
+    top_ten = top_ten.filter(engagement__test__finding__false_p=False,
                              engagement__test__finding__duplicate=False,
                              engagement__test__finding__out_of_scope=False,
                              engagement__test__finding__mitigated__isnull=True,

@@ -189,23 +189,18 @@ def simple_metrics(request):
         total_opened = []
         findings_broken_out = {}
 
+        total = Finding.objects.filter(test__engagement__product__prod_type=pt,
+                                       false_p=False,
+                                       duplicate=False,
+                                       out_of_scope=False,
+                                       date__month=now.month,
+                                       date__year=now.year,
+                                       )
+
         if get_system_setting("enforce_verified_status", True):
-            total = Finding.objects.filter(test__engagement__product__prod_type=pt,
-                                       verified=True,
-                                       false_p=False,
-                                       duplicate=False,
-                                       out_of_scope=False,
-                                       date__month=now.month,
-                                       date__year=now.year,
-                                       ).distinct()
-        else:
-            total = Finding.objects.filter(test__engagement__product__prod_type=pt,
-                                       false_p=False,
-                                       duplicate=False,
-                                       out_of_scope=False,
-                                       date__month=now.month,
-                                       date__year=now.year,
-                                       ).distinct()
+            total = total.filter(verified=True)
+
+        total = total.distinct()
 
         for f in total:
             if f.severity == "Critical":
