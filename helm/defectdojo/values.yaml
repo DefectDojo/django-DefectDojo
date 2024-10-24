@@ -234,13 +234,29 @@ django:
   tolerations: []
   uwsgi:
     livenessProbe:
-      # Enable liveness checks on uwsgi container. Those values are use on nginx readiness checks as well.
+      # Enable liveness checks on uwsgi container.
       enabled: true
       failureThreshold: 6
-      initialDelaySeconds: 3
+      initialDelaySeconds: 0
       periodSeconds: 10
       successThreshold: 1
       timeoutSeconds: 5
+    readinessProbe:
+      # Enable readiness checks on uwsgi container.
+      enabled: true
+      failureThreshold: 6
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    startupProbe:
+      # Enable startup checks on uwsgi container.
+      enabled: true
+      failureThreshold: 30
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      successThreshold: 1
+      timeoutSeconds: 1
     resources:
       requests:
         cpu: 100m
