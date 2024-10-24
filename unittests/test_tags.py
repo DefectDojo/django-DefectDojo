@@ -24,7 +24,7 @@ class TagTests(DojoAPITestCase):
 
         del finding_details["id"]
 
-        finding_details["title"] = "tags test " + str(random.randint(1, 9999))
+        finding_details["title"] = "tags test " + str(random.randint(1, 9999))  # noqa: S311
         finding_details["tags"] = tags
         response = self.post_new_finding_api(finding_details)
 
