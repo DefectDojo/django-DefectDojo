@@ -831,13 +831,13 @@
                                                         {% trans "View Vulnerable Hosts" %}
                                                     </a>
                                                 </li>
-                                                <li role="separator" class="divider"></li>
-                                                <li>
+                                                <!-- <li role="separator" class="divider"></li> -->
+                                                <!-- <li>
                                                     <a rel="noopener noreferrer" href="{% url 'product_endpoint_report' product_tab.product.id %}">
                                                         <i class="fa-solid fa-file-lines"></i>
                                                         {% trans "Endpoint Report" %}
                                                     </a>
-                                                </li>
+                                                </li> -->
                                                 {% if product_tab.product|has_object_permission:"Endpoint_Add" %}
                                                     <li role="separator" class="divider"></li>
                                                     <li>
