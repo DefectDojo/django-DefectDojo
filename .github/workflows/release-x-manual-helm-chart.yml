@@ -64,7 +64,8 @@ jobs:
         id: pin_image
         run: |-
           yq --version
-          yq -i '.tag="${{ github.event.inputs.release_number }}"'  helm/defectdojo/values.yaml
+          yq -i '.django-tag="${{ github.event.inputs.release_number }}"'  helm/defectdojo/values.yaml
+          yq -i '.nginx-tag="${{ github.event.inputs.release_number }}"'  helm/defectdojo/values.yaml
           echo "Current image tag:`yq -r '.tag' helm/defectdojo/values.yaml`"
 
       - name: Package Helm chart
