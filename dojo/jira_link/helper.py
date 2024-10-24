@@ -159,7 +159,13 @@ def can_be_pushed_to_jira(obj, form=None):
     elif isinstance(obj, Finding_Group):
         if not obj.findings.all():
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is empty.", "error_empty"
-        if "Active" not in obj.status():
+        # Accommodating a strange behavior where a finding group sometimes prefers `obj.status` rather than `obj.status()`
+        try:
+            not_active = "Active" not in obj.status()
+        except TypeError:  # TypeError: 'str' object is not callable
+            not_active = "Active" not in obj.status
+        # Determine if the finding group is not active
+        if not_active:
             return False, f"{to_str_typed(obj)} cannot be pushed to jira as it is not active.", "error_inactive"
 
     else:
