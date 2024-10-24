@@ -140,12 +140,7 @@ class SemgrepParser:
         if upper_value == "LOW":
             return "Low"
         if upper_value == "INFO":
-            if "WARNING" == val.upper():
-                return "Medium"
-            if "ERROR" == val.upper() or "HIGH" == val.upper():
-                return "High"
-            if "INFO" == val.upper():
-                return "Info"
+            return "Info"
         msg = f"Unknown value for severity: {val}"
         raise ValueError(msg)
 

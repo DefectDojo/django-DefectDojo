@@ -103,9 +103,7 @@ def update_azure_groups(backend, uid, user=None, social=None, *args, **kwargs):
 
 
 def is_group_id(group):
-    if re.search(r"^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$", group):
-        return True
-    return False
+    return bool(re.search("^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$", group))
 
 
 def assign_user_to_groups(user, group_names, social_provider):

@@ -249,8 +249,5 @@ class BugCrowdParser:
 
     def get_endpoint(self, url):
         stripped_url = url.strip()
-        if "://" in stripped_url:  # is the host full uri?
-            endpoint = Endpoint.from_uri(stripped_url)
-        else:
-            endpoint = Endpoint.from_uri("//" + stripped_url)
-        return endpoint
+        # is the host full uri?
+        return Endpoint.from_uri(stripped_url) if "://" in stripped_url else Endpoint.from_uri("//" + stripped_url)
