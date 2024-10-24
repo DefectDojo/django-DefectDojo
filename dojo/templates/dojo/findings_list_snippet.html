@@ -310,6 +310,9 @@
                                     {% endif %}
                                     <th></th>
                                     <th class="nowrap centered severity-sort">
+                                        {% trans "Id" %}
+                                    </th>
+                                    <th class="nowrap centered severity-sort">
                                         {% trans "Severity" %}
                                     </th>
                                     <th class="nowrap">
@@ -544,6 +547,7 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <td>{{finding.id}}</td>
                                         <td class="centered severity-sort" data-severity="{{ finding.severity_display }}">
                                             <span class="label severity severity-{{ finding.severity }}">
                                                 {{ finding.severity_display }}
