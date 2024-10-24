@@ -155,7 +155,7 @@ class TestTenableParser(DojoTestCase):
                 self.assertEqual("CVE-2005-1794", vulnerability_id)
 
     def test_parse_some_findings_with_cvssv3_nessus_legacy(self):
-        """test with cvssv3"""
+        """Test with cvssv3"""
         with open(path.join(path.dirname(__file__), "../scans/tenable/nessus/nessus_with_cvssv3.nessus"), encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())

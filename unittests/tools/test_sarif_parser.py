@@ -28,7 +28,7 @@ class TestSarifParser(DojoTestCase):
                 self.common_checks(finding)
 
     def test_suppression_report(self):
-        """test report file having different suppression definitions"""
+        """Test report file having different suppression definitions"""
         with open(path.join(path.dirname(__file__), "../scans/sarif/suppression_test.sarif"), encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
