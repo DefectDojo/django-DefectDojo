@@ -162,7 +162,7 @@ def can_be_pushed_to_jira(obj, form=None):
         # Accommodating a strange behavior where a finding group sometimes prefers `obj.status` rather than `obj.status()`
         try:
             not_active = "Active" not in obj.status()
-        except TypeError: # TypeError: 'str' object is not callable
+        except TypeError:  # TypeError: 'str' object is not callable
             not_active = "Active" not in obj.status
         # Determine if the finding group is not active
         if not_active:
