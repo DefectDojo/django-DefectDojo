@@ -87,7 +87,7 @@
                                 {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}    
                                 <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
                             {% endif %}
-							<th class="text-center" nowrap="nowrap">Active (Verified) Findings</th>
+              <th class="text-center" nowrap="nowrap">{% dojo_sort request 'Active (Verified) Findings' 'findings_count' %}</th>
 							<th>Status</th>
                         </tr>
 
