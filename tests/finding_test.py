@@ -74,7 +74,7 @@ class FindingTest(BaseTestCase):
                 file_found = True
                 break
         self.assertTrue(file_found, f"Cannot find {file_name}")
-        os.remove(file_name)
+        Path(file_name).unlink()
 
     def test_csv_export(self):
         driver = self.driver

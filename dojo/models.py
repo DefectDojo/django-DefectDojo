@@ -6,6 +6,7 @@ import os
 import re
 import warnings
 from datetime import datetime
+from pathlib import Path
 from uuid import uuid4
 
 import hyperlink
@@ -3655,7 +3656,7 @@ class Risk_Acceptance(models.Model):
         # logger.debug('path: "%s"', self.path)
         if not self.path:
             return None
-        return os.path.basename(self.path.name)
+        return Path(self.path.name).name
 
     @property
     def name_and_expiration_info(self):
