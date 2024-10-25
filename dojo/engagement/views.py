@@ -100,6 +100,7 @@ from dojo.utils import (
     add_success_message_to_response,
     async_delete,
     calculate_grade,
+    generate_file_response_from_file_path,
     get_cal_event,
     get_page_items,
     get_return_url,
@@ -1516,7 +1517,7 @@ def upload_threatmodel(request, eid):
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
-    return FileResponse(open(eng.tmodel_path, "rb"))
+    return generate_file_response_from_file_path(eng.tmodel_path, )
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
