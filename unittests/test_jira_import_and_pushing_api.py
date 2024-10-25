@@ -556,6 +556,22 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 
+    def test_import_with_push_to_jira_not_verified(self):
+        # Test added to ensure that when verified status is not enforced the finding does get pushed to JIRA
+        from dojo.utils import System_Settings, get_system_setting
+        ss = System_Settings.objects.get()
+        ss.enforce_verified_status = False
+        ss.save()
+
+        self.assertFalse(get_system_setting("enforce_verified_status", True))
+
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 2)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
     def test_engagement_epic_creation(self):
         eng = self.get_engagement(3)
         # Set epic_mapping to true
