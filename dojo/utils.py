@@ -5,8 +5,8 @@ import importlib
 import logging
 import mimetypes
 import os
-import re
 import pathlib
+import re
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
@@ -2619,7 +2619,7 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
 
     return generate_file_response_from_file_path(
-        file_path, file_name=file_object.title, file_size=file_object.file.size
+        file_path, file_name=file_object.title, file_size=file_object.file.size,
     )
 
 

@@ -17,7 +17,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q
 from django.db.models.query import Prefetch, QuerySet
-from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
@@ -1517,7 +1517,7 @@ def upload_threatmodel(request, eid):
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
-    return generate_file_response_from_file_path(eng.tmodel_path, )
+    return generate_file_response_from_file_path(eng.tmodel_path)
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
