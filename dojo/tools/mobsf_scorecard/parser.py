@@ -87,7 +87,7 @@ class MobSFScorecardParser:
                             title=title,
                             cwe=919,  # Weaknesses in Mobile Applications
                             test=test,
-                            description=f"**Category:** {section}\n\n{1}".format(section, description),
+                            description=f"**Category:** {section}\n\n{description}",
                             severity=finding_severities[finding_severity],
                             references=None,
                             date=find_date,
