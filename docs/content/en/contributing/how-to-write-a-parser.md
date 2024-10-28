@@ -309,7 +309,7 @@ $ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_
 or like this:
 
 {{< highlight bash >}}
-$ dc-unittest.sh --test-case unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser
+$ ./dc-unittest.sh --test-case unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser
 {{< /highlight >}}
 
 {{% alert title="Information" color="info" %}}
