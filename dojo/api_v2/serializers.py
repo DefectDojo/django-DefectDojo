@@ -3,7 +3,6 @@ import logging
 import os
 import re
 from datetime import datetime
-from typing import List
 
 import six
 import tagulous
@@ -1517,7 +1516,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        def validate_findings_have_same_engagement(finding_objects: List[Finding]):
+        def validate_findings_have_same_engagement(finding_objects: list[Finding]):
             engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
             if engagements > 1:
                 msg = "You are not permitted to add findings from multiple engagements"
@@ -2043,7 +2042,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.findings_count
 
     # TODO: maybe extend_schema_field is needed here?
-    def get_findings_list(self, obj) -> List[int]:
+    def get_findings_list(self, obj) -> list[int]:
         return obj.open_findings_list
 
 

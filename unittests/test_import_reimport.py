@@ -1456,8 +1456,8 @@ class ImportReimportMixin:
             engagement=test.engagement,
             test_type=test_type,
             scan_type=self.anchore_grype_scan_type,
-            target_start=datetime.datetime.now(datetime.timezone.utc),
-            target_end=datetime.datetime.now(datetime.timezone.utc),
+            target_start=datetime.datetime.now(datetime.UTC),
+            target_end=datetime.datetime.now(datetime.UTC),
         )
         reimport_test.save()
 

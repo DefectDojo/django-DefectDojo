@@ -2399,10 +2399,7 @@ def get_jira_issue_template_dir_choices():
         #     template_list.append((os.path.join(base_dir, filename), filename))
 
         for dirname in dirnames:
-            if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
-                clean_base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
-            else:
-                clean_base_dir = base_dir
+            clean_base_dir = base_dir.removeprefix(settings.TEMPLATE_DIR_PREFIX)
             template_dir_list.append((os.path.join(clean_base_dir, dirname), dirname))
 
     logger.debug("templates: %s", template_dir_list)
