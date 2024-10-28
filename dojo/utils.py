@@ -8,9 +8,9 @@ import os
 import pathlib
 import re
 from calendar import monthrange
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
-from typing import Callable, Optional
 
 import bleach
 import crum
@@ -2587,7 +2587,7 @@ def get_open_findings_burndown(product):
     return past_90_days
 
 
-def get_custom_method(setting_name: str) -> Optional[Callable]:
+def get_custom_method(setting_name: str) -> Callable | None:
     """
     Attempts to load and return the method specified by fully-qualified name at the given setting.
 
