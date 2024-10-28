@@ -2065,7 +2065,6 @@ class CommonImportScanSerializer(serializers.Serializer):
         help_text="Override the verified setting from the tool.",
     )
 
-    scan_type = serializers.ChoiceField(choices=get_choices_sorted())
     # TODO: why do we allow only existing endpoints?
     endpoint_to_add = serializers.PrimaryKeyRelatedField(
         queryset=Endpoint.objects.all(),
@@ -2093,26 +2092,8 @@ class CommonImportScanSerializer(serializers.Serializer):
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True, default=None, queryset=User.objects.all(),
     )
-    tags = TagListSerializerField(
-        required=False, allow_empty=True, help_text="Add tags that help describe this scan.",
-    )
-    close_old_findings = serializers.BooleanField(
-        required=False,
-        default=False,
-        help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
-        "If service has been set, only the findings for this service will be closed.",
-    )
-    close_old_findings_product_scope = serializers.BooleanField(
-        required=False,
-        default=False,
-        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
-        "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
-    )
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
-    version = serializers.CharField(
-        required=False, help_text="Version that was scanned.",
-    )
     build_id = serializers.CharField(
         required=False, help_text="ID of the build that was scanned.",
     )
@@ -2281,11 +2262,28 @@ class CommonImportScanSerializer(serializers.Serializer):
 
 
 class ImportScanSerializer(CommonImportScanSerializer):
-
+    scan_type = serializers.ChoiceField(choices=get_choices_sorted())
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), required=False,
     )
-
+    tags = TagListSerializerField(
+        required=False, allow_empty=True, help_text="Add tags that help describe this scan.",
+    )
+    close_old_findings = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+        "If service has been set, only the findings for this service will be closed.",
+    )
+    close_old_findings_product_scope = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
+        "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
+    )
+    version = serializers.CharField(
+        required=False, help_text="Version that was scanned.",
+    )
     # extra fields populated in response
     # need to use the _id suffix as without the serializer framework gets
     # confused
@@ -2341,8 +2339,35 @@ class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
     do_not_reactivate = serializers.BooleanField(
         default=False, required=False, help_text=help_do_not_reactivate,
     )
+    scan_type = serializers.ChoiceField(
+        choices=get_choices_sorted(), required=True,
+    )
     test = serializers.PrimaryKeyRelatedField(
         required=False, queryset=Test.objects.all(),
+    )
+    # Close the old findings if the parameter is not provided. This is to
+    # maintain the old API behavior after reintroducing the close_old_findings parameter
+    # also for ReImport.
+    close_old_findings = serializers.BooleanField(
+        required=False,
+        default=True,
+        help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
+    )
+    close_old_findings_product_scope = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
+        "By default, it is false meaning that only old findings of the same type in the engagement are in scope. "
+        "Note that this only applies on the first call to reimport-scan.",
+    )
+    version = serializers.CharField(
+        required=False,
+        help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.",
+    )
+    tags = TagListSerializerField(
+        required=False,
+        allow_empty=True,
+        help_text="Modify existing tags that help describe this scan. (Existing test tags will be overwritten)",
     )
 
     def set_context(
