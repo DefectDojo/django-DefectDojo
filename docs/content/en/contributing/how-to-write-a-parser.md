@@ -297,7 +297,7 @@ $ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.<your
 or like this:
 
 {{< highlight bash >}}
-$ dc-unittest.sh --test-case unittests.tools.<your_unittest_py_file>.<main_class_name>
+$ ./dc-unittest.sh --test-case unittests.tools.<your_unittest_py_file>.<main_class_name>
 {{< /highlight >}}
 
 Example for the blackduck hub parser:
