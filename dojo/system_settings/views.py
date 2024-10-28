@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 
 from django.conf import settings
 from django.contrib import messages
@@ -59,7 +58,7 @@ class SystemSettingsView(View):
         self,
         request: HttpRequest,
         context: dict,
-    ) -> Tuple[HttpRequest, bool]:
+    ) -> tuple[HttpRequest, bool]:
         if context["form"].is_valid():
             if (context["form"].cleaned_data["default_group"] is None and context["form"].cleaned_data["default_group_role"] is not None) or \
                (context["form"].cleaned_data["default_group"] is not None and context["form"].cleaned_data["default_group_role"] is None):
