@@ -752,6 +752,23 @@ class UploadThreatForm(forms.Form):
         attrs={"accept": ".jpg,.png,.pdf"}),
         label="Select Threat Model")
 
+    def clean(self):
+        if (file := self.cleaned_data.get("file", None)) is not None:
+            ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+            valid_extensions = [".jpg", ".png", ".pdf"]
+            if ext.lower() not in valid_extensions:
+                if accepted_extensions := f"{', '.join(valid_extensions)}":
+                    msg = (
+                        "Unsupported extension. Supported extensions are as "
+                        f"follows: {accepted_extensions}"
+                    )
+                else:
+                    msg = (
+                        "File uploads are prohibited due to the list of acceptable "
+                        "file extensions being empty"
+                    )
+                raise ValidationError(msg)
+
 
 class MergeFindings(forms.ModelForm):
     FINDING_ACTION = (("", "Select an Action"), ("inactive", "Inactive"), ("delete", "Delete"))
