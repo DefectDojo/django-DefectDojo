@@ -12,7 +12,8 @@ X-DefectDojo-Event: test_added
 ## Event HTTP body
 ```json
 {
-    "description": null,
+    "description": "",
+    "event_title": "",
     "engagement": {
         "id": 7,
         "name": "notif eng",

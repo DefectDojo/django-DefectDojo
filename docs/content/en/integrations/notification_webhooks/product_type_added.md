@@ -12,7 +12,8 @@ X-DefectDojo-Event: product_type_added
 ## Event HTTP body
 ```json
 {
-    "description": null,
+    "description": "",
+    "event_title": "",
     "product_type": {
         "id": 4,
         "name": "notif prod type",
