@@ -25,7 +25,15 @@ class TrivyOperatorParser:
             data = json.loads(str(scan_data, "utf-8"))
         except Exception:
             data = json.loads(scan_data)
+        findings = []
+        if type(data) is list:
+            for listitems in data:
+                findings += self.output_findings(listitems, test)
+        else:
+            findings += self.output_findings(data, test)
+        return findings
 
+    def output_findings(self, data, test):
         if data is None:
             return []
         metadata = data.get("metadata", None)

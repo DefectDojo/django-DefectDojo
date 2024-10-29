@@ -157,3 +157,9 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("AVD-KSV-0012", finding.unsaved_vulnerability_ids[0])
+
+    def test_findings_in_list(self):
+        with open(sample_path("findings_in_list.json"), encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 18)
