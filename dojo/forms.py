@@ -752,6 +752,23 @@ class UploadThreatForm(forms.Form):
         attrs={"accept": ".jpg,.png,.pdf"}),
         label="Select Threat Model")
 
+    def clean(self):
+        if (file := self.cleaned_data.get("file", None)) is not None:
+            ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+            valid_extensions = [".jpg", ".png", ".pdf"]
+            if ext.lower() not in valid_extensions:
+                if accepted_extensions := f"{', '.join(valid_extensions)}":
+                    msg = (
+                        "Unsupported extension. Supported extensions are as "
+                        f"follows: {accepted_extensions}"
+                    )
+                else:
+                    msg = (
+                        "File uploads are prohibited due to the list of acceptable "
+                        "file extensions being empty"
+                    )
+                raise ValidationError(msg)
+
 
 class MergeFindings(forms.ModelForm):
     FINDING_ACTION = (("", "Select an Action"), ("inactive", "Inactive"), ("delete", "Delete"))
@@ -2422,7 +2439,7 @@ class BaseJiraForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class JIRAForm(BaseJiraForm):
+class AdvancedJIRAForm(BaseJiraForm):
     issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
                                        help_text="Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.")
@@ -2442,8 +2459,11 @@ class JIRAForm(BaseJiraForm):
         exclude = [""]
 
 
-class ExpressJIRAForm(BaseJiraForm):
+class JIRAForm(BaseJiraForm):
     issue_key = forms.CharField(required=True, help_text="A valid issue ID is required to gather the necessary information.")
+    issue_template_dir = forms.ChoiceField(required=False,
+                                       choices=JIRA_TEMPLATE_CHOICES,
+                                       help_text="Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.")
 
     class Meta:
         model = JIRA_Instance
@@ -2853,7 +2873,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ["product", "engagement"]
-        fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "jira_labels", "default_assignee", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "product_jira_sla_notification", "risk_acceptance_expiration_notification"]
+        fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "jira_labels", "default_assignee", "enabled", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "product_jira_sla_notification", "risk_acceptance_expiration_notification"]
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2891,6 +2911,7 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields["custom_fields"].disabled = False
                 self.fields["default_assignee"].disabled = False
                 self.fields["jira_labels"].disabled = False
+                self.fields["enabled"].disabled = False
                 self.fields["add_vulnerability_id_to_jira_label"].disabled = False
                 self.fields["push_all_issues"].disabled = False
                 self.fields["enable_engagement_epic_mapping"].disabled = False
@@ -2915,6 +2936,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial["custom_fields"] = jira_project_product.custom_fields
                     self.initial["default_assignee"] = jira_project_product.default_assignee
                     self.initial["jira_labels"] = jira_project_product.jira_labels
+                    self.initial["enabled"] = jira_project_product.enabled
                     self.initial["add_vulnerability_id_to_jira_label"] = jira_project_product.add_vulnerability_id_to_jira_label
                     self.initial["push_all_issues"] = jira_project_product.push_all_issues
                     self.initial["enable_engagement_epic_mapping"] = jira_project_product.enable_engagement_epic_mapping
@@ -2930,6 +2952,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields["custom_fields"].disabled = True
                     self.fields["default_assignee"].disabled = True
                     self.fields["jira_labels"].disabled = True
+                    self.fields["enabled"].disabled = True
                     self.fields["add_vulnerability_id_to_jira_label"].disabled = True
                     self.fields["push_all_issues"].disabled = True
                     self.fields["enable_engagement_epic_mapping"].disabled = True

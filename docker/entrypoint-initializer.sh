@@ -154,7 +154,7 @@ EOD
    echo "Importing fixtures all at once"
    python3 manage.py loaddata system_settings initial_banner_conf product_type test_type \
        development_environment benchmark_type benchmark_category benchmark_requirement \
-       language_type objects_review regulation initial_surveys role
+       language_type objects_review regulation initial_surveys role sla_configurations
 
   echo "UPDATE dojo_system_settings SET jira_webhook_secret='$DD_JIRA_WEBHOOK_SECRET'" | python manage.py dbshell
 
