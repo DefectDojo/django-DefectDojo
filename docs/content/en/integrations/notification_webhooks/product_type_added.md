@@ -13,7 +13,7 @@ X-DefectDojo-Event: product_type_added
 ```json
 {
     "description": "",
-    "event_title": "",
+    "title": "",
     "product_type": {
         "id": 4,
         "name": "notif prod type",

@@ -683,7 +683,7 @@ class TestNotificationWebhooks(DojoTestCase):
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Product Type notif prod type has been created successfully.",
-                "event_title": "notif prod type",
+                "title": "notif prod type",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/product_types/{prod_type.pk}/",
                 "url_ui": f"http://localhost:8080/product/type/{prod_type.pk}",
@@ -701,7 +701,7 @@ class TestNotificationWebhooks(DojoTestCase):
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Product notif prod has been created successfully.",
-                "event_title": "notif prod",
+                "title": "notif prod",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/products/{prod.pk}/",
                 "url_ui": f"http://localhost:8080/product/{prod.pk}",
@@ -725,7 +725,7 @@ class TestNotificationWebhooks(DojoTestCase):
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Event engagement_added has occurred.",
-                "event_title": "Engagement created for &quot;notif prod&quot;: notif eng",
+                "title": "Engagement created for &quot;notif prod&quot;: notif eng",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/engagements/{eng.pk}/",
                 "url_ui": f"http://localhost:8080/engagement/{eng.pk}",
@@ -756,7 +756,7 @@ class TestNotificationWebhooks(DojoTestCase):
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Event test_added has occurred.",
-                "event_title": "Test created for notif prod: notif eng: notif test (Acunetix Scan)",
+                "title": "Test created for notif prod: notif eng: notif test (Acunetix Scan)",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/tests/{test.pk}/",
                 "url_ui": f"http://localhost:8080/test/{test.pk}",
@@ -792,7 +792,7 @@ class TestNotificationWebhooks(DojoTestCase):
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
                 "description": "Event scan_added_empty has occurred.",
-                "event_title": "Created/Updated 0 findings for notif prod: notif eng: notif test (Acunetix Scan)",
+                "title": "Created/Updated 0 findings for notif prod: notif eng: notif test (Acunetix Scan)",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/tests/{test.pk}/",
                 "url_ui": f"http://localhost:8080/test/{test.pk}",

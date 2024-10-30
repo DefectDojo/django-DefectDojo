@@ -5,7 +5,7 @@ weight: 7
 chapter: true
 ---
 
-Webhooks are HTTP requests coming from the DefectDojo instance towards user-defined webserver which expects this kind of incoming traffic.
+Webhooks are HTTP requests coming from the DefectDojo instance towards a user-defined webserver which expects this kind of incoming traffic.
 
 ## Transition graph:
 

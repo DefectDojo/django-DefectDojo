@@ -20,7 +20,7 @@ X-DefectDojo-Event: scan_added_empty
 ```json
 {
     "description": "",
-    "event_title": "",
+    "title": "",
     "engagement": {
         "id": 7,
         "name": "notif eng",

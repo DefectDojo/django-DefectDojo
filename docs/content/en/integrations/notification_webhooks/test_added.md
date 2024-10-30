@@ -13,7 +13,7 @@ X-DefectDojo-Event: test_added
 ```json
 {
     "description": "",
-    "event_title": "",
+    "title": "",
     "engagement": {
         "id": 7,
         "name": "notif eng",

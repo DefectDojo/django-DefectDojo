@@ -154,8 +154,8 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
 
     notification_message = None
 
-    if (event_title := kwargs.get("title")) is not None:
-        kwargs.update({"event_title": event_title})
+    if (title := kwargs.get("title")) is not None:
+        kwargs.update({"title": title})
 
     if kwargs.get("description") is None:
         kwargs.update({"description": create_description(event, *args, **kwargs)})
