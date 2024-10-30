@@ -2057,7 +2057,7 @@ class EngagementByProductResponseSerializer(TaggitSerializer, serializers.ModelS
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
-    findings_list = serializers.SerializerMethodField()
+    # findings_list = serializers.SerializerMethodField()
 
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
@@ -2084,8 +2084,8 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.findings_count
 
     # TODO: maybe extend_schema_field is needed here?
-    def get_findings_list(self, obj) -> List[int]:
-        return obj.open_findings_list
+    # def get_findings_list(self, obj) -> List[int]:
+    #     return obj.open_findings_list
 
 
 class ImportScanSerializer(serializers.Serializer):

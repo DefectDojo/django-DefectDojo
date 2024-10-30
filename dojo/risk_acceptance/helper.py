@@ -31,11 +31,15 @@ def expire_now(risk_acceptance):
         for finding in risk_acceptance.accepted_findings.all():
             if not finding.active:
                 logger.debug("%i:%s: unaccepting a.k.a reactivating finding.", finding.id, finding)
-                finding.active = True
+              
                 finding.risk_accepted = False
-                finding.risk_status = "Risk Expired"
+                finding.risk_status = "Risk Active"
                 finding.acceptances_confirmed = 0
                 finding.accepted_by = ""
+
+                if not finding.mitigated:
+                    finding.active = True
+                    finding.risk_status = "Risk Expired"
                 
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=False)

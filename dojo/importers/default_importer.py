@@ -267,8 +267,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             hash_code__in=new_hash_codes,
         ).filter(
             test__test_type=self.test.test_type,
-            active=True,
-        )
+        ).filter(Q(active=True) | Q(risk_accepted=True))
         # Accommodate for product scope or engagement scope
         if self.close_old_findings_product_scope:
             old_findings = old_findings.filter(test__engagement__product=self.test.engagement.product)
