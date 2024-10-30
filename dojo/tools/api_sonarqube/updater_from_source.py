@@ -35,7 +35,10 @@ class SonarQubeApiUpdaterFromSource:
         # we don't care about config, each finding knows which config was used
         # during import
 
-        issue = client.get_issue(sonarqube_issue.key)
+        if sonarqube_issue.type == "SECURITY_HOTSPOT":
+            issue = client.get_hotspots(finding.test.branch_tag,sonarqube_issue.key, finding.service)
+        else:
+            issue = client.get_issue(finding.test.branch_tag,sonarqube_issue.key)
         if (
             issue
         ):  # Issue could have disappeared in SQ because a previous scan has resolved the issue as fixed

@@ -1,0 +1,36 @@
+<div class="modal fade modal fade bd-example-modal-sm" id="id_loading_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Accepted all risks</h5>
+        </div>
+        <div id="spinnerContainer">
+            <h4>Loading...</h4>
+            <div class="spinner"></div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+
+   $(document).ready(function() {
+       $(document).on("click", "#id_bullk_risk_accepted", function() {
+           $('#id_loading_modal').modal('show') 
+           eid = $(this).attr("data-eid")
+           raid =$(this).attr("data-raid")
+           $.ajax({
+               url: raid + "/accept",
+               type: "GET",
+               success: function(response) {
+                   $('#id_loading_modal').modal('hide') 
+                   location.reload()
+               },
+               error: function(error) {
+                   console.error(error);
+               }
+           });
+           })
+   });
+</script>

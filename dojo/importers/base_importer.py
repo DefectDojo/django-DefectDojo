@@ -1,5 +1,6 @@
 import base64
 import logging
+import json
 from typing import List, Tuple
 
 from django.conf import settings
@@ -360,32 +361,36 @@ class BaseImporter(ImporterOptions):
         test_import_finding_action_list = []
         for finding in closed_findings:
             logger.debug(f"preparing Test_Import_Finding_Action for closed finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_CLOSED_FINDING,
-            ))
+            if Finding.objects.filter(id=finding.id).exists():
+                test_import_finding_action_list.append(Test_Import_Finding_Action(
+                    test_import=test_import,
+                    finding=finding,
+                    action=IMPORT_CLOSED_FINDING,
+                ))
         for finding in new_findings:
             logger.debug(f"preparing Test_Import_Finding_Action for created finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_CREATED_FINDING,
-            ))
+            if Finding.objects.filter(id=finding.id).exists():
+                test_import_finding_action_list.append(Test_Import_Finding_Action(
+                    test_import=test_import,
+                    finding=finding,
+                    action=IMPORT_CREATED_FINDING,
+                ))
         for finding in reactivated_findings:
             logger.debug(f"preparing Test_Import_Finding_Action for reactivated finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_REACTIVATED_FINDING,
-            ))
+            if Finding.objects.filter(id=finding.id).exists():
+                test_import_finding_action_list.append(Test_Import_Finding_Action(
+                    test_import=test_import,
+                    finding=finding,
+                    action=IMPORT_REACTIVATED_FINDING,
+                ))
         for finding in untouched_findings:
             logger.debug(f"preparing Test_Import_Finding_Action for untouched finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_UNTOUCHED_FINDING,
-            ))
+            if Finding.objects.filter(id=finding.id).exists():
+                test_import_finding_action_list.append(Test_Import_Finding_Action(
+                    test_import=test_import,
+                    finding=finding,
+                    action=IMPORT_UNTOUCHED_FINDING,
+                ))
         # Bulk create all the defined objects
         Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
 
@@ -720,3 +725,16 @@ class BaseImporter(ImporterOptions):
             finding.save(dedupe_option=False)
         else:
             finding.save(dedupe_option=False, push_to_jira=self.push_to_jira)
+    
+    def decode_datetime(self, findings):
+        adjusted_json_data = json.loads(findings)
+        adjusted_json_data = [self.adjust_date_format(obj) for obj in adjusted_json_data]
+        return json.dumps(adjusted_json_data)
+
+
+    def adjust_date_format(self, obj):
+        if "fields" in obj:
+            for field in ["date", "publish_date"]:
+                if field in obj["fields"] and obj["fields"][field] is not None:
+                    obj["fields"][field] = obj["fields"][field][:10]  # Extract date (YYYY-MM-DD)
+        return obj

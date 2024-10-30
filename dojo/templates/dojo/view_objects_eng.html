@@ -31,7 +31,7 @@
                 <tr>
                   <td>
                     {% if object.full_url %}
-                      <a href="{{ object.full_url }}" target="_blank">{{ object.object_id|tracked_object_value }}</a>
+                      <a rel="noopener noreferrer" rel="noopener noreferrer" href="{{ object.full_url }}" target="_blank">{{ object.object_id|tracked_object_value }}</a>
                     {% else %}
                     {{ object.object_id|tracked_object_value }}
                     {% endif %}
@@ -57,7 +57,7 @@ No files for this build were found.
 {% block postscript %}
     {{ block.super }}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="{{request.csp_nonce}}">
         $(function () {
             $('form#bulk_change_form').on('submit', function(e){
                 $('input[type=checkbox].select_one:checked').each(function(){
@@ -142,13 +142,13 @@ No files for this build were found.
                         jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
                     },
                     success: function (data, textStatus, jqXHR) {
-                        // Your processing of the data here. <a href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
+                        // Your processing of the data here. <a rel="noopener noreferrer" href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
                         //
                         $('table#stub_findings').removeClass('hidden');
                         var fid = jqXHR.getResponseHeader('Location').split('/');
                         fid = fid[fid.length - 2];
                         var row = $("<tr id='added-" + fid + "' class='success'></tr>");
-                        var link = $('<a></a>');
+                        var link = $('<a rel="noopener noreferrer"></a>');
 
                         link.attr('href', "/stub_finding/" + fid + "/promote");
                         link.text($("input#quick_add_finding").val());
@@ -156,7 +156,7 @@ No files for this build were found.
                         var severity = $("<td> </td>");
                         var reporter = $("<td>{{ request.user.username }}</td>");
                         var date = $("<td>None</td>");
-                        var actions = $('<td><div class="btn-group"><a class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
+                        var actions = $('<td><div class="btn-group"><a rel="noopener noreferrer" class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a rel="noopener noreferrer" class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
 
                         row.append(title, severity, reporter, date, actions).appendTo("#stub_findings tbody");
                         $("input#quick_add_finding").val("")

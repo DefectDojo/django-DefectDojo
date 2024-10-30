@@ -73,4 +73,6 @@ urlpatterns = [
         name="edit_product_group"),
     re_path(r"^product/group/(?P<groupid>\d+)/delete$", views.delete_product_group,
         name="delete_product_group"),
+    re_path(r"^product/(?P<pid>\d+)/view_transfer_findings/all$",
+            views.view_transfer_finding, name="view_transfer_finding"),
 ]

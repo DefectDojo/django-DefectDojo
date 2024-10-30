@@ -299,7 +299,7 @@ class TestEndpointStatusModel(DojoTestCase):
 
     def test_str(self):
         eps = Endpoint_Status.objects.get(id=1)
-        self.assertEqual(str(eps), "'High Impact Test Finding' on 'ftp://localhost'")
+        self.assertEqual(str(eps), "'2 - High Impact Test Finding' on 'ftp://localhost'")
 
     def test_status_evaluation(self):
         ep1 = Endpoint.objects.get(id=4)

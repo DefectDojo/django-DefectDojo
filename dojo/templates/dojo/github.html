@@ -19,7 +19,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_github' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'add_github' %}">
                                             <i class="fa-solid fa-plus"></i> Add GitHub Configuration
                                         </a>
                                     </li>
@@ -52,7 +52,7 @@
                                 </td>
                                 <td class="text-right">
                                     {% if "dojo.delete_github_conf"|has_configuration_permission:request %}
-                                    <a href="{% url 'delete_github' conf.id %}" class="btn btn-sm btn-danger">
+                                    <a rel="noopener noreferrer" href="{% url 'delete_github' conf.id %}" class="btn btn-sm btn-danger">
                                         <i class="fa-solid fa-trash" style="color:white"></i>
                                         Delete
                                     </a>

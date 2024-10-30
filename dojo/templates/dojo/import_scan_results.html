@@ -11,7 +11,7 @@
     {{ block.super }}
     <h3> Add Tests</h3>
 	<p>
-		<a href="https://defectdojo.github.io/django-DefectDojo/integrations/importing/">Documentation</a>
+		<a rel="noopener noreferrer" href="https://defectdojo.github.io/django-DefectDojo/integrations/importing/">Documentation</a>
 	</p>
     <form class="form-horizontal" action="" enctype="multipart/form-data" method="post">
 	{% csrf_token %}
@@ -27,7 +27,7 @@
 			</label>
 			<div class="col-sm-10 form-control-static">
 				{% if product_tab.product.has_jira_configured %}
-					<a href="{{ engagement_or_product|jira_project_url }}"
+					<a rel="noopener noreferrer" href="{{ engagement_or_product|jira_project_url }}"
 					target="_blank"> {{ engagement_or_product|jira_project_url }} </a>
 				{% else %}
 				None

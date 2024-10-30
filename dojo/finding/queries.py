@@ -39,7 +39,6 @@ def get_authorized_groups(permission, user=None):
         authorized_product_groups,
     )
 
-
 def get_authorized_findings(permission, queryset=None, user=None):
     if user is None:
         user = get_current_user()
@@ -73,6 +72,12 @@ def get_authorized_findings(permission, queryset=None, user=None):
         | Q(test__engagement__product__member=True)
         | Q(test__engagement__product__prod_type__authorized_group=True)
         | Q(test__engagement__product__authorized_group=True))
+
+
+def get_authorized_findings_by_status(permission, queryset=None, user=None):
+    findings = get_authorized_findings(permission, queryset, user)
+    findings = findings.filter(risk_status__in=["Risk Active", "Risk Expired"])
+    return findings
 
 
 def get_authorized_stub_findings(permission):

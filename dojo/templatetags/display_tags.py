@@ -9,6 +9,7 @@ import dateutil.relativedelta
 import git
 import markdown
 from django import template
+from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -486,28 +487,40 @@ def not_specified_icon(tooltip):
 
 
 def stars(filled, total, tooltip):
-    code = '<i class="has-popover" data-placement="bottom" data-content="' + tooltip + '">'
-    for i in range(total):
-        if i < filled:
-            code += '<i class="fa-solid fa-star has-popover" aria-hidden="true"></span>'
-        else:
-            code += '<i class="fa-regular fa-star text-muted has-popover" aria-hidden="true"></span>'
-    code += "</i>"
-    return code
+    html_contect = """
+    <i class="has-popover" data-placement="bottom" data-content="{{tooltip}}">
+        {% for i in range %}
+            {% if i < filled %}
+                <i class="fa-solid fa-star has-popover" aria-hidden="true"></span>
+            {% else %}
+                <i class="fa-regular fa-star text-muted has-popover" aria-hidden="true"></span>
+            {% endif %}
+        {% endfor %}
+    </i>
+    """
+
+    context = {
+        "tooltip": tooltip,
+        "filled": filled,
+        "range": range(total)
+    }
+    template_object = template.Template(html_contect)
+    context_object = template.Context(context)
+    return template_object.render(context_object)
 
 
 @register.filter
 def business_criticality_icon(value):
     if value == Product.VERY_HIGH_CRITICALITY:
-        return mark_safe(stars(5, 5, "Very High"))
+        return stars(5, 5, "Very High")
     if value == Product.HIGH_CRITICALITY:
-        return mark_safe(stars(4, 5, "High"))
+        return stars(4, 5, "High")
     if value == Product.MEDIUM_CRITICALITY:
-        return mark_safe(stars(3, 5, "Medium"))
+        return stars(3, 5, "Medium")
     if value == Product.LOW_CRITICALITY:
-        return mark_safe(stars(2, 5, "Low"))
+        return stars(2, 5, "Low")
     if value == Product.VERY_LOW_CRITICALITY:
-        return mark_safe(stars(1, 5, "Very Low"))
+        return stars(1, 5, "Very Low")
     if value == Product.NONE_CRITICALITY:
         return mark_safe(stars(0, 5, "None"))
     return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
@@ -727,7 +740,45 @@ def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
-    if "Risk Accepted" in display_status:
+    if "Transfer Rejected" in display_status:
+        url = reverse("view_transfer_finding", args=(finding.test.engagement.product.id, ))
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Rejected"><span style="color: #b97a0c;">Transfer Rejected</span></a>'
+        display_status = display_status.replace('Transfer Rejected', link)
+    if "Transfer Pending" in display_status:
+        url = reverse("view_transfer_finding", args=(finding.test.engagement.product.id, ))
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Pending"><span style="color: #1B30DE;">Transfer Pending</span></a>'
+        display_status = display_status.replace("Transfer Pending", link)
+    if "Transfer Accepted" in display_status:
+        url = reverse("view_transfer_finding", args=(finding.test.engagement.product.id, ))
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Accepted"><span style="color: #096C11;">Transfer Accepted</span></a>'
+        display_status = display_status.replace("Transfer Accepted", link)
+    if "Transfer Expired" in display_status:
+        url = reverse("view_transfer_finding", args=(finding.test.engagement.product.id, ))
+        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Expired"><span style="color: #D93E14;">Transfer Expired</span></a>'
+        display_status = display_status.replace("Transfer Expired", link)
+    if 'Risk Expired' in display_status:
+        ra = finding.risk_acceptance
+        if ra:
+            url = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id, ))
+            info = ra.name_and_expiration_info
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Expired"><span style="color: #D93E14;">Risk Expired</span></a>'
+            display_status = display_status.replace("Risk Expired", link)
+    if "Risk Rejected" in display_status:
+        ra = finding.risk_acceptance
+        if ra:
+            url = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id, ))
+            info = ra.name_and_expiration_info
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Rejected"><span style="color: #DA9917;">Risk Rejected</span></a>'
+            display_status = display_status.replace("Risk Rejected", link)
+
+    if "Risk pending" in display_status:
+        ra = finding.risk_acceptance
+        if ra:
+            url = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id, ))
+            info = ra.name_and_expiration_info
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Pending"><span style="color: blue;">Risk pending</span></a>'
+            display_status = display_status.replace("Risk pending", link)
+    elif "Risk Accepted" in display_status:
         ra = finding.risk_acceptance
         if ra:
             url = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id))
@@ -899,6 +950,25 @@ def product_findings(product, findings):
 def class_name(value):
     return value.__class__.__name__
 
+@register.filter
+def status_style_color(status: str):
+    dict_style_color = {
+        "Risk Active": f'<span style="color:gray">{status}</span>',
+        "Risk Pending": f'<span style="color:blue">{status}</span>',
+        "Risk Accepted": f'<span style="color:green">{status}</span>',
+        "Risk Rejected": f'<span style="color:red">{status}</span>',
+        "Risk Expired": f'<span style="color:#D93E14">{status}</span>',
+        "Transfer Pending": f'<span style="color:blue">{status}</span>',
+        "Transfer Accepted": f'<span style="color:green">{status}</span>',
+        "Transfer Expired": f'<span style="color:#D93E14">{status}</span>',
+        "Transfer Rejected": f'<span style="color:red">{status}</span>',
+    }
+    html_contect = dict_style_color.get(status, status)
+    template_object = template.Template(html_contect)
+    context = {"status": status}
+    context_object = template.Context(context)
+    return template_object.render(context_object)
+
 
 @register.filter(needs_autoescape=True)
 def jira_project_tag(product_or_engagement, autoescape=True):
@@ -955,57 +1025,41 @@ def full_name(user):
     return Dojo_User.generate_full_name(user)
 
 
-@register.filter(needs_autoescape=True)
-def import_settings_tag(test_import, autoescape=True):
-    if not test_import or not test_import.import_settings:
-        return ""
-
-    if autoescape:
-        esc = conditional_escape
-    else:
-        def esc(x):
-            return x
-
-    html = """
-
-    <i class="fa %s has-popover %s"
-        title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+@register.filter()
+def import_settings_tag(test_import):
+    html_contect = """
+    <i class="fa {{ icon }} has-popover {{ color }}"
+        title="<i class='fa {{ icon }}'></i> <b>Import Settings</b>"
+        data-trigger="hover"
+        data-container="body"
+        data-html="true"
+        data-placement="bottom"
         data-content="
-            <b>ID:</b> %s<br/>
-            <b>Active:</b> %s<br/>
-            <b>Verified:</b> %s<br/>
-            <b>Minimum Severity:</b> %s<br/>
-            <b>Close Old Findings:</b> %s<br/>
-            <b>Push to jira:</b> %s<br/>
-            <b>Tags:</b> %s<br/>
-            <b>Endpoints:</b> %s<br/>
-        "
+            <b>ID:</b> {{ test_import.id }}<br/>
+            <b>Active:</b> {{ test_import.import_settings.active|default_if_none:'' }}<br/>
+            <b>Verified:</b> {{ test_import.import_settings.verified|default_if_none:'' }}<br/>
+            <b>Minimum Severity:</b> {{ test_import.import_settings.minimum_severity|default_if_none:'' }}<br/>
+            <b>Close Old Findings:</b> {{ test_import.import_settings.close_old_findings|default_if_none:'' }}<br/>
+            <b>Push to jira:</b> {{ test_import.import_settings.push_to_jira|default_if_none:'' }}<br/>
+            <b>Tags:</b> {{ test_import.import_settings.tags|default_if_none:''}}<br/>
+            <b>Endpoints:</b> {{test_import.import_settings.endpoints|default_if_none:''<br/>">
     </i>
     """
+    template_object = template.Template(html_contect)
+    context = {
+        'icon': 'fa-info-circle',
+        'color': '',
+        'test_import': test_import,
+    }
+    context_object = template.Context(context)
 
-    icon = "fa-info-circle"
-    color = ""
-
-    return mark_safe(html % (icon, color, icon,
-                                esc(test_import.id),
-                                esc(test_import.import_settings.get("active", None)),
-                                esc(test_import.import_settings.get("verified", None)),
-                                esc(test_import.import_settings.get("minimum_severity", None)),
-                                esc(test_import.import_settings.get("close_old_findings", None)),
-                                esc(test_import.import_settings.get("push_to_jira", None)),
-                                esc(test_import.import_settings.get("tags", None)),
-                                esc(test_import.import_settings.get("endpoints", test_import.import_settings.get("endpoint", None)))))
+    return template_object.render(context_object)
 
 
-@register.filter(needs_autoescape=True)
-def import_history(finding, autoescape=True):
+@register.filter()
+def import_history(finding):
     if not finding or not settings.TRACK_IMPORT_HISTORY:
         return ""
-
-    if autoescape:
-        conditional_escape
-    else:
-        lambda x: x
 
     # prefetched, so no filtering here
     status_changes = finding.test_import_finding_action_set.all()
@@ -1014,16 +1068,22 @@ def import_history(finding, autoescape=True):
         # assumption is that the first status_change is the initial import
         return ""
 
-    html = """
-
-    <i class="fa-solid fa-clock-rotate-left has-popover"
-        title="<i class='fa-solid fa-clock-rotate-left'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
-        data-content="%s<br/>Currently only showing status changes made by import/reimport."
-    </i>
-    """
-
     list_of_status_changes = ""
     for status_change in status_changes:
         list_of_status_changes += "<b>" + status_change.created.strftime("%b %d, %Y, %H:%M:%S") + "</b>: " + status_change.get_action_display() + "<br/>"
 
-    return mark_safe(html % (list_of_status_changes))
+    html_contect = """
+       <i class="fa-solid fa-clock-rotate-left has-popover"
+        title="<i class='fa-solid fa-clock-rotate-left'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
+        data-content="{{list_of_status_changes}}<br/>Currently only showing status changes made by import/reimport."
+        </i>
+        </i>
+        
+        """
+    context = {
+        "list_of_status_changes": list_of_status_changes
+    }
+    template_object = template.Template(html_contect)
+    context_object = template.Context(context)
+
+    return template_object.render(context_object)

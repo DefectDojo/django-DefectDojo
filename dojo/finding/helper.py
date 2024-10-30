@@ -121,6 +121,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     if is_new_finding or "active" in changed_fields:
         # finding is being (re)activated
         if new_state_finding.active:
+            new_state_finding.pending_acceptance = True
             new_state_finding.false_p = False
             new_state_finding.out_of_scope = False
             new_state_finding.is_mitigated = False

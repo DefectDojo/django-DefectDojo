@@ -7,6 +7,10 @@ class Roles(IntEnum):
     Writer = 2
     Maintainer = 3
     Owner = 4
+    Developer = 6
+    Leader = 7
+    Cibersecurity = 8
+    Risk = 9
 
     @classmethod
     def has_value(cls, value):
@@ -48,8 +52,16 @@ class Permissions(IntEnum):
     Engagement_Add = 1203
     Engagement_Edit = 1206
     Engagement_Delete = 1207
-    Risk_Acceptance = 1208
 
+    Risk_Acceptance = 1208
+    Risk_Acceptance_Edit = 1209
+    Risk_Acceptance_Add = 1210
+    Risk_Acceptance_Delete = 1211
+    Risk_Acceptance_Expire = 1212
+    Risk_Acceptance_Reinstance = 1213
+    Risk_Unaccept = 1214
+    Risk_Acceptance_Bullk = 1215
+    
     Test_View = 1302
     Test_Add = 1303
     Test_Edit = 1306
@@ -60,6 +72,7 @@ class Permissions(IntEnum):
     Import_Scan_Result = 1404
     Finding_Edit = 1406
     Finding_Delete = 1407
+    Finding_Code_Review = 1408
 
     Endpoint_View = 1502
     Endpoint_Add = 1503
@@ -124,6 +137,23 @@ class Permissions(IntEnum):
     Credential_Add = 2703
     Credential_Edit = 2706
     Credential_Delete = 2707
+    
+    Metrics_Panel = 2708
+    Metrics_DevSecOps = 2709
+    Metrics_Panel_Admin = 2710
+
+    Transfer_Finding_View = 2801
+    Transfer_Finding_Edit = 2802
+    Transfer_Finding_Delete = 2803
+    Transfer_Finding_Add = 2804
+    Transfer_Finding_Finding_View = 2805
+    Transfer_Finding_Finding_Edit = 2806
+    Transfer_Finding_Finding_Delete = 2807
+    Transfer_Finding_Finding_Add = 2808
+
+    Api_v2_Key = 2901
+    Swagger_Documentation = 2902
+    Defect_Dojo_Documentation = 2903
 
     @classmethod
     def has_value(cls, value):
@@ -140,12 +170,20 @@ class Permissions(IntEnum):
             Permissions.Engagement_Edit,
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Edit,
+            Permissions.Risk_Acceptance_Delete,
+            Permissions.Risk_Acceptance_Add,
+            Permissions.Risk_Acceptance_Expire,
+            Permissions.Risk_Acceptance_Reinstance,
+            Permissions.Risk_Acceptance_Bullk,
+            Permissions.Risk_Unaccept,
             Permissions.Test_Add,
             Permissions.Import_Scan_Result,
             Permissions.Note_Add,
             Permissions.Note_Delete,
             Permissions.Note_Edit,
             Permissions.Note_View_History,
+
         }.union(cls.get_test_permissions())
 
     @classmethod
@@ -175,31 +213,43 @@ class Permissions(IntEnum):
             Permissions.Note_Delete,
             Permissions.Note_Edit,
             Permissions.Note_View_History,
+            Permissions.Transfer_Finding_Add,
+            Permissions.Finding_Code_Review
         }.union(cls.get_finding_group_permissions())
+    
+    @classmethod
+    def get_transfer_finding_permissions(cls):
+        return {
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Edit,
+            Permissions.Transfer_Finding_Delete,
+            Permissions.Transfer_Finding_Add,
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Edit,
+            Permissions.Transfer_Finding_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_Add,
+        }
+
+    @classmethod
+    def get_transfer_finding_finding_permissions(cls):
+        return {
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Edit,
+            Permissions.Transfer_Finding_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_Add,
+        }
 
     @classmethod
     def get_finding_group_permissions(cls):
-        return {
-            Permissions.Finding_Group_View,
-            Permissions.Finding_Group_Edit,
-            Permissions.Finding_Group_Delete,
-        }
+        return {Permissions.Finding_Group_View, Permissions.Finding_Group_Edit, Permissions.Finding_Group_Delete}
 
     @classmethod
     def get_endpoint_permissions(cls):
-        return {
-            Permissions.Endpoint_View,
-            Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Delete,
-        }
+        return {Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
 
     @classmethod
     def get_product_member_permissions(cls):
-        return {
-            Permissions.Product_View,
-            Permissions.Product_Manage_Members,
-            Permissions.Product_Member_Delete,
-        }
+        return {Permissions.Product_View, Permissions.Product_Manage_Members, Permissions.Product_Member_Delete}
 
     @classmethod
     def get_product_type_member_permissions(cls):
@@ -211,11 +261,7 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_product_group_permissions(cls):
-        return {
-            Permissions.Product_Group_View,
-            Permissions.Product_Group_Edit,
-            Permissions.Product_Group_Delete,
-        }
+        return {Permissions.Product_Group_View, Permissions.Product_Group_Edit, Permissions.Product_Group_Delete}
 
     @classmethod
     def get_product_type_group_permissions(cls):
@@ -238,27 +284,15 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_group_member_permissions(cls):
-        return {
-            Permissions.Group_View,
-            Permissions.Group_Manage_Members,
-            Permissions.Group_Member_Delete,
-        }
+        return {Permissions.Group_View, Permissions.Group_Manage_Members, Permissions.Group_Member_Delete}
 
     @classmethod
     def get_language_permissions(cls):
-        return {
-            Permissions.Language_View,
-            Permissions.Language_Edit,
-            Permissions.Language_Delete,
-        }
+        return {Permissions.Language_View, Permissions.Language_Edit, Permissions.Language_Delete}
 
     @classmethod
     def get_technology_permissions(cls):
-        return {
-            Permissions.Technology_View,
-            Permissions.Technology_Edit,
-            Permissions.Technology_Delete,
-        }
+        return {Permissions.Technology_View, Permissions.Technology_Edit, Permissions.Technology_Delete}
 
     @classmethod
     def get_product_api_scan_configuration_permissions(cls):
@@ -300,6 +334,8 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
         },
         Roles.API_Importer: {
+            Permissions.Product_Type_Add,
+            Permissions.Product_Type_Add_Product,
             Permissions.Product_Type_View,
             Permissions.Product_View,
             Permissions.Engagement_View,
@@ -308,6 +344,8 @@ def get_roles_with_permissions():
             Permissions.Test_View,
             Permissions.Test_Edit,
             Permissions.Finding_View,
+            Permissions.Finding_Edit,
+            Permissions.Finding_Delete,
             Permissions.Finding_Group_View,
             Permissions.Endpoint_View,
             Permissions.Component_View,
@@ -316,6 +354,11 @@ def get_roles_with_permissions():
             Permissions.Technology_View,
             Permissions.Import_Scan_Result,
             Permissions.Credential_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_API_Scan_Configuration_Add,
+            Permissions.Api_v2_Key,
+            Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Add
         },
         Roles.Writer: {
             Permissions.Product_Type_View,
@@ -358,16 +401,19 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
+            Permissions.Finding_Code_Review
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
             Permissions.Product_Type_View,
             Permissions.Product_Type_Member_Delete,
             Permissions.Product_Type_Manage_Members,
+            Permissions.Product_Type_Member_Add_Owner,
             Permissions.Product_Type_Edit,
             Permissions.Product_View,
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
+            Permissions.Product_Member_Add_Owner,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Engagement_View,
@@ -375,6 +421,10 @@ def get_roles_with_permissions():
             Permissions.Engagement_Edit,
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Edit,
+            Permissions.Risk_Acceptance_Bullk,
+            Permissions.Risk_Unaccept,
+            Permissions.Risk_Acceptance_Expire,
             Permissions.Test_View,
             Permissions.Test_Add,
             Permissions.Test_Edit,
@@ -431,6 +481,21 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
+            Permissions.Metrics_Panel,
+            Permissions.Metrics_DevSecOps,
+            Permissions.Metrics_Panel_Admin,
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Edit,
+            Permissions.Transfer_Finding_Delete,
+            Permissions.Transfer_Finding_Add,
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Edit,
+            Permissions.Transfer_Finding_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_Add,
+            Permissions.Swagger_Documentation,
+            Permissions.Api_v2_Key,
+            Permissions.Defect_Dojo_Documentation,
+            Permissions.Finding_Code_Review
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -512,6 +577,112 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
+            Permissions.Finding_Code_Review
+        },
+        Roles.Developer: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Engagement_View,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+            Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Bullk,
+            Permissions.Transfer_Finding_Add,
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Add,
+        },
+        Roles.Leader: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Product_Type_Edit,
+            Permissions.Engagement_View,
+            Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Bullk,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Benchmark_Edit,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Note_View_History,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Language_Add,
+            Permissions.Language_Edit,
+            Permissions.Technology_View,
+            Permissions.Technology_Add,
+            Permissions.Technology_Edit,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+            Permissions.Transfer_Finding_Edit,
+            Permissions.Transfer_Finding_View,
+            Permissions.Transfer_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_View,
+            Permissions.Transfer_Finding_Finding_Edit,
+            Permissions.Transfer_Finding_Finding_Delete,
+            Permissions.Transfer_Finding_Finding_Add,
+            Permissions.Metrics_Panel_Admin,
+        },
+        Roles.Cibersecurity: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Engagement_View,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+            Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Bullk,
+            Permissions.Finding_Code_Review,
+            Permissions.Metrics_Panel_Admin,
+        },
+        Roles.Risk: {
+            Permissions.Product_Type_View,
+            Permissions.Product_View,
+            Permissions.Engagement_View,
+            Permissions.Test_View,
+            Permissions.Finding_View,
+            Permissions.Finding_Group_View,
+            Permissions.Endpoint_View,
+            Permissions.Component_View,
+            Permissions.Note_Add,
+            Permissions.Product_Group_View,
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_Tracking_Files_View,
+            Permissions.Credential_View,
+            Permissions.Risk_Acceptance,
+            Permissions.Metrics_Panel_Admin,
         },
     }
 

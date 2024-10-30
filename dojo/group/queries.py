@@ -3,7 +3,7 @@ from django.db.models import Exists, OuterRef
 
 from dojo.authorization.authorization import get_roles_for_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.models import Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group, Role
+from dojo.models import Dojo_User, Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group, Role
 
 
 def get_authorized_groups(permission):
@@ -55,3 +55,7 @@ def get_product_type_groups_for_group(group):
 
 def get_group_member_roles():
     return Role.objects.exclude(name="API_Importer").exclude(name="Writer")
+
+def get_users_for_group(group_name):
+    group_members = Dojo_Group_Member.objects.filter(group__name=group_name).values_list("user", flat=True)
+    return Dojo_User.objects.filter(id__in=group_members)

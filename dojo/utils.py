@@ -7,6 +7,7 @@ import mimetypes
 import os
 import pathlib
 import re
+import json
 from calendar import monthrange
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
@@ -17,6 +18,7 @@ import crum
 import hyperlink
 import vobject
 from asteval import Interpreter
+from azure.devops.connection import Connection
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from dateutil.parser import parse
@@ -59,6 +61,7 @@ from dojo.models import (
     Languages,
     Notifications,
     Product,
+    SLA_Configuration,
     System_Settings,
     Test,
     User,
@@ -225,7 +228,10 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
 
 # true if both findings are on an engagement that have a different "deduplication on engagement" configuration
 def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
-    return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
+    return (
+        not new_finding.test.engagement.deduplication_on_engagement
+        and to_duplicate_finding.test.engagement.deduplication_on_engagement
+    )
 
 
 def get_endpoints_as_url(finding):
@@ -383,14 +389,18 @@ def deduplicate_legacy(new_finding):
                 deduplicationLogger.debug("%s: file_path and line match", find.id)
                 flag_line_path = True
             else:
-                deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
+                deduplicationLogger.debug(
+                    "no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur"
+                )
         else:
             deduplicationLogger.debug("find.static/dynamic: %s/%s", find.static_finding, find.dynamic_finding)
             deduplicationLogger.debug("new_finding.static/dynamic: %s/%s", new_finding.static_finding, new_finding.dynamic_finding)
             deduplicationLogger.debug("find.file_path: %s", find.file_path)
             deduplicationLogger.debug("new_finding.file_path: %s", new_finding.file_path)
 
-            deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
+            deduplicationLogger.debug(
+                "no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur"
+            )
 
         if find.hash_code == new_finding.hash_code:
             flag_hash = True
@@ -404,7 +414,7 @@ def deduplicate_legacy(new_finding):
         #    hash
         #    and (endpoints or (line and file_path)
         # ---------------------------------------------------------
-        if ((flag_endpoints or flag_line_path) and flag_hash):
+        if (flag_endpoints or flag_line_path) and flag_hash:
             try:
                 set_duplicate(new_finding, find)
             except Exception as e:
@@ -542,6 +552,9 @@ def set_duplicate(new_finding, existing_finding):
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
+    existing_finding.severity = new_finding.severity
+    existing_finding.vuln_id_from_tool = new_finding.vuln_id_from_tool
+    existing_finding.unique_id_from_tool = new_finding.unique_id_from_tool
     logger.debug("saving new finding: %d", new_finding.id)
     super(Finding, new_finding).save()
     logger.debug("saving existing finding: %d", existing_finding.id)
@@ -566,8 +579,10 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.is_mitigated = new_finding.is_mitigated
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
-    existing_finding.notes.create(author=existing_finding.reporter,
-                                    entry="This finding has been automatically re-opened as it was found in recent scans.")
+    existing_finding.notes.create(
+        author=existing_finding.reporter,
+        entry="This finding has been automatically re-opened as it was found in recent scans.",
+    )
     existing_finding.save()
 
 
@@ -617,16 +632,12 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
         # Weeks start on Monday
         if period_type == 0:
             curr = now - relativedelta(weeks=i)
-            start_of_period = curr - relativedelta(
-                weeks=1, weekday=0, hour=0, minute=0, second=0)
-            end_of_period = curr + relativedelta(
-                weeks=0, weekday=0, hour=0, minute=0, second=0)
+            start_of_period = curr - relativedelta(weeks=1, weekday=0, hour=0, minute=0, second=0)
+            end_of_period = curr + relativedelta(weeks=0, weekday=0, hour=0, minute=0, second=0)
         else:
             curr = now - relativedelta(months=i)
-            start_of_period = curr - relativedelta(
-                day=1, hour=0, minute=0, second=0)
-            end_of_period = curr + relativedelta(
-                day=31, hour=23, minute=59, second=59)
+            start_of_period = curr - relativedelta(day=1, hour=0, minute=0, second=0)
+            end_of_period = curr + relativedelta(day=31, hour=23, minute=59, second=59)
 
         o_count = {
             "closed": 0,
@@ -760,12 +771,12 @@ def add_breadcrumb(parent=None,
                 if crumb_view.view_name == obj_crumb_view.view_name:
                     if crumb_view.kwargs == obj_crumb_view.kwargs:
                         if len(obj_crumbs) == 1 and crumb in crumbs:
-                            crumbs = crumbs[:crumbs.index(crumb)]
+                            crumbs = crumbs[: crumbs.index(crumb)]
                         else:
                             obj_crumbs.remove(obj_crumb)
                     else:
                         if crumb in crumbs:
-                            crumbs = crumbs[:crumbs.index(crumb)]
+                            crumbs = crumbs[: crumbs.index(crumb)]
 
         crumbs += obj_crumbs
 
@@ -877,7 +888,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
             start_of_next_week += relativedelta(weeks=1)
 
         # adjust the size or circles
-        ratio = (sqrt(highest_day_count / pi))
+        ratio = sqrt(highest_day_count / pi)
         for punch in punchcard:
             # front-end needs both the count for the label and the ratios of the radii of the circles
             punch.append(punch[2])
@@ -915,26 +926,19 @@ def get_period_counts_legacy(findings,
     for x in range(-1, period_interval):
         if relative_delta == "months":
             # make interval the first through last of month
-            end_date = (start_date + relativedelta(months=x)) + relativedelta(
-                day=1, months=+1, days=-1)
-            new_date = (
-                start_date + relativedelta(months=x)) + relativedelta(day=1)
+            end_date = (start_date + relativedelta(months=x)) + relativedelta(day=1, months=+1, days=-1)
+            new_date = (start_date + relativedelta(months=x)) + relativedelta(day=1)
         else:
             # week starts the monday before
             new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
-        closed_in_range_count = findings_closed.filter(
-            mitigated__date__range=[new_date, end_date]).count()
+        closed_in_range_count = findings_closed.filter(mitigated__date__range=[new_date, end_date]).count()
 
         if accepted_findings:
             risks_a = accepted_findings.filter(
                 risk_acceptance__created__date__range=[
-                    datetime(
-                        new_date.year,
-                        new_date.month,
-                        1,
-                        tzinfo=timezone.get_current_timezone()),
+                    datetime(new_date.year, new_date.month, 1, tzinfo=timezone.get_current_timezone()),
                     datetime(
                         new_date.year,
                         new_date.month,
@@ -980,8 +984,16 @@ def get_period_counts_legacy(findings,
 
         total = crit_count + high_count + med_count + low_count
         accepted_in_period.append(
-            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             crit_count, high_count, med_count, low_count, total])
+            [
+                (tcalendar.timegm(new_date.timetuple()) * 1000),
+                new_date,
+                crit_count,
+                high_count,
+                med_count,
+                low_count,
+                total,
+            ]
+        )
 
     return {
         "opened_per_period": opened_in_period,
@@ -1013,21 +1025,17 @@ def get_period_counts(findings,
     for x in range(-1, period_interval):
         if relative_delta == "months":
             # make interval the first through last of month
-            end_date = (start_date + relativedelta(months=x)) + relativedelta(
-                day=1, months=+1, days=-1)
-            new_date = (
-                start_date + relativedelta(months=x)) + relativedelta(day=1)
+            end_date = (start_date + relativedelta(months=x)) + relativedelta(day=1, months=+1, days=-1)
+            new_date = (start_date + relativedelta(months=x)) + relativedelta(day=1)
         else:
             # week starts the monday before
             new_date = start_date + relativedelta(weeks=x, weekday=MO(1))
             end_date = new_date + relativedelta(weeks=1, weekday=MO(1))
 
         try:
-            closed_in_range_count = findings_closed.filter(
-                mitigated__date__range=[new_date, end_date]).count()
+            closed_in_range_count = findings_closed.filter(mitigated__date__range=[new_date, end_date]).count()
         except:
-            closed_in_range_count = findings_closed.filter(
-                mitigated_time__range=[new_date, end_date]).count()
+            closed_in_range_count = findings_closed.filter(mitigated_time__range=[new_date, end_date]).count()
 
         if accepted_findings:
             date_range = [
@@ -1055,11 +1063,11 @@ def get_period_counts(findings,
             try:
                 severity = finding.severity
                 active = finding.active
-#                risk_accepted = finding.risk_accepted TODO: in future release
+            #                risk_accepted = finding.risk_accepted TODO: in future release
             except:
                 severity = finding.finding.severity
                 active = finding.finding.active
-#                risk_accepted = finding.finding.risk_accepted
+            #                risk_accepted = finding.finding.risk_accepted
 
             try:
                 f_time = datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=tz)
@@ -1105,19 +1113,43 @@ def get_period_counts(findings,
 
         total = f_crit_count + f_high_count + f_med_count + f_low_count
         opened_in_period.append(
-            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             f_crit_count, f_high_count, f_med_count, f_low_count, total,
-             closed_in_range_count])
+            [
+                (tcalendar.timegm(new_date.timetuple()) * 1000),
+                new_date,
+                f_crit_count,
+                f_high_count,
+                f_med_count,
+                f_low_count,
+                total,
+                closed_in_range_count,
+            ]
+        )
 
         total = ra_crit_count + ra_high_count + ra_med_count + ra_low_count
         accepted_in_period.append(
-            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             ra_crit_count, ra_high_count, ra_med_count, ra_low_count, total])
+            [
+                (tcalendar.timegm(new_date.timetuple()) * 1000),
+                new_date,
+                ra_crit_count,
+                ra_high_count,
+                ra_med_count,
+                ra_low_count,
+                total,
+            ]
+        )
 
         total = active_crit_count + active_high_count + active_med_count + active_low_count
         active_in_period.append(
-            [(tcalendar.timegm(new_date.timetuple()) * 1000), new_date,
-             active_crit_count, active_high_count, active_med_count, active_low_count, total])
+            [
+                (tcalendar.timegm(new_date.timetuple()) * 1000),
+                new_date,
+                active_crit_count,
+                active_high_count,
+                active_med_count,
+                active_low_count,
+                total,
+            ]
+        )
 
     return {
         "opened_per_period": opened_in_period,
@@ -1476,8 +1508,14 @@ def get_db_key():
     return db_key
 
 
-def prepare_for_view(encrypted_value):
+def get_aad_key():
+    aad_key = None
+    if hasattr(settings, "AAD_KEY"):
+        aad_key = settings.AAD_KEY
+    return aad_key.encode("utf-8")
 
+
+def prepare_for_view(encrypted_value):
     key = None
     decrypted_value = ""
     if encrypted_value is not NotImplementedError and encrypted_value is not None:
@@ -1549,6 +1587,7 @@ def calculate_grade(product, *args, **kwargs):
 
 def get_celery_worker_status():
     from .tasks import celery_status
+
     res = celery_status.apply_async()
 
     # Wait 5 seconds for a response from Celery
@@ -1593,14 +1632,15 @@ class Product_Tab:
         self.product = product
         self.title = title
         self.tab = tab
-        self.engagement_count = Engagement.objects.filter(
-            product=self.product, active=True).count()
-        self.open_findings_count = Finding.objects.filter(test__engagement__product=self.product,
-                                                          false_p=False,
-                                                          duplicate=False,
-                                                          out_of_scope=False,
-                                                          active=True,
-                                                          mitigated__isnull=True).count()
+        self.engagement_count = Engagement.objects.filter(product=self.product, active=True).count()
+        self.open_findings_count = Finding.objects.filter(
+            test__engagement__product=self.product,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            active=True,
+            mitigated__isnull=True,
+        ).count()
         active_endpoints = Endpoint.objects.filter(
             product=self.product,
             status_endpoint__mitigated=False,
@@ -1654,14 +1694,15 @@ class Product_Tab:
 # Used to display the counts and enabled tabs in the product view
 def tab_view_count(product_id):
     product = Product.objects.get(id=product_id)
-    engagements = Engagement.objects.filter(
-        product=product, active=True).count()
-    open_findings = Finding.objects.filter(test__engagement__product=product,
-                                           false_p=False,
-                                           duplicate=False,
-                                           out_of_scope=False,
-                                           active=True,
-                                           mitigated__isnull=True).count()
+    engagements = Engagement.objects.filter(product=product, active=True).count()
+    open_findings = Finding.objects.filter(
+        test__engagement__product=product,
+        false_p=False,
+        duplicate=False,
+        out_of_scope=False,
+        active=True,
+        mitigated__isnull=True,
+    ).count()
     endpoints = Endpoint.objects.filter(product=product).count()
     # benchmarks = Benchmark_Product_Summary.objects.filter(product=product, publish=True, benchmark_type__enabled=True).order_by('benchmark_type__name')
     benchmark_type = Benchmark_Type.objects.filter(
@@ -1671,13 +1712,11 @@ def tab_view_count(product_id):
 
 def add_language(product, language, files=1, code=1):
     """Add a language to product"""
-    prod_language = Languages.objects.filter(
-        language__language__iexact=language, product=product)
+    prod_language = Languages.objects.filter(language__language__iexact=language, product=product)
 
     if not prod_language:
         try:
-            language_type = Language_Type.objects.get(
-                language__iexact=language)
+            language_type = Language_Type.objects.get(language__iexact=language)
 
             if language_type:
                 lang = Languages(language=language_type, product=product, files=files, code=code)
@@ -1691,11 +1730,11 @@ def apply_cwe_to_template(finding, override=False):
     if System_Settings.objects.get().enable_template_match or override:
         # Attempt to match on CWE and Title First
         template = Finding_Template.objects.filter(
-            cwe=finding.cwe, title__icontains=finding.title, template_match=True).first()
+            cwe=finding.cwe, title__icontains=finding.title, template_match=True
+        ).first()
 
         # If none then match on CWE
-        template = Finding_Template.objects.filter(
-            cwe=finding.cwe, template_match=True).first()
+        template = Finding_Template.objects.filter(cwe=finding.cwe, template_match=True).first()
 
         if template:
             finding.mitigation = template.mitigation
@@ -1754,9 +1793,8 @@ def user_post_save(sender, instance, created, **kwargs):
                not system_settings.default_group_email_pattern:
                 logger.info("setting default group for: " + str(instance))
                 dojo_group_member = Dojo_Group_Member(
-                    group=system_settings.default_group,
-                    user=instance,
-                    role=system_settings.default_group_role)
+                    group=system_settings.default_group, user=instance, role=system_settings.default_group_role
+                )
                 dojo_group_member.save()
 
     # Superusers shall always be staff
@@ -1825,6 +1863,13 @@ def is_scan_file_too_large(scan_file):
 
 def queryset_check(query):
     return query if isinstance(query, QuerySet) else query.qs
+
+
+def sla_expiration_risk_acceptance(sla_settings_name) -> dict:
+    risk_acceptance_expiration = list(SLA_Configuration.objects.filter(name=sla_settings_name).values())
+    if risk_acceptance_expiration:
+        return risk_acceptance_expiration[0]
+    raise ValueError("(RiskAcceptanceExpiration) configuration not defined in database")
 
 
 def sla_compute_and_notify(*args, **kwargs):
@@ -2000,7 +2045,9 @@ def sla_compute_and_notify(*args, **kwargs):
                         # global config or product config set, product level takes precedence
                         try:
                             # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
-                            product_jira_sla_comment_enabled = jira_helper.get_jira_project(finding).product_jira_sla_notification
+                            product_jira_sla_comment_enabled = jira_helper.get_jira_project(
+                                finding
+                            ).product_jira_sla_notification
                         except Exception as e:
                             logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
                             logger.error(f"Error is: {e}")
@@ -2020,14 +2067,16 @@ def sla_compute_and_notify(*args, **kwargs):
                     if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
                         _add_notification(finding, "breached")
                     else:
-                        logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
+                        logger.info(
+                            "Skipping notification as exponential backoff is enabled and the SLA is not a power of two"
+                        )
                 # The finding is within the pre-breach period
                 elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
                     pre_breach_count += 1
                     logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
                     _add_notification(finding, "prebreach")
                 # The finding breaches the SLA today
-                elif (sla_age == 0):
+                elif sla_age == 0:
                     at_breach_count += 1
                     logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
                     _add_notification(finding, "breaching")
@@ -2207,7 +2256,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
             batch.append(model)
 
-            if (i > 0 and i % page_size == 0):
+            if i > 0 and i % page_size == 0:
                 if fields:
                     model_type.objects.bulk_update(batch, fields)
                 batch = []
@@ -2646,3 +2695,38 @@ def generate_file_response_from_file_path(
     response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
     response["Content-Length"] = file_size
     return response
+
+
+def get_remote_json_config(connection: Connection, path_file: str):
+    try:
+        git_client = connection.clients.get_git_client()
+        file_content = git_client.get_item_text(
+            repository_id=settings.AZURE_DEVOPS_REPOSITORY_ID,
+            path=path_file,
+            project=settings.AZURE_DEVOPS_OFFICES_LOCATION.split(",")[0]
+        )
+        data = json.loads(b"".join(file_content).decode("utf-8"))
+        return data
+    except Exception as e:
+        logger.error("Error getting remote configuration file: " + str(e))
+        raise e
+    
+def validate_group_role(request, user, ptid, viewname, role):
+    if settings.DD_VALIDATE_ROLE_USER:
+        valid_group = settings.DD_ROLES_MAP_GROUPS.get(role)
+        contact_info = ""
+        if hasattr(user, 'usercontactinfo'):
+            contact_info = user.usercontactinfo.title if user.usercontactinfo.title else ""
+        if (valid_group not in contact_info):
+            messages.add_message(request,
+                messages.WARNING,
+                _("The user %(user)s does not have the group %(valid_group)s.") % {"user": user, "valid_group":valid_group},
+                extra_tags="alert-warning")
+            return HttpResponseRedirect(reverse(viewname, args=(ptid, )))
+    return None
+
+class Response:
+
+    def __init__(self, status, message) -> None:
+        self.status = status
+        self.message = message

@@ -19,7 +19,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'new_sla_config' %}">
+                                        <a rel="noopener noreferrer" href="{% url 'new_sla_config' %}">
                                             <i class="fa-solid fa-plus"></i> Add SLA Configuration
                                         </a>
                                     </li>
@@ -52,7 +52,7 @@
                             <tr>
                                 <td>
                                     {% if "dojo.change_sla_configuration"|has_configuration_permission:request %}
-                                        <a href="{% url 'edit_sla_config' conf.id %}"><b>{{ conf.name }}</b></a>
+                                        <a rel="noopener noreferrer" href="{% url 'edit_sla_config' conf.id %}"><b>{{ conf.name }}</b></a>
                                     {% else %}
                                         {{ conf.name }}
                                     {% endif %}

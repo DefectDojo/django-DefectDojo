@@ -6,6 +6,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.http import HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -24,7 +25,7 @@ from dojo.forms import (
     Edit_Product_Type_MemberForm,
     Product_TypeForm,
 )
-from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role
+from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role, Product, Engagement
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
     get_authorized_global_groups_for_product_type,
@@ -33,12 +34,14 @@ from dojo.product_type.queries import (
     get_authorized_members_for_product_type,
     get_authorized_product_types,
 )
+from dojo.product_type.utils import add_technical_contact_whit_member
 from dojo.utils import (
     add_breadcrumb,
     async_delete,
     get_page_items,
     get_setting,
     is_title_in_breadcrumbs,
+    validate_group_role
 )
 
 logger = logging.getLogger(__name__)
@@ -48,6 +51,41 @@ Jay
 Status: in prod
 Product Type views
 """
+
+def get_products_name(_request, pid):
+    prod_type = Product_Type.objects.get(id=pid)
+    data = Product.objects.filter(prod_type=prod_type).values("id", "name")
+    return JsonResponse({"data": list(data)})
+
+
+def get_description_product(_request, pid):
+    """
+    Returns a list of products with their contacts.
+    """
+    product = Product.objects.get(id=pid)
+    engagements = Engagement.objects.filter(product=product)
+    engagement_list = []
+    for engagement in engagements:
+        engagement_list.append({"id": engagement.id, "engagement_name": engagement.name})
+    contacts = {
+        "contacts": {
+            "product_manager": {
+                "id": product.product_manager.id if product.product_manager else "",
+                "username": product.product_manager.username if product.product_manager else ""
+            },
+            "technical_contact": {
+                "id": product.technical_contact.id if product.technical_contact else "",
+                "username": product.technical_contact.username if product.technical_contact else ""
+            },
+            "team_manager": {
+                "id": product.team_manager.id if product.team_manager else "",
+                "username": product.team_manager.username if product.team_manager else ""
+            }
+        }
+    }
+    data = {"message": "Success", "id": product.id, "engagements": engagement_list}
+    data.update(contacts)
+    return JsonResponse(data)
 
 
 def product_type(request):
@@ -182,6 +220,7 @@ def edit_product_type(request, ptid):
     if request.method == "POST" and request.POST.get("edit_product_type"):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
+            add_technical_contact_whit_member(pt, pt_form)
             pt = pt_form.save()
             messages.add_message(
                 request,
@@ -220,7 +259,14 @@ def add_product_type_member(request, ptid):
                             product_type_member.product_type = pt
                             product_type_member.user = user
                             product_type_member.role = memberform.cleaned_data["role"]
-                            product_type_member.save()
+
+                            validate_res = validate_group_role(request, user, ptid, "view_product_type", 
+                                                               memberform.cleaned_data["role"].name)
+                            if validate_res:
+                                return validate_res
+                            else:
+                                product_type_member.save()
+
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     _("Product type members added successfully."),
@@ -256,7 +302,14 @@ def edit_product_type_member(request, memberid):
                                     "You are not permitted to make users to owners.",
                                     extra_tags="alert-warning")
             else:
-                memberform.save()
+                
+                validate_res = validate_group_role(request, member.user, member.product_type.id, "view_product_type", 
+                                                               memberform.cleaned_data["role"].name)
+                if validate_res:
+                    return validate_res
+                else:
+                    memberform.save()
+                    
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     _("Product type member updated successfully."),

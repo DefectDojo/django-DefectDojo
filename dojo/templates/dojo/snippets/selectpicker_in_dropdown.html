@@ -1,5 +1,5 @@
 {% load static %}
-<script type="application/javascript">
+<script type="application/javascript" nonce="{{request.csp_nonce}}">
     $('.selectpicker').selectpicker({
         container: 'body'
     });

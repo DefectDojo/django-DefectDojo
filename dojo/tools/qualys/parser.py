@@ -238,10 +238,7 @@ def parse_finding(host, tree):
             # CVE and LINKS
             _temp_cve_details = vuln_item.iterfind("CVE_ID_LIST/CVE_ID")
             if _temp_cve_details:
-                _cl = {
-                    cve_detail.findtext("ID"): cve_detail.findtext("URL")
-                    for cve_detail in _temp_cve_details
-                }
+                _cl = {cve_detail.findtext("ID"): cve_detail.findtext("URL") for cve_detail in _temp_cve_details}
                 _temp["cve"] = "\n".join(list(_cl.keys()))
                 _temp["links"] = "\n".join(list(_cl.values()))
 
@@ -287,8 +284,8 @@ def parse_finding(host, tree):
 
 
 def qualys_parser(qualys_xml_file):
-    parser = etree.XMLParser()
-    tree = etree.parse(qualys_xml_file, parser)
+    parser = etree.XMLParser(forbid_external=True)
+    tree = etree.parse(qualys_xml_file, parser, forbid_external=True)
     host_list = tree.find("HOST_LIST")
     finding_list = []
     if host_list is not None:

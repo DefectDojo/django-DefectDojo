@@ -14,6 +14,7 @@ from dojo.announcement.urls import urlpatterns as announcement_urls
 from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
+    ApiToken,
     ConfigurationPermissionViewSet,
     CredentialsMappingViewSet,
     CredentialsViewSet,
@@ -62,6 +63,8 @@ from dojo.api_v2.views import (
     SonarqubeIssueViewSet,
     StubFindingsViewSet,
     SystemSettingsViewSet,
+    TransferFindingViewSet, 
+    TransferFindingFindingsViewSet,
     TestImportViewSet,
     TestsViewSet,
     TestTypesViewSet,
@@ -81,6 +84,7 @@ from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
+from dojo.transfer_findings.urls import urlpatterns as transfer_finding_url
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.group.urls import urlpatterns as group_urls
@@ -177,11 +181,14 @@ v2_api.register(r"questionnaire_answered_questionnaires", QuestionnaireAnsweredS
 v2_api.register(r"questionnaire_engagement_questionnaires", QuestionnaireEngagementSurveyViewSet, basename="engagement_survey")
 v2_api.register(r"questionnaire_general_questionnaires", QuestionnaireGeneralSurveyViewSet, basename="general_survey")
 v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basename="question")
+v2_api.register(r"transfer_finding", TransferFindingViewSet, basename="transfer_finding")
+v2_api.register(r"transfer_finding_findings", TransferFindingFindingsViewSet, basename="transfer_finding_findings")
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls
+ur += transfer_finding_url
 ur += finding_group_urls
 ur += home_urls
 ur += metrics_urls
@@ -222,12 +229,14 @@ if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH
         api_v2_urls += [
             re_path(
                 f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
-                tokenviews.obtain_auth_token,
+                ApiToken.as_view(),
                 name="api-token-auth",
-            ),
+            )
         ]
 
 urlpatterns = []
+
+
 
 # sometimes urlpatterns needed be added from local_settings.py before other URLs of core dojo
 if hasattr(settings, "PRELOAD_URL_PATTERNS"):

@@ -19,7 +19,7 @@ def get_authorized_tests(permission, product=None):
         return tests
 
     if user_has_global_permission(user, permission):
-        return Test.objects.all().order_by("id")
+        return tests
 
     roles = get_roles_for_permission(permission)
     authorized_product_type_roles = Product_Type_Member.objects.filter(

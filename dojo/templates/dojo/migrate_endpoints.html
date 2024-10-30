@@ -29,8 +29,8 @@
                     {% for log in html_log %}
                         <li>
                             {% if 'message' in log.keys %}
-                                <a href="{{ log.view }}">Endpoint</a> {{ log.message }}. It is not possible to migrate it.
-                                  <a href="{{ log.delete }}">Delete</a> or <a href="{{ log.edit }}">edit</a> this endpoint.
+                                <a rel="noopener noreferrer" href="{{ log.view }}">Endpoint</a> {{ log.message }}. It is not possible to migrate it.
+                                  <a rel="noopener noreferrer" href="{{ log.delete }}">Delete</a> or <a rel="noopener noreferrer" href="{{ log.edit }}">edit</a> this endpoint.
                             {% else %}
                                 {{ log }}
                             {% endif %}

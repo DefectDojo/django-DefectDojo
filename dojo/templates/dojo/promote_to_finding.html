@@ -42,7 +42,7 @@
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="{{request.csp_nonce}}">
         $ = django.jQuery;
         $.hotkeys.options.filterInputAcceptingElements = false;
         $.hotkeys.options.filterTextInputs = false;

@@ -94,7 +94,7 @@ class ImportReimportMixin:
         self.aws_prowler_file_name_plus_one = self.scans_path + "aws_prowler/many_vuln_plus_one.json"
         self.scan_type_aws_prowler = "AWS Prowler Scan"
 
-        self.nuclei_empty = self.scans_path + "nuclei/empty.jsonl"
+        self.nuclei_empty = self.scans_path + 'nuclei/empty.json'
 
         self.gitlab_dast_file_name = f"{self.scans_path}gitlab_dast/gitlab_dast_one_vul_v15.json"
         self.scan_type_gitlab_dast = "GitLab DAST Report"

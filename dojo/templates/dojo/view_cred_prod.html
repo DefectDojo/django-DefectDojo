@@ -8,7 +8,7 @@
           <div class="panel panel-default table-responsive">
               <div class="panel-heading">
                   <h4>Credentials
-                      <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
+                      <a rel="noopener noreferrer" title="Add New Credential" class="pull-right btn btn-primary btn-sm"
                          href="{% url 'new_cred_product' prod.id %}"><span class="fa-solid fa-plus"></span></a>
                   </h4>
               </div>
@@ -29,7 +29,7 @@
                       {% for cred in creds %}
                           <tr>
                             <td>
-                                <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
+                                <a rel="noopener noreferrer" href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
                             </td>
                             <td>{{ cred.cred_id.username }}</td>
                             <td>{{ cred.cred_id.role }}</td>
@@ -38,11 +38,11 @@
                             <td>{{ cred.cred_id.is_valid }}</td>
                             <td>
                                 <div class="btn-group">
-                                    <a class="btn btn-sm btn-secondary"
+                                    <a rel="noopener noreferrer" class="btn btn-sm btn-secondary"
                                        href="{% url 'view_cred_product' cred.product.id cred.id  %}">View</a>
-                                    <a class="btn btn-sm btn-warning"
+                                    <a rel="noopener noreferrer" class="btn btn-sm btn-warning"
                                        href="{% url 'edit_cred_product' cred.product.id cred.id  %}">Edit</a>
-                                    <a class="btn btn-sm btn-danger delete-finding"
+                                    <a rel="noopener noreferrer" class="btn btn-sm btn-danger delete-finding"
                                        href="{% url 'delete_cred_product' cred.product.id cred.id  %}">Delete</a>
                                 </div>
                             </td>

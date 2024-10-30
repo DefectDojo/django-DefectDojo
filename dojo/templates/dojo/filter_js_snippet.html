@@ -1,6 +1,6 @@
 {% load static %}
 <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
-<script type="application/javascript">
+<script type="application/javascript" nonce="{{request.csp_nonce}}">
     $(function () {
         $(function () {
 

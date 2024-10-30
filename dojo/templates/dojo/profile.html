@@ -34,10 +34,10 @@
                 </ul>
                 <div class="center" style="margin: auto; text-align: center;">
                 {% if user.has_usable_password %}
-                    <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">{% trans "Change Password" %}</a>
+                    <a rel="noopener noreferrer" class="btn btn-sm btn-primary" href="{% url 'change_password' %}">{% trans "Change Password" %}</a>
                 {% endif %}
                 {% if API_TOKENS_ENABLED %}
-                    <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">{% trans "API Key" %}</a>
+                    <a rel="noopener noreferrer" class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">{% trans "API Key" %}</a>
                 {% endif %}
                 </div>
             </div>
@@ -46,7 +46,7 @@
                     <div class="clearfix">
                         <h4 class="pull-left">{% trans "Groups" %}</h4>
                         &nbsp;
-                        <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
+                        <a rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                             <i class="fa-solid fa-circle-question"></i></a>
                         {% if request.user.is_superuser %}
                         <div class="dropdown pull-right">
@@ -57,7 +57,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
                                 <li role="presentation">
-                                    <a id="addGroupMember" href="{% url 'add_group_member_user' user.id %}">
+                                    <a rel="noopener noreferrer" id="addGroupMember" href="{% url 'add_group_member_user' user.id %}">
                                         <i class="fa-solid fa-plus"></i>{% trans "Add Groups" %}
                                     </a>
                                 </li>
@@ -81,7 +81,7 @@
                         <tr>
                             <td>
                             </td>
-                            <td name="group_name"><a href="{% url 'view_group' member.group.id %}">{{ member.group }}</a></td>
+                            <td name="group_name"><a rel="noopener noreferrer" href="{% url 'view_group' member.group.id %}">{{ member.group }}</a></td>
                             <td name="group_role">{{ member.role }}</td>
                         </tr>
                         {% endfor %}

@@ -37,13 +37,13 @@
                     </label>
                     <div class="col-sm-10 form-control-static">
                         {% if engagement.has_jira_issue %}
-                            <a href="{{ engagement | jira_issue_url }}"
+                            <a rel="noopener noreferrer" href="{{ engagement | jira_issue_url }}"
                             target="_blank"> {{ engagement | jira_issue_url }} </a>
                         {% elif engagement %}
-                            <a href="{{ engagement | jira_project_url }}"
+                            <a rel="noopener noreferrer" href="{{ engagement | jira_project_url }}"
                             target="_blank"> {{ engagement | jira_project_url }} </a>
                         {% else %}
-                            <a href="{{ product_tab.product | jira_project_url }}"
+                            <a rel="noopener noreferrer" href="{{ product_tab.product | jira_project_url }}"
                             target="_blank"> {{ product_tab.product | jira_project_url }} </a>
                         {% endif %}
                     </div>
@@ -62,7 +62,7 @@
 {% block postscript %}
     {{ block.super }}
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="{{request.csp_nonce}}">
         $(function () {
             $("textarea").each(function (index, elem) {
                 if (elem.hasAttribute("required")) {
@@ -88,15 +88,13 @@
             });
         });
     </script>
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="{{request.csp_nonce}}">
         $(function () {
             $('[id$="inherit_from_product"]').click(function()  {
                 inherit_from_product = $(this)
                 checked = $(this).prop('checked')
                 $('[id^="id_jira-project-form-"]').each(function() {
-                    console.log('found field: ' + $(this).attr('id'))
                     if (!$(this).is(inherit_from_product)) {
-                        console.log('disabling: ' + $(this).attr('id'))
                         $(this).prop("disabled", checked)
                         if (checked) {
                             $(this).val('')

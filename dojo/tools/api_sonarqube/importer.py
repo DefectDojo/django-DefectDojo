@@ -202,7 +202,9 @@ class SonarQubeApiImporter:
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=issue.get("key"),
+                    vuln_id_from_tool=rule_id,
                 )
+                find.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("sonarqube")]
                 items.append(find)
 
         except Exception as e:
@@ -215,6 +217,7 @@ class SonarQubeApiImporter:
                 source="SonarQube API",
                 obj=test.engagement.product,
             )
+            raise e
 
         return items
 
@@ -323,7 +326,9 @@ class SonarQubeApiImporter:
                     scanner_confidence=scanner_confidence,
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
+                    vuln_id_from_tool=rule_id,
                 )
+                find.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("sonarqube")]
                 items.append(find)
 
             return items

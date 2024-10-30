@@ -30,3 +30,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 application = get_wsgi_application()
+
+
+if os.environ.get("DD_OPENTELEMETRY_TRACES_ENABLED"):
+    # Configuring OpenTelemetry middleware for WSGI application
+    from opentelemetry.instrumentation.wsgi import OpenTelemetryMiddleware
+
+    application = OpenTelemetryMiddleware(application)

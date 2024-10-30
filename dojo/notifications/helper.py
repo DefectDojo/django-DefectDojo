@@ -11,6 +11,7 @@ from django.db.models import Count, Prefetch, Q
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.conf import settings
 from django.utils.translation import gettext as _
 
 from dojo import __version__ as dd_version
@@ -27,6 +28,7 @@ from dojo.models import (
     get_current_datetime,
 )
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
+from dojo.aws import ses_email
 
 logger = logging.getLogger(__name__)
 
@@ -44,17 +46,17 @@ def create_notification(event=None, **kwargs):
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug("creating notifications for recipients: %s", kwargs["recipients"])
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs["recipients"], user__is_active=True, product=None):
-            if event in settings.NOTIFICATIONS_SYSTEM_LEVEL_TRUMP:
+            # if event in settings.NOTIFICATIONS_SYSTEM_LEVEL_TRUMP:
                 # merge the system level notifications with the personal level
                 # this allows for system to trump the personal
                 merged_notifications = Notifications.merge_notifications_list([system_notifications, recipient_notifications])
                 merged_notifications.user = recipient_notifications.user
                 logger.debug("Sent notification to %s", merged_notifications.user)
                 process_notifications(event, merged_notifications, **kwargs)
-            else:
-                # Do not trump user preferences and send notifications as usual
-                logger.debug("Sent notification to %s", recipient_notifications.user)
-                process_notifications(event, recipient_notifications, **kwargs)
+            # else:
+            #     # Do not trump user preferences and send notifications as usual
+            #     logger.debug('Sent notification to %s', recipient_notifications.user)
+            #     process_notifications(event, recipient_notifications, **kwargs)
 
     else:
         logger.debug("creating system notifications for event: %s", event)
@@ -163,6 +165,7 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
         logger.error("error during rendering of template %s exception is %s", template, e)
     finally:
         if not notification_message:
+            logger.warning("Generate notification messager for template by default")
             kwargs["description"] = create_description(event, *args, **kwargs)
             notification_message = render_to_string(f"notifications/{notification_type}/other.tpl", kwargs)
 
@@ -290,8 +293,8 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         log_alert(e, "Microsoft Teams Notification", title=kwargs["title"], description=str(e), url=kwargs["url"])
 
 
-@dojo_async_task
-@app.task
+# @dojo_async_task
+# @app.task
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
     email_from_address = get_system_setting("email_from")
@@ -306,21 +309,30 @@ def send_mail_notification(event, user=None, *args, **kwargs):
     logger.debug("notification email for user %s to %s", user, address)
 
     try:
-        subject = f"{get_system_setting('team_name')} notification"
-        if "title" in kwargs:
-            subject += f": {kwargs['title']}"
+        if settings.AWS_SES_EMAIL:
+            ses_email.aws_ses(email=address,
+                              email_from_address=f"{get_system_setting('team_name')} <{email_from_address}>",
+                              html_contect=create_notification_message(event, user, "mail", *args, **kwargs),
+                              template_name=event,
+                              subject=kwargs.get("subject", event),
+                              text=event
+                              )
+        else:
+            subject = f"{get_system_setting('team_name')} notification"
+            if "title" in kwargs:
+                subject += f": {kwargs['title']}"
 
-        email = EmailMessage(
-            subject,
-            create_notification_message(event, user, "mail", *args, **kwargs),
-            email_from_address,
-            [address],
-            headers={"From": f"{email_from_address}"},
-        )
-        email.content_subtype = "html"
-        logger.debug("sending email alert")
-        # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
-        email.send(fail_silently=False)
+            email = EmailMessage(
+                subject,
+                create_notification_message(event, user, 'mail', *args, **kwargs),
+                email_from_address,
+                [address],
+                headers={"From": f"{email_from_address}"},
+            )
+            email.content_subtype = 'html'
+            logger.debug('sending email alert')
+            # logger.info(create_notification_message(event, user, 'mail', *args, **kwargs))
+            email.send(fail_silently=False)
 
     except Exception as e:
         logger.exception(e)
@@ -492,6 +504,7 @@ def send_alert_notification(event, user=None, *args, **kwargs):
             description=create_notification_message(event, user, "alert", *args, **kwargs)[:2000],
             url=kwargs.get("url", reverse("alerts")),
             icon=icon[:25],
+            color_icon=kwargs.get("color_icon", "#262626"),
             source=source,
         )
         # relative urls will fail validation

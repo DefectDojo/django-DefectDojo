@@ -12,6 +12,15 @@
 
 # Django settings for DefectDojo
 import json
+import boto3
+from botocore.exceptions import ClientError
+
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
 import logging
 import os
 import warnings
@@ -36,6 +45,7 @@ env = environ.FileAwareEnv(
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
+    DD_OPENTELEMETRY_TRACES_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, "/"),
     DD_LOGIN_URL=(str, "/login"),
     DD_DJANGO_ADMIN_ENABLED=(bool, True),
@@ -46,8 +56,9 @@ env = environ.FileAwareEnv(
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
+    DD_SESSION_COOKIE_DOMAIN=(str, "localhost"),
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
-    DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
+    DD_SESSION_COOKIE_AGE=(int, 3600),  # 1 hour
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_CSRF_TRUSTED_ORIGINS=(list, []),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
@@ -61,6 +72,8 @@ env = environ.FileAwareEnv(
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, True),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
+    DD_THROTTLE_ANON=(str, "0/secod"),
+    DD_THROTTLE_USER=(str, "1000/secod"),
     DD_TEST_RUNNER=(str, "django.test.runner.DiscoverRunner"),
     DD_URL_PREFIX=(str, ""),
     DD_ROOT=(str, root("dojo")),
@@ -87,6 +100,8 @@ env = environ.FileAwareEnv(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_PASS_MODEL_BY_ID=(str, True),
+    DD_CELERY_CRON_SCHEDULE=(str, "* * * * *"),
+    DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY=(str, "* * * * *"),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
@@ -96,18 +111,27 @@ env = environ.FileAwareEnv(
     DD_DATABASE_NAME=(str, "defectdojo"),
     # default django database name for testing is test_<dbname>
     DD_TEST_DATABASE_NAME=(str, "test_defectdojo"),
-    DD_DATABASE_PASSWORD=(str, "defectdojo"),
+    DD_DATABASE_PASSWORD=(str, None),
     DD_DATABASE_PORT=(int, 3306),
-    DD_DATABASE_USER=(str, "defectdojo"),
+    DD_DATABASE_USER=(str, None),
+    DD_DATABASE_REPLICA=(bool, False),
+    DD_TABLES_REPLICA_DEFAULT=(list, []),
+    DD_SCHEMA_DB=(str, 'public'),
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
+    DD_AUTHENTICATE_ADDITIONAL_DATA_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
-    DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
-    DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
-    DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
+    # do we show link "I forgot my password" on login screen
+    DD_FORGOT_PASSWORD=(bool, True),
+    # 3 days, in seconds (the deafult)
+    DD_PASSWORD_RESET_TIMEOUT=(int, 259200),
+    # do we show link "I forgot my username" on login screen
+    DD_FORGOT_USERNAME=(bool, True),
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
-    DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
-    DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
+    # if True creates user at first login
+    DD_SOCIAL_AUTH_CREATE_USER=(bool, True),
+    # auto-redirect if there is only one social login method
+    DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ""),
@@ -123,6 +147,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ""),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ""),
     DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, "https://{your-org-url}/oauth2"),
+    DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, ""),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ""),
@@ -131,6 +156,16 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=(bool, False),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER=(str, ""),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=(bool, True),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSION_AUTO_IMPORT=(bool, False),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_TOKEN=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_MAIN_SECURITY_GROUP=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_OFFICES_LOCATION=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_GROUP_TEAM_FILTERS=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_JOBS_TITLE=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_USERS_EXCLUDED_TPM=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_REPOSITORY_ID=(str, ""),
+    DD_SOCIAL_AUTH_AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS=(bool, False),
@@ -304,8 +339,115 @@ env = environ.FileAwareEnv(
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
     # Use System notification settings to override user's notification settings
     DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
+    DD_CUSTOM_TAG_PARSER=(dict, {}),
+    DD_REVIEWERS_ROLE_TAG=(dict, {}),
+    DD_VALIDATE_ROLE_USER=(bool, False),
+    DD_ROLES_MAP_GROUPS=(dict, {}),
+    DD_INVALID_ESCAPE_STR=(dict, {}),
+    # SES Email
+    DD_AWS_SES_EMAIL=(bool, True),
+    # --------------- Grafana Metrics ---------------
+    DD_GRAFANA_URL=(str, ""),
+    DD_GRAFANA_PATH=(dict, {}),
+    DD_GRAFANA_PARAMS=(str, ""),
+    DD_MICROSOFT_LOGIN_URL=(str, ""),
+    
+    # ---------------RISK PENDING-------------------------
+    # The variable that allows enabling pending risk acceptance.
+    DD_RISK_PENDING=(bool, False),
+    DD_COMPLIANCE_FILTER_RISK=(str, ""),
+    # The varible that allows settings acceptance for email
+    DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL=(bool, False),
+    DD_LIFETIME_MINUTE_PERMISSION_KEY=(int, 2880),
+    DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL=(str, "http://localhost/8080"),
+    # System user for automated resource creation
+    DD_SYSTEM_USER=(str, "admin"),
+    # These variables are the params of providers name
+    DD_PROVIDERS=(str, ""),
+    DD_PROVIDER_ENDPOINT_MAPPING=(str, "{\"provider-1\": \"event-provider-1\", \"provider-2\": \"event-provider-2\"}"),
+    # The variable that sets the provider risk accept api and credentials
+    DD_PROVIDER_URL=(str, ""),
+    DD_PROVIDER_HEADER=(str, ""),
+    DD_PROVIDER_SECRET=(str, ""),
+    DD_PROVIDER_TOKEN=(str, ""),
+    # Role that allows risk acceptance bypassing restrictions.
+    DD_ROLE_ALLOWED_TO_ACCEPT_RISKS=(list, ["Maintainer"]),
+    # Risk severity levels: Low, Medium, High, Critical
+    # num_acceptors: number of acceptors required for risk acceptance
+    # roles: roles with permission to accept the risk
+    # type_contacts: users with allowed contact types for risk acceptance at a specific severity
+    # ----------------
+    # Abuse Control
+    DD_LIMIT_ASSUMPTION_OF_VULNERABILITY=(int, 1),
+    DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE=(int, 0),
+    DD_PERCENTAGE_OF_VULNERABILITIES_CLOSED=(dict,
+                                             {
+                                                 "days": 90,
+                                                 "percentage": 0.82,
+                                                 "active": False
+                                             }),
+    DD_TEMPORARILY_ASSUMED_VULNERABILITIES=(dict,
+                                        {
+                                            "percentage": 0.40,
+                                            "active": False
+                                        }),
+    
+    DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY=(dict, {
+        "Low": {
+            "roles": ["Developer"],
+            "type_contacts": {
+                "PT1": {
+                    "users": [],
+                    "number_acceptors": 0
+                },
+                "PT2": {
+                    "users": [],
+                    "number_acceptors": 0
+                }
+            }
+        },
+        "Medium": {
+            "roles": ["Leader"],
+            "type_contacts": {
+                "PT1": {
+                    "users": ["team_manager"],
+                    "number_acceptors" : 1
+                },
+                "PT2": {
+                    "users": ["product_type_technical_contact"],
+                    "number_acceptors" : 1
+                }
+            }
+        },
+        "High": {
+            "roles": ["Leader"],
+            "type_contacts": {
+                "PT1": {
+                    "users": ["product_type_technical_contact"],
+                    "number_acceptors" : 1
+                },
+                "PT2": {
+                    "users": ["product_type_manager", "product_type_technical_contact"],
+                    "number_acceptors" : 2
+                }
+            }
+        },
+        "Critical": {
+            "roles": ["Leader"],
+            "type_contacts": {
+                "PT1": {
+                    "users": ["product_type_technical_contact", "environment_technical_contact"],
+                    "number_acceptors" : 2
+                },
+                "PT2": {
+                    "users": ["environment_manager", "environment_technical_contact"],
+                    "number_acceptors" : 2
+                }
+            }
+        }
+    }),
     # When enabled, force the password field to be required for creating/updating users
-    DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
+    DD_REQUIRE_PASSWORD_ON_USER=(bool, True)
 )
 
 
@@ -320,7 +462,7 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
     if len(user) > 0 or len(password) > 0:
         result_list.append("@")
     result_list.append(host)
-    if port >= 0:
+    if int(port) >= 0:
         result_list.extend((":", str(port)))
     if len(path) > 0 and path[0] != "/":
         result_list.append("/")
@@ -329,6 +471,24 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
         result_list.append("?")
     result_list.append(params)
     return "".join(result_list)
+
+
+def get_secret(secret_name):
+    region_name = env("AWS_REGION")
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(service_name="secretsmanager", region_name=region_name)
+
+    try:
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+    except ClientError as e:
+        logger.error("An error occurred on requested secret " + secret_name, e)
+        raise e
+
+    # Decrypts secret using the associated KMS key.
+    secret = get_secret_value_response["SecretString"]
+    return json.loads(secret)
 
 
 # Read .env file as default or from the command line, DD_ENV_PATH
@@ -349,7 +509,11 @@ SITE_URL = env("DD_SITE_URL")
 ALLOWED_HOSTS = tuple(env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"]))
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
-SECRET_KEY = env("DD_SECRET_KEY")
+SECRET_KEY = (
+    get_secret(env("DD_SECRET_APP"))["dd_secret_key"]
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
+    else env("DD_SECRET_KEY")
+)
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -377,30 +541,74 @@ DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
 MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
+SCHEMA_DB = env('DD_SCHEMA_DB')
 
 # ------------------------------------------------------------------------------
 # DATABASE
 # ------------------------------------------------------------------------------
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
-if os.getenv("DD_DATABASE_URL") is not None:
-    DATABASES = {
-        "default": env.db("DD_DATABASE_URL"),
-    }
-else:
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_database = get_secret(env("DD_SECRET_DATABASE"))
     DATABASES = {
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
-            "NAME": env("DD_DATABASE_NAME"),
+            "OPTIONS": {
+                "options": f"-c search_path={SCHEMA_DB}"
+            },
+            "NAME": secret_database["dbname"],
             "TEST": {
                 "NAME": env("DD_TEST_DATABASE_NAME"),
             },
-            "USER": env("DD_DATABASE_USER"),
-            "PASSWORD": env("DD_DATABASE_PASSWORD"),
-            "HOST": env("DD_DATABASE_HOST"),
-            "PORT": env("DD_DATABASE_PORT"),
-        },
+            "USER": secret_database["username"],
+            "PASSWORD": secret_database["password"],
+            "HOST": secret_database["host"],
+            "PORT": secret_database["port"],
+        }
     }
+    if env("DD_DATABASE_REPLICA"):
+        REPLICA_TABLES_DEFAULT = env("DD_TABLES_REPLICA_DEFAULT")
+        DATABASES["replica"] = {
+            "ENGINE": env("DD_DATABASE_ENGINE"),
+            "OPTIONS": {
+                "options": f"-c search_path={SCHEMA_DB}"
+            },
+            "NAME": secret_database["dbname"],
+            "USER": secret_database["username"],
+            "PASSWORD": secret_database["password"],
+            "HOST": secret_database["hostro"],
+            "PORT": secret_database["port"],
+        }
+        DATABASE_ROUTERS = ['dojo.routers.db_router.DbRouter']
+else:
+    if os.getenv("DD_DATABASE_URL") is not None:
+        DATABASES = {"default": env.db("DD_DATABASE_URL")}
+    else:
+        DATABASES = {
+            "default": {
+                "ENGINE": env("DD_DATABASE_ENGINE"),
+                "OPTIONS": {
+                    "options": f"-c search_path={SCHEMA_DB}"
+                },
+                "NAME": env("DD_DATABASE_NAME"),
+                "TEST": {
+                    "NAME": env("DD_TEST_DATABASE_NAME"),
+                },
+                "USER": env("DD_DATABASE_USER"),
+                "PASSWORD": env("DD_DATABASE_PASSWORD"),
+                "HOST": env("DD_DATABASE_HOST"),
+                "PORT": env("DD_DATABASE_PORT"),
+            }
+        }
+
+# ------------------------------------------------------------------------------
+# ENGINE BACKEND
+# ------------------------------------------------------------------------------
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_engine_backend = get_secret(env("DD_PROVIDER_SECRET"))
+    PROVIDER_TOKEN = secret_engine_backend["tokenRiskAcceptanceApi"]
+else:
+    PROVIDER_TOKEN = env("DD_PROVIDER_TOKEN")
 
 # Track migrations through source control rather than making migrations locally
 if env("DD_TRACK_MIGRATIONS"):
@@ -454,9 +662,7 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
-FILE_UPLOAD_HANDLERS = (
-    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
-)
+FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = env("DD_DATA_UPLOAD_MAX_MEMORY_SIZE")
 
@@ -525,6 +731,7 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.user.user_details",
     "dojo.pipeline.update_azure_groups",
     "dojo.pipeline.update_product_access",
+    "dojo.pipeline.update_product_type_azure_devops",
 )
 
 CLASSIC_AUTH_ENABLED = True
@@ -555,14 +762,35 @@ SOCIAL_AUTH_OKTA_OAUTH2_KEY = env("DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY")
 SOCIAL_AUTH_OKTA_OAUTH2_SECRET = env("DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET")
 SOCIAL_AUTH_OKTA_OAUTH2_API_URL = env("DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL")
 
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = env("DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS")
+
 AZUREAD_TENANT_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED")
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY")
-SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET")
+SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = (
+    get_secret(env("DD_SECRET_APP"))["dd_azuread_secret"]
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
+    else env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET")
+)
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID")
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE")
 AZUREAD_TENANT_OAUTH2_GET_GROUPS = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS")
 AZUREAD_TENANT_OAUTH2_GROUPS_FILTER = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER")
 AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS")
+
+AZURE_DEVOPS_PERMISSION_AUTO_IMPORT = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSION_AUTO_IMPORT")
+AZURE_DEVOPS_ORGANIZATION_URL = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL")
+AZURE_DEVOPS_TOKEN = (
+    get_secret(env("DD_SECRET_AZURE_DEVOPS_TOKEN"))["token"]
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
+    else env("DD_SOCIAL_AUTH_AZURE_DEVOPS_TOKEN")
+)
+AZURE_DEVOPS_MAIN_SECURITY_GROUP = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_MAIN_SECURITY_GROUP")
+AZURE_DEVOPS_OFFICES_LOCATION = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_OFFICES_LOCATION")
+AZURE_DEVOPS_JOBS_TITLE = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_JOBS_TITLE")
+AZURE_DEVOPS_GROUP_TEAM_FILTERS = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_GROUP_TEAM_FILTERS")
+AZURE_DEVOPS_USERS_EXCLUDED_TPM = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_USERS_EXCLUDED_TPM")
+AZURE_DEVOPS_REPOSITORY_ID = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_REPOSITORY_ID")
+AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH")
 
 GITLAB_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED")
 GITLAB_PROJECT_AUTO_IMPORT = env("DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT")
@@ -606,12 +834,17 @@ DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 # and make the choice of enabling SLA notifications for non-verified findings,
 # be mindful of performance.
 # 'SLA_NOTIFY_ACTIVE', 'SLA_NOTIFY_ACTIVE_VERIFIED_ONLY' and 'SLA_NOTIFY_WITH_JIRA_ONLY' are moved to system settings, will be removed here
-SLA_NOTIFY_ACTIVE = env("DD_SLA_NOTIFY_ACTIVE")  # this will include 'verified' findings as well as non-verified.
+# this will include 'verified' findings as well as non-verified.
+SLA_NOTIFY_ACTIVE = env("DD_SLA_NOTIFY_ACTIVE")
 SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env("DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY")
-SLA_NOTIFY_WITH_JIRA_ONLY = env("DD_SLA_NOTIFY_WITH_JIRA_ONLY")  # Based on the 2 above, but only with a JIRA link
-SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")  # in days, notify between dayofbreach minus this number until dayofbreach
-SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")  # in days, skip notifications for findings that go past dayofbreach plus this number
-SLA_BUSINESS_DAYS = env("DD_SLA_BUSINESS_DAYS")  # Use business days to calculate SLA's and age of a finding instead of calendar days
+# Based on the 2 above, but only with a JIRA link
+SLA_NOTIFY_WITH_JIRA_ONLY = env("DD_SLA_NOTIFY_WITH_JIRA_ONLY")
+# in days, notify between dayofbreach minus this number until dayofbreach
+SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")
+# in days, skip notifications for findings that go past dayofbreach plus this number
+SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")
+# Use business days to calculate SLA's and age of a finding instead of calendar days
+SLA_BUSINESS_DAYS = env("DD_SLA_BUSINESS_DAYS")
 
 
 SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
@@ -639,31 +872,22 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "dojo.user.validators.DojoCommonPasswordValidator",
     },
-    {
-        "NAME": "dojo.user.validators.MinLengthValidator",
-    },
-    {
-        "NAME": "dojo.user.validators.MaxLengthValidator",
-    },
-    {
-        "NAME": "dojo.user.validators.NumberValidator",
-    },
-    {
-        "NAME": "dojo.user.validators.UppercaseValidator",
-    },
-    {
-        "NAME": "dojo.user.validators.LowercaseValidator",
-    },
-    {
-        "NAME": "dojo.user.validators.SymbolValidator",
-    },
+    {"NAME": "dojo.user.validators.MinLengthValidator"},
+    {"NAME": "dojo.user.validators.MaxLengthValidator"},
+    {"NAME": "dojo.user.validators.NumberValidator"},
+    {"NAME": "dojo.user.validators.UppercaseValidator"},
+    {"NAME": "dojo.user.validators.LowercaseValidator"},
+    {"NAME": "dojo.user.validators.SymbolValidator"},
 ]
 
 # https://django-ratelimit.readthedocs.io/en/stable/index.html
 RATE_LIMITER_ENABLED = env("DD_RATE_LIMITER_ENABLED")
-RATE_LIMITER_RATE = env("DD_RATE_LIMITER_RATE")  # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
-RATE_LIMITER_BLOCK = env("DD_RATE_LIMITER_BLOCK")  # Block the requests after rate limit is exceeded
-RATE_LIMITER_ACCOUNT_LOCKOUT = env("DD_RATE_LIMITER_ACCOUNT_LOCKOUT")  # Forces the user to change password on next login.
+# Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
+RATE_LIMITER_RATE = env("DD_RATE_LIMITER_RATE")
+# Block the requests after rate limit is exceeded
+RATE_LIMITER_BLOCK = env("DD_RATE_LIMITER_BLOCK")
+# Forces the user to change password on next login.
+RATE_LIMITER_ACCOUNT_LOCKOUT = env("DD_RATE_LIMITER_ACCOUNT_LOCKOUT")
 
 # ------------------------------------------------------------------------------
 # SECURITY DIRECTIVES
@@ -697,6 +921,53 @@ APPEND_SLASH = env("DD_APPEND_SLASH")
 CSRF_COOKIE_SECURE = env("DD_CSRF_COOKIE_SECURE")
 CSRF_COOKIE_SAMESITE = env("DD_CSRF_COOKIE_SAMESITE")
 
+# Content Policy
+PERMISSIONS_POLICY = {
+    "accelerometer": [],
+    "ambient-light-sensor": [],
+    "autoplay": [],
+    "camera": [],
+    "display-capture": [],
+    "document-domain": [],
+    "encrypted-media": [],
+    "fullscreen": [],
+    "gamepad": [],
+    "geolocation": [],
+    "gyroscope": [],
+    "magnetometer": [],
+    "microphone": [],
+    "midi": [],
+    "payment": [],
+    "picture-in-picture": [],
+    "publickey-credentials-get": [],
+    "speaker-selection": [],
+    "sync-xhr": [],
+    "usb": [],
+    "screen-wake-lock": [],
+    "web-share": [],
+    "xr-spatial-tracking": []
+}
+
+# Content Security Policy
+CSP_INCLUDE_NONCE_IN = ["script-src"]
+CSP_DEFAULT_SRC = "'self'"
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "maxcdn.bootstrapcdn.com", "https://cdn.jsdelivr.net/")
+CSP_FONT_SRC = ("'self'", "maxcdn.bootstrapcdn.com")
+CSP_SCRIPT_SRC = (
+    "'self'\
+    'sha256-kVXTuVyrBvSmDdt9pq+32zN7Z3Gbsy8QTVzqMcwc250='\
+    'sha256-5+pwrx2Sqjl/avFtF6fl0AI2NWTJKFi85jHWC5WClLY='\
+    'sha256-KLC2c/jOiFuDb857eep/XE3PQELBO2bzgF65fTnWEtE='\
+    'sha256-N2m+h2dL1jkiIrpfPLwB/UYRVI/K6J2shKA5oUqZnK4='\
+    'sha256-UEzT5nigNpCgb+fPsTD0s0QmaPBXku0aBOrleuQFvxg='\
+    'sha256-MaVZQAjCSc9XBKyhKStNf1pRXWXwoAUFx8O/9RarS5Y='\
+    'sha256-cvC+Syj3v3KJmWIrEfedrdOftmWCiaMeXwjthb9vMjY='\
+    'sha256-CxI1T50WYk55488gv4VMGpNzMYBe/D7Ah6AmX/+dULw='",
+    "https://cdn.jsdelivr.net/",
+)
+CSP_SCRIPT_SRC_ELEM = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
+CSP_IMG_SRC = ("'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net")
+
 # A list of trusted origins for unsafe requests (e.g. POST).
 # Use comma-separated list of domains, they will be split to list automatically
 # Only specify this settings if the contents is not an empty list (the default)
@@ -705,7 +976,9 @@ if env("DD_CSRF_TRUSTED_ORIGINS") != ["[]"]:
 
 # Unless set to None, the SecurityMiddleware sets the Cross-Origin Opener Policy
 # header on all responses that do not already have it to the value provided.
-SECURE_CROSS_ORIGIN_OPENER_POLICY = env("DD_SECURE_CROSS_ORIGIN_OPENER_POLICY") if env("DD_SECURE_CROSS_ORIGIN_OPENER_POLICY") != "None" else None
+SECURE_CROSS_ORIGIN_OPENER_POLICY = (
+    env("DD_SECURE_CROSS_ORIGIN_OPENER_POLICY") if env("DD_SECURE_CROSS_ORIGIN_OPENER_POLICY") != "None" else None
+)
 
 if env("DD_SECURE_PROXY_SSL_HEADER"):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -713,6 +986,9 @@ if env("DD_SECURE_PROXY_SSL_HEADER"):
 if env("DD_SECURE_HSTS_INCLUDE_SUBDOMAINS"):
     SECURE_HSTS_SECONDS = env("DD_SECURE_HSTS_SECONDS")
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env("DD_SECURE_HSTS_INCLUDE_SUBDOMAINS")
+
+THROTTLE_ANON = env("DD_THROTTLE_ANON")
+THROTTLE_USER = env("DD_THROTTLE_USER")
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = env("DD_SESSION_EXPIRE_AT_BROWSER_CLOSE")
 SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
@@ -722,8 +998,15 @@ SESSION_COOKIE_AGE = env("DD_SESSION_COOKIE_AGE")
 # ------------------------------------------------------------------------------
 
 # Credential Key
-CREDENTIAL_AES_256_KEY = env("DD_CREDENTIAL_AES_256_KEY")
-DB_KEY = env("DD_CREDENTIAL_AES_256_KEY")
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_app = get_secret(env("DD_SECRET_APP"))
+    CREDENTIAL_AES_256_KEY = secret_app["dd_credential_aes_key"]
+    DB_KEY = secret_app["dd_credential_aes_key"]
+    AAD_KEY = secret_app["dd_authenticate_data_key"]
+else:
+    CREDENTIAL_AES_256_KEY = env("DD_CREDENTIAL_AES_256_KEY")
+    DB_KEY = env("DD_CREDENTIAL_AES_256_KEY")
+    AAD_KEY = env("DD_AUTHENTICATE_ADDITIONAL_DATA_KEY")
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env("DD_TEAM_NAME")
@@ -761,15 +1044,19 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.DjangoModelPermissions",
-    ),
-    "DEFAULT_RENDERER_CLASSES": (
-        "rest_framework.renderers.JSONRenderer",
-    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.DjangoModelPermissions",),
+    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 25,
     "EXCEPTION_HANDLER": "dojo.api_v2.exception_handler.custom_exception_handler",
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': THROTTLE_ANON,
+        'user': THROTTLE_USER 
+    }
 }
 
 if API_TOKENS_ENABLED:
@@ -852,6 +1139,7 @@ INSTALLED_APPS = (
     "tagulous",
     "fontawesomefree",
     "django_filters",
+    "django.db.migrations",
 )
 
 # ------------------------------------------------------------------------------
@@ -877,6 +1165,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
+
 
 # WhiteNoise allows your web app to serve its own static files,
 # making it a self-contained unit that can be deployed anywhere without relying on nginx
@@ -985,7 +1274,6 @@ if SAML2_ENABLED:
                         saml2.BINDING_HTTP_POST),
                     ],
                 },
-
                 # attributes that this project need to identify a user
                 "required_attributes": ["Email", "UserName"],
 
@@ -998,7 +1286,6 @@ if SAML2_ENABLED:
                 #     # we do not need a WAYF service since there is
                 #     # only an IdP defined here. This IdP should be
                 #     # present in our metadata
-
                 #     # the keys of this dictionary are entity ids
                 #     'https://localhost/simplesaml/saml2/idp/metadata.php': {
                 #         'single_sign_on_service': {
@@ -1011,7 +1298,6 @@ if SAML2_ENABLED:
                 # },
             },
         },
-
         # where the remote metadata is stored, local, remote or mdq server.
         # One metadatastore or many ...
         "metadata": SAML_METADATA,
@@ -1022,13 +1308,11 @@ if SAML2_ENABLED:
         # Signing
         # 'key_file': path.join(BASEDIR, 'private.key'),  # private part
         # 'cert_file': path.join(BASEDIR, 'public.pem'),  # public part
-
         # Encryption
         # 'encryption_keypairs': [{
         #     'key_file': path.join(BASEDIR, 'private.key'),  # private part
         #     'cert_file': path.join(BASEDIR, 'public.pem'),  # public part
         # }],
-
         # own metadata settings
         "contact_person": [
             {"given_name": "Lorenzo",
@@ -1088,17 +1372,33 @@ if AUTH_REMOTEUSER_ENABLED:
 # ------------------------------------------------------------------------------
 
 # Celery settings
-CELERY_BROKER_URL = env("DD_CELERY_BROKER_URL") \
-    if len(env("DD_CELERY_BROKER_URL")) > 0 else generate_url(
-    scheme=env("DD_CELERY_BROKER_SCHEME"),
-    double_slashes=True,
-    user=env("DD_CELERY_BROKER_USER"),
-    password=env("DD_CELERY_BROKER_PASSWORD"),
-    host=env("DD_CELERY_BROKER_HOST"),
-    port=env("DD_CELERY_BROKER_PORT"),
-    path=env("DD_CELERY_BROKER_PATH"),
-    params=env("DD_CELERY_BROKER_PARAMS"),
-)
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_broker = get_secret(env("DD_SECRET_BROKER"))
+    CELERY_BROKER_URL = generate_url(
+        scheme=env("DD_CELERY_BROKER_SCHEME"),
+        double_slashes=True,
+        user=secret_broker["username"],
+        password=secret_broker["password"],
+        host=secret_broker["hostname"],
+        port=secret_broker["port"],
+        path=secret_broker["virtualhost"],
+        params=env("DD_CELERY_BROKER_PARAMS"),
+    )
+else:
+    CELERY_BROKER_URL = (
+        env("DD_CELERY_BROKER_URL")
+        if len(env("DD_CELERY_BROKER_URL")) > 0
+        else generate_url(
+            scheme=env("DD_CELERY_BROKER_SCHEME"),
+            double_slashes=True,
+            user=env("DD_CELERY_BROKER_USER"),
+            password=env("DD_CELERY_BROKER_PASSWORD"),
+            host=env("DD_CELERY_BROKER_HOST"),
+            port=env("DD_CELERY_BROKER_PORT"),
+            path=env("DD_CELERY_BROKER_PATH"),
+            params=env("DD_CELERY_BROKER_PARAMS"),
+        )
+    )
 CELERY_TASK_IGNORE_RESULT = env("DD_CELERY_TASK_IGNORE_RESULT")
 CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = TIME_ZONE
@@ -1107,19 +1407,17 @@ CELERY_BEAT_SCHEDULE_FILENAME = env("DD_CELERY_BEAT_SCHEDULE_FILENAME")
 CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
+CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
+CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY = env("DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
 
-CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
+CELERY_IMPORTS = ("dojo.tools.tool_issue_updater",)
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
-    "add-alerts": {
-        "task": "dojo.tasks.add_alerts",
-        "schedule": timedelta(hours=1),
-        "args": [timedelta(hours=1)],
-    },
+    "add-alerts": {"task": "dojo.tasks.add_alerts", "schedule": timedelta(hours=1), "args": [timedelta(hours=1)]},
     "cleanup-alerts": {
         "task": "dojo.tasks.cleanup_alerts",
         "schedule": timedelta(hours=8),
@@ -1145,6 +1443,23 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
         "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
     },
+    "transfer_finding_expiration_handler": {
+        "task": "dojo.transfer_findings.helper.expiration_handler",
+        "schedule": crontab(minute=CELERY_CRON_SCHEDULE.split()[0],
+                            hour=CELERY_CRON_SCHEDULE.split()[1],
+                            day_of_month=CELERY_CRON_SCHEDULE.split()[2],
+                            month_of_year=CELERY_CRON_SCHEDULE.split()[3],
+                            day_of_week=CELERY_CRON_SCHEDULE.split()[4]),
+    },
+    "risk_pending_expiration_handler": {
+        "task": "dojo.risk_acceptance.risk_pending.expiration_handler",
+        "schedule": crontab(
+            minute=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[0],
+            hour=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[1],
+            day_of_month=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[2],
+            month_of_year=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[3],
+            day_of_week=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[4]),
+        },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
@@ -1158,7 +1473,6 @@ CELERY_BEAT_SCHEDULE = {
     #     'task': 'dojo.tasks.fix_loop_duplicates_task',
     #     'schedule': timedelta(hours=12)
     # },
-
 }
 
 # ------------------------------------
@@ -1181,6 +1495,16 @@ if env("DD_DJANGO_METRICS_ENABLED"):
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
     LOGIN_EXEMPT_URLS += (rf"^{URL_PREFIX}django_metrics/",)
 
+# ------------------------------------
+# Traces OpenTelemetry to OTLP
+# ------------------------------------
+if env("DD_OPENTELEMETRY_TRACES_ENABLED"):
+    resource = Resource.create()
+
+    trace.set_tracer_provider(TracerProvider(resource=resource))
+    # Please see the OTLP Exporter documentation for other options.
+    span_processor = BatchSpanProcessor(OTLPSpanExporter())
+    trace.get_tracer_provider().add_span_processor(span_processor)
 
 # ------------------------------------
 # Hashcode configuration
@@ -1456,7 +1780,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
-    "SARIF": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "SARIF": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Azure Security Center Recommendations Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Hadolint Dockerfile check": DEDUPE_ALGO_HASH_CODE,
     "Semgrep JSON Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
@@ -1751,11 +2075,76 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 # Auditlog
 # ------------------------------------------------------------------------------
-AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
-ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
-USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
-USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
+AUDITLOG_FLUSH_RETENTION_PERIOD = env('DD_AUDITLOG_FLUSH_RETENTION_PERIOD')
+ENABLE_AUDITLOG = env('DD_ENABLE_AUDITLOG')
+USE_FIRST_SEEN = env('DD_USE_FIRST_SEEN')
+USE_QUALYS_LEGACY_SEVERITY_PARSING = env('DD_QUALYS_LEGACY_SEVERITY_PARSING')
+DD_CUSTOM_TAG_PARSER = env('DD_CUSTOM_TAG_PARSER')
+DD_REVIEWERS_ROLE_TAG= env('DD_REVIEWERS_ROLE_TAG')
+DD_VALIDATE_ROLE_USER = env('DD_VALIDATE_ROLE_USER')
+DD_ROLES_MAP_GROUPS = env('DD_ROLES_MAP_GROUPS')
+DD_INVALID_ESCAPE_STR = env('DD_INVALID_ESCAPE_STR')
+# SES Email
+AWS_SES_EMAIL = env('DD_AWS_SES_EMAIL')
 
+# Risk Pending
+RISK_PENDING = env("DD_RISK_PENDING")
+ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
+RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
+COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
+# Acceptace for email
+ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
+LIFETIME_MINUTE_PERMISSION_KEY = env("DD_LIFETIME_MINUTE_PERMISSION_KEY")
+HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
+# System user for automated resource creation
+SYSTEM_USER = env("DD_SYSTEM_USER")
+# Engine Backend
+PROVIDERS = env("DD_PROVIDERS")
+PROVIDERS_ENDPOINT_MAPPING = env("DD_PROVIDER_ENDPOINT_MAPPING")
+PROVIDER_URL = env("DD_PROVIDER_URL")
+PROVIDER_HEADER = env("DD_PROVIDER_HEADER")
+# Abuse Control
+LIMIT_ASSUMPTION_OF_VULNERABILITY = env("DD_LIMIT_ASSUMPTION_OF_VULNERABILITY")
+LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE = env("DD_LIMIT_OF_TEMPORARILY_ASSUMED_VULNERABILITIES_LIMITED_TO_TOLERANCE")
+PERCENTAGE_OF_VULNERABILITIES_CLOSED = env("DD_PERCENTAGE_OF_VULNERABILITIES_CLOSED")
+TEMPORARILY_ASSUMED_VULNERABILITIES = env("DD_TEMPORARILY_ASSUMED_VULNERABILITIES")
+
+# ------------------------------------------------------------------------------
+# CACHE REDIS
+# ------------------------------------------------------------------------------
+if os.getenv("DD_USE_CACHE_REDIS") == "true":
+    LOCATION_CACHE = "redis://127.0.0.1:6379"
+    OPTIONS_CACHE = {"CLIENT_CLASS": "django_redis.client.DefaultClient"}
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+        secret_redis = get_secret(env("DD_SECRET_REDIS"))
+        LOCATION_CACHE = [
+            f"rediss://{secret_redis['username']}@{secret_redis['host']}:{secret_redis['port']}",
+            f"rediss://{secret_redis['username']}@{secret_redis['hostread']}:{secret_redis['port']}",
+        ]
+        OPTIONS_CACHE.update({"PASSWORD": secret_redis['password']})
+
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": LOCATION_CACHE,
+            "OPTIONS": OPTIONS_CACHE,
+        }
+    }
+
+# ------------------------------------------------------------------------------
+# Render Grafana Metricsin a <frame>, <iframe>, <embed> or <object>
+# ------------------------------------------------------------------------------
+
+GRAFANA_URL = env('DD_GRAFANA_URL')
+GRAFANA_PATH = env('DD_GRAFANA_PATH')
+GRAFANA_PARAMS = env('DD_GRAFANA_PARAMS')
+MICROSOFT_LOGIN_URL = env('DD_MICROSOFT_LOGIN_URL')
+
+CSP_FRAME_SRC = [
+    "'self'",
+    GRAFANA_URL,
+    MICROSOFT_LOGIN_URL
+]
 # ------------------------------------------------------------------------------
 # Notifications
 # ------------------------------------------------------------------------------

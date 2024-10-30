@@ -10,6 +10,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.contrib.postgres.aggregates import StringAgg
+from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS, connection
 from django.db.models import Count, F, Max, OuterRef, Prefetch, Q, Subquery, Sum
@@ -87,6 +88,7 @@ from dojo.models import (
     Product_Group,
     Product_Member,
     Product_Type,
+    TransferFinding,
     System_Settings,
     Test,
     Test_Type,
@@ -124,6 +126,7 @@ from dojo.utils import (
     is_title_in_breadcrumbs,
     queryset_check,
     sum_by_severity_level,
+    validate_group_role
 )
 
 logger = logging.getLogger(__name__)
@@ -749,6 +752,7 @@ def async_burndown_metrics(request, pid):
         "max": open_findings_burndown.get("y_max", 0),
         "min": open_findings_burndown.get("y_min", 0),
     })
+
 
 
 @user_is_authorized(Product, Permissions.Engagement_View, "pid")
@@ -1678,7 +1682,14 @@ def add_product_member(request, pid):
                             product_member.product = product
                             product_member.user = user
                             product_member.role = memberform.cleaned_data["role"]
-                            product_member.save()
+
+                            validate_res = validate_group_role(request, user, pid, "view_product", 
+                                                               memberform.cleaned_data["role"].name)
+                            if validate_res:
+                                return validate_res
+                            else:
+                                product_member.save()
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      _("Product members added successfully."),
@@ -1706,7 +1717,13 @@ def edit_product_member(request, memberid):
                                      _("You are not permitted to make users to owners."),
                                      extra_tags="alert-warning")
             else:
-                memberform.save()
+                validate_res = validate_group_role(request, member.user, member.product.id, "view_product", 
+                                                               memberform.cleaned_data["role"].name)
+                if validate_res:
+                    return validate_res
+                else:
+                    memberform.save()
+
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      _("Product member updated successfully."),
@@ -1974,3 +1991,12 @@ def add_product_group(request, pid):
         "form": group_form,
         "product_tab": product_tab,
     })
+
+
+def view_transfer_finding(request, pid=None):
+    pt = get_object_or_404(Product, id=pid)
+    transfer_finding = TransferFinding.objects.filter(origin_product=pt) | TransferFinding.objects.filter(destination_product=pt).order_by('-id')
+    paginator = Paginator(transfer_finding, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'dojo/view_transfer_finding.html', {'page_obj': page_obj})

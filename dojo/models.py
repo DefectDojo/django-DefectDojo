@@ -5,11 +5,11 @@ import logging
 import os
 import re
 import warnings
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional, Set
 from uuid import uuid4
-
 import hyperlink
+import secrets
 import tagulous.admin
 from auditlog.registry import auditlog
 from cvss import CVSS3
@@ -19,12 +19,13 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError 
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
 from django.db import connection, models
 from django.db.models import Count, JSONField, Q
 from django.db.models.expressions import Case, When
+from django.db import IntegrityError
 from django.db.models.functions import Lower
 from django.urls import reverse
 from django.utils import timezone
@@ -485,6 +486,12 @@ class System_Settings(models.Model):
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text=_("Default expiry period for risk acceptance form."))
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name=_("Risk acceptance expiration heads up days"), help_text=_("Notify X days before risk acceptance expires. Leave empty to disable."))
+    enable_transfer_finding = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Enable Transfer Finding"),
+        help_text=_("Enable transfer of findings between different product types"))
+    orphan_findings = models.CharField(max_length=100, default='', blank=True, help_text=_("Name of the producttype that contains the orphan findings"))
     enable_credentials = models.BooleanField(
         default=True,
         blank=False,
@@ -748,6 +755,14 @@ class Product_Type(models.Model):
 
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
+    product_type_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                        related_name='product_type_manager', on_delete=models.RESTRICT)
+    product_type_technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                          related_name='product_type_technical_contact', on_delete=models.RESTRICT)
+    environment_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                     related_name='environment_manager', on_delete=models.RESTRICT)
+    environment_technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
+                                     related_name='environment_technical_contact', on_delete=models.RESTRICT)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -1246,6 +1261,18 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else "unknown"
 
+    @property
+    def engagements_list(self):
+        engagements = Engagement.objects.filter(product=self, active=True)
+        engagement_list = []
+        for engagement_dict in engagements.values("id", "name", "product_id", "status", "engagement_type", "build_id"):
+            findings = Finding.objects.filter(test__engagement__id=engagement_dict["id"], active=True, risk_status__in=["Risk Active", "Risk Expired"])
+            engagement_dict.update({"findings": list(
+                findings.values("id", "title", "cve", "severity", "description", "active",
+                                "verified", "risk_status", "risk_accepted", "accepted_by"))})
+            engagement_list.append(engagement_dict)
+        return engagement_list
+
     # only used in APIv2 serializers.py, query should be aligned with findings_count
     @cached_property
     def open_findings_list(self):
@@ -1255,6 +1282,7 @@ class Product(models.Model):
         for i in findings:
             findings_list.append(i.id)
         return findings_list
+    
 
     @property
     def has_jira_configured(self):
@@ -2247,6 +2275,17 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
 
 class Finding(models.Model):
+
+    STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
+                      ('Risk Rejected', 'Risk Rejected'),
+                      ('Risk Expired', 'Risk Expired'),
+                      ('Risk Accepted', 'Risk Accepted'),
+                      ('Risk Active', 'Risk Active'),
+                      ('Transfer Pending', 'Transfer Pending'),
+                      ('Transfer Rejected', 'Transfer Rejected'),
+                      ('Transfer Expired', 'Transfer Expired'),
+                      ('Transfer Accepted', 'Transfer Accepted'))
+
     title = models.CharField(max_length=511,
                              verbose_name=_("Title"),
                              help_text=_("A short description of the flaw."))
@@ -2266,7 +2305,7 @@ class Finding(models.Model):
     cwe = models.IntegerField(default=0, null=True, blank=True,
                               verbose_name=_("CWE"),
                               help_text=_("The CWE number associated with this flaw."))
-    cve = models.CharField(max_length=50,
+    cve = models.CharField(max_length=100,
                            null=True,
                            blank=False,
                            verbose_name=_("Vulnerability Id"),
@@ -2356,6 +2395,16 @@ class Finding(models.Model):
     out_of_scope = models.BooleanField(default=False,
                                        verbose_name=_("Out Of Scope"),
                                        help_text=_("Denotes if this flaw falls outside the scope of the test and/or engagement."))
+    acceptances_confirmed = models.IntegerField(default=0,
+                                       null=True,
+                                       verbose_name=_('Acceptances confirmed'),
+                                       help_text=_("number of confirmed acceptances for finding"))
+    risk_status = models.CharField(default="Risk Active",
+                                       null=True,
+                                       verbose_name=_('Risk Status'),
+                                       choices=STATUS_CHOICES,
+                                       max_length=20,
+                                       help_text=_("Denotes the type of finding status, (pending, rejected)."))
     risk_accepted = models.BooleanField(default=False,
                                        verbose_name=_("Risk Accepted"),
                                        help_text=_("Denotes if this finding has been marked as an accepted risk."))
@@ -2411,6 +2460,12 @@ class Finding(models.Model):
                                      on_delete=models.RESTRICT,
                                      verbose_name=_("Mitigated By"),
                                      help_text=_("Documents who has marked this flaw as fixed."))
+    accepted_by = models.CharField(max_length=200,
+                                   default="",
+                                   null=True,
+                                   blank=True,
+                                   verbose_name=_('Accepted By'),
+                                   help_text=_("The person that accepts the risk, can be outside of DefectDojo."))
     reporter = models.ForeignKey(Dojo_User,
                                  editable=False,
                                  default=1,
@@ -2611,7 +2666,7 @@ class Finding(models.Model):
         ]
 
     def __str__(self):
-        return self.title
+        return f"{self.id} - {self.title[:80] + '...' if len(self.title) > 80 else self.title}"
 
     def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
@@ -2746,6 +2801,14 @@ class Finding(models.Model):
         if ras:
             return ras[0]
 
+        return None
+    
+    @property
+    def transfer_finding(self):
+        if self.findings:
+            tf = self.findings.first().transfer_findings
+            if tf:
+                return tf
         return None
 
     def compute_hash_code(self):
@@ -2935,7 +2998,21 @@ class Finding(models.Model):
             status += ["Out Of Scope"]
         if self.duplicate:
             status += ["Duplicate"]
-        if self.risk_accepted:
+        if self.risk_status == "Transfer Accepted":
+            status += ["Transfer Accepted"]
+        if self.risk_status == "Transfer Expired":
+            status += ["Transfer Expired"]
+        if self.risk_status == "Transfer Pending":
+            status += ["Transfer Pending"]
+        if self.risk_status == "Transfer Rejected":
+            status += ["Transfer Rejected"]
+        if self.risk_status == "Risk Pending":
+            status += ["Risk pending"]
+        if self.risk_status == "Risk Rejected":
+            status += ["Risk Rejected"]
+        if self.risk_status == "Risk Expired":
+            status += ["Risk Expired"]
+        elif self.risk_accepted:
             status += ["Risk Accepted"]
         if not len(status):
             status += ["Initial"]
@@ -3339,6 +3416,98 @@ class Finding(models.Model):
                     deduplicationLogger.debug("Hash_code computed for finding: %s", self.hash_code)
 
 
+class TransferFinding(models.Model):
+    title = models.CharField(max_length=255, verbose_name=("Titile"))
+    date = models.DateField(auto_now_add=True, verbose_name=("Date"))
+    destination_product_type = models.ForeignKey(
+        Product_Type,
+        related_name="destination_product_type",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("Destination Product Type Name"))
+
+    destination_product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="destination_product",
+        blank=True,
+        null=True,
+        help_text=_("Destination Product name"))
+    
+    destination_engagement = models.ForeignKey(
+        Engagement,
+        related_name="destination_engagement",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("Destination Engagement"))
+
+    origin_product_type = models.ForeignKey(
+        Product_Type,
+        related_name="origin_product_type",
+        editable=True,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("Origin Product Type"))
+
+    origin_product = models.ForeignKey(
+        Product,
+        related_name="origin_product",
+        editable=True,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_(" Origin Product name"))
+
+    origin_engagement = models.ForeignKey(
+        Engagement,
+        related_name="origin_engagement",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("Origin Engagement Name"))
+
+    accepted_by = models.ForeignKey(
+        Dojo_User,
+        related_name="accepted_by",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        help_text=_("The user that accepts the tranfer finding, The user must belong to the product whit contact"))
+    
+    expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text=_('When the Transfer-Finding expires, the findings will be reactivated (unless disabled below).'))
+    expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) Date at which notice about the transfer-finding expiration was sent.'))
+    expiration_date_handled = models.DateTimeField(default=None, null=True, blank=True, help_text=_('(readonly) When the transfer-finding expiration was handled (manually or by the daily job).'))
+    reactivate_expired = models.BooleanField(null=False, blank=False, default=True, verbose_name=_('Reactivate findings on expiration'), help_text=_('Reactivate findings when transfer-finding expires?'))
+    restart_sla_expired = models.BooleanField(default=False, null=False, verbose_name=_('Restart SLA on expiration'), help_text=_("When enabled, the SLA for findings is restarted when the transfer-finding expires."))
+
+    path = models.FileField(upload_to='transfer_finding/%Y/%m/%d',
+                            editable=True, null=True,
+                            blank=True, verbose_name=('Proof'))
+
+    owner = models.ForeignKey(Dojo_User,
+                             related_name="owner",
+                             null=False,
+                             blank=False,
+                             on_delete=models.CASCADE,
+                             verbose_name=_('Owner'), help_text=_("The person that Owner the Tranfer finding"))
+
+    notes = models.CharField(max_length=2500, editable=True, blank=True)
+
+    class Meta:
+
+        def __str__(self):
+            return self.title
+
+class TransferFindingFinding(models.Model):
+    findings = models.ForeignKey(Finding, verbose_name=("Finding ID"), related_name="findings", on_delete=models.CASCADE)
+    transfer_findings = models.ForeignKey(TransferFinding, verbose_name=("Transfer Finding"), related_name="transfer_findings", on_delete=models.CASCADE)
+    finding_related = models.ForeignKey(Finding, verbose_name=("finding_related"), on_delete=models.CASCADE, null=True)
+    engagement_related = models.ForeignKey(Finding, related_name="engagement_related", on_delete=models.CASCADE, null=True)
+
+
 class FindingAdmin(admin.ModelAdmin):
     # For efficiency with large databases, display many-to-many fields with raw
     # IDs rather than multi-select
@@ -3349,7 +3518,7 @@ class FindingAdmin(admin.ModelAdmin):
 
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey(Finding, editable=False, on_delete=models.CASCADE)
-    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    vulnerability_id = models.TextField(max_length=100, blank=False, null=False)
 
     def __str__(self):
         return self.vulnerability_id
@@ -3468,7 +3637,7 @@ class Finding_Group(TimeStampedModel):
 class Finding_Template(models.Model):
     title = models.TextField(max_length=1000)
     cwe = models.IntegerField(default=None, null=True, blank=True)
-    cve = models.CharField(max_length=50,
+    cve = models.CharField(max_length=100,
                            null=True,
                            blank=False,
                            verbose_name="Vulnerability Id",
@@ -3528,7 +3697,7 @@ class Finding_Template(models.Model):
 
 class Vulnerability_Id_Template(models.Model):
     finding_template = models.ForeignKey(Finding_Template, editable=False, on_delete=models.CASCADE)
-    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    vulnerability_id = models.TextField(max_length=100, blank=False, null=False)
 
 
 class Check_List(models.Model):
@@ -3604,6 +3773,16 @@ class Risk_Acceptance(models.Model):
     TREATMENT_FIX = "F"
     TREATMENT_TRANSFER = "T"
 
+    SEVERITY_CHOICES = [("Critial", "Critical"),
+                        ("Hight", "Hight"),
+                        ("Medium", "Medium"),
+                        ("Low", "Low")]
+
+    SEVERITY_CHOICES = [("Critial", "Critical"),
+                        ("Hight", "Hight"),
+                        ("Medium", "Medium"),
+                        ("Low", "Low")]
+
     TREATMENT_TRANSLATIONS = {
         TREATMENT_ACCEPT: _("Accept (The risk is acknowledged, yet remains)"),
         TREATMENT_AVOID: _("Avoid (Do not engage with whatever creates the risk)"),
@@ -3623,6 +3802,11 @@ class Risk_Acceptance(models.Model):
     name = models.CharField(max_length=300, null=False, blank=False, help_text=_("Descriptive name which in the future may also be used to group risk acceptances together across engagements and products"))
 
     accepted_findings = models.ManyToManyField(Finding)
+    severity = models.CharField(choices=SEVERITY_CHOICES,
+                                max_length=10,
+                                null=True,
+                                blank=True,
+                                help_text=_("type of severity admitted"))
 
     recommendation = models.CharField(choices=TREATMENT_CHOICES, max_length=2, null=False, default=TREATMENT_FIX, help_text=_("Recommendation from the security team."), verbose_name=_("Security Recommendation"))
 
@@ -4005,6 +4189,8 @@ NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
 NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
 NOTIFICATION_CHOICE_WEBHOOKS = ("webhooks", "webhooks")
 NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
+NOTIFICATION_CHOICE_ALERT_MAIL = ("mail", "alert")
+NOTIFICATION_CHOICE_NONE = ("", "")
 
 NOTIFICATION_CHOICES = (
     NOTIFICATION_CHOICE_SLACK,
@@ -4018,32 +4204,38 @@ DEFAULT_NOTIFICATION = NOTIFICATION_CHOICE_ALERT
 
 
 class Notifications(models.Model):
-    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
 
-    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, help_text=_("Triggered whenever an (re-)import has been done that created/updated/closed findings."))
+    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True, help_text=_("Triggered whenever an (re-)import has been done that created/updated/closed findings."))
     scan_added_empty = MultiSelectField(choices=NOTIFICATION_CHOICES, default=[], blank=True, help_text=_("Triggered whenever an (re-)import has been done (even if that created/updated/closed no findings)."))
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
-    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
+    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
+    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
+    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True)
+    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True)
     user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
     template = models.BooleanField(default=False)
-    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
+    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_NONE, blank=True,
         verbose_name=_("SLA breach"),
         help_text=_("Get notified of (upcoming) SLA breaches"))
-    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
+    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_("Risk Acceptance Expiration"),
         help_text=_("Get notified of (upcoming) Risk Acceptance expiries"))
-    sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
+    risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
+        verbose_name=_("Risk Acceptance Request"),
+        help_text=_("Send notification to the contacts of the product type"))
+    transfer_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
+        verbose_name=_("Transfer Finding"),
+        help_text=_("Send notification to the contacts of the product"))
+    sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
         verbose_name=_("SLA breach (combined)"),
         help_text=_("Get notified of (upcoming) SLA breaches (a message per project)"))
 
@@ -4087,6 +4279,7 @@ class Notifications(models.Model):
                 result.sla_breach = {*result.sla_breach, *notifications.sla_breach}
                 result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
                 result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
+                result.risk_acceptance_request = {*result.risk_acceptance_request, *notifications.risk_acceptance_request}
         return result
 
 
@@ -4154,6 +4347,7 @@ class Alerts(models.Model):
     url = models.URLField(max_length=2000, null=True, blank=True)
     source = models.CharField(max_length=100, default="Generic")
     icon = models.CharField(max_length=25, default="icon-user-check")
+    color_icon = models.CharField(max_length=10, null=True, blank=True, default="#262626")
     user_id = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=False)
 
@@ -4577,6 +4771,52 @@ class ChoiceAnswer(Answer):
             return str(self.answer.all()[0])
         return "No Response"
 
+class PermissionKey(models.Model):
+    token = models.CharField(max_length=100, unique=True, null=True)
+    status = models.BooleanField(default=True)
+    user = models.ForeignKey(Dojo_User, null=True, blank=True, on_delete=models.CASCADE)
+    risk_acceptance = models.ForeignKey(Risk_Acceptance, null=True, blank=True, on_delete=models.CASCADE)
+    transfer_finding = models.ForeignKey(TransferFinding, null=True, blank=True, on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now=True)
+    expiration = models.DateTimeField()
+
+    def is_expired(self):
+        return self.status
+    
+    def expire(self):
+        self.status = False
+
+    
+    @classmethod
+    def create_token(
+        cls,
+        lifetime,
+        user,
+        risk_acceptance,
+        transfer_finding
+        ):
+
+        token = secrets.token_urlsafe(64)
+        expiration = timezone.now() + timedelta(minutes=lifetime)
+        try:
+            permissionkey = cls.objects.create(
+                token=token,
+                user=user,
+                risk_acceptance=risk_acceptance,
+                transfer_finding=transfer_finding,
+                expiration=expiration)
+        except IntegrityError:
+            logger.debug("IntegrityError token key duplicated")
+            permissionkey = cls.objects.create(
+                token=secrets.token_urlsafe(64)[0],
+                user=user,
+                risk_acceptance=risk_acceptance,
+                transfer_finding=transfer_finding,
+                expiration=expiration)
+
+        return permissionkey
+            
+
 
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database
@@ -4634,6 +4874,9 @@ admin.site.register(FileAccessToken)
 admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
+admin.site.register(PermissionKey)
+admin.site.register(TransferFinding)
+admin.site.register(TransferFindingFinding)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
 admin.site.register(Endpoint_Params)

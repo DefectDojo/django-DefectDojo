@@ -42,5 +42,41 @@
             "is_owner": false
 
         }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 6,
+        "fields": {
+            "name": "Developer",
+            "is_owner": false
+
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 7,
+        "fields": {
+            "name": "Leader",
+            "is_owner": false
+
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 8,
+        "fields": {
+            "name": "Cibersecurity",
+            "is_owner": false
+
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 9,
+        "fields": {
+            "name": "Risk",
+            "is_owner": false
+
+        }
     }
 ]

@@ -20,3 +20,7 @@ $('a.expire-risk_acceptance').on('click', function (e) {
         'The expiration date for this risk acceptance will be set to "now".'
         )
 });
+
+$('a.accept-risk_acceptance').on('click', function (e) {
+    return confirm('Are you sure you want to accept all the risks?')
+});

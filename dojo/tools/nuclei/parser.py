@@ -6,6 +6,7 @@ from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
 
 from dojo.models import Endpoint, Finding
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,10 @@ class NucleiParser:
                 nb_occurences=1,
                 vuln_id_from_tool=template_id,
             )
+            custom_tags = list()
+            if settings.DD_CUSTOM_TAG_PARSER.get("nuclei"):
+                custom_tags.append(settings.DD_CUSTOM_TAG_PARSER.get("nuclei"))
+
             if item.get("timestamp"):
                 finding.date = date_parser.parse(item.get("timestamp"))
             if info.get("description"):
@@ -80,7 +85,7 @@ class NucleiParser:
                     item.get("extracted-results"),
                 )
             if info.get("tags"):
-                finding.unsaved_tags = info.get("tags")
+                finding.unsaved_tags = custom_tags + info.get("tags")
             if info.get("reference"):
                 reference = info.get("reference")
                 if isinstance(reference, list):

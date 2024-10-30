@@ -4,9 +4,13 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def update_collation(apps, schema_editor):
-    print('Database vendor: {}'.format(schema_editor.connection.vendor))
+    logger.debug('Database vendor: {}'.format(schema_editor.connection.vendor))
     if not schema_editor.connection.vendor.startswith('mysql'):
         return
     schema_editor.execute('ALTER TABLE dojo_sonarqube_issue CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_bin')

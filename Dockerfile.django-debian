@@ -17,13 +17,27 @@ RUN \
     libpq-dev \
     postgresql-client \
     xmlsec1 \
-    git \
     uuid-runtime \
+    curl \
+    autoconf \
+    gettext \
+    zlib1g-dev \
     # libcurl4-openssl-dev is required for installing pycurl python package
     libcurl4-openssl-dev \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
+  # Instalar Git 2.45.1
+  curl -LO https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.45.1.tar.gz && \
+  tar -xzf git-2.45.1.tar.gz && \
+  cd git-2.45.1 && \
+  make clean && \
+  make configure && \
+  ./configure --prefix=/usr/local && \
+  make all && \
+  make install && \
+  cd .. && \
+  rm -rf git-2.45.1* && \  
   true
 COPY requirements.txt ./
 # CPUCOUNT=1 is needed, otherwise the wheel for uwsgi won't always be build succesfully
@@ -47,8 +61,12 @@ RUN \
     libtiff6 \
     dnsutils \
     xmlsec1 \
-    git \
     uuid-runtime \
+    build-essential \
+    curl \
+    autoconf \
+    gettext \
+    zlib1g-dev \
     libpq-dev \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
@@ -57,6 +75,17 @@ RUN \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
+  # Instalar Git 2.45.1
+  curl -LO https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.45.1.tar.gz && \
+  tar -xzf git-2.45.1.tar.gz && \
+  cd git-2.45.1 && \
+  make clean && \
+  make configure && \
+  ./configure --prefix=/usr/local && \
+  make all && \
+  make install && \
+  cd .. && \
+  rm -rf git-2.45.1* && \  
   true
 COPY --from=build /tmp/wheels /tmp/wheels
 COPY requirements.txt ./
@@ -76,6 +105,8 @@ COPY \
   docker/entrypoint-unit-tests.sh \
   docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
+  docker/celery_readiness.py \
+  docker/celery_worker_liveness.py \
   docker/secret-file-loader.sh \
   docker/reach_database.sh \
   docker/certs/* \
@@ -95,7 +126,6 @@ RUN \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   true
-USER root
 RUN \
     addgroup --gid ${gid} ${appuser} && \
     adduser --system --no-create-home --disabled-password --gecos '' \
@@ -104,11 +134,10 @@ RUN \
     chmod -R u+rwX,go+rX,go-w /app && \
     # Allow for bind mounting local_settings.py and other setting overrides
     chown -R root:${appuser} /app/dojo/settings && \
-    chmod -R 775 /app/dojo/settings && \
+    chmod -R 770 /app/dojo/settings && \
     mkdir /var/run/${appuser} && \
     chown ${appuser} /var/run/${appuser} && \
     chmod g=u /var/run/${appuser} && \
-    chmod 775 /*.sh && \
     mkdir -p media/threat && chown -R ${uid} media && \
     # To avoid warning: (staticfiles.W004) The directory '/app/components/node_modules' in the STATICFILES_DIRS setting does not exist.
     mkdir -p components/node_modules && \
@@ -132,7 +161,6 @@ ENV \
   # DD_CELERY_WORKER_PREFETCH_MULTIPLIER="128" \
   DD_INITIALIZE=true \
   DD_UWSGI_MODE="socket" \
-  DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
   DD_UWSGI_NUM_OF_PROCESSES="2" \
   DD_UWSGI_NUM_OF_THREADS="2"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]

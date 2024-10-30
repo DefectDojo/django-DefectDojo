@@ -15,7 +15,6 @@ Useful if you need to make bulk changes with JIRA:
 
 logger = logging.getLogger(__name__)
 
-
 class Command(BaseCommand):
     help = "No input commands for JIRA bulk update."
 

@@ -6,6 +6,7 @@ from django.core.serializers import deserialize, serialize
 from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
+from dojo.transfer_findings import helper as hp_transfer_finding
 import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from dojo.importers.base_importer import BaseImporter, Parser
@@ -15,6 +16,7 @@ from dojo.models import (
     Finding,
     Test,
     Test_Import,
+    System_Settings
 )
 
 logger = logging.getLogger(__name__)
@@ -267,8 +269,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             hash_code__in=new_hash_codes,
         ).filter(
             test__test_type=self.test.test_type,
-            active=True,
-        )
+        ).filter(Q(active=True) | Q(risk_accepted=True))
         # Accommodate for product scope or engagement scope
         if self.close_old_findings_product_scope:
             old_findings = old_findings.filter(test__engagement__product=self.test.engagement.product)
@@ -279,6 +280,14 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             old_findings = old_findings.filter(service=self.service)
         else:
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=""))
+        
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_transfer_finding:
+            old_findings = old_findings.exclude(tags="transferred")
+
+        if len(self.test.tags.tags) > 0:
+            old_findings = old_findings.filter(test__tags__in=self.test.tags.tags)
+
         # Update the status of the findings and any endpoints
         for old_finding in old_findings:
             self.mitigate_finding(
@@ -293,6 +302,15 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
                 jira_helper.push_to_jira(finding_group)
+
+        system_settings = System_Settings.objects.get()
+        if system_settings.enable_transfer_finding:
+            for closed_finding in old_findings:
+                hp_transfer_finding.close_or_reactive_related_finding(
+                    event="close",
+                    parent_finding=closed_finding,
+                    notes=f"finding closed by the parent finding {closed_finding.id} (policies for the transfer of findings)",
+                    send_notification=False)
 
         return old_findings
 
@@ -402,7 +420,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.info("IMPORT_SCAN: Collecting Findings")
         for results in results_list:
             serial_new_findings = results
-            new_findings += [next(deserialize("json", finding)).object for finding in serial_new_findings]
+            new_findings += [
+                    next(deserialize("json", self.decode_datetime(finding))).object
+                    for finding in serial_new_findings
+                ]
         logger.info("IMPORT_SCAN: All Findings Collected")
         # Indicate that the test is not complete yet as endpoints will still be rolling in.
         self.test.percent_complete = 50

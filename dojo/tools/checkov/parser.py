@@ -1,7 +1,7 @@
 import json
 
 from dojo.models import Finding
-
+from django.conf import settings
 
 class CheckovParser:
     def get_scan_types(self):
@@ -67,8 +67,10 @@ def get_item(vuln, test, check_type):
         vuln["check_name"] if "check_name" in vuln else "check_name not found"
     )
     description = f"Check Type: {check_type}\n"
+    vuln_id = ""
     if "check_id" in vuln:
         description += f"Check Id: {vuln['check_id']}\n"
+        vuln_id = vuln["check_id"]
     if "check_name" in vuln:
         description += f"{vuln['check_name']}\n"
 
@@ -85,14 +87,19 @@ def get_item(vuln, test, check_type):
     severity = "Medium"
     if "severity" in vuln and vuln["severity"] is not None:
         severity = vuln["severity"].capitalize()
+    
+    impact= None
+    if "bc_category" in vuln:
+        impact = f"{vuln['bc_category']}_{vuln_id.split('_')[1]}"
 
     mitigation = ""
 
     references = vuln["guideline"] if "guideline" in vuln else ""
-    return Finding(
+    finding =  Finding(
         title=title,
         test=test,
         description=description,
+        impact=impact,
         severity=severity,
         mitigation=mitigation,
         references=references,
@@ -101,4 +108,11 @@ def get_item(vuln, test, check_type):
         component_name=resource,
         static_finding=True,
         dynamic_finding=False,
+        vuln_id_from_tool= vuln_id,
+
     )
+    finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("checkov")]
+    if "custom_vuln_id" in vuln:
+        finding.unsaved_vulnerability_ids = [vuln['custom_vuln_id']]
+    return finding
+

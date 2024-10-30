@@ -1,3 +1,4 @@
+import copy
 import base64
 import logging
 import mimetypes
@@ -22,13 +23,15 @@ from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
-from drf_spectacular.views import SpectacularAPIView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 
 import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
@@ -39,7 +42,10 @@ from dojo.api_v2 import (
     prefetch,
     serializers,
 )
+from dojo.transfer_findings.serializers import TransferFindingFindingSerializer, TransferFindingFindingsSerializer
+from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
 from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
@@ -48,6 +54,8 @@ from dojo.endpoint.queries import (
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.api_v2.api_error import ApiError
+from dojo.api_v2.utils import http_response
 from dojo.filters import (
     ApiAppAnalysisFilter,
     ApiCredentialsFilter,
@@ -129,6 +137,8 @@ from dojo.models import (
     Sonarqube_Issue_Transition,
     Stub_Finding,
     System_Settings,
+    TransferFinding,
+    TransferFindingFinding,
     Test,
     Test_Import,
     Test_Type,
@@ -159,16 +169,20 @@ from dojo.reports.views import (
 )
 from dojo.risk_acceptance import api as ra_api
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
+from dojo.risk_acceptance.risk_pending import accept_risk_pending_bullk 
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
 from dojo.user.utils import get_configuration_permissions_codenames
+import dojo.transfer_findings.helper as helper_tf
+from dojo.transfer_findings.notification import Notification as NotificationTransferFinding
 from dojo.utils import (
     async_delete,
     generate_file_response,
     get_setting,
     get_system_setting,
 )
+from rest_framework.throttling import UserRateThrottle
 
 logger = logging.getLogger(__name__)
 
@@ -703,10 +717,31 @@ class RiskAcceptanceViewSet(
         ] = f'attachment; filename="{risk_acceptance.filename()}"'
 
         return response
+    
+    @extend_schema(
+        methods=["POST"],
+        responses=None,
+        request=RiskAcceptanceEmailSerializer,
+    )
+    @action(detail=True, methods=["post"])
+    def accept_bullk(self, request, pk=None):
+        risk_acceptance = get_object_or_404(Risk_Acceptance.objects, id=pk)
+        try:
+            eng = Risk_Acceptance.objects.get(id=pk).accepted_findings.all().first().test.engagement
+            product = eng.product
+            product_type = product.prod_type
+            permission_key = request.data.get("permission_key", None)
+        except Exception as e:
+            logger.error("Failed accept bullk {e}")
+            ApiError.internal_server_error(detail=str(e))
+
+        accept_risk_pending_bullk(eng, risk_acceptance,
+                                  product,
+                                  product_type,
+                                  permission_key)
+        return http_response.ok(message="Acceptance process completed")
 
 
-# These are technologies in the UI and the API!
-# Authorization: object-based
 @extend_schema_view(**schema_with_prefetch())
 class AppAnalysisViewSet(
     PrefetchDojoModelViewSet,
@@ -925,6 +960,13 @@ class FindingViewSet(
                     e_status.last_modified = timezone.now()
                     e_status.save()
                 finding.save()
+                system_settings = System_Settings.objects.get()
+                if system_settings.enable_transfer_finding:
+                    helper_tf.close_or_reactive_related_finding(
+                        event="close",
+                        parent_finding=finding,
+                        notes=f"finding closed by the parent finding {finding.id} (policies for the transfer of findings)",
+                        send_notification=False)
             else:
                 return Response(
                     finding_close.errors, status=status.HTTP_400_BAD_REQUEST,
@@ -1651,6 +1693,21 @@ class ProductViewSet(
         else:
             instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @extend_schema(
+        responses={status.HTTP_200_OK: serializers.EngagementByProductResponseSerializer},
+    )
+    @action(
+        detail=True, methods=["get"], permission_classes=[IsAuthenticated]
+    )
+    def engagements(self, request, pk=None):
+        try:
+            queryset = self.get_queryset().get(pk=pk)
+        except Product.DoesNotExist:
+            return http_response.non_authoritative_information()
+
+        serializer = serializers.EngagementByProductResponseSerializer(queryset)
+        return http_response.ok(data=serializer.data)
 
     # def list(self, request):
     #     # Note the use of `get_queryset()` instead of `self.queryset`
@@ -2397,7 +2454,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     When `auto_create_context` is set to `True` you can use `deduplication_on_engagement` to restrict deduplication for
     imported Findings to the newly created Engagement.
     """
-
+    throttle_classes = [UserRateThrottle]
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
@@ -3088,6 +3145,104 @@ class AnnouncementViewSet(
 
     def get_queryset(self):
         return Announcement.objects.all().order_by("id")
+
+
+class TransferFindingViewSet(prefetch.PrefetchListMixin,
+                             prefetch.PrefetchRetrieveMixin,
+                             DojoModelViewSet):
+    queryset = TransferFinding.objects.all().order_by('id')
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.TransferFindingSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["id",
+                        "destination_engagement",
+                        "origin_product_type",
+                        "origin_product",
+                        "origin_engagement",
+                        "owner"]
+    
+    def destroy(self, request, pk=None):
+        transfer_finding = get_object_or_404(TransferFinding, id=pk)
+        obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+        for transfer_finding_finding in obj_transfer_finding_findings:
+            helper_tf.reset_finding_related(transfer_finding_finding.findings)
+        NotificationTransferFinding.transfer_finding_remove(transfer_finding)
+        super().destroy(request, pk)
+        return http_response.no_content(message="TransferFinding Deleted")
+
+
+class TransferFindingFindingsViewSet(prefetch.PrefetchListMixin,
+                             prefetch.PrefetchRetrieveMixin,
+                             DojoModelViewSet):
+    queryset = TransferFindingFinding.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = TransferFindingFindingsSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["id"]
+
+    @extend_schema(
+        request=TransferFindingFindingSerializer,
+        responses={status.HTTP_200_OK: serializers.TransferFindingFindingsUpdateSerializer},
+    )
+    @action(detail=True, methods=['post'])
+    def change_status(self, request, pk=None):
+        serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+            if transfer_finding_findings:
+                helper_tf.transfer_findings(transfer_finding_findings, serializer)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return http_response.no_content(data=serializer.data, message=f"Transfer Finding {pk} Not Found")
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, pk=None):
+        serializer = serializers.TransferFindingFindingsUpdateSerializer(data=request.data)
+        transfer_finding_obj = get_object_or_404(TransferFinding, pk=int(pk))
+        if serializer.is_valid():
+            if request.data.get('findings'):
+                obj_transfer_finding_findings = TransferFindingFinding.objects.filter(transfer_findings=int(pk))
+                request_findings = request.data["findings"]
+                for transfer_finding_finding in obj_transfer_finding_findings:
+                    if str(transfer_finding_finding.findings.id) in request_findings:
+                        helper_tf.reset_finding_related(transfer_finding_finding.findings)
+                        transfer_finding_finding.delete()
+                NotificationTransferFinding.transfer_finding_status_changes(transfer_finding_obj)
+                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+            else:
+                helper_tf.reset_finding_related(pk)
+                super().destroy(request, pk)
+                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SchemaOa3View(SpectacularAPIView):
+    permission_classes = [permissions.UserHasViewSwaggerDocumentation]
+
+
+class SwaggerUiOa3View(SpectacularSwaggerView):
+    permission_classes = [permissions.UserHasViewApiV2Key]
+
+
+class ApiToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        token = Token.objects.get(key=response.data['token'])
+        user = token.user
+        if user.is_superuser:
+            return response
+
+        if user.global_role:
+            if user.global_role.role:
+                if role_has_global_permission(user.global_role.role.id, Permissions.Api_v2_Key):
+                    return response
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def delete(self, request, *args, **kwargs):
+        Token.objects.filter(user=request.user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class NotificationWebhooksViewSet(

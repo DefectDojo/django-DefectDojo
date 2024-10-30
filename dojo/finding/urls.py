@@ -7,7 +7,12 @@ urlpatterns = [
     re_path(
         r"^finding/(?P<finding_id>\d+)$",
         views.ViewFinding.as_view(),
-        name="view_finding",
+        name="view_finding"
+    ),
+    re_path(
+        r'^finding/(?P<finding_id>\d+)/transfer_finding/(?P<transfer_finding_id>\d+)$',
+        views.ViewFindingRender.as_view(),
+        name="view_finding_render"
     ),
     re_path(
         r"^finding/(?P<finding_id>\d+)/edit$",
@@ -89,6 +94,11 @@ urlpatterns = [
         r"^product/(?P<product_id>\d+)/finding/accepted$",
         views.ListAcceptedFindings.as_view(),
         name="product_accepted_findings",
+    ),
+    re_path(
+        r'^product/(?P<product_id>\d+)/transfer_finding/accepted$',
+        views.ListTransferFinding.as_view(),
+        name="product_accepted_transfer_finding"
     ),
     re_path(
         r"^engagement/(?P<engagement_id>\d+)/finding/open$",

@@ -4,6 +4,7 @@ import dateutil
 from netaddr import IPAddress
 
 from dojo.models import Endpoint, Finding
+import re
 
 SEVERITY_MAPPING = {
     "INFORMATIONAL": "Info",  # No issue was found.
@@ -14,6 +15,7 @@ SEVERITY_MAPPING = {
     "CRITICAL": "Critical",
 }
 
+from django.conf import settings
 
 class AsffParser:
     def get_scan_types(self):
@@ -26,15 +28,20 @@ class AsffParser:
         return """AWS Security Finding Format (ASFF).
         https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
 
-    def get_item_resource_arns(self, item):
-        resource_arns = []
-        if isinstance(item.get("Resources"), list):
-            for resource_block in item["Resources"]:
-                if isinstance(resource_block, dict):
-                    resource_id = resource_block.get("Id")
-                    if resource_id:
-                        resource_arns.append(resource_id)
-        return resource_arns
+    def get_resource_arn(self, item):
+        resource_arn = ""
+        for i in item.get("Resources"):
+            resource_arn += "resource_arn: " + i.get("Id") + "\n"
+        return resource_arn
+
+    def get_description(self, item):
+        description = ""
+        description = description.join(
+            ["ID: ", item.get("Id"), "\n",
+             self.get_resource_arn(item), "\n",
+             "AwsAccountID: ", item.get("AwsAccountId"), "\n",
+             item.get("Description")])
+        return description
 
     def get_findings(self, file, test):
         data = json.load(file)
@@ -50,7 +57,6 @@ class AsffParser:
                 active = True
             else:
                 active = False
-
             # Adding the Resources:0/Id value to the description.
             #
             # This is needed because every Finding in AWS from Security Hub has an
@@ -74,18 +80,22 @@ class AsffParser:
                 full_description = control_description
                 impact = None
 
+            vuln_id_tool = re.match(r"" + settings.DD_CUSTOM_TAG_PARSER.get("asff_regex"), item.get("Title"))
+
             finding = Finding(
                 title=item.get("Title"),
-                description=full_description,
+                description=self.get_description(item),
                 date=dateutil.parser.parse(item.get("CreatedAt")),
                 mitigation=mitigation,
                 references=references,
                 severity=self.get_severity(item.get("Severity")),
                 active=active,
                 unique_id_from_tool=item.get("Id"),
+                vuln_id_from_tool=vuln_id_tool.group(0).upper() if vuln_id_tool else "",
                 impact=impact,
             )
-
+            finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("asff")]
+            
             if "Resources" in item:
                 endpoints = []
                 for resource in item["Resources"]:

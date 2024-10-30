@@ -22,7 +22,7 @@
             {% endblocktrans %}</h2>
         <h3 class="inline-block">{{ pt.name }}</h3>
         {% if pt|class_name == "Product_Type" %}
-        [<a href="{% url 'product_type_metrics' pt.id %}" class="inline-block">{% trans "View Details" %}</a>]
+        [<a rel="noopener noreferrer" href="{% url 'product_type_metrics' pt.id %}" class="inline-block">{% trans "View Details" %}</a>]
         {% elif pt|class_name == "Tagulous_Product_tags" %}
         [<a href="{% url 'product' %}?tags={{ pt }}" class="inline-block">{% trans "View Details" %}</a>]
         {% endif %}
@@ -253,7 +253,7 @@
                 {% for finding in all_current_in_pt %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td><a title="{{ finding.title }}"
+                        <td><a rel="noopener noreferrer" title="{{ finding.title }}"
                                href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
                         </td>
                         <td class="nowrap">{{ finding.date }}</td>
@@ -266,7 +266,7 @@
                             {{ finding.epss_percentile|format_epss }}
                         </td>
                         <td>{{ finding.age }}</td>
-                        <td><a
+                        <td><a rel="noopener noreferrer"
                                 href="{% url 'view_product' finding.test.engagement.product.id %}"
                                 title="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                         </td>

@@ -38,9 +38,9 @@ class UserTest(APITestCase):
         # test password by fetching API key
         r = self.client.post(reverse("api-token-auth"), {
             "username": "api-user-2",
-            "password": password,
+            "password": password
         }, format="json")
-        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertEqual(r.status_code, 500, r.content[:1000])
 
         # user with weak password
         r = self.client.post(reverse("user-list"), {

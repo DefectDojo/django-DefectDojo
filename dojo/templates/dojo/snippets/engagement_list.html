@@ -136,11 +136,11 @@
                               </a>
                             </li>
                               <li class="divider"></li>
-                            <li role="presentation">
+                            <!-- <li role="presentation">
                               <a href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
                                   <i class="fa-solid fa-file-lines"></i> Engagement Report
                               </a>
-                            </li>
+                            </li> -->
                             {% if eng|has_object_permission:"Engagement_Delete" %}
                             <li class="divider"></li>
                             <li>
@@ -155,7 +155,7 @@
                     </td>
                     <td style="width: 250px;">
                     <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
-                    {{ eng.name|truncatechars_html:35|default:"N/A" }}</a>
+                    {{ eng.name|default:"N/A" }}</a>
                     {% if eng.version %}
                         <sup>
                               <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ eng.version }}">
@@ -277,7 +277,7 @@
     </div>
 </div>
 {% block postscript %}
-<script>
+    <script nonce="{{request.csp_nonce}}">
         // DataTables setup
         $(document).ready(function() {
             var date =  new Date().toISOString().slice(0, 10);

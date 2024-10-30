@@ -32,7 +32,7 @@ class BurpParser:
         )
 
     def get_findings(self, xml_output, test):
-        tree = etree.parse(xml_output, etree.XMLParser())
+        tree = etree.parse(xml_output, etree.XMLParser(forbid_external=True), forbid_external=True)
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
@@ -41,23 +41,15 @@ class BurpParser:
             item = get_item(node, test)
             dupe_key = item.vuln_id_from_tool
             if dupe_key in items:
-                items[dupe_key].unsaved_endpoints = (
-                    items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
-                )
-                items[dupe_key].unsaved_req_resp = (
-                    items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
-                )
+                items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
+                items[dupe_key].unsaved_req_resp = items[dupe_key].unsaved_req_resp + item.unsaved_req_resp
 
                 # Description details of the finding are added
-                items[dupe_key].description = (
-                    item.description + items[dupe_key].description
-                )
+                items[dupe_key].description = item.description + items[dupe_key].description
 
                 # Parameters of the finding are added
                 if item.param:
-                    items[dupe_key].param = (
-                        item.param + ", " + str(items[dupe_key].param)
-                    )
+                    items[dupe_key].param = item.param + ", " + str(items[dupe_key].param)
             else:
                 items[dupe_key] = item
 
@@ -143,7 +135,7 @@ def get_item(item_node, test):
     url = item_node.get("url")
     path = item_node.findall("path")[0].text
     location = item_node.findall("location")[0].text
-    rparameter = re.search(r"(?<=\[)(.*)(\])", location)
+    rparameter = re.search(r"(\[)([^\[\]]*)(\])", location)
     parameter = None
     if rparameter:
         parameter = rparameter.group(1)
@@ -227,9 +219,7 @@ def get_item(item_node, test):
 
     remediation_detail = do_clean(item_node.findall("remediationDetail"))
     if remediation_detail:
-        remediation = (
-            text_maker.handle(remediation_detail + "\n") + remediation
-        )
+        remediation = text_maker.handle(remediation_detail + "\n") + remediation
 
     references = do_clean(item_node.findall("references"))
     if references:

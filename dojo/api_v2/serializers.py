@@ -20,9 +20,9 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField, MultipleChoiceField
-
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.authorization import user_has_permission
+from dojo.transfer_findings.serializers import TransferFindingSerializer 
+from dojo.authorization.authorization import user_has_permission, user_has_global_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.finding.helper import (
@@ -109,6 +109,8 @@ from dojo.models import (
     Vulnerability_Id,
     Vulnerability_Id_Template,
     get_current_date,
+    TransferFinding,
+    TransferFindingFinding,
 )
 from dojo.risk_acceptance.helper import add_findings_to_risk_acceptance, remove_finding_from_risk_acceptance
 from dojo.tools.factory import (
@@ -1526,7 +1528,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         findings = data.get("accepted_findings", [])
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
-        authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
+        authed_findings = get_authorized_findings(Permissions.Risk_Acceptance_Add).filter(id__in=findings_ids)
         if len(findings) != len(authed_findings):
             msg = "You are not permitted to add one or more selected findings to this risk acceptance"
             raise PermissionDenied(msg)
@@ -1640,12 +1642,14 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
         model = Vulnerability_Id
         fields = ["vulnerability_id"]
 
-
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(
         many=True, read_only=True, source="risk_acceptance_set",
+    )
+    transfer_finding = TransferFindingSerializer(
+        read_only=True,
     )
     push_to_jira = serializers.BooleanField(default=False)
     age = serializers.IntegerField(read_only=True)
@@ -1802,6 +1806,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         )
         return serialized_burps.data
 
+
+class FindingUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Finding
+        fields = ('risk_status',)
 
 class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
@@ -2014,9 +2023,37 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+class EngagementByProductResponseSerializer(TaggitSerializer, serializers.ModelSerializer):
+    name = serializers.CharField(max_length=255)
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
+    engagements_list = serializers.SerializerMethodField()
+
+    def get_findings_count(self, obj):
+        return obj.findings_count
+
+    def get_findings_list(self, obj):
+        return obj.open_findings_list
+    
+    def get_engagements_list(self, obj):
+        return obj.engagements_list
+
+    class Meta:
+        model = Product
+        fields = ("name",
+                  "findings_count",
+                  "findings_list",
+                  "engagements_list",
+                  "description",
+                  "product_manager",
+                  "technical_contact",
+                  "team_manager",
+                  "prod_type")
+
+
+class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+    findings_count = serializers.SerializerMethodField()
+    # findings_list = serializers.SerializerMethodField()
 
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
@@ -2043,8 +2080,8 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.findings_count
 
     # TODO: maybe extend_schema_field is needed here?
-    def get_findings_list(self, obj) -> List[int]:
-        return obj.open_findings_list
+    # def get_findings_list(self, obj) -> List[int]:
+    #     return obj.open_findings_list
 
 
 class CommonImportScanSerializer(serializers.Serializer):
@@ -2321,6 +2358,19 @@ class ImportScanSerializer(CommonImportScanSerializer):
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
+
+    def validate_file(self, value):
+        """
+        Validate that the file has an allowed extension.
+        """
+        if value.name:
+            allowed_extension = ["json", "csv", "xml", "sarif", "html"]
+            __, extension = os.path.splitext(value.name)
+            extension = extension[1:]
+            if len(extension.split('.')) == 1 and extension in allowed_extension:
+                return value
+            else:
+                raise serializers.ValidationError('file not allowed')
 
     def save(self, push_to_jira=False):
         # Go through the validate method
@@ -2800,6 +2850,12 @@ class NotificationsSerializer(serializers.ModelSerializer):
     risk_acceptance_expiration = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
     )
+    risk_acceptance_request = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
+    transfer_finding = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
     template = serializers.BooleanField(default=False)
 
     class Meta:
@@ -2851,6 +2907,7 @@ class EngagementPresetsSerializer(serializers.ModelSerializer):
 class NetworkLocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Network_Locations
+
         fields = "__all__"
 
 
@@ -2998,6 +3055,39 @@ class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
         model = General_Survey
         fields = "__all__"
 
+
+class TransferFindinFindingsSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Finding
+        fields = "__all__"
+
+
+class FindingDeleteSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Finding
+        fields = ['id']
+
+
+class TransferFindingDeleteSerializer(serializers.Serializer):
+    findings = FindingDeleteSerializers(required=False)
+
+
+class TransferFindingUpdateSerializer(serializers.ModelSerializer):
+    findings = TransferFindinFindingsSerializers(many=True, read_only=True)
+    
+    class Meta:
+        model = TransferFinding
+        fields = ("findings",)
+
+
+class TransferFindingFindingsDetailSerializer(serializers.Serializer):
+    risk_status = serializers.CharField()
+    related_finding = serializers.IntegerField(required=False)
+
+
+class TransferFindingFindingsUpdateSerializer(serializers.Serializer):
+    engagement_id = serializers.IntegerField(required=False)
+    findings = serializers.DictField(child=TransferFindingFindingsDetailSerializer())
 
 class AnnouncementSerializer(serializers.ModelSerializer):
 

@@ -1,4 +1,10 @@
 import logging
+import crum
+import requests
+import json
+from azure.devops.connection import Connection
+from msrest.authentication import BasicAuthentication
+from django.conf import settings
 from contextlib import suppress
 
 from dateutil.relativedelta import relativedelta
@@ -6,15 +12,17 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.utils import timezone
 
-import dojo.jira_link.helper as jira_helper
+from retry import retry
 from dojo.celery import app
+import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
-from dojo.models import Dojo_User, Finding, Notes, Risk_Acceptance, System_Settings
-from dojo.notifications.helper import create_notification
-from dojo.utils import get_full_url, get_system_setting
+from dojo.models import Dojo_User, Finding, Notes, Risk_Acceptance, System_Settings, PermissionKey, Dojo_User
+from dojo.user import queries as user_queries
+from dojo.transfer_findings import helper as hp_transfer_finding
+from dojo.risk_acceptance.notification import Notification
+from dojo.utils import get_full_url, get_system_setting, get_remote_json_config
 
 logger = logging.getLogger(__name__)
-
 
 def expire_now(risk_acceptance):
     logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
@@ -24,8 +32,16 @@ def expire_now(risk_acceptance):
         for finding in risk_acceptance.accepted_findings.all():
             if not finding.active:
                 logger.debug("%i:%s: unaccepting a.k.a reactivating finding.", finding.id, finding)
-                finding.active = True
+              
                 finding.risk_accepted = False
+                finding.risk_status = "Risk Active"
+                finding.acceptances_confirmed = 0
+                finding.accepted_by = ""
+
+                if not finding.mitigated:
+                    finding.active = True
+                    finding.risk_status = "Risk Expired"
+                
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=False)
 
@@ -33,6 +49,13 @@ def expire_now(risk_acceptance):
                     finding.sla_start_date = timezone.now().date()
 
                 finding.save(dedupe_option=False)
+                # reactivate finding realted (transfer finding)
+                system_settings = System_Settings.objects.get()
+                if system_settings.enable_transfer_finding:
+                    hp_transfer_finding.close_or_reactive_related_finding(event="reactive",
+                                                    parent_finding=finding,
+                                                    notes=f"The finding expired by the parent finding {finding.id} (policies for the transfer of findings)",
+                                                    send_notification=False)
                 reactivated_findings.append(finding)
                 # findings remain in this risk acceptance for reporting / metrics purposes
             else:
@@ -44,15 +67,7 @@ def expire_now(risk_acceptance):
     risk_acceptance.expiration_date = timezone.now()
     risk_acceptance.expiration_date_handled = timezone.now()
     risk_acceptance.save()
-
-    accepted_findings = risk_acceptance.accepted_findings.all()
-    title = "Risk acceptance with " + str(len(accepted_findings)) + " accepted findings has expired for " + \
-            str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
-
-    create_notification(event="risk_acceptance_expiration", title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
-                         reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
-                         product=risk_acceptance.engagement.product,
-                         url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
+    Notification.risk_acceptance_expiration(risk_acceptance, reactivated_findings)
 
 
 def reinstate(risk_acceptance, old_expiration_date):
@@ -122,16 +137,75 @@ def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_A
             ),
             author=user,
         ))
-
     return
 
 
+def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
+    permission_keys = []
+    for finding in findings:
+        add_severity_to_risk_acceptance(risk_pending, finding.severity)
+        if not finding.duplicate:
+            finding.risk_status = "Risk Pending"
+            finding.acceptend_by = ""
+            finding.save(dedupe_option=False)
+            risk_pending.accepted_findings.add(finding)
+    risk_pending.save()
+    if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:
+        for user_name in eval(risk_pending.accepted_by):
+            user = Dojo_User.objects.get(username=user_name)
+            token = generate_permision_key(
+                user=user,
+                risk_acceptance=risk_pending)
+
+            url = "/".join([
+                settings.HOST_ACCEPTANCE_RISK_FOR_EMAIL,
+                str(risk_pending.id),
+                token
+                ])
+            
+            permission_keys.append(
+                {"username": user.username, "url": url})
+
+    Notification.risk_acceptance_request(
+        risk_pending=risk_pending,
+        permission_keys=permission_keys,
+        enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
+    post_jira_comments(risk_pending, findings, accepted_message_creator)
+
+
+def generate_permision_key(risk_acceptance, user, transfer_finding=None):
+    permission_key = PermissionKey.create_token(
+        lifetime=settings.LIFETIME_MINUTE_PERMISSION_KEY,
+        user=user,
+        risk_acceptance=risk_acceptance,
+        transfer_finding=transfer_finding)
+    return permission_key.token
+
+
+def add_severity_to_risk_acceptance(risk_acceptance: Risk_Acceptance, severity: str):
+    if risk_acceptance.severity is None:
+        risk_acceptance.severity = severity
+        risk_acceptance.save()
+
+
 def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Acceptance, findings: list[Finding]) -> None:
+    user = crum.get_current_user()
     for finding in findings:
         if not finding.duplicate or finding.risk_accepted:
+            add_severity_to_risk_acceptance(risk_acceptance, finding.severity)
             finding.active = False
             finding.risk_accepted = True
+            finding.accepted_by = user.username
+            finding.risk_status = "Risk Accepted"
             finding.save(dedupe_option=False)
+            hp_transfer_finding.close_or_reactive_related_finding(
+                event="accepted",
+                parent_finding=finding,
+                notes=f"The finding was accepted by the user {user.username} and for finding parent id: {finding.id}(policies for the transfer of findings)",
+                send_notification=False
+            )
+            acceptance_days = (risk_acceptance.expiration_date.date() - timezone.now().date()).days
+            handle_from_provider_risk(finding, acceptance_days)
             # Update any endpoint statuses on each of the findings
             update_endpoint_statuses(finding, accept_risk=True)
             risk_acceptance.accepted_findings.add(finding)
@@ -184,11 +258,7 @@ def expiration_handler(*args, **kwargs):
                 timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
                 str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
 
-            create_notification(event="risk_acceptance_expiration", title=notification_title, risk_acceptance=risk_acceptance,
-                                accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
-                                product=risk_acceptance.engagement.product,
-                                url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
-
+            Notification.risk_acceptance_expiration(risk_acceptance, notification_title)
             post_jira_comments(risk_acceptance, expiration_warning_message_creator, heads_up_days)
 
             risk_acceptance.expiration_date_warned = timezone.now()
@@ -362,3 +432,68 @@ def update_endpoint_statuses(finding: Finding, *, accept_risk: bool) -> None:
             status.risk_accepted = False
         status.last_modified = timezone.now()
         status.save()
+
+def handle_from_provider_risk(finding, acceptance_days):
+    logger.info(f'Risk accepting for external provider Id:{finding.id}')
+    tag = get_matching_value(list_a=finding.tags.tags, list_b=settings.PROVIDERS.split('//'))
+    endpoints = json.loads(settings.PROVIDERS_ENDPOINT_MAPPING)
+    if tag is not None:
+        logger.info(f"Vulnerability {finding.vuln_id_from_tool} has provider tags")
+        finding_id = finding.vuln_id_from_tool
+        risk_accept_provider(
+            finding_id=finding_id,
+            provider_endpoint=endpoints[tag],
+            provider_tag=tag,
+            acceptance_days=acceptance_days,
+            url=settings.PROVIDER_URL,
+            header=settings.PROVIDER_HEADER,
+            token=settings.PROVIDER_TOKEN)
+
+@retry(tries=100, delay=10)
+def risk_accept_provider(
+        finding_id: str,
+        provider_endpoint: str,
+        provider_tag: str,
+        acceptance_days: int,
+        url: str,
+        header: str,
+        token: str
+    ):
+    logger.info(f"Making risk accept for {finding_id} provider: {provider_tag}")
+    formatted_url = url + f'{provider_endpoint}'
+    headers = {}
+    headers['Content-Type'] = 'application/json'
+    body = {}
+    headers[header] = token
+    body["event"] = "DD_RISK_ACCEPTANCE"
+    body["id_vulnerability"] = finding_id
+    body["acceptanceDays"] = acceptance_days
+    body["provider_to_accept"] = provider_tag
+    try:
+        response = requests.post(url=formatted_url, headers=headers, data=body, verify=False)
+    except Exception as ex:
+        logger.error(ex)
+        raise(ex)
+    print(response.status_code)
+    if response.status_code == 200:
+        logger.info(f"Risk accept response from provider: {provider_tag}, response: {response.text}")
+    else:
+        logger.error(f"Error for provider: {provider_tag}, response: {response.text}")
+
+
+def get_matching_value(list_a, list_b):
+    matches = [item.name for item in list_a if item in list_b]
+    return matches[0] if matches else None
+
+
+def get_config_risk():
+    credentials = BasicAuthentication("", settings.AZURE_DEVOPS_TOKEN)
+    connection = Connection(base_url=settings.AZURE_DEVOPS_ORGANIZATION_URL, creds=credentials)
+    return get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[1])
+
+def enable_flow_accept_risk(**kwargs):
+    # add rule custom if necessary
+    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
+    and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-")).exists()):
+        return True
+    return False

@@ -38,36 +38,36 @@
                     <tr>
                         <td>
                             {% if result.component_name == none %}
-                            <a href="{% url 'all_findings' %}?has_component=false"><b>{{ result.component_name }}</b></a>
+                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?has_component=false"><b>{{ result.component_name }}</b></a>
                             {% else %}
-                                <a href="{% url 'all_findings' %}?component_name={{ result.component_name }}"><b>{{ result.component_name }}</b></a>
+                                <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.component_name }}"><b>{{ result.component_name }}</b></a>
                             {% endif %}
                         </td>
 
                         <td>{{result.component_version}} </td>
                         <td class="text-center">
                             {% if result.active and result.component_name == none %}
-                            <a href="{% url 'open_findings' %}?has_component=false"><b>{{ result.active }}</b></a>
+                            <a rel="noopener noreferrer" href="{% url 'open_findings' %}?has_component=false"><b>{{ result.active }}</b></a>
                             {% elif result.active%}
-                            <a href="{% url 'open_findings' %}?component_name={{ result.component_name }}"><b>{{ result.active }}</b></a>
+                            <a rel="noopener noreferrer" href="{% url 'open_findings' %}?component_name={{ result.component_name }}"><b>{{ result.active }}</b></a>
                             {% else %}
                             0
                             {% endif %}
                         </td>
                         <td class="text-center">
                             {% if result.duplicate and result.component_name == none %}
-                            <a href="{% url 'all_findings' %}?has_component=false&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?has_component=false&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% elif result.duplicate %}
-                            <a href="{% url 'all_findings' %}?component_name={{ result.component_name }}&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.component_name }}&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% else %}
                             0
                             {% endif %}
                         </td>
                         <td class="text-center">
                             {% if result.total and result.component_name == none %}
-                            <a href="{% url 'all_findings' %}?has_component=false"><b>{{ result.total }}</b></a>
+                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?has_component=false"><b>{{ result.total }}</b></a>
                             {% elif result.total %}
-                            <a href="{% url 'all_findings' %}?component_name={{ result.component_name }}"><b>{{ result.total }}</b></a>
+                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.component_name }}"><b>{{ result.total }}</b></a>
                             {% else %}
                             0
                             {% endif %}
@@ -85,7 +85,7 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-<script>
+<script nonce="{{request.csp_nonce}}">
         $(function () {
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
@@ -105,7 +105,7 @@
             });
         });
 </script>
-<script>
+<script nonce="{{request.csp_nonce}}">
     // DataTables setup
     $(document).ready(function() {
         date =  new Date().toISOString().slice(0, 10);

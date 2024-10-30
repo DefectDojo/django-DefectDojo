@@ -12,6 +12,30 @@
     .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
     width: 70% !important;
     }
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border-left-color: #09f;
+      
+        animation: spin 1s ease infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+      
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      #spinnerContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
 {% endblock %}
 {% block add_css %}
     {{ block.super }}
@@ -19,6 +43,26 @@
 {% endblock %}
 {% block content %}
     {{ block.super }}
+    {% include 'dojo/modal/modal_loading.html' %}
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="confirmModalLabel"><h3> Action Confirmed <h3></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div id="id_modal_message" class="modal-body">
+            Are you sure to perform this action?
+            </div>
+            <div class="modal-footer">
+            <input type="button" class="btn btn-secondary" data-dismiss="modal" value="Cancel">
+            <input id="confirmed_action_risk_pending" type="button" class="btn btn-secondary" name="#" value="Confirmed">
+            </div>
+        </div>
+        </div>
+    </div>
     {% if risk_acceptance.is_expired %}
         <div class="danger-zone panel panel-danger">
             <div class="panel-heading">
@@ -73,10 +117,9 @@
                 <table class="table-striped table table-condensed table-hover centered">
                     <tr>
                         <th>Date</th>
-                        <th>Accepted By</th>
+                        <th>Recommended Acceptors</th>
                         <th>Name</th>
                         <th>Decision</th>
-                        <!-- <th>Decision Details</th> -->
                         <th>Expiration</th>
                         <th>Expiration handled</th>
                         <th>Findings</th>
@@ -107,7 +150,7 @@
                         <td>{{ risk_acceptance.expiration_date_handled|date }}</td>
                         <td>{{ risk_acceptance.accepted_findings.count }}</td>
                         {% if risk_acceptance.filename %}
-                            <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>
+                            <td><a rel="noopener noreferrer" href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a></td>
                         {% else %}
                             <td>No</a></td>
                         {% endif %}
@@ -124,56 +167,96 @@
         </div>
 
         <div class="panel panel-default table-responsive">
-            <div class="panel-heading">
-                <h3>Decision & Recommendation</h3>
-            </div>
-            <table class="table table-condensed">
-                <thead>
-                    <tr>
-                        <th>Recommendation</th>
-                        <th>Details</th>
-                        <th>Decision</th>
-                        <th>Details</th>
-                    <tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td width="10%">
-                            {{ risk_acceptance.get_recommendation_display }}
-                        </td>
-                        <td width="40%">
-                            {{ risk_acceptance.recommendation_details|markdown_render }}
-                        </td>
-                        <td width="10%">
-                            {{ risk_acceptance.get_decision_display }}
-                        </td>
-                        <td width="40%">
-                            {{ risk_acceptance.decision_details|markdown_render }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            {% if RISK_PENDING %}
+                <div class="panel-heading">
+                    <h3>Recommendation</h3>
+                </div>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Recommendation</th>
+                            <th>Details</th>
+                        <tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td width="10%">
+                                {{ risk_acceptance.get_recommendation_display }}
+                            </td>
+                            <td width="40%">
+                                {{ risk_acceptance.recommendation_details|markdown_render }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            {% else %}
+                <div class="panel-heading">
+                    <h3>Decision & Recommendation</h3>
+                </div>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Recommendation</th>
+                            <th>Details</th>
+                            <th>Decision</th>
+                            <th>Details</th>
+                        <tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td width="10%">
+                                {{ risk_acceptance.get_recommendation_display }}
+                            </td>
+                            <td width="40%">
+                                {{ risk_acceptance.recommendation_details|markdown_render }}
+                            </td>
+                            <td width="10%">
+                                {{ risk_acceptance.get_decision_display }}
+                            </td>
+                            <td width="40%">
+                                {{ risk_acceptance.decision_details|markdown_render }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            {% endif%}
         </div>
     {% endif %}
-
     <div id="risk_acceptance" class="panel panel-default table-responsive">
-        <div class="panel-heading">
-            <h3>Findings Accepted</h3>
-        </div>
+        <div class="panel-heading tight">
+            <div class="clearfix">
+                <h3 class="pull-left">
+                    Accept all risks 
+                </h3>
+                {% if engagement|has_object_permission:"Risk_Acceptance_Bullk" and engagement|has_risk_acceptance_pending:accepted_findings%}
+                <a class="accept-risk_acceptance pull-right btn btn-success pull-right" id="id_bullk_risk_accepted" data-eid={{engagement.id}} data-raid={{risk_acceptance.id}} >
+                    <i class="fa-solid fa-check-double"></i>&nbspAccept all risks
+                </a>
+                {% endif %}
+            </div>
+    </div>
         {% if accepted_findings %}
             <table id="open_findings" class="table table-condensed table-striped">
                 <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Severity</th>
                     <th>EPSS Score / Percentile</th>
+                    <th>Vulnerability Id</th>
                     <th>Name</th>
                     <th>Date</th>
                     <th>Active</th>
+                    <th>Status</th>
+                    <th>Accepted by</th>
                     <th>Actions</th>
                 </thead>
                 <tbody>
                 {% for finding in accepted_findings %}
                     <tr>
+                        <td>
+                            {{finding.id}}
+                        </td>
                         <td>
                           <span class="label severity severity-{{ finding.severity }}">
                               {{ finding.severity_display }}
@@ -184,19 +267,41 @@
                             /
                             {{ finding.epss_percentile|format_epss }}
                         </td>
-                        <td><a href="{% url 'view_finding' finding.id %}"
+                        <td>
+                            {% for vulnerability_id in finding.vulnerability_ids %}
+                                {% if vulnerability_id|has_vulnerability_url%}
+                                    <a rel="noopener noreferrer" target="_blank" href="{{ vulnerability_id|vulnerability_url }}">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ vulnerability_id }}</a>
+                                {% else %}
+                                    {{ vulnerability_id }}
+                                {% endif %}
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td><a rel="noopener noreferrer" href="{% url 'view_finding' finding.id %}"
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding.active }}</td>
-
+                        <td><span>{{ finding.risk_status|status_style_color}}</span></td>
+                        {% comment %} <td><span style="color: {{ finding.risk_status|status_style_color.color }}">{{ finding.risk_status|status_style_color.text }}</span></td> {% endcomment %}
+                        <td> <span style="color: green;">{{ finding.accepted_by}} </span></td>
                         <td>
-                            {% if engagement|has_object_permission:"Risk_Acceptance" %}
-                                <form method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
-                                    <input class="btn btn-sm btn-warning" type="submit" name="remove_finding"
-                                           value="Remove"/>
-                                </form>
+                            {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}
+                            <form method="post">
+                                {% csrf_token %}
+
+                                <input type="hidden" name="risk_accept_finding_id"
+                                    value="{{ finding.id }}"/>
+                                    
+                                <input type="hidden" name="remove_finding_id" value="{{ finding.id }}"/>
+                                <input class="btn btn-sm btn-success" type="submit" name="risk_accept_pending"
+                                value="Accept"/>
+                                <input class="btn btn-sm btn-warning" type="submit" name="risk_accept_decline"
+                                value="Reject"/>
+                                <input class="btn btn-sm btn-danger" type="submit" name="remove_finding"
+                                value="Remove"/>
+                                <input type="hidden" name="risk_accept_finding_id" value="{{ finding.id }}"/>
+                            </form>
                             {% else %}
                                 Not Authorized
                             {% endif %}
@@ -253,7 +358,7 @@
             <tr>
                 {% if risk_acceptance.filename %}
                     <td>
-                        <a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
+                        <a rel="noopener noreferrer" href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.filename }}</a>
                     </td>
                     <td>
                         {{ risk_acceptance.created }}
@@ -341,6 +446,7 @@
 
 {% block postscript %}
     {{ block.super }}
+
 {% if not edit_mode %}
     <script type="text/javascript">
         // keyboard shortcuts
@@ -381,7 +487,6 @@
         });
     </script>
 {% endif %}
-
 <script type="text/javascript">
      {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
 </script>

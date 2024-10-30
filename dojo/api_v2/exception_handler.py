@@ -3,6 +3,7 @@ import logging
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import RestrictedError
 from rest_framework.exceptions import ParseError
+from dojo.api_v2.api_error import ApiError
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
@@ -36,6 +37,16 @@ def custom_exception_handler(exc, context):
         response.status_code = HTTP_400_BAD_REQUEST
         response.data = {}
         response.data["message"] = str(exc)
+    elif isinstance(exc, ApiError):
+        response = Response()
+        response.status_code = exc.code
+        response.data = {}
+        response.data["error"] = {
+            "code": exc.code,
+            "detail": str(exc.detail),
+            "message": str(exc.message)
+        }
+        response.data["message"] = str(exc.detail)
     else:
         if response is None:
             if System_Settings.objects.get().api_expose_error_details:

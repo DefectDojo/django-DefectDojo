@@ -9,6 +9,7 @@ from functools import reduce
 from operator import itemgetter
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Case, Count, IntegerField, Q, Sum, Value, When
@@ -22,7 +23,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.filters import UserFilter
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
 from dojo.metrics.utils import (
@@ -35,7 +36,7 @@ from dojo.metrics.utils import (
     identify_view,
     severity_count,
 )
-from dojo.models import Dojo_User, Engagement, Finding, Product, Product_Type, Risk_Acceptance, Test
+from dojo.models import Dojo_User, Engagement, Finding, Product, Product_Type, Risk_Acceptance, Role, Test
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.utils import (
@@ -158,7 +159,7 @@ simple metrics for easy reporting
 """
 
 
-@cache_page(60 * 5)  # cache for 5 minutes
+@cache_page(60 * 15)  # cache for 15 minutes
 @vary_on_cookie
 def simple_metrics(request):
     page_name = _("Simple Metrics")
@@ -238,6 +239,56 @@ def simple_metrics(request):
         "form": form,
     })
 
+# @cache_page(60 * 15)  # cache for 15 minutes
+# @vary_on_cookie
+def metrics_panel(request):
+    page_name = _('Metrics Panel')
+    now = timezone.now()
+    role = Role.objects.get(id=Roles.Maintainer)
+    user = request.user.id
+    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    grafana_params = f"{settings.GRAFANA_PARAMS}&var-csrftoken={cookie_csrftoken}&var-sessionid={cookie_sessionid}"
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/metrics_panel.html', {
+       'name': page_name,
+       'grafana_url': settings.GRAFANA_URL,
+       'grafana_path': settings.GRAFANA_PATH.get("metrics_panel"),
+       'grafana_params': grafana_params,
+       'role': role,
+       'user': user,
+    })
+
+def metrics_devsecops(request):
+    page_name = _('Metrics DevSecOps')
+    role = Role.objects.get(id=Roles.Maintainer)
+    user = request.user.id
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/metrics_devsecops.html', {
+       'name': page_name,
+       'grafana_url': settings.GRAFANA_URL,
+       'grafana_path': settings.GRAFANA_PATH.get("metrics_devsecops"),
+       'grafana_params': settings.GRAFANA_PARAMS,
+       'role': role,
+       'user': user,
+    })
+
+def metrics_panel_admin(request):
+    page_name = _('Metrics Panel Admin')
+    role = Role.objects.get(id=Roles.Maintainer)
+    user = request.user.id
+    cookie_csrftoken = request.COOKIES.get('csrftoken', '')
+    cookie_sessionid = request.COOKIES.get('sessionid', '')
+    grafana_params = f"{settings.GRAFANA_PARAMS}&var-csrftoken={cookie_csrftoken}&var-sessionid={cookie_sessionid}"
+    add_breadcrumb(title=page_name, top_level=not len(request.GET), request=request)
+    return render(request, 'dojo/metrics_panel_admin.html', {
+       'name': page_name,
+       'grafana_url': settings.GRAFANA_URL,
+       'grafana_path': settings.GRAFANA_PATH.get("metrics_panel_admin"),
+       'grafana_params': grafana_params,
+       'role': role,
+       'user': user,
+    })
 
 # @cache_page(60 * 5)  # cache for 5 minutes
 # @vary_on_cookie
