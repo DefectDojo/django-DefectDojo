@@ -550,6 +550,8 @@ def set_duplicate(new_finding, existing_finding):
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
     existing_finding.severity = new_finding.severity
+    existing_finding.vuln_id_from_tool = new_finding.vuln_id_from_tool
+    existing_finding.unique_id_from_tool = new_finding.unique_id_from_tool
     logger.debug("saving new finding: %d", new_finding.id)
     super(Finding, new_finding).save()
     logger.debug("saving existing finding: %d", existing_finding.id)
