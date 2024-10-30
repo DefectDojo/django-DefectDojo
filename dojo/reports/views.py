@@ -3,7 +3,6 @@ import logging
 import re
 from datetime import datetime
 from tempfile import NamedTemporaryFile
-from typing import List
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -267,7 +266,7 @@ def endpoint_host_report(request, eid):
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
-    endpoints = Endpoint.objects.filter( finding__active=True,
+    endpoints = Endpoint.objects.filter(finding__active=True,
                                          finding__false_p=False,
                                          finding__duplicate=False,
                                          finding__out_of_scope=False)
