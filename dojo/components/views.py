@@ -1,14 +1,8 @@
-from django.contrib.postgres.aggregates import StringAgg
-from django.db import connection
 from django.db.models import Count, Q
-from django.db.models.expressions import Value
 from django.shortcuts import render
-
 from dojo.models import Component
 from dojo.authorization.roles_permissions import Permissions
-from dojo.components.sql_group_concat import Sql_GroupConcat
 from dojo.filters import ComponentFilter, ComponentFilterWithoutObjectLookups
-from dojo.finding.queries import get_authorized_findings
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
 

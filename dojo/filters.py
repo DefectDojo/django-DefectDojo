@@ -855,23 +855,23 @@ class MetricsDateRangeFilter(ChoiceFilter):
 
 
 class ProductComponentFilter(DojoFilter):
-    component_name = CharFilter(lookup_expr="icontains", label="Module Name")
-    component_version = CharFilter(lookup_expr="icontains", label="Module Version")
+    name = CharFilter(lookup_expr="icontains", label="Module Name")
+    version = CharFilter(lookup_expr="icontains", label="Module Version")
 
     o = OrderingFilter(
         fields=(
-            ("component_name", "component_name"),
-            ("component_version", "component_version"),
-            ("active", "active"),
-            ("duplicate", "duplicate"),
-            ("total", "total"),
+            ("name", "name"),
+            ("version", "version"),
+            ("active_findings", "active_findings"),
+            ("duplicate_findings", "duplicate_findings"),
+            ("total_findings", "total_findings"),
         ),
         field_labels={
-            "component_name": "Component Name",
-            "component_version": "Component Version",
-            "active": "Active",
-            "duplicate": "Duplicate",
-            "total": "Total",
+            "name": "Component Name",
+            "version": "Component Version",
+            "active_findings": "Active",
+            "duplicate_findings": "Duplicate",
+            "total_findings": "Total",
         },
     )
 
@@ -892,18 +892,18 @@ class ComponentFilterWithoutObjectLookups(ProductComponentFilter):
         lookup_expr="iexact",
         label="Product Name",
         help_text="Search for Product names that are an exact match")
-    test__engagement__product__name_contains = CharFilter(
-        field_name="test__engagement__product__name",
+    engagement__product__name_contains = CharFilter(
+        field_name="engagement__product__name",
         lookup_expr="icontains",
         label="Product Name Contains",
         help_text="Search for Product names that contain a given pattern")
 
 
 class ComponentFilter(ProductComponentFilter):
-    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
+    engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
-    test__engagement__product = ModelMultipleChoiceFilter(
+    engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
     engagement = ModelMultipleChoiceFilter(
@@ -913,9 +913,9 @@ class ComponentFilter(ProductComponentFilter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form.fields[
-            "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+            "engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
         self.form.fields[
-            "test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
+            "engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
         self.form.fields[
             "engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
