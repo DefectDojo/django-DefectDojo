@@ -846,7 +846,7 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.save()
 
         # expect duplicate, uid mismatch, but same hash_code
-        self.assert_finding(finding_new, not_pk=224, duplicate=False, not_hash_code=finding_224.hash_code)
+        self.assert_finding(finding_new, not_pk=224, duplicate=True, not_hash_code=finding_224.hash_code)
 
     def test_identical_ordering_unique_id_or_hash_code(self):
         # create identical copy
