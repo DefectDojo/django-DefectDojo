@@ -422,14 +422,15 @@ def risk_accept_provider(
     formatted_url = url + f'{provider_endpoint}'
     headers = {}
     headers['Content-Type'] = 'application/json'
-    body = {}
     headers[header] = token
-    body["event"] = "DD_RISK_ACCEPTANCE"
-    body["id_vulnerability"] = finding_id
-    body["acceptanceDays"] = acceptance_days
-    body["provider_to_accept"] = provider_tag
+    body = {
+        "event": "DD_RISK_ACCEPTANCE",
+        "id_vulnerability": finding_id,
+        "acceptanceDays": acceptance_days,
+        "provider_to_accept": provider_tag
+    }
     try:
-        response = requests.post(url=formatted_url, headers=headers, data=body, verify=False)
+        response = requests.post(url=formatted_url, headers=headers, json=body, verify=False)
     except Exception as ex:
         logger.error(ex)
         raise(ex)
