@@ -731,7 +731,7 @@ class RiskAcceptanceViewSet(
         request=RiskAcceptanceEmailSerializer,
     )
     @action(detail=True, methods=["post"])
-    def accept_bullk(self, request, pk=None):
+    def accept_bulk(self, request, pk=None):
         risk_acceptance = get_object_or_404(Risk_Acceptance.objects, id=pk)
         try:
             eng = Risk_Acceptance.objects.get(id=pk).accepted_findings.all().first().test.engagement
