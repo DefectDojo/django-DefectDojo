@@ -1271,6 +1271,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Humble Json Importer": ["title"],
     "MSDefender Parser": ["title", "description"],
     "HCLAppScan XML": ["title", "description"],
+    "HCL AppScan on Cloud SAST XML": ["title", "file_path", "line", "severity"],
     "KICS Scan": ["file_path", "line", "severity", "description", "title"],
     "MobSF Scan": ["title", "description", "severity"],
     "OSV Scan": ["title", "description", "severity"],
@@ -1350,6 +1351,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Wazuh": True,
     "Nuclei Scan": True,
     "Threagile risks report": True,
+    "HCL AppScan on Cloud SAST XML": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1499,6 +1501,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Wazuh Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "MSDefender Parser": DEDUPE_ALGO_HASH_CODE,
     "HCLAppScan XML": DEDUPE_ALGO_HASH_CODE,
+    "HCL AppScan on Cloud SAST XML": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "KICS Scan": DEDUPE_ALGO_HASH_CODE,
     "MobSF Scan": DEDUPE_ALGO_HASH_CODE,
     "OSV Scan": DEDUPE_ALGO_HASH_CODE,
