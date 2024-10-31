@@ -356,6 +356,10 @@ env = environ.FileAwareEnv(
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
     DD_COMPLIANCE_FILTER_RISK=(str, ""),
+    # Microsoft Entra id for risk acceptance for email
+    DD_TENAN_ID=(str, ""),
+    DD_CLIENT_ID=(str, ""),
+    DD_CALLBACK_URL=(str, ""),
     # The varible that allows settings acceptance for email
     DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL=(bool, False),
     DD_LIFETIME_MINUTE_PERMISSION_KEY=(int, 2880),
@@ -2081,6 +2085,11 @@ COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
 LIFETIME_MINUTE_PERMISSION_KEY = env("DD_LIFETIME_MINUTE_PERMISSION_KEY")
 HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
+
+TENAN_ID = env("DD_TENAN_ID")
+CLIENT_ID = env("DD_CLIENT_ID")
+CALLBACK_URL = env("DD_CALLBACK_URL")
+
 # System user for automated resource creation
 SYSTEM_USER = env("DD_SYSTEM_USER")
 # Engine Backend

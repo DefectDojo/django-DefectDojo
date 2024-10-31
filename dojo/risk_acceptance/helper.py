@@ -145,13 +145,14 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             token = generate_permision_key(
                 user=user,
                 risk_acceptance=risk_pending)
-
-            url = "/".join([
-                settings.HOST_ACCEPTANCE_RISK_FOR_EMAIL,
-                str(risk_pending.id),
-                token
-                ])
-            
+            url = (
+                settings.HOST_ACCEPTANCE_RISK_FOR_EMAIL
+                .replace("{TENAN_ID}", settings.TENAN_ID)
+                .replace("{CLIENT_ID}", settings.CLIENT_ID)
+                .replace("{CALLBACK_URL}", settings.CALLBACK_URL)
+                .replace("{risk_acceptance_id}", str(risk_pending.id))
+                .replace("{permission_key_id}", token)
+            )
             permission_keys.append(
                 {"username": user.username, "url": url})
 
