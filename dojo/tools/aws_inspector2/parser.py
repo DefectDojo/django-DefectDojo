@@ -7,9 +7,8 @@ from dojo.models import Endpoint, Finding
 
 
 class AWSInspector2Parser:
-    """
-    Import AWS Inspector2 json
-    """
+
+    """Import AWS Inspector2 json."""
 
     def get_scan_types(self):
         return ["AWS Inspector2 Scan"]
@@ -166,7 +165,7 @@ class AWSInspector2Parser:
         network_path_steps = network_path_info.get("steps", [])
         steps_descriptions = "\n".join(
             [
-                ("steps:\n" f'{step_number}: {step.get("componentId", "N/A")} {step.get("componentType", "N/A")}')
+                f'steps:\n{step_number}: {step.get("componentId", "N/A")} {step.get("componentType", "N/A")}'
                 for step_number, step in enumerate(network_path_steps)
             ],
         )
@@ -196,27 +195,35 @@ class AWSInspector2Parser:
                 endpoint_host = resource_id
                 ec2_instance_details = resource_details.get("awsEc2Instance", None)
                 if ec2_instance_details:
-                    impact.append(f"ARN: {resource_id}")
-                    impact.append(f"Image ID: {ec2_instance_details.get('imageId', 'N/A')}")
-                    impact.append(f"IPv4 address: {ec2_instance_details.get('ipV4Addresses', 'N/A')}")
-                    impact.append(f"Subnet: {ec2_instance_details.get('subnetId', 'N/A')}")
-                    impact.append(f"VPC: {ec2_instance_details.get('vpcId', 'N/A')}")
-                    impact.append(f"Region: {resource_region}")
-                    impact.append(f"AWS Account: {aws_account}")
-                    impact.append(f"Launched at: {ec2_instance_details.get('launchedAt', 'N/A')}")
-                    impact.append("---")
+                    impact.extend(
+                        (
+                            f"ARN: {resource_id}",
+                            f"Image ID: {ec2_instance_details.get('imageId', 'N/A')}",
+                            f"IPv4 address: {ec2_instance_details.get('ipV4Addresses', 'N/A')}",
+                            f"Subnet: {ec2_instance_details.get('subnetId', 'N/A')}",
+                            f"VPC: {ec2_instance_details.get('vpcId', 'N/A')}",
+                            f"Region: {resource_region}",
+                            f"AWS Account: {aws_account}",
+                            f"Launched at: {ec2_instance_details.get('launchedAt', 'N/A')}",
+                            "---",
+                        ),
+                    )
             elif resource_type == "AWS_ECR_CONTAINER_IMAGE":
                 image_id = resource_id.split("repository/")[1].replace("sha256:", "").replace("/", "-")
                 endpoint_host = image_id
                 ecr_image_details = resource_details.get("awsEcrContainerImage", None)
                 if ecr_image_details:
-                    impact.append(f"ARN: {resource_id}")
-                    impact.append(f"Registry: {ecr_image_details.get('registry', 'N/A')}")
-                    impact.append(f"Repository: {ecr_image_details.get('repositoryName', 'N/A')}")
-                    impact.append(f"Hash: {ecr_image_details.get('imageHash', 'N/A')}")
-                    impact.append(f"Author: {ecr_image_details.get('author', 'N/A')}")
-                    impact.append(f"Pushed at: {ecr_image_details.get('pushedAt', 'N/A')}")
-                    impact.append("---")
+                    impact.extend(
+                        (
+                            f"ARN: {resource_id}",
+                            f"Registry: {ecr_image_details.get('registry', 'N/A')}",
+                            f"Repository: {ecr_image_details.get('repositoryName', 'N/A')}",
+                            f"Hash: {ecr_image_details.get('imageHash', 'N/A')}",
+                            f"Author: {ecr_image_details.get('author', 'N/A')}",
+                            f"Pushed at: {ecr_image_details.get('pushedAt', 'N/A')}",
+                            "---",
+                        ),
+                    )
             elif resource_type == "AWS_ECR_REPOSITORY":
                 # no corresponding
                 # key present in
@@ -227,12 +234,16 @@ class AWSInspector2Parser:
                 endpoint_host = lambda_id
                 lambda_details = resource_details.get("awsLambdaFunction", None)
                 if lambda_details:
-                    impact.append(f"ARN: {resource_id}")
-                    impact.append(f"Name: {lambda_details.get('functionName', 'N/A')}")
-                    impact.append(f"Version: {lambda_details.get('version', 'N/A')}")
-                    impact.append(f"Runtime: {lambda_details.get('runtime', 'N/A')}")
-                    impact.append(f"Hash: {lambda_details.get('codeSha256', 'N/A')}")
-                    impact.append(f"Pushed at: {lambda_details.get('lastModifiedAt', 'N/A')}")
+                    impact.extend(
+                        (
+                            f"ARN: {resource_id}",
+                            f"Name: {lambda_details.get('functionName', 'N/A')}",
+                            f"Version: {lambda_details.get('version', 'N/A')}",
+                            f"Runtime: {lambda_details.get('runtime', 'N/A')}",
+                            f"Hash: {lambda_details.get('codeSha256', 'N/A')}",
+                            f"Pushed at: {lambda_details.get('lastModifiedAt', 'N/A')}",
+                        ),
+                    )
             else:
                 msg = "Incorrect Inspector2 report format"
                 raise TypeError(msg)
