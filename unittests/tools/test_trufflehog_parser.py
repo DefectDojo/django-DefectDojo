@@ -12,7 +12,7 @@ def sample_path(file_name):
 class TestTruffleHogParser(DojoTestCase):
 
     def test_many_vulns_v2(self):
-        with open(sample_path("v2_many_vulns.json")) as test_file:
+        with open(sample_path("v2_many_vulns.json"), encoding="utf-8") as test_file:
             parser = TruffleHogParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 18)
@@ -22,7 +22,7 @@ class TestTruffleHogParser(DojoTestCase):
             self.assertEqual("test_all.py", finding.file_path)
 
     def test_many_vulns_git_v3(self):
-        with open(sample_path("v3_git.json")) as test_file:
+        with open(sample_path("v3_git.json"), encoding="utf-8") as test_file:
             parser = TruffleHogParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 3)
@@ -32,7 +32,7 @@ class TestTruffleHogParser(DojoTestCase):
             self.assertEqual("keys", finding.file_path)
 
     def test_many_vulns_github_v3(self):
-        with open(sample_path("v3_github.json")) as test_file:
+        with open(sample_path("v3_github.json"), encoding="utf-8") as test_file:
             parser = TruffleHogParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 3)

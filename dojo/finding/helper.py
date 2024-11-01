@@ -248,8 +248,7 @@ def get_group_by_group_name(finding, finding_group_by_option):
         group_name = finding.component_name
     elif finding_group_by_option == "component_name+component_version":
         if finding.component_name or finding.component_version:
-            group_name = "{}:{}".format((finding.component_name if finding.component_name else "None"),
-                (finding.component_version if finding.component_version else "None"))
+            group_name = "{}:{}".format(finding.component_name or "None", finding.component_version or "None")
     elif finding_group_by_option == "file_path":
         if finding.file_path:
             group_name = f"Filepath {finding.file_path}"
@@ -567,25 +566,25 @@ def engagement_post_delete(sender, instance, **kwargs):
 
 
 def fix_loop_duplicates():
-    """ Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates. """
+    """Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates."""
     """ i.e. A -> B -> C. This can lead to problems when deleting findingns, performing deduplication, etc """
     candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).order_by("-id")
 
     loop_count = len(candidates)
 
     if loop_count > 0:
-        deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
+        deduplicationLogger.info(f"Identified {len(candidates)} Findings with Loops")
         for find_id in candidates.values_list("id", flat=True):
             removeLoop(find_id, 50)
 
         new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
         for f in new_originals:
-            deduplicationLogger.info("New Original: %d " % f.id)
+            deduplicationLogger.info(f"New Original: {f.id}")
             f.duplicate = False
             super(Finding, f).save()
 
         loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
-        deduplicationLogger.info("%d Finding found which still has Loops, please run fix loop duplicates again" % loop_count)
+        deduplicationLogger.info(f"{loop_count} Finding found which still has Loops, please run fix loop duplicates again")
     return loop_count
 
 

@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class KICSParser:
-    """
-    A class that can be used to parse the KICS JSON report file
-    """
+
+    """A class that can be used to parse the KICS JSON report file"""
 
     # table to match KICS severity to DefectDojo severity
     SEVERITY = {
@@ -54,8 +53,7 @@ class KICSParser:
                     description += f"**Issue type:** {issue_type}\n"
                 if actual_value:
                     description += f"**Actual value:** {actual_value}\n"
-                if description.endswith("\n"):
-                    description = description[:-1]
+                description = description.removesuffix("\n")
 
                 dupe_key = hashlib.sha256(
                     (

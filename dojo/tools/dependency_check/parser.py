@@ -46,12 +46,11 @@ class DependencyCheckParser:
             return related_dependency.findtext(
                 f"{namespace}fileName",
             ), related_dependency.findtext(f"{namespace}filePath")
-        else:
-            # without filename, it would be just a duplicate finding so we have to skip it. filename
-            # is only present for relateddependencies since v6.0.0
-            # logger.debug('related_dependency: %s',
-            # ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
-            return None, None
+        # without filename, it would be just a duplicate finding so we have to skip it. filename
+        # is only present for relateddependencies since v6.0.0
+        # logger.debug('related_dependency: %s',
+        # ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
+        return None, None
 
     def get_component_name_and_version_from_dependency(
         self, dependency, related_dependency, namespace,
@@ -75,7 +74,7 @@ class DependencyCheckParser:
                     if purl_parts["name"] and len(purl_parts["name"]) > 0
                     else ""
                 )
-                component_name = component_name if component_name else None
+                component_name = component_name or None
                 component_version = (
                     purl_parts["version"]
                     if purl_parts["version"] and len(purl_parts["version"]) > 0
@@ -107,7 +106,7 @@ class DependencyCheckParser:
                 component_name += (
                     cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
                 )
-                component_name = component_name if component_name else None
+                component_name = component_name or None
                 component_version = (
                     cpe.get_version()[0]
                     if len(cpe.get_version()) > 0
@@ -282,7 +281,7 @@ class DependencyCheckParser:
                 ref_name = reference_node.findtext(f"{namespace}name")
                 if ref_url == ref_name:
                     reference_detail += (
-                        f"**Source:** {ref_source}\n" f"**URL:** {ref_url}\n\n"
+                        f"**Source:** {ref_source}\n**URL:** {ref_url}\n\n"
                     )
                 else:
                     reference_detail += (

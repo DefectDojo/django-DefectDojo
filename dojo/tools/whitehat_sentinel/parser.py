@@ -3,12 +3,12 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import List, Union
 
 from dojo.models import Endpoint, Finding
 
 
 class WhiteHatSentinelParser:
+
     """
     A class to parse WhiteHat Sentinel vulns from the WhiteHat Sentinel API vuln?query_site=[
     SITE_ID]&format=json&display_attack_vectors=all&display_custom_risk=1&display_risk=1&display_description=custom
@@ -42,7 +42,7 @@ class WhiteHatSentinelParser:
 
         # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo
         # findings
-        dojo_findings = self._convert_whitehat_sentinel_vulns_to_dojo_finding(
+        return self._convert_whitehat_sentinel_vulns_to_dojo_finding(
             findings_collection["collection"], test,
         )
 
@@ -51,11 +51,10 @@ class WhiteHatSentinelParser:
         #
         #     # Append DefectDojo findings to list
         #     dojo_findings.append(dojo_finding)
-        return dojo_findings
 
     def _convert_whitehat_severity_id_to_dojo_severity(
         self, whitehat_severity_id: int,
-    ) -> Union[str, None]:
+    ) -> str | None:
         """
         Converts a WhiteHat Sentinel numerical severity to a DefectDojo severity.
         Args:
@@ -87,6 +86,7 @@ class WhiteHatSentinelParser:
         for tag in whitehat_sentinel_tags:
             if tag.startswith("CWE-"):
                 return tag.split("-")[1]
+        return None
 
     def _parse_description(self, whitehat_sentinel_description: dict):
         """
@@ -95,7 +95,6 @@ class WhiteHatSentinelParser:
             whitehat_sentinel_description: The description section of the WhiteHat Sentinel vulnerability dict
         Returns: A dict with description and reference link
         """
-
         description_ref = {"description": "", "reference_link": ""}
 
         # The references section is always between <h2> or <strong> tags
@@ -149,7 +148,6 @@ class WhiteHatSentinelParser:
             text_to_search: The text string to search for an anchor tag
         Returns:
         """
-
         links = ""
 
         for match in re.findall(r'(<a href=")(https://\S+)">', text_to_search):
@@ -163,12 +161,11 @@ class WhiteHatSentinelParser:
             html_string: The HMTL string to remove <p> </p> tags from
         Returns: The original string stipped of paragraph tags
         """
-
         return re.sub(r"<p>|</p>", "", html_string)
 
     def _convert_attack_vectors_to_endpoints(
-        self, attack_vectors: List[dict],
-    ) -> List["Endpoint"]:
+        self, attack_vectors: list[dict],
+    ) -> list["Endpoint"]:
         """
         Takes a list of Attack Vectors dictionaries from the WhiteHat vuln API and converts them to Defect Dojo
         Endpoints
@@ -176,7 +173,6 @@ class WhiteHatSentinelParser:
             attack_vectors: The list of Attack Vector dictionaries
         Returns: A list of Defect Dojo Endpoints
         """
-
         endpoints_list = []
 
         # This should be in the Endpoint class should it not?
@@ -219,11 +215,7 @@ class WhiteHatSentinelParser:
             )
             steps = whitehat_vuln["description"].get("description_prepend", "")
             solution = self._parse_solution(whitehat_vuln["solution"])
-            risk_id = (
-                whitehat_vuln.get("custom_risk")
-                if whitehat_vuln.get("custom_risk")
-                else whitehat_vuln.get("risk")
-            )
+            risk_id = whitehat_vuln.get("custom_risk") or whitehat_vuln.get("risk")
             severity = self._convert_whitehat_severity_id_to_dojo_severity(
                 risk_id,
             )
@@ -272,4 +264,4 @@ class WhiteHatSentinelParser:
                 finding.unsaved_endpoints = endpoints
                 dupes[dupe_key] = finding
 
-        return dupes.values()
+        return list(dupes.values())

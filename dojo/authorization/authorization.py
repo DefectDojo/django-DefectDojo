@@ -66,7 +66,7 @@ def user_has_permission(user, obj, permission):
             if role_has_permission(product_type_group.role.id, permission):
                 return True
         return False
-    elif (
+    if (
         isinstance(obj, Product)
         and permission.value >= Permissions.Product_View.value
     ):
@@ -87,51 +87,51 @@ def user_has_permission(user, obj, permission):
             if role_has_permission(product_group.role.id, permission):
                 return True
         return False
-    elif (
+    if (
         isinstance(obj, Engagement)
         and permission in Permissions.get_engagement_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Test)
         and permission in Permissions.get_test_permissions()
     ):
         return user_has_permission(user, obj.engagement.product, permission)
-    elif (
+    if (
         isinstance(obj, Finding) or isinstance(obj, Stub_Finding)
     ) and permission in Permissions.get_finding_permissions():
         return user_has_permission(
             user, obj.test.engagement.product, permission,
         )
-    elif (
+    if (
         isinstance(obj, Finding_Group)
         and permission in Permissions.get_finding_group_permissions()
     ):
         return user_has_permission(
             user, obj.test.engagement.product, permission,
         )
-    elif (
+    if (
         isinstance(obj, Endpoint)
         and permission in Permissions.get_endpoint_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Languages)
         and permission in Permissions.get_language_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, App_Analysis)
         and permission in Permissions.get_technology_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Product_API_Scan_Configuration)
         and permission
         in Permissions.get_product_api_scan_configuration_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Product_Type_Member)
         and permission in Permissions.get_product_type_member_permissions()
     ):
@@ -140,9 +140,8 @@ def user_has_permission(user, obj, permission):
             return obj.user == user or user_has_permission(
                 user, obj.product_type, permission,
             )
-        else:
-            return user_has_permission(user, obj.product_type, permission)
-    elif (
+        return user_has_permission(user, obj.product_type, permission)
+    if (
         isinstance(obj, Product_Member)
         and permission in Permissions.get_product_member_permissions()
     ):
@@ -151,19 +150,18 @@ def user_has_permission(user, obj, permission):
             return obj.user == user or user_has_permission(
                 user, obj.product, permission,
             )
-        else:
-            return user_has_permission(user, obj.product, permission)
-    elif (
+        return user_has_permission(user, obj.product, permission)
+    if (
         isinstance(obj, Product_Type_Group)
         and permission in Permissions.get_product_type_group_permissions()
     ):
         return user_has_permission(user, obj.product_type, permission)
-    elif (
+    if (
         isinstance(obj, Product_Group)
         and permission in Permissions.get_product_group_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Dojo_Group)
         and permission in Permissions.get_group_permissions()
     ):
@@ -173,7 +171,7 @@ def user_has_permission(user, obj, permission):
         return group_member is not None and role_has_permission(
             group_member.role.id, permission,
         )
-    elif (
+    if (
         isinstance(obj, Dojo_Group_Member)
         and permission in Permissions.get_group_member_permissions()
     ):
@@ -182,9 +180,8 @@ def user_has_permission(user, obj, permission):
             return obj.user == user or user_has_permission(
                 user, obj.group, permission,
             )
-        else:
-            return user_has_permission(user, obj.group, permission)
-    elif (
+        return user_has_permission(user, obj.group, permission)
+    if (
         isinstance(obj, Cred_Mapping)
         and permission in Permissions.get_credential_permissions()
     ):
@@ -202,9 +199,9 @@ def user_has_permission(user, obj, permission):
             return user_has_permission(
                 user, obj.finding.test.engagement.product, permission,
             )
-    else:
-        msg = f"No authorization implemented for class {type(obj).__name__} and permission {permission}"
-        raise NoAuthorizationImplementedError(msg)
+        return None
+    msg = f"No authorization implemented for class {type(obj).__name__} and permission {permission}"
+    raise NoAuthorizationImplementedError(msg)
 
 
 def user_has_global_permission(user, permission):

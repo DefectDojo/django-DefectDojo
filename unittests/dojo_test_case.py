@@ -173,6 +173,7 @@ class DojoTestUtilsMixin:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-enable_engagement_epic_mapping": "on",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-push_notes": "on",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
@@ -188,6 +189,7 @@ class DojoTestUtilsMixin:
             "sla_configuration": 1,
             # A value is set by default by the model, so we need to add it here as well
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
@@ -204,6 +206,7 @@ class DojoTestUtilsMixin:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-enable_engagement_epic_mapping": "on",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-push_notes": "on",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
@@ -220,6 +223,7 @@ class DojoTestUtilsMixin:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-enable_engagement_epic_mapping": "on",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-push_notes": "on",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
@@ -235,6 +239,7 @@ class DojoTestUtilsMixin:
             "sla_configuration": 1,
             # A value is set by default by the model, so we need to add it here as well
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-custom_fields": "null",
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
@@ -244,7 +249,7 @@ class DojoTestUtilsMixin:
         }
 
     def get_expected_redirect_product(self, product):
-        return "/product/%i" % product.id
+        return f"/product/{product.id}"
 
     def add_product_jira(self, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse("new_product"))
@@ -352,18 +357,15 @@ class DojoTestUtilsMixin:
 
     def get_jira_issue_status(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
-        updated = jira_helper.get_jira_status(finding)
-        return updated
+        return jira_helper.get_jira_status(finding)
 
     def get_jira_issue_updated(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
-        updated = jira_helper.get_jira_updated(finding)
-        return updated
+        return jira_helper.get_jira_updated(finding)
 
     def get_jira_comments(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
-        comments = jira_helper.get_jira_comments(finding)
-        return comments
+        return jira_helper.get_jira_comments(finding)
 
     def get_jira_issue_updated_map(self, test_id):
         findings = Test.objects.get(id=test_id).finding_set.all()
@@ -413,7 +415,7 @@ class DojoTestUtilsMixin:
         url = instance.url.strip("/") + "/rest/api/latest/issue/" + issue_id
         response = jira._session.get(url).json().get("fields", {})
         epic_link = response.get(epic_link_field, None)
-        if epic_id is None and epic_link is None or issue_in_epic:
+        if (epic_id is None and epic_link is None) or issue_in_epic:
             self.assertEqual(epic_id, epic_link)
         else:
             self.assertNotEqual(epic_id, epic_link)
@@ -481,7 +483,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
                                 scan_date=None, service=None, forceActive=True, forceVerified=True):
 
-        with open(get_unit_tests_path() + "/" + filename) as testfile:
+        with open(get_unit_tests_path() + "/" + filename, encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": active,
@@ -533,7 +535,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def reimport_scan_with_params(self, test_id, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", active=True, verified=False, push_to_jira=None,
                                   tags=None, close_old_findings=True, group_by=None, engagement_name=None, scan_date=None,
                                   product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None):
-        with open(get_unit_tests_path() + "/" + filename) as testfile:
+        with open(get_unit_tests_path() + "/" + filename, encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": minimum_severity,
                     "active": active,
@@ -582,7 +584,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def endpoint_meta_import_scan_with_params(self, filename, product=1, product_name=None,
                                               create_endpoints=True, create_tags=True, create_dojo_meta=True,
                                               expected_http_status_code=201):
-        with open(get_unit_tests_path() + "/" + filename) as testfile:
+        with open(get_unit_tests_path() + "/" + filename, encoding="utf-8") as testfile:
             payload = {
                 "create_endpoints": create_endpoints,
                 "create_tags": create_tags,
@@ -710,12 +712,10 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return response.data
 
     def put_finding_remove_tags_api(self, finding_id, tags, *args, **kwargs):
-        response = self.do_finding_remove_tags_api(self.client.put, finding_id, tags, *args, **kwargs)
-        return response
+        return self.do_finding_remove_tags_api(self.client.put, finding_id, tags, *args, **kwargs)
 
     def patch_finding_remove_tags_api(self, finding_id, tags, *args, **kwargs):
-        response = self.do_finding_remove_tags_api(self.client.patch, finding_id, tags, *args, **kwargs)
-        return response
+        return self.do_finding_remove_tags_api(self.client.patch, finding_id, tags, *args, **kwargs)
 
     def do_finding_notes_api(self, http_method, finding_id, note=None):
         data = None

@@ -47,6 +47,7 @@ For example: :
 
 If you use [an alternative authentication method](../social-authentication/) for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
+Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
 ## Sample Code
 

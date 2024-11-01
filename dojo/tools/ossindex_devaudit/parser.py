@@ -5,7 +5,9 @@ from dojo.models import Finding
 
 
 class OssIndexDevauditParser:
-    """OssIndex Devaudit Results Parser
+
+    """
+    OssIndex Devaudit Results Parser
     Parses files created by the Sonatype OssIndex Devaudit tool
     https://github.com/sonatype-nexus-community/DevAudit
     """
@@ -24,8 +26,7 @@ class OssIndexDevauditParser:
 
         if tree:
             return list(self.get_items(tree, test))
-        else:
-            return []
+        return []
 
     def parse_json(self, json_file):
         if json_file is None:
@@ -71,7 +72,7 @@ def get_item(
         msg = "Attempting to convert the CWE value to an integer failed"
         raise ValueError(msg)
 
-    finding = Finding(
+    return Finding(
         title=dependency_source
         + ":"
         + dependency_name
@@ -96,8 +97,6 @@ def get_item(
         dynamic_finding=False,
         impact="No impact provided by scan",
     )
-
-    return finding
 
 
 def get_severity(cvss_score):

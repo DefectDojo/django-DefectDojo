@@ -185,12 +185,11 @@ class EditGroup(View):
                     extra_tags="alert-success")
 
             return request, True
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Group was not saved successfully.",
-                extra_tags="alert_danger")
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Group was not saved successfully.",
+            extra_tags="alert_danger")
 
         return request, False
 
@@ -450,8 +449,7 @@ def edit_group_member(request, mid):
                                         extra_tags="alert-warning")
                     if is_title_in_breadcrumbs("View User"):
                         return HttpResponseRedirect(reverse("view_user", args=(member.user.id, )))
-                    else:
-                        return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
+                    return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
             if member.role.is_owner and not user_has_permission(request.user, member.group, Permissions.Group_Add_Owner):
                 messages.add_message(request,
                                      messages.WARNING,
@@ -465,8 +463,7 @@ def edit_group_member(request, mid):
                                      extra_tags="alert-success")
                 if is_title_in_breadcrumbs("View User"):
                     return HttpResponseRedirect(reverse("view_user", args=(member.user.id, )))
-                else:
-                    return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
+                return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
 
     add_breadcrumb(title="Edit a Group Member", top_level=False, request=request)
     return render(request, "dojo/edit_group_member.html", {
@@ -492,8 +489,7 @@ def delete_group_member(request, mid):
                                     extra_tags="alert-warning")
                 if is_title_in_breadcrumbs("View User"):
                     return HttpResponseRedirect(reverse("view_user", args=(member.user.id, )))
-                else:
-                    return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
+                return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
 
         user = member.user
         member.delete()
@@ -503,11 +499,9 @@ def delete_group_member(request, mid):
                              extra_tags="alert-success")
         if is_title_in_breadcrumbs("View User"):
             return HttpResponseRedirect(reverse("view_user", args=(member.user.id, )))
-        else:
-            if user == request.user:
-                return HttpResponseRedirect(reverse("groups"))
-            else:
-                return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
+        if user == request.user:
+            return HttpResponseRedirect(reverse("groups"))
+        return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
 
     add_breadcrumb("Delete a group member", top_level=False, request=request)
     return render(request, "dojo/delete_group_member.html", {

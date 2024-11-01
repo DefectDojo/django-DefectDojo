@@ -1,11 +1,14 @@
 import os
-import re
+from pathlib import Path
+
+from django.test import tag as test_tag
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_path
 
 basedir = os.path.join(get_unit_tests_path(), "..")
 
 
+@test_tag("parser-supplement-tests")
 class TestParsers(DojoTestCase):
     def test_file_existence(self):
         for parser_dir in os.scandir(os.path.join(basedir, "dojo", "tools")):
@@ -31,23 +34,22 @@ class TestParsers(DojoTestCase):
                         f"Documentation file '{doc_file}' is missing or using different name",
                                     )
 
-                    with open(doc_file) as file:
-                        content = file.read()
-                        self.assertTrue(re.search("title:", content),
-                                        f"Documentation file '{doc_file}' does not contain a title",
+                    content = Path(doc_file).read_text(encoding="utf-8")
+                    self.assertRegex(content, "title:",
+                                    f"Documentation file '{doc_file}' does not contain a title",
+                                    )
+                    self.assertRegex(content, "toc_hide: true",
+                                    f"Documentation file '{doc_file}' does not contain toc_hide: true",
+                                    )
+                    if category == "file":
+                        self.assertRegex(content, "### Sample Scan Data",
+                                        f"Documentation file '{doc_file}' does not contain ### Sample Scan Data",
                                         )
-                        self.assertTrue(re.search("toc_hide: true", content),
-                                        f"Documentation file '{doc_file}' does not contain toc_hide: true",
+                        self.assertRegex(content, "https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
+                                        f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
                                         )
-                        if category == "file":
-                            self.assertTrue(re.search("### Sample Scan Data", content),
-                                            f"Documentation file '{doc_file}' does not contain ### Sample Scan Data",
-                                            )
-                            self.assertTrue(re.search("https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans", content),
-                                            f"Documentation file '{doc_file}' does not contain https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans",
-                                            )
 
-            if parser_dir.name not in [
+            if parser_dir.name not in [  # noqa: FURB171
                 "wizcli_common_parsers",  # common class for other wizcli parsers
             ]:
                 with self.subTest(parser=parser_dir.name, category="parser"):
@@ -83,15 +85,15 @@ class TestParsers(DojoTestCase):
                 if file.is_file() and file.name != "__pycache__" and file.name != "__init__.py":
                     f = os.path.join(basedir, "dojo", "tools", parser_dir.name, file.name)
                     read_true = False
-                    with open(f) as f:
+                    with open(f, encoding="utf-8") as f:
                         i = 0
-                        for line in f.readlines():
+                        for line in f:
                             if read_true is True:
                                 if ('"utf-8"' in str(line) or "'utf-8'" in str(line) or '"utf-8-sig"' in str(line) or "'utf-8-sig'" in str(line)) and i <= 4:
                                     read_true = False
                                     i = 0
                                 elif i > 4:
-                                    self.assertTrue(False, "In file " + str(os.path.join("dojo", "tools", parser_dir.name, file.name)) + " the test is failing because you don't have utf-8 after .read()")
+                                    self.assertTrue(expr=False, msg="In file " + str(os.path.join("dojo", "tools", parser_dir.name, file.name)) + " the test is failing because you don't have utf-8 after .read()")
                                     i = 0
                                     read_true = False
                                 else:

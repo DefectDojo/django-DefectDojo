@@ -1,6 +1,5 @@
 from collections import defaultdict
 from datetime import timedelta
-from typing import Dict
 
 from dateutil.relativedelta import relativedelta
 from django.db.models import Count, Q
@@ -33,7 +32,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 
     date_range = [today - timedelta(days=6), today]  # 7 days (6 days plus today)
     finding_count = findings\
-        .filter(created__date__range=date_range)\
+        .filter(date__range=date_range)\
         .count()
     mitigated_count = findings\
         .filter(mitigated__date__range=date_range)\
@@ -75,7 +74,7 @@ def support(request: HttpRequest) -> HttpResponse:
     return render(request, "dojo/support.html", {})
 
 
-def get_severities_all(findings) -> Dict[str, int]:
+def get_severities_all(findings) -> dict[str, int]:
     severities_all = findings.values("severity").annotate(count=Count("severity")).order_by()
     return defaultdict(lambda: 0, {s["severity"]: s["count"] for s in severities_all})
 

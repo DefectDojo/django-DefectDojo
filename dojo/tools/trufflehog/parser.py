@@ -26,10 +26,9 @@ class TruffleHogParser:
 
         if "SourceMetadata" in json_data:
             return self.get_findings_v3(dict_strs, test)
-        elif "path" in json_data:
+        if "path" in json_data:
             return self.get_findings_v2(dict_strs, test)
-        else:
-            return []
+        return []
 
     def get_findings_v2(self, data, test):
         dupes = {}
@@ -210,6 +209,5 @@ class TruffleHogParser:
                             value, tab_count=(tab_count + 1),
                         )
                         continue
-                    else:
-                        return_string += f"{tab_string}{key}: {value}\n"
+                    return_string += f"{tab_string}{key}: {value}\n"
         return return_string

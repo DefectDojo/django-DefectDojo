@@ -5,7 +5,6 @@
 target_dir="${0%/*}/.."
 override_link='docker-compose.override.yml'
 override_file_dev='docker-compose.override.dev.yml'
-override_file_debug='docker-compose.override.debug.yml'
 override_file_unit_tests='docker-compose.override.unit_tests.yml'
 override_file_unit_tests_cicd='docker-compose.override.unit_tests_cicd.yml'
 override_file_integration_tests='docker-compose.override.integration_tests.yml'
@@ -74,19 +73,6 @@ function set_dev {
         echo "Now using 'dev' configuration."
     else
         echo "Already using 'dev' configuration."
-    fi
-}
-
-function set_debug {
-    get_current
-    if [ "${current_env}" != debug ]
-    then
-        docker compose down
-        rm -f ${override_link}
-        ln -s ${override_file_debug} ${override_link}
-        echo "Now using 'debug' configuration."
-    else
-        echo "Already using 'debug' configuration."
     fi
 }
 

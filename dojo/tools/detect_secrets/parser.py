@@ -7,9 +7,8 @@ from dojo.models import Finding
 
 
 class DetectSecretsParser:
-    """
-    A class that can be used to parse the detect-secrets JSON report file
-    """
+
+    """A class that can be used to parse the detect-secrets JSON report file"""
 
     def get_scan_types(self):
         return ["Detect-secrets Scan"]
@@ -53,8 +52,8 @@ class DetectSecretsParser:
                         date=find_date,
                         severity="High",
                         verified=is_verified,
-                        active="is_secret" in item
-                        and item["is_secret"] is True
+                        active=("is_secret" in item
+                        and item["is_secret"] is True)
                         or "is_secret" not in item,
                         file_path=file,
                         line=line,
