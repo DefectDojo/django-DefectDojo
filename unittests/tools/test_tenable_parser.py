@@ -155,7 +155,7 @@ class TestTenableParser(DojoTestCase):
                 self.assertEqual("CVE-2005-1794", vulnerability_id)
 
     def test_parse_some_findings_with_cvssv3_nessus_legacy(self):
-        """test with cvssv3"""
+        """Test with cvssv3"""
         with open(path.join(path.dirname(__file__), "../scans/tenable/nessus/nessus_with_cvssv3.nessus"), encoding="utf-8") as testfile:
             parser = TenableParser()
             findings = parser.get_findings(testfile, self.create_test())
@@ -299,3 +299,13 @@ class TestTenableParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(2, len(findings))
             self.assertEqual("Critical", findings[0].severity)
+
+    def test_parse_issue_11102(self):
+        with open("unittests/scans/tenable/issue_11102.csv", encoding="utf-8") as testfile:
+            parser = TenableParser()
+            findings = parser.get_findings(testfile, self.create_test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(2, len(findings))
+            self.assertEqual("Reconfigure the affected application if possible to avoid use of medium strength ciphers.", findings[0].mitigation)
