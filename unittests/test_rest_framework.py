@@ -4,6 +4,7 @@ import pathlib
 from collections import OrderedDict
 from enum import Enum
 from json import dumps
+from pathlib import Path
 
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import ANY, MagicMock, call, patch
@@ -52,6 +53,7 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     NotificationsViewSet,
+    NotificationWebhooksViewSet,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -106,6 +108,7 @@ from dojo.models import (
     Languages,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -219,7 +222,7 @@ class SchemaChecker:
 
         for required_field in required_fields:
             # passwords are writeOnly, but this is not supported by Swagger / OpenAPIv2
-            # TODO check this for OpenAPI3
+            # TODO: check this for OpenAPI3
             if required_field != "password":
                 # print('checking field: ', required_field)
                 field = f"{self._get_prefix()}#{required_field}"
@@ -227,7 +230,7 @@ class SchemaChecker:
 
     def _check_type(self, schema, obj):
         if "type" not in schema:
-            # TODO implement OneOf / AllOff  (enums)
+            # TODO: implement OneOf / AllOff  (enums)
             # Engagement
             # "status": {
             #     "nullable": true,
@@ -262,21 +265,28 @@ class SchemaChecker:
 
         if obj is None:
             self._check_or_fail(is_nullable, f"{self._get_prefix()} is not nullable yet the value returned was null")
-        elif schema_type == TYPE_BOOLEAN:
+            return None
+        if schema_type == TYPE_BOOLEAN:
             _check_helper(isinstance(obj, bool))
-        elif schema_type == TYPE_INTEGER:
+            return None
+        if schema_type == TYPE_INTEGER:
             _check_helper(isinstance(obj, int))
-        elif schema_type == TYPE_NUMBER:
+            return None
+        if schema_type == TYPE_NUMBER:
             _check_helper(obj.isdecimal())
-        elif schema_type == TYPE_ARRAY:
+            return None
+        if schema_type == TYPE_ARRAY:
             _check_helper(isinstance(obj, list))
-        elif schema_type == TYPE_OBJECT:
+            return None
+        if schema_type == TYPE_OBJECT:
             _check_helper(isinstance(obj, OrderedDict) or isinstance(obj, dict))
-        elif schema_type == TYPE_STRING:
+            return None
+        if schema_type == TYPE_STRING:
             _check_helper(isinstance(obj, str))
-        else:
-            # Default case
-            _check_helper(False)
+            return None
+        # Default case
+        _check_helper(check=False)
+        return None
 
         # print('_check_type ok for: %s: %s' % (schema, obj))
 
@@ -311,8 +321,8 @@ class SchemaChecker:
                         _check(prop, obj_child)
 
                 for child_name in obj.keys():
-                    # TODO prefetch mixins not picked up by spectcular?
-                    if child_name not in ["prefetch"]:
+                    # TODO: prefetch mixins not picked up by spectcular?
+                    if child_name != "prefetch":
                         if not properties or child_name not in properties.keys():
                             self._has_failed = True
                             self._register_error(f'unexpected property "{child_name}" found')
@@ -322,7 +332,7 @@ class SchemaChecker:
                 for name, obj_child in obj.items():
                     self._with_prefix(f"additionalProp<{name}>", _check, additional_properties, obj_child)
 
-            # TODO implement support for enum / OneOff / AllOff
+            # TODO: implement support for enum / OneOff / AllOff
             if "type" in schema and schema["type"] is TYPE_ARRAY:
                 items_schema = schema["items"]
                 for index in range(len(obj)):
@@ -425,7 +435,7 @@ class BaseClass:
                 for value in values:
                     self.assertIn(value, obj["prefetch"][field])
 
-            # TODO add schema check
+            # TODO: add schema check
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_object_not_authorized(self):
@@ -516,10 +526,12 @@ class BaseClass:
 
                     for value in values:
                         if not isinstance(value, int):
-                            value = value["id"]
-                        self.assertIn(value, objs["prefetch"][field])
+                            clean_value = value["id"]
+                        else:
+                            clean_value = value
+                        self.assertIn(clean_value, objs["prefetch"][field])
 
-            # TODO add schema check
+            # TODO: add schema check
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list_object_not_authorized(self):
@@ -600,12 +612,14 @@ class BaseClass:
                 if key not in ["push_to_jira", "ssh", "password", "api_key"]:
                     # Convert data to sets to avoid problems with lists
                     if isinstance(value, list):
-                        value = set(value)
+                        clean_value = set(value)
+                    else:
+                        clean_value = value
                     if isinstance(response.data[key], list):
                         response_data = set(response.data[key])
                     else:
                         response_data = response.data[key]
-                    self.assertEqual(value, response_data)
+                    self.assertEqual(clean_value, response_data)
 
             self.assertNotIn("push_to_jira", response.data)
             self.assertNotIn("ssh", response.data)
@@ -1110,7 +1124,7 @@ class FilesTest(DojoAPITestCase):
         # Test the creation
         for level in self.url_levels.keys():
             length = FileUpload.objects.count()
-            with open(f"{str(self.path)}/scans/acunetix/one_finding.xml") as testfile:
+            with open(f"{str(self.path)}/scans/acunetix/one_finding.xml", encoding="utf-8") as testfile:
                 payload = {
                     "title": level,
                     "file": testfile,
@@ -1122,8 +1136,7 @@ class FilesTest(DojoAPITestCase):
                 self.url_levels[level] = response.data.get("id")
 
         #  Test the download
-        with open(f"{str(self.path)}/scans/acunetix/one_finding.xml") as file:
-            file_data = file.read()
+        file_data = Path(f"{str(self.path)}/scans/acunetix/one_finding.xml").read_text(encoding="utf-8")
         for level, file_id in self.url_levels.items():
             response = self.client.get(f"/api/v2/{level}/files/download/{file_id}/")
             self.assertEqual(200, response.status_code)
@@ -1699,8 +1712,19 @@ class UsersTest(BaseClass.BaseClassTest):
         self.deleted_objects = 25
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_create(self):
+        payload = self.payload.copy() | {
+            "password": "testTEST1234!@#$",
+        }
+        length = self.endpoint_model.objects.count()
+        response = self.client.post(self.url, payload)
+        self.assertEqual(201, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length + 1)
+
     def test_create_user_with_non_configuration_permissions(self):
-        payload = self.payload.copy()
+        payload = self.payload.copy() | {
+            "password": "testTEST1234!@#$",
+        }
         payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, 400)
@@ -1774,7 +1798,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         self.viewname = "importscan"
         self.viewset = ImportScanView
 
-        testfile = open("tests/zap_sample.xml")
+        testfile = open("tests/zap_sample.xml", encoding="utf-8")
         self.payload = {
             "minimum_severity": "Low",
             "active": False,
@@ -1801,7 +1825,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1831,7 +1855,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1862,7 +1886,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1894,7 +1918,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1921,14 +1945,12 @@ class ImportScanTest(BaseClass.BaseClassTest):
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
     @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
-        """
-        Test creating a new engagement should also check for import scan permission in the product
-        """
+        """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1963,7 +1985,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -1995,7 +2017,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2037,7 +2059,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             length = Test.objects.all().count()
             response = self.client.post(
                 reverse("reimportscan-list"), {
@@ -2051,7 +2073,7 @@ class ReimportScanTest(DojoAPITestCase):
                 })
             self.assertEqual(length, Test.objects.all().count())
             self.assertEqual(201, response.status_code, response.content[:1000])
-            # TODO add schema check
+            # TODO: add schema check
             importer_mock.assert_not_called()
             reimporter_mock.assert_called_once()
 
@@ -2063,7 +2085,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2093,7 +2115,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2119,14 +2141,12 @@ class ReimportScanTest(DojoAPITestCase):
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
     @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
-        """
-        Test creating a new engagement should also check for import scan permission in the product
-        """
+        """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2162,7 +2182,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2194,7 +2214,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2225,7 +2245,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                     "minimum_severity": "Low",
                     "active": True,
@@ -2253,7 +2273,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2284,7 +2304,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2316,7 +2336,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2347,7 +2367,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2375,7 +2395,7 @@ class ReimportScanTest(DojoAPITestCase):
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
-        with open("tests/zap_sample.xml") as testfile:
+        with open("tests/zap_sample.xml", encoding="utf-8") as testfile:
             payload = {
                 "minimum_severity": "Low",
                 "active": False,
@@ -2709,7 +2729,7 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
         self.viewset = ImportLanguagesView
         self.payload = {
             "product": 1,
-            "file": open("unittests/files/defectdojo_cloc.json"),
+            "file": open("unittests/files/defectdojo_cloc.json", encoding="utf-8"),
         }
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Languages
@@ -2997,3 +3017,24 @@ class AnnouncementTest(BaseClass.BaseClassTest):
 
     def test_create(self):
         self.skipTest("Only one Announcement can exists")
+
+
+class NotificationWebhooksTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Notification_Webhooks
+        self.endpoint_path = "notification_webhooks"
+        self.viewname = "notification_webhooks"
+        self.viewset = NotificationWebhooksViewSet
+        self.payload = {
+            "name": "My endpoint",
+            "url": "http://webhook.endpoint:8080/post",
+        }
+        self.update_fields = {
+            "header_name": "Auth",
+            "header_value": "token x",
+        }
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

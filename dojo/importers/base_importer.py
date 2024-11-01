@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 class Parser:
+
     """
     This class is used as an alias to a given parser
     and is purely for the sake of type hinting
@@ -52,11 +53,13 @@ class Parser:
 
 
 class BaseImporter(ImporterOptions):
+
     """
     A collection of utilities used by various importers within DefectDojo.
     Some of these commonalities may be fully used by children importers,
     or even extended
     """
+
     def __init__(
         self,
         *args: list,
@@ -166,9 +169,7 @@ class BaseImporter(ImporterOptions):
         scan: TemporaryUploadedFile,
         parser: Parser,
     ) -> List[Test]:
-        """
-        Use the API configuration object to get the tests to be used by the parser
-        """
+        """Use the API configuration object to get the tests to be used by the parser"""
         try:
             return parser.get_tests(self.scan_type, scan)
         except ValueError as e:
@@ -255,11 +256,10 @@ class BaseImporter(ImporterOptions):
                 parsed_findings,
                 **kwargs,
             )
-        else:
-            return self.sync_process_findings(
-                parsed_findings,
-                **kwargs,
-            )
+        return self.sync_process_findings(
+            parsed_findings,
+            **kwargs,
+        )
 
     def update_test_meta(self):
         """
@@ -276,7 +276,7 @@ class BaseImporter(ImporterOptions):
         if not self.commit_hash.isspace():
             self.test.commit_hash = self.commit_hash
 
-        return None
+        return
 
     def update_timestamps(self):
         """
@@ -323,9 +323,7 @@ class BaseImporter(ImporterOptions):
         reactivated_findings: List[Finding] = [],
         untouched_findings: List[Finding] = [],
     ) -> Test_Import:
-        """
-        Creates a record of the import or reimport operation that has occurred.
-        """
+        """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
         if settings.TRACK_IMPORT_HISTORY is False:
             return None
@@ -491,6 +489,8 @@ class BaseImporter(ImporterOptions):
         test_type, created = Test_Type.objects.get_or_create(name=test_type_name)
         if created:
             logger.info(f"Created new Test_Type with name {test_type.name} because a report is being imported")
+            test_type.dynamically_generated = True
+            test_type.save()
         return test_type
 
     def verify_tool_configuration_from_test(self):
@@ -508,7 +508,7 @@ class BaseImporter(ImporterOptions):
             # Return early as there is no value in validating further
             return
         # Validate that the test has a value
-        elif self.test is not None:
+        if self.test is not None:
             # Make sure the Tool_Configuration is connected to the product that the test is
             if self.api_scan_configuration.product != self.test.engagement.product:
                 msg = "API Scan Configuration has to be from same product as the Test"
@@ -534,7 +534,7 @@ class BaseImporter(ImporterOptions):
             # Return early as there is no value in validating further
             return
         # Validate that the engagement has a value
-        elif self.engagement is not None:
+        if self.engagement is not None:
             # Make sure the Tool_Configuration is connected to the engagement that the test is
             if self.api_scan_configuration.product != self.engagement.product:
                 msg = "API Scan Configuration has to be from same product as the Engagement"
@@ -695,6 +695,7 @@ class BaseImporter(ImporterOptions):
         self,
         finding: Finding,
         note_message: str,
+        *,
         finding_groups_enabled: bool,
     ) -> None:
         """

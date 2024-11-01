@@ -79,7 +79,7 @@ class BaseTestCase(unittest.TestCase):
             dd_driver_options.add_argument("--window-size=1280,1024")
             # dd_driver_options.add_argument("--start-maximized")
 
-            dd_driver_options.set_capability("acceptInsecureCerts", True)
+            dd_driver_options.set_capability(name="acceptInsecureCerts", value=True)
 
             # some extra logging can be turned on if you want to query the browser javascripe console in your tests
             desired = webdriver.DesiredCapabilities.CHROME
@@ -94,7 +94,7 @@ class BaseTestCase(unittest.TestCase):
                 f"starting chromedriver with options: {vars(dd_driver_options)} {desired}",
             )
 
-            # TODO - this filter needs to be removed
+            # TODO: - this filter needs to be removed
             import warnings
             warnings.filterwarnings("ignore", message="executable_path has been deprecated, please pass in a Service object")
             warnings.filterwarnings("ignore", message="use options instead of chrome_options")
@@ -350,9 +350,9 @@ class BaseTestCase(unittest.TestCase):
             # save settings
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
             # check if it's enabled after reload
-            self.assertTrue(
-                driver.find_element(By.ID, "id_block_execution").is_selected()
-                == block_execution,
+            self.assertEqual(
+                driver.find_element(By.ID, "id_block_execution").is_selected(),
+                block_execution,
             )
         return driver
 
@@ -407,7 +407,6 @@ class BaseTestCase(unittest.TestCase):
         {'level': 'WARNING', 'message': 'http://localhost:8080/product/type/4/edit 562:16 "warning"', 'source': 'console-api', 'timestamp': 1583952828410}
         {'level': 'SEVERE', 'message': 'http://localhost:8080/product/type/4/edit 563:16 "error"', 'source': 'console-api', 'timestamp': 1583952828410}
         """
-
         for entry in WebdriverOnlyNewLogFacade(self.driver).get_log("browser"):
             """
             Images are now working after https://github.com/DefectDojo/django-DefectDojo/pull/3954,
@@ -419,7 +418,7 @@ class BaseTestCase(unittest.TestCase):
             accepted_javascript_messages = r"(zoom\-in\.cur.*)404\ \(Not\ Found\)|Uncaught TypeError: Cannot read properties of null \(reading \'trigger\'\)|Uncaught TypeError: Cannot read properties of null \(reading \'innerHTML\'\)"
 
             if entry["level"] == "SEVERE":
-                # TODO actually this seems to be the previous url
+                # TODO: actually this seems to be the previous url
                 # self.driver.save_screenshot("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.png")
                 # with open("C:\\Data\\django-DefectDojo\\tests\\javascript-errors.html", "w") as f:
                 #    f.write(self.driver.page_source)

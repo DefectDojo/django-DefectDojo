@@ -10,6 +10,7 @@ from dojo.models import Endpoint, Finding
 
 
 class NexposeParser:
+
     """
     The objective of this class is to parse Nexpose's XML 2.0 Report.
 
@@ -141,9 +142,7 @@ class NexposeParser:
         return vulns
 
     def get_vuln_definitions(self, tree):
-        """
-        @returns vulns A dict of Vulnerability Definitions
-        """
+        """@returns vulns A dict of Vulnerability Definitions"""
         vulns = {}
         url_index = 0
         for vulnsDef in tree.findall("VulnerabilityDefinitions"):
@@ -287,7 +286,7 @@ class NexposeParser:
             for vuln in host["vulns"]:
                 dupe_key = vuln["severity"] + vuln["name"]
 
-                find = self.findings(dupe_key, dupes, test, vuln)
+                find = self.findings(dupe_key, dupes, vuln)
 
                 endpoint = Endpoint(host=host["name"])
                 find.unsaved_endpoints.append(endpoint)
@@ -298,7 +297,7 @@ class NexposeParser:
                 for vuln in service["vulns"]:
                     dupe_key = vuln["severity"] + vuln["name"]
 
-                    find = self.findings(dupe_key, dupes, test, vuln)
+                    find = self.findings(dupe_key, dupes, vuln)
 
                     endpoint = Endpoint(
                         host=host["name"],
@@ -318,7 +317,7 @@ class NexposeParser:
         return list(dupes.values())
 
     @staticmethod
-    def findings(dupe_key, dupes, test, vuln):
+    def findings(dupe_key, dupes, vuln):
         """ """
         if dupe_key in dupes:
             find = dupes[dupe_key]
@@ -335,7 +334,7 @@ class NexposeParser:
                 mitigation=html2text.html2text(vuln.get("resolution"))
                 if vuln.get("resolution")
                 else None,
-                impact=vuln.get("vector") if vuln.get("vector") else None,
+                impact=vuln.get("vector") or None,
                 false_p=False,
                 duplicate=False,
                 out_of_scope=False,

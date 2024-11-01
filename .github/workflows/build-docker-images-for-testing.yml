@@ -37,15 +37,15 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v6
         timeout-minutes: 10
+        env:
+          DOCKER_BUILD_CHECKS_ANNOTATIONS: false
         with:
           context: .
           push: false
           tags: defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
           file: Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}_img
-          cache-from: type=gha,scope=${{ matrix.docker-image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
-  
+
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
         timeout-minutes: 10

@@ -61,7 +61,7 @@ class TenableCSVParser:
         if val is None or val == "":
             return None
         cpe_match = re.findall(r"cpe:/[^\n\ ]+", val)
-        return cpe_match if cpe_match else None
+        return cpe_match or None
 
     def detect_delimiter(self, content: str):
         """Detect the delimiter of the CSV file"""
@@ -70,8 +70,7 @@ class TenableCSVParser:
         first_line = content.split("\n")[0]
         if ";" in first_line:
             return ";"
-        else:
-            return ","  # default to comma if no semicolon found
+        return ","  # default to comma if no semicolon found
 
     def get_findings(self, filename: str, test: Test):
         # Read the CSV
@@ -101,7 +100,7 @@ class TenableCSVParser:
             severity = self._convert_severity(raw_severity)
             # Other text fields
             description = row.get("Synopsis", row.get("definition.synopsis", "N/A"))
-            mitigation = str(row.get("Solution", row.get("definition.solution", "N/A")))
+            mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
             impact = row.get("Description", row.get("definition.description", "N/A"))
             references = row.get("See Also", row.get("definition.see_also", "N/A"))
             # Determine if the current row has already been processed
@@ -140,7 +139,7 @@ class TenableCSVParser:
                 # manage CPE data
                 detected_cpe = self._format_cpe(str(row.get("CPE", row.get("definition.cpe", ""))))
                 if detected_cpe:
-                    # FIXME support more than one CPE in Nessus CSV parser
+                    # TODO: support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
                         LOGGER.debug(
                             "more than one CPE for a finding. NOT supported by Nessus CSV parser",

@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class GitleaksParser:
-    """
-    A class that can be used to parse the Gitleaks JSON report files
-    """
+
+    """A class that can be used to parse the Gitleaks JSON report files"""
 
     def get_scan_types(self):
         return ["Gitleaks Scan"]
@@ -19,9 +18,7 @@ class GitleaksParser:
         return "Import Gitleaks Scan findings in JSON format."
 
     def get_findings(self, filename, test):
-        """
-        Converts a Gitleaks report to DefectDojo findings
-        """
+        """Converts a Gitleaks report to DefectDojo findings"""
         issues = json.load(filename)
         # empty report are just null object
         if issues is None:
@@ -61,10 +58,10 @@ class GitleaksParser:
         description += "**Reason:** " + reason + "\n"
         description += "**Path:** " + file_path + "\n"
         if "lineNumber" in issue:
-            description += "**Line:** %i\n" % issue["lineNumber"]
+            description += f"**Line:** {issue['lineNumber']}\n"
             line = issue["lineNumber"]
         if "operation" in issue:
-            description += "**Operation:** " + issue["operation"] + "\n"
+            description += f"**Operation:** {issue['operation']}\n"
         if "leakURL" in issue:
             description += (
                 "**Leak URL:** ["

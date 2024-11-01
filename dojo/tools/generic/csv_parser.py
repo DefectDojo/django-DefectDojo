@@ -53,7 +53,7 @@ class GenericCSVParser:
             if "CVE" in row and [row["CVE"]]:
                 finding.unsaved_vulnerability_ids = [row["CVE"]]
             # manage Vulnerability Id
-            if "Vulnerability Id" in row and row["Vulnerability Id"]:
+            if row.get("Vulnerability Id"):
                 if finding.unsaved_vulnerability_ids:
                     finding.unsaved_vulnerability_ids.append(
                         row["Vulnerability Id"],
@@ -105,5 +105,4 @@ class GenericCSVParser:
     def get_severity(self, input):
         if input in ["Info", "Low", "Medium", "High", "Critical"]:
             return input
-        else:
-            return "Info"
+        return "Info"

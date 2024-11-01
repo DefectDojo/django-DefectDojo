@@ -141,7 +141,7 @@ Create chart name and version as used by the chart label.
   imagePullPolicy: {{ .Values.imagePullPolicy }}
   {{- if .Values.securityContext.enabled }}
   securityContext:
-    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 4 }}
   {{- end }}
   envFrom:
   - configMapRef:
@@ -150,7 +150,7 @@ Create chart name and version as used by the chart label.
       name: {{ .fullName }}-extrasecrets
       optional: true
   env:
-  {{- if .Values.django.uwsgi.enable_debug }}
+  {{- if .Values.django.uwsgi.enableDebug }}
   - name: DD_DEBUG
     value: 'True'
   {{- end }}
@@ -165,8 +165,8 @@ Create chart name and version as used by the chart label.
           key: postgresql-postgres-password
         {{- end }}
   {{- if .Values.extraEnv }}
-  {{- toYaml .Values.extraEnv | nindent 8 }}
+  {{- toYaml .Values.extraEnv | nindent 2 }}
   {{- end }}
   resources:
-    {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
+    {{- toYaml .Values.dbMigrationChecker.resources | nindent 4 }}
 {{- end -}}

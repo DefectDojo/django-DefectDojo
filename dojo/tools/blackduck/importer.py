@@ -24,8 +24,7 @@ class BlackduckImporter(Importer):
 
         if zipfile.is_zipfile(str(report)):
             return self._process_zipfile(report)
-        else:
-            return self._process_csvfile(report)
+        return self._process_csvfile(report)
 
     def _process_csvfile(self, report):
         """
@@ -33,7 +32,7 @@ class BlackduckImporter(Importer):
         No file information then.
         """
         security_issues = {}
-        with open(str(report)) as f:
+        with open(str(report), encoding="utf-8") as f:
             security_issues = self.__partition_by_key(f)
 
         project_ids = set(security_issues.keys())
@@ -55,10 +54,10 @@ class BlackduckImporter(Importer):
                 # Backwards compatibility, newer versions of Blackduck have a source file rather
                 # than a "files" file.
                 if "source" in file_name or "files" in file_name:
-                    with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                    with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                         files = self.__partition_by_key(f)
                 elif "security" in file_name:
-                    with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                    with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                         security_issues = self.__partition_by_key(f)
 
         project_ids = set(files.keys()) & set(security_issues.keys())
@@ -69,9 +68,7 @@ class BlackduckImporter(Importer):
     def _process_project_findings(
         self, project_ids, security_issues, files=None,
     ):
-        """
-        Process findings per projects and return a BlackduckFinding object per the model
-        """
+        """Process findings per projects and return a BlackduckFinding object per the model"""
         for project_id in project_ids:
             locations = set()
             if files is not None:

@@ -5,6 +5,7 @@ from .importer import BlackduckCRImporter
 
 
 class BlackduckComponentRiskParser:
+
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv
@@ -86,7 +87,7 @@ class BlackduckComponentRiskParser:
                 title = "Review " + self.license_title(component)
                 description = self.license_description(component, source)
                 severity = self.license_severity(component)
-                mitigation = self.license_mitigation(component, False)
+                mitigation = self.license_mitigation(component, violation=False)
                 impact = "N/A"
                 references = self.license_references(component)
                 finding = Finding(
@@ -206,10 +207,9 @@ class BlackduckComponentRiskParser:
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        title = "Security Risk: {}:{}".format(
+        return "Security Risk: {}:{}".format(
             vulns[0]["Component name"], vulns[0]["Component version name"],
         )
-        return title
 
     def security_description(self, vulns):
         """
@@ -289,10 +289,9 @@ class BlackduckComponentRiskParser:
         :param vulns: Dictionary {component_version_identifier: [vulns]}
         :return:
         """
-        mit = "Update component {}:{} to a secure version".format(
+        return "Update component {}:{} to a secure version".format(
             vulns[0]["Component name"], vulns[0]["Component version name"],
         )
-        return mit
 
     def security_impact(self, vulns):
         """

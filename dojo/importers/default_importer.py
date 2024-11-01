@@ -37,12 +37,14 @@ class DefaultImporterOptions(ImporterOptions):
 
 
 class DefaultImporter(BaseImporter, DefaultImporterOptions):
+
     """
     The classic importer process used by DefectDojo
 
     This Importer is intended to be used when auditing the history
     of findings at a given point in time is required
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(
             self,
@@ -108,7 +110,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         new_findings = self.determine_process_method(self.parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
-        closed_findings = self.close_old_findings(self.test.finding_set.values(), **kwargs)
+        closed_findings = self.close_old_findings(self.test.finding_set.all(), **kwargs)
         # Update the timestamps of the test object by looking at the findings imported
         self.update_timestamps()
         # Update the test meta
@@ -155,9 +157,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("starting import of %i parsed findings.", len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
-        for unsaved_finding in parsed_findings:
+        for non_clean_unsaved_finding in parsed_findings:
             # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(unsaved_finding)
+            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
             # Filter on minimum severity if applicable
             if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
@@ -247,11 +249,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("REIMPORT_SCAN: Closing findings no longer present in scan report")
         # Close old active findings that are not reported by this scan.
         # Refactoring this to only call test.finding_set.values() once.
+        findings = findings.values()
         mitigated_hash_codes = []
         new_hash_codes = []
         for finding in findings:
             new_hash_codes.append(finding["hash_code"])
-            if getattr(finding, "is_mitigated", None):
+            if finding.get("is_mitigated", None):
                 mitigated_hash_codes.append(finding["hash_code"])
                 for hash_code in new_hash_codes:
                     if hash_code == finding["hash_code"]:
@@ -284,7 +287,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     "This finding has been automatically closed "
                     "as it is not present anymore in recent scans."
                 ),
-                self.findings_groups_enabled,
+                finding_groups_enabled=self.findings_groups_enabled,
             )
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
