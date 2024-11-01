@@ -20,8 +20,8 @@ dynamic content.
 
 ## Message Broker
 
-The application server sends tasks to a [Message Broker](https://docs.celeryproject.org/en/stable/getting-started/brokers/index.html)
-for asynchronous execution.
+The application server sends tasks to a [Message Broker](https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html#choosing-a-broker)
+for asynchronous execution. [RabbitMQ](https://www.rabbitmq.com/) is a well established choice.
 
 ## Celery Worker
 

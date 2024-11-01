@@ -14,7 +14,7 @@ See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo
 
 ### SaaS (Includes Support & Supports the Project)
 
-[SaaS link](https://www.defectdojo.com/pricing)
+[SaaS link](https://defectdojo.com/platform)
 
 ### AWS AMI (Supports the Project)
 
