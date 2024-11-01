@@ -5,11 +5,12 @@ import importlib
 import logging
 import mimetypes
 import os
+import pathlib
 import re
 from calendar import monthrange
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
-from typing import Callable, Optional
 
 import bleach
 import crum
@@ -2221,7 +2222,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
 
 def to_str_typed(obj):
-    """for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    """For code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
     return f"{type(obj)}: {obj}"
 
 
@@ -2586,7 +2587,7 @@ def get_open_findings_burndown(product):
     return past_90_days
 
 
-def get_custom_method(setting_name: str) -> Optional[Callable]:
+def get_custom_method(setting_name: str) -> Callable | None:
     """
     Attempts to load and return the method specified by fully-qualified name at the given setting.
 
@@ -2616,14 +2617,32 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
         raise TypeError(msg)
     # Determine the path of the file on disk within the MEDIA_ROOT
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
-    _, file_extension = os.path.splitext(file_path)
+
+    return generate_file_response_from_file_path(
+        file_path, file_name=file_object.title, file_size=file_object.file.size,
+    )
+
+
+def generate_file_response_from_file_path(
+    file_path: str, file_name: str | None = None, file_size: int | None = None,
+) -> FileResponse:
+    """Serve an local file in a uniformed way."""
+    # Determine the file path
+    file_path_without_extension, file_extension = os.path.splitext(file_path)
+    # Determine the file name if not supplied
+    if file_name is None:
+        file_name = file_path_without_extension.rsplit("/")[-1]
+    # Determine the file size if not supplied
+    if file_size is None:
+        file_size = pathlib.Path(file_path).stat().st_size
     # Generate the FileResponse
+    full_file_name = f"{file_name}{file_extension}"
     response = FileResponse(
         open(file_path, "rb"),
-        filename=f"{file_object.title}{file_extension}",
+        filename=full_file_name,
         content_type=f"{mimetypes.guess_type(file_path)}",
     )
     # Add some important headers
-    response["Content-Disposition"] = f'attachment; filename="{file_object.title}{file_extension}"'
-    response["Content-Length"] = file_object.file.size
+    response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
+    response["Content-Length"] = file_size
     return response

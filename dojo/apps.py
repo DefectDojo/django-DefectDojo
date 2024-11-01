@@ -98,5 +98,5 @@ def get_model_fields(default_fields, extra_fields=()):
 def get_model_default_fields(model):
     return tuple(
         field.name for field in model._meta.fields if
-        isinstance(field, (models.CharField, models.TextField))
+        isinstance(field, models.CharField | models.TextField)
     )
