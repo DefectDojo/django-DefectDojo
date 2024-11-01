@@ -18,7 +18,7 @@ See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo
 
 ### AWS AMI (Supports the Project)
 
-[Marketplace link](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk), and complete [walkthrough](https://www.10security.com/defectdojo-aws-launch-guide)
+[Marketplace link](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk), and complete [walkthrough](https://defectdojo.com/defectdojo-aws-launch-guide)
 
 ---
 ## **Options for the brave (not officially supported)**
