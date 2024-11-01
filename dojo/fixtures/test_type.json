@@ -47,12 +47,5 @@
         },
         "model": "dojo.test_type",
         "pk": 7
-    },
-    {
-        "fields": {
-            "name": "AWS Inspector2"
-        },
-        "model": "dojo.test_type",
-        "pk": 8
     }
 ]

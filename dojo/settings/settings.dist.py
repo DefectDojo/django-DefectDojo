@@ -1273,7 +1273,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
     "AppCheck Web Application Scanner": ["title", "severity"],
-    "AWS Inspector2 Scan": ["title"],
+    "AWS Inspector2 Scan": ["title", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
