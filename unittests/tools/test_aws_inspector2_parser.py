@@ -42,5 +42,5 @@ class TestAWSInspector2Parser(TestCase):
                 parser.get_findings(testfile, Test())
                 testfile.close()
                 self.assertTrue(
-                    "Incorrect Inspector2 report format" in str(context.exception)
+                    "Incorrect Inspector2 report format" in str(context.exception),
                 )
