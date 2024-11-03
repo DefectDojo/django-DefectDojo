@@ -19,7 +19,8 @@ X-DefectDojo-Event: scan_added_empty
 ## Event HTTP body
 ```json
 {
-    "description": null,
+    "description": "",
+    "title": "",
     "engagement": {
         "id": 7,
         "name": "notif eng",
