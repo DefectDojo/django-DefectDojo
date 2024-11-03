@@ -1,9 +1,6 @@
 
 # code: language=Dockerfile
 
-# The code for the build image should be identical with the code in
-# Dockerfile.nginx to use the caching mechanism of Docker.
-
 # Ref: https://devguide.python.org/#branchstatus
 FROM python:3.11.9-alpine3.20@sha256:df44c0c0761ddbd6388f4549cab42d24d64d257c2a960ad5b276bb7dab9639c7 AS base
 FROM base AS build
@@ -133,6 +130,53 @@ ENV \
   DD_UWSGI_NUM_OF_PROCESSES="2" \
   DD_UWSGI_NUM_OF_THREADS="2"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
+
+FROM node:20.11.0@sha256:7bf4a586b423aac858176b3f683e35f08575c84500fbcfd1d433ad8568972ec6 AS yarn
+
+WORKDIR /app
+
+# yarn already installed but we want to reproduce with exact version
+RUN npm -g --force i yarn@1.22.19
+
+COPY components/ ./components/
+RUN \
+  cd components && \
+  yarn
+
+FROM django-alpine AS collectstatic
+
+USER root
+
+COPY --from=yarn /app/components/ ./components/
+
+RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
+
+FROM nginx:1.27.2-alpine@sha256:2140dad235c130ac861018a4e13a6bc8aea3a35f3a40e20c1b060d51a7efd250 as nginx
+ARG uid=1001
+ARG appuser=defectdojo
+COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
+COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
+COPY docker/entrypoint-nginx.sh /
+RUN \
+  apk add --no-cache openssl && \
+  chmod -R g=u /var/cache/nginx && \
+  mkdir /var/run/defectdojo && \
+  chmod -R g=u /var/run/defectdojo && \
+  mkdir -p /etc/nginx/ssl && \
+  chmod -R g=u /etc/nginx && \
+  true
+ENV \
+  DD_UWSGI_PASS="uwsgi_server" \
+  DD_UWSGI_HOST="uwsgi" \
+  DD_UWSGI_PORT="3031" \
+  GENERATE_TLS_CERTIFICATE="false" \
+  USE_TLS="false" \
+  NGINX_METRICS_ENABLED="false" \
+  METRICS_HTTP_AUTH_USER="" \
+  METRICS_HTTP_AUTH_PASSWORD=""
+USER ${uid}
+EXPOSE 8080
+ENTRYPOINT ["/entrypoint-nginx.sh"]
 
 FROM django-alpine AS django-unittests
 COPY unittests/ ./unittests/
