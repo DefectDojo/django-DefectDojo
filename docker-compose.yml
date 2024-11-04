@@ -16,6 +16,8 @@ services:
       - uwsgi
     environment:
       NGINX_METRICS_ENABLED: "${NGINX_METRICS_ENABLED:-false}"
+      DD_UWSGI_HOST: "${DD_UWSGI_HOST:-uwsgi}"
+      DD_UWSGI_PORT: "${DD_UWSGI_PORT:-3031}"
     volumes:
       - defectdojo_media:/usr/share/nginx/html/media
     ports:
