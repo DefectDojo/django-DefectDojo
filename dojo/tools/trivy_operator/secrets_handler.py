@@ -42,6 +42,7 @@ class TrivySecretsHandler:
             secret_description += "\n**resource.kind:** " + resource_kind
             secret_description += "\n**resource.name:** " + resource_name
             secret_description += "\n**resource.namespace:** " + resource_namespace
+            secret_description += "\n**ruleID:** " + secret_rule_id
             finding = Finding(
                 test=test,
                 title=title,
