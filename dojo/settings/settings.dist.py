@@ -1738,6 +1738,8 @@ VULNERABILITY_URLS = {
     "ELSA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
     "ELBA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELBA-2024-7457.html
     "RXSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
+    "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
+    "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
