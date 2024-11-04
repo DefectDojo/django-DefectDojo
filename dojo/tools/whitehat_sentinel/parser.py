@@ -3,7 +3,6 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import List, Union
 
 from dojo.models import Endpoint, Finding
 
@@ -55,7 +54,7 @@ class WhiteHatSentinelParser:
 
     def _convert_whitehat_severity_id_to_dojo_severity(
         self, whitehat_severity_id: int,
-    ) -> Union[str, None]:
+    ) -> str | None:
         """
         Converts a WhiteHat Sentinel numerical severity to a DefectDojo severity.
         Args:
@@ -165,8 +164,8 @@ class WhiteHatSentinelParser:
         return re.sub(r"<p>|</p>", "", html_string)
 
     def _convert_attack_vectors_to_endpoints(
-        self, attack_vectors: List[dict],
-    ) -> List["Endpoint"]:
+        self, attack_vectors: list[dict],
+    ) -> list["Endpoint"]:
         """
         Takes a list of Attack Vectors dictionaries from the WhiteHat vuln API and converts them to Defect Dojo
         Endpoints

@@ -123,7 +123,7 @@ def add_external_issue_github(find, prod, eng):
     github_conf = github_pkey.git_conf
 
     # We push only active and verified issues
-    if "Active" in find.status() and "Verified" in find.status():
+    if "Active" in find.status() and ("Verified" in find.status() and get_system_setting("enforce_verified_status", True)):
         eng = Engagement.objects.get(test=find.test)
         prod = Product.objects.get(engagement=eng)
         github_product_key = GITHUB_PKey.objects.get(product=prod)

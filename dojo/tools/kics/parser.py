@@ -53,8 +53,7 @@ class KICSParser:
                     description += f"**Issue type:** {issue_type}\n"
                 if actual_value:
                     description += f"**Actual value:** {actual_value}\n"
-                if description.endswith("\n"):
-                    description = description[:-1]
+                description = description.removesuffix("\n")
 
                 dupe_key = hashlib.sha256(
                     (

@@ -102,6 +102,24 @@ class MendParser:
                         "Error handling local paths for vulnerability.",
                     )
 
+            locations = []
+            if "locations" in node:
+                try:
+                    locations_node = node.get("locations", [])
+                    for location in locations_node:
+                        path = location.get("path")
+                        if path is not None:
+                            locations.append(path)
+                except Exception:
+                    logger.exception(
+                        "Error handling local paths for vulnerability.",
+                    )
+
+            if locations:
+                filepaths = locations
+            else:
+                filepaths = filepaths
+
             new_finding = Finding(
                 title=title,
                 test=test,

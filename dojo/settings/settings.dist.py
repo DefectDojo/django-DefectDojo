@@ -1201,6 +1201,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Anchore Grype": ["title", "severity", "component_name", "component_version"],
     "Aqua Scan": ["severity", "vulnerability_ids", "component_name", "component_version"],
     "Bandit Scan": ["file_path", "line", "vuln_id_from_tool"],
+    "Burp Enterprise Scan": ["title", "severity", "cwe"],
     "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
     "Checkmarx Scan": ["cwe", "severity", "file_path"],
     "Checkmarx OSA": ["vulnerability_ids", "component_name"],
@@ -1283,6 +1284,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
     "AppCheck Web Application Scanner": ["title", "severity"],
+    "AWS Inspector2 Scan": ["title", "severity", "description"],
     "Legitify Scan": ["title", "endpoints", "severity"],
     "ThreatComposer Scan": ["title", "description"],
     "Invicti Scan": ["title", "description", "severity"],
@@ -1350,6 +1352,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Wazuh": True,
     "Nuclei Scan": True,
     "Threagile risks report": True,
+    "AWS Inspector2 Scan": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1401,6 +1404,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AWS Security Finding Format (ASFF) Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Burp REST API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Bandit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Burp Enterprise Scan": DEDUPE_ALGO_HASH_CODE,
     "CargoAudit Scan": DEDUPE_ALGO_HASH_CODE,
     "Checkmarx Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Checkmarx Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1510,10 +1514,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
     "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
+    "AWS Inspector2 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
     "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
     "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var
