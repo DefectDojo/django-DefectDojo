@@ -130,7 +130,7 @@ class VeracodeJSONParser:
                     finding.cvssv3 = CVSS3(str(uncleaned_cvss)).clean_vector(output_prefix=True)
                 elif not uncleaned_cvss.startswith("CVSS"):
                     finding.cvssv3 = CVSS3(f"CVSS:3.1/{str(uncleaned_cvss)}").clean_vector(output_prefix=True)
-            elif isinstance(uncleaned_cvss, (float, int)):
+            elif isinstance(uncleaned_cvss, float | int):
                 finding.cvssv3_score = float(uncleaned_cvss)
         # Fill in extra info based on the scan type
         if scan_type == "STATIC":

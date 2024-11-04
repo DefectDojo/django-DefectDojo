@@ -1,7 +1,6 @@
 import datetime
 import json
 import re
-from typing import List
 
 from dateutil import parser
 from django.conf import settings
@@ -40,7 +39,7 @@ class CheckmarxOneParser:
         self,
         test: Test,
         data: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         cwe_store = data.get("vulnerabilityDetails", [])
         # SAST
@@ -59,7 +58,7 @@ class CheckmarxOneParser:
         test: Test,
         results: list,
         cwe_store: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         for technology in results:
             # Set the name aside for use in the title
@@ -109,7 +108,7 @@ class CheckmarxOneParser:
         test: Test,
         results: list,
         cwe_store: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         # Not implemented yet
         return []
 
@@ -118,7 +117,7 @@ class CheckmarxOneParser:
         test: Test,
         results: list,
         cwe_store: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         def get_cwe_store_entry(cwe_store: list, cwe: int) -> dict:
             # Quick base case
             if cwe is None:
@@ -197,7 +196,7 @@ class CheckmarxOneParser:
         self,
         test: Test,
         results: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         for result in results:
             id = result.get("identifiers")[0].get("value")
@@ -233,7 +232,7 @@ class CheckmarxOneParser:
         self,
         test: Test,
         results: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         for vulnerability in results:
             result_type = vulnerability.get("type")
