@@ -20,7 +20,7 @@ class TestArachniParser(DojoTestCase):
             self.assertEqual("Cross-Site Scripting (XSS)", finding.title)
             self.assertEqual(79, finding.cwe)
             self.assertEqual("High", finding.severity)
-            self.assertEqual(datetime.datetime(2017, 11, 14, 2, 57, 29, tzinfo=datetime.timezone.utc), finding.date)
+            self.assertEqual(datetime.datetime(2017, 11, 14, 2, 57, 29, tzinfo=datetime.UTC), finding.date)
 
     def test_parser_has_many_finding(self):
         with open("unittests/scans/arachni/dd.com.afr.json", encoding="utf-8") as testfile:

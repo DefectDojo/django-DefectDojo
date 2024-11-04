@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, NamedTuple
+from typing import NamedTuple
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -81,7 +81,7 @@ class AcceptedFindingsMixin(ABC):
         return Response(status=201, data=result.data)
 
 
-def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, owner: User):
+def _accept_risks(accepted_risks: list[AcceptedRisk], base_findings: QuerySet, owner: User):
     accepted = []
     for risk in accepted_risks:
         vulnerability_ids = Vulnerability_Id.objects \

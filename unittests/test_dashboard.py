@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import List, Tuple
 from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
@@ -14,7 +13,7 @@ from .dojo_test_case import DojoTestCase
 User = get_user_model()
 
 
-def create(when: datetime, product_id: int, titles_and_severities: List[Tuple[str, str]]):
+def create(when: datetime, product_id: int, titles_and_severities: list[tuple[str, str]]):
     with patch("django.db.models.fields.timezone.now") as mock_now:
         mock_now.return_value = when
         engagement = Engagement.objects.create(product_id=product_id, target_start=when.date(), target_end=when.date())
@@ -25,7 +24,7 @@ def create(when: datetime, product_id: int, titles_and_severities: List[Tuple[st
         )
 
 
-def create_with_duplicates(when: datetime, product_id: int, titles_and_severities: List[Tuple[str, str]]):
+def create_with_duplicates(when: datetime, product_id: int, titles_and_severities: list[tuple[str, str]]):
     with patch("django.db.models.fields.timezone.now") as mock_now:
         mock_now.return_value = when
         engagement = Engagement.objects.create(product_id=product_id, target_start=when.date(), target_end=when.date())

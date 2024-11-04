@@ -297,10 +297,7 @@ def get_description(result, rule):
     if len(result.get("codeFlows", [])) > 0:
         description += get_codeFlowsDescription(result["codeFlows"])
 
-    if description.endswith("\n"):
-        description = description[:-1]
-
-    return description
+    return description.removesuffix("\n")
 
 
 def get_references(rule):
