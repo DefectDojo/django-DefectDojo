@@ -3,9 +3,11 @@ import re
 
 class UniformTrivyVulnID:
     def return_uniformed_vulnid(self, vulnid, test):
-        if "cve" in vulnid.lower():
+        if vulnid is None:
             return vulnid
-        if "khv" in vulnid.lower():
+        elif "cve" in vulnid.lower():
+            return vulnid
+        elif "khv" in vulnid.lower():
             temp = re.compile("([a-zA-Z-_]+)([0-9]+)")
             number = str(temp.match(vulnid).groups()[1]).zfill(3)
             avd_category = str(temp.match(vulnid.lower()).groups()[0])
