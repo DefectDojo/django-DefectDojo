@@ -25,7 +25,15 @@ class TrivyOperatorParser:
             data = json.loads(str(scan_data, "utf-8"))
         except Exception:
             data = json.loads(scan_data)
+        findings = []
+        if type(data) is list:
+            for listitems in data:
+                findings += self.output_findings(listitems, test)
+        else:
+            findings += self.output_findings(data, test)
+        return findings
 
+    def output_findings(self, data, test):
         if data is None:
             return []
         metadata = data.get("metadata", None)
@@ -40,24 +48,15 @@ class TrivyOperatorParser:
             benchmarkreport = benchmark.get("detailReport", None)
         findings = []
         if report is not None:
-            resource_namespace = labels.get(
-                "trivy-operator.resource.namespace", "",
-            )
-            resource_kind = labels.get("trivy-operator.resource.kind", "")
-            resource_name = labels.get("trivy-operator.resource.name", "")
-            container_name = labels.get("trivy-operator.container.name", "")
-            service = f"{resource_namespace}/{resource_kind}/{resource_name}"
-            if container_name != "":
-                service = f"{service}/{container_name}"
             vulnerabilities = report.get("vulnerabilities", None)
             if vulnerabilities is not None:
-                findings += TrivyVulnerabilityHandler().handle_vulns(service, vulnerabilities, test)
+                findings += TrivyVulnerabilityHandler().handle_vulns(labels, vulnerabilities, test)
             checks = report.get("checks", None)
             if checks is not None:
-                findings += TrivyChecksHandler().handle_checks(service, checks, test)
+                findings += TrivyChecksHandler().handle_checks(labels, checks, test)
             secrets = report.get("secrets", None)
             if secrets is not None:
-                findings += TrivySecretsHandler().handle_secrets(service, secrets, test)
+                findings += TrivySecretsHandler().handle_secrets(labels, secrets, test)
         elif benchmarkreport is not None:
             findings += TrivyComplianceHandler().handle_compliance(benchmarkreport, test)
         return findings

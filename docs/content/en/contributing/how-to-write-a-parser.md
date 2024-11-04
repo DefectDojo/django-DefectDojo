@@ -16,9 +16,9 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 - It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name`.
 
 It is easiest to use the docker compose deployment as it has hot-reload capbility for uWSGI.
-Set up your environment to use the debug environment:
+Set up your environment to use the dev environment:
 
-`$ docker/setEnv.sh debug`
+`$ docker/setEnv.sh dev`
 
 Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) for more details.
 
@@ -294,10 +294,22 @@ This local command will launch the unit test for your new parser
 $ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.<your_unittest_py_file>.<main_class_name> -v2'
 {{< /highlight >}}
 
+or like this:
+
+{{< highlight bash >}}
+$ ./dc-unittest.sh --test-case unittests.tools.<your_unittest_py_file>.<main_class_name>
+{{< /highlight >}}
+
 Example for the blackduck hub parser:
 
 {{< highlight bash >}}
 $ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
+{{< /highlight >}}
+
+or like this:
+
+{{< highlight bash >}}
+$ ./dc-unittest.sh --test-case unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser
 {{< /highlight >}}
 
 {{% alert title="Information" color="info" %}}

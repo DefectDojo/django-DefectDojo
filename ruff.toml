@@ -1,3 +1,6 @@
+# Always generate Python 3.11-compatible code.
+target-version = "py311"
+
 # Same as Black.
 line-length = 120
 
@@ -34,11 +37,11 @@ select = [
    "W",
    "C90",
    "I",
-   "D2", "D3",
+   "D2", "D3", "D403",
    "UP",
    "YTT",
    "ASYNC",
-   "S2", "S5", "S7",
+   "S2", "S5", "S7", "S101", "S112", "S311",
    "FBT001", "FBT003",
    "A003", "A004", "A006",
    "COM",
@@ -72,7 +75,6 @@ select = [
    "TRY003",
    "TRY004",
    "TRY2",
-   "TRY302",
    "FLY",
    "NPY",
    "FAST",
