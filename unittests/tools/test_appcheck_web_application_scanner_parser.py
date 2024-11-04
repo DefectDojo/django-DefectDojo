@@ -1,3 +1,5 @@
+import string
+
 from django.test import TestCase
 
 from dojo.models import Finding, Test
@@ -548,7 +550,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
         for test_string, expected in [
             ("", ""),
             (
-                "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c",
+                string.printable,
                 "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\\x0b\\x0c",
             ),
             ("'!Test String?'\"\"", "'!Test String?'\"\""),
