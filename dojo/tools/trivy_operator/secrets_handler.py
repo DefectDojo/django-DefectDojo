@@ -54,7 +54,5 @@ class TrivySecretsHandler:
                 service=service,
                 tags=[resource_namespace],
             )
-            if secret_rule_id:
-                finding.unsaved_vulnerability_ids = [secret_rule_id]
             findings.append(finding)
         return findings
