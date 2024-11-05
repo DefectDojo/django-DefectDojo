@@ -135,7 +135,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("3.6.13-2ubuntu1.10", finding.mitigation)
             self.assertEqual(5.9, finding.cvssv3_score)
             self.assertEqual("ubuntu:20.04 (ubuntu 20.04)", finding.file_path)
-            self.assertEqual("os-pkgs, ubuntu", str(finding.tags))
+            self.assertEqual("lbc, os-pkgs, ubuntu", str(finding.tags))
 
     def test_cis_benchmark(self):
         with open(sample_path("cis_benchmark.json"), encoding="utf-8") as test_file:
@@ -157,3 +157,9 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("AVD-KSV-0012", finding.unsaved_vulnerability_ids[0])
+
+    def test_findings_in_list(self):
+        with open(sample_path("findings_in_list.json"), encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 18)

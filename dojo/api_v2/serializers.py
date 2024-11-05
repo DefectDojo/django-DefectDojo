@@ -2257,6 +2257,13 @@ class CommonImportScanSerializer(serializers.Serializer):
             if context.get("scan_date")
             else None
         )
+
+        # engagement end date was not being used at all and so target_end would also turn into None
+        # in this case, do not want to change target_end unless engagement_end exists
+        eng_end_date = context.get("engagement_end_date", None)
+        if eng_end_date:
+            context["target_end"] = context.get("engagement_end_date")
+
         return context
 
 
