@@ -5,6 +5,7 @@ import re
 import shutil
 import sys
 import unittest
+from pathlib import Path
 
 import git
 from base_test_class import BaseTestCase
@@ -23,7 +24,7 @@ class ScannerTest(BaseTestCase):
         self.repo_path = dir_path + "/scans"
         if os.path.isdir(self.repo_path):
             shutil.rmtree(self.repo_path)
-        os.mkdir(self.repo_path)
+        Path(self.repo_path).mkdir()
         git.Repo.clone_from("https://github.com/DefectDojo/sample-scan-files", self.repo_path)
         self.remove_items = ["__init__.py", "__init__.pyc", "factory.py", "factory.pyc",
                         "factory.py", "LICENSE", "README.md", ".gitignore", ".git", "__pycache__"]
