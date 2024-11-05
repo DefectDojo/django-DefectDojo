@@ -84,11 +84,15 @@ class ReportBuilder(View):
 
     def get_endpoints(self, request: HttpRequest):
         endpoints = Endpoint.objects.filter(finding__active=True,
-                                            finding__verified=True,
                                             finding__false_p=False,
                                             finding__duplicate=False,
                                             finding__out_of_scope=False,
-                                            ).distinct()
+                                            )
+        if get_system_setting("enforce_verified_status", True):
+            endpoints = endpoints.filter(finding__active=True)
+
+        endpoints = endpoints.distinct()
+
         filter_string_matching = get_system_setting("filter_string_matching", False)
         filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
         return filter_class(request.GET, queryset=endpoints, user=request.user)
@@ -186,12 +190,14 @@ def report_findings(request):
 
 def report_endpoints(request):
     endpoints = Endpoint.objects.filter(finding__active=True,
-                                        finding__verified=True,
                                         finding__false_p=False,
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
-                                        ).distinct()
+                                        )
+    if get_system_setting("enforce_verified_status", True):
+        endpoints = endpoints.filter(finding__active=True)
 
+    endpoints = endpoints.distinct()
     endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
@@ -260,13 +266,15 @@ def endpoint_host_report(request, eid):
 @user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
-    endpoint_ids = Endpoint.objects.filter(product=product,
-                                           finding__active=True,
-                                           finding__verified=True,
-                                           finding__false_p=False,
-                                           finding__duplicate=False,
-                                           finding__out_of_scope=False,
-                                           ).values_list("id", flat=True)
+    endpoints = Endpoint.objects.filter(finding__active=True,
+                                         finding__false_p=False,
+                                         finding__duplicate=False,
+                                         finding__out_of_scope=False)
+
+    if get_system_setting("enforce_verified_status", True):
+        endpoint_ids = endpoints.filter(finding__active=True).values_list("id", flat=True)
+
+    endpoint_ids = endpoints.values_list("id", flat=True)
 
     endpoints = prefetch_related_endpoints_for_report(Endpoint.objects.filter(id__in=endpoint_ids))
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
