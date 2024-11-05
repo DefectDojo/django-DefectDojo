@@ -2,6 +2,7 @@ import json
 import logging
 
 import requests
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from dojo.models import Language_Type
@@ -22,7 +23,12 @@ class Command(BaseCommand):
         logger.info("Started importing languages from GitHub ...")
 
         try:
-            deserialized = json.loads(requests.get("https://raw.githubusercontent.com/ozh/github-colors/master/colors.json").text)
+            deserialized = json.loads(
+                requests.get(
+                    "https://raw.githubusercontent.com/ozh/github-colors/master/colors.json",
+                    timeout=settings.REQUESTS_TIMEOUT,
+                ).text,
+            )
         except:
             msg = "Invalid format"
             raise Exception(msg)
