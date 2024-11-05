@@ -6,6 +6,7 @@ import os
 import re
 import warnings
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, Optional, Set
 from uuid import uuid4
 
@@ -732,6 +733,24 @@ class FileUpload(models.Model):
             obj_type = "Finding"
 
         return f"access_file/{self.id}/{obj_id}/{obj_type}"
+
+    def clean(self):
+        if not self.title:
+            self.title = "<No Title>"
+
+        title = self.title
+        valid_extensions = settings.FILE_UPLOAD_TYPES
+
+        if Path(title).suffix.lower() not in valid_extensions:
+            if accepted_extensions := f"{', '.join(valid_extensions)}":
+                msg = (
+                    _("Unsupported extension. Supported extensions are as follows: %s") % accepted_extensions
+                )
+            else:
+                msg = (
+                    _("File uploads are prohibited due to the list of acceptable file extensions being empty")
+                )
+            raise ValidationError(msg)
 
 
 class Product_Type(models.Model):

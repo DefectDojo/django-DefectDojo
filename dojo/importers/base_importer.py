@@ -1,6 +1,5 @@
 import base64
 import logging
-from pathlib import Path
 from typing import List, Tuple
 
 from django.conf import settings
@@ -687,21 +686,6 @@ class BaseImporter(ImporterOptions):
             for unsaved_file in finding.unsaved_files:
                 data = base64.b64decode(unsaved_file.get("data"))
                 title = unsaved_file.get("title", "<No title>")
-                valid_extensions = settings.FILE_UPLOAD_TYPES
-
-                if Path(title).suffix not in valid_extensions:
-                    if accepted_extensions := f"{', '.join(valid_extensions)}":
-                        msg = (
-                            "Unsupported extension. Supported extensions are as "
-                            f"follows: {accepted_extensions}"
-                        )
-                    else:
-                        msg = (
-                            "File uploads are prohibited due to the list of acceptable "
-                            "file extensions being empty"
-                        )
-                    raise ValidationError(msg)
-
                 file_upload, _ = FileUpload.objects.get_or_create(title=title)
                 file_upload.file.save(title, ContentFile(data))
                 file_upload.save()
