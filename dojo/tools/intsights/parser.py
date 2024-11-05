@@ -27,6 +27,7 @@ class IntSightsParser:
         Args:
             alert: The parsed alert dictionary
         Returns: A markdown formatted description
+
         """
         return "\n".join(
             [

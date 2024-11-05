@@ -62,6 +62,7 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
         cvss_temporal:
     Returns:
         A CVSS3 Vector including both Base and Temporal if available
+
     """
     vector_pattern = r"^\d{1,2}.\d \((.*)\)"
     cvss_vector = "CVSS:3.0/"
