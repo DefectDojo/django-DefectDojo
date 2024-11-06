@@ -747,10 +747,9 @@ class FileUpload(models.Model):
         if not self.title:
             self.title = "<No Title>"
 
-        title = self.title
         valid_extensions = settings.FILE_UPLOAD_TYPES
 
-        if Path(title).suffix.lower() not in valid_extensions:
+        if Path(self.file.url).suffix.lower() not in valid_extensions:
             if accepted_extensions := f"{', '.join(valid_extensions)}":
                 msg = (
                     _("Unsupported extension. Supported extensions are as follows: %s") % accepted_extensions
