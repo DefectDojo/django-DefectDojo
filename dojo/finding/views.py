@@ -7,7 +7,6 @@ import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
 from itertools import chain
-from typing import Optional
 
 from django.conf import settings
 from django.contrib import messages
@@ -265,9 +264,9 @@ class BaseListFindings:
     def __init__(
         self,
         filter_name: str = "All",
-        product_id: Optional[int] = None,
-        engagement_id: Optional[int] = None,
-        test_id: Optional[int] = None,
+        product_id: int | None = None,
+        engagement_id: int | None = None,
+        test_id: int | None = None,
         order_by: str = "numerical_severity",
         prefetch_type: str = "all",
     ):
@@ -420,7 +419,7 @@ class ListFindings(View, BaseListFindings):
 
         return request, context
 
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         # Store the product and engagement ids
         self.product_id = product_id
         self.engagement_id = engagement_id
@@ -446,43 +445,43 @@ class ListFindings(View, BaseListFindings):
 
 
 class ListOpenFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Open"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListVerifiedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Verified"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListOutOfScopeFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Out of Scope"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListFalsePositiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "False Positive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListInactiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Inactive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListAcceptedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Accepted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListClosedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Closed"
         self.order_by = "-mitigated"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)

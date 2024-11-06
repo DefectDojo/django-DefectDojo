@@ -153,6 +153,13 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     kwargs.update({"user": user})
 
     notification_message = None
+
+    if (title := kwargs.get("title")) is not None:
+        kwargs.update({"title": title})
+
+    if kwargs.get("description") is None:
+        kwargs.update({"description": create_description(event, *args, **kwargs)})
+
     try:
         notification_message = render_to_string(template, kwargs)
         logger.debug("Rendering from the template %s", template)

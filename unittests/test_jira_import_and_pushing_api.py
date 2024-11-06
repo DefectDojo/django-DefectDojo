@@ -9,7 +9,7 @@ from vcr import VCR
 from dojo.jira_link import helper as jira_helper
 from dojo.models import Finding, Finding_Group, JIRA_Instance, User
 
-from .dojo_test_case import DojoVCRAPITestCase, get_unit_tests_path
+from .dojo_test_case import DojoVCRAPITestCase, get_unit_tests_path, toggle_system_setting_boolean
 
 logger = logging.getLogger(__name__)
 
@@ -553,6 +553,24 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # Assert that the tags match
         self.assertEqual(issue.fields.labels, tags_new)
 
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
+    def test_import_with_push_to_jira_not_verified_with_enforced_verified(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # This scan file has two active findings, so we should not push either of them
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    def test_import_with_push_to_jira_not_verified_without_enforced_verified(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # This scan file has two active findings, so we should not push both of them
+        self.assert_jira_issue_count_in_test(test_id, 2)
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 

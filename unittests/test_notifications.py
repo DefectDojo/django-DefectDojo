@@ -680,8 +680,10 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("product_type_added"):
             prod_type = Product_Type.objects.create(name="notif prod type")
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "product_type_added")
+            self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
-                "description": None,
+                "description": "Product Type notif prod type has been created successfully.",
+                "title": "notif prod type",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/product_types/{prod_type.pk}/",
                 "url_ui": f"http://localhost:8080/product/type/{prod_type.pk}",
@@ -696,8 +698,10 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("product_added"):
             prod = Product.objects.create(name="notif prod", prod_type=prod_type)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "product_added")
+            self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
-                "description": None,
+                "description": "Product notif prod has been created successfully.",
+                "title": "notif prod",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/products/{prod.pk}/",
                 "url_ui": f"http://localhost:8080/product/{prod.pk}",
@@ -718,8 +722,10 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("engagement_added"):
             eng = Engagement.objects.create(name="notif eng", product=prod, target_start=timezone.now(), target_end=timezone.now())
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "engagement_added")
+            self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
-                "description": None,
+                "description": "Event engagement_added has occurred.",
+                "title": "Engagement created for &quot;notif prod&quot;: notif eng",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/engagements/{eng.pk}/",
                 "url_ui": f"http://localhost:8080/engagement/{eng.pk}",
@@ -747,8 +753,10 @@ class TestNotificationWebhooks(DojoTestCase):
             test = Test.objects.create(title="notif test", engagement=eng, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
             notifications_helper.notify_test_created(test)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "test_added")
+            self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
-                "description": None,
+                "description": "Event test_added has occurred.",
+                "title": "Test created for notif prod: notif eng: notif test (Acunetix Scan)",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/tests/{test.pk}/",
                 "url_ui": f"http://localhost:8080/test/{test.pk}",
@@ -781,8 +789,10 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("scan_added_empty"):
             notifications_helper.notify_scan_added(test, updated_count=0)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added_empty")
+            self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
-                "description": None,
+                "description": "Event scan_added_empty has occurred.",
+                "title": "Created/Updated 0 findings for notif prod: notif eng: notif test (Acunetix Scan)",
                 "user": None,
                 "url_api": f"http://localhost:8080/api/v2/tests/{test.pk}/",
                 "url_ui": f"http://localhost:8080/test/{test.pk}",
