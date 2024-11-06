@@ -277,7 +277,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Same Eng Test 1").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="a total of 3 findings"))
@@ -288,7 +288,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Same Eng Test 2").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
+        driver.find_element(By.ID, "id_file").send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="a total of 3 findings"))
@@ -420,7 +420,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Immuniweb Test").click()
         driver.find_element(By.CSS_SELECTOR, "i.fa-solid.fa-ellipsis-vertical").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan Results").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
+        driver.find_element(By.ID, "id_file").send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="a total of 3 findings"))
@@ -431,7 +431,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element(By.PARTIAL_LINK_TEXT, "Generic Test").click()
         driver.find_element(By.CSS_SELECTOR, "i.fa-solid.fa-ellipsis-vertical").click()
         driver.find_element(By.LINK_TEXT, "Re-Upload Scan Results").click()
-        driver.find_element(By.ID, "id_file").send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
+        driver.find_element(By.ID, "id_file").send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv"))
         driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
 
         self.assertTrue(self.is_success_message_present(text="a total of 3 findings"))
