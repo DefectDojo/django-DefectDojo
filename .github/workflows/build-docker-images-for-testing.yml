@@ -51,6 +51,6 @@ jobs:
         timeout-minutes: 10
         uses:  actions/upload-artifact@v4
         with:
-          name: built-docker-image-${{ matrix.docker-image }}
+          name: built-docker-image-${{ matrix.docker-image }}-${{ matrix.os }}
           path: ${{ matrix.docker-image }}-${{ matrix.os }}_img
           retention-days: 1
