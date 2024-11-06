@@ -2995,7 +2995,7 @@
       "user_mentioned": "alert",
       "code_review": "alert",
       "review_requested": "alert",
-      "other": "alert",
+      "other": "",
       "sla_breach": "alert",
       "risk_acceptance_expiration": "alert",
       "sla_breach_combined": "alert"
