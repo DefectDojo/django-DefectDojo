@@ -17,6 +17,7 @@ import os
 import warnings
 from datetime import timedelta
 from email.utils import getaddresses
+from pathlib import Path
 
 import environ
 from celery.schedules import crontab
@@ -444,7 +445,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(os.path.dirname(DOJO_ROOT), "components", "node_modules"),
+    os.path.join(Path(DOJO_ROOT).parent, "components", "node_modules"),
 )
 
 # List of finder classes that know how to find static files in
@@ -937,7 +938,7 @@ if SAML2_ENABLED:
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env("DD_SAML2_ATTRIBUTES_MAP"))
     SAML_FORCE_AUTH = env("DD_SAML2_FORCE_AUTH")
     SAML_ALLOW_UNKNOWN_ATTRIBUTES = env("DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE")
-    BASEDIR = path.dirname(path.abspath(__file__))
+    BASEDIR = Path(path.abspath(__file__)).parent
     if len(env("DD_SAML2_ENTITY_ID")) == 0:
         SAML2_ENTITY_ID = f"{SITE_URL}/saml2/metadata/"
     else:

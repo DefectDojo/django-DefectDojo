@@ -1,4 +1,5 @@
 from os import path
+from pathlib import Path
 
 from dojo.models import Test
 from dojo.tools.burp_enterprise.parser import BurpEnterpriseParser
@@ -8,7 +9,7 @@ from unittests.dojo_test_case import DojoTestCase
 class TestBurpEnterpriseParser(DojoTestCase):
 
     def test_burp_enterprise_with_multiple_vulns(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp_enterprise/many_vulns.html"), encoding="utf-8") as test_file:
+        with open(path.join(Path(__file__).parent, "../scans/burp_enterprise/many_vulns.html"), encoding="utf-8") as test_file:
             parser = BurpEnterpriseParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
