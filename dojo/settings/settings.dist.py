@@ -308,7 +308,7 @@ env = environ.FileAwareEnv(
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
-    DD_REQUESTS_TIMEOUT=(int, 5),
+    DD_REQUESTS_TIMEOUT=(int, 30),
 )
 
 
