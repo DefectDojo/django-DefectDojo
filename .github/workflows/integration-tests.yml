@@ -54,8 +54,8 @@ jobs:
       - name: Load docker images
         timeout-minutes: 10
         run: |-
-             docker load -i nginx/nginx-${{ matrix.os }}_img
-             docker load -i django/django-${{ matrix.os }}_img
+             docker load -i nginx-${{ matrix.os }}_img
+             docker load -i django-${{ matrix.os }}_img
              docker load -i integration-tests/integration-tests-debian_img
              docker images
 
