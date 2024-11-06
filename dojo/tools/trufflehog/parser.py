@@ -131,10 +131,16 @@ class TruffleHogParser:
             verified = json_data.get("Verified", "")
             raw = json_data.get("Raw", "")
             rawV2 = json_data.get("RawV2", "")
+            references = "N.A"
 
-            titleText = f"Hard Coded {detector_name} secret in: {file}"
+            if "exposure" in raw:
+                titleText = f"Misconfiguration in file {file} can produce a credential leaks"
+                mitigation = "Make sure you only enable the Spring Boot Actuator endpoints that you really need and restrict access to these endpoints."
+                references = "https://discuss.apps.bancolombia.com/t/nueva-validacion-engine-secret/11246"
+            else:
+                titleText = f"Hard Coded {detector_name} secret in: {file}"
+                mitigation = "Secrets and passwords should be stored in a secure vault and/or secure storage."
 
-            mitigation = "Secrets and passwords should be stored in a secure vault and/or secure storage."
             if link:
                 mitigation = f"{mitigation}\nSee the commit here: {link}"
 
@@ -188,7 +194,7 @@ class TruffleHogParser:
                     severity=severity,
                     mitigation=mitigation,
                     impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
-                    references="N/A",
+                    references=references,
                     file_path=file,
                     line=line_number,  # setting it to a fake value to activate deduplication
                     url="N/A",
