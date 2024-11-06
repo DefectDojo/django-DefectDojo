@@ -45,7 +45,11 @@ jobs:
 
       # load docker images from build jobs
       - name: Load images from artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
+        with:
+          path: built-docker-image
+          pattern: built-docker-image-*
+          merge-multiple: true
 
       - name: Load docker images
         timeout-minutes: 10
