@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_unit_tests_path():
-    return Path(os.path.realpath(__file__)).parent
+    return str(Path(os.path.realpath(__file__)).parent)
 
 
 def toggle_system_setting_boolean(flag_name, value):
