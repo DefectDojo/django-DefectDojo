@@ -29,8 +29,8 @@ jobs:
       - name: Load docker images
         timeout-minutes: 10
         run: |-
-             docker load -i nginx-${{ matrix.os }}_img
-             docker load -i django-${{ matrix.os }}_img
+             docker load -i built-docker-image/nginx-${{ matrix.os }}_img
+             docker load -i built-docker-image/django-${{ matrix.os }}_img
              docker images
 
       # run tests with docker compose
