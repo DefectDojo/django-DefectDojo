@@ -7,7 +7,6 @@ import re
 import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional, Set
 from uuid import uuid4
 
 import hyperlink
@@ -749,7 +748,12 @@ class FileUpload(models.Model):
 
         valid_extensions = settings.FILE_UPLOAD_TYPES
 
-        if Path(self.file.url).suffix.lower() not in valid_extensions:
+        # why does this not work with self.file....
+        if self.file:
+            file_name = self.file.url
+        else:
+            file_name = self.title
+        if Path(file_name).suffix.lower() not in valid_extensions:
             if accepted_extensions := f"{', '.join(valid_extensions)}":
                 msg = (
                     _("Unsupported extension. Supported extensions are as follows: %s") % accepted_extensions
