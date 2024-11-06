@@ -27,6 +27,16 @@ class AsffParser:
     def get_description_for_scan_types(self, scan_type):
         return """AWS Security Finding Format (ASFF).
         https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
+    
+    def get_item_resource_arns(self, item):
+        resource_arns = []
+        if isinstance(item.get("Resources"), list):
+            for resource_block in item["Resources"]:
+                if isinstance(resource_block, dict):
+                    resource_id = resource_block.get("Id")
+                    if resource_id:
+                        resource_arns.append(resource_id)
+        return resource_arns
 
     def get_resource_arn(self, item):
         resource_arn = ""
