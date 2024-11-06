@@ -10,12 +10,13 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
-import dojo.notifications.helper as notifications_helper
 from dojo import __version__ as dd_version
+from dojo.importers.base_importer import BaseImporter
 from dojo.models import (
     DEFAULT_NOTIFICATION,
     Alerts,
     Dojo_User,
+    Development_Environment,
     Endpoint,
     Engagement,
     Finding,
@@ -31,10 +32,8 @@ from dojo.models import (
     get_current_datetime,
 )
 from dojo.notifications.helper import (
+    NotificationManager,
     create_notification,
-    send_alert_notification,
-    send_webhooks_notification,
-    webhook_reactivation,
     webhook_status_cleanup,
 )
 
@@ -90,7 +89,7 @@ class TestNotifications(DojoTestCase):
         self.assertEqual(len(merged_notifications.other), 3)
         self.assertEqual(merged_notifications.other, {"alert", "mail", "slack"})
 
-    @patch("dojo.notifications.helper.send_alert_notification", wraps=send_alert_notification)
+    @patch("dojo.notifications.helper.NotificationManager.send_alert_notification", wraps=NotificationManager.send_alert_notification)
     def test_notifications_system_level_trump(self, mock):
         notif_user, _ = Notifications.objects.get_or_create(user=User.objects.get(username="admin"))
         notif_system, _ = Notifications.objects.get_or_create(user=None, template=False)
@@ -133,7 +132,7 @@ class TestNotifications(DojoTestCase):
             self.assertEqual(mock.call_count, last_count + 1)
         last_count = mock.call_count
 
-    @patch("dojo.notifications.helper.send_alert_notification", wraps=send_alert_notification)
+    @patch("dojo.notifications.helper.NotificationManager.send_alert_notification", wraps=NotificationManager.send_alert_notification)
     def test_non_default_other_notifications(self, mock):
         notif_user, _ = Notifications.objects.get_or_create(user=User.objects.get(username="admin"))
         notif_system, _ = Notifications.objects.get_or_create(user=None, template=False)
@@ -199,7 +198,7 @@ class TestNotificationTriggers(DojoTestCase):
     def setUp(self):
         self.notification_tester = Dojo_User.objects.get(username="admin")
 
-    @patch("dojo.notifications.helper.process_notifications")
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     def test_product_types(self, mock):
 
         last_count = mock.call_count
@@ -219,7 +218,7 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type" was deleted by admin')
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], "/product/type")
 
-    @patch("dojo.notifications.helper.process_notifications")
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     def test_products(self, mock):
 
         last_count = mock.call_count
@@ -240,7 +239,7 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product "prod name" was deleted by admin')
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], "/product")
 
-    @patch("dojo.notifications.helper.process_notifications")
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     def test_engagements(self, mock):
 
         last_count = mock.call_count
@@ -300,7 +299,7 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The engagement "Testing engagement" was deleted by admin')
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/product/{prod2.id}")
 
-    @patch("dojo.notifications.helper.process_notifications")
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     def test_endpoints(self, mock):
         prod_type = Product_Type.objects.first()
         prod1, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name 1")
@@ -323,7 +322,7 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The endpoint "host2" was deleted by admin')
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], "/endpoint")
 
-    @patch("dojo.notifications.helper.process_notifications")
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     def test_tests(self, mock):
         prod_type = Product_Type.objects.first()
         prod, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name")
@@ -347,7 +346,7 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The test "Acunetix Scan" was deleted by admin')
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/engagement/{eng2.id}")
 
-    @patch("dojo.notifications.helper.process_notifications")
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     def test_finding_groups(self, mock):
         prod_type = Product_Type.objects.first()
         prod, _ = Product.objects.get_or_create(prod_type=prod_type, name="prod name")
@@ -372,7 +371,7 @@ class TestNotificationTriggers(DojoTestCase):
             self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The finding group "fg test" was deleted by admin')
             self.assertEqual(mock.call_args_list[-1].kwargs["url"], f"/test/{test2.id}")
 
-    @patch("dojo.notifications.helper.process_notifications")
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     @override_settings(ENABLE_AUDITLOG=True)
     def test_auditlog_on(self, mock):
         prod_type = Product_Type.objects.create(name="notif prod type")
@@ -380,7 +379,7 @@ class TestNotificationTriggers(DojoTestCase):
             prod_type.delete()
         self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type" was deleted by admin')
 
-    @patch("dojo.notifications.helper.process_notifications")
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     @override_settings(ENABLE_AUDITLOG=False)
     def test_auditlog_off(self, mock):
         prod_type = Product_Type.objects.create(name="notif prod type")
@@ -397,7 +396,7 @@ class TestNotificationTriggersApi(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
-    @patch("dojo.notifications.helper.process_notifications")
+    @patch("dojo.notifications.helper.NotificationManager._process_notifications")
     @override_settings(ENABLE_AUDITLOG=True)
     def test_auditlog_on(self, mock):
         prod_type = Product_Type.objects.create(name="notif prod type API")
@@ -427,26 +426,30 @@ class TestNotificationWebhooks(DojoTestCase):
         # test data contains 2 entries but we need to test missing definition
         Notification_Webhooks.objects.all().delete()
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
-            send_webhooks_notification(event="dummy")
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy")
         self.assertIn("URLs for Webhooks not configured: skipping system notification", cm.output[0])
 
     def test_missing_personal_webhook(self):
         # test data contains 2 entries but we need to test missing definition
         Notification_Webhooks.objects.all().delete()
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
-            send_webhooks_notification(event="dummy", user=Dojo_User.objects.get(username="admin"))
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy", user=Dojo_User.objects.get(username="admin"))
         self.assertIn("URLs for Webhooks not configured for user '(admin)': skipping user notification", cm.output[0])
 
     def test_system_webhook_inactive(self):
         self.sys_wh.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
         self.sys_wh.save()
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
-            send_webhooks_notification(event="dummy")
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy")
         self.assertIn("URL for Webhook 'My webhook endpoint' is not active: Permanently inactive (inactive_permanent)", cm.output[0])
 
     def test_system_webhook_sucessful(self):
         with self.assertLogs("dojo.notifications.helper", level="DEBUG") as cm:
-            send_webhooks_notification(event="dummy")
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy")
         self.assertIn("Message sent to endpoint 'My webhook endpoint' successfully.", cm.output[-1])
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
@@ -459,7 +462,8 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            send_webhooks_notification(event="dummy", title="Dummy event")
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy", title="Dummy event")
         self.assertIn("Error when sending message to Webhooks 'My webhook endpoint' (status: 400)", cm.output[-1])
 
         updated_wh = Notification_Webhooks.objects.all().filter(owner=None).first()
@@ -472,7 +476,8 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            send_webhooks_notification(event="dummy", title="Dummy event")
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_TMP)
@@ -490,7 +495,8 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            send_webhooks_notification(event="dummy", title="Dummy event")
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_TMP)
@@ -510,7 +516,8 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            send_webhooks_notification(event="dummy", title="Dummy event")
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT)
@@ -522,7 +529,8 @@ class TestNotificationWebhooks(DojoTestCase):
     def test_webhook_reactivation(self):
         with self.subTest("active"):
             wh = Notification_Webhooks.objects.filter(owner=None).first()
-            webhook_reactivation(endpoint_id=wh.pk)
+            manager = NotificationManager()
+            manager._webhook_reactivation(endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
             self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE)
@@ -540,7 +548,8 @@ class TestNotificationWebhooks(DojoTestCase):
             wh.save()
 
             with self.assertLogs("dojo.notifications.helper", level="DEBUG") as cm:
-                webhook_reactivation(endpoint_id=wh.pk)
+                manager = NotificationManager()
+                manager._webhook_reactivation(endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
             self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE_TMP)
@@ -640,7 +649,8 @@ class TestNotificationWebhooks(DojoTestCase):
         system_settings.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            send_webhooks_notification(event="dummy", title="Dummy event")
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_TMP)
@@ -655,7 +665,8 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            send_webhooks_notification(event="dummy", title="Dummy event")
+            manager = NotificationManager()
+            manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
         self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT)
@@ -751,7 +762,15 @@ class TestNotificationWebhooks(DojoTestCase):
 
         with self.subTest("test_added"):
             test = Test.objects.create(title="notif test", engagement=eng, target_start=timezone.now(), target_end=timezone.now(), test_type_id=Test_Type.objects.first().id)
-            notifications_helper.notify_test_created(test)
+            create_notification(
+                event="test_added",
+                title=f"Test created for {test.engagement.product}: {test.engagement.name}: {test}",
+                test=test,
+                engagement=test.engagement,
+                product=test.engagement.product,
+                url=reverse("view_test", args=(test.id,)),
+                url_api=reverse("test-detail", args=(test.id,)),
+            )
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "test_added")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
@@ -787,7 +806,10 @@ class TestNotificationWebhooks(DojoTestCase):
             })
 
         with self.subTest("scan_added_empty"):
-            notifications_helper.notify_scan_added(test, updated_count=0)
+            BaseImporter(
+                environment=Development_Environment.objects.get_or_create(name="Development")[0],
+                scan_type="ZAP Scan",
+            ).notify_scan_added(test, updated_count=0)
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "scan_added_empty")
             self.maxDiff = None
             self.assertEqual(mock.call_args.kwargs["json"], {
@@ -830,7 +852,11 @@ class TestNotificationWebhooks(DojoTestCase):
             })
 
         with self.subTest("scan_added"):
-            notifications_helper.notify_scan_added(test,
+            BaseImporter(
+                environment=Development_Environment.objects.get_or_create(name="Development")[0],
+                scan_type="ZAP Scan",
+            ).notify_scan_added(
+                test,
                 updated_count=4,
                 new_findings=[
                     Finding.objects.create(test=test, title="New Finding", severity="Critical"),

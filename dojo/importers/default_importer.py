@@ -3,10 +3,10 @@ import logging
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import deserialize, serialize
 from django.db.models.query_utils import Q
+from django.urls import reverse
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-import dojo.notifications.helper as notifications_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -15,6 +15,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -126,9 +127,17 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         )
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
-        notifications_helper.notify_test_created(self.test)
+        create_notification(
+            event="test_added",
+            title=f"Test created for {self.test.engagement.product}: {self.test.engagement.name}: {self.test}",
+            test=self.test,
+            engagement=self.test.engagement,
+            product=self.test.engagement.product,
+            url=reverse("view_test", args=(self.test.id,)),
+            url_api=reverse("test-detail", args=(self.test.id,)),
+        )
         updated_count = len(new_findings) + len(closed_findings)
-        notifications_helper.notify_scan_added(
+        self.notify_scan_added(
             self.test,
             updated_count,
             new_findings=new_findings,

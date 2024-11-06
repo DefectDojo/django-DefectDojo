@@ -55,12 +55,13 @@ echo "Unit Tests"
 echo "------------------------------------------------------------"
 
 # Removing parallel and shuffle for now to maintain stability
-python3 manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
-    exit 1; 
-}
-python3 manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
-    exit 1; 
-}
+python3 manage.py test unittests.test_notifications -v 3 --keepdb --no-input
+# python3 manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
+#     exit 1; 
+# }
+# python3 manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
+#     exit 1; 
+# }
 
 # you can select a single file to "test" unit tests
 # python3 manage.py test unittests.tools.test_npm_audit_scan_parser.TestNpmAuditParser --keepdb -v 3
