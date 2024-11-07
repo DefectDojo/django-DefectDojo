@@ -1516,13 +1516,16 @@ class FindingViewSet(
 class ComponentViewSet(viewsets.ModelViewSet):
     queryset = Component.objects.none()
     serializer_class = serializers.ComponentSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name', 'version', 'date', 'engagement_id']  # Campos disponibles para filtrar
 
     def get_queryset(self):
+        queryset = Component.objects.all()
         engagement_id = self.request.GET.get('engagement_id')
         if engagement_id:
-            return Component.objects.filter(engagement_id=engagement_id)
-        return Component.objects.all()
-    
+            queryset = queryset.filter(engagement_id=engagement_id)
+        return queryset
+
     def perform_create(self, serializer):
         serializer.save()
 

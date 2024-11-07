@@ -2295,6 +2295,7 @@ class Component(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
 
     class Meta:
+        unique_together = ("name", "version", "engagement")
         ordering = ("-date", "name")
 
     def __str__(self):
