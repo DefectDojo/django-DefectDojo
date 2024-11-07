@@ -96,7 +96,7 @@ class AcunetixJSONParser:
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
             if item.get("FirstSeenDate"):
-                parseddate = parser.parse(item["FirstSeenDate"])
+                parseddate = parser.parse(item["FirstSeenDate"], dayfirst=True)
                 finding.date = parseddate
             if dupe_key in dupes:
                 find = dupes[dupe_key]
