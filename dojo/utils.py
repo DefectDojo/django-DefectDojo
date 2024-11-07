@@ -11,6 +11,7 @@ from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+from pathlib import Path
 
 import bleach
 import crum
@@ -88,6 +89,7 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     Args:
         finding (:model:`dojo.Finding`): Finding to be replicated
+
     """
     to_mark_as_fp = set()
 
@@ -149,6 +151,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         product (:model:`dojo.Product`, optional): Product to filter findings by
         engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
         test (:model:`dojo.Test`, optional): Test to filter findings by
+
     """
     if product:
         custom_filter_type = "product"
@@ -1382,7 +1385,7 @@ def handle_uploaded_threat(f, eng):
     # Check if threat folder exist.
     if not os.path.isdir(settings.MEDIA_ROOT + "/threat/"):
         # Create the folder
-        os.mkdir(settings.MEDIA_ROOT + "/threat/")
+        Path(settings.MEDIA_ROOT + "/threat/").mkdir()
     with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
               "wb+") as destination:
         for chunk in f.chunks():
