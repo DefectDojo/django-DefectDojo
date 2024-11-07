@@ -130,12 +130,10 @@ class MSDefenderParser:
             finding.unsaved_vulnerability_ids.append(vulnerability["cveId"])
         self.findings.append(finding)
         finding.unsaved_endpoints = []
-        if machine["computerDnsName"] is not None:
-            finding.unsaved_endpoints.append(Endpoint(host=str(machine["computerDnsName"]).replace(" ","")))
         if machine["lastIpAddress"] is not None:
-            finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastIpAddress"])))
+            finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastIpAddress"]), userinfo=str(machine["computerDnsName"]).replace(" ","")))
         if machine["lastExternalIpAddress"] is not None:
-            finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastExternalIpAddress"])))
+            finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastExternalIpAddress"]), userinfo=str(machine["computerDnsName"]).replace(" ","")))
 
     def severity_check(self, input):
         if input in ["Informational", "Low", "Medium", "High", "Critical"]:
