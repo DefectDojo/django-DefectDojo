@@ -1,6 +1,6 @@
+import datetime
 import hashlib
 import json
-import datetime
 
 from dojo.models import Endpoint, Finding
 
