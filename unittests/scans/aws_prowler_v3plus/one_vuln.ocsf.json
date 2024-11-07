@@ -67,7 +67,7 @@
         "provider": "aws",
         "region": "us-east-1"
     },
-    "event_time": "2024-06-03T14:15:19.382075",
+    "time_dt": "2024-06-03T14:15:19.382075",
     "remediation": {
         "desc": "Apply the principle of least privilege. Instead of AdministratorAccess, assign only the permissions necessary for specific roles and tasks. Create custom IAM policies with minimal permissions based on the principle of least privilege. If a role really needs AdministratorAccess, the trust relationship must be well defined to restrict it usage only to the Principal, Action, Audience and Subject intended for it.",
         "references": [
