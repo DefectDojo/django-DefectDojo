@@ -15,7 +15,7 @@ class AcunetixJSONParser:
         dupes = {}
         data = json.load(filename)
         dupes = {}
-        scan_date = parser.parse(data["Generated"])
+        scan_date = parser.parse(data["Generated"], dayfirst=True)
         text_maker = html2text.HTML2Text()
         text_maker.body_width = 0
         for item in data["Vulnerabilities"]:
