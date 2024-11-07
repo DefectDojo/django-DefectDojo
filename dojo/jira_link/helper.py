@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import os
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -145,9 +146,11 @@ def can_be_pushed_to_jira(obj, form=None):
 
         logger.debug("can_be_pushed_to_jira: %s, %s, %s", active, verified, severity)
 
-        if not active or not verified:
-            logger.debug("Findings must be active and verified to be pushed to JIRA")
-            return False, "Findings must be active and verified to be pushed to JIRA", "not_active_or_verified"
+        isenforced = get_system_setting("enforce_verified_status", True)
+
+        if not active or (not verified and isenforced):
+            logger.debug("Findings must be active and verified, if enforced by system settings, to be pushed to JIRA")
+            return False, "Findings must be active and verified, if enforced by system settings, to be pushed to JIRA", "not_active_or_verified"
 
         jira_minimum_threshold = None
         if System_Settings.objects.get().jira_minimum_severity:
@@ -1185,7 +1188,7 @@ def is_jira_project_valid(jira_project):
 def jira_attachment(finding, jira, issue, file, jira_filename=None):
     basename = file
     if jira_filename is None:
-        basename = os.path.basename(file)
+        basename = Path(file).name
 
     # Check to see if the file has been uploaded to Jira
     # TODO: JIRA: check for local existince of attachment as it currently crashes if local attachment doesn't exist

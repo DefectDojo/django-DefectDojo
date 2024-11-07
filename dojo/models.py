@@ -6,6 +6,7 @@ import os
 import re
 import warnings
 from datetime import datetime
+from pathlib import Path
 from uuid import uuid4
 
 import hyperlink
@@ -357,6 +358,15 @@ class System_Settings(models.Model):
                             blank=False)
     webhooks_notifications_timeout = models.IntegerField(default=10,
                                           help_text=_("How many seconds will DefectDojo waits for response from webhook endpoint"))
+
+    enforce_verified_status = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status"),
+        help_text=_("When enabled, features such as product grading, jira "
+                    "integration, metrics, and reports will only interact "
+                    "with verified findings.",
+        ),
+    )
 
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
@@ -1195,42 +1205,24 @@ class Product(models.Model):
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
             return {}
-        critical = Finding.objects.filter(test__engagement__product=self,
-                                          mitigated__isnull=True,
-                                          verified=True,
-                                          false_p=False,
-                                          duplicate=False,
-                                          out_of_scope=False,
-                                          severity="Critical",
-                                          date__range=[start_date,
-                                                       end_date]).count()
-        high = Finding.objects.filter(test__engagement__product=self,
-                                      mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      severity="High",
-                                      date__range=[start_date,
-                                                   end_date]).count()
-        medium = Finding.objects.filter(test__engagement__product=self,
+
+        from dojo.utils import get_system_setting
+        findings = Finding.objects.filter(test__engagement__product=self,
                                         mitigated__isnull=True,
-                                        verified=True,
                                         false_p=False,
                                         duplicate=False,
                                         out_of_scope=False,
-                                        severity="Medium",
                                         date__range=[start_date,
-                                                     end_date]).count()
-        low = Finding.objects.filter(test__engagement__product=self,
-                                     mitigated__isnull=True,
-                                     verified=True,
-                                     false_p=False,
-                                     duplicate=False,
-                                     out_of_scope=False,
-                                     severity="Low",
-                                     date__range=[start_date,
-                                                  end_date]).count()
+                                                    end_date])
+
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True)
+
+        critical = findings.filter(severity="Critical").count()
+        high = findings.filter(severity="High").count()
+        medium = findings.filter(severity="Medium").count()
+        low = findings.filter(severity="Low").count()
+
         return {"Critical": critical,
                 "High": high,
                 "Medium": medium,
@@ -1543,7 +1535,13 @@ class Engagement(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test__engagement=self)
+        from dojo.utils import get_system_setting
+
+        findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True)
+
+        return findings
 
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
@@ -2113,7 +2111,12 @@ class Test(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test=self)
+        from dojo.utils import get_system_setting
+        findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True)
+
+        return findings
 
     def accept_risks(self, accepted_risks):
         self.engagement.risk_acceptance.add(*accepted_risks)
@@ -2737,7 +2740,12 @@ class Finding(models.Model):
     # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
-        return cls.objects.filter(active=True, verified=True, duplicate=False, risk_accepted=False)
+        from dojo.utils import get_system_setting
+        results = cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
+        if get_system_setting("enforce_verified_status", True):
+            results = results.filter(verified=True)
+
+        return results
 
     @property
     def risk_acceptance(self):
@@ -3568,9 +3576,9 @@ class Check_List(models.Model):
 
     @staticmethod
     def get_status(pass_fail):
-        if pass_fail == "Pass":
+        if pass_fail == "Pass":  # noqa: S105
             return "success"
-        if pass_fail == "Fail":
+        if pass_fail == "Fail":  # noqa: S105
             return "danger"
         return "warning"
 
@@ -3655,7 +3663,7 @@ class Risk_Acceptance(models.Model):
         # logger.debug('path: "%s"', self.path)
         if not self.path:
             return None
-        return os.path.basename(self.path.name)
+        return Path(self.path.name).name
 
     @property
     def name_and_expiration_info(self):
@@ -3911,7 +3919,7 @@ class JIRA_Project(models.Model):
                                                              verbose_name=_("Add vulnerability Id as a JIRA label"),
                                                              blank=False)
     push_all_issues = models.BooleanField(default=False, blank=True,
-         help_text=_("Automatically create JIRA tickets for verified findings. Once linked, the JIRA ticket will continue to sync, regardless of status in DefectDojo."))
+         help_text=_("Automatically create JIRA tickets for verified findings, assuming enforce_verified_status is True, or for all findings otherwise. Once linked, the JIRA ticket will continue to sync, regardless of status in DefectDojo."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))

@@ -23,9 +23,11 @@ class IntSightsParser:
     def _build_finding_description(self, alert: dict) -> str:
         """
         Builds an IntSights Finding description from various pieces of information.
+
         Args:
             alert: The parsed alert dictionary
         Returns: A markdown formatted description
+
         """
         return "\n".join(
             [

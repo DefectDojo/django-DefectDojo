@@ -11,6 +11,7 @@ from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+from pathlib import Path
 
 import bleach
 import crum
@@ -88,6 +89,7 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     Args:
         finding (:model:`dojo.Finding`): Finding to be replicated
+
     """
     to_mark_as_fp = set()
 
@@ -149,6 +151,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         product (:model:`dojo.Product`, optional): Product to filter findings by
         engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
         test (:model:`dojo.Test`, optional): Test to filter findings by
+
     """
     if product:
         custom_filter_type = "product"
@@ -1137,71 +1140,135 @@ def opened_in_period(start_date, end_date, **kwargs):
         end_date.month,
         end_date.day,
         tzinfo=timezone.get_current_timezone())
-    opened_in_period = Finding.objects.filter(
-        date__range=[start_date, end_date],
-        **kwargs,
-        verified=True,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated__isnull=True,
-        severity__in=(
-            "Critical", "High", "Medium",
-            "Low")).values("numerical_severity").annotate(
-                Count("numerical_severity")).order_by("numerical_severity")
-    total_opened_in_period = Finding.objects.filter(
-        date__range=[start_date, end_date],
-        **kwargs,
-        verified=True,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated__isnull=True,
-        severity__in=("Critical", "High", "Medium", "Low")).aggregate(
-            total=Sum(
-                Case(
-                    When(
-                        severity__in=("Critical", "High", "Medium", "Low"),
-                        then=Value(1)),
-                    output_field=IntegerField())))["total"]
-
-    oip = {
-        "S0":
-        0,
-        "S1":
-        0,
-        "S2":
-        0,
-        "S3":
-        0,
-        "Total":
-        total_opened_in_period,
-        "start_date":
-        start_date,
-        "end_date":
-        end_date,
-        "closed":
-        Finding.objects.filter(
-            mitigated__date__range=[start_date, end_date],
+    if get_system_setting("enforce_verified_status", True):
+        opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
             **kwargs,
+            verified=True,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            severity__in=(
+                "Critical", "High", "Medium",
+                "Low")).values("numerical_severity").annotate(
+                    Count("numerical_severity")).order_by("numerical_severity")
+        total_opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
+            **kwargs,
+            verified=True,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated__isnull=True,
             severity__in=("Critical", "High", "Medium", "Low")).aggregate(
                 total=Sum(
                     Case(
                         When(
                             severity__in=("Critical", "High", "Medium", "Low"),
                             then=Value(1)),
-                        output_field=IntegerField())))["total"],
-        "to_date_total":
-        Finding.objects.filter(
-            date__lte=end_date.date(),
-            verified=True,
+                        output_field=IntegerField())))["total"]
+
+        oip = {
+            "S0":
+            0,
+            "S1":
+            0,
+            "S2":
+            0,
+            "S3":
+            0,
+            "Total":
+            total_opened_in_period,
+            "start_date":
+            start_date,
+            "end_date":
+            end_date,
+            "closed":
+            Finding.objects.filter(
+                mitigated__date__range=[start_date, end_date],
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(
+                            When(
+                                severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"],
+            "to_date_total":
+            Finding.objects.filter(
+                date__lte=end_date.date(),
+                verified=True,
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                mitigated__isnull=True,
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).count(),
+        }
+    else:
+        opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
+            **kwargs,
             false_p=False,
             duplicate=False,
             out_of_scope=False,
             mitigated__isnull=True,
+            severity__in=(
+                "Critical", "High", "Medium",
+                "Low")).values("numerical_severity").annotate(
+                    Count("numerical_severity")).order_by("numerical_severity")
+        total_opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
             **kwargs,
-            severity__in=("Critical", "High", "Medium", "Low")).count(),
-    }
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                total=Sum(
+                    Case(
+                        When(
+                            severity__in=("Critical", "High", "Medium", "Low"),
+                            then=Value(1)),
+                        output_field=IntegerField())))["total"]
+
+        oip = {
+            "S0":
+            0,
+            "S1":
+            0,
+            "S2":
+            0,
+            "S3":
+            0,
+            "Total":
+            total_opened_in_period,
+            "start_date":
+            start_date,
+            "end_date":
+            end_date,
+            "closed":
+            Finding.objects.filter(
+                mitigated__date__range=[start_date, end_date],
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(
+                            When(
+                                severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"],
+            "to_date_total":
+            Finding.objects.filter(
+                date__lte=end_date.date(),
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                mitigated__isnull=True,
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).count(),
+        }
 
     for o in opened_in_period:
         oip[o["numerical_severity"]] = o["numerical_severity__count"]
@@ -1318,7 +1385,7 @@ def handle_uploaded_threat(f, eng):
     # Check if threat folder exist.
     if not os.path.isdir(settings.MEDIA_ROOT + "/threat/"):
         # Create the folder
-        os.mkdir(settings.MEDIA_ROOT + "/threat/")
+        Path(settings.MEDIA_ROOT + "/threat/").mkdir()
     with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
               "wb+") as destination:
         for chunk in f.chunks():
@@ -1518,14 +1585,18 @@ def calculate_grade(product, *args, **kwargs):
 
     if system_settings.enable_product_grade:
         logger.debug("calculating product grade for %s:%s", product.id, product.name)
-        severity_values = Finding.objects.filter(
-            ~Q(severity="Info"),
-            active=True,
-            duplicate=False,
-            verified=True,
-            false_p=False,
-            test__engagement__product=product).values("severity").annotate(
-                Count("numerical_severity")).order_by()
+        findings = Finding.objects.filter(
+                ~Q(severity="Info"),
+                active=True,
+                duplicate=False,
+                false_p=False,
+                test__engagement__product=product)
+
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True)
+
+        severity_values = findings.values("severity").annotate(
+                    Count("numerical_severity")).order_by()
 
         low = 0
         medium = 0
@@ -2222,7 +2293,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
 
 def to_str_typed(obj):
-    """for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    """For code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
     return f"{type(obj)}: {obj}"
 
 

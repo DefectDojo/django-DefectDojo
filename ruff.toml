@@ -37,11 +37,11 @@ select = [
    "W",
    "C90",
    "I",
-   "D2", "D3",
+   "D2", "D3", "D403", "D411", "D413",
    "UP",
    "YTT",
    "ASYNC",
-   "S2", "S5", "S7",
+   "S2", "S5", "S7", "S101", "S104", "S105", "S112", "S311",
    "FBT001", "FBT003",
    "A003", "A004", "A006",
    "COM",
@@ -65,7 +65,7 @@ select = [
    "TCH",
    "INT",
    "ARG003", "ARG004", "ARG005",
-   "PTH2",
+   "PTH2", "PTH101", "PTH102", "PTH103", "PTH104", "PTH105", "PTH106", "PTH107", "PTH108", "PTH109", "PTH110", "PTH111", "PTH114", "PTH115", "PTH116", "PTH117", "PTH119", "PTH121", "PTH124",
    "TD001", "TD004", "TD005",
    "PD",
    "PGH",
@@ -99,7 +99,10 @@ fixable = ["ALL"]
 unfixable = []
 preview = true
 
-per-file-ignores = {}
+[lint.per-file-ignores]
+"unittests/**" = [
+    "S105",  # hardcoded passwords in tests are fine
+]
 
 [lint.flake8-boolean-trap]
 extend-allowed-calls = ["dojo.utils.get_system_setting"]

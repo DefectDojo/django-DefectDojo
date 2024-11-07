@@ -1,6 +1,7 @@
 {% load display_tags %}
 ---
-description: {{ description | default_if_none:'' }}
+description: "{{ description | default_if_none:'' }}"
+title: "{{ title | default_if_none:'' }}"
 user: {{ user | default_if_none:'' }}
 {% if url %}
 url_ui:  {{ url|full_url }}
