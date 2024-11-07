@@ -137,5 +137,18 @@ ENV \
   DD_UWSGI_NUM_OF_THREADS="2"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
+FROM django AS devcontainer
+
+USER root
+RUN usermod -d /home/${appuser} -s /usr/bin/bash ${appuser} \
+ && mkdir /home/${appuser} \
+ && chown ${appuser}:${appuser} /home/${appuser}
+
+# do not clean cache as it can be useful in dev
+RUN apt update \
+ && apt install -y procps
+
+USER ${appuser}
+
 FROM django AS django-unittests
 COPY unittests/ ./unittests/

@@ -1,0 +1,27 @@
+---
+services:
+  uwsgi:
+    entrypoint: ['sleep', 'infinity']
+    ports:
+      - target: 8080
+        published: ${DD_PORT:-8080}
+        protocol: tcp
+        mode: host
+    build:
+      context: ./
+      dockerfile: "Dockerfile.django-debian"
+      target: devcontainer
+  node-static:
+    # yarn cleans node_modules, including .gitkeep - alternative to readding it is to configure autoclean/.yarnclean
+    command: sh -c "yarn; touch node_modules/.gitkeep"
+    working_dir: /app/components
+    volumes:
+      - '.:/app:z'
+    build:
+      context: ./
+      dockerfile: "Dockerfile.nginx-debian"
+      target: collectstatic
+  nginx:
+    deploy:
+      # disable nginx - serve static directly from Django
+      replicas: 0

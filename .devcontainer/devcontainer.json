@@ -1,0 +1,13 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/go-postgres
+{
+	"name": "DefectDojo",
+	"dockerComposeFile": ["../docker-compose.yml", "../docker-compose.override.dev.yml", "docker-compose.override.dc.yml"],
+	"service": "uwsgi",
+	"workspaceFolder": "/app/",
+
+	// Configure tool-specific properties - https://containers.dev/supporting
+	"customizations": {
+		"extensions": ["ms-azuretools.vscode-docker", "ms-python.python", "ms-python.debugpy"]
+	}
+}
