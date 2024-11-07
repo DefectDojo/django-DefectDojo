@@ -1,7 +1,7 @@
+import datetime
 import hashlib
 import logging
 import re
-import datetime
 
 import dateutil
 from cpe import CPE
