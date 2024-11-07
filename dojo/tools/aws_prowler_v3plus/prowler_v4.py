@@ -38,8 +38,7 @@ class AWSProwlerV4Parser:
             documentation = str(documentation) + "\n" + str(deserialized.get("unmapped", {}).get("related_url", ""))
             security_domain = deserialized.get("resources", [{}])[0].get("type", "")
             # Prowler v4.5.0 changed 'event_time' key in report with 'time_dt'
-            timestamp = deserialized.get(
-                "time_dt") or deserialized.get("event_time")
+            timestamp = deserialized.get("time_dt") or deserialized.get("event_time")
             resource_arn = deserialized.get("resources", [{}])[0].get("uid", "")
             resource_id = deserialized.get("resources", [{}])[0].get("name", "")
             unique_id_from_tool = deserialized.get("finding_info", {}).get("uid", "")
