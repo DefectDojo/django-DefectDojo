@@ -227,7 +227,7 @@ class TestSonarQubeParser(DojoTestCase):
         )
         self.assertEqual(str, type(item.references))
         self.assertMultiLineEqual(
-            "squid:S2975\n" "Copy Constructor versus Cloning\n" "S2157\n" "S1182",
+            "squid:S2975\nCopy Constructor versus Cloning\nS2157\nS1182",
             item.references,
         )
         self.assertEqual(str, type(item.file_path))
@@ -366,7 +366,8 @@ class TestSonarQubeParser(DojoTestCase):
         my_file_handle.close()
 
     def test_detailed_parse_file_with_vuln_issue_3725(self):
-        """SonarQube Scan detailed - report that crash
+        """
+        SonarQube Scan detailed - report that crash
         see: https://github.com/DefectDojo/django-DefectDojo/issues/3725
         """
         my_file_handle, _product, _engagement, test = self.init(get_unit_tests_path() + "/scans/sonarqube/sonar.html")
@@ -444,7 +445,7 @@ class TestSonarQubeParser(DojoTestCase):
         )
         self.assertEqual(str, type(item.references))
         self.assertMultiLineEqual(
-            "squid:S2975\n" "Copy Constructor versus Cloning\n" "S2157\n" "S1182",
+            "squid:S2975\nCopy Constructor versus Cloning\nS2157\nS1182",
             item.references,
         )
         self.assertEqual(str, type(item.file_path))
@@ -641,6 +642,7 @@ class TestSonarQubeParser(DojoTestCase):
         item = findings[0]
         self.assertEqual(str, type(item.description))
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("testapplication", item.file_path)
         self.assertEqual("Medium", item.severity)
         item = findings[3]
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwo1123efijo", item.title)

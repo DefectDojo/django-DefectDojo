@@ -26,9 +26,8 @@ def create_vulnerability_id_template(finding_template):
 
 
 class Command(BaseCommand):
-    """
-    This management command creates vulnerability ids for all findings / findings_templates with cve's.
-    """
+
+    """This management command creates vulnerability ids for all findings / findings_templates with cve's."""
 
     help = "Usage: manage.py migrate_cve"
 

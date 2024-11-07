@@ -24,8 +24,7 @@ class BlackduckImporter(Importer):
 
         if zipfile.is_zipfile(str(report)):
             return self._process_zipfile(report)
-        else:
-            return self._process_csvfile(report)
+        return self._process_csvfile(report)
 
     def _process_csvfile(self, report):
         """
@@ -69,9 +68,7 @@ class BlackduckImporter(Importer):
     def _process_project_findings(
         self, project_ids, security_issues, files=None,
     ):
-        """
-        Process findings per projects and return a BlackduckFinding object per the model
-        """
+        """Process findings per projects and return a BlackduckFinding object per the model"""
         for project_id in project_ids:
             locations = set()
             if files is not None:

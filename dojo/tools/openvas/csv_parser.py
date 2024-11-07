@@ -21,10 +21,9 @@ class ColumnMappingStrategy:
     def evaluate_bool_value(column_value):
         if column_value.lower() == "true":
             return True
-        elif column_value.lower() == "false":
+        if column_value.lower() == "false":
             return False
-        else:
-            return None
+        return None
 
     def process_column(self, column_name, column_value, finding):
         if (

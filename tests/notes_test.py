@@ -34,10 +34,7 @@ class NoteTest(BaseTestCase):
         if not driver.find_element(By.ID, "add_note").is_displayed():
             self.uncollapse_all(driver)
         text = driver.find_element(By.TAG_NAME, "body").text
-        pass_test = "Test public note" in text
-        if not pass_test:
-            logger.info(f"Public note created at the {level} level")
-        self.assertTrue(pass_test)
+        self.assertIn("Test public note", text, f"Public note created at the {level} level")
 
     def create_private_note(self, driver, level):
         time.sleep(1)

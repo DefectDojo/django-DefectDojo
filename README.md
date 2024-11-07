@@ -132,15 +132,14 @@ Core Moderators can help you with pull requests or feedback on dev ideas:
 * Cody Maffucci ([@Maffooch](https://github.com/maffooch) | [LinkedIn](https://www.linkedin.com/in/cody-maffucci))
 
 Moderators can help you with pull requests or feedback on dev ideas:
-* Damien Carol ([@damiencarol](https://github.com/damiencarol) | [LinkedIn](https://www.linkedin.com/in/damien-carol/))
-* Jannik Jürgens ([@alles-klar](https://github.com/alles-klar))
-* Dubravko Sever ([@dsever](https://github.com/dsever))
 * Charles Neill ([@cneill](https://github.com/cneill) | [@ccneill](https://twitter.com/ccneill))
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz))
 * Blake Owens ([@blakeaowens](https://github.com/blakeaowens))
 
 ## Hall of Fame
-
+* Jannik Jürgens ([@alles-klar](https://github.com/alles-klar)) - Jannik was a long time contributor and moderator for 
+  DefectDojo and made significant contributions to many areas of the platform. Jannik was instrumental in pioneering 
+  and optimizing deployment methods.
 * Valentijn Scholten ([@valentijnscholten](https://github.com/valentijnscholten) |
   [Sponsor](https://github.com/sponsors/valentijnscholten) |
   [LinkedIn](https://www.linkedin.com/in/valentijn-scholten/)) - Valentijn served as a core moderator for 3 years.

@@ -70,10 +70,10 @@ finding_related_action_title_dict = {
     "mark_finding_duplicate": "Mark as duplicate",
 }
 
-supported_file_formats = [
+supported_thumbnail_file_formats = [
     "apng", "avif", "gif", "jpg",
     "jpeg", "jfif", "pjpeg", "pjp",
-    "png", "svg", "webp", "pdf",
+    "png", "svg", "webp",
 ]
 
 
@@ -88,6 +88,7 @@ def markdown_render(value):
                                                       "markdown.extensions.toc",
                                                       "markdown.extensions.tables"])
         return mark_safe(bleach.clean(markdown_text, tags=markdown_tags, attributes=markdown_attrs, css_sanitizer=markdown_styles))
+    return None
 
 
 def text_shortener(value, length):
@@ -139,6 +140,11 @@ def dojo_current_hash():
 @register.simple_tag
 def display_date():
     return timezone.localtime(timezone.now()).strftime("%b %d, %Y")
+
+
+@register.filter
+def display_date_with_secs(obj):
+    return obj.strftime("%c")
 
 
 @register.simple_tag
@@ -364,8 +370,7 @@ def overdue(date1):
 def notspecified(text):
     if text:
         return text
-    else:
-        return mark_safe('<em class="text-muted">Not Specified</em>')
+    return mark_safe('<em class="text-muted">Not Specified</em>')
 
 
 @register.tag
@@ -517,33 +522,30 @@ def business_criticality_icon(value):
     if value == Product.VERY_LOW_CRITICALITY:
         return stars(1, 5, "Very Low")
     if value == Product.NONE_CRITICALITY:
-        return stars(0, 5, "None")
-    else:
-        return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
+        return mark_safe(stars(0, 5, "None"))
+    return ""  # mark_safe(not_specified_icon('Business Criticality Not Specified'))
 
 
 @register.filter
 def last_value(value):
     if "/" in value:
         return value.rsplit("/")[-1:][0]
-    else:
-        return value
+    return value
 
 
 @register.filter
 def platform_icon(value):
     if value == Product.WEB_PLATFORM:
         return mark_safe(icon("list-alt", "Web"))
-    elif value == Product.DESKTOP_PLATFORM:
+    if value == Product.DESKTOP_PLATFORM:
         return mark_safe(icon("desktop", "Desktop"))
-    elif value == Product.MOBILE_PLATFORM:
+    if value == Product.MOBILE_PLATFORM:
         return mark_safe(icon("mobile", "Mobile"))
-    elif value == Product.WEB_SERVICE_PLATFORM:
+    if value == Product.WEB_SERVICE_PLATFORM:
         return mark_safe(icon("plug", "Web Service"))
-    elif value == Product.IOT:
+    if value == Product.IOT:
         return mark_safe(icon("random", "Internet of Things"))
-    else:
-        return ""  # mark_safe(not_specified_icon('Platform Not Specified'))
+    return ""  # mark_safe(not_specified_icon('Platform Not Specified'))
 
 
 @register.filter
@@ -554,8 +556,7 @@ def lifecycle_icon(value):
         return mark_safe(icon("ship", "Sustain"))
     if value == Product.RETIREMENT:
         return mark_safe(icon("moon-o", "Retire"))
-    else:
-        return ""  # mark_safe(not_specified_icon('Lifecycle Not Specified'))
+    return ""  # mark_safe(not_specified_icon('Lifecycle Not Specified'))
 
 
 @register.filter
@@ -572,24 +573,21 @@ def origin_icon(value):
         return mark_safe(icon("code", "Open Source"))
     if value == Product.OUTSOURCED_ORIGIN:
         return mark_safe(icon("globe", "Outsourced"))
-    else:
-        return ""  # mark_safe(not_specified_icon('Origin Not Specified'))
+    return ""  # mark_safe(not_specified_icon('Origin Not Specified'))
 
 
 @register.filter
 def external_audience_icon(value):
     if value:
         return mark_safe(icon("users", "External Audience"))
-    else:
-        return ""
+    return ""
 
 
 @register.filter
 def internet_accessible_icon(value):
     if value:
         return mark_safe(icon("cloud", "Internet Accessible"))
-    else:
-        return ""
+    return ""
 
 
 @register.filter
@@ -716,9 +714,7 @@ def get_severity_count(id, table):
     elif table == "product":
         display_counts.append("Total: " + str(total) + " Active Findings")
 
-    display_counts = ", ".join([str(item) for item in display_counts])
-
-    return display_counts
+    return ", ".join([str(item) for item in display_counts])
 
 
 @register.filter
@@ -835,6 +831,8 @@ def vulnerability_url(vulnerability_id):
 
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
+            if "&&" in settings.VULNERABILITY_URLS[key]:
+                return settings.VULNERABILITY_URLS[key].split("&&")[0] + str(vulnerability_id) + settings.VULNERABILITY_URLS[key].split("&&")[1]
             return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
     return ""
 
@@ -844,8 +842,7 @@ def first_vulnerability_id(finding):
     vulnerability_ids = finding.vulnerability_ids
     if vulnerability_ids:
         return vulnerability_ids[0]
-    else:
-        return None
+    return None
 
 
 @register.filter
@@ -856,8 +853,7 @@ def additional_vulnerability_ids(finding):
         for vulnerability_id in vulnerability_ids[1:]:
             references.append(vulnerability_id)
         return references
-    else:
-        return None
+    return None
 
 
 @register.filter
@@ -911,7 +907,7 @@ def jira_change(obj):
 def get_thumbnail(file):
     from pathlib import Path
     file_format = Path(file.file.url).suffix[1:]
-    return file_format in supported_file_formats
+    return file_format in supported_thumbnail_file_formats
 
 
 @register.filter
