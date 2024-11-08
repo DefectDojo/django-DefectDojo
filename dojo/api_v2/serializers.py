@@ -3,6 +3,7 @@ import logging
 import os
 import re
 from datetime import datetime
+import collections
 
 import six
 import tagulous
@@ -281,7 +282,7 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
-class RequestResponseDict(list):
+class RequestResponseDict(collections.UserList):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
         list.__init__(self, *args, **kwargs)
