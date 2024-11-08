@@ -19,7 +19,7 @@ from dojo.models import (
     PermissionKey
     )
 from dojo.api_v2.api_error import ApiError
-from dojo.risk_acceptance.helper import post_jira_comments
+from dojo.risk_acceptance.helper import post_jira_comments, handle_from_provider_risk
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
 from dojo.authorization.roles_permissions import Permissions
@@ -80,25 +80,6 @@ def update_expiration_risk_accepted(finding: Finding,
             risk_acceptance.expiration_date,
             risk_acceptance.created)
 
-
-def handle_from_provider_risk(finding, acceptance_days):
-    logger.info(f'Risk accepting for external provider Id:{finding.id}')
-    tag = ra_helper.get_matching_value(list_a=finding.tags.tags, list_b=[settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3])
-    if tag is not None:
-        logger.info(f"Vulnerability {finding.vuln_id_from_tool} has provider tags")
-        if tag.name == settings.PROVIDER3:
-            finding_id = finding.unique_id_from_tool
-        else:
-            finding_id = finding.vuln_id_from_tool
-        ra_helper.risk_accept_provider(
-            finding_id=finding_id,
-            provider=tag.name,
-            acceptance_days=acceptance_days,
-            url=settings.PROVIDER_URL,
-            header=settings.PROVIDER_HEADER,
-            token=settings.PROVIDER_TOKEN)
-
-
 def risk_accepted_succesfully(
     finding: Finding,
     risk_acceptance: Risk_Acceptance,
@@ -112,7 +93,7 @@ def risk_accepted_succesfully(
     acceptance_days, __, __ = update_expiration_risk_accepted(finding,
                                                               risk_acceptance)
     finding.save()
-    handle_from_provider_risk(finding, acceptance_days)
+    ra_helper.handle_from_provider_risk(finding, acceptance_days)
 
     system_settings = System_Settings.objects.get()
     if system_settings.enable_transfer_finding:
@@ -146,7 +127,7 @@ def get_role_members(user, product: Product, product_type: Product_Type):
         elif hasattr(user_member, "product_id"):
             if user_member.product_id == product.id:
                 return user_member.role.name
-    raise ValueError(f"The user is not related to the object {product_type}")    
+    raise ValueError(f"The user is not related to the object {product_type}")
 
 
 def role_has_exclusive_permissions(user):

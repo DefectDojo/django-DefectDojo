@@ -1,6 +1,9 @@
+import json
 import logging
+from datetime import timedelta
 
 import requests
+import yaml
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.core.mail import EmailMessage
@@ -11,10 +14,19 @@ from django.urls import reverse
 from django.conf import settings
 from django.utils.translation import gettext as _
 
+from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, we_want_async
-from dojo.models import Alerts, Dojo_User, Notifications, System_Settings, UserContactInfo
+from dojo.models import (
+    Alerts,
+    Dojo_User,
+    Notification_Webhooks,
+    Notifications,
+    System_Settings,
+    UserContactInfo,
+    get_current_datetime,
+)
 from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
 from dojo.aws import ses_email
 
@@ -146,8 +158,9 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
     try:
         notification_message = render_to_string(template, kwargs)
         logger.debug("Rendering from the template %s", template)
-    except TemplateDoesNotExist:
-        logger.debug("template not found or not implemented yet: %s", template)
+    except TemplateDoesNotExist as e:
+        # In some cases, template includes another templates, if the interior one is missing, we will see it in "specifically" section
+        logger.debug(f"template not found or not implemented yet: {template} (specifically: {e.args})")
     except Exception as e:
         logger.error("error during rendering of template %s exception is %s", template, e)
     finally:
@@ -173,6 +186,7 @@ def process_notifications(event, notifications=None, **kwargs):
     slack_enabled = get_system_setting("enable_slack_notifications")
     msteams_enabled = get_system_setting("enable_msteams_notifications")
     mail_enabled = get_system_setting("enable_mail_notifications")
+    webhooks_enabled = get_system_setting("enable_webhooks_notifications")
 
     if slack_enabled and "slack" in getattr(notifications, event, getattr(notifications, "other")):
         logger.debug("Sending Slack Notification")
@@ -185,6 +199,10 @@ def process_notifications(event, notifications=None, **kwargs):
     if mail_enabled and "mail" in getattr(notifications, event, getattr(notifications, "other")):
         logger.debug("Sending Mail Notification")
         send_mail_notification(event, notifications.user, **kwargs)
+
+    if webhooks_enabled and "webhooks" in getattr(notifications, event, getattr(notifications, "other")):
+        logger.debug("Sending Webhooks Notification")
+        send_webhooks_notification(event, notifications.user, **kwargs)
 
     if "alert" in getattr(notifications, event, getattr(notifications, "other")):
         logger.debug(f"Sending Alert to {notifications.user}")
@@ -321,6 +339,155 @@ def send_mail_notification(event, user=None, *args, **kwargs):
         log_alert(e, "Email Notification", title=kwargs["title"], description=str(e), url=kwargs["url"])
 
 
+def webhooks_notification_request(endpoint, event, *args, **kwargs):
+    from dojo.utils import get_system_setting
+
+    headers = {
+        "User-Agent": f"DefectDojo-{dd_version}",
+        "X-DefectDojo-Event": event,
+        "X-DefectDojo-Instance": settings.SITE_URL,
+        "Accept": "application/json",
+    }
+    if endpoint.header_name is not None:
+        headers[endpoint.header_name] = endpoint.header_value
+    yaml_data = create_notification_message(event, endpoint.owner, "webhooks", *args, **kwargs)
+    data = yaml.safe_load(yaml_data)
+
+    timeout = get_system_setting("webhooks_notifications_timeout")
+
+    return requests.request(
+        method="POST",
+        url=endpoint.url,
+        headers=headers,
+        json=data,
+        timeout=timeout,
+    )
+
+
+def test_webhooks_notification(endpoint):
+    res = webhooks_notification_request(endpoint, "ping", description="Test webhook notification")
+    res.raise_for_status()
+    # in "send_webhooks_notification", we are doing deeper analysis, why it failed
+    # for now, "raise_for_status" should be enough
+
+
+@app.task(ignore_result=True)
+def webhook_reactivation(endpoint_id: int, *args, **kwargs):
+    endpoint = Notification_Webhooks.objects.get(pk=endpoint_id)
+
+    # User already changed status of endpoint
+    if endpoint.status != Notification_Webhooks.Status.STATUS_INACTIVE_TMP:
+        return
+
+    endpoint.status = Notification_Webhooks.Status.STATUS_ACTIVE_TMP
+    endpoint.save()
+    logger.debug(f"Webhook endpoint '{endpoint.name}' reactivated to '{Notification_Webhooks.Status.STATUS_ACTIVE_TMP}'")
+
+
+@app.task(ignore_result=True)
+def webhook_status_cleanup(*args, **kwargs):
+    # If some endpoint was affected by some outage (5xx, 429, Timeout) but it was clean during last 24 hours,
+    # we consider this endpoint as healthy so need to reset it
+    endpoints = Notification_Webhooks.objects.filter(
+        status=Notification_Webhooks.Status.STATUS_ACTIVE_TMP,
+        last_error__lt=get_current_datetime() - timedelta(hours=24),
+    )
+    for endpoint in endpoints:
+        endpoint.status = Notification_Webhooks.Status.STATUS_ACTIVE
+        endpoint.first_error = None
+        endpoint.last_error = None
+        endpoint.note = f"Reactivation from {Notification_Webhooks.Status.STATUS_ACTIVE_TMP}"
+        endpoint.save()
+        logger.debug(f"Webhook endpoint '{endpoint.name}' reactivated from '{Notification_Webhooks.Status.STATUS_ACTIVE_TMP}' to '{Notification_Webhooks.Status.STATUS_ACTIVE}'")
+
+    # Reactivation of STATUS_INACTIVE_TMP endpoints.
+    # They should reactive automatically in 60s, however in case of some unexpected event (e.g. start of whole stack),
+    # endpoints should not be left in STATUS_INACTIVE_TMP state
+    broken_endpoints = Notification_Webhooks.objects.filter(
+        status=Notification_Webhooks.Status.STATUS_INACTIVE_TMP,
+        last_error__lt=get_current_datetime() - timedelta(minutes=5),
+    )
+    for endpoint in broken_endpoints:
+        webhook_reactivation(endpoint_id=endpoint.pk)
+
+
+@dojo_async_task
+@app.task
+def send_webhooks_notification(event, user=None, *args, **kwargs):
+
+    ERROR_PERMANENT = "permanent"
+    ERROR_TEMPORARY = "temporary"
+
+    endpoints = Notification_Webhooks.objects.filter(owner=user)
+
+    if not endpoints:
+        if user:
+            logger.info(f"URLs for Webhooks not configured for user '{user}': skipping user notification")
+        else:
+            logger.info("URLs for Webhooks not configured: skipping system notification")
+        return
+
+    for endpoint in endpoints:
+
+        error = None
+        if endpoint.status not in [Notification_Webhooks.Status.STATUS_ACTIVE, Notification_Webhooks.Status.STATUS_ACTIVE_TMP]:
+            logger.info(f"URL for Webhook '{endpoint.name}' is not active: {endpoint.get_status_display()} ({endpoint.status})")
+            continue
+
+        try:
+            logger.debug(f"Sending webhook message to endpoint '{endpoint.name}'")
+            res = webhooks_notification_request(endpoint, event, *args, **kwargs)
+
+            if 200 <= res.status_code < 300:
+                logger.debug(f"Message sent to endpoint '{endpoint.name}' successfully.")
+                continue
+
+            # HTTP request passed successfully but we still need to check status code
+            if 500 <= res.status_code < 600 or res.status_code == 429:
+                error = ERROR_TEMPORARY
+            else:
+                error = ERROR_PERMANENT
+
+            endpoint.note = f"Response status code: {res.status_code}"
+            logger.error(f"Error when sending message to Webhooks '{endpoint.name}' (status: {res.status_code}): {res.text}")
+
+        except requests.exceptions.Timeout as e:
+            error = ERROR_TEMPORARY
+            endpoint.note = f"Requests exception: {e}"
+            logger.error(f"Timeout when sending message to Webhook '{endpoint.name}'")
+
+        except Exception as e:
+            error = ERROR_PERMANENT
+            endpoint.note = f"Exception: {e}"[:1000]
+            logger.exception(e)
+            log_alert(e, "Webhooks Notification")
+
+        now = get_current_datetime()
+
+        if error == ERROR_TEMPORARY:
+
+            # If endpoint is unstable for more then one day, it needs to be deactivated
+            if endpoint.first_error is not None and (now - endpoint.first_error).total_seconds() > 60 * 60 * 24:
+                endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
+
+            else:
+                # We need to monitor when outage started
+                if endpoint.status == Notification_Webhooks.Status.STATUS_ACTIVE:
+                    endpoint.first_error = now
+
+                endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_TMP
+
+                # In case of failure within one day, endpoint can be deactivated temporally only for one minute
+                webhook_reactivation.apply_async(kwargs={"endpoint_id": endpoint.pk}, countdown=60)
+
+        # There is no reason to keep endpoint active if it is returning 4xx errors
+        else:
+            endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
+            endpoint.first_error = now
+
+        endpoint.last_error = now
+        endpoint.save()
+
 
 def send_alert_notification(event, user=None, *args, **kwargs):
     logger.debug("sending alert notification to %s", user)
@@ -349,7 +516,6 @@ def send_alert_notification(event, user=None, *args, **kwargs):
 
 
 def get_slack_user_id(user_email):
-    import json
 
     from dojo.utils import get_system_setting
 
@@ -368,18 +534,17 @@ def get_slack_user_id(user_email):
             logger.error("Slack is complaining. See error message below.")
             logger.error(user)
             raise RuntimeError("Error getting user list from Slack: " + res.text)
-        else:
-            if "email" in user["user"]["profile"]:
-                if user_email == user["user"]["profile"]["email"]:
-                    if "id" in user["user"]:
-                        user_id = user["user"]["id"]
-                        logger.debug(f"Slack user ID is {user_id}")
-                        slack_user_is_found = True
-                else:
-                    logger.warning(f"A user with email {user_email} could not be found in this Slack workspace.")
+        if "email" in user["user"]["profile"]:
+            if user_email == user["user"]["profile"]["email"]:
+                if "id" in user["user"]:
+                    user_id = user["user"]["id"]
+                    logger.debug(f"Slack user ID is {user_id}")
+                    slack_user_is_found = True
+            else:
+                logger.warning(f"A user with email {user_email} could not be found in this Slack workspace.")
 
-            if not slack_user_is_found:
-                logger.warning("The Slack user was not found.")
+        if not slack_user_is_found:
+            logger.warning("The Slack user was not found.")
 
     return user_id
 
@@ -404,7 +569,7 @@ def log_alert(e, notification_type=None, *args, **kwargs):
 def notify_test_created(test):
     title = "Test created for " + str(test.engagement.product) + ": " + str(test.engagement.name) + ": " + str(test)
     create_notification(event="test_added", title=title, test=test, engagement=test.engagement, product=test.engagement.product,
-                        url=reverse("view_test", args=(test.id,)))
+                        url=reverse("view_test", args=(test.id,)), url_api=reverse("test-detail", args=(test.id,)))
 
 
 def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
@@ -424,4 +589,4 @@ def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[
 
     create_notification(event=event, title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,
-                        url=reverse("view_test", args=(test.id,)))
+                        url=reverse("view_test", args=(test.id,)), url_api=reverse("test-detail", args=(test.id,)))

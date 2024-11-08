@@ -59,6 +59,9 @@ class UserTest(BaseTestCase):
         # username
         driver.find_element(By.ID, "id_username").clear()
         driver.find_element(By.ID, "id_username").send_keys("userWriter")
+        # password
+        driver.find_element(By.ID, "id_password").clear()
+        driver.find_element(By.ID, "id_password").send_keys("Def3ctD0jo&")
         # First Name
         driver.find_element(By.ID, "id_first_name").clear()
         driver.find_element(By.ID, "id_first_name").send_keys("Writer")

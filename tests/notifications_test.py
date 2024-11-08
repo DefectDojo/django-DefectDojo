@@ -159,24 +159,29 @@ def suite():
     suite.addTest(NotificationTest("test_disable_personal_notification", "mail"))
     suite.addTest(NotificationTest("test_disable_personal_notification", "slack"))
     suite.addTest(NotificationTest("test_disable_personal_notification", "msteams"))
+    suite.addTest(NotificationTest("test_disable_personal_notification", "webhooks"))
     # now test when enabled
     suite.addTest(NotificationTest("test_enable_personal_notification", "mail"))
     suite.addTest(NotificationTest("test_enable_personal_notification", "slack"))
     suite.addTest(NotificationTest("test_enable_personal_notification", "msteams"))
+    suite.addTest(NotificationTest("test_enable_personal_notification", "webhooks"))
     # Now switch to system notifications
     suite.addTest(NotificationTest("test_disable_system_notification", "mail"))
     suite.addTest(NotificationTest("test_disable_system_notification", "slack"))
     suite.addTest(NotificationTest("test_disable_system_notification", "msteams"))
+    suite.addTest(NotificationTest("test_disable_system_notification", "webhooks"))
     # now test when enabled
     suite.addTest(NotificationTest("test_enable_system_notification", "mail"))
     suite.addTest(NotificationTest("test_enable_system_notification", "slack"))
     suite.addTest(NotificationTest("test_enable_system_notification", "msteams"))
+    suite.addTest(NotificationTest("test_enable_system_notification", "webhooks"))
     # not really for the user we created, but still related to user settings
     suite.addTest(NotificationTest("test_user_mail_notifications_change", "mail"))
     # now do short test for the template
     suite.addTest(NotificationTest("test_enable_template_notification", "mail"))
     suite.addTest(NotificationTest("test_enable_template_notification", "slack"))
     suite.addTest(NotificationTest("test_enable_template_notification", "msteams"))
+    suite.addTest(NotificationTest("test_enable_template_notification", "webhooks"))
 
     return suite
 

@@ -3,6 +3,7 @@ from dojo.tools.acunetix.parse_acunetix_xml import AcunetixXMLParser
 
 
 class AcunetixParser:
+
     """Parser for Acunetix XML files and Acunetix 360 JSON files."""
 
     def get_scan_types(self):
@@ -17,5 +18,6 @@ class AcunetixParser:
     def get_findings(self, filename, test):
         if ".xml" in str(filename):
             return AcunetixXMLParser().get_findings(filename, test)
-        elif ".json" in str(filename):
+        if ".json" in str(filename):
             return AcunetixJSONParser().get_findings(filename, test)
+        return None

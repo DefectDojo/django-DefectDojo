@@ -162,13 +162,12 @@ def logout_view(request):
 
     if not settings.SHOW_LOGIN_FORM:
         return login_view(request)
-    else:
-        messages.add_message(request,
-                         messages.SUCCESS,
-                         _("You have logged out successfully."),
-                         extra_tags="alert-success")
+    messages.add_message(request,
+                     messages.SUCCESS,
+                     _("You have logged out successfully."),
+                     extra_tags="alert-success")
 
-        return HttpResponseRedirect(reverse("login"))
+    return HttpResponseRedirect(reverse("login"))
 
 
 @user_passes_test(lambda u: u.is_active)

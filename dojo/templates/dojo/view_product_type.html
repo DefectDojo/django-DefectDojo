@@ -30,10 +30,10 @@
                                 <a rel="noopener noreferrer" class="" href="{% url 'product_type_metrics' pt.id %}">
                                 <i class="fa-solid fa-chart-line"></i> {% trans "Metrics" %}</a>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <a rel="noopener noreferrer" class="" href="{% url 'product_type_report' pt.id %}">
                                 <i class="fa-solid fa-file-lines"></i> {% trans "Product Type Report" %} </a>
-                            </li>
+                            </li> -->
                             {% if pt|has_object_permission:"Product_Type_Delete" %}
                             <li role="separator" class="divider"></li>
                             <li>
@@ -151,7 +151,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    {% if members %}
+                    {% if members or global_members %}
                         <div class="table-responsive">
                             <table class="tablesorter-bootstrap table table-condensed table-striped">
                                 <thead>
@@ -189,6 +189,14 @@
                                         <td name="member_role">{{ member.role }}</td>
                                     </tr>
                                 {% endfor %}
+                                {% for member in global_members %}
+                                    <tr>
+                                        <td>
+                                        </td>
+                                        <td name="member_global_user">{{ member.user.get_full_name }}</td>
+                                        <td name="member_global_role">{{ member.role }} (Global role)</td>
+                                    </tr>
+                                {% endfor %}
                                 </tbody>
                             </table>
                         </div>
@@ -224,7 +232,7 @@
                         {% endif %}
                     </div>
                 </div>
-                {% if groups %}
+                {% if groups or global_groups %}
                 <div class="table-responsive">
                     <table class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
@@ -260,6 +268,14 @@
                             </td>
                             <td name="product_type_group_group">{{ group.group.name }}</td>
                             <td name="product_type_group_role">{{ group.role }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% for group in global_groups %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td name="product_type_group_global_group">{{ group.group.name }}</td>
+                            <td name="product_type_group_global_role">{{ group.role }} (Global role)</td>
                         </tr>
                         {% endfor %}
                         </tbody>

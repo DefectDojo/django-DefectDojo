@@ -149,7 +149,6 @@ class SonarQubeAPI:
         :param types: issue types (comma separated values). e.g. BUG,VULNERABILITY,CODE_SMELL
         :return:
         """
-
         if self.extras is not None:
             types = self.extras
 
@@ -419,9 +418,7 @@ class SonarQubeAPI:
             raise Exception(msg)
 
     def test_connection(self):
-        """
-        Returns number of components (projects) or raise error.
-        """
+        """Returns number of components (projects) or raise error."""
         parameters = {"qualifiers": "TRK"}
 
         if self.org_id is not None:
