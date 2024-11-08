@@ -1,0 +1,22 @@
+{
+  // These tasks will run in order when initializing your CodeSandbox project.
+  "setupTasks": [
+    {
+      "name": "Install Dependencies",
+      "command": "npm install"
+    }
+  ],
+
+  // These tasks can be run from CodeSandbox. Running one will open a log in the app.
+  "tasks": {
+    "start": {
+      "name": "dev",
+      "command": "npm run dev -- --baseURL=/ --appendPort=false --liveReloadPort=443 --bind=0.0.0.0",
+      "runAtStart": true
+    },
+    "install": {
+      "name": "install dependencies",
+      "command": "npm install"
+    }
+  }
+}
