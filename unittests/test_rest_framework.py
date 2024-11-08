@@ -3003,6 +3003,19 @@ class AnsweredSurveyTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+class QuestionnaireEngagementQuestionnairesLinkEngagementTest(BaseClass.BaseClassTest):
+    fixtures = ["questionnaire_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Answered_Survey
+        self.endpoint_path = "questionnaire_engagement_questionnaires"
+        self.viewname = "link_engagement"
+        self.viewset = QuestionnaireAnsweredSurveyViewSet
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 5
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
 class AnnouncementTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
