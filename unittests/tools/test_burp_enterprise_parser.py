@@ -34,7 +34,7 @@ class TestBurpEnterpriseParser(DojoTestCase):
                 self.assertTrue(finding.dynamic_finding)
                 self.assertIsNone(finding.cwe)
                 self.assertEqual("WAF Detected: redacted", finding.title)
-                self.assertIn("Fingerprint Details:\n \n WAF Type : redacted\n WAF tech. details : Cloud-based CDN, WAF & DDoS prevention", finding.description)
+                self.assertIn("**Issue detail**:\nFingerprint Details:\n\nWAF Type : redacted\nWAF tech. details : Cloud-based CDN, WAF & DDoS prevention", finding.description)
 
     def test_burp_enterprise_with_multiple_vulns_newer_format(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_enterprise/many_vulns_updated_format.html"), encoding="utf-8") as test_file:
