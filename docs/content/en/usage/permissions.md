@@ -122,6 +122,4 @@ Many configuration dialogues and API endpoints can be enabled for users or group
 * Notifications on system level
 * Configuration permissions for users and groups
 
-{{% alert title="Warning" color="warning" %}}
 These configuration settings are a powerful tool and should be used with great care.
-{{% /alert %}}
