@@ -1,8 +1,8 @@
 import json
 from datetime import datetime
-
-from dojo.models import Finding
 from dateutil import parser as date_parser
+from dojo.models import Finding
+
 
 class MobSFScorecardParser:
 
