@@ -3058,69 +3058,28 @@ class QuestionnaireEngagementSurveyViewSet(
         return Engagement_Survey.objects.all().order_by("id")
 
     @extend_schema(
-        methods=["POST"],
-        request=serializers.QuestionnaireEngagementLinkSerializer,
-        responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer}# QuestionnaireAnsweredSurveySerializer} #QuestionnaireEngagementSurveySerializer}, # QuestionAnsweredSurveySerializer?
+    request=OpenApiTypes.NONE,
+    parameters=[
+        OpenApiParameter(
+            "engagement_id", OpenApiTypes.INT, OpenApiParameter.PATH,
+        ),
+    ],
+    responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer},
     )
-    @action(detail=True, methods=["post"])
-    def link_engagement(self, request, pk=None):
-        # replace these two things with the right things....
-
-        if request.method == "POST":
-            engagement = serializers.EngagementSerializer(data=request.data)
-            if engagement.is_valid():
-                msg = f"{engagement.validated_data['id']}"
-                raise Exception(msg)
-
-            answered = Answered_Survey.objects.get_or_create()
-            # have engagement, need to query for the 
-            # finding_close = serializers.FindingCloseSerializer(
-            #     data=request.data,
-            # )
-            # if finding_close.is_valid():
-            #     finding.is_mitigated = finding_close.validated_data[
-            #         "is_mitigated"
-            #     ]
-            #     if settings.EDITABLE_MITIGATED_DATA:
-            #         finding.mitigated = (
-            #             finding_close.validated_data["mitigated"]
-            #             or timezone.now()
-            #         )
-            #     else:
-            #         finding.mitigated = timezone.now()
-            #     finding.mitigated_by = request.user
-            #     finding.active = False
-            #     finding.false_p = finding_close.validated_data.get(
-            #         "false_p", False,
-            #     )
-            #     finding.duplicate = finding_close.validated_data.get(
-            #         "duplicate", False,
-            #     )
-            #     finding.out_of_scope = finding_close.validated_data.get(
-            #         "out_of_scope", False,
-            #     )
-
-            #     endpoints_status = finding.status_finding.all()
-            #     for e_status in endpoints_status:
-            #         e_status.mitigated_by = request.user
-            #         if settings.EDITABLE_MITIGATED_DATA:
-            #             e_status.mitigated_time = (
-            #                 finding_close.validated_data["mitigated"]
-            #                 or timezone.now()
-            #             )
-            #         else:
-            #             e_status.mitigated_time = timezone.now()
-            #         e_status.mitigated = True
-            #         e_status.last_modified = timezone.now()
-            #         e_status.save()
-            #     finding.save()
-            # else:
-            #     return Response(
-            #         finding_close.errors, status=status.HTTP_400_BAD_REQUEST,
-            #     )
-        #serialized_finding = serializers.FindingCloseSerializer(finding)
-        serialized_answered_survey = serializers.QuestionnaireAnsweredSurveySerializer(answered)
+    @action(
+        detail=True, methods=["post"], url_path=r"link_engagement/(?P<engagement_id>\d+)",
+    )
+    def link_engagement(self, request, pk, engagement_id):
+        # Get the answered survey
+        engagement_survey = self.get_object()
+        # Safely get the engagement
+        engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
+        # Link the engagement
+        answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
+        # Send a favorable response
+        serialized_answered_survey = serializers.QuestionnaireAnsweredSurveySerializer(answered_survey)
         return Response(serialized_answered_survey.data)
+
 
 @extend_schema_view(**schema_with_prefetch())
 class QuestionnaireAnsweredSurveyViewSet(

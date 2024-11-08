@@ -2997,13 +2997,6 @@ class QuestionnaireEngagementSurveySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class QuestionnaireEngagementLinkSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Answered_Survey
-        exclude = ("survey", "completed", "answered_on", "assignee", "responder")
-
-
 class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
     survey = QuestionnaireEngagementSurveySerializer()
 
