@@ -67,8 +67,8 @@ spec:
             name: {{ $fullName }}
             optional: true
         env:
-        {{- if .Values.extraEnv }}
-        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- with .Values.extraEnv }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
@@ -122,8 +122,8 @@ spec:
               name: {{ .Values.postgresqlha.postgresql.existingSecret }}
               key: postgresql-postgres-password
               {{- end }}
-        {{- if .Values.extraEnv }}
-        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- with .Values.extraEnv }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
         resources:
           {{- toYaml .Values.initializer.resources | nindent 10 }}
