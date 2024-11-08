@@ -3057,6 +3057,70 @@ class QuestionnaireEngagementSurveyViewSet(
     def get_queryset(self):
         return Engagement_Survey.objects.all().order_by("id")
 
+    @extend_schema(
+        methods=["POST"],
+        request=serializers.QuestionnaireEngagementLinkSerializer,
+        responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer}# QuestionnaireAnsweredSurveySerializer} #QuestionnaireEngagementSurveySerializer}, # QuestionAnsweredSurveySerializer?
+    )
+    @action(detail=True, methods=["post"])
+    def link_engagement(self, request, pk=None):
+        # replace these two things with the right things....
+
+        if request.method == "POST":
+            engagement = serializers.EngagementSerializer(data=request.data)
+            if engagement.is_valid():
+                msg = f"{engagement.validated_data['id']}"
+                raise Exception(msg)
+
+            answered = Answered_Survey.objects.get_or_create()
+            # have engagement, need to query for the 
+            # finding_close = serializers.FindingCloseSerializer(
+            #     data=request.data,
+            # )
+            # if finding_close.is_valid():
+            #     finding.is_mitigated = finding_close.validated_data[
+            #         "is_mitigated"
+            #     ]
+            #     if settings.EDITABLE_MITIGATED_DATA:
+            #         finding.mitigated = (
+            #             finding_close.validated_data["mitigated"]
+            #             or timezone.now()
+            #         )
+            #     else:
+            #         finding.mitigated = timezone.now()
+            #     finding.mitigated_by = request.user
+            #     finding.active = False
+            #     finding.false_p = finding_close.validated_data.get(
+            #         "false_p", False,
+            #     )
+            #     finding.duplicate = finding_close.validated_data.get(
+            #         "duplicate", False,
+            #     )
+            #     finding.out_of_scope = finding_close.validated_data.get(
+            #         "out_of_scope", False,
+            #     )
+
+            #     endpoints_status = finding.status_finding.all()
+            #     for e_status in endpoints_status:
+            #         e_status.mitigated_by = request.user
+            #         if settings.EDITABLE_MITIGATED_DATA:
+            #             e_status.mitigated_time = (
+            #                 finding_close.validated_data["mitigated"]
+            #                 or timezone.now()
+            #             )
+            #         else:
+            #             e_status.mitigated_time = timezone.now()
+            #         e_status.mitigated = True
+            #         e_status.last_modified = timezone.now()
+            #         e_status.save()
+            #     finding.save()
+            # else:
+            #     return Response(
+            #         finding_close.errors, status=status.HTTP_400_BAD_REQUEST,
+            #     )
+        #serialized_finding = serializers.FindingCloseSerializer(finding)
+        serialized_answered_survey = serializers.QuestionnaireAnsweredSurveySerializer(answered)
+        return Response(serialized_answered_survey.data)
 
 @extend_schema_view(**schema_with_prefetch())
 class QuestionnaireAnsweredSurveyViewSet(
