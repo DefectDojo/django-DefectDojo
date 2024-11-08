@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
+
 from dateutil import parser as date_parser
+
 from dojo.models import Finding
 
 
