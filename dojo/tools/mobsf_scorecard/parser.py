@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 from dojo.models import Finding
-
+from dateutil import parser as date_parser
 
 class MobSFScorecardParser:
 
@@ -25,7 +25,10 @@ class MobSFScorecardParser:
             data = json.loads(tree)
 
         if "timestamp" in data:
-            find_date = datetime.strptime(data["timestamp"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            try:
+                find_date = date_parser.parse(data["timestamp"])
+            except date_parser.ParserError:
+                find_date = datetime.now()
         else:
             find_date = datetime.now()
 
