@@ -25,9 +25,7 @@ Media files for uploaded files, including threat models and risk acceptance, are
 
 ### Instance size
 
-{{% alert title="Information" color="info" %}}
 Please read the paragraphs below about key processes tweaks.
-{{% /alert %}}
 
 
 With a separate database, the minimum recommendations

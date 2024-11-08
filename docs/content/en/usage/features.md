@@ -454,11 +454,9 @@ The `SLA_NOTIFY_POST_BREACH` lets you define in days how long you want
 to be kept notified about findings that have breached the SLA. Passed
 that number, notifications will cease.
 
-{{% alert title="Warning" color="warning" %}}
 Be mindful of performance if you choose to have SLA notifications on
 non-verified findings, especially if you import a lot of findings
 through CI in \'active\' state.
-{{% /alert %}}
 
 
 ### What notification channels for SLA notifications?
@@ -490,11 +488,9 @@ modify this schedule to your context.
 }
 {{< / highlight >}}
 
-{{% alert title="Information" color="info" %}}
 The celery containers are the ones concerned with this configuration. If
 you suspect things are not working as expected, make sure they have the
 latest version of your settings.py file.
-{{% /alert %}}
 
 
 You can of course change this default by modifying that stanza.

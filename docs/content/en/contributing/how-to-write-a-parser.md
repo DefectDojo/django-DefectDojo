@@ -5,9 +5,7 @@ draft: false
 weight: 1
 ---
 
-{{% alert title="Information" color="info" %}}
 All commands assume that you're located at the root of the django-DefectDojo cloned repo.
-{{% /alert %}}
 
 ## Pre-requisites
 
@@ -312,9 +310,7 @@ or like this:
 $ ./dc-unittest.sh --test-case unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser
 {{< /highlight >}}
 
-{{% alert title="Information" color="info" %}}
-If you want to run all unit tests, simply run `$ docker compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
-{{% /alert %}}
+If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
 
 ### Endpoint validation
 

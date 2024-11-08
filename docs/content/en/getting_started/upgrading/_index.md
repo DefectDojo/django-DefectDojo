@@ -13,11 +13,8 @@ should not lose any data.
 
 ### Using docker images provided in DockerHub
 
-{{% alert title="Information" color="info" %}}
 If you\'re using `latest`, then you need to pre pull the `latest` from
 DockerHub to update.
-{{% /alert %}}
-
 
 The generic upgrade method for docker compose are as follows:
 -   Pull the latest version
