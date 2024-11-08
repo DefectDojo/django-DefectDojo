@@ -1,9 +1,9 @@
+import collections
 import json
 import logging
 import os
 import re
 from datetime import datetime
-import collections
 
 import six
 import tagulous
