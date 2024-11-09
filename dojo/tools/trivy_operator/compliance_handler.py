@@ -55,6 +55,6 @@ class TrivyComplianceHandler:
                         dynamic_finding=True,
                     )
                     if check_checkID:
-                        finding.unsaved_vulnerability_ids = [UniformTrivyVulnID().return_uniformed_vulnid(check_checkID, test)]
+                        finding.unsaved_vulnerability_ids = [UniformTrivyVulnID().return_uniformed_vulnid(check_checkID)]
                     findings.append(finding)
         return findings
