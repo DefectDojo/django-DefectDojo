@@ -2,7 +2,7 @@ import re
 
 
 class UniformTrivyVulnID:
-    def return_uniformed_vulnid(self, vulnid, test):
+    def return_uniformed_vulnid(self, vulnid):
         if vulnid is None:
             return vulnid
         if "cve" in vulnid.lower():
