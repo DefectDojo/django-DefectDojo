@@ -82,7 +82,6 @@ class KubescapeParser:
                         else:
                             mitigation = ""
 
-                    armoLink = f"https://hub.armosec.io/docs/{controlID.lower()}"
                     description = "**Summary:** " + f"The ressource '{resourceid}' has failed the control '{control_name}'." + "\n"
                     if controlSummary is not None and "description" in controlSummary:
                         description += "**Description:** " + controlSummary["description"] + "\n"
@@ -97,15 +96,10 @@ class KubescapeParser:
                         category = controlSummary["category"]["name"]
                         description += "**Category:** " + category + "\n"
 
-                    description += "View control details here: " + self.__hyperlink(armoLink)
-
                     steps_to_reproduce = "The following rules have failed :" + "\n"
                     steps_to_reproduce += "\t**Rules:** " + str(json.dumps(control["rules"], indent=4)) + "\n"
-
                     steps_to_reproduce += "Resource object may contain evidence:" + "\n"
                     steps_to_reproduce += "\t**Resource object:** " + str(json.dumps(resource["object"], indent=4))
-
-                    references = armoLink
 
                     find = Finding(
                         title=textwrap.shorten(title, 150),
@@ -113,11 +107,13 @@ class KubescapeParser:
                         description=description,
                         mitigation=mitigation,
                         steps_to_reproduce=steps_to_reproduce,
-                        references=references,
                         severity=severity,
                         component_name=resourceid,
                         static_finding=True,
                         dynamic_finding=False,
                     )
                     findings.append(find)
+                    if controlID is not None:
+                        find.unsaved_vulnerability_ids = []
+                        find.unsaved_vulnerability_ids.append(controlID)
         return findings
