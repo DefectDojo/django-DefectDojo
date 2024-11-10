@@ -2709,6 +2709,9 @@ class ReportGenerateSerializer(serializers.Serializer):
         many=True, allow_null=True, required=False,
     )
 
+class EngagementUpdateJiraEpicSerializer(serializers.Serializer):
+    epic_name = serializers.CharField(required=False, max_length=200)
+    epic_priority = serializers.CharField(required=False, allow_null=True)
 
 class TagSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=True)
