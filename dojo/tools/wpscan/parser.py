@@ -1,6 +1,6 @@
+import datetime
 import hashlib
 import json
-from datetime import datetime
 
 from dojo.models import Endpoint, Finding
 
@@ -89,7 +89,7 @@ class WpscanParser:
 
         report_date = None
         if "start_time" in tree:
-            report_date = datetime.utcfromtimestamp(tree.get("start_time"))
+            report_date = datetime.datetime.fromtimestamp(tree.get("start_time"), datetime.UTC)
 
         dupes = {}
         # manage plugin findings
