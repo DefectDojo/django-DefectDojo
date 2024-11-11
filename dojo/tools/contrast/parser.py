@@ -41,9 +41,7 @@ class ContrastParser:
             severity = row.get("Severity")
             if severity == "Note":
                 severity = "Info"
-            date_raw = datetime.datetime.utcfromtimestamp(
-                int(row.get("First Seen")) / 1000,
-            )
+            date_raw = datetime.datetime.fromtimestamp(int(row.get("First Seen")) / 1000, datetime.UTC)
             finding = Finding(
                 title=title.split(" from")[0],
                 date=date_raw,
