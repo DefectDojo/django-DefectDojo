@@ -131,7 +131,7 @@ class MSDefenderParser:
         self.findings.append(finding)
         finding.unsaved_endpoints = []
         if machine["computerDnsName"] is not None:
-            finding.unsaved_endpoints.append(Endpoint(host=str(machine["computerDnsName"])))
+            finding.unsaved_endpoints.append(Endpoint(host=str(machine["computerDnsName"]).replace(" ", "").replace("(", "_").replace(")", "_")))
         if machine["lastIpAddress"] is not None:
             finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastIpAddress"])))
         if machine["lastExternalIpAddress"] is not None:
