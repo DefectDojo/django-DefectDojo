@@ -100,7 +100,7 @@ class KubescapeParser:
                     steps_to_reproduce += "\t**Rules:** " + str(json.dumps(control["rules"], indent=4)) + "\n"
                     steps_to_reproduce += "Resource object may contain evidence:" + "\n"
                     steps_to_reproduce += "\t**Resource object:** " + str(json.dumps(resource["object"], indent=4))
-                    if control["rules"][0]["status"] is not "passed":
+                    if control["rules"][0]["status"] != "passed":
                         find = Finding(
                             title=textwrap.shorten(title, 150),
                             test=test,
@@ -111,7 +111,7 @@ class KubescapeParser:
                             component_name=resourceid,
                             static_finding=True,
                             dynamic_finding=False,
-                        )
+                       )
                         findings.append(find)
                         if controlID is not None:
                             find.unsaved_vulnerability_ids = []
