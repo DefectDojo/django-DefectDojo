@@ -3003,7 +3003,7 @@ class AnsweredSurveyTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class QuestionnaireEngagementQuestionnairesLinkEngagementTest(BaseClass.BaseClassTest):
+class QuestionnaireEngagementQuestionnairesLinkEngagementTest(BaseClass.RESTEndpointTest):
     fixtures = ["questionnaire_testdata.json"]
 
     def __init__(self, *args, **kwargs):
