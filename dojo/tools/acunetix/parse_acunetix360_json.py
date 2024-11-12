@@ -15,7 +15,7 @@ class AcunetixJSONParser:
         dupes = {}
         data = json.load(filename)
         dupes = {}
-        scan_date = parser.parse(data["Generated"])
+        scan_date = parser.parse(data["Generated"], dayfirst=True)
         text_maker = html2text.HTML2Text()
         text_maker.body_width = 0
         for item in data["Vulnerabilities"]:
@@ -96,7 +96,7 @@ class AcunetixJSONParser:
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
             if item.get("FirstSeenDate"):
-                parseddate = parser.parse(item["FirstSeenDate"])
+                parseddate = parser.parse(item["FirstSeenDate"], dayfirst=True)
                 finding.date = parseddate
             if dupe_key in dupes:
                 find = dupes[dupe_key]
