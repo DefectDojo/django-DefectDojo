@@ -34,7 +34,7 @@ MISC_DESCRIPTION_TEMPLATE = """**Target:** {target}
 SECRET_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
 **Match:** {match}
-"""
+"""  # noqa: S105
 
 LICENSE_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
