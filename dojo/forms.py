@@ -2130,6 +2130,7 @@ class ReviewFindingForm(forms.Form):
         },
     )
     allow_all_reviewers = forms.BooleanField(
+        disabled=True,
         required=False,
         label="Allow All Eligible Reviewers",
         help_text=(
