@@ -1383,7 +1383,7 @@ def get_page_items_and_count(request, items, page_size, prefix="", do_count=True
 def handle_uploaded_threat(f, eng):
     _name, extension = os.path.splitext(f.name)
     # Check if threat folder exist.
-    if not os.path.isdir(settings.MEDIA_ROOT + "/threat/"):
+    if not Path(settings.MEDIA_ROOT + "/threat/").is_dir():
         # Create the folder
         Path(settings.MEDIA_ROOT + "/threat/").mkdir()
     with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",

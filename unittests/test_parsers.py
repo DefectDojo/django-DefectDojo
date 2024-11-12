@@ -66,7 +66,7 @@ class TestParsers(DojoTestCase):
                 with self.subTest(parser=parser_dir.name, category="testfiles"):
                     scan_dir = os.path.join(basedir, "unittests", "scans", parser_dir.name)
                     self.assertTrue(
-                        os.path.isdir(scan_dir),
+                        Path(scan_dir).is_dir(),
                         f"Test files for unittest of parser '{scan_dir}' are missing or using different name",
                     )
 
