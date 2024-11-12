@@ -22,7 +22,7 @@ class CheckmarxOneParser:
         if isinstance(value, str):
             return parser.parse(value)
         if isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.utcfromtimestamp(value.get("seconds"))
+            return datetime.datetime.fromtimestamp(value.get("seconds"), datetime.UTC)
         return None
 
     def _parse_cwe(self, cwe):
