@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from django.core.management.base import BaseCommand
 from django.db import connection
@@ -27,7 +28,7 @@ class Command(BaseCommand):
             row = cursor.fetchone()
             ctype_id = row[0]
         # Find the current id in the surveys file
-        path = os.path.dirname(os.path.abspath(__file__))
+        path = Path(os.path.abspath(__file__)).parent
         path = path[:-19] + "fixtures/initial_surveys.json"
         contents = open(path, encoding="utf-8").readlines()
         for line in contents:
