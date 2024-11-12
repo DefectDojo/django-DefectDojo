@@ -30,9 +30,9 @@ Product:Engagement model, enables traceability among multiple projects
 
 ### How does DefectDojo work?
 
-1. [Getting started]({{< ref "/getting_started" >}}) covers how to install and configure DefectDojo.
-2. [Usage]({{< ref "/usage" >}}) covers how to use DefectDojo to manage vulnerabilities.
-3. We support a large amount of [integrations]({{< ref "/integrations" >}}) to help fit DefectDojo in your DevSecOps program.
+1. [Getting started] covers how to install and configure DefectDojo.
+2. [Usage](./os_getting_started) covers how to use DefectDojo to manage vulnerabilities.
+3. We support a large amount of [integrations](./integrations) to help fit DefectDojo in your DevSecOps program.
 
 ### Where to find DefectDojo?
 
