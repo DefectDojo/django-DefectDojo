@@ -1251,7 +1251,9 @@ def close_epic(eng, push_to_jira, **kwargs):
                 r = requests.post(
                     url=req_url,
                     auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-                    json=json_data)
+                    json=json_data,
+                    timeout=settings.REQUESTS_TIMEOUT,
+                )
                 if r.status_code != 204:
                     logger.warning(f"JIRA close epic failed with error: {r.text}")
                     return False

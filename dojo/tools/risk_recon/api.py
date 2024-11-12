@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 
 
 class RiskReconAPI:
@@ -33,6 +34,7 @@ class RiskReconAPI:
         response = self.session.get(
             url=f"{self.url}/toes",
             headers={"accept": "application/json", "Authorization": self.key},
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
@@ -75,6 +77,7 @@ class RiskReconAPI:
                     "accept": "application/json",
                     "Authorization": self.key,
                 },
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if response.ok:
