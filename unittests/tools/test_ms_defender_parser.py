@@ -68,3 +68,15 @@ class TestMSDefenderParser(DojoTestCase):
         for endpoint in finding.unsaved_endpoints:
             endpoint.clean()
         self.assertEqual("1.1.1.1", finding.unsaved_endpoints[0].host)
+
+    def test_parser_defender_issue_11217(self):
+        testfile = open("unittests/scans/ms_defender/issue_11217.zip", encoding="utf-8")
+        parser = MSDefenderParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("Medium", finding.severity)
+        for endpoint in finding.unsaved_endpoints:
+            endpoint.clean()
+        self.assertEqual("Max_Mustermann_iPadAir_17zoll__2ndgeneration_", finding.unsaved_endpoints[0].host)
