@@ -102,7 +102,11 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{- define "initializer.jobname" -}}
+{{- if .Values.initializer.staticName -}}
+{{ .Release.Name }}-initializer
+{{- else -}}
 {{ .Release.Name }}-initializer-{{- printf "%s" now | date "2006-01-02-15-04" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
