@@ -14,7 +14,7 @@ each endpoint is available within each DefectDojo installation at
 [`/api/v2/doc/`](https://demo.defectdojo.org/api/v2/) and can be accessed by choosing the API v2
 Docs link on the user drop down menu in the header. 
 
-![image](../../images/api_v2_1.png)
+![image](images/api_v2_1.png)
 
 The documentation is generated using [drf-spectacular](https://drf-spectacular.readthedocs.io/) at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/), and is
 interactive. On the top of API v2 docs is a link that generates an OpenAPI v3 spec.
@@ -23,12 +23,12 @@ To interact with the documentation, a valid Authorization header value
 is needed. Visit the `/api/key-v2` view to generate your
 API Key (`Token <api_key>`) and copy the header value provided.
 
-![image](../../images/api_v2_2.png)
+![image](images/api_v2_2.png)
 
 Each section allows you to make calls to the API and view the Request
 URL, Response Body, Response Code and Response Headers.
 
-![image](../../images/api_v2_3.png)
+![image](images/api_v2_3.png)
 
 If you're logged in to the Defect Dojo web UI, you do not need to provide the authorization token.
 

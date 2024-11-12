@@ -26,4 +26,4 @@ you will need to do the following :
 Usage
 -----
 
-![image](../../images/burp_plugin_usage.gif)
+![image](images/burp_plugin_usage.gif)

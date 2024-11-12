@@ -10,8 +10,8 @@ weight: 12
 
 Pages that show a list of findings or a list of engagements have a CSV and Excel Export functionality in the top right dropdown menu.
 
-![Export findings](../../images/export_1.png)
+![Export findings](images/export_1.png)
 
 The list of engagements can be exported as CSV/Excel.
 
-![Export engagements](../../images/export_2.png)
+![Export engagements](images/export_2.png)

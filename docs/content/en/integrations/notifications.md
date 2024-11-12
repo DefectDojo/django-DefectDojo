@@ -7,7 +7,7 @@ weight: 6
 
 ## Notifications
 
-![Notification settings](../../images/notifications_1.png)
+![Notification settings](images/notifications_1.png)
 
 DefectDojo can inform you of different events in a variety of ways. You
 can be notified about things like an upcoming engagement, when someone
@@ -91,19 +91,19 @@ Choose the channel where you want to post Global notifications during the 'Creat
 
 The following scopes have to be granted to your Slack App.  If the App was created from the JSON Manifest above, these permission scopes will already be set correctly.
 
-![Slack OAuth scopes](../../images/slack_scopes.png)
+![Slack OAuth scopes](images/slack_scopes.png)
 
 #### Token
 
 The Slack Bot Token needs to be pasted in the DefectDojo System Settings, nested underneath the 'Enable slack notifications' checkbox.  This token can be found in the Features / OAuth & Permissions section on the Slack App settings.
 
-![Slack token](../../images/slack_tokens.png)
+![Slack token](images/slack_tokens.png)
 
 #### Examples of Slack notifications
 
-![Add Product](../../images/slack_add_product.png)
+![Add Product](images/slack_add_product.png)
 
-![Import Scan](../../images/slack_import_scan.png)
+![Import Scan](images/slack_import_scan.png)
 
 
 ### Microsoft Teams

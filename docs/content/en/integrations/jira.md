@@ -103,7 +103,7 @@ By default Defect Dojo uses the `dojo/templates/issue-trackers/jira_full/jira-de
 This file can be modified to your needs, rebuild all containers afterwards. There's also a more limited template available, which can be chosen when
 configuring a JIRA Instance or JIRA Project for a Product or Engagement:
 
-![image](../../images/jira_issue_templates.png)
+![image](images/jira_issue_templates.png)
 
 Any folder added to  `dojo/templates/issue-trackers/` will be added to the dropdown (after rebuilding/restarting the containers).
 

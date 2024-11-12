@@ -5,7 +5,7 @@ draft: false
 weight: 1
 ---
 
-![Architecture](../../images/DD-Architecture.svg)
+{{ readFile "/docs/assets/svgs/DD-Architecture.svg" | safeHTML }}
 
 ## NGINX
 

@@ -5,7 +5,7 @@ draft: false
 weight: 1
 ---
 
-![Data Model](../../images/DD-Hierarchy.svg)
+{{ readFile "/docs/assets/svgs/DD-Hierarchy.svg" | safeHTML }}
 
 ## Product Type
 

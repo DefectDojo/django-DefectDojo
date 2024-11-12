@@ -11,7 +11,7 @@ The importers analyze each report and create new Findings for each item
 reported. DefectDojo collapses duplicate Findings by capturing the
 individual hosts vulnerable.
 
-![Import Form](../../images/imp_1.png)
+![Import Form](images/imp_1.png)
 
 This approach will create a new Test for each upload. This can result in a lot of findings. If deduplication is enabled, new Findings that are identical to existing Findings get marked as a duplicate.
 
@@ -20,21 +20,21 @@ This approach will create a new Test for each upload. This can result in a lot o
 Additionally, DefectDojo allows for re-imports of previously uploaded
 reports. This greatly reduces the amount of findings as no duplicates are created for findings that already exist.
 
-![Reimport menu](../../images/reupload_menu1.png)
+![Reimport menu](images/reupload_menu1.png)
 
 DefectDojo will attempt to capture the deltas between the
 original and new import and automatically add or mitigate findings as
 appropriate.
 
-![Re-Import Form](../../images/imp_2.png)
+![Re-Import Form](images/imp_2.png)
 
 This behaviour can be controled via the `closed_old_findings` parameter on the reupload form.
 
 The history of a test will be shown with the delta's for each reimported scan report.
-![Import History](../../images/import_history1.png)
+![Import History](images/import_history1.png)
 
 Clicking on a reimport changset will show the affected findings, as well as a status history per finding.
-![Import History details](../../images/import_history_details1.png)
+![Import History details](images/import_history_details1.png)
 
 ### Triage-less scanners
 Some scanners might not include triage information in their reports (e.g. tfsec). They simply scan code or dependencies, flag issues, and return everything. Removing some findings requires you to add comments in your code perhaps, but there is no simple way to filter out findings from the reports.

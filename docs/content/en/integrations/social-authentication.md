@@ -52,12 +52,12 @@ to be created. Closely follow the steps below to guarantee success.
     on the left side of the screen. Click **Create Credentials**, and
     choose **OAuth Client ID**:
 
-    ![image](../../images/google_1.png)
+    ![image](images/google_1.png)
 
 3.  Select **Web Applications**, and provide a descriptive name for the
     client.
 
-    ![image](../../images/google_2.png)
+    ![image](images/google_2.png)
 
 4.  Add the pictured URLs in the **Authorized Redirect URLs** section.
     This part is very important. If there are any mistakes here, the
@@ -69,7 +69,7 @@ to be created. Closely follow the steps below to guarantee success.
    **Client Secret Key** need to be copied over to the settings.
    Click the newly created client and copy the values:
 
-   ![image](../../images/google_3.png)
+   ![image](images/google_3.png)
 
 7. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
    information:
@@ -103,31 +103,31 @@ carries the same attributes and a similar procedure. Follow along below.
 2.  Once logged in, enter the **Applications** and click **Add
     Application**:
 
-    ![image](../../images/okta_1.png)
+    ![image](images/okta_1.png)
 
 3.  Select **Web Applications**.
 
-    ![image](../../images/okta_2.png)
+    ![image](images/okta_2.png)
 
 4.  Add the pictured URLs in the **Login Redirect URLs** section. This
     part is very important. If there are any mistakes here, the
     authentication client will not authorize the request, and deny
     access. Check the **Implicit** box as well.
 
-    ![image](../../images/okta_3.png)
+    ![image](images/okta_3.png)
 
 5.  Once all URLs are added, finish by clicking **Done**.
 
 6.  Return to the **Dashboard** to find the **Org-URL**. Note this value
     as it will be important in the settings file.
 
-    ![image](../../images/okta_4.png)
+    ![image](images/okta_4.png)
 
 7.  Now, with the authentication client created, the **Client ID** and
     **Client Secret** Key need to be copied over to the settings.
     Click the newly created client and copy the values:
 
-    ![image](../../images/okta_5.png)
+    ![image](images/okta_5.png)
 
 8. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
    information:

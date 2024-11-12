@@ -56,7 +56,7 @@ Configurations in DefectDojo
 2.  Click \'Google Sheets Sync\'.
 3.  Fill the form.
 
-    ![Google Sheets Sync Configuration Page](../../images/google_sheets_sync_1.png)
+    ![Google Sheets Sync Configuration Page](images/google_sheets_sync_1.png)
 
     * Upload the downloaded json file into the **Upload
       Credentials file** field.
@@ -71,7 +71,7 @@ Configurations in DefectDojo
         * Extract the folder id from the URL and insert it as the
           **Drive Folder Id**:
 
-          ![Extracting Drive Folder ID](../../images/google_sheets_sync_2.png)
+          ![Extracting Drive Folder ID](images/google_sheets_sync_2.png)
 
     * Tick the **Enable Service** check box. (**Optional** as this
       has no impact on the configuration, but you must set it to
@@ -104,11 +104,11 @@ interface displayed will be different.
 
 If a Google Spreadsheet does not exist for the Test:
 
-![Create Google Sheet Button](../../images/google_sheets_sync_3.png)
+![Create Google Sheet Button](images/google_sheets_sync_3.png)
 
 If a Google Spreadsheet is already created for the Test:
 
-![Sync Google Sheet Button](../../images/google_sheets_sync_4.png)
+![Sync Google Sheet Button](images/google_sheets_sync_4.png)
 
 After creating a Google Spreadsheet, users can review and edit Finding
 details using the Google Sheet. If any change is done in the Google

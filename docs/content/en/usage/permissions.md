@@ -115,7 +115,7 @@ Groups can have a global role too. This global role gives all members of the gro
 
 Many configuration dialogues and API endpoints can be enabled for users or groups of users, regardless of their **superuser** status:
 
-![Configuration permissions](../../images/configuration_permissions.png)
+![Configuration permissions](images/configuration_permissions.png)
 
 3 configurations can still only be changed by superusers:
 * System settings

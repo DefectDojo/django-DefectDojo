@@ -14,7 +14,7 @@ digestible chunks.
 
 Here is an example with a product with two tags and four findings each with a single tag
 
-![High level example of usage with tags](../../images/tags-high-level-example.png)
+![High level example of usage with tags](images/tags-high-level-example.png)
 
 #### Format of tag
 
@@ -38,7 +38,7 @@ Tags can be managed in the following ways
    auto completion to make searching and adding existing tags a breeze. Here is what the field 
    looks like on the product from the screenshot in the previous section:
    
-   ![Tag management on an object](../../images/tags-management-on-object.png)
+   ![Tag management on an object](images/tags-management-on-object.png)
     
 2. Import and Reimport
 
@@ -57,25 +57,25 @@ Tags can be managed in the following ways
     In the following example, lets say I want to update the tags of the two findings with the tag "tag-group-alpha" to be a new tag list like this ["tag-group-charlie", "tag-group-delta"]. 
     First I would select the tags to be updated:
 
-    ![Select findings for bulk edit tag update](../../images/tags-select-findings-for-bulk-edit.png)
+    ![Select findings for bulk edit tag update](images/tags-select-findings-for-bulk-edit.png)
 
     Once a finding is selected, a new button appears with the name "Bulk Edit". Clicking this button
     produces a dropdown menu with many options, but the focus is just on tags for now. Update the
     field to have the desired tag list as follows, and click submit
 
-    ![Apply changes for bulk edit tag update](../../images/tags-bulk-edit-submit.png)
+    ![Apply changes for bulk edit tag update](images/tags-bulk-edit-submit.png)
 
     The tags on the selected Findings will be updated to whatever was specified in the tags field
     within the bulk edit menu
 
-    ![Completed bulk edit tag update](../../images/tags-bulk-edit-complete.png)
+    ![Completed bulk edit tag update](images/tags-bulk-edit-complete.png)
 
 ### Filtering
 
 Tags can be filtered in many ways through both the UI and the API. For example, here is a snippet
 of the Finding filters:
 
-![Snippet of the finding filters](../../images/tags-finding-filter-snippet.png)
+![Snippet of the finding filters](images/tags-finding-filter-snippet.png)
 
 There are ten fields related to tags:
 
@@ -144,7 +144,7 @@ is disabled. The only exception to that rule being inherited tags as they cannot
 be removed from an object. See the following example of adding a tag "test_only_tag"
 to the Test object and a tag "engagement_only_tag" to the Engagement.
 
-![Example of inherited tags](../../images/tags-inherit-exmaple.png)
+![Example of inherited tags](images/tags-inherit-exmaple.png)
 
 When updates are made to the tag list on a product, the same changes are made to all
 objects within the product asynchronously. The duration of this task directly correlates
@@ -159,21 +159,21 @@ finding \'status\' can be change to \'accepted\' by doing the following: Finding
 are accepted in the engagement view. To locate the engagement from the
 finding click the link to engagement as shown below.
 
-![Select an engagement](../../images/select_engagement.png)
+![Select an engagement](images/select_engagement.png)
 
 Then, in the engagement view click the plus icon in the \'Risk
 Acceptance\' box and fill in the details to support the risk acceptance.
 
-![Creating a risk acceptance](../../images/risk_exception.png)
+![Creating a risk acceptance](images/risk_exception.png)
 
 The engagement view is now updated with the risk.
 
-![Risk Acceptance engagement view](../../images/engagement_risk_acceptance.png)
+![Risk Acceptance engagement view](images/engagement_risk_acceptance.png)
 
 The finding status changes to \'Accepted\' with a link to the risk
 acceptance.
 
-![Risk acceptance on finding](../../images/finding_accepted.png)
+![Risk acceptance on finding](images/finding_accepted.png)
 ## Deduplication
 
 Deduplication is a feature that when enabled will compare
@@ -182,7 +182,7 @@ deduplication is enabled, a list of deduplicated findings is added
 to the engagement view. The following image illustrates the option
 deduplication on engagement and deduplication on product level:
 
-![Deduplication on product and engagement level](../../images/deduplication.png)
+![Deduplication on product and engagement level](images/deduplication.png)
 
 Upon saving a finding, DefectDojo will look at the other findings in the
 product or the engagement (depending on the configuration) to find
@@ -402,9 +402,9 @@ details about the deduplication process : switch
 
 Similar Findings Visualization:
 
-![Similar findings list](../../images/similar_finding_1.png)
+![Similar findings list](images/similar_finding_1.png)
 
-![Similar findings list with a duplicate](../../images/similar_finding_2.png)
+![Similar findings list with a duplicate](images/similar_finding_2.png)
 
 Similar Findings
 :   While viewing a finding, similar findings within the same product
@@ -427,7 +427,7 @@ To apply SLAs to Findings, open the `System Settings` page and check 'Enable Fin
 
 You will then need to create one or more SLA Configurations, from the SLA Configuration menu (your-defectdojo.com/sla_config).  
 
-![SLA configuration screen](../../images/sla_settings.png)
+![SLA configuration screen](images/sla_settings.png)
 
 ### SLA notification configuration
 
@@ -464,7 +464,7 @@ through CI in \'active\' state.
 You will notice that an extra `SLA breach` option is now present
 on the `Notification` page and  also in the `Product` view.
 
-![SLA notification checkbox](../../images/sla_notification_product_checkboxes.png)
+![SLA notification checkbox](images/sla_notification_product_checkboxes.png)
 
 ### SLA notification with JIRA
 
@@ -508,7 +508,7 @@ $ docker compose exec uwsgi /bin/bash -c 'python manage.py sla_notifications'
 
 ### Instant reports
 
-![Report Listing](../../images/report_1.png)
+![Report Listing](images/report_1.png)
 
 Instant reports can be generated for:
 
@@ -523,7 +523,7 @@ Filtering is available on all report generation views to aid in focusing the rep
 
 ### Custom reports
 
-![Report Generation](../../images/report_2.png)
+![Report Generation](images/report_2.png)
 
 Custom reports, generated with the Report Builder, allow you to select specific components to be added to the report. These include:
 
@@ -552,7 +552,7 @@ Product Type Metrics
     Findings, Accepted Findings, Closed Findings, Trending Open Bug
     Count, Trending Accepted Bug Count, and Age of Issues.
 
-    ![Product Type Metrics](../../images/met_1.png)
+    ![Product Type Metrics](images/met_1.png)
 
 Product Type Counts
 :   This view provides tabular data of Total Current Security Bug Count,
@@ -561,7 +561,7 @@ Product Type Counts
     and Open Findings. This view works great for communication with
     stakeholders as it is a snapshot in time of the product.
 
-    ![Product Type Counts](../../images/met_2.png)
+    ![Product Type Counts](images/met_2.png)
 
 Product Tag Counts
 :   Same as above, but for a group of products sharing a tag.
@@ -571,18 +571,18 @@ Simple Metrics
     this view is the total number of S0, S1, S2, S3, S4, Opened This
     Month, and Closed This Month.
 
-    ![Simple Metrics](../../images/met_3.png)
+    ![Simple Metrics](images/met_3.png)
 
 Engineer Metrics
 :   Provides graphs displaying information about a tester\'s activity.
 
-    ![Simple Metrics](../../images/met_4.png)
+    ![Simple Metrics](images/met_4.png)
 
 Metrics Dashboard
 :   Provides a full screen, auto scroll view with many metrics in graph
     format. This view is great for large displays or \"Dashboards.\"
 
-    ![Metrics Dashboard](../../images/met_5.png)
+    ![Metrics Dashboard](images/met_5.png)
 
 ## Users
 
@@ -618,7 +618,7 @@ respective engagement or test view page.
 
 ## Benchmarks
 
-![OWASP ASVS Benchmarks](../../images/owasp_asvs.png)
+![OWASP ASVS Benchmarks](images/owasp_asvs.png)
 
 DefectDojo utilizes the OWASP ASVS Benchmarks to benchmark a product to
 ensure the product meets your application technical security controls.
@@ -630,7 +630,7 @@ benchmarks select the dropdown menu from the right hand drop down menu.
 You will find the selection near the bottom of the menu entitled:
 \'OWASP ASVS v.3.1\'.
 
-![OWASP ASVS Benchmarks Menu](../../images/owasp_asvs_menu.png)
+![OWASP ASVS Benchmarks Menu](images/owasp_asvs_menu.png)
 
 In the Benchmarks view for each product, the default level is ASVS Level
 1. On the top right hand side the drop down can be changed to the
@@ -638,7 +638,7 @@ desired ASVS level (Level 1, Level 2 or Level 3). The publish checkbox
 will display the ASVS score on the product page and in the future this
 will be applied to reporting.
 
-![OWASP ASVS Score](../../images/owasp_asvs_score.png)
+![OWASP ASVS Score](images/owasp_asvs_score.png)
 
 On the left hand side the ASVS score is displayed with the desired
 score, the % of benchmarks passed to achieve the score and the total
@@ -684,8 +684,8 @@ Endpoint Meta Importer can be found in the Endpoint tab when viewing a Product
 ## Findings Image Upload
 
 You can add images (.png, .jpeg, .gif) to your findings. In order to achieve this, you have to click on "Manage Files" within the finding:
-![Manage Files](../../images/findings_manage_files.png)
+![Manage Files](images/findings_manage_files.png)
 There, you can upload a png file to attach it to a finding:
-![Upload PNG File](../../images/file_upload.png)
+![Upload PNG File](images/file_upload.png)
 The following picture shows the result:
-![Result PNG File in finding](../../images/uploaded_png_to_finding.png)
+![Result PNG File in finding](images/uploaded_png_to_finding.png)
