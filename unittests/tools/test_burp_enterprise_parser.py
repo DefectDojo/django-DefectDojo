@@ -38,7 +38,7 @@ class TestBurpEnterpriseParser(DojoTestCase):
                 self.assertIn("**Issue detail**:\nFingerprint Details:\n\nWAF Type : redacted\nWAF tech. details : Cloud-based CDN, WAF & DDoS prevention", finding.description)
 
     def test_burp_enterprise_with_multiple_vulns_newer_format(self):
-        with open(path.join(path.dirname(__file__), "../scans/burp_enterprise/many_vulns_updated_format.html"), encoding="utf-8") as test_file:
+        with open(path.join(Path(__file__).parent, "../scans/burp_enterprise/many_vulns_updated_format.html"), encoding="utf-8") as test_file:
             parser = BurpEnterpriseParser()
             findings = parser.get_findings(test_file, Test())
             for finding in findings:
