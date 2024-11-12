@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from dojo.models import Endpoint, Finding
 
@@ -48,11 +48,11 @@ class Inspector:
             active = False
             if finding.get("LastObservedAt", None):
                 try:
-                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
                 except Exception:
-                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
+                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
             else:
-                mitigated = datetime.utcnow()
+                mitigated = datetime.datetime.now(datetime.UTC)
         title_suffix = ""
         hosts = []
         for resource in finding.get("Resources", []):

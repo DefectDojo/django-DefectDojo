@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import re
 from datetime import datetime
 
@@ -803,20 +802,8 @@ class FileSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if file := data.get("file"):
-            ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
-            valid_extensions = settings.FILE_UPLOAD_TYPES
-            if ext.lower() not in valid_extensions:
-                if accepted_extensions := f"{', '.join(valid_extensions)}":
-                    msg = (
-                        "Unsupported extension. Supported extensions are as "
-                        f"follows: {accepted_extensions}"
-                    )
-                else:
-                    msg = (
-                        "File uploads are prohibited due to the list of acceptable "
-                        "file extensions being empty"
-                    )
-                raise ValidationError(msg)
+            # the clean will validate the file extensions and raise a Validation error if the extensions are not accepted
+            FileUpload(title=file.name, file=file).clean()
             return data
         return None
 
