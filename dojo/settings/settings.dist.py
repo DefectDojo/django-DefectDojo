@@ -17,6 +17,7 @@ import os
 import warnings
 from datetime import timedelta
 from email.utils import getaddresses
+from pathlib import Path
 
 import environ
 from celery.schedules import crontab
@@ -335,7 +336,7 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
 
 
 # Read .env file as default or from the command line, DD_ENV_PATH
-if os.path.isfile(root("dojo/settings/.env.prod")) or "DD_ENV_PATH" in os.environ:
+if Path(root("dojo/settings/.env.prod")).is_file() or "DD_ENV_PATH" in os.environ:
     env.read_env(root("dojo/settings/" + env.str("DD_ENV_PATH", ".env.prod")))
 
 # ------------------------------------------------------------------------------
