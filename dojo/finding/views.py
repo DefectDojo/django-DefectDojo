@@ -135,6 +135,9 @@ def prefetch_for_findings(findings, prefetch_type="all", exclude_untouched=True)
     if isinstance(
         findings, QuerySet,
     ):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_findings = prefetched_findings.prefetch_related(
+            "reviewers",
+        )
         prefetched_findings = prefetched_findings.prefetch_related("reporter")
         prefetched_findings = prefetched_findings.prefetch_related(
             "jira_issue__jira_project__jira_instance",
