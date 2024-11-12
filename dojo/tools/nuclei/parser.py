@@ -96,12 +96,16 @@ class NucleiParser:
                     cve_ids = classification["cve-id"]
                     finding.unsaved_vulnerability_ids = [x.upper() for x in cve_ids]
                 if (
-                    "cwe-id" in classification
-                    and classification["cwe-id"]
-                    and len(classification["cwe-id"]) > 0
+                    classification.get("cwe-id")
                 ):
                     cwe = classification["cwe-id"][0]
-                    finding.cwe = int(cwe[4:])
+                    try:
+                        finding.cwe = int(cwe[4:])
+                    except ValueError:
+                        """
+                        ignore CWE if non-int
+                        several older templates such as https://github.com/projectdiscovery/nuclei-templates/blob/6636c0d2dd540645cc3472822beb4b3819ff8322/http/cves/2004/CVE-2004-0519.yaml#L21
+                        """
                 if classification.get("cvss-metrics"):
                     cvss_objects = cvss_parser.parse_cvss_from_text(
                         classification["cvss-metrics"],
