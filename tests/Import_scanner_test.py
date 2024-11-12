@@ -22,7 +22,7 @@ class ScannerTest(BaseTestCase):
     def setUp(self):
         super().setUp(self)
         self.repo_path = dir_path + "/scans"
-        if os.path.isdir(self.repo_path):
+        if Path(self.repo_path).is_dir():
             shutil.rmtree(self.repo_path)
         Path(self.repo_path).mkdir()
         git.Repo.clone_from("https://github.com/DefectDojo/sample-scan-files", self.repo_path)
