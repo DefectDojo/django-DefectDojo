@@ -1,4 +1,4 @@
-title = "My Docs"
+title = "DefectDojo Documentation"
 baseurl = "http://localhost/"
 canonifyURLs = false
 disableAliases = true
@@ -58,7 +58,7 @@ copyRight = "Copyright (c) 2020-2024 Thulite"
 
 [permalinks]
   blog = "/blog/:slug/"
-  docs = "/docs/:sections[1:]/:slug/"
+  docs = "/en/:sections[1:]/:slug/"
 # docs = "/docs/1.0/:sections[1:]/:slug/"
 
 [minify.tdewolff.html]

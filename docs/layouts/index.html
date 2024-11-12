@@ -6,8 +6,26 @@
     </div>
     <div class="col-lg-9 col-xl-8 text-center">
       <p class="lead">{{ .Params.lead | safeHTML }}</p>
-      <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="/docs/{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}guides/example-guide/" role="button">{{ i18n "get_started" }}</a>
+      <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="/docs/{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}defectdojo_overview/about-documentation/" role="button" style="--bs-btn-bg: #f2561d; --bs-btn-hover-bg: #f28d1d;">Open The Docs</a>
       {{ .Content }}
+    </div>
+  </div>
+</section>
+<section class="section section-md section-features">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-5" style="border-style: solid; border-radius: 2px;">
+        <h2 class="h4">Getting Started</h2>
+        <p>Start your journey with DefectDojo with our <a href="/docs/defectdojo_overview/new-user-checklist/">New User Checklist</a>.</p>
+      </div>
+      <div class="col-lg-5" style="border-style: solid; border-radius: 2px;">
+        <h2 class="h4">Import Data</h2>
+        <p>Learn how to import data from 190+ supported security tools <a href="docs/connecting_security_tools/import-fundamentals/">here</a>.</p>
+      </div>
+      <div class="col-lg-5" style="border-style: solid; border-radius: 2px;">
+        <h2 class="h4">Create Reports</h2>
+        <p>Use the <a href="docs/pro_reports/using-the-report-builder/">Report Builder</a> to present customizable reports of Findings.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -24,20 +42,16 @@
     <div class="container">
       <div class="row justify-content-center text-center">
         <div class="col-lg-5">
-          <h2 class="h4">Update content</h2>
-          <p>Edit <code>content/_index.md</code> to see this page change.</p>
+          <h2 class="h4">Join the Dojo community</h2>
+          <p>Check out live events, upcoming features and connect with other security professionals on our <a href="https://defectdojo.com/community">Community Page</a>.</p>
         </div>
         <div class="col-lg-5">
-          <h2 class="h4">Add new content</h2>
-          <p>Add Markdown files to <code>content</code> to create new pages.</p>
+          <h2 class="h4">Sign up for a trial</h2>
+          <p>Ready to go Pro? Create an account <a href="https://cloud.defectdojo.com/accounts/signup/">here</a>.</p>
         </div>
         <div class="col-lg-5">
-          <h2 class="h4">Configure your site</h2>
-          <p>Edit your config in <code>config/_default/params.toml</code>.</p>
-        </div>
-        <div class="col-lg-5">
-          <h2 class="h4">Read the docs</h2>
-          <p>Learn more in the <a href="https://getdoks.org/">Docs</a>.</p>
+          <h2 class="h4">Reach out to Support</h2>
+          <p>Need some help? Pro users can send an email to support@defectdojo.com</p>
         </div>
       </div>
     </div>
