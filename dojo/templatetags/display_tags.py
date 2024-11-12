@@ -781,7 +781,12 @@ def vulnerability_url(vulnerability_id):
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
             if "&&" in settings.VULNERABILITY_URLS[key]:
-                return settings.VULNERABILITY_URLS[key].split("&&")[0] + str(vulnerability_id) + settings.VULNERABILITY_URLS[key].split("&&")[1]
+                # Process specific keys specially if need
+                if key in ["CAPEC", "CWE"]:
+                    vuln_id = str(vulnerability_id).replace(f"{key}-", "")
+                else:
+                    vuln_id = str(vulnerability_id)
+                return f'{settings.VULNERABILITY_URLS[key].split("&&")[0]}{vuln_id}{settings.VULNERABILITY_URLS[key].split("&&")[1]}'
             return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
     return ""
 
