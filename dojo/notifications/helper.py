@@ -227,7 +227,9 @@ def send_slack_notification(event, user=None, *args, **kwargs):
                 "channel": channel,
                 "username": get_system_setting("slack_username"),
                 "text": create_notification_message(event, user, "slack", *args, **kwargs),
-            })
+            },
+            timeout=settings.REQUESTS_TIMEOUT,
+        )
 
         if "error" in res.text:
             logger.error("Slack is complaining. See raw text below.")
@@ -284,7 +286,9 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
                 res = requests.request(
                     method="POST",
                     url=get_system_setting("msteams_url"),
-                    data=create_notification_message(event, None, "msteams", *args, **kwargs))
+                    data=create_notification_message(event, None, "msteams", *args, **kwargs),
+                    timeout=settings.REQUESTS_TIMEOUT,
+                )
                 if res.status_code != 200:
                     logger.error("Error when sending message to Microsoft Teams")
                     logger.error(res.status_code)
@@ -518,7 +522,9 @@ def get_slack_user_id(user_email):
     res = requests.request(
         method="POST",
         url="https://slack.com/api/users.lookupByEmail",
-        data={"token": get_system_setting("slack_token"), "email": user_email})
+        data={"token": get_system_setting("slack_token"), "email": user_email},
+        timeout=settings.REQUESTS_TIMEOUT,
+    )
 
     user = json.loads(res.text)
 

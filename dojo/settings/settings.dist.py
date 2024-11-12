@@ -307,6 +307,9 @@ env = environ.FileAwareEnv(
     DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
+    # For HTTP requests, how long connection is open before timeout
+    # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
+    DD_REQUESTS_TIMEOUT=(int, 30),
 )
 
 
@@ -1771,6 +1774,11 @@ USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
 # Notifications
 # ------------------------------------------------------------------------------
 NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
+
+# ------------------------------------------------------------------------------
+# Timeouts
+# ------------------------------------------------------------------------------
+REQUESTS_TIMEOUT = env("DD_REQUESTS_TIMEOUT")
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings
