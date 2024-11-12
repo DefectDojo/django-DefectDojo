@@ -530,13 +530,15 @@ class ImporterOptions:
         *args: list,
         **kwargs: dict,
     ) -> list:
-        return self.validate(
+        tags = self.validate(
             "tags",
             expected_types=[list],
             required=False,
             default=[],
             **kwargs,
         )
+        # Force all tags to be lowercase
+        return [tag.lower() for tag in tags]
 
     def validate_test(
         self,
