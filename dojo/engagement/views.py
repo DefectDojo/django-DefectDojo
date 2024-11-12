@@ -1341,11 +1341,11 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 or rp_helper.role_has_exclusive_permissions(request.user)
                 or white_list_final
                 or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
-                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
-                risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
+                risk_acceptance = ra_helper.add_findings_to_risk_pending(request.user, risk_acceptance, findings)
             else:
-                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
         messages.add_message(
             request,
@@ -1648,7 +1648,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             finding = get_object_or_404(
                 Finding, pk=request.POST["remove_finding_id"])
             if settings.RISK_PENDING:
-                rp_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
+                rp_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
             else:
                 ra_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
 
