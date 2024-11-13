@@ -18,12 +18,10 @@ class CreateFindingExclusionForm(forms.ModelForm):
         help_text="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities.")
     expiration_date = forms.DateTimeField()
     user_history = forms.IntegerField(required=True)
-    product = forms.ModelChoiceField(queryset=Product.objects.all(),
-                                     required=True)
     reason = forms.CharField(max_length=200, required=True,
                              widget=forms.Textarea,
                              label="Reason")
 
     class Meta:
         model = FindingExclusion
-        exclude = ["accepted_by", "status", "finding"]
+        exclude = ["product", "accepted_by", "status", "finding"]
