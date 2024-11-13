@@ -1398,7 +1398,6 @@ def handle_uploaded_threat(f, eng):
 
 def handle_uploaded_selenium(f, cred):
     path = Path(f.name)
-    _name = path.parent / path.stem
     extension = path.suffix
     with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
               "wb+") as destination:
