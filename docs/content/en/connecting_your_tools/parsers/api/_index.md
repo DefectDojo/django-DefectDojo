@@ -3,6 +3,8 @@ title: "API Pull"
 description: "Report pulled to DefectDojo via API exposed by scanning service"
 weight: 2
 chapter: true
+sidebar:
+  collapsed: true
 ---
 All parsers that use API pull have common basic configuration steps, but with different values.
 
