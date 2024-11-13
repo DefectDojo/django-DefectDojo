@@ -30,9 +30,9 @@ class TrivyOperatorParser:
                 findings += self.output_findings(listitems, test)
         elif type(data) is dict and bool(set(data.keys()) & {"clustercompliancereports.aquasecurity.github.io", "clusterconfigauditreports.aquasecurity.github.io", "clusterinfraassessmentreports.aquasecurity.github.io", "clusterrbacassessmentreports.aquasecurity.github.io", "clustersbomreports.aquasecurity.github.io", "configauditreports.aquasecurity.github.io", "exposedsecretreports.aquasecurity.github.io", "infraassessmentreports.aquasecurity.github.io", "rbacassessmentreports.aquasecurity.github.io", "sbomreports.aquasecurity.github.io", "vulnerabilityreports.aquasecurity.github.io"}):
             for datakey in list(data.keys()):
-                # if datakey not in ["clustersbomreports.aquasecurity.github.io", "sbomreports.aquasecurity.github.io"]:
-                for listitems in (data[datakey]):
-                    findings += self.output_findings(listitems, test)
+                if datakey not in ["clustersbomreports.aquasecurity.github.io", "sbomreports.aquasecurity.github.io"]:
+                    for listitems in (data[datakey]):
+                        findings += self.output_findings(listitems, test)
         else:
             findings += self.output_findings(data, test)
         return findings
