@@ -132,6 +132,7 @@ class TruffleHogParser:
             rawV2 = json_data.get("RawV2", "")
             references = json_data.get("References", "N.A")
             id_from_tool = json_data.get("Id", "SECRET_SCANNING")
+            mitigation = json_data.get("Mitigation")
 
             if "MISSCONFIGURATION" in id_from_tool:
                 titleText = f"Misconfiguration in file {file} can produce a credential leaks"
