@@ -6,7 +6,7 @@
     </div>
     <div class="col-lg-9 col-xl-8 text-center">
       <p class="lead">{{ .Params.lead | safeHTML }}</p>
-      <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="/docs/{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}defectdojo_overview/about-documentation/" role="button" style="--bs-btn-bg: #f2561d; --bs-btn-hover-bg: #f28d1d;">Open The Docs</a>
+      <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="/en/{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}about_defectdojo/about_docs/" role="button" style="--bs-btn-bg: #f2561d; --bs-btn-hover-bg: #f28d1d;">Open The Docs</a>
       {{ .Content }}
     </div>
   </div>

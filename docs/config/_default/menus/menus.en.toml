@@ -30,7 +30,7 @@
 
 [[main]]
   name = "Docs"
-  url = "/docs/guides/example-guide/"
+  url = "/en/about_defectdojo/about_docs/"
 # url = "/docs/1.0/prologue/introduction/"
   weight = 10
 

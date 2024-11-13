@@ -2,7 +2,7 @@
 title: "Upgrading"
 description: "Release specific upgrading instructions"
 draft: false
-weight: 5
+weight: 2
 ---
 
 ## Docker compose

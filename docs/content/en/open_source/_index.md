@@ -1,7 +1,11 @@
 ---
-title: "Integrations"
-description: "A lot of integrations help to fit DefectDojo in your environment"
-weight: 3
+title: "Open Source DefectDojo"
+description: ""
+summary: ""
+date: 2023-09-07T16:12:03+02:00
+lastmod: 2023-09-07T16:12:03+02:00
+draft: false
+weight: 999
 toc: true
 sidebar:
     collapsed: true
