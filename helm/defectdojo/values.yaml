@@ -321,7 +321,7 @@ initializer:
   jobAnnotations: {}
   annotations: {}
   labels: {}
-  keepSeconds: 60
+  keepSeconds: 60  # A positive integer will keep this Job and Pod deployed for the specified number of seconds, after which they will be removed. For all other values, the Job and Pod will remain deployed.
   affinity: {}
   nodeSelector: {}
   resources:
