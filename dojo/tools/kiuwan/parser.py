@@ -1,4 +1,3 @@
-import contextlib
 import csv
 import hashlib
 import io
@@ -105,8 +104,9 @@ class KiuwanParser:
             finding.mitigation = "Not provided!"
             finding.severity = findingdict["severity"]
             finding.static_finding = True
-            with contextlib.suppress(Exception):
-                finding.cwe = int(row["CWE"])
+            if cwe := row.get("CWE"):
+                if cwe.isdigit():
+                    finding.cwe = int(cwe)
 
             if finding is not None:
                 if finding.title is None:
