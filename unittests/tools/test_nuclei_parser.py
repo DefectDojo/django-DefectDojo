@@ -236,3 +236,14 @@ class TestNucleiParser(DojoTestCase):
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Info", finding.severity)
+
+    def test_parse_invalid_cwe(self):
+        with open("unittests/scans/nuclei/invalid_cwe.json", encoding="utf-8") as testfile:
+            parser = NucleiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
+            self.assertEqual(0, finding.cwe)

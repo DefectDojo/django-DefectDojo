@@ -1,6 +1,6 @@
+import collections
 import json
 import logging
-import os
 import re
 from datetime import datetime
 
@@ -281,10 +281,10 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
-class RequestResponseDict(list):
+class RequestResponseDict(collections.UserList):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
-        list.__init__(self, *args, **kwargs)
+        collections.UserList.__init__(self, *args, **kwargs)
         self.pretty_print = pretty_print
 
     def __add__(self, rhs):
@@ -803,20 +803,8 @@ class FileSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if file := data.get("file"):
-            ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
-            valid_extensions = settings.FILE_UPLOAD_TYPES
-            if ext.lower() not in valid_extensions:
-                if accepted_extensions := f"{', '.join(valid_extensions)}":
-                    msg = (
-                        "Unsupported extension. Supported extensions are as "
-                        f"follows: {accepted_extensions}"
-                    )
-                else:
-                    msg = (
-                        "File uploads are prohibited due to the list of acceptable "
-                        "file extensions being empty"
-                    )
-                raise ValidationError(msg)
+            # the clean will validate the file extensions and raise a Validation error if the extensions are not accepted
+            FileUpload(title=file.name, file=file).clean()
             return data
         return None
 
@@ -2708,6 +2696,11 @@ class ReportGenerateSerializer(serializers.Serializer):
     finding_notes = FindingToNotesSerializer(
         many=True, allow_null=True, required=False,
     )
+
+
+class EngagementUpdateJiraEpicSerializer(serializers.Serializer):
+    epic_name = serializers.CharField(required=False, max_length=200)
+    epic_priority = serializers.CharField(required=False, allow_null=True)
 
 
 class TagSerializer(serializers.Serializer):

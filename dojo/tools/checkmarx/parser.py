@@ -368,7 +368,7 @@ class CheckmarxParser:
         if isinstance(value, str):
             return parser.parse(value).date()
         if isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.utcfromtimestamp(value.get("seconds")).date()
+            return datetime.datetime.fromtimestamp(value.get("seconds"), datetime.UTC).date()
         return None
 
     def _get_findings_json(self, file, test):

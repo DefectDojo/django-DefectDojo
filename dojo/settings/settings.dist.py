@@ -17,6 +17,7 @@ import os
 import warnings
 from datetime import timedelta
 from email.utils import getaddresses
+from pathlib import Path
 
 import environ
 from celery.schedules import crontab
@@ -306,6 +307,9 @@ env = environ.FileAwareEnv(
     DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
+    # For HTTP requests, how long connection is open before timeout
+    # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
+    DD_REQUESTS_TIMEOUT=(int, 30),
 )
 
 
@@ -332,7 +336,7 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
 
 
 # Read .env file as default or from the command line, DD_ENV_PATH
-if os.path.isfile(root("dojo/settings/.env.prod")) or "DD_ENV_PATH" in os.environ:
+if Path(root("dojo/settings/.env.prod")).is_file() or "DD_ENV_PATH" in os.environ:
     env.read_env(root("dojo/settings/" + env.str("DD_ENV_PATH", ".env.prod")))
 
 # ------------------------------------------------------------------------------
@@ -444,7 +448,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(os.path.dirname(DOJO_ROOT), "components", "node_modules"),
+    os.path.join(Path(DOJO_ROOT).parent, "components", "node_modules"),
 )
 
 # List of finder classes that know how to find static files in
@@ -937,7 +941,7 @@ if SAML2_ENABLED:
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env("DD_SAML2_ATTRIBUTES_MAP"))
     SAML_FORCE_AUTH = env("DD_SAML2_FORCE_AUTH")
     SAML_ALLOW_UNKNOWN_ATTRIBUTES = env("DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE")
-    BASEDIR = path.dirname(path.abspath(__file__))
+    BASEDIR = Path(path.abspath(__file__)).parent
     if len(env("DD_SAML2_ENTITY_ID")) == 0:
         SAML2_ENTITY_ID = f"{SITE_URL}/saml2/metadata/"
     else:
@@ -1746,6 +1750,9 @@ VULNERABILITY_URLS = {
     "ELSA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
     "ELBA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELBA-2024-7457.html
     "RXSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
+    "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html
+    "CWE": "https://cwe.mitre.org/data/definitions/&&.html",  # e.g. https://cwe.mitre.org/data/definitions/79.html
+    "TEMP": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/TEMP-0841856-B18BAF
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
@@ -1769,6 +1776,11 @@ USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
 # Notifications
 # ------------------------------------------------------------------------------
 NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
+
+# ------------------------------------------------------------------------------
+# Timeouts
+# ------------------------------------------------------------------------------
+REQUESTS_TIMEOUT = env("DD_REQUESTS_TIMEOUT")
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings

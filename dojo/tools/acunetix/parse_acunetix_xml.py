@@ -26,7 +26,7 @@ class AcunetixXMLParser:
             # get report date
             if scan.findtext("StartTime") and "" != scan.findtext("StartTime"):
                 report_date = dateutil.parser.parse(
-                    scan.findtext("StartTime"),
+                    scan.findtext("StartTime"), dayfirst=True,
                 ).date()
             for item in scan.findall("ReportItems/ReportItem"):
                 finding = Finding(
