@@ -130,12 +130,11 @@ class TruffleHogParser:
             verified = json_data.get("Verified", "")
             raw = json_data.get("Raw", "")
             rawV2 = json_data.get("RawV2", "")
-            references = "N.A"
+            references = json_data.get("References", "N.A")
+            id_from_tool = json_data.get("Id", "SECRET_SCANNING")
 
-            if "exposure" in raw:
+            if "MISSCONFIGURATION" in id_from_tool:
                 titleText = f"Misconfiguration in file {file} can produce a credential leaks"
-                mitigation = "Make sure you only enable the Spring Boot Actuator endpoints that you really need and restrict access to these endpoints."
-                references = "https://discuss.apps.bancolombia.com/t/nueva-validacion-engine-secret/11246"
             else:
                 titleText = f"Hard Coded {detector_name} secret in: {file}"
                 mitigation = "Secrets and passwords should be stored in a secure vault and/or secure storage."
@@ -200,7 +199,7 @@ class TruffleHogParser:
                     dynamic_finding=False,
                     static_finding=True,
                     nb_occurences=1,
-                    vuln_id_from_tool= json_data.get("Id", "SECRET_SCANNING")
+                    vuln_id_from_tool= id_from_tool
                 )
                 finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")]
                 dupes[dupe_key] = finding
