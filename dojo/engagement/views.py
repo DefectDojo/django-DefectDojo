@@ -1252,6 +1252,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
 
         findings = form.cleaned_data['accepted_findings']
         form.fields["accepted_findings"].queryset = form.fields["accepted_findings"].queryset.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
         white_list_final = None
         len_white_list = 0
         findings_not_on_white_list = []
@@ -1343,7 +1344,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
-                risk_acceptance = ra_helper.add_findings_to_risk_pending(request.user, risk_acceptance, findings)
+                risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
