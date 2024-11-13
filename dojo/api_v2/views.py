@@ -1511,7 +1511,10 @@ class ComponentViewSet(viewsets.ModelViewSet):
     queryset = Component.objects.none()
     serializer_class = serializers.ComponentSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'version', 'date', 'engagement_id']  # Campos disponibles para filtrar
+    filterset_fields = ["name", "version", "date", "engagement_id"]  # Campos disponibles para filtrar
+    permission_classes = (
+        IsAuthenticated, 
+        permissions.UserHasComponentPermission,)
 
     def get_queryset(self):
         queryset = Component.objects.all()

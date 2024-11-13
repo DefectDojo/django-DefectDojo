@@ -83,6 +83,9 @@ class Permissions(IntEnum):
     Benchmark_Delete = 1607
 
     Component_View = 1702
+    Component_Add = 1703
+    Component_Edit = 1706
+    Component_Delete = 1707
 
     Note_View_History = 1802
     Note_Add = 1803
@@ -183,6 +186,10 @@ class Permissions(IntEnum):
             Permissions.Note_Delete,
             Permissions.Note_Edit,
             Permissions.Note_View_History,
+            Permissions.Component_Add,
+            Permissions.Component_View,
+            Permissions.Component_Edit,
+            Permissions.Component_Delete,
 
         }.union(cls.get_test_permissions())
 
@@ -216,6 +223,14 @@ class Permissions(IntEnum):
             Permissions.Transfer_Finding_Add,
             Permissions.Finding_Code_Review
         }.union(cls.get_finding_group_permissions())
+
+    @classmethod
+    def get_component_permissions(cls):
+        return{
+            Permissions.Component_View,
+            Permissions.Component_Edit,
+            Permissions.Component_Delete,
+        }
     
     @classmethod
     def get_transfer_finding_permissions(cls):
@@ -349,6 +364,9 @@ def get_roles_with_permissions():
             Permissions.Finding_Group_View,
             Permissions.Endpoint_View,
             Permissions.Component_View,
+            Permissions.Component_Add,
+            Permissions.Component_Delete,
+            Permissions.Component_Edit,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
             Permissions.Technology_View,
@@ -383,6 +401,7 @@ def get_roles_with_permissions():
             Permissions.Endpoint_Edit,
             Permissions.Benchmark_Edit,
             Permissions.Component_View,
+            Permissions.Component_Add,
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
@@ -445,6 +464,9 @@ def get_roles_with_permissions():
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
             Permissions.Component_View,
+            Permissions.Component_Add,
+            Permissions.Component_Edit,
+            Permissions.Component_Delete,
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
@@ -537,6 +559,9 @@ def get_roles_with_permissions():
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
             Permissions.Component_View,
+            Permissions.Component_Add,
+            Permissions.Component_Edit,
+            Permissions.Component_Delete,
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
