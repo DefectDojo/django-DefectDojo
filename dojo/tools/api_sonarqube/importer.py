@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiImporter:
+
     """
     This class imports from SonarQube (SQ) all open/confirmed SQ issues related to the project related to the test as
      findings.
@@ -361,32 +362,31 @@ class SonarQubeApiImporter:
         search = re.search(r"CWE-(\d+)", raw_html)
         if search:
             return int(search.group(1))
+        return None
 
     @staticmethod
     def convert_sonar_severity(sonar_severity):
         sev = sonar_severity.lower()
         if sev == "blocker":
             return "Critical"
-        elif sev == "critical":
+        if sev == "critical":
             return "High"
-        elif sev == "major":
+        if sev == "major":
             return "Medium"
-        elif sev == "minor":
+        if sev == "minor":
             return "Low"
-        else:
-            return "Info"
+        return "Info"
 
     @staticmethod
     def convert_scanner_confidence(sonar_scanner_confidence):
         sev = sonar_scanner_confidence.lower()
         if sev == "high":
             return 1
-        elif sev == "medium":
+        if sev == "medium":
             return 4
-        elif sev == "low":
+        if sev == "low":
             return 7
-        else:
-            return 7
+        return 7
 
     @staticmethod
     def get_references(vuln_details):

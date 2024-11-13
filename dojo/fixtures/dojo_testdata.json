@@ -227,6 +227,7 @@
       "url_prefix": "",
       "enable_slack_notifications": false,
       "enable_mail_notifications": false,
+      "enable_webhooks_notifications": true,
       "email_from": "no-reply@example.com",
       "false_positive_history": false,
       "msteams_url": "",
@@ -2977,11 +2978,27 @@
     "pk": 1,
     "model": "dojo.notifications",
     "fields": {
-      "product": 1,
-      "user": 2,
-      "product_type_added": [
-        "slack"
-      ]
+      "product": null,
+      "user": null,
+      "template": false,
+      "product_type_added": "webhooks,alert",
+      "product_added": "webhooks,alert",
+      "engagement_added": "webhooks,alert",
+      "test_added": "webhooks,alert",
+      "scan_added": "webhooks,alert",
+      "scan_added_empty": "webhooks",
+      "jira_update": "alert",
+      "upcoming_engagement": "alert",
+      "stale_engagement": "alert",
+      "auto_close_engagement": "alert",
+      "close_engagement": "alert",
+      "user_mentioned": "alert",
+      "code_review": "alert",
+      "review_requested": "alert",
+      "other": "",
+      "sla_breach": "alert",
+      "risk_acceptance_expiration": "alert",
+      "sla_breach_combined": "alert"
     }
   },
   {
@@ -3095,6 +3112,36 @@
       "message": "test message",
       "dismissable": true,
       "style": "danger"
+    }
+  },
+  {
+    "model": "dojo.notification_webhooks",
+    "pk": 1,
+    "fields": {
+      "name": "My webhook endpoint",
+      "url": "http://webhook.endpoint:8080/post",
+      "header_name": "Auth",
+      "header_value": "Token xxx",
+      "status": "active",
+      "first_error": null,
+      "last_error": null,
+      "note": null,
+      "owner": null
+    }
+  },
+  {
+    "model": "dojo.notification_webhooks",
+    "pk": 2,
+    "fields": {
+      "name": "My personal webhook endpoint",
+      "url": "http://webhook.endpoint:8080/post",
+      "header_name": "Auth",
+      "header_value": "Token secret",
+      "status": "active",
+      "first_error": null,
+      "last_error": null,
+      "note": null,
+      "owner": 2
     }
   }
 ]

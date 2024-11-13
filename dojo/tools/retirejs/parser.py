@@ -62,7 +62,7 @@ class RetireJsParser:
             elif "osvdb" in item_node["identifiers"]:
                 title = "".join(item_node["identifiers"]["osvdb"])
 
-        finding = Finding(
+        return Finding(
             title=title,
             test=test,
             cwe=1035,  # Vulnerable Third Party Component
@@ -74,5 +74,3 @@ class RetireJsParser:
             duplicate=False,
             out_of_scope=False,
         )
-
-        return finding

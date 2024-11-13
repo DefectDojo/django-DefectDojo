@@ -70,8 +70,7 @@ class TenableCSVParser:
         first_line = content.split("\n")[0]
         if ";" in first_line:
             return ";"
-        else:
-            return ","  # default to comma if no semicolon found
+        return ","  # default to comma if no semicolon found
 
     def get_findings(self, filename: str, test: Test):
         # Read the CSV
@@ -101,7 +100,7 @@ class TenableCSVParser:
             severity = self._convert_severity(raw_severity)
             # Other text fields
             description = row.get("Synopsis", row.get("definition.synopsis", "N/A"))
-            mitigation = str(row.get("Solution", row.get("definition.solution", "N/A")))
+            mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
             impact = row.get("Description", row.get("definition.description", "N/A"))
             references = row.get("See Also", row.get("definition.see_also", "N/A"))
             # Determine if the current row has already been processed

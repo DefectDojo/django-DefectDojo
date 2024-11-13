@@ -3,7 +3,9 @@ from dojo.tools.cyclonedx.xml_parser import CycloneDXXMLParser
 
 
 class CycloneDXParser:
-    """CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security
+
+    """
+    CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security
     contexts and supply chain component analysis.
     https://www.cyclonedx.org/
     """
@@ -20,5 +22,4 @@ class CycloneDXParser:
     def get_findings(self, file, test):
         if file.name.strip().lower().endswith(".json"):
             return CycloneDXJSONParser()._get_findings_json(file, test)
-        else:
-            return CycloneDXXMLParser()._get_findings_xml(file, test)
+        return CycloneDXXMLParser()._get_findings_xml(file, test)

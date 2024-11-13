@@ -4,9 +4,8 @@ from dojo.models import Finding
 from django.conf import settings
 
 class BearerCLIParser:
-    """
-    Bearer CLI tool is a SAST scanner for multiple languages
-    """
+
+    """Bearer CLI tool is a SAST scanner for multiple languages"""
 
     def get_scan_types(self):
         return ["Bearer CLI"]
@@ -29,8 +28,7 @@ class BearerCLIParser:
 
                 if bearerfinding["fingerprint"] in dupes:
                     continue
-                else:
-                    dupes.add(bearerfinding["fingerprint"])
+                dupes.add(bearerfinding["fingerprint"])
 
                 finding = Finding(
                     title=bearerfinding["title"] + " in " + bearerfinding["filename"] + ":" + str(bearerfinding["line_number"]),

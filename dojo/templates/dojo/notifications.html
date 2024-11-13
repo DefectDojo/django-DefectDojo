@@ -89,6 +89,9 @@
                         {% if 'mail' in enabled_notifications %}
                             <th class="centered">{% trans "Mail" %}</th>
                         {% endif %}
+                        {% if 'webhooks' in enabled_notifications %}
+                        <th class="centered">{% trans "Webhooks" %}</th>
+                        {% endif %}
                         <th class="centered">{% trans "Alert" %}</th>
                     </tr>
                 </thead>

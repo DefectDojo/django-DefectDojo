@@ -148,9 +148,7 @@ class IbmAppParser:
 
     # this fetches Issue description
     def fetch_advisory_group(self, root, advisory):
-        """
-        Function that parse advisory-group in order to get the item's description
-        """
+        """Function that parse advisory-group in order to get the item's description"""
         for advisory_group in root.iter("advisory-group"):
             for item in advisory_group.iter("item"):
                 if item.attrib["id"] == advisory:

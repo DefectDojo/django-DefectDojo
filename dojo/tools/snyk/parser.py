@@ -23,8 +23,7 @@ class SnykParser:
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
             return temp
-        else:
-            return self.process_tree(reportTree, test)
+        return self.process_tree(reportTree, test)
 
     def process_tree(self, tree, test):
         return list(self.get_items(tree, test)) if tree else []
@@ -238,7 +237,7 @@ class SnykParser:
         else:
             severity = "Critical"
         # create the finding object
-        finding = Finding(
+        return Finding(
             title=ruleId + "_" + locations_uri,
             test=test,
             severity=severity,
@@ -259,4 +258,3 @@ class SnykParser:
             static_finding=True,
             dynamic_finding=False,
         )
-        return finding

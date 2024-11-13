@@ -4,7 +4,9 @@ from dojo.models import Finding
 
 
 class MozillaObservatoryParser:
-    """Mozilla Observatory
+
+    """
+    Mozilla Observatory
 
     See: https://observatory.mozilla.org
 
@@ -61,9 +63,8 @@ class MozillaObservatoryParser:
     def get_severity(self, num_severity):
         if 0 > num_severity >= -10:
             return "Low"
-        elif -11 >= num_severity > -26:
+        if -11 >= num_severity > -26:
             return "Medium"
-        elif num_severity <= -26:
+        if num_severity <= -26:
             return "High"
-        else:
-            return "Info"
+        return "Info"

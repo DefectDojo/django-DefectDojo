@@ -174,7 +174,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, "https://gitlab.com"),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid"]),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid", "read_api", "read_repository"]),
     DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ""),
     DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ""),
@@ -449,7 +449,9 @@ env = environ.FileAwareEnv(
                 }
             }
         }
-    })
+    }),
+    # When enabled, force the password field to be required for creating/updating users
+    DD_REQUIRE_PASSWORD_ON_USER=(bool, True)
 )
 
 
@@ -738,6 +740,7 @@ SOCIAL_AUTH_PIPELINE = (
 
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
+REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
@@ -1461,6 +1464,10 @@ CELERY_BEAT_SCHEDULE = {
             month_of_year=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[3],
             day_of_week=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[4]),
         },
+    "notification_webhook_status_cleanup": {
+        "task": "dojo.notifications.helper.webhook_status_cleanup",
+        "schedule": timedelta(minutes=1),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1607,6 +1614,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Legitify Scan": ["title", "endpoints", "severity"],
     "ThreatComposer Scan": ["title", "description"],
     "Invicti Scan": ["title", "description", "severity"],
+    "HackerOne Cases": ["title", "severity"],
+    "KrakenD Audit Scan": ["description", "mitigation", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1832,6 +1841,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
     "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
+    "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -2050,6 +2060,11 @@ VULNERABILITY_URLS = {
     "RHBA": "https://access.redhat.com/errata/",
     "RHEA": "https://access.redhat.com/errata/",
     "FEDORA": "https://bodhi.fedoraproject.org/updates/",
+    "ALSA": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
+    "USN": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "DLA": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/DLA-3917-1
+    "ELSA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
+    "RXSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")

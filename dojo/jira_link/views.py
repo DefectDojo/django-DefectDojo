@@ -22,7 +22,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_configuration_permission
 
 # Local application/library imports
-from dojo.forms import DeleteJIRAInstanceForm, ExpressJIRAForm, JIRAForm
+from dojo.forms import AdvancedJIRAForm, DeleteJIRAInstanceForm, JIRAForm
 from dojo.models import JIRA_Instance, JIRA_Issue, Notes, System_Settings, User
 from dojo.notifications.helper import create_notification
 from dojo.utils import add_breadcrumb, add_error_message_to_response, get_setting
@@ -67,10 +67,10 @@ def webhook(request, secret=None):
     if not system_settings.enable_jira:
         return webhook_responser_handler("info", "Ignoring incoming webhook as JIRA is disabled.")
     # If the webhook is not enabled, then return a 404
-    elif not system_settings.enable_jira_web_hook:
+    if not system_settings.enable_jira_web_hook:
         return webhook_responser_handler("info", "Ignoring incoming webhook as JIRA Webhook is disabled.")
     # Determine if the request should be "authenticated"
-    elif not system_settings.disable_jira_webhook_secret:
+    if not system_settings.disable_jira_webhook_secret:
         # Make sure there is a value for the webhook secret before making a comparison
         if not system_settings.jira_webhook_secret:
             return webhook_responser_handler("info", "Ignoring incoming webhook as JIRA Webhook secret is empty in Defect Dojo system settings.")
@@ -168,50 +168,50 @@ def webhook(request, secret=None):
 
 def check_for_and_create_comment(parsed_json):
     """
-        example incoming requests from JIRA Server 8.14.0
-        {
-        "timestamp":1610269967824,
-        "webhookEvent":"comment_created",
-        "comment":{
-            "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
-            "id":"466578",
-            "author":{
-                "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                "name":"defect.dojo",
-                "key":"defect.dojo", # seems to be only present on JIRA Server, not on Cloud
-                "avatarUrls":{
-                    "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                    "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                    "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                    "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                },
-                "displayName":"Defect Dojo",
-                "active":true,
-                "timeZone":"Europe/Amsterdam"
+    example incoming requests from JIRA Server 8.14.0
+    {
+    "timestamp":1610269967824,
+    "webhookEvent":"comment_created",
+    "comment":{
+        "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
+        "id":"466578",
+        "author":{
+            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+            "name":"defect.dojo",
+            "key":"defect.dojo", # seems to be only present on JIRA Server, not on Cloud
+            "avatarUrls":{
+                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
             },
-            "body":"(Valentijn Scholten):test4",
-            "updateAuthor":{
-                "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                "name":"defect.dojo",
-                "key":"defect.dojo",
-                "avatarUrls":{
-                    "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                    "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                    "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                    "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                },
-                "displayName":"Defect Dojo",
-                "active":true,
-                "timeZone":"Europe/Amsterdam"
+            "displayName":"Defect Dojo",
+            "active":true,
+            "timeZone":"Europe/Amsterdam"
+        },
+        "body":"(Valentijn Scholten):test4",
+        "updateAuthor":{
+            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+            "name":"defect.dojo",
+            "key":"defect.dojo",
+            "avatarUrls":{
+                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
             },
-            "created":"2021-01-10T10:12:47.824+0100",
-            "updated":"2021-01-10T10:12:47.824+0100"
-        }
-        }
+            "displayName":"Defect Dojo",
+            "active":true,
+            "timeZone":"Europe/Amsterdam"
+        },
+        "created":"2021-01-10T10:12:47.824+0100",
+        "updated":"2021-01-10T10:12:47.824+0100"
+    }
+    }
     """
     comment = parsed_json.get("comment", None)
     if comment is None:
-        return
+        return None
 
     comment_text = comment.get("body")
     commenter = ""
@@ -271,6 +271,7 @@ def check_for_and_create_comment(parsed_json):
             finding.jira_issue.jira_change = timezone.now()
             finding.jira_issue.save()
             finding.save()
+    return None
 
 
 def get_custom_field(jira, label):
@@ -284,24 +285,24 @@ def get_custom_field(jira, label):
     return field
 
 
-class ExpressJiraView(View):
+class NewJiraView(View):
     def get_template(self):
-        return "dojo/express_new_jira.html"
-
-    def get_fallback_template(self):
         return "dojo/new_jira.html"
 
+    def get_fallback_template(self):
+        return "dojo/new_jira_advanced.html"
+
     def get_form_class(self):
-        return ExpressJIRAForm
+        return JIRAForm
 
     def get_fallback_form_class(self):
-        return JIRAForm
+        return AdvancedJIRAForm
 
     def get(self, request):
         if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
-        add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
+        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
         return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
@@ -390,18 +391,18 @@ class ExpressJiraView(View):
         return render(request, self.get_template(), {"jform": jform})
 
 
-class NewJiraView(View):
+class AdvancedJiraView(View):
     def get_template(self):
-        return "dojo/new_jira.html"
+        return "dojo/new_jira_advanced.html"
 
     def get_form_class(self):
-        return JIRAForm
+        return AdvancedJIRAForm
 
     def get(self, request):
         if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
-        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
+        add_breadcrumb(title="New Jira Configuration (Advanced)", top_level=False, request=request)
         return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
@@ -432,8 +433,7 @@ class NewJiraView(View):
                 url=request.build_absolute_uri(reverse("jira")))
 
             return HttpResponseRedirect(reverse("jira"))
-        else:
-            logger.error("jform.errors: %s", jform.errors)
+        logger.error("jform.errors: %s", jform.errors)
         return render(request, self.get_template(), {"jform": jform})
 
 
@@ -442,7 +442,7 @@ class EditJiraView(View):
         return "dojo/edit_jira.html"
 
     def get_form_class(self):
-        return JIRAForm
+        return AdvancedJIRAForm
 
     def get(self, request, jid=None):
         if not user_has_configuration_permission(request.user, "dojo.change_jira_instance"):
