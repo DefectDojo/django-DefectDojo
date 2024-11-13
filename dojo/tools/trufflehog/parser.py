@@ -135,7 +135,7 @@ class TruffleHogParser:
             mitigation = json_data.get("Mitigation")
 
             if "MISSCONFIGURATION" in id_from_tool:
-                titleText = f"Misconfiguration in file {file} can produce a credential leaks"
+                titleText = f"Misconfiguration in file {file} can produce a credential leak"
             else:
                 titleText = f"Hard Coded {detector_name} secret in: {file}"
                 mitigation = "Secrets and passwords should be stored in a secure vault and/or secure storage."
