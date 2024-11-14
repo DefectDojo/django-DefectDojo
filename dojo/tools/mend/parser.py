@@ -35,6 +35,7 @@ class MendParser:
             cve = None
             component_name = None
             component_version = None
+            impact = None
             if "component" in node:
                 node["project"].get("name", "")
                 description = (
