@@ -4797,7 +4797,7 @@ class PermissionKey(models.Model):
         ):
 
         token = secrets.token_urlsafe(64)
-        expiration = timezone.now() + timedelta(minutes=lifetime)
+        expiration = timezone.now() + timedelta(hours=lifetime)
         try:
             permissionkey = cls.objects.create(
                 token=token,
@@ -4815,7 +4815,13 @@ class PermissionKey(models.Model):
                 expiration=expiration)
 
         return permissionkey
-            
+    
+    @classmethod 
+    def get_token(cls, risk_acceptance: Risk_Acceptance, user: Dojo_User):
+        permission_key = cls.objects.get(risk_acceptance=risk_acceptance,
+                                         user=user)
+        return permission_key
+    
 
 
 if settings.ENABLE_AUDITLOG:
