@@ -39,6 +39,7 @@ class Mend_platform_api3Parser:
             component_name = None
             component_version = None
             impact = None
+            file_path = None
 
             if 'component' in node:
                 description = (
@@ -68,6 +69,7 @@ class Mend_platform_api3Parser:
                 component_name = node['component'].get('artifactId')
                 component_version = node['component'].get('version')
                 impact = node['component'].get('dependencyType')
+                file_path = node['component'].get('path')
             else:
                 description = node['vulnerability'].get('description', "")
 
