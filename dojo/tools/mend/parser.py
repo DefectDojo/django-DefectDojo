@@ -36,6 +36,7 @@ class MendParser:
             component_name = None
             component_version = None
             impact = None
+            description = ""
             if "component" in node:
                 node["project"].get("name")
                 description = (
@@ -215,6 +216,7 @@ class MendParser:
                         )
 
         elif "response" in content:
+            # New schema: handle response array
             tree_node = content["response"]
             for node in tree_node:
                 findings.append(_build_common_output(node))
