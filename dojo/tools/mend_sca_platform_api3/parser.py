@@ -27,7 +27,7 @@ class MendPlatformApi3Parser:
         # Ensure we handle JSON formatting before attempting to parse
         try:
             content = json.loads(str(data, "utf-8"))
-        except Exception as e:
+        except Exception:
             content = json.loads(data)
 
         def _build_common_output(node, lib_name=None):
