@@ -189,34 +189,35 @@ def get_title(result, rule):
     return textwrap.shorten(title, 150)
 
 
-def get_snippet(result):
+def get_snippet(location):
+
     snippet = None
-    if "locations" in result:
-        location = result["locations"][0]
-        if "physicalLocation" in location:
-            if "region" in location["physicalLocation"]:
-                if "snippet" in location["physicalLocation"]["region"]:
-                    if (
-                        "text"
-                        in location["physicalLocation"]["region"]["snippet"]
-                    ):
-                        snippet = location["physicalLocation"]["region"][
-                            "snippet"
-                        ]["text"]
-            if (
-                snippet is None
-                and "contextRegion" in location["physicalLocation"]
-            ):
-                if "snippet" in location["physicalLocation"]["contextRegion"]:
-                    if (
-                        "text"
-                        in location["physicalLocation"]["contextRegion"][
-                            "snippet"
-                        ]
-                    ):
-                        snippet = location["physicalLocation"][
-                            "contextRegion"
-                        ]["snippet"]["text"]
+
+    if location and "physicalLocation" in location:
+        if "region" in location["physicalLocation"]:
+            if "snippet" in location["physicalLocation"]["region"]:
+                if (
+                    "text"
+                    in location["physicalLocation"]["region"]["snippet"]
+                ):
+                    snippet = location["physicalLocation"]["region"][
+                        "snippet"
+                    ]["text"]
+        if (
+            snippet is None
+            and "contextRegion" in location["physicalLocation"]
+        ):
+            if "snippet" in location["physicalLocation"]["contextRegion"]:
+                if (
+                    "text"
+                    in location["physicalLocation"]["contextRegion"][
+                        "snippet"
+                    ]
+                ):
+                    snippet = location["physicalLocation"][
+                        "contextRegion"
+                    ]["snippet"]["text"]
+
     return snippet
 
 
@@ -264,7 +265,7 @@ def get_codeFlowsDescription(codeFlows):
     return description
 
 
-def get_description(result, rule):
+def get_description(result, rule, location):
     description = ""
     message = ""
     if "message" in result:
@@ -272,7 +273,7 @@ def get_description(result, rule):
             result["message"], rule,
         )
         description += f"**Result message:** {message}\n"
-    if get_snippet(result) is not None:
+    if get_snippet(location) is not None:
         description += f"**Snippet:**\n```\n{get_snippet(result)}\n```\n"
     if rule is not None:
         if "name" in rule:
@@ -388,14 +389,14 @@ def get_items_from_result(result, rules, artifacts, run_date):
                     else:
                         line = location["physicalLocation"]["region"]["startLine"]
 
-            files.append((file_path, line))
+            files.append((file_path, line, location))
 
     if not files:
-        files.append((None, None))
+        files.append((None, None, None))
 
     result_items = []
 
-    for file_path, line in files:
+    for file_path, line, location in files:
 
         # test rule link
         rule = rules.get(result.get("ruleId"))
@@ -403,7 +404,7 @@ def get_items_from_result(result, rules, artifacts, run_date):
         finding = Finding(
             title=get_title(result, rule),
             severity=get_severity(result, rule),
-            description=get_description(result, rule),
+            description=get_description(result, rule, location),
             static_finding=True,  # by definition
             dynamic_finding=False,  # by definition
             false_p=suppressed,
