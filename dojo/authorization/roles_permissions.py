@@ -177,6 +177,7 @@ class Permissions(IntEnum):
             Permissions.Risk_Acceptance_Expire,
             Permissions.Risk_Acceptance_Reinstance,
             Permissions.Risk_Acceptance_Bullk,
+            Permissions.Risk_Acceptance_Refresh_Permission_key,
             Permissions.Risk_Unaccept,
             Permissions.Test_Add,
             Permissions.Import_Scan_Result,

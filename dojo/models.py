@@ -19,7 +19,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError 
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
 from django.db import connection, models
@@ -4818,8 +4818,12 @@ class PermissionKey(models.Model):
     
     @classmethod 
     def get_token(cls, risk_acceptance: Risk_Acceptance, user: Dojo_User):
-        permission_key = cls.objects.get(risk_acceptance=risk_acceptance,
-                                         user=user)
+        try:
+            permission_key = cls.objects.get(risk_acceptance=risk_acceptance,
+                                            user=user)
+        except ObjectDoesNotExist as e:
+            logger.error(f"Permission key not found for user {user.id} associated with risk acceptance {risk_acceptance.id}")
+            raise e 
         return permission_key
     
 
