@@ -130,10 +130,16 @@ class TruffleHogParser:
             verified = json_data.get("Verified", "")
             raw = json_data.get("Raw", "")
             rawV2 = json_data.get("RawV2", "")
+            references = json_data.get("References", "N.A")
+            id_from_tool = json_data.get("Id", "SECRET_SCANNING")
+            mitigation = json_data.get("Mitigation")
 
-            titleText = f"Hard Coded {detector_name} secret in: {file}"
+            if "MISSCONFIGURATION" in id_from_tool:
+                titleText = f"Misconfiguration in file {file} can produce a credential leak"
+            else:
+                titleText = f"Hard Coded {detector_name} secret in: {file}"
+                mitigation = "Secrets and passwords should be stored in a secure vault and/or secure storage."
 
-            mitigation = "Secrets and passwords should be stored in a secure vault and/or secure storage."
             if link:
                 mitigation = f"{mitigation}\nSee the commit here: {link}"
 
@@ -187,14 +193,14 @@ class TruffleHogParser:
                     severity=severity,
                     mitigation=mitigation,
                     impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
-                    references="N/A",
+                    references=references,
                     file_path=file,
                     line=line_number,  # setting it to a fake value to activate deduplication
                     url="N/A",
                     dynamic_finding=False,
                     static_finding=True,
                     nb_occurences=1,
-                    vuln_id_from_tool= json_data.get("Id", "SECRET_SCANNING")
+                    vuln_id_from_tool= id_from_tool
                 )
                 finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("trufflehog")]
                 dupes[dupe_key] = finding
