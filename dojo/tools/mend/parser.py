@@ -4,7 +4,7 @@ import logging
 
 from dojo.models import Finding
 
-__author__ = "dr3dd589"
+__author__ = "dr3dd589 + testaccount90009 aka SH"
 
 logger = logging.getLogger(__name__)
 
