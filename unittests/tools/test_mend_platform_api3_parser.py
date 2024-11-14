@@ -28,7 +28,7 @@ class TestMend_platform_api3Parser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(5, len(findings))
 
-#The below context is TBD on if it is needed or not.
+# The below context is TBD on if it is needed or not.
 #    def test_parse_file_with_multiple_vuln_cli_output(self):
 #        with open(
 #            get_unit_tests_path() + "/scans/mend_platform_api3/cli_generated_many_vulns.json", encoding="utf-8",
