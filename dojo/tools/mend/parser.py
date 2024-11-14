@@ -66,6 +66,7 @@ class MendParser:
                 component_name = node["component"].get("artifactId")
                 component_version = node["component"].get("version")
                 impact = node["component"].get("dependencyType")
+                cvss3_score = node["vulnerability"].get("score", None)
             else:
                 description = node.get("vulnerability", {}).get("description", "Unknown")
 
@@ -91,6 +92,7 @@ class MendParser:
                 lib_name = node["library"].get("filename")
                 component_name = node["library"].get("artifactId")
                 component_version = node["library"].get("version")
+                cvss3_score = node.get("cvss3_score", None)
             else:
                 description = node.get("description", "Unknown")
 
@@ -109,7 +111,7 @@ class MendParser:
                 cvss_sev = node.get("severity")
             severity = cvss_sev.lower().capitalize()
 
-            cvss3_score = node.get("cvss3_score", None)
+            
             cvss3_vector = node.get("scoreMetadataVector", None)
             severity_justification = "CVSS v3 score: {} ({})".format(
                 cvss3_score if cvss3_score is not None else "N/A", cvss3_vector if cvss3_vector is not None else "N/A",
@@ -224,7 +226,7 @@ class MendParser:
 
         def create_finding_key(f: Finding) -> str:
             # """Hashes the finding's description and title to retrieve a key for deduplication."""
-            description = f.description or f.description else ""
+            description = f.description if f.description else ""
             return hashlib.md5(
                 description.encode("utf-8")
                 + f.title.encode("utf-8"),
