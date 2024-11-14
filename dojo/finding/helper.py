@@ -302,7 +302,7 @@ def group_findings_by(finds, finding_group_by_option):
     return affected_groups, grouped, skipped, groups_created
 
 
-def add_findings_to_auto_group(name, findings, group_by, create_finding_groups_for_all_findings=True, **kwargs):
+def add_findings_to_auto_group(name, findings, group_by, *, create_finding_groups_for_all_findings=True, **kwargs):
     if name is not None and findings is not None and len(findings) > 0:
         creator = get_current_user()
         if not creator:

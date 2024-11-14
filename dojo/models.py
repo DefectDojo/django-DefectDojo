@@ -135,7 +135,7 @@ class UniqueUploadNameProvider:
     the filename extension will be dropped.
     """
 
-    def __init__(self, directory=None, keep_basename=False, keep_ext=True):
+    def __init__(self, directory=None, *, keep_basename=False, keep_ext=True):
         self.directory = directory
         self.keep_basename = keep_basename
         self.keep_ext = keep_ext
