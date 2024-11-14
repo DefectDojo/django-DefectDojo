@@ -200,8 +200,8 @@ class MendParser:
 
         elif "component" in content:
             # likely a Mend Platform or 3.0 API SCA output - "library" is replaced as "component"
-            tree_node = content["response"]
-            for node in tree_node:
+            tree_node_platform = content["response"]
+            for node in tree_node_platform:
                 findings.append(_build_common_output(node))
 
         def create_finding_key(f: Finding) -> str:
