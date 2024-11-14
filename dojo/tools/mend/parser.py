@@ -196,6 +196,12 @@ class MendParser:
             tree_node = content["vulnerabilities"]
             for node in tree_node:
                 findings.append(_build_common_output(node))
+                
+        elif "component" in content:
+            # likely a Mend Platform or 3.0 API SCA output - "library" is replaced as "component"
+            tree_node = content["response"]
+            for node in tree_node:
+                findings.append(_build_common_output(node))
 
         def create_finding_key(f: Finding) -> str:
             """Hashes the finding's description and title to retrieve a key for deduplication."""
