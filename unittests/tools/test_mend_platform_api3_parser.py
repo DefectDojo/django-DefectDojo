@@ -1,6 +1,5 @@
 from dojo.models import Test
 from dojo.tools.mend_sca_platform_api3.parser import MendPlatformApi3Parser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 class TestMendPlatformApi3Parser(DojoTestCase):
