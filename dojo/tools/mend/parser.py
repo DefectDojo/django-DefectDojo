@@ -104,6 +104,8 @@ class MendParser:
                 cvss_sev = node.get("cvss3_severity")
             elif "vulnerability" in node:
                 cvss_sev = node["vulnerability"].get("severity")
+            else:
+                cvss_sev = node.get("severity")
             severity = cvss_sev.lower().capitalize()
 
             cvss3_score = node.get("cvss3_score", None)
