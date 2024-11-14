@@ -111,7 +111,6 @@ class MendParser:
                 cvss_sev = node.get("severity")
             severity = cvss_sev.lower().capitalize()
 
-            
             cvss3_vector = node.get("scoreMetadataVector", None)
             severity_justification = "CVSS v3 score: {} ({})".format(
                 cvss3_score if cvss3_score is not None else "N/A", cvss3_vector if cvss3_vector is not None else "N/A",
