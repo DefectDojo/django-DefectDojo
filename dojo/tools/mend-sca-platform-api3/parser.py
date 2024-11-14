@@ -8,6 +8,7 @@ __author__ = "testaccount90009 aka SH"
 
 logger = logging.getLogger(__name__)
 
+
 class MendPlatformApi3Parser:
     def get_scan_types(self):
         return ["Mend Platform APIv3 Scan"]
