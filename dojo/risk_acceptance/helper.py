@@ -141,7 +141,7 @@ def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_A
 
 
 def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
-    permission_keys = []
+    PermissionKey = []
     for finding in findings:
         add_severity_to_risk_acceptance(risk_pending, finding.severity)
         if not finding.duplicate:
@@ -499,3 +499,31 @@ def enable_flow_accept_risk(**kwargs):
     and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-")).exists()):
         return True
     return False
+
+def update_or_create_permission_key(risk_pending: Risk_Acceptance):
+    # actulizar fecha de expiracion permission keys
+    # recorer todos los permission keys y actulizara la fecha de expiraicon
+    permission_keys = []
+    if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:
+        for user_name in eval(risk_pending.accepted_by):
+            user = Dojo_User.objects.get(username=user_name)
+            token = generate_permision_key(
+                user=user,
+                risk_acceptance=risk_pending)
+            url = (
+                settings.HOST_ACCEPTANCE_RISK_FOR_EMAIL
+                .replace("{TENAN_ID}", settings.TENAN_ID)
+                .replace("{CLIENT_ID}", settings.CLIENT_ID)
+                .replace("{CALLBACK_URL}", settings.CALLBACK_URL)
+                .replace("{risk_acceptance_id}", str(risk_pending.id))
+                .replace("{permission_key_id}", token)
+            )
+            permission_keys.append(
+                {"username": user.username, "url": url})
+
+    Notification.risk_acceptance_request(
+        risk_pending=risk_pending,
+        permission_keys=permission_keys,
+        enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
+    # for permission_key in risk_acceptance.permissionkey_set.all():
+        

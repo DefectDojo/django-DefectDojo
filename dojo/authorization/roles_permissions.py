@@ -61,6 +61,7 @@ class Permissions(IntEnum):
     Risk_Acceptance_Reinstance = 1213
     Risk_Unaccept = 1214
     Risk_Acceptance_Bullk = 1215
+    Risk_Acceptance_Refresh_Permission_key = 1216
     
     Test_View = 1302
     Test_Add = 1303
@@ -603,6 +604,7 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Finding_View,
             Permissions.Transfer_Finding_Finding_Add,
+            Permissions.Risk_Acceptance_Refresh_Permission_key,
         },
         Roles.Leader: {
             Permissions.Product_Type_View,

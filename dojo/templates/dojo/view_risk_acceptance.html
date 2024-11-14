@@ -229,11 +229,17 @@
                 <h3 class="pull-left">
                     Accept all risks 
                 </h3>
-                {% if engagement|has_object_permission:"Risk_Acceptance_Bullk" and engagement|has_risk_acceptance_pending:accepted_findings%}
-                <a class="accept-risk_acceptance pull-right btn btn-success pull-right help-tooltip" title="Accept all Risk" id="id_bullk_risk_accepted" data-eid={{engagement.id}} data-raid={{risk_acceptance.id}} >
-                    <i class="fa-solid fa-check-double"></i>
-                </a>
-                {% endif %}
+                <div class="dropdown pull-right">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" aria-expanded="true">
+                        <span class="fa-solid fa-bars"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        {% include 'dojo/snippets/risk_pending_actions_snippet.html' %}
+                    </ul>
+                </div>
+                
             </div>
     </div>
         {% if accepted_findings %}
