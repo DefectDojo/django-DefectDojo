@@ -37,10 +37,10 @@ class MendParser:
             component_version = None
             impact = None
             if "component" in node:
-                node["project"].get("name", "")
+                node["project"].get("name")
                 description = (
                     "**Vulnerability Description** : "
-                    + node.get("vulnerability", {}).get("description", "")
+                    + node["vulnerability"].get("description", "")
                     + "\n\n"
                     + "**Component Name** : "
                     + node["component"].get("name", "")
