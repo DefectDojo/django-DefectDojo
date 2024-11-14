@@ -102,8 +102,8 @@ class MendParser:
             # homogeneous behavior.
             if "cvss3_severity" in node:
                 cvss_sev = node.get("cvss3_severity")
-            else:
-                cvss_sev = node.get("severity")
+            elif "vulnerability" in node:
+                cvss_sev = node["vulnerability"].get("severity")
             severity = cvss_sev.lower().capitalize()
 
             cvss3_score = node.get("cvss3_score", None)
