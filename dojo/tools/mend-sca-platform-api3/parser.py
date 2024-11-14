@@ -23,10 +23,14 @@ class Mend_platform_api3Parser:
             return []
 
         data = file.read()
+        # Ensure we handle JSON formatting before attempting to parse
         try:
-            content = json.loads(str(data, "utf-8"))
-        except Exception:
-            content = json.loads(data)
+            # Try fixing the single quotes by replacing them with double quotes
+            fixed_data = data.replace("'", '"')
+            content = json.loads(fixed_data)
+        except Exception as e:
+            logger.exception("Failed to parse JSON data: %s", e)
+            return []
 
         def _build_common_output(node, lib_name=None):
             # project only available in manual export
@@ -35,8 +39,8 @@ class Mend_platform_api3Parser:
             component_name = None
             component_version = None
             impact = None
+
             if 'component' in node:
-                # Fixed the issue here: changed 'vulnerability'.get() to 'vulnerability'.get() for proper access
                 description = (
                     "**Vulnerability Description** : "
                     + node['vulnerability'].get('description', "")
@@ -48,7 +52,7 @@ class Mend_platform_api3Parser:
                     + node['component'].get('componentType', "")
                     + "\n\n"
                     + "**Root Library** : "
-                    + node['component'].get('rootLibrary', "")
+                    + str(node['component'].get('rootLibrary', ""))
                     + "\n\n"
                     + "**Library Type** : "
                     + node['component'].get('libraryType', "")
@@ -65,7 +69,7 @@ class Mend_platform_api3Parser:
                 component_version = node['component'].get('version')
                 impact = node['component'].get('dependencyType')
             else:
-                description = node['vulnerability'].get('description')
+                description = node['vulnerability'].get('description', "")
 
             cve = node.get('name')
             if cve is None:
@@ -73,65 +77,56 @@ class Mend_platform_api3Parser:
             else:
                 title = cve + " | " + lib_name
 
-            # Fixed the second assignment for cvss_sev.
-            if 'vulnerability' in node:
-                cvss_sev = node['vulnerability'].get('severity')
-            else:
-                cvss_sev = node['vulnerability'].get('severity')
-            severity = cvss_sev.lower().capitalize()
+            cvss_sev = node.get('vulnerability', {}).get('severity', 'UNKNOWN').lower().capitalize()
 
-            cvss3_score = node['vulnerability'].get('score', None)
+            cvss3_score = node.get('vulnerability', {}).get('score', None)
             cvss3_vector = node.get('scoreMetadataVector', None)
             severity_justification = "CVSS v3 score: {} ({})".format(
                 cvss3_score if cvss3_score is not None else "N/A", cvss3_vector if cvss3_vector is not None else "N/A",
             )
+
             cwe = 1035  # default OWASP a9 until the report actually has them
 
+            # Handling Mitigation (topFix) safely
             mitigation = "N/A"
             if 'topFix' in node:
                 try:
-                    topfix_node = node.get('topFix')
+                    topfix_node = node.get('topFix', {})
                     mitigation = "**Resolution** ({}): {}\n".format(
-                        topfix_node.get('date'),
-                        topfix_node.get('fixResolution'),
+                        topfix_node.get('date', 'N/A'),
+                        topfix_node.get('fixResolution', 'N/A'),
                     )
-                except Exception:
-                    logger.exception("Error handling topFix node.")
+                except Exception as ex:
+                    logger.exception("Error handling topFix node: %s", ex)
 
             filepaths = []
             if 'sourceFiles' in node:
                 try:
-                    sourceFiles_node = node.get('sourceFiles')
+                    sourceFiles_node = node.get('sourceFiles', [])
                     for sfile in sourceFiles_node:
-                        filepaths.append(sfile.get('localPath'))
-                except Exception:
-                    logger.exception(
-                        "Error handling local paths for vulnerability.",
-                    )
+                        filepaths.append(sfile.get('localPath', ''))
+                except Exception as ex:
+                    logger.exception("Error handling sourceFiles for vulnerability: %s", ex)
 
             locations = []
             if 'locations' in node:
                 try:
                     locations_node = node.get('locations', [])
                     for location in locations_node:
-                        path = location.get('path')
-                        if path is not None:
+                        path = location.get('path', '')
+                        if path:
                             locations.append(path)
-                except Exception:
-                    logger.exception(
-                        "Error handling local paths for vulnerability.",
-                    )
+                except Exception as ex:
+                    logger.exception("Error handling locations for vulnerability: %s", ex)
 
-            if locations:
-                filepaths = locations
-            else:
-                filepaths = filepaths
+            # Use locations if available, otherwise fallback to filepaths
+            filepaths = locations if locations else filepaths
 
             new_finding = Finding(
                 title=title,
                 test=test,
                 description=description,
-                severity=severity,
+                severity=cvss_sev,
                 cwe=cwe,
                 mitigation=mitigation,
                 file_path=", ".join(filepaths),
@@ -150,33 +145,20 @@ class Mend_platform_api3Parser:
 
         findings = []
         if 'libraries' in content:
-            # we are likely dealing with a report generated from CLI with -generateScanReport,
-            # which will output vulnerabilities as an array of a library
-            # In this scenario, build up an array
-            tree_libs = content.get('libraries')
+            tree_libs = content.get('libraries', [])
             for lib_node in tree_libs:
-                # get the overall lib info here, before going into vulns
-                if (
-                    'response' in lib_node
-                    and len(lib_node.get('response')) > 0
-                ):
-                    for vuln in lib_node.get('response'):
-                        findings.append(
-                            _build_common_output(vuln, lib_node.get('name')),
-                        )
-
+                if 'response' in lib_node and len(lib_node.get('response', [])) > 0:
+                    for vuln in lib_node.get('response', []):
+                        findings.append(_build_common_output(vuln, lib_node.get('name')))
         elif 'response' in content:
-            # likely a manual json export for vulnerabilities only for a project.
-            # Vulns are standalone, and library is a property.
-            tree_node = content['response']
+            tree_node = content.get('response', [])
             for node in tree_node:
                 findings.append(_build_common_output(node))
 
         def create_finding_key(f: Finding) -> str:
             """Hashes the finding's description and title to retrieve a key for deduplication."""
             return hashlib.md5(
-                f.description.encode("utf-8")
-                + f.title.encode("utf-8"),
+                f.description.encode("utf-8") + f.title.encode("utf-8"),
             ).hexdigest()
 
         dupes = {}
