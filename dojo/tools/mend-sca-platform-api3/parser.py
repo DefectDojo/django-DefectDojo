@@ -9,7 +9,6 @@ __author__ = "testaccount90009 aka SH"
 logger = logging.getLogger(__name__)
 
 class MendPlatformApi3Parser:
-    
     def get_scan_types(self):
         return ["Mend Platform APIv3 Scan"]
 
@@ -120,8 +119,10 @@ class MendPlatformApi3Parser:
                 except Exception as ex:
                     logger.exception("Error handling locations for vulnerability: %s", ex)
 
-            # Use locations if available, otherwise fallback to filepaths
-            filepaths = locations if locations else filepaths
+            if locations:
+                filepaths = locations
+            else:
+                filepaths = filepaths
 
             new_finding = Finding(
                 title=title,
