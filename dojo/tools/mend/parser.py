@@ -36,7 +36,7 @@ class MendParser:
             component_name = None
             component_version = None
             impact = None
-            description = ""
+            description = "No Description Available"
             if "component" in node:
                 node["project"].get("name")
                 description = (
@@ -67,7 +67,7 @@ class MendParser:
                 component_version = node["component"].get("version")
                 impact = node["component"].get("dependencyType")
             else:
-                description = node["vulnerability"].get("description")
+                description = node["vulnerability"].get("description", "Unknown")
 
             if "library" in node:
                 node.get("project")
@@ -92,7 +92,7 @@ class MendParser:
                 component_name = node["library"].get("artifactId")
                 component_version = node["library"].get("version")
             else:
-                description = node.get("description")
+                description = node.get("description", "Unknown")
 
             cve = node.get("name")
             if cve is None:
