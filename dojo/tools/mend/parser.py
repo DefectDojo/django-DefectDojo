@@ -40,7 +40,7 @@ class MendParser:
                 node["project"].get("name", "")
                 description = (
                     "**Vulnerability Description** : "
-                    + node["vulnerability"].get("description", "")
+                    + node.get("vulnerability", {}).get("description", "")
                     + "\n\n"
                     + "**Component Name** : "
                     + node["component"].get("name", "")
