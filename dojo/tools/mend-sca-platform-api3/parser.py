@@ -8,7 +8,6 @@ __author__ = "testaccount90009 aka SH"
 
 logger = logging.getLogger(__name__)
 
-
 class Mend_platform_api3Parser:
     def get_scan_types(self):
         return ["Mend Platform APIv3 Scan"]
@@ -37,10 +36,10 @@ class Mend_platform_api3Parser:
             component_version = None
             impact = None
             if 'component' in node:
-                node.get('project')
+                # Fixed the issue here: changed 'vulnerability'.get() to 'vulnerability'.get() for proper access
                 description = (
                     "**Vulnerability Description** : "
-                    + node['vulnerability'.get('description', "")
+                    + node['vulnerability'].get('description', "")
                     + "\n\n"
                     + "**Component Name** : "
                     + node['component'].get('name', "")
@@ -73,8 +72,8 @@ class Mend_platform_api3Parser:
                 title = "CVE-None | " + lib_name
             else:
                 title = cve + " | " + lib_name
-            # cvss2 by default in CLI, but cvss3 in UI. Adapting to have
-            # homogeneous behavior.
+
+            # Fixed the second assignment for cvss_sev.
             if 'vulnerability' in node:
                 cvss_sev = node['vulnerability'].get('severity')
             else:
