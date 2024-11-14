@@ -1,19 +1,19 @@
 from dojo.models import Test
-from dojo.tools.mend_platform_api3.parser import Mend_platform_api3Parser
+from dojo.tools.mend_platform_api3.parser import MendPlatformApi3Parser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
-class TestMend_platform_api3Parser(DojoTestCase):
+class TestMendPlatformApi3Parser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         with open("unittests/scans/mend_platform_api3/mend-sca-platform-api3-no-findings.json", encoding="utf-8") as testfile:
-            parser = Mend_platform_api3Parser()
+            parser = MendPlatformApi3Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
         with open("unittests/scans/mend_platform_api3/mend-sca-platform-api3-one-finding.json", encoding="utf-8") as testfile:
-            parser = Mend_platform_api3Parser()
+            parser = MendPlatformApi3Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = list(findings)[0]
@@ -26,7 +26,7 @@ class TestMend_platform_api3Parser(DojoTestCase):
         with open(
             get_unit_tests_path() + "unittests/scans/mend_platform_api3/mend-sca-platform-api3-five-findings.json", encoding="utf-8",
         ) as testfile:
-            parser = Mend_platform_api3Parser()
+            parser = MendPlatformApi3Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(5, len(findings))
 
