@@ -62,7 +62,7 @@ class SarifParser:
         run_date = self.__get_last_invocation_date(run)
         for result in run.get("results", []):
             result_items = get_items_from_result(result, rules, artifacts, run_date)
-            if result_items :
+            if result_items:
                 items.extend(result_items)
         return items
 
@@ -388,7 +388,7 @@ def get_items_from_result(result, rules, artifacts, run_date):
                     else:
                         line = location["physicalLocation"]["region"]["startLine"]
 
-            files.append((file_path,line))
+            files.append((file_path, line))
 
     if not files:
         files.append((None, None))
