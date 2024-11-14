@@ -35,6 +35,38 @@ class MendParser:
             cve = None
             component_name = None
             component_version = None
+            if "component" in node:
+                node["project"].get("name", "")
+                description = (
+                    "**Vulnerability Description** : "
+                    + node["vulnerability"].get("description", "")
+                    + "\n\n"
+                    + "**Component Name** : "
+                    + node["component"].get("name", "")
+                    + "\n\n"
+                    + "**Component Type** : "
+                    + node["component"].get("componentType", "")
+                    + "\n\n"
+                    + "**Root Library** : "
+                    + str(node["component"].get("rootLibrary", ""))
+                    + "\n\n"
+                    + "**Library Type** : "
+                    + node["component"].get("libraryType", "")
+                    + "\n\n"
+                    + "**Location Found** : "
+                    + node["component"].get("path", "")
+                    + "\n\n"
+                    + "**Direct or Transitive Dependency** : "
+                    + node["component"].get("dependencyType", "")
+                    + "\n"
+                )
+                lib_name = node["component"].get("name")
+                component_name = node["component"].get("artifactId")
+                component_version = node["component"].get("version")
+                impact = node["component"].get("dependencyType")
+            else:
+                description = node["vulnerability"].get("description", "")
+            
             if "library" in node:
                 node.get("project")
                 description = (
@@ -134,6 +166,7 @@ class MendParser:
                 dynamic_finding=True,
                 cvssv3=cvss3_vector,
                 cvssv3_score=float(cvss3_score) if cvss3_score is not None else None,
+                impact=impact,
             )
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]
