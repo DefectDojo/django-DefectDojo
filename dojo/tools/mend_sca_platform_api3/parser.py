@@ -26,12 +26,9 @@ class MendPlatformApi3Parser:
         data = file.read()
         # Ensure we handle JSON formatting before attempting to parse
         try:
-            # Try fixing the single quotes by replacing them with double quotes
-            fixed_data = data.replace("'", '"')
-            content = json.loads(fixed_data)
+            content = json.loads(str(data, "utf-8"))
         except Exception as e:
-            logger.exception("Failed to parse JSON data: %s", e)
-            return []
+            content = json.loads(data)
 
         def _build_common_output(node, lib_name=None):
             # project only available in manual export
