@@ -23,7 +23,9 @@ class TestMend_platform_api3Parser(DojoTestCase):
             self.assertEqual(3.1, finding.cvssv3_score)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
-        with open("unittests/scans/mend_platform_api3/mend-sca-platform-api3-five-findings.json", encoding="utf-8") as testfile:
+        with open(
+            get_unit_tests_path() + "unittests/scans/mend_platform_api3/mend-sca-platform-api3-five-findings.json", encoding="utf-8",
+        ) as testfile:
             parser = Mend_platform_api3Parser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(5, len(findings))
