@@ -218,8 +218,9 @@ class MendParser:
         elif "response" in content:
             # New schema: handle response array
             tree_node = content["response"]
-            for node in tree_node:
-                findings.append(_build_common_output(node))
+            if tree_node:
+                for node in tree_node:
+                    findings.append(_build_common_output(node))
 
         def create_finding_key(f: Finding) -> str:
             # """Hashes the finding's description and title to retrieve a key for deduplication."""
