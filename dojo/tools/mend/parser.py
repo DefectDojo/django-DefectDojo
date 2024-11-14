@@ -41,7 +41,7 @@ class MendParser:
                 node["project"].get("name")
                 description = (
                     "**Vulnerability Description** : "
-                    + node["vulnerability"].get("description", "")
+                    + node["vulnerability"].get("description", "No Description Available")
                     + "\n\n"
                     + "**Component Name** : "
                     + node["component"].get("name", "")
@@ -224,8 +224,9 @@ class MendParser:
 
         def create_finding_key(f: Finding) -> str:
             # """Hashes the finding's description and title to retrieve a key for deduplication."""
+            description = f.description if f.description else ""
             return hashlib.md5(
-                f.description.encode("utf-8")
+                description.encode("utf-8")
                 + f.title.encode("utf-8"),
             ).hexdigest()
 
