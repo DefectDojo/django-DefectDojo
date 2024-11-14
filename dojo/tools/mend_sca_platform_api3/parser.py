@@ -24,7 +24,6 @@ class MendPlatformApi3Parser:
             return []
 
         data = file.read()
-        # Ensure we handle JSON formatting before attempting to parse
         try:
             content = json.loads(str(data, "utf-8"))
         except Exception:
