@@ -66,7 +66,7 @@ class MendParser:
                 component_version = node["component"].get("version")
                 impact = node["component"].get("dependencyType")
             else:
-                description = node.get("description")
+                description = node["vulnerability"].get("description")
 
             if "library" in node:
                 node.get("project")
