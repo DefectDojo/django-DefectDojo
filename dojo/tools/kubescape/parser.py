@@ -112,9 +112,9 @@ class KubescapeParser:
                                 component_name=resourceid,
                                 static_finding=True,
                                 dynamic_finding=False,
-                        )
-                            findings.append(find)
+                            )
                             if controlID is not None:
                                 find.unsaved_vulnerability_ids = []
                                 find.unsaved_vulnerability_ids.append(controlID)
+                            findings.append(find)
         return findings
