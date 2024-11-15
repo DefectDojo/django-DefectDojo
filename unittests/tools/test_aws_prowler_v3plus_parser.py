@@ -1,7 +1,8 @@
+from datetime import date
+
 from dojo.models import Test
 from dojo.tools.aws_prowler_v3plus.parser import AWSProwlerV3plusParser
 from unittests.dojo_test_case import DojoTestCase
-from datetime import date
 
 
 class TestAwsProwlerV3plusParser(DojoTestCase):
