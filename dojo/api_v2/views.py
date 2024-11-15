@@ -1689,7 +1689,7 @@ class DojoMetaViewSet(
     def process_patch(self: object, data: dict):
         product = Product.objects.filter(id=data.get("product")).first()
         finding = Finding.objects.filter(id=data.get("finding")).first()
-        endpoint = Finding.objects.filter(id=data.get("endpoint")).first()
+        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
         metalist = data.get("metadata")
         for metadata in metalist:
             dojometa = DojoMeta.objects.filter(product=product, finding=finding, endpoint=endpoint, name=metadata.get("name"))
