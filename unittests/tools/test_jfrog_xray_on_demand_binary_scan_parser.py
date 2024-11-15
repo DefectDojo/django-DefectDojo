@@ -4,14 +4,13 @@ from dojo.tools.jfrog_xray_on_demand_binary_scan.parser import (
     clean_title,
     get_component_name_version,
 )
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
 
     def test_parse_file_with_one_vuln(self):
-        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/one_vuln.json")
+        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/one_vuln.json", encoding="utf-8")
         parser = JFrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -22,7 +21,7 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
         self.assertEqual("High", item.severity)
 
     def test_parse_file_with_many_vulns(self):
-        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns.json")
+        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns.json", encoding="utf-8")
         parser = JFrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -51,14 +50,14 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
             self.assertEqual("Processing some specially crafted ASN.1 object identifiers or", clean_title("Issue summary: Processing some specially crafted ASN.1 object identifiers or\ndata containing them may be very slow."))
 
     def test_parse_file_with_many_vulns_docker(self):
-        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns_docker.json")
+        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns_docker.json", encoding="utf-8")
         parser = JFrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
 
     def test_parse_file_with_many_vulns_pypi(self):
-        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns_pypi.json")
+        testfile = open("unittests/scans/jfrog_xray_on_demand_binary_scan/many_vulns_pypi.json", encoding="utf-8")
         parser = JFrogXrayOnDemandBinaryScanParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -78,7 +77,7 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
             self.assertFalse(findings[0].dynamic_finding)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", findings[0].cvssv3)
             self.assertEqual("XRAY-515353", findings[0].vuln_id_from_tool)
-            self.assertEqual(['CVE-2023-30608'], findings[0].unsaved_vulnerability_ids)
+            self.assertEqual(["CVE-2023-30608"], findings[0].unsaved_vulnerability_ids)
 
         with self.subTest(finding=1):
             self.assertIn("**Short description**\nA design problem in Django may lead to denial of service when processing multipart forms.\n", findings[1].severity_justification)

@@ -9,6 +9,7 @@ from dojo.models import Finding
 
 
 class AuditJSParser:
+
     """Parser for AuditJS Scan tool"""
 
     def get_scan_types(self):
@@ -25,14 +26,13 @@ class AuditJSParser:
         cvss = float(cvss)
         if cvss > 0 and cvss < 4:
             return "Low"
-        elif cvss >= 4 and cvss < 7:
+        if cvss >= 4 and cvss < 7:
             return "Medium"
-        elif cvss >= 7 and cvss < 9:
+        if cvss >= 7 and cvss < 9:
             return "High"
-        elif cvss >= 9:
+        if cvss >= 9:
             return "Critical"
-        else:
-            return "Informational"
+        return "Informational"
 
     def get_findings(self, filename, test):
         try:
@@ -55,7 +55,7 @@ class AuditJSParser:
                 )
 
                 component_name, component_version = pacakge_full_name.split(
-                    "@"
+                    "@",
                 )
 
             # Check if there are any vulnerabilities
@@ -94,16 +94,16 @@ class AuditJSParser:
                         cvss_score = vulnerability["cvssScore"]
                     if "cvssVector" in vulnerability:
                         cvss_vectors = cvss.parser.parse_cvss_from_text(
-                            vulnerability["cvssVector"]
+                            vulnerability["cvssVector"],
                         )
                         if len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS3
+                            cvss_vectors[0], CVSS3,
                         ):
                             # Only set finding vector if it's version 3
                             cvss_vector = cvss_vectors[0].clean_vector()
                             severity = cvss_vectors[0].severities()[0]
                         elif len(cvss_vectors) > 0 and isinstance(
-                            cvss_vectors[0], CVSS2
+                            cvss_vectors[0], CVSS2,
                         ):
                             # Otherwise add it to description
                             description = (
@@ -148,7 +148,7 @@ class AuditJSParser:
                         if finding.description:
                             find.description += "\n" + finding.description
                         find.unsaved_endpoints.extend(
-                            finding.unsaved_endpoints
+                            finding.unsaved_endpoints,
                         )
                         dupes[dupe_key] = find
                     else:

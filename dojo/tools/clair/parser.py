@@ -19,10 +19,10 @@ class ClairParser:
         if tree:
             if self.scanner == "clair":
                 return ClairScan().get_items_clair(tree, test)
-            elif self.scanner == "clairklar":
+            if self.scanner == "clairklar":
                 return ClairKlarScan().get_items_klar(tree, test)
-        else:
-            return []
+            return None
+        return []
 
     def parse_json(self, json_output):
         try:
@@ -31,10 +31,10 @@ class ClairParser:
                 tree = json.loads(str(data, "utf-8"))
             except BaseException:
                 tree = json.loads(data)
-            if tree.get('image'):
+            if tree.get("image"):
                 self.scanner = "clair"
                 subtree = tree.get("vulnerabilities")
-            elif tree.get('LayerCount'):
+            elif tree.get("LayerCount"):
                 self.scanner = "clairklar"
                 subtree = tree.get("Vulnerabilities")
         except BaseException:

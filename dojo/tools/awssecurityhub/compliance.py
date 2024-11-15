@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from dojo.models import Finding
 
@@ -23,7 +23,7 @@ class Compliance:
         description += f"**AWS Finding ARN:** {finding_id}\n"
         description += f"**Resource IDs:** {', '.join(set(resource_arns))}\n"
         description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
-        if finding.get('Region'):
+        if finding.get("Region"):
             description += f"**Region:** {finding.get('Region', '')}\n"
         description += f"**Generator ID:** {finding.get('GeneratorId', '')}\n"
         if finding.get("Compliance", {}).get("Status", "PASSED") == "PASSED":
@@ -31,11 +31,11 @@ class Compliance:
             active = False
             if finding.get("LastObservedAt", None):
                 try:
-                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
                 except Exception:
-                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
+                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
             else:
-                mitigated = datetime.utcnow()
+                mitigated = datetime.datetime.now(datetime.UTC)
         else:
             mitigated = None
             is_Mitigated = False
@@ -47,10 +47,12 @@ class Compliance:
                 details = resource.get("Details", {}).get("AwsEcrContainerImage")
                 arn = resource.get("Id")
                 if details:
-                    impact.append(f"Image ARN: {arn}")
-                    impact.append(f"Registry: {details.get('RegistryId')}")
-                    impact.append(f"Repository: {details.get('RepositoryName')}")
-                    impact.append(f"Image digest: {details.get('ImageDigest')}")
+                    impact.extend((
+                        f"Image ARN: {arn}",
+                        f"Registry: {details.get('RegistryId')}",
+                        f"Repository: {details.get('RepositoryName')}",
+                        f"Image digest: {details.get('ImageDigest')}",
+                    ))
                 title_suffix = f" - Image: {arn.split('/', 1)[1]}"  # repo-name/sha256:digest
             else:  # generic implementation
                 resource_id = resource["Id"].split(":")[-1]

@@ -21,10 +21,9 @@ class ColumnMappingStrategy:
     def evaluate_bool_value(column_value):
         if column_value.lower() == "true":
             return True
-        elif column_value.lower() == "false":
+        if column_value.lower() == "false":
             return False
-        else:
-            return None
+        return None
 
     def process_column(self, column_name, column_value, finding):
         if (
@@ -95,7 +94,7 @@ class NVDCVEColumnMappingStrategy(ColumnMappingStrategy):
         super().__init__()
 
     def map_column_value(self, finding, column_value):
-        cve_pattern = r'CVE-\d{4}-\d{4,7}'
+        cve_pattern = r"CVE-\d{4}-\d{4,7}"
         cves = re.findall(cve_pattern, column_value)
         for cve in cves:
             finding.unsaved_vulnerability_ids.append(cve)
@@ -289,7 +288,7 @@ class OpenVASCSVParser:
             column_number = 0
             for column in row:
                 chain.process_column(
-                    column_names[column_number], column, finding
+                    column_names[column_number], column, finding,
                 )
                 column_number += 1
             if finding is not None and row_number > 0:
@@ -306,7 +305,7 @@ class OpenVASCSVParser:
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
                 if key not in dupes:
                     dupes[key] = finding

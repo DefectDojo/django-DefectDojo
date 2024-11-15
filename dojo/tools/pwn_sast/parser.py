@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class PWNSASTParser:
-    """
-    A class that can be used to parse pwn_sast source code scanning results in JSON format.  See https://github.com/0dayinc/pwn for additional details.
-    """
+
+    """A class that can be used to parse pwn_sast source code scanning results in JSON format.  See https://github.com/0dayinc/pwn for additional details."""
 
     def get_scan_types(self):
         return ["PWN SAST"]
@@ -59,7 +58,7 @@ class PWNSASTParser:
                         "Install pwn_sast Driver via: https://github.com/0dayinc/pwn#installation",
                         "Execute the pwn_sast Driver via:",
                         f"```pwn_sast --dir-path . --uri-source-root {git_repo_root_uri} -s```",
-                    ]
+                    ],
                 )
 
                 for line in line_no_and_contents:
@@ -76,7 +75,7 @@ class PWNSASTParser:
                             f"Committed By: {author}",
                             "Line Contents:",
                             f"```{contents}```",
-                        ]
+                        ],
                     )
 
                     impact = "\n".join(
@@ -84,17 +83,17 @@ class PWNSASTParser:
                             f"Security Control Impacted: {section}",
                             f"NIST 800-53 Security Control Details: {nist_800_53_uri}",
                             f"CWE Details: {cwe_uri}",
-                        ]
+                        ],
                     )
 
                     mitigation = "\n".join(
                         [
                             f"NIST 800-53 Security Control Details / Mitigation Strategy: {nist_800_53_uri}",
-                        ]
+                        ],
                     )
 
                     unique_finding_key = hashlib.sha256(
-                        (offending_uri + contents).encode("utf-8")
+                        (offending_uri + contents).encode("utf-8"),
                     ).hexdigest()
 
                     if unique_finding_key in findings:
@@ -119,3 +118,4 @@ class PWNSASTParser:
                         findings[unique_finding_key] = finding
 
             return list(findings.values())
+        return None

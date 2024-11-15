@@ -45,20 +45,20 @@ class SemgrepParser:
                             item["extra"]["metadata"]
                             .get("cwe")[0]
                             .partition(":")[0]
-                            .partition("-")[2]
+                            .partition("-")[2],
                         )
                     else:
                         finding.cwe = int(
                             item["extra"]["metadata"]
                             .get("cwe")
                             .partition(":")[0]
-                            .partition("-")[2]
+                            .partition("-")[2],
                         )
 
                 # manage references from metadata
                 if "references" in item["extra"]["metadata"]:
                     finding.references = "\n".join(
-                        item["extra"]["metadata"]["references"]
+                        item["extra"]["metadata"]["references"],
                     )
 
                 # manage mitigation from metadata
@@ -71,7 +71,7 @@ class SemgrepParser:
                             "\n```\n",
                             json.dumps(item["extra"]["fix_regex"]),
                             "\n```\n",
-                        ]
+                        ],
                     )
 
                 dupe_key = finding.title + finding.file_path + str(finding.line)
@@ -109,14 +109,14 @@ class SemgrepParser:
                             item["advisory"]["references"]
                             .get("cweIds")[0]
                             .partition(":")[0]
-                            .partition("-")[2]
+                            .partition("-")[2],
                         )
                     else:
                         finding.cwe = int(
                             item["advisory"]["references"]
                             .get("cweIds")
                             .partition(":")[0]
-                            .partition("-")[2]
+                            .partition("-")[2],
                         )
 
                 dupe_key = finding.title + finding.file_path + str(finding.line)
@@ -130,17 +130,17 @@ class SemgrepParser:
         return list(dupes.values())
 
     def convert_severity(self, val):
-        if "CRITICAL" == val.upper():
+        upper_value = val.upper()
+        if upper_value == "CRITICAL":
             return "Critical"
-        elif "WARNING" == val.upper():
+        if upper_value in ["WARNING", "MEDIUM"]:
             return "Medium"
-        elif "ERROR" == val.upper() or "HIGH" == val.upper():
+        if upper_value in ["ERROR", "HIGH"]:
             return "High"
-        elif "INFO" == val.upper():
-            return "Info"
-        else:
-            msg = f"Unknown value for severity: {val}"
-            raise ValueError(msg)
+        if upper_value in ["LOW", "INFO"]:
+            return "Low"
+        msg = f"Unknown value for severity: {val}"
+        raise ValueError(msg)
 
     def get_description(self, item):
         description = ""

@@ -7,7 +7,9 @@ from dojo.models import Finding
 
 
 class AnchoreGrypeParser:
-    """Anchore Grype JSON report format generated with `-o json` option.
+
+    """
+    Anchore Grype JSON report format generated with `-o json` option.
 
     command: `grype defectdojo/defectdojo-django:1.13.1 -o json > many_vulns.json`
     """
@@ -53,7 +55,7 @@ class AnchoreGrypeParser:
                 rel_description = related_vulnerability.get("description")
                 rel_cvss = related_vulnerability.get("cvss")
             vulnerability_ids = self.get_vulnerability_ids(
-                vuln_id, related_vulnerabilities
+                vuln_id, related_vulnerabilities,
             )
 
             matches = item["matchDetails"]
@@ -96,7 +98,7 @@ class AnchoreGrypeParser:
                         f"\n**Matcher:** {matches[0]['matcher']}"
                     )
                     finding_tags = [
-                        matches[0]["matcher"].replace("-matcher", "")
+                        matches[0]["matcher"].replace("-matcher", ""),
                     ]
                 else:
                     finding_description += "\n**Matchers:**"
@@ -187,10 +189,9 @@ class AnchoreGrypeParser:
     def _convert_severity(self, val):
         if "Unknown" == val:
             return "Info"
-        elif "Negligible" == val:
+        if "Negligible" == val:
             return "Info"
-        else:
-            return val.title()
+        return val.title()
 
     def get_cvss(self, cvss):
         if cvss:
@@ -198,7 +199,7 @@ class AnchoreGrypeParser:
                 vector = cvss_item["vector"]
                 cvss_objects = cvss_parser.parse_cvss_from_text(vector)
                 if len(cvss_objects) > 0 and isinstance(
-                    cvss_objects[0], CVSS3
+                    cvss_objects[0], CVSS3,
                 ):
                     return vector
         return None
@@ -213,5 +214,4 @@ class AnchoreGrypeParser:
                     vulnerability_ids.append(related_vulnerability.get("id"))
         if vulnerability_ids:
             return vulnerability_ids
-        else:
-            return None
+        return None

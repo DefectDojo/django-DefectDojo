@@ -57,7 +57,7 @@ def user_has_permission(user, obj, permission):
         # permissions
         member = get_product_type_member(user, obj)
         if member is not None and role_has_permission(
-            member.role.id, permission
+            member.role.id, permission,
         ):
             return True
         # Check if the user is in a group with a role for the product type with
@@ -66,7 +66,7 @@ def user_has_permission(user, obj, permission):
             if role_has_permission(product_type_group.role.id, permission):
                 return True
         return False
-    elif (
+    if (
         isinstance(obj, Product)
         and permission.value >= Permissions.Product_View.value
     ):
@@ -78,7 +78,7 @@ def user_has_permission(user, obj, permission):
         # permissions
         member = get_product_member(user, obj)
         if member is not None and role_has_permission(
-            member.role.id, permission
+            member.role.id, permission,
         ):
             return True
         # Check if the user is in a group with a role for the product with the
@@ -87,83 +87,81 @@ def user_has_permission(user, obj, permission):
             if role_has_permission(product_group.role.id, permission):
                 return True
         return False
-    elif (
+    if (
         isinstance(obj, Engagement)
         and permission in Permissions.get_engagement_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Test)
         and permission in Permissions.get_test_permissions()
     ):
         return user_has_permission(user, obj.engagement.product, permission)
-    elif (
+    if (
         isinstance(obj, Finding) or isinstance(obj, Stub_Finding)
     ) and permission in Permissions.get_finding_permissions():
         return user_has_permission(
-            user, obj.test.engagement.product, permission
+            user, obj.test.engagement.product, permission,
         )
-    elif (
+    if (
         isinstance(obj, Finding_Group)
         and permission in Permissions.get_finding_group_permissions()
     ):
         return user_has_permission(
-            user, obj.test.engagement.product, permission
+            user, obj.test.engagement.product, permission,
         )
-    elif (
+    if (
         isinstance(obj, Endpoint)
         and permission in Permissions.get_endpoint_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Languages)
         and permission in Permissions.get_language_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, App_Analysis)
         and permission in Permissions.get_technology_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Product_API_Scan_Configuration)
         and permission
         in Permissions.get_product_api_scan_configuration_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Product_Type_Member)
         and permission in Permissions.get_product_type_member_permissions()
     ):
         if permission == Permissions.Product_Type_Member_Delete:
             # Every member is allowed to remove himself
             return obj.user == user or user_has_permission(
-                user, obj.product_type, permission
+                user, obj.product_type, permission,
             )
-        else:
-            return user_has_permission(user, obj.product_type, permission)
-    elif (
+        return user_has_permission(user, obj.product_type, permission)
+    if (
         isinstance(obj, Product_Member)
         and permission in Permissions.get_product_member_permissions()
     ):
         if permission == Permissions.Product_Member_Delete:
             # Every member is allowed to remove himself
             return obj.user == user or user_has_permission(
-                user, obj.product, permission
+                user, obj.product, permission,
             )
-        else:
-            return user_has_permission(user, obj.product, permission)
-    elif (
+        return user_has_permission(user, obj.product, permission)
+    if (
         isinstance(obj, Product_Type_Group)
         and permission in Permissions.get_product_type_group_permissions()
     ):
         return user_has_permission(user, obj.product_type, permission)
-    elif (
+    if (
         isinstance(obj, Product_Group)
         and permission in Permissions.get_product_group_permissions()
     ):
         return user_has_permission(user, obj.product, permission)
-    elif (
+    if (
         isinstance(obj, Dojo_Group)
         and permission in Permissions.get_group_permissions()
     ):
@@ -171,20 +169,19 @@ def user_has_permission(user, obj, permission):
         # permissions
         group_member = get_group_member(user, obj)
         return group_member is not None and role_has_permission(
-            group_member.role.id, permission
+            group_member.role.id, permission,
         )
-    elif (
+    if (
         isinstance(obj, Dojo_Group_Member)
         and permission in Permissions.get_group_member_permissions()
     ):
         if permission == Permissions.Group_Member_Delete:
             # Every user is allowed to remove himself
             return obj.user == user or user_has_permission(
-                user, obj.group, permission
+                user, obj.group, permission,
             )
-        else:
-            return user_has_permission(user, obj.group, permission)
-    elif (
+        return user_has_permission(user, obj.group, permission)
+    if (
         isinstance(obj, Cred_Mapping)
         and permission in Permissions.get_credential_permissions()
     ):
@@ -192,19 +189,19 @@ def user_has_permission(user, obj, permission):
             return user_has_permission(user, obj.product, permission)
         if obj.engagement:
             return user_has_permission(
-                user, obj.engagement.product, permission
+                user, obj.engagement.product, permission,
             )
         if obj.test:
             return user_has_permission(
-                user, obj.test.engagement.product, permission
+                user, obj.test.engagement.product, permission,
             )
         if obj.finding:
             return user_has_permission(
-                user, obj.finding.test.engagement.product, permission
+                user, obj.finding.test.engagement.product, permission,
             )
-    else:
-        msg = f"No authorization implemented for class {type(obj).__name__} and permission {permission}"
-        raise NoAuthorizationImplementedError(msg)
+        return None
+    msg = f"No authorization implemented for class {type(obj).__name__} and permission {permission}"
+    raise NoAuthorizationImplementedError(msg)
 
 
 def user_has_global_permission(user, permission):
@@ -233,7 +230,7 @@ def user_has_global_permission(user, permission):
             hasattr(group, "global_role")
             and group.global_role.role is not None
             and role_has_global_permission(
-                group.global_role.role.id, permission
+                group.global_role.role.id, permission,
             )
         ):
             return True
@@ -243,17 +240,17 @@ def user_has_global_permission(user, permission):
 
 def user_has_configuration_permission_or_403(user, permission):
     if not user_has_configuration_permission(user, permission):
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def user_has_permission_or_403(user, obj, permission):
     if not user_has_permission(user, obj, permission):
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def user_has_global_permission_or_403(user, permission):
     if not user_has_global_permission(user, permission):
-        raise PermissionDenied()
+        raise PermissionDenied
 
 
 def get_roles_for_permission(permission):

@@ -40,7 +40,13 @@ from dojo.group.queries import (
 )
 from dojo.group.utils import get_auth_group_name
 from dojo.models import Dojo_Group, Dojo_Group_Member, Global_Role, Product_Group, Product_Type_Group
-from dojo.utils import add_breadcrumb, get_page_items, is_title_in_breadcrumbs, redirect_to_return_url_or_else
+from dojo.utils import (
+    add_breadcrumb,
+    get_page_items,
+    get_setting,
+    is_title_in_breadcrumbs,
+    redirect_to_return_url_or_else,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +68,7 @@ class ListGroups(View):
 
     def get(self, request: HttpRequest):
         # quick permission check
-        if not user_has_configuration_permission(request.user, 'auth.view_group'):
+        if not user_has_configuration_permission(request.user, "auth.view_group"):
             raise PermissionDenied
         # Fetch the groups
         groups = self.get_groups()
@@ -108,7 +114,7 @@ class ViewGroup(View):
         # Fetch the group
         group = self.get_group(group_id)
         # quick permission check
-        if not user_has_configuration_permission(request.user, 'auth.view_group'):
+        if not user_has_configuration_permission(request.user, "auth.view_group"):
             raise PermissionDenied
         user_has_permission_or_403(request.user, group, Permissions.Group_View)
         # Set up the initial context
@@ -127,7 +133,7 @@ class EditGroup(View):
 
     def get_global_role(self, group: Dojo_Group):
         # Try to pull the global role from the group object
-        return group.global_role if hasattr(group, 'global_role') else None
+        return group.global_role if hasattr(group, "global_role") else None
 
     def get_group_form(self, request: HttpRequest, group: Dojo_Group):
         # Set up the args for the form
@@ -161,12 +167,12 @@ class EditGroup(View):
         # Validate the forms
         if context["form"].is_valid() and context["global_role_form"].is_valid():
             # Determine if the previous global roles was changed with proper authorization
-            if context["global_role_form"].cleaned_data['role'] != context["previous_global_role"] and not request.user.is_superuser:
+            if context["global_role_form"].cleaned_data["role"] != context["previous_global_role"] and not request.user.is_superuser:
                 messages.add_message(
                     request,
                     messages.WARNING,
-                    'Only superusers are allowed to change the global role.',
-                    extra_tags='alert-warning')
+                    "Only superusers are allowed to change the global role.",
+                    extra_tags="alert-warning")
             else:
                 context["form"].save()
                 global_role = context["global_role_form"].save(commit=False)
@@ -175,16 +181,15 @@ class EditGroup(View):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Group saved successfully.',
-                    extra_tags='alert-success')
+                    "Group saved successfully.",
+                    extra_tags="alert-success")
 
             return request, True
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Group was not saved successfully.',
-                extra_tags='alert_danger')
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Group was not saved successfully.",
+            extra_tags="alert_danger")
 
         return request, False
 
@@ -239,12 +244,17 @@ class DeleteGroup(View):
 
     def get_initial_context(self, request: HttpRequest, group: Dojo_Group):
         # Add the related objects to the delete page
-        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-        collector.collect([group])
+        rels = ["Previewing the relationships has been disabled.", ""]
+        display_preview = get_setting("DELETE_PREVIEW")
+        if display_preview:
+            collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+            collector.collect([group])
+            rels = collector.nested()
         return {
             "form": self.get_group_form(request, group),
             "to_delete": group,
-            "rels": collector.nested()
+            "rels": rels,
+
         }
 
     def process_forms(self, request: HttpRequest, group: Dojo_Group, context: dict):
@@ -255,14 +265,14 @@ class DeleteGroup(View):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Group and relationships successfully removed.',
-                    extra_tags='alert-success')
+                    "Group and relationships successfully removed.",
+                    extra_tags="alert-success")
             except RestrictedError as err:
                 messages.add_message(
                     request,
                     messages.WARNING,
-                    f'Group cannot be deleted: {err}',
-                    extra_tags='alert-warning',
+                    f"Group cannot be deleted: {err}",
+                    extra_tags="alert-warning",
                 )
                 return request, False
 
@@ -329,12 +339,12 @@ class AddGroup(View):
         group = None
         # Validate the forms
         if context["form"].is_valid() and context["global_role_form"].is_valid():
-            if context["global_role_form"].cleaned_data['role'] is not None and not request.user.is_superuser:
+            if context["global_role_form"].cleaned_data["role"] is not None and not request.user.is_superuser:
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    'Only superusers are allowed to set global role.',
-                    extra_tags='alert-warning')
+                    "Only superusers are allowed to set global role.",
+                    extra_tags="alert-warning")
             else:
                 group = context["form"].save()
                 global_role = context["global_role_form"].save(commit=False)
@@ -343,15 +353,15 @@ class AddGroup(View):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    'Group was added successfully.',
-                    extra_tags='alert-success')
+                    "Group was added successfully.",
+                    extra_tags="alert-success")
                 return request, group, True
         else:
             messages.add_message(
                 request,
                 messages.ERROR,
-                'Group was not added successfully.',
-                extra_tags='alert-danger')
+                "Group was not added successfully.",
+                extra_tags="alert-danger")
 
         return request, group, False
 
@@ -360,7 +370,7 @@ class AddGroup(View):
 
     def get(self, request: HttpRequest):
         # quick permission check
-        if not user_has_configuration_permission(request.user, 'auth.add_group'):
+        if not user_has_configuration_permission(request.user, "auth.add_group"):
             raise PermissionDenied
         # Set up the initial context
         context = self.get_initial_context(request)
@@ -371,7 +381,7 @@ class AddGroup(View):
 
     def post(self, request: HttpRequest):
         # quick permission check
-        if not user_has_configuration_permission(request.user, 'auth.add_group'):
+        if not user_has_configuration_permission(request.user, "auth.add_group"):
             raise PermissionDenied
         # Set up the initial context
         context = self.get_initial_context(request)
@@ -386,48 +396,48 @@ class AddGroup(View):
         return render(request, self.get_template(), context)
 
 
-@user_is_authorized(Dojo_Group, Permissions.Group_Manage_Members, 'gid')
+@user_is_authorized(Dojo_Group, Permissions.Group_Manage_Members, "gid")
 def add_group_member(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
-    groupform = Add_Group_MemberForm(initial={'group': group.id})
+    groupform = Add_Group_MemberForm(initial={"group": group.id})
 
-    if request.method == 'POST':
-        groupform = Add_Group_MemberForm(request.POST, initial={'group': group.id})
+    if request.method == "POST":
+        groupform = Add_Group_MemberForm(request.POST, initial={"group": group.id})
         if groupform.is_valid():
-            if groupform.cleaned_data['role'].is_owner and not user_has_permission(request.user, group, Permissions.Group_Add_Owner):
+            if groupform.cleaned_data["role"].is_owner and not user_has_permission(request.user, group, Permissions.Group_Add_Owner):
                 messages.add_message(request,
                                      messages.WARNING,
-                                     'You are not permitted to add users as owners.',
-                                     extra_tags='alert-warning')
+                                     "You are not permitted to add users as owners.",
+                                     extra_tags="alert-warning")
             else:
-                if 'users' in groupform.cleaned_data and len(groupform.cleaned_data['users']) > 0:
-                    for user in groupform.cleaned_data['users']:
+                if "users" in groupform.cleaned_data and len(groupform.cleaned_data["users"]) > 0:
+                    for user in groupform.cleaned_data["users"]:
                         existing_users = Dojo_Group_Member.objects.filter(group=group, user=user)
                         if existing_users.count() == 0:
                             group_member = Dojo_Group_Member()
                             group_member.group = group
                             group_member.user = user
-                            group_member.role = groupform.cleaned_data['role']
+                            group_member.role = groupform.cleaned_data["role"]
                             group_member.save()
                             messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Group members added successfully.',
-                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_group', args=(gid, )))
+                                     "Group members added successfully.",
+                                     extra_tags="alert-success")
+                return HttpResponseRedirect(reverse("view_group", args=(gid, )))
 
     add_breadcrumb(title="Add Group Member", top_level=False, request=request)
-    return render(request, 'dojo/new_group_member.html', {
-        'group': group,
-        'form': groupform
+    return render(request, "dojo/new_group_member.html", {
+        "group": group,
+        "form": groupform,
     })
 
 
-@user_is_authorized(Dojo_Group_Member, Permissions.Group_Manage_Members, 'mid')
+@user_is_authorized(Dojo_Group_Member, Permissions.Group_Manage_Members, "mid")
 def edit_group_member(request, mid):
     member = get_object_or_404(Dojo_Group_Member, pk=mid)
     memberform = Edit_Group_MemberForm(instance=member)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         memberform = Edit_Group_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
             if not member.role.is_owner:
@@ -435,41 +445,39 @@ def edit_group_member(request, mid):
                 if owners < 1:
                     messages.add_message(request,
                                         messages.WARNING,
-                                        f'There must be at least one owner for group {member.group.name}.',
-                                        extra_tags='alert-warning')
-                    if is_title_in_breadcrumbs('View User'):
-                        return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
-                    else:
-                        return HttpResponseRedirect(reverse('view_group', args=(member.group.id, )))
+                                        f"There must be at least one owner for group {member.group.name}.",
+                                        extra_tags="alert-warning")
+                    if is_title_in_breadcrumbs("View User"):
+                        return HttpResponseRedirect(reverse("view_user", args=(member.user.id, )))
+                    return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
             if member.role.is_owner and not user_has_permission(request.user, member.group, Permissions.Group_Add_Owner):
                 messages.add_message(request,
                                      messages.WARNING,
-                                     'You are not permitted to make users owners.',
-                                     extra_tags='alert-warning')
+                                     "You are not permitted to make users owners.",
+                                     extra_tags="alert-warning")
             else:
                 memberform.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Group member updated successfully',
-                                     extra_tags='alert-success')
-                if is_title_in_breadcrumbs('View User'):
-                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
-                else:
-                    return HttpResponseRedirect(reverse('view_group', args=(member.group.id, )))
+                                     "Group member updated successfully",
+                                     extra_tags="alert-success")
+                if is_title_in_breadcrumbs("View User"):
+                    return HttpResponseRedirect(reverse("view_user", args=(member.user.id, )))
+                return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
 
     add_breadcrumb(title="Edit a Group Member", top_level=False, request=request)
-    return render(request, 'dojo/edit_group_member.html', {
-        'memberid': mid,
-        'form': memberform
+    return render(request, "dojo/edit_group_member.html", {
+        "memberid": mid,
+        "form": memberform,
     })
 
 
-@user_is_authorized(Dojo_Group_Member, Permissions.Group_Member_Delete, 'mid')
+@user_is_authorized(Dojo_Group_Member, Permissions.Group_Member_Delete, "mid")
 def delete_group_member(request, mid):
     member = get_object_or_404(Dojo_Group_Member, pk=mid)
     memberform = Delete_Group_MemberForm(instance=member)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         memberform = Delete_Group_MemberForm(request.POST, instance=member)
         member = memberform.instance
         if member.role.is_owner:
@@ -477,103 +485,100 @@ def delete_group_member(request, mid):
             if owners <= 1:
                 messages.add_message(request,
                                     messages.WARNING,
-                                        f'There must be at least one owner for group {member.group.name}.',
-                                    extra_tags='alert-warning')
-                if is_title_in_breadcrumbs('View User'):
-                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
-                else:
-                    return HttpResponseRedirect(reverse('view_group', args=(member.group.id, )))
+                                        f"There must be at least one owner for group {member.group.name}.",
+                                    extra_tags="alert-warning")
+                if is_title_in_breadcrumbs("View User"):
+                    return HttpResponseRedirect(reverse("view_user", args=(member.user.id, )))
+                return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
 
         user = member.user
         member.delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             'Group member deleted successfully.',
-                             extra_tags='alert-success')
-        if is_title_in_breadcrumbs('View User'):
-            return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
-        else:
-            if user == request.user:
-                return HttpResponseRedirect(reverse('groups'))
-            else:
-                return HttpResponseRedirect(reverse('view_group', args=(member.group.id, )))
+                             "Group member deleted successfully.",
+                             extra_tags="alert-success")
+        if is_title_in_breadcrumbs("View User"):
+            return HttpResponseRedirect(reverse("view_user", args=(member.user.id, )))
+        if user == request.user:
+            return HttpResponseRedirect(reverse("groups"))
+        return HttpResponseRedirect(reverse("view_group", args=(member.group.id, )))
 
     add_breadcrumb("Delete a group member", top_level=False, request=request)
-    return render(request, 'dojo/delete_group_member.html', {
-        'memberid': mid,
-        'form': memberform
+    return render(request, "dojo/delete_group_member.html", {
+        "memberid": mid,
+        "form": memberform,
     })
 
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_product_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
-    group_form = Add_Product_Group_GroupForm(initial={'group': group.id})
+    group_form = Add_Product_Group_GroupForm(initial={"group": group.id})
 
-    if request.method == 'POST':
-        group_form = Add_Product_Group_GroupForm(request.POST, initial={'group': group.id})
+    if request.method == "POST":
+        group_form = Add_Product_Group_GroupForm(request.POST, initial={"group": group.id})
         if group_form.is_valid():
-            if 'products' in group_form.cleaned_data and len(group_form.cleaned_data['products']) > 0:
-                for product in group_form.cleaned_data['products']:
+            if "products" in group_form.cleaned_data and len(group_form.cleaned_data["products"]) > 0:
+                for product in group_form.cleaned_data["products"]:
                     existing_groups = Product_Group.objects.filter(product=product, group=group)
                     if existing_groups.count() == 0:
                         product_group = Product_Group()
                         product_group.product = product
                         product_group.group = group
-                        product_group.role = group_form.cleaned_data['role']
+                        product_group.role = group_form.cleaned_data["role"]
                         product_group.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Product groups added successfully.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_group', args=(gid, )))
+                                 "Product groups added successfully.",
+                                 extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("view_group", args=(gid, )))
 
     add_breadcrumb(title="Add Product Group", top_level=False, request=request)
-    return render(request, 'dojo/new_product_group_group.html', {
-        'group': group,
-        'form': group_form
+    return render(request, "dojo/new_product_group_group.html", {
+        "group": group,
+        "form": group_form,
     })
 
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_product_type_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
-    group_form = Add_Product_Type_Group_GroupForm(initial={'group': group.id})
+    group_form = Add_Product_Type_Group_GroupForm(initial={"group": group.id})
 
-    if request.method == 'POST':
-        group_form = Add_Product_Type_Group_GroupForm(request.POST, initial={'group': group.id})
+    if request.method == "POST":
+        group_form = Add_Product_Type_Group_GroupForm(request.POST, initial={"group": group.id})
         if group_form.is_valid():
-            if 'product_types' in group_form.cleaned_data and len(group_form.cleaned_data['product_types']) > 0:
-                for product_type in group_form.cleaned_data['product_types']:
+            if "product_types" in group_form.cleaned_data and len(group_form.cleaned_data["product_types"]) > 0:
+                for product_type in group_form.cleaned_data["product_types"]:
                     existing_groups = Product_Type_Group.objects.filter(product_type=product_type, group=group)
                     if existing_groups.count() == 0:
                         product_type_group = Product_Type_Group()
                         product_type_group.product_type = product_type
                         product_type_group.group = group
-                        product_type_group.role = group_form.cleaned_data['role']
+                        product_type_group.role = group_form.cleaned_data["role"]
                         product_type_group.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Product type groups added successfully.',
-                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_group', args=(gid, )))
+                                     "Product type groups added successfully.",
+                                     extra_tags="alert-success")
+                return HttpResponseRedirect(reverse("view_group", args=(gid, )))
 
     add_breadcrumb(title="Add Product Type Group", top_level=False, request=request)
-    return render(request, 'dojo/new_product_type_group_group.html', {
-        'group': group,
-        'form': group_form,
+    return render(request, "dojo/new_product_type_group_group.html", {
+        "group": group,
+        "form": group_form,
     })
 
 
-@user_is_configuration_authorized('auth.change_permission')
+@user_is_configuration_authorized("auth.change_permission")
 def edit_permissions(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ConfigurationPermissionsForm(request.POST, group=group)
         if form.is_valid():
             form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Permissions updated.',
-                                 extra_tags='alert-success')
-    return HttpResponseRedirect(reverse('view_group', args=(gid,)))
+                                 "Permissions updated.",
+                                 extra_tags="alert-success")
+    return HttpResponseRedirect(reverse("view_group", args=(gid,)))

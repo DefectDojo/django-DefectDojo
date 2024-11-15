@@ -15,11 +15,11 @@
     </p>
 {% endif %}
 
-<div id="endpoint_content">
+<div id="endpoint_content" class="endpoint_content report_widget">
     {% for endpoint in endpoints %}
         <div class="panel panel-default panel-warning">
             <div class="panel-heading">
-                <h4>
+                <h4 class="report_endpoint">
                     Endpoint: {{ endpoint }} with {{ endpoint.active_findings|length|apnumber }}
                     active findings
                 </h4>
@@ -28,12 +28,12 @@
 
         {% for finding in endpoint.active_findings %}
             {% ifchanged finding.severity %}
-                <h4>{{ finding.severity|capfirst }}</h4>
+                <h4 class="report_findings_severity">{{ finding.severity|capfirst }}</h4>
             {% endifchanged %}
             <div class="panel panel-default">
                 <div class="panel-heading finding-title">
                     <div class="clearfix">
-                        <h5>
+                        <h5 class="report_findings_entry">
                             Finding {{ forloop.counter }}: {{ finding.title }}
                             {% if finding.tags %}
                                 <sup>
@@ -151,7 +151,7 @@
             <pre>{{ finding.references|markdown_render }}</pre>
             {% endif %}
             {% if include_finding_images %}
-                {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
+                {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="INLINE" %}
             {% endif %}
             {% if include_finding_notes %}
                 {% with notes=finding.notes.all|get_public_notes %}

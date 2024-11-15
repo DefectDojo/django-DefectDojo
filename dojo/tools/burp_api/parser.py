@@ -16,6 +16,7 @@ DESCRIPTION_TEMPLATE = """**{title}**
 
 
 class BurpApiParser:
+
     """Parser that can load data from Burp API"""
 
     def get_scan_types(self):
@@ -65,10 +66,10 @@ class BurpApiParser:
                     static_finding=False,  # by definition
                     dynamic_finding=True,  # by definition
                     unique_id_from_tool=str(
-                        issue.get("serial_number", "")
+                        issue.get("serial_number", ""),
                     ),  # the serial number is a good candidate for this attribute
                     vuln_id_from_tool=str(
-                        issue.get("type_index", "")
+                        issue.get("type_index", ""),
                     ),  # the type index is a good candidate for this attribute
                 )
                 # manage confidence
@@ -78,8 +79,8 @@ class BurpApiParser:
                 if "origin" in issue and "path" in issue:
                     finding.unsaved_endpoints = [
                         Endpoint.from_uri(
-                            issue.get("origin") + issue.get("path")
-                        )
+                            issue.get("origin") + issue.get("path"),
+                        ),
                     ]
                 finding.unsaved_req_resp = []
                 for evidence in issue.get("evidence", []):
@@ -89,13 +90,13 @@ class BurpApiParser:
                     ]:
                         continue
                     request = self.get_clean_base64(
-                        evidence.get("request_response").get("request")
+                        evidence.get("request_response").get("request"),
                     )
                     response = self.get_clean_base64(
-                        evidence.get("request_response").get("response")
+                        evidence.get("request_response").get("response"),
                     )
                     finding.unsaved_req_resp.append(
-                        {"req": request, "resp": response}
+                        {"req": request, "resp": response},
                     )
 
                 items.append(finding)
@@ -111,7 +112,7 @@ class BurpApiParser:
                         output += data.decode()
                     except UnicodeDecodeError:
                         output += "Decoding of the DataSegment failed. Thus, decoded with `latin1`. The result is the following one:\n"
-                        output += data.decode('latin1')
+                        output += data.decode("latin1")
                 elif segment["type"] == "SnipSegment":
                     output += f"\n<...> ({segment['length']} bytes)"
                 elif segment["type"] == "HighlightSegment":
@@ -123,7 +124,8 @@ class BurpApiParser:
 
 
 def convert_severity(issue):
-    """According to OpenAPI definition of the API
+    """
+    According to OpenAPI definition of the API
 
     "Severity":{
              "type":"string",
@@ -144,7 +146,8 @@ def convert_severity(issue):
 
 
 def convert_confidence(issue):
-    """According to OpenAPI definition:
+    """
+    According to OpenAPI definition:
 
     "Confidence":{
              "type":"string",
@@ -159,9 +162,8 @@ def convert_confidence(issue):
     value = issue.get("confidence", "undefined").lower()
     if "certain" == value:
         return 2
-    elif "firm" == value:
+    if "firm" == value:
         return 3
-    elif "tentative" == value:
+    if "tentative" == value:
         return 6
-    else:
-        return None
+    return None

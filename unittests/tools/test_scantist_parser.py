@@ -1,19 +1,18 @@
 from dojo.models import Test
 from dojo.tools.scantist.parser import ScantistParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestScantistParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with open("unittests/scans/scantist/scantist-no-vuln.json") as testfile:
+        with open("unittests/scans/scantist/scantist-no-vuln.json", encoding="utf-8") as testfile:
             parser = ScantistParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
-        with open("unittests/scans/scantist/scantist-one-vuln.json") as testfile:
+        with open("unittests/scans/scantist/scantist-one-vuln.json", encoding="utf-8") as testfile:
             parser = ScantistParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -27,11 +26,11 @@ class TestScantistParser(DojoTestCase):
                 "attack against hashes associated with the maximum exponent.",
             )
             self.assertEqual(
-                findings.severity, "Medium"
+                findings.severity, "Medium",
             )  # Negligible is translated to Informational
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
-        with open("unittests/scans/scantist/scantist-many-vuln.json") as testfile:
+        with open("unittests/scans/scantist/scantist-many-vuln.json", encoding="utf-8") as testfile:
             parser = ScantistParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(17, len(findings))

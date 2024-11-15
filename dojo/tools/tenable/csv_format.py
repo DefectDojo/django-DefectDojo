@@ -51,7 +51,7 @@ class TenableCSVParser:
         if val is None or val == "":
             return None
         cve_match = re.findall(
-            r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE
+            r"CVE-[0-9]+-[0-9]+", val.upper(), re.IGNORECASE,
         )
         if cve_match:
             return cve_match
@@ -61,17 +61,16 @@ class TenableCSVParser:
         if val is None or val == "":
             return None
         cpe_match = re.findall(r"cpe:/[^\n\ ]+", val)
-        return cpe_match if cpe_match else None
+        return cpe_match or None
 
     def detect_delimiter(self, content: str):
         """Detect the delimiter of the CSV file"""
         if isinstance(content, bytes):
             content = content.decode("utf-8")
-        first_line = content.split('\n')[0]
-        if ';' in first_line:
-            return ';'
-        else:
-            return ','  # default to comma if no semicolon found
+        first_line = content.split("\n")[0]
+        if ";" in first_line:
+            return ";"
+        return ","  # default to comma if no semicolon found
 
     def get_findings(self, filename: str, test: Test):
         # Read the CSV
@@ -101,9 +100,12 @@ class TenableCSVParser:
             severity = self._convert_severity(raw_severity)
             # Other text fields
             description = row.get("Synopsis", row.get("definition.synopsis", "N/A"))
-            mitigation = str(row.get("Solution", row.get("definition.solution", "N/A")))
+            mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
             impact = row.get("Description", row.get("definition.description", "N/A"))
             references = row.get("See Also", row.get("definition.see_also", "N/A"))
+            references += "\nTenable Plugin ID: " + row.get("Plugin", "N/A")
+            references += "\nPlugin Publication Date: " + row.get("Plugin Publication Date", "N/A")
+            references += "\nPlugin Modification Date: " + row.get("Plugin Modification Date", "N/A")
             # Determine if the current row has already been processed
             dupe_key = (
                 severity
@@ -130,7 +132,7 @@ class TenableCSVParser:
                 cvss_vector = row.get("CVSS V3 Vector", "")
                 if cvss_vector != "":
                     find.cvssv3 = CVSS3(
-                        "CVSS:3.0/" + str(cvss_vector)
+                        "CVSS:3.0/" + str(cvss_vector),
                     ).clean_vector(output_prefix=True)
 
                 # Add CVSS score if present
@@ -140,10 +142,10 @@ class TenableCSVParser:
                 # manage CPE data
                 detected_cpe = self._format_cpe(str(row.get("CPE", row.get("definition.cpe", ""))))
                 if detected_cpe:
-                    # FIXME support more than one CPE in Nessus CSV parser
+                    # TODO: support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
                         LOGGER.debug(
-                            "more than one CPE for a finding. NOT supported by Nessus CSV parser"
+                            "more than one CPE for a finding. NOT supported by Nessus CSV parser",
                         )
                     cpe_decoded = CPE(detected_cpe[0])
                     find.component_name = (

@@ -1,13 +1,12 @@
 from dojo.models import Test
 from dojo.tools.kubeaudit.parser import KubeAuditParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestKubeAuditParser(DojoTestCase):
 
     def test_parse_file_has_no_findings(self):
-        testfile = open("unittests/scans/kubeaudit/kubeaudit.json")
+        testfile = open("unittests/scans/kubeaudit/kubeaudit.json", encoding="utf-8")
         parser = KubeAuditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

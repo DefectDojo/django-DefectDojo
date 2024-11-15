@@ -43,7 +43,7 @@ class NeuVectorJsonParser:
                 unique_key = node.get("name") + str(
                     package_name
                     + str(node.get("package_version"))
-                    + str(node.get("severity"))
+                    + str(node.get("severity")),
                 )
                 items[unique_key] = item
         return list(items.values())
@@ -116,16 +116,15 @@ def get_item(vulnerability, test):
 def convert_severity(severity):
     if severity.lower() == "critical":
         return "Critical"
-    elif severity.lower() == "high":
+    if severity.lower() == "high":
         return "High"
-    elif severity.lower() == "medium":
+    if severity.lower() == "medium":
         return "Medium"
-    elif severity.lower() == "low":
+    if severity.lower() == "low":
         return "Low"
-    elif severity == "":
+    if severity == "":
         return "Info"
-    else:
-        return severity.title()
+    return severity.title()
 
 
 class NeuVectorParser:
@@ -144,6 +143,5 @@ class NeuVectorParser:
 
         if filename.name.lower().endswith(".json"):
             return NeuVectorJsonParser().parse(filename, test)
-        else:
-            msg = "Unknown File Format"
-            raise ValueError(msg)
+        msg = "Unknown File Format"
+        raise ValueError(msg)

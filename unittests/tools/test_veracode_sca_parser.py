@@ -5,8 +5,7 @@ from django.test import override_settings
 
 from dojo.models import Test
 from dojo.tools.veracode_sca.parser import VeracodeScaParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestVeracodeScaScannerParser(DojoTestCase):
@@ -19,7 +18,7 @@ class TestVeracodeScaScannerParser(DojoTestCase):
         self.parse_csv()
 
     def parse_csv(self):
-        with open("unittests/scans/veracode_sca/veracode_sca.csv") as testfile:
+        with open("unittests/scans/veracode_sca/veracode_sca.csv", encoding="utf-8") as testfile:
             parser = VeracodeScaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -68,7 +67,7 @@ class TestVeracodeScaScannerParser(DojoTestCase):
         self.parse_json()
 
     def parse_json(self):
-        with open("unittests/scans/veracode_sca/veracode_sca.json") as testfile:
+        with open("unittests/scans/veracode_sca/veracode_sca.json", encoding="utf-8") as testfile:
             parser = VeracodeScaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -94,7 +93,7 @@ class TestVeracodeScaScannerParser(DojoTestCase):
         self.parse_json_fixed()
 
     def parse_json_fixed(self):
-        with open("unittests/scans/veracode_sca/veracode_sca_fixed.json") as testfile:
+        with open("unittests/scans/veracode_sca/veracode_sca_fixed.json", encoding="utf-8") as testfile:
             parser = VeracodeScaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))

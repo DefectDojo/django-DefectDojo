@@ -2,8 +2,7 @@ import datetime
 
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestFile:
@@ -19,14 +18,14 @@ class TestFile:
 class TestGenericParser(DojoTestCase):
 
     def setUp(self):
-        self.product = Product(name='sample product',
-                               description='what a description')
-        self.engagement = Engagement(name='sample engagement',
+        self.product = Product(name="sample product",
+                               description="what a description")
+        self.engagement = Engagement(name="sample engagement",
                                      product=self.product)
         self.test = Test(engagement=self.engagement)
 
     def test_parse_report1(self):
-        with open("unittests/scans/generic/generic_report1.csv") as file:
+        with open("unittests/scans/generic/generic_report1.csv", encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, self.test)
             for finding in findings:
@@ -127,7 +126,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
-        self.assertEqual('Potential XSS Vulnerability',
+        self.assertEqual("Potential XSS Vulnerability",
                          findings[0].title)
 
     def test_parsed_finding_has_cve(self):
@@ -174,10 +173,10 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         finding = findings[0]
         self.assertEqual(1, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
-        self.assertEqual('localhost', endpoint.host)
+        self.assertEqual("localhost", endpoint.host)
         self.assertEqual(80, endpoint.port)
-        self.assertEqual('http', endpoint.protocol)
-        self.assertEqual('default.aspx', endpoint.path)
+        self.assertEqual("http", endpoint.protocol)
+        self.assertEqual("default.aspx", endpoint.path)
         self.assertIsNone(endpoint.query)
         self.assertIsNone(endpoint.fragment)
         self.assertEqual(True, finding.active)
@@ -196,7 +195,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual('High', findings[0].severity)
+        self.assertEqual("High", findings[0].severity)
 
     def test_parsed_finding_with_invalid_severity_has_info_severity(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
@@ -211,7 +210,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual('Info', findings[0].severity)
+        self.assertEqual("Info", findings[0].severity)
 
     def test_parsed_finding_has_description(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
@@ -227,7 +226,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(
-            'FileName: default.aspx.cs\nDescription: Potential XSS Vulnerability\nLine:18\nCode Line: Response.Write(output);',
+            "FileName: default.aspx.cs\nDescription: Potential XSS Vulnerability\nLine:18\nCode Line: Response.Write(output);",
             findings[0].description)
 
     def test_parsed_finding_has_mitigation(self):
@@ -243,7 +242,7 @@ Code Line: Response.Write(output);","None Currently Available",,,TRUE,FALSE
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual('None Currently Available',
+        self.assertEqual("None Currently Available",
                          findings[0].mitigation)
 
     def test_parsed_finding_has_impact(self):
@@ -259,7 +258,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual('Impact is currently unknown',
+        self.assertEqual("Impact is currently unknown",
                          findings[0].impact)
 
     def test_parsed_finding_has_references(self):
@@ -275,7 +274,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual('Finding has references.', findings[0].references)
+        self.assertEqual("Finding has references.", findings[0].references)
 
     def test_parsed_finding_has_positive_active_status(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
@@ -429,13 +428,13 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         finding1 = findings1[0]
         finding2 = findings2[0]
 
-        fields1 = {k: v for k, v in finding1.__dict__.items() if k != '_state'}
-        fields2 = {k: v for k, v in finding2.__dict__.items() if k != '_state'}
+        fields1 = {k: v for k, v in finding1.__dict__.items() if k != "_state"}
+        fields2 = {k: v for k, v in finding2.__dict__.items() if k != "_state"}
 
         self.assertEqual(fields1, fields2)
 
     def test_parse_json(self):
-        with open("unittests/scans/generic/generic_report1.json") as file:
+        with open("unittests/scans/generic/generic_report1.json", encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
             for finding in findings:
@@ -466,7 +465,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertIn(finding.severity, Finding.SEVERITIES)
 
     def test_parse_json2(self):
-        with open("unittests/scans/generic/generic_report2.json") as file:
+        with open("unittests/scans/generic/generic_report2.json", encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
             for finding in findings:
@@ -489,7 +488,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual("Some mitigation", finding.mitigation)
 
     def test_parse_json3(self):
-        with open("unittests/scans/generic/generic_report3.json") as file:
+        with open("unittests/scans/generic/generic_report3.json", encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
             self.assertEqual(3, len(findings))
@@ -527,7 +526,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual("test-pest", endpoint.path)
 
     def test_parse_endpoints_and_vulnerability_ids_json(self):
-        with open("unittests/scans/generic/generic_report4.json") as file:
+        with open("unittests/scans/generic/generic_report4.json", encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
             self.assertEqual(1, len(findings))
@@ -558,7 +557,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertEqual("CVE-2015-9235", finding.unsaved_vulnerability_ids[1])
 
     def test_parse_host_and_vulnerability_id_csv(self):
-        with open("unittests/scans/generic/generic_report4.csv") as file:
+        with open("unittests/scans/generic/generic_report4.csv", encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
             self.assertEqual(4, len(findings))
@@ -600,7 +599,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertIsNone(finding.unsaved_vulnerability_ids)
 
     def test_parse_json_with_image(self):
-        with open("unittests/scans/generic/test_with_image.json") as file:
+        with open("unittests/scans/generic/test_with_image.json", encoding="utf-8") as file:
             parser = GenericParser()
             findings = parser.get_findings(file, Test())
             self.assertEqual(1, len(findings))
@@ -613,7 +612,7 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertIn("data", image)
 
     def test_parse_json_custom_test(self):
-        with open("unittests/scans/generic/generic_custom_test.json") as file:
+        with open("unittests/scans/generic/generic_custom_test.json", encoding="utf-8") as file:
             parser = GenericParser()
             tests = parser.get_tests(parser.get_scan_types()[0], file)
             self.assertEqual(1, len(tests))
@@ -638,14 +637,14 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                 self.assertEqual("TEST1", finding.vuln_id_from_tool)
 
     def test_parse_json_empty_finding(self):
-        with open("unittests/scans/generic/generic_empty.json") as file:
+        with open("unittests/scans/generic/generic_empty.json", encoding="utf-8") as file:
             parser = GenericParser()
             with self.assertRaisesMessage(ValueError,
                     "Required fields are missing: ['description', 'severity', 'title']"):
                 parser.get_findings(file, Test())
 
     def test_parse_json_invalid_finding(self):
-        with open("unittests/scans/generic/generic_invalid.json") as file:
+        with open("unittests/scans/generic/generic_invalid.json", encoding="utf-8") as file:
             parser = GenericParser()
             with self.assertRaisesMessage(ValueError,
                     "Not allowed fields are present: ['invalid_field', 'last_status_update']"):

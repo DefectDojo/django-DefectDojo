@@ -6,6 +6,7 @@ from .importer import BlackduckImporter
 
 
 class BlackduckParser:
+
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv and files.csv
@@ -28,10 +29,9 @@ class BlackduckParser:
     def normalize_findings(self, filename):
         importer = BlackduckImporter()
 
-        findings = sorted(
-            importer.parse_findings(filename), key=lambda f: f.vuln_id
+        return sorted(
+            importer.parse_findings(filename), key=lambda f: f.vuln_id,
         )
-        return findings
 
     def ingest_findings(self, normalized_findings, test):
         dupes = {}
@@ -46,7 +46,7 @@ class BlackduckParser:
             references = self.format_reference(i)
 
             dupe_key = hashlib.md5(
-                f"{title} | {i.vuln_source}".encode()
+                f"{title} | {i.vuln_source}".encode(),
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -78,7 +78,7 @@ class BlackduckParser:
 
                 dupes[dupe_key] = finding
 
-        return dupes.values()
+        return list(dupes.values())
 
     def format_title(self, i):
         if i.channel_version_origin_id is not None:

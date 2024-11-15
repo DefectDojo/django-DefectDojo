@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiUpdater:
+
     """
     This class updates in SonarQube, a SonarQube issue previously imported as a DefectDojo Findings.
      This class maps the finding status to a SQ issue status and later on it transitions the issue
@@ -68,11 +69,11 @@ class SonarQubeApiUpdater:
         return target_status
 
     def get_sonarqube_required_transitions_for(
-        self, current_status, target_status
+        self, current_status, target_status,
     ):
         # If current and target is the same... do nothing
         if current_status == target_status:
-            return
+            return None
 
         # Check if there is at least one transition from current_status...
         if not [
@@ -80,7 +81,7 @@ class SonarQubeApiUpdater:
             for x in self.MAPPING_SONARQUBE_STATUS_TRANSITION
             if current_status in x.get("from")
         ]:
-            return
+            return None
 
         # Starting from target_status... find out possible origin statuses that
         # can transition to target_status
@@ -107,12 +108,14 @@ class SonarQubeApiUpdater:
                 for t_from in transition.get("from"):
                     possible_transition = (
                         self.get_sonarqube_required_transitions_for(
-                            current_status, t_from
+                            current_status, t_from,
                         )
                     )
                     if possible_transition:
                         transitions_result.extendleft(possible_transition)
                         return list(transitions_result)
+            return None
+        return None
 
     def update_sonarqube_finding(self, finding):
         sonarqube_issue = finding.sonarqube_issue
@@ -120,7 +123,7 @@ class SonarQubeApiUpdater:
             return
 
         logger.debug(
-            f"Checking if finding '{finding}' needs to be updated in SonarQube"
+            f"Checking if finding '{finding}' needs to be updated in SonarQube",
         )
 
         client, _ = SonarQubeApiImporter.prepare_client(finding.test)
@@ -135,21 +138,21 @@ class SonarQubeApiUpdater:
         ):  # Issue could have disappeared in SQ because a previous scan has resolved the issue as fixed
             if issue.get("resolution"):
                 current_status = "{} / {}".format(
-                    issue.get("status"), issue.get("resolution")
+                    issue.get("status"), issue.get("resolution"),
                 )
             else:
                 current_status = issue.get("status")
 
             logger.debug(
-                f"--> SQ Current status: {current_status}. Current target status: {target_status}"
+                f"--> SQ Current status: {current_status}. Current target status: {target_status}",
             )
 
             transitions = self.get_sonarqube_required_transitions_for(
-                current_status, target_status
+                current_status, target_status,
             )
             if transitions:
                 logger.info(
-                    f"Updating finding '{finding}' in SonarQube"
+                    f"Updating finding '{finding}' in SonarQube",
                 )
 
                 for transition in transitions:
@@ -162,7 +165,7 @@ class SonarQubeApiUpdater:
                     # to sonarqube we changed Accepted into Risk Accepted, but we change it back to be sure we don't
                     # break the integration
                     finding_status=finding.status().replace(
-                        "Risk Accepted", "Accepted"
+                        "Risk Accepted", "Accepted",
                     )
                     if finding.status()
                     else finding.status(),

@@ -1080,8 +1080,7 @@
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
                                                                     <li role="presentation">
-                                                                        <a href
-                                                                        {% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}>
+                                                                        <a href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                             <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptance..." %}
                                                                         </a>
                                                                     </li>
@@ -1205,7 +1204,7 @@
                                     <td class="nowrap">
                                         {{ finding.epss_percentile|format_epss }}
                                     </td>
-                                    <td class="nowrap">
+                                    <td class="nowrap" data-order="{{ finding.date|date:"U" }}">
                                         {{ finding.date }}
                                     </td>
                                     <td>
@@ -1604,7 +1603,14 @@
                 { "data": "cve" },
                 { "data": "epss_score", "type": "num", "render": percentSort },
                 { "data": "epss_percentile", "type": "num", "render": percentSort },
-                { "data": "date" },
+                { "data": "date", render: function (data, type, row, meta) {
+                    if(type === 'sort') {
+                        var api = new $.fn.dataTable.Api(meta.settings);
+                        var td = api.cell({row: meta.row, column: meta.col}).node();
+                        var data = $(td).attr("data-order");
+                    }
+                    return data;
+                }},
                 { "data": "age" },
                 {% if system_settings.enable_finding_sla %}
                     { "data": "sla" },
@@ -1674,58 +1680,60 @@
             };
 
             // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#test_findings').DataTable({
-                drawCallback: function(){
-                    $('#test_findings .has-popover').hover(
-                        function() { $(this).popover('show'); }, // hover
-                        function() { $(this).popover('hide'); } // unhover
-                    );
-                },
-                colReorder: true,
-                "columns": columns,
-                columnDefs: [
-                    {
-                        "orderable": false,
-                        "targets": [0]
+            {% if enable_table_filtering %}
+                var dojoTable = $('#test_findings').DataTable({
+                    drawCallback: function(){
+                        $('#test_findings .has-popover').hover(
+                            function() { $(this).popover('show'); }, // hover
+                            function() { $(this).popover('hide'); } // unhover
+                        );
                     },
-                    {
-                        targets: [0, 1],
-                        className: 'noVis'
-                    },
-                    {
-                        targets: 'severity-sort',
-                        orderDataType: 'severity-asc'
-                    },
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
+                    colReorder: true,
+                    "columns": columns,
+                    columnDefs: [
+                        {
+                            "orderable": false,
+                            "targets": [0]
+                        },
+                        {
+                            targets: [0, 1],
+                            className: 'noVis'
+                        },
+                        {
+                            targets: 'severity-sort',
+                            orderDataType: 'severity-asc'
+                        },
+                    ],
+                    dom: 'Bfrtip',
+                    paging: false,
+                    info: false,
+                    buttons: [
+                        {
+                            extend: 'colvis',
+                            columns: ':not(.noVis)'
+                        },
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'copy'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'excel',
+                            autoFilter: true,
+                            sheetName: 'Exported data',
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'csv'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'pdf',
+                            orientation: 'landscape',
+                            pageSize: 'LETTER'
+                        }),
+                        $.extend( true, {}, buttonCommon, {
+                            extend: 'print'
+                        }),
+                    ],
+                });
+            {% endif %}
         });
 
         $(function () {

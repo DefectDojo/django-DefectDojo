@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 from requests.exceptions import JSONDecodeError as RequestsJSONDecodeError
 
 from dojo.utils import prepare_for_view
@@ -75,6 +76,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/components/search",
             params=parameters,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
@@ -120,6 +122,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/components/show",
             params=parameters,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
@@ -147,7 +150,6 @@ class SonarQubeAPI:
         :param types: issue types (comma separated values). e.g. BUG,VULNERABILITY,CODE_SMELL
         :return:
         """
-
         if self.extras is not None:
             types = self.extras
 
@@ -174,6 +176,7 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/issues/search",
                 params=request_filter,
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if not response.ok:
@@ -216,6 +219,7 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/hotspots/search",
                 params=request_filter,
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if not response.ok:
@@ -251,6 +255,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/issues/search",
             params=request_filter,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
@@ -265,7 +270,7 @@ class SonarQubeAPI:
             if issue["key"] == issue_key:
                 return issue
         msg = (
-            f"Expected Issue \"{issue_key}\", but it returned"
+            f'Expected Issue "{issue_key}", but it returned'
             f"{[x.get('key') for x in response.json().get('issues')]}. "
             "Full response: "
             f"{response.json()}"
@@ -281,7 +286,7 @@ class SonarQubeAPI:
         rule = self.rules_cache.get(rule_id)
         if not rule:
             request_filter = {
-                "key": rule_id
+                "key": rule_id,
             }
             if organization:
                 request_filter["organization"] = organization
@@ -291,6 +296,7 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/rules/show",
                 params=request_filter,
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
             if not response.ok:
                 msg = (
@@ -315,6 +321,7 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/hotspots/show",
                 params={"hotspot": rule_id},
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
             if not response.ok:
                 msg = (
@@ -358,6 +365,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/issues/do_transition",
             data={"issue": issue_key, "transition": transition},
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
@@ -379,6 +387,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/issues/add_comment",
             data={"issue": issue_key, "text": text},
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
         if not response.ok:
             msg = (
@@ -388,9 +397,7 @@ class SonarQubeAPI:
             raise Exception(msg)
 
     def test_connection(self):
-        """
-        Returns number of components (projects) or raise error.
-        """
+        """Returns number of components (projects) or raise error."""
         parameters = {"qualifiers": "TRK"}
 
         if self.org_id is not None:
@@ -400,6 +407,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/components/search",
             params=parameters,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
@@ -424,7 +432,7 @@ class SonarQubeAPI:
     def test_product_connection(self, api_scan_configuration):
         organization = api_scan_configuration.service_key_2 or None
         project = self.get_project(
-            api_scan_configuration.service_key_1, organization=organization
+            api_scan_configuration.service_key_1, organization=organization,
         )
         project_name = project.get("name")
         message_prefix = "You have access to project"

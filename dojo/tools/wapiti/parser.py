@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class WapitiParser:
-    """The web-application vulnerability scanner
+
+    """
+    The web-application vulnerability scanner
 
     see: https://wapiti.sourceforge.io/
     """
@@ -56,7 +58,7 @@ class WapitiParser:
                 if reference_title.startswith("CWE"):
                     cwe = self.get_cwe(reference_title)
                 references.append(
-                    f"* [{reference_title}]({reference.findtext('url')})"
+                    f"* [{reference_title}]({reference.findtext('url')})",
                 )
             references = "\n".join(references)
 
@@ -84,12 +86,12 @@ class WapitiParser:
                 finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
                 finding.unsaved_req_resp = [
-                    {"req": entry.findtext("http_request"), "resp": ""}
+                    {"req": entry.findtext("http_request"), "resp": ""},
                 ]
 
                 # make dupe hash key
                 dupe_key = hashlib.sha256(
-                    str(description + title + severity).encode("utf-8")
+                    str(description + title + severity).encode("utf-8"),
                 ).hexdigest()
                 # check if dupes are present.
                 if dupe_key in dupes:
@@ -108,5 +110,4 @@ class WapitiParser:
         cweSearch = re.search("CWE-(\\d+)", val, re.IGNORECASE)
         if cweSearch:
             return int(cweSearch.group(1))
-        else:
-            return None
+        return None

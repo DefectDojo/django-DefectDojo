@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class SolarAppscreenerParser:
-    """
-    SAST scanner
-    """
+
+    """SAST scanner"""
 
     def get_scan_types(self):
         return ["Solar Appscreener Scan"]
@@ -26,7 +25,7 @@ class SolarAppscreenerParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         csvarray = []
 

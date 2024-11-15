@@ -25,6 +25,7 @@ def globalize_vars(request):
         "SAML2_LOGOUT_URL": settings.SAML2_LOGOUT_URL,
         "DOCUMENTATION_URL": settings.DOCUMENTATION_URL,
         "API_TOKENS_ENABLED": settings.API_TOKENS_ENABLED,
+        "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
     }
 
 
@@ -49,7 +50,7 @@ def bind_announcement(request):
     try:
         if request.user.is_authenticated:
             user_announcement = UserAnnouncement.objects.select_related(
-                "announcement"
+                "announcement",
             ).get(user=request.user)
             return {"announcement": user_announcement.announcement}
         return {}

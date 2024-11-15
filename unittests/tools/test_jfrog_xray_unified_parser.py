@@ -2,21 +2,20 @@ import datetime
 
 from dojo.models import Test
 from dojo.tools.jfrog_xray_unified.parser import JFrogXrayUnifiedParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestJFrogXrayUnifiedParser(DojoTestCase):
 
     def test_parse_file_with_no_vuln(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/no_vuln.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/no_vuln.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/one_vuln.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/one_vuln.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -46,14 +45,14 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertEqual("XRAY-139239", item.unique_id_from_tool)
 
     def test_parse_file_with_many_vulns(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/many_vulns.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/many_vulns.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
 
     def test_parse_file_with_very_many_vulns(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/very_many_vulns.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/very_many_vulns.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -326,7 +325,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         self.assertEqual("TABLE statements.\n\nRed Hat Severity: Moderate", item.description[-45:])
         self.assertIsNone(item.mitigation)
         self.assertEqual("7:sqlite:0", item.component_name)
-        self.assertIn('packagetype_rpm', item.tags)
+        self.assertIn("packagetype_rpm", item.tags)
         self.assertEqual("3.7.17-8.el7_7.1", item.component_version)
         self.assertEqual("elastic-docker-remote/elasticsearch/elasticsearch/7.9.1-amd64/", item.file_path)
         self.assertIsNotNone(item.severity_justification)
@@ -340,7 +339,7 @@ class TestJFrogXrayUnifiedParser(DojoTestCase):
         # **finished various packages**
 
     def test_parse_file_with_another_report(self):
-        testfile = open("unittests/scans/jfrog_xray_unified/Vulnerabilities-Report-XRAY_Unified.json")
+        testfile = open("unittests/scans/jfrog_xray_unified/Vulnerabilities-Report-XRAY_Unified.json", encoding="utf-8")
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

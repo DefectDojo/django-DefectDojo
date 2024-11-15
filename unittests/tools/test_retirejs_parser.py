@@ -1,12 +1,11 @@
 from dojo.models import Test
 from dojo.tools.retirejs.parser import RetireJsParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestRetireJsParser(DojoTestCase):
     def test_parse(self):
-        with open("unittests/scans/retirejs/latest.json") as testfile:
+        with open("unittests/scans/retirejs/latest.json", encoding="utf-8") as testfile:
             parser = RetireJsParser()
             findings = parser.get_findings(testfile, Test())
             self.assertIsInstance(findings, list)

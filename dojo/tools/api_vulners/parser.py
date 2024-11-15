@@ -20,6 +20,7 @@ vulners_severity_mapping = {
 
 
 class ApiVulnersParser:
+
     """Parser that can load data from Vulners Scanner API"""
 
     def get_scan_types(self):
@@ -91,7 +92,7 @@ class ApiVulnersParser:
                 finding.cvssv3 = CVSS3(
                     vuln.get("cvss3", {})
                     .get("cvssV3", {})
-                    .get("vectorString", "")
+                    .get("vectorString", ""),
                 ).clean_vector()
 
             # References

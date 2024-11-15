@@ -13,7 +13,7 @@ def get_authorized_jira_projects(permission, user=None):
     if user is None:
         return JIRA_Project.objects.none()
 
-    jira_projects = JIRA_Project.objects.all()
+    jira_projects = JIRA_Project.objects.all().order_by("id")
 
     if user.is_superuser:
         return jira_projects
@@ -23,35 +23,35 @@ def get_authorized_jira_projects(permission, user=None):
 
     roles = get_roles_for_permission(permission)
     engagement_authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('engagement__product__prod_type_id'),
+        product_type=OuterRef("engagement__product__prod_type_id"),
         user=user,
         role__in=roles)
     engagement_authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('engagement__product_id'),
+        product=OuterRef("engagement__product_id"),
         user=user,
         role__in=roles)
     engagement_authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('engagement__product__prod_type_id'),
+        product_type=OuterRef("engagement__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     engagement_authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('engagement__product_id'),
+        product=OuterRef("engagement__product_id"),
         group__users=user,
         role__in=roles)
     product_authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('product__prod_type_id'),
+        product_type=OuterRef("product__prod_type_id"),
         user=user,
         role__in=roles)
     product_authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('product_id'),
+        product=OuterRef("product_id"),
         user=user,
         role__in=roles)
     product_authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('product__prod_type_id'),
+        product_type=OuterRef("product__prod_type_id"),
         group__users=user,
         role__in=roles)
     product_authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('product_id'),
+        product=OuterRef("product_id"),
         group__users=user,
         role__in=roles)
     jira_projects = jira_projects.annotate(
@@ -63,7 +63,7 @@ def get_authorized_jira_projects(permission, user=None):
         product__member=Exists(product_authorized_product_roles),
         product__prod_type__authorized_group=Exists(product_authorized_product_type_groups),
         product__authorized_group=Exists(product_authorized_product_groups))
-    jira_projects = jira_projects.filter(
+    return jira_projects.filter(
         Q(engagement__product__prod_type__member=True)
         | Q(engagement__product__member=True)
         | Q(engagement__product__prod_type__authorized_group=True)
@@ -73,8 +73,6 @@ def get_authorized_jira_projects(permission, user=None):
         | Q(product__prod_type__authorized_group=True)
         | Q(product__authorized_group=True))
 
-    return jira_projects
-
 
 def get_authorized_jira_issues(permission):
     user = get_current_user()
@@ -82,7 +80,7 @@ def get_authorized_jira_issues(permission):
     if user is None:
         return JIRA_Issue.objects.none()
 
-    jira_issues = JIRA_Issue.objects.all()
+    jira_issues = JIRA_Issue.objects.all().order_by("id")
 
     if user.is_superuser:
         return jira_issues
@@ -92,51 +90,51 @@ def get_authorized_jira_issues(permission):
 
     roles = get_roles_for_permission(permission)
     engagement_authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('engagement__product__prod_type_id'),
+        product_type=OuterRef("engagement__product__prod_type_id"),
         user=user,
         role__in=roles)
     engagement_authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('engagement__product_id'),
+        product=OuterRef("engagement__product_id"),
         user=user,
         role__in=roles)
     engagement_authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('engagement__product__prod_type_id'),
+        product_type=OuterRef("engagement__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     engagement_authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('engagement__product_id'),
+        product=OuterRef("engagement__product_id"),
         group__users=user,
         role__in=roles)
     finding_group_authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('finding_group__test__engagement__product__prod_type_id'),
+        product_type=OuterRef("finding_group__test__engagement__product__prod_type_id"),
         user=user,
         role__in=roles)
     finding_group_authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('finding_group__test__engagement__product_id'),
+        product=OuterRef("finding_group__test__engagement__product_id"),
         user=user,
         role__in=roles)
     finding_group_authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('finding_group__test__engagement__product__prod_type_id'),
+        product_type=OuterRef("finding_group__test__engagement__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     finding_group_authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('finding_group__test__engagement__product_id'),
+        product=OuterRef("finding_group__test__engagement__product_id"),
         group__users=user,
         role__in=roles)
     finding_authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef('finding__test__engagement__product__prod_type_id'),
+        product_type=OuterRef("finding__test__engagement__product__prod_type_id"),
         user=user,
         role__in=roles)
     finding_authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef('finding__test__engagement__product_id'),
+        product=OuterRef("finding__test__engagement__product_id"),
         user=user,
         role__in=roles)
     finding_authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef('finding__test__engagement__product__prod_type_id'),
+        product_type=OuterRef("finding__test__engagement__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     finding_authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef('finding__test__engagement__product_id'),
+        product=OuterRef("finding__test__engagement__product_id"),
         group__users=user,
         role__in=roles)
     jira_issues = jira_issues.annotate(
@@ -152,7 +150,7 @@ def get_authorized_jira_issues(permission):
         finding__test__engagement__product__member=Exists(finding_authorized_product_roles),
         finding__test__engagement__product__prod_type__authorized_group=Exists(finding_authorized_product_type_groups),
         finding__test__engagement__product__authorized_group=Exists(finding_authorized_product_groups))
-    jira_issues = jira_issues.filter(
+    return jira_issues.filter(
         Q(engagement__product__prod_type__member=True)
         | Q(engagement__product__member=True)
         | Q(engagement__product__prod_type__authorized_group=True)
@@ -165,5 +163,3 @@ def get_authorized_jira_issues(permission):
         | Q(finding__test__engagement__product__member=True)
         | Q(finding__test__engagement__product__prod_type__authorized_group=True)
         | Q(finding__test__engagement__product__authorized_group=True))
-
-    return jira_issues

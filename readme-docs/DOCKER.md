@@ -8,7 +8,7 @@ Although Docker Compose is one of the supported installation methods to deploy a
 # Prerequisites
 
 *  Docker version
-    *  Installing with docker-compose requires at least Docker 19.03.0 and Docker Compose 1.28.0. See "Checking Docker versions" below for version errors during running docker-compose.
+    *  Installing with docker compose requires at least Docker 19.03.0 and Docker Compose 1.28.0. See "Checking Docker versions" below for version errors during running docker compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ .
 
@@ -30,43 +30,18 @@ When running the application without building images, the application will run b
     *  https://hub.docker.com/r/defectdojo/defectdojo-nginx
 
 
-# Setup via Docker Compose - Profiles
-
-## Parameters to start docker-compose
-
-The Docker Compose setup supports 2 different databases (MySQL and PostgreSQL) and 2 different celery brokers (RabbitMQ and Redis). To make this possible, docker-compose needs to be started with the parameter `--profile` with one of these choices:
-
-- mysql-rabbitmq
-- mysql-redis
-- postgres-rabbitmq
-- postgres-redis*
-
-e.g. 
-```zsh
-./dc-up.sh mysql-redis
-```
-
-A default profile can be set with the environment variable `DD_PROFILE`. If this environment variable is set when starting the containers, the parameter for the profile needs not to be given for the start scripts.
-
-When DD_PROFILE or command-line profile is not specified, the command will run "postgres-redis" as the default profile. 
-
-The environment variables needed for the different profiles are prepared in files, which need to be included additionally with the parameter `--env-file` with a choices that fits to the profile:
-
-- ./docker/environments/mysql-rabbitmq.env
-- ./docker/environments/mysql-redis.env
-- ./docker/environments/postgres-rabbitmq.env
-- ./docker/environments/postgres-redis.env
+# Setup via Docker Compose
 
 ## Scripts
 
 6 shell scripts make life easier and avoid typing long commands:
 
 - `./dc-build.sh` - Build the docker images, it can take one additional parameter to be used in the build process, e.g. `./dc-build.sh --no-cache`.
-- `./dc-up.sh` - Start the docker containers in the foreground, it needs one of the profile names as a parameter, e.g. `./dc-up.sh postgres-redis`.
-- `./dc-up-d.sh` - Start the docker containers in the background, it needs one of the profile names as a parameter, e.g. `./dc-up-d.sh mysql-rabbitmq`
+- `./dc-up.sh` - Start the docker containers in the foreground.
+- `./dc-up-d.sh` - Start the docker containers in the background.
 - `./dc-stop.sh` - Stop the docker containers, it can take one additional parameter to be used in the stop process.
 - `./dc-down.sh` - Stop and remove the docker containers, it can take one additional parameter to be used in the stop and remove process.
-- `./dc-unittest.sh` - Utility script to aid in running a specific unit test class.  Requires a profile and test case as parameters.
+- `./dc-unittest.sh` - Utility script to aid in running a specific unit test class.
 
 
 # Setup via Docker Compose - Building and running the application
@@ -97,7 +72,7 @@ To run the application based on previously built image (or based on dockerhub im
 
 ```zsh
 docker/setEnv.sh release
-./dc-up.sh postgres-redis # or an other profile
+./dc-up.sh
 ```
 
 This will run the application based on docker-compose.yml only.
@@ -112,7 +87,7 @@ For development, use:
 ```zsh
 docker/setEnv.sh dev
 ./dc-build.sh
-./dc-up.sh postgres-redis # or an other profile
+./dc-up.sh
 ```
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.dev.yml.
@@ -125,10 +100,10 @@ This will run the application based on merged configurations from docker-compose
 * Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with:
 
 ```
-docker-compose restart celeryworker
+docker compose restart celeryworker
 ```
 
-*  The mysql port is forwarded to the host so that you can access your database from outside the container.
+*  The postgres port is forwarded to the host so that you can access your database from outside the container.
 
 To update changes in static resources, served by nginx, just refresh the browser with ctrl + F5.
 
@@ -143,56 +118,7 @@ id -u
 
 ## Run with Docker Compose in development mode with debugpy (remote debug)
 
-The debug mode, offers out of the box a debugging server listening on port 3000
-
-```zsh
-# switch to debug configuration
-docker/setEnv.sh debug
-# then use docker-compose as usual
-./dc-up.sh
-```
-
-This will run the application based on merged configurations from `docker-compose.yml` and `docker-compose.override.debug.yml`.
-
-Alternatively (if using docker for windows for example), you can copy the override file over (and re-create the containers):
-```
-cp docker-compose.override.debug.yml docker-compose.override.yml
-./dc-down.sh
-./dc-up.sh
-```
-
-The default configuration assumes port 3000 by default for debug.
-
-But you can pass additional environment variables:
-- `DD_DEBUG_PORT` to define a different port
-- `DD_DEBUG_WAIT_FOR_CLIENT` - That's if you want to debugger to wait, right before calling `django.core.wsgi.get_wsgi_application()`
-
-
-### VS code
-Add the following python debug configuration (You would have to install the `ms-python.python`. Other setup may work.)
-
-```
-  {
-      "name": "Remote DefectDojo",
-      "type": "python",
-      "request": "attach",
-      "pathMappings": [
-          {
-              "localRoot": "${workspaceFolder}",
-              "remoteRoot": "/app"
-          }
-      ],
-      "port": 3000,
-      "host": "localhost"
-  }
-```
-
-You can now launch the remote debug from VS Code, place your breakpoints and step through the code.
-
-> At present, 2 caveats:
-> - Static will not be present. You would have to `docker cp` them over from the nginx container
-> - For some reason, the page loading may hang. You can stop the loading and reload, the page will ultimately appear.
-
+Some users have found value in using debugpy. A short guide to setting this up can be found [here](https://testdriven.io/blog/django-debugging-vs-code/)
 
 ## Access the application
 Navigate to <http://localhost:8080> where you can log in with username admin.
@@ -200,7 +126,7 @@ To find out the admin password, check the very beginning of the console
 output of the initializer container by running:
 
 ```zsh
-docker-compose logs initializer | grep "Admin password:"
+docker compose logs initializer | grep "Admin password:"
 ```
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
@@ -215,7 +141,7 @@ docker exec -it django-defectdojo-uwsgi-1 ./manage.py changepassword admin
 ```
 
 # Logging
-For docker-compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
+For docker compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
 
 
 ```
@@ -325,7 +251,7 @@ To change the port:
 - update `docker-compose.override.https.yml` or set DD_TLS_PORT in the environment)
 - restart the application
 
-NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker-compose declarations to discover which ports to map when publishing the application.
+NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker compose declarations to discover which ports to map when publishing the application.
 
 
 # Run the tests with Docker Compose
@@ -375,10 +301,10 @@ python manage.py test unittests.tools.test_dependency_check_parser.TestDependenc
 ```
 
 For docker compose stack, there is a convenience script (`dc-unittest.sh`) capable of running a single test class. 
-You will need to provide a docker compose profile (`--profile`), and a test case (`--test-case`). Example:
+You will need to provide a test case (`--test-case`). Example:
 
 ```
-./dc-unittest.sh --profile mysql-rabbitmq --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
+./dc-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
 ```
 
 ## Running the integration tests
@@ -398,7 +324,7 @@ docker logs -f django-defectdojo_integration-tests_1
 
 # Checking Docker versions
 
-Run the following to determine the versions for docker and docker-compose:
+Run the following to determine the versions for docker and docker compose:
 
 ```zsh
 $ docker version
@@ -419,58 +345,14 @@ Server:
  OS/Arch:      linux/amd64
  Experimental: false
 
-$ docker-compose version
-docker-compose version 1.18.0, build 8dd22a9
+$ docker compose version
+Docker Compose version 1.18.0, build 8dd22a9
 docker-py version: 2.6.1
 CPython version: 2.7.13
 OpenSSL version: OpenSSL 1.0.1t  3 May 2016
 ```
 
-In this case, both docker (version 17.09.0-ce) and docker-compose (1.18.0) need to be updated.
+In this case, both docker (version 17.09.0-ce) and docker compose (1.18.0) need to be updated.
 
 Follow [Docker's documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
 
-Docker Compose isn't packaged like Docker and you'll need to manually update an existing install if using Linux. For Linux, either follow the instructions in the [Docker Compose documentation](https://docs.docker.com/compose/install/) or use the shell script below. The script below will update docker-compose to the latest version automatically. You will need to make the script executable and have sudo privileges to upgrade docker-compose:
-
-```zsh
-#!/bin/bash
-
-# Set location of docker-compose binary - shouldn't need to modify this
-DESTINATION=/usr/local/bin/docker-compose
-
-# Get latest docker-compose version
-VERSION=$(curl --silent https://api.github.com/repos/docker/compose/releases/latest | jq .name -r)
-
-# Output some info on what this is going to do
-echo "Note: docker-compose version $VERSION will be downloaded from:"
-echo "https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m)"
-echo "Enter sudo password to install docker-compose"
-
-# Download and install latest docker compose
-sudo curl -L https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m) -o $DESTINATION
-sudo chmod +x $DESTINATION
-
-# Output new docker-compose version info
-echo ""
-docker-compose version
-```
-
-Running the script above will look like:
-
-```zsh
-$ vi update-docker-compose
-$ chmod u+x update-docker-compose
-$ ./update-docker-compose
-Note: docker-compose version 1.24.0 will be downloaded from:
-https://github.com/docker/compose/releases/download/1.24.0/docker-compose-Linux-x86_64
-Enter sudo password to install docker-compose
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100   617    0   617    0     0   1778      0 --:--:-- --:--:-- --:--:--  1778
-100 15.4M  100 15.4M    0     0  2478k      0  0:00:06  0:00:06 --:--:-- 2910k
-
-docker-compose version 1.24.0, build 0aa59064
-docker-py version: 3.7.2
-CPython version: 3.6.8
-OpenSSL version: OpenSSL 1.1.0j  20 Nov 2018
-```

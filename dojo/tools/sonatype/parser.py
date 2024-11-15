@@ -57,7 +57,7 @@ def get_finding(security_issue, component, test):
         mitigation=status,
         references=reference,
         impact=threat_category,
-        static_finding=True
+        static_finding=True,
     )
     if "cwe" in security_issue:
         finding.cwe = security_issue["cwe"]
@@ -78,9 +78,8 @@ def get_finding(security_issue, component, test):
 def get_severity(vulnerability):
     if vulnerability["severity"] <= 3.9:
         return "Low"
-    elif vulnerability["severity"] <= 6.9:
+    if vulnerability["severity"] <= 6.9:
         return "Medium"
-    elif vulnerability["severity"] <= 8.9:
+    if vulnerability["severity"] <= 8.9:
         return "High"
-    else:
-        return "Critical"
+    return "Critical"

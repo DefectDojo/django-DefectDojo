@@ -1,26 +1,26 @@
 from os import path
+from pathlib import Path
 
 from dojo.models import Test
 from dojo.tools.anchore_enterprise.parser import AnchoreEnterpriseParser, extract_vulnerability_id, search_filepath
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAnchoreEnterpriseParser(DojoTestCase):
     def test_anchore_policy_check_parser_has_no_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/no_checks.json")) as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/anchore_enterprise/no_checks.json"), encoding="utf-8") as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_anchore_policy_check_parser_has_one_finding(self):
-        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/one_check.json")) as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/anchore_enterprise/one_check.json"), encoding="utf-8") as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
 
     def test_anchore_policy_check_parser_has_multiple_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/many_checks.json")) as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/anchore_enterprise/many_checks.json"), encoding="utf-8") as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(57, len(findings))
@@ -29,7 +29,7 @@ class TestAnchoreEnterpriseParser(DojoTestCase):
             self.assertEqual("CVE-2015-2992", finding.unsaved_vulnerability_ids[0])
 
     def test_anchore_policy_check_parser_invalid_format(self):
-        with open(path.join(path.dirname(__file__), "../scans/anchore_enterprise/invalid_checks_format.json")) as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/anchore_enterprise/invalid_checks_format.json"), encoding="utf-8") as testfile:
             with self.assertRaises(Exception):
                 parser = AnchoreEnterpriseParser()
                 parser.get_findings(testfile, Test())
@@ -46,22 +46,22 @@ class TestAnchoreEnterpriseParser(DojoTestCase):
 
     def test_anchore_policy_check_parser_search_filepath(self):
         file_path = search_filepath(
-            "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2014-4616 - https://nvd.nist.gov/vuln/detail/CVE-2014-4616)"
+            "MEDIUM Vulnerability found in non-os package type (python) - /usr/lib64/python2.7/lib-dynload/Python (CVE-2014-4616 - https://nvd.nist.gov/vuln/detail/CVE-2014-4616)",
         )
         self.assertEqual("/usr/lib64/python2.7/lib-dynload/Python", file_path)
         file_path = search_filepath(
-            "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)"
+            "HIGH Vulnerability found in non-os package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)",
         )
         self.assertEqual(
             "/root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar",
             file_path,
         )
         file_path = search_filepath(
-            "test /usr/local/bin/ag package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)"
+            "test /usr/local/bin/ag package type (java) - /root/.m2/repository/org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar (CVE-2015-0899 - https://nvd.nist.gov/vuln/detail/CVE-2015-0899)",
         )
         self.assertEqual("/usr/local/bin/ag", file_path)
         file_path = search_filepath(
-            "HIGH Vulnerability found in os package type (rpm) - kernel-headers (RHSA-2017:0372 - https://access.redhat.com/errata/RHSA-2017:0372)"
+            "HIGH Vulnerability found in os package type (rpm) - kernel-headers (RHSA-2017:0372 - https://access.redhat.com/errata/RHSA-2017:0372)",
         )
         self.assertEqual("", file_path)
         file_path = search_filepath("test")

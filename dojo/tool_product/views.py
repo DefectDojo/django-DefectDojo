@@ -17,10 +17,10 @@ from dojo.utils import Product_Tab
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def new_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = ToolProductSettingsForm(request.POST)
         if tform.is_valid():
             # form.tool_type = tool_type
@@ -31,83 +31,82 @@ def new_tool_product(request, pid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Product Tool Configuration Successfully Created.'),
-                extra_tags='alert-success')
+                _("Product Tool Configuration Successfully Created."),
+                extra_tags="alert-success")
             return HttpResponseRedirect(
-                reverse('all_tool_product', args=(pid, )))
+                reverse("all_tool_product", args=(pid, )))
     else:
         tform = ToolProductSettingsForm()
     product_tab = Product_Tab(prod, title=_("Tool Configurations"), tab="settings")
-    return render(request, 'dojo/new_tool_product.html', {
-        'tform': tform,
-        'product_tab': product_tab,
-        'pid': pid
+    return render(request, "dojo/new_tool_product.html", {
+        "tform": tform,
+        "product_tab": product_tab,
+        "pid": pid,
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def all_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
-    tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
+    tools = Tool_Product_Settings.objects.filter(product=prod).order_by("name")
     product_tab = Product_Tab(prod, title=_("Tool Configurations"), tab="settings")
-    return render(request, 'dojo/view_tool_product_all.html', {
-        'prod': prod,
-        'tools': tools,
-        'product_tab': product_tab
+    return render(request, "dojo/view_tool_product_all.html", {
+        "prod": prod,
+        "tools": tools,
+        "product_tab": product_tab,
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_tool_product(request, pid, ttid):
     product = get_object_or_404(Product, id=pid)
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
     if tool_product.product != product:
-        msg = f'Product {pid} does not fit to product of Tool_Product {tool_product.product.id}'
+        msg = f"Product {pid} does not fit to product of Tool_Product {tool_product.product.id}"
         raise BadRequest(msg)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = ToolProductSettingsForm(request.POST, instance=tool_product)
         if tform.is_valid():
             tform.save()
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                _('Tool Product Configuration Successfully Updated.'),
-                extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('all_tool_product', args=(pid, )))
+                _("Tool Product Configuration Successfully Updated."),
+                extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("all_tool_product", args=(pid, )))
     else:
         tform = ToolProductSettingsForm(instance=tool_product)
 
     product_tab = Product_Tab(product, title=_("Edit Product Tool Configuration"), tab="settings")
-    return render(request, 'dojo/edit_tool_product.html', {
-        'tform': tform,
-        'product_tab': product_tab
+    return render(request, "dojo/edit_tool_product.html", {
+        "tform": tform,
+        "product_tab": product_tab,
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def delete_tool_product(request, pid, ttid):
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if tool_product.product != product:
-        msg = f'Product {pid} does not fit to product of Tool_Product {tool_product.product.id}'
+        msg = f"Product {pid} does not fit to product of Tool_Product {tool_product.product.id}"
         raise BadRequest(msg)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         DeleteToolProductSettingsForm(request.POST, instance=tool_product)
         tool_product.delete()
         messages.add_message(
             request,
             messages.SUCCESS,
-            _('Tool Product Successfully Deleted.'),
-            extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('all_tool_product', args=(pid, )))
-    else:
-        tform = ToolProductSettingsForm(instance=tool_product)
+            _("Tool Product Successfully Deleted."),
+            extra_tags="alert-success")
+        return HttpResponseRedirect(reverse("all_tool_product", args=(pid, )))
+    tform = ToolProductSettingsForm(instance=tool_product)
 
     product_tab = Product_Tab(product, title=_("Delete Product Tool Configuration"), tab="settings")
 
-    return render(request, 'dojo/delete_tool_product.html', {
-        'tform': tform,
-        'product_tab': product_tab
+    return render(request, "dojo/delete_tool_product.html", {
+        "tform": tform,
+        "product_tab": product_tab,
     })

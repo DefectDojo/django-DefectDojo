@@ -1,6 +1,4 @@
-"""
-Parser for Aquasecurity trivy (https://github.com/aquasecurity/trivy) Docker images scaner
-"""
+"""Parser for Aquasecurity trivy (https://github.com/aquasecurity/trivy) Docker images scaner"""
 
 import json
 import logging
@@ -36,7 +34,7 @@ MISC_DESCRIPTION_TEMPLATE = """**Target:** {target}
 SECRET_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
 **Match:** {match}
-"""
+"""  # noqa: S105
 
 LICENSE_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
@@ -57,18 +55,16 @@ class TrivyParser:
     def convert_cvss_score(self, raw_value):
         if raw_value is None:
             return "Info"
-        else:
-            val = float(raw_value)
-            if val == 0.0:
-                return "Info"
-            elif val < 4.0:
-                return "Low"
-            elif val < 7.0:
-                return "Medium"
-            elif val < 9.0:
-                return "High"
-            else:
-                return "Critical"
+        val = float(raw_value)
+        if val == 0.0:
+            return "Info"
+        if val < 4.0:
+            return "Low"
+        if val < 7.0:
+            return "Medium"
+        if val < 9.0:
+            return "High"
+        return "Critical"
 
     def get_findings(self, scan_file, test):
         scan_data = scan_file.read()
@@ -82,71 +78,69 @@ class TrivyParser:
         if data is None:
             return []
         # Legacy format with results
-        elif isinstance(data, list):
+        if isinstance(data, list):
             return self.get_result_items(test, data)
-        else:
-            schema_version = data.get("SchemaVersion", None)
-            artifact_name = data.get("ArtifactName", "")
-            cluster_name = data.get("ClusterName")
-            if schema_version == 2:
-                results = data.get("Results", [])
-                return self.get_result_items(test, results, artifact_name=artifact_name)
-            elif cluster_name:
-                findings = []
-                vulnerabilities = data.get("Vulnerabilities", [])
-                for service in vulnerabilities:
-                    namespace = service.get("Namespace")
-                    kind = service.get("Kind")
-                    name = service.get("Name")
-                    service_name = ""
-                    if namespace:
-                        service_name = f"{namespace} / "
-                    if kind:
-                        service_name += f"{kind} / "
-                    if name:
-                        service_name += f"{name} / "
-                    if len(service_name) >= 3:
-                        service_name = service_name[:-3]
-                    findings += self.get_result_items(
-                        test, service.get("Results", []), service_name
-                    )
-                misconfigurations = data.get("Misconfigurations", [])
-                for service in misconfigurations:
-                    namespace = service.get("Namespace")
-                    kind = service.get("Kind")
-                    name = service.get("Name")
-                    service_name = ""
-                    if namespace:
-                        service_name = f"{namespace} / "
-                    if kind:
-                        service_name += f"{kind} / "
-                    if name:
-                        service_name += f"{name} / "
-                    if len(service_name) >= 3:
-                        service_name = service_name[:-3]
-                    findings += self.get_result_items(
-                        test, service.get("Results", []), service_name
-                    )
-                resources = data.get("Resources", [])
-                for resource in resources:
-                    namespace = resource.get("Namespace")
-                    kind = resource.get("Kind")
-                    name = resource.get("Name")
-                    if namespace:
-                        resource_name = f"{namespace} / "
-                    if kind:
-                        resource_name += f"{kind} / "
-                    if name:
-                        resource_name += f"{name} / "
-                    if len(resource_name) >= 3:
-                        resource_name = resource_name[:-3]
-                    findings += self.get_result_items(
-                        test, resource.get("Results", []), resource_name
-                    )
-                return findings
-            else:
-                msg = "Schema of Trivy json report is not supported"
-                raise ValueError(msg)
+        schema_version = data.get("SchemaVersion", None)
+        artifact_name = data.get("ArtifactName", "")
+        cluster_name = data.get("ClusterName")
+        if schema_version == 2:
+            results = data.get("Results", [])
+            return self.get_result_items(test, results, artifact_name=artifact_name)
+        if cluster_name is not None:
+            findings = []
+            vulnerabilities = data.get("Vulnerabilities", [])
+            for service in vulnerabilities:
+                namespace = service.get("Namespace")
+                kind = service.get("Kind")
+                name = service.get("Name")
+                service_name = ""
+                if namespace:
+                    service_name = f"{namespace} / "
+                if kind:
+                    service_name += f"{kind} / "
+                if name:
+                    service_name += f"{name} / "
+                if len(service_name) >= 3:
+                    service_name = service_name[:-3]
+                findings += self.get_result_items(
+                    test, service.get("Results", []), service_name,
+                )
+            misconfigurations = data.get("Misconfigurations", [])
+            for service in misconfigurations:
+                namespace = service.get("Namespace")
+                kind = service.get("Kind")
+                name = service.get("Name")
+                service_name = ""
+                if namespace:
+                    service_name = f"{namespace} / "
+                if kind:
+                    service_name += f"{kind} / "
+                if name:
+                    service_name += f"{name} / "
+                if len(service_name) >= 3:
+                    service_name = service_name[:-3]
+                findings += self.get_result_items(
+                    test, service.get("Results", []), service_name,
+                )
+            resources = data.get("Resources", [])
+            for resource in resources:
+                namespace = resource.get("Namespace")
+                kind = resource.get("Kind")
+                name = resource.get("Name")
+                if namespace:
+                    resource_name = f"{namespace} / "
+                if kind:
+                    resource_name += f"{kind} / "
+                if name:
+                    resource_name += f"{name} / "
+                if len(resource_name) >= 3:
+                    resource_name = resource_name[:-3]
+                findings += self.get_result_items(
+                    test, resource.get("Results", []), resource_name,
+                )
+            return findings
+        msg = "Schema of Trivy json report is not supported"
+        raise ValueError(msg)
 
     def get_result_items(self, test, results, service_name=None, artifact_name=""):
         items = []
@@ -259,7 +253,7 @@ class TrivyParser:
                     target=target_target,
                     type=misc_type,
                     description=misc_description,
-                    message=misc_message
+                    message=misc_message,
                 )
                 severity = TRIVY_SEVERITIES[misc_severity]
                 references = None
@@ -363,7 +357,7 @@ class TrivyParser:
         # Create the table string
         table_string = f"{header_row}\n"
         for item in lines:
-            row = "\t".join(str(item.get(header, '')) for header in headers)
+            row = "\t".join(str(item.get(header, "")) for header in headers)
             table_string += f"{row}\n"
 
         return table_string

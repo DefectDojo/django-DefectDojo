@@ -5,6 +5,7 @@ from dojo.models import Finding
 
 
 class ScantistParser:
+
     """
     Scantist Parser: Scantist does a deep scan of source code and binaries for vulnerabilities and has reports
     following three main categories
@@ -84,7 +85,7 @@ class ScantistParser:
             if item:
                 hash_key = hashlib.md5(
                     node.get("Public ID").encode("utf-8")
-                    + node.get("Library").encode("utf-8")
+                    + node.get("Library").encode("utf-8"),
                 ).hexdigest()
 
                 items[hash_key] = get_findings(node, test)

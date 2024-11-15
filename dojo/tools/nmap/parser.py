@@ -27,7 +27,7 @@ class NmapParser:
         report_date = None
         try:
             report_date = datetime.datetime.fromtimestamp(
-                int(root.attrib["start"])
+                int(root.attrib["start"]),
             )
         except ValueError:
             pass
@@ -57,7 +57,7 @@ class NmapParser:
                         )
                     if "accuracy" in os_match.attrib:
                         host_info += "**Accuracy:** {}%\n".format(
-                            os_match.attrib["accuracy"]
+                            os_match.attrib["accuracy"],
                         )
 
                 host_info += "\n\n"
@@ -65,7 +65,7 @@ class NmapParser:
             for port_element in host.findall("ports/port"):
                 protocol = port_element.attrib["protocol"]
                 endpoint = Endpoint(
-                    host=fqdn if fqdn else ip, protocol=protocol
+                    host=fqdn or ip, protocol=protocol,
                 )
                 if (
                     "portid" in port_element.attrib
@@ -96,18 +96,21 @@ class NmapParser:
                         service_info += (
                             "**Extra Info:** {}\n".format(port_element.find("service").attrib["extrainfo"])
                         )
-
                     description += service_info
-
+                if script := port_element.find("script"):
+                    if script_id := script.attrib.get("id"):
+                        description += f"**Script ID:** {script_id}\n"
+                    if script_output := script.attrib.get("output"):
+                        description += f"**Script Output:** {script_output}\n"
                 description += "\n\n"
 
                 # manage some script like
                 # https://github.com/vulnersCom/nmap-vulners
                 for script_element in port_element.findall(
-                    'script[@id="vulners"]'
+                    'script[@id="vulners"]',
                 ):
                     self.manage_vulner_script(
-                        test, dupes, script_element, endpoint, report_date
+                        test, dupes, script_element, endpoint, report_date,
                     )
 
                 severity = "Info"
@@ -134,26 +137,27 @@ class NmapParser:
         return list(dupes.values())
 
     def convert_cvss_score(self, raw_value):
-        """According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
+        """
+        According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
                         None 	0.0
         Low 	0.0-3.9 	Low 	0.1-3.9
         Medium 	4.0-6.9 	Medium 	4.0-6.9
         High 	7.0-10.0 	High 	7.0-8.9
-        Critical 	9.0-10.0"""
+        Critical 	9.0-10.0
+        """
         val = float(raw_value)
         if val == 0.0:
             return "Info"
-        elif val < 4.0:
+        if val < 4.0:
             return "Low"
-        elif val < 7.0:
+        if val < 7.0:
             return "Medium"
-        elif val < 9.0:
+        if val < 9.0:
             return "High"
-        else:
-            return "Critical"
+        return "Critical"
 
     def manage_vulner_script(
-        self, test, dupes, script_element, endpoint, report_date=None
+        self, test, dupes, script_element, endpoint, report_date=None,
     ):
         for component_element in script_element.findall("table"):
             component_cpe = CPE(component_element.attrib["key"])

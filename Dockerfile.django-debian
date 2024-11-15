@@ -5,8 +5,8 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.11.4-slim-bullseye@sha256:40319d0a897896e746edf877783ef39685d44e90e1e6de8d964d0382df0d4952 as base
-FROM base as build
+FROM python:3.11.9-slim-bookworm@sha256:8c1036ec919826052306dfb5286e4753ffd9d5f6c24fbc352a5399c3b405b57e AS base
+FROM base AS build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -14,8 +14,6 @@ RUN \
     gcc \
     build-essential \
     dnsutils \
-    default-mysql-client \
-    libmariadb-dev-compat \
     libpq-dev \
     postgresql-client \
     xmlsec1 \
@@ -32,24 +30,22 @@ COPY requirements.txt ./
 # https://github.com/unbit/uwsgi/issues/1318#issuecomment-542238096
 RUN CPUCOUNT=1 pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM base as django
+FROM base AS django
 WORKDIR /app
 ARG uid=1001
 ARG gid=1337
 ARG appuser=defectdojo
-ENV appuser ${appuser}
+ENV appuser=${appuser}
 RUN \
   apt-get -y update && \
   # ugly fix to install postgresql-client without errors
   mkdir -p /usr/share/man/man1 /usr/share/man/man7 && \
   apt-get -y install --no-install-recommends \
-    # libopenjp2-7 libjpeg62 libtiff5 are required by the pillow package
+    # libopenjp2-7 libjpeg62 libtiff are required by the pillow package
     libopenjp2-7 \
     libjpeg62 \
-    libtiff5 \
+    libtiff6 \
     dnsutils \
-    default-mysql-client \
-    libmariadb3 \
     xmlsec1 \
     git \
     uuid-runtime \
@@ -81,6 +77,7 @@ COPY \
   docker/entrypoint-unit-tests-devDocker.sh \
   docker/wait-for-it.sh \
   docker/secret-file-loader.sh \
+  docker/reach_database.sh \
   docker/certs/* \
   /
 COPY wsgi.py manage.py docker/unit-tests.sh ./
@@ -140,5 +137,5 @@ ENV \
   DD_UWSGI_NUM_OF_THREADS="2"
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]
 
-FROM django as django-unittests
+FROM django AS django-unittests
 COPY unittests/ ./unittests/

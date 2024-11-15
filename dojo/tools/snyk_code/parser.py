@@ -23,8 +23,7 @@ class SnykCodeParser:
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
             return temp
-        else:
-            return self.process_tree(reportTree, test)
+        return self.process_tree(reportTree, test)
 
     def process_tree(self, tree, test):
         return list(self.get_items(tree, test)) if tree else []
@@ -51,7 +50,7 @@ class SnykCodeParser:
             vulnerabilityTree = tree["vulnerabilities"]
             for node in vulnerabilityTree:
                 item = self.get_item(
-                    node, test, target_file=target_file, upgrades=upgrades
+                    node, test, target_file=target_file, upgrades=upgrades,
                 )
                 items[iterator] = item
                 iterator += 1
@@ -59,7 +58,7 @@ class SnykCodeParser:
             results = tree["runs"][0]["results"]
             for node in results:
                 item = self.get_code_item(
-                    node, test
+                    node, test,
                 )
                 items[iterator] = item
                 iterator += 1
@@ -70,7 +69,7 @@ class SnykCodeParser:
         # or an array for multiple versions depending on the language.
         if isinstance(vulnerability["semver"]["vulnerable"], list):
             vulnerable_versions = ", ".join(
-                vulnerability["semver"]["vulnerable"]
+                vulnerability["semver"]["vulnerable"],
             )
         else:
             vulnerable_versions = vulnerability["semver"]["vulnerable"]
@@ -168,7 +167,7 @@ class SnykCodeParser:
         references = ""
         if "id" in vulnerability:
             references = "**SNYK ID**: https://app.snyk.io/vuln/{}\n\n".format(
-                vulnerability["id"]
+                vulnerability["id"],
             )
 
         if cwe_references:
@@ -207,7 +206,7 @@ class SnykCodeParser:
                     for lib in tertiary_upgrade_list
                 ):
                     finding.unsaved_tags.append(
-                        f"upgrade_to:{upgraded_pack}"
+                        f"upgrade_to:{upgraded_pack}",
                     )
                     finding.mitigation += f"\nUpgrade from {current_pack_version} to {upgraded_pack} to fix this issue, as well as updating the following:\n - "
                     finding.mitigation += "\n - ".join(tertiary_upgrade_list)
@@ -235,7 +234,7 @@ class SnykCodeParser:
         else:
             severity = "Critical"
         # create the finding object
-        finding = Finding(
+        return Finding(
             vuln_id_from_tool=ruleId,
             file_path=locations_uri,
             title=ruleId + "_" + locations_uri,
@@ -258,4 +257,3 @@ class SnykCodeParser:
             static_finding=True,
             dynamic_finding=False,
         )
-        return finding

@@ -1,18 +1,17 @@
 from dojo.models import Test
 from dojo.tools.gitlab_dast.parser import GitlabDastParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestGitlabDastParser(DojoTestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with open("unittests/scans/gitlab_dast/gitlab_dast_zero_vul.json") as testfile:
+        with open("unittests/scans/gitlab_dast/gitlab_dast_zero_vul.json", encoding="utf-8") as testfile:
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding_v14(self):
-        with open("unittests/scans/gitlab_dast/gitlab_dast_one_vul_v14.json") as testfile:
+        with open("unittests/scans/gitlab_dast/gitlab_dast_one_vul_v14.json", encoding="utf-8") as testfile:
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -23,7 +22,7 @@ class TestGitlabDastParser(DojoTestCase):
                 endpoint.clean()
 
             self.assertEqual(
-                "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool
+                "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool,
             )
             self.assertEqual(3, finding.scanner_confidence)
             # vulnerability does not have a name: fallback to using id as a title
@@ -40,7 +39,7 @@ class TestGitlabDastParser(DojoTestCase):
             self.assertEqual(359, finding.cwe)
 
     def test_parse_file_with_one_vuln_has_one_finding_v15(self):
-        with open("unittests/scans/gitlab_dast/gitlab_dast_one_vul_v15.json") as testfile:
+        with open("unittests/scans/gitlab_dast/gitlab_dast_one_vul_v15.json", encoding="utf-8") as testfile:
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -51,7 +50,7 @@ class TestGitlabDastParser(DojoTestCase):
                 endpoint.clean()
 
             self.assertEqual(
-                "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool
+                "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool,
             )
             self.assertEqual(None, finding.scanner_confidence)
             # vulnerability does not have a name: fallback to using id as a title
@@ -68,7 +67,7 @@ class TestGitlabDastParser(DojoTestCase):
             self.assertEqual(359, finding.cwe)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings_v14(self):
-        with open("unittests/scans/gitlab_dast/gitlab_dast_many_vul_v14.json") as testfile:
+        with open("unittests/scans/gitlab_dast/gitlab_dast_many_vul_v14.json", encoding="utf-8") as testfile:
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -91,7 +90,7 @@ class TestGitlabDastParser(DojoTestCase):
             date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
             self.assertEqual("2021-04-23T15:46:40.644000", date)
             self.assertEqual(
-                "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool
+                "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool,
             )
             # vulnerability does not have a name: fallback to using id as a title
             self.assertEqual(finding.unique_id_from_tool, finding.title)
@@ -106,7 +105,7 @@ class TestGitlabDastParser(DojoTestCase):
             self.assertIn("Ensure that your web server,", finding.mitigation)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings_v15(self):
-        with open("unittests/scans/gitlab_dast/gitlab_dast_many_vul_v15.json") as testfile:
+        with open("unittests/scans/gitlab_dast/gitlab_dast_many_vul_v15.json", encoding="utf-8") as testfile:
             parser = GitlabDastParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -129,7 +128,7 @@ class TestGitlabDastParser(DojoTestCase):
             date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
             self.assertEqual("2021-04-23T15:46:40.644000", date)
             self.assertEqual(
-                "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool
+                "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool,
             )
             # vulnerability does not have a name: fallback to using id as a title
             self.assertEqual(finding.unique_id_from_tool, finding.title)

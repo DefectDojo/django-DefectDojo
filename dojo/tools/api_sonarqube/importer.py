@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiImporter:
+
     """
     This class imports from SonarQube (SQ) all open/confirmed SQ issues related to the project related to the test as
      findings.
@@ -51,7 +52,7 @@ class SonarQubeApiImporter:
 
     @staticmethod
     def is_reviewed(state):
-        return state.lower() in ["reviewed"]
+        return state.lower() == "reviewed"
 
     @staticmethod
     def prepare_client(test):
@@ -128,7 +129,7 @@ class SonarQubeApiImporter:
                 branch=test.branch_tag,
             )
             logging.info(
-                f'Found {len(issues)} issues for component {component["key"]}'
+                f'Found {len(issues)} issues for component {component["key"]}',
             )
 
             sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL
@@ -158,7 +159,7 @@ class SonarQubeApiImporter:
                 # custom (user defined) SQ rules may not have 'htmlDesc'
                 if "htmlDesc" in rule:
                     description = self.clean_rule_description_html(
-                        rule["htmlDesc"]
+                        rule["htmlDesc"],
                     )
                     cwe = self.clean_cwe(rule["htmlDesc"])
                     references = sonarqube_permalink + self.get_references(rule["htmlDesc"])
@@ -178,7 +179,7 @@ class SonarQubeApiImporter:
                 # Only assign the SonarQube_issue to the first finding related
                 # to the issue
                 if Finding.objects.filter(
-                    sonarqube_issue=sonarqube_issue
+                    sonarqube_issue=sonarqube_issue,
                 ).exists():
                     sonarqube_issue = None
 
@@ -247,7 +248,7 @@ class SonarQubeApiImporter:
                 branch=test.branch_tag,
             )
             logging.info(
-                f'Found {len(hotspots)} hotspots for project {component["key"]}'
+                f'Found {len(hotspots)} hotspots for project {component["key"]}',
             )
             sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL
 
@@ -269,19 +270,19 @@ class SonarQubeApiImporter:
                 else:
                     severity = "Info"
                 title = textwrap.shorten(
-                    text=hotspot.get("message", ""), width=500
+                    text=hotspot.get("message", ""), width=500,
                 )
                 component_key = hotspot.get("component")
                 line = hotspot.get("line")
                 rule_id = hotspot.get("key", "")
                 rule = client.get_hotspot_rule(rule_id)
                 scanner_confidence = self.convert_scanner_confidence(
-                    hotspot.get("vulnerabilityProbability", "")
+                    hotspot.get("vulnerabilityProbability", ""),
                 )
                 description = self.clean_rule_description_html(
                     rule.get(
-                        "vulnerabilityDescription", "No description provided."
-                    )
+                        "vulnerabilityDescription", "No description provided.",
+                    ),
                 )
                 cwe = self.clean_cwe(rule.get("fixRecommendations", ""))
                 try:
@@ -289,7 +290,7 @@ class SonarQubeApiImporter:
                 except KeyError:
                     sonarqube_permalink = "No permalink \n"
                 references = sonarqube_permalink + self.get_references(
-                    rule.get("riskDescription", "")
+                    rule.get("riskDescription", ""),
                 ) + self.get_references(rule.get("fixRecommendations", ""))
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
@@ -300,7 +301,7 @@ class SonarQubeApiImporter:
                 # Only assign the SonarQube_issue to the first finding related
                 # to the issue
                 if Finding.objects.filter(
-                    sonarqube_issue=sonarqube_issue
+                    sonarqube_issue=sonarqube_issue,
                 ).exists():
                     sonarqube_issue = None
 
@@ -356,32 +357,31 @@ class SonarQubeApiImporter:
         search = re.search(r"CWE-(\d+)", raw_html)
         if search:
             return int(search.group(1))
+        return None
 
     @staticmethod
     def convert_sonar_severity(sonar_severity):
         sev = sonar_severity.lower()
         if sev == "blocker":
             return "Critical"
-        elif sev == "critical":
+        if sev == "critical":
             return "High"
-        elif sev == "major":
+        if sev == "major":
             return "Medium"
-        elif sev == "minor":
+        if sev == "minor":
             return "Low"
-        else:
-            return "Info"
+        return "Info"
 
     @staticmethod
     def convert_scanner_confidence(sonar_scanner_confidence):
         sev = sonar_scanner_confidence.lower()
         if sev == "high":
             return 1
-        elif sev == "medium":
+        if sev == "medium":
             return 4
-        elif sev == "low":
+        if sev == "low":
             return 7
-        else:
-            return 7
+        return 7
 
     @staticmethod
     def get_references(vuln_details):

@@ -36,7 +36,7 @@ class PhpSecurityAuditV2Parser:
                     findingdetail += "Details: " + issue["message"] + "\n"
 
                     sev = PhpSecurityAuditV2Parser.get_severity_word(
-                        issue["severity"]
+                        issue["severity"],
                     )
 
                     dupe_key = (
@@ -73,9 +73,8 @@ class PhpSecurityAuditV2Parser:
 
         if sev == 5:
             return "Critical"
-        elif sev == 4:
+        if sev == 4:
             return "High"
-        elif sev == 3:
+        if sev == 3:
             return "Medium"
-        else:
-            return "Low"
+        return "Low"

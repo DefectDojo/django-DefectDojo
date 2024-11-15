@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from crum import get_current_user
+from django.db import transaction
 from django.http.request import QueryDict
 from django.utils import timezone
 
@@ -22,6 +23,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class AutoCreateContextManager:
+
     """
     Management of safely fetching and creating resources used in the import
     and reimport processes. Resources managed by this class are:
@@ -30,6 +32,7 @@ class AutoCreateContextManager:
     - Engagements
     - Tests
     """
+
     """
     ===================================
     ----------- Validators ------------
@@ -110,7 +113,7 @@ class AutoCreateContextManager:
     """
     def get_target_product_type_if_exists(
         self,
-        product_type_name: str = None,
+        product_type_name: str | None = None,
         **kwargs: dict,
     ) -> Product_Type | None:
         """
@@ -125,8 +128,8 @@ class AutoCreateContextManager:
 
     def get_target_product_if_exists(
         self,
-        product_name: str = None,
-        product_type_name: str = None,
+        product_name: str | None = None,
+        product_type_name: str | None = None,
         **kwargs: dict,
     ) -> Product | None:
         """
@@ -165,7 +168,7 @@ class AutoCreateContextManager:
     def get_target_engagement_if_exists(
         self,
         engagement_id: int = 0,
-        engagement_name: str = None,
+        engagement_name: str | None = None,
         product: Product = None,
         **kwargs: dict,
     ) -> Engagement | None:
@@ -177,7 +180,7 @@ class AutoCreateContextManager:
         If a match is not found, and a product is not supplied, return None
         """
         if engagement := get_object_or_none(Engagement, pk=engagement_id):
-            logger.debug('Using existing engagement by id: %s', engagement_id)
+            logger.debug("Using existing engagement by id: %s", engagement_id)
             return engagement
         # if there's no product, then for sure there's no engagement either
         if product is None:
@@ -188,8 +191,8 @@ class AutoCreateContextManager:
     def get_target_test_if_exists(
         self,
         test_id: int = 0,
-        test_title: str = None,
-        scan_type: str = None,
+        test_title: str | None = None,
+        scan_type: str | None = None,
         engagement: Engagement = None,
         **kwargs: dict,
     ) -> Test | None:
@@ -199,7 +202,7 @@ class AutoCreateContextManager:
         the provided scan_type and test_title.
         """
         if test := get_object_or_none(Test, pk=test_id):
-            logger.debug('Using existing Test by id: %s', test_id)
+            logger.debug("Using existing Test by id: %s", test_id)
             return test
         # If the engagement is not supplied, we cannot do anything
         if not engagement:
@@ -217,7 +220,7 @@ class AutoCreateContextManager:
     """
     def get_or_create_product_type(
         self,
-        product_type_name: str = None,
+        product_type_name: str | None = None,
         **kwargs: dict,
     ) -> Product_Type:
         """
@@ -228,8 +231,8 @@ class AutoCreateContextManager:
         # Look for an existing object
         if product_type := self.get_target_product_type_if_exists(product_type_name=product_type_name):
             return product_type
-        else:
-            product_type, created = Product_Type.objects.get_or_create(name=product_type_name)
+        with transaction.atomic():
+            product_type, created = Product_Type.objects.select_for_update().get_or_create(name=product_type_name)
             if created:
                 Product_Type_Member.objects.create(
                     user=get_current_user(),
@@ -240,8 +243,9 @@ class AutoCreateContextManager:
 
     def get_or_create_product(
         self,
-        product_name: str = None,
-        product_type_name: str = None,
+        product_name: str | None = None,
+        product_type_name: str | None = None,
+        *,
         auto_create_context: bool = False,
         **kwargs: dict,
     ) -> Product:
@@ -260,31 +264,31 @@ class AutoCreateContextManager:
         # Look for a product type first
         product_type = self.get_or_create_product_type(product_type_name=product_type_name)
         # Create the product
-        product, created = Product.objects.get_or_create(name=product_name, prod_type=product_type, description=product_name)
-        if created:
-            Product_Member.objects.create(
-                user=get_current_user(),
-                product=product,
-                role=Role.objects.get(is_owner=True),
-            )
+        with transaction.atomic():
+            product, created = Product.objects.select_for_update().get_or_create(name=product_name, prod_type=product_type, description=product_name)
+            if created:
+                Product_Member.objects.create(
+                    user=get_current_user(),
+                    product=product,
+                    role=Role.objects.get(is_owner=True),
+                )
 
         return product
 
     def get_or_create_engagement(
         self,
         engagement_id: int = 0,
-        engagement_name: str = None,
-        product_name: str = None,
-        product_type_name: str = None,
+        engagement_name: str | None = None,
+        product_name: str | None = None,
+        product_type_name: str | None = None,
+        *,
         auto_create_context: bool = False,
         deduplication_on_engagement: bool = False,
-        source_code_management_uri: str = None,
-        target_end: datetime = None,
+        source_code_management_uri: str | None = None,
+        target_end: datetime | None = None,
         **kwargs: dict,
     ) -> Engagement:
-        """
-        Fetches an engagement by name or ID if one already exists.
-        """
+        """Fetches an engagement by name or ID if one already exists."""
         # try to find the engagement (and product)
         product = self.get_target_product_if_exists(
             product_name=product_name,
@@ -293,7 +297,7 @@ class AutoCreateContextManager:
         engagement = self.get_target_engagement_if_exists(
             engagement_id=engagement_id,
             engagement_name=engagement_name,
-            product=product
+            product=product,
         )
         # If we have an engagement, we cna just return it
         if engagement:
@@ -313,17 +317,18 @@ class AutoCreateContextManager:
         if (target_end is None) or (target_start > target_end):
             target_end = (timezone.now() + timedelta(days=365)).date()
         # Create the engagement
-        return Engagement.objects.create(
-            engagement_type="CI/CD",
-            name=engagement_name,
-            product=product,
-            lead=get_current_user(),
-            target_start=target_start,
-            target_end=target_end,
-            status="In Progress",
-            deduplication_on_engagement=deduplication_on_engagement,
-            source_code_management_uri=source_code_management_uri,
-        )
+        with transaction.atomic():
+            return Engagement.objects.select_for_update().create(
+                engagement_type="CI/CD",
+                name=engagement_name,
+                product=product,
+                lead=get_current_user(),
+                target_start=target_start,
+                target_end=target_end,
+                status="In Progress",
+                deduplication_on_engagement=deduplication_on_engagement,
+                source_code_management_uri=source_code_management_uri,
+            )
 
     """
     ===================================

@@ -1,14 +1,13 @@
 from dojo.models import Test
 from dojo.tools.wapiti.parser import WapitiParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestWapitiParser(DojoTestCase):
 
     def test_parse_file_3_0_4(self):
         """Generated with version 3.0.4 on OWASP Juicy Shop"""
-        with open("unittests/scans/wapiti/juicyshop.xml") as testfile:
+        with open("unittests/scans/wapiti/juicyshop.xml", encoding="utf-8") as testfile:
             parser = WapitiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -29,7 +28,7 @@ class TestWapitiParser(DojoTestCase):
 
     def test_parse_file_demo(self):
         """"""
-        with open("unittests/scans/wapiti/demo.xml") as testfile:
+        with open("unittests/scans/wapiti/demo.xml", encoding="utf-8") as testfile:
             parser = WapitiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -42,7 +41,7 @@ class TestWapitiParser(DojoTestCase):
 
     def test_parse_file_example(self):
         """"""
-        with open("unittests/scans/wapiti/example.xml") as testfile:
+        with open("unittests/scans/wapiti/example.xml", encoding="utf-8") as testfile:
             parser = WapitiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -55,7 +54,7 @@ class TestWapitiParser(DojoTestCase):
 
     def test_parse_cwe(self):
         """File to test CWE"""
-        with open("unittests/scans/wapiti/cwe.xml") as testfile:
+        with open("unittests/scans/wapiti/cwe.xml", encoding="utf-8") as testfile:
             parser = WapitiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

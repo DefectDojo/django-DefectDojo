@@ -1,0 +1,32 @@
+{
+   "findings": [
+      {
+         "id": "2501687",
+         "title": "Sensitive Account Balance Information Exposure via example's DaviPlata Payment Link Integration",
+         "severity_rating": "medium",
+         "severity_score": "",
+         "state": "open",
+         "substate": "triaged",
+         "weakness": "Information Disclosure",
+         "reported_at": "2024-05-12 04:05:27 UTC",
+         "first_response_at": "2024-05-14 22:14:16 UTC",
+         "triaged_at": "2024-08-28 19:35:16 UTC",
+         "closed_at": "",
+         "awarded_at": "2024-08-28 19:40:24 UTC",
+         "assigned": "Group example.co Team",
+         "reporter": "reporter",
+         "source": "",
+         "bounty": "400.0",
+         "bonus": "",
+         "public": "no",
+         "reference": "",
+         "reference_url": "",
+         "structured_scope": "1489537348",
+         "structured_scope_reference": "",
+         "original_report_id": "",
+         "cve_ids": "",
+         "collaborating_users": "",
+         "duplicate_report_ids": ""
+      }
+   ]
+}

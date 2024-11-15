@@ -19,7 +19,7 @@ class ClairKlarScan:
         ]
         for clair_severity in clair_severities:
             items.extend(
-                self.set_items_for_severity(tree, test, clair_severity)
+                self.set_items_for_severity(tree, test, clair_severity),
             )
         return items
 
@@ -60,7 +60,7 @@ class ClairKlarScan:
             )
         if "FeatureVersion" in item_node:
             description += " Vulnerable Versions: " + str(
-                item_node["FeatureVersion"]
+                item_node["FeatureVersion"],
             )
 
         mitigation = ""
@@ -79,7 +79,7 @@ class ClairKlarScan:
         if "Link" in item_node:
             link = item_node["Link"]
 
-        finding = Finding(
+        return Finding(
             title=item_node["Name"]
             + " - "
             + "("
@@ -101,4 +101,3 @@ class ClairKlarScan:
             dynamic_finding=False,
             impact="No impact provided",
         )
-        return finding

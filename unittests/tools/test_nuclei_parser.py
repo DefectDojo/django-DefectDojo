@@ -4,26 +4,25 @@ from dateutil.tz import tzoffset
 
 from dojo.models import Test
 from dojo.tools.nuclei.parser import NucleiParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestNucleiParser(DojoTestCase):
 
     def test_parse_no_empty(self):
-        with open("unittests/scans/nuclei/empty.jsonl") as testfile:
+        with open("unittests/scans/nuclei/empty.jsonl", encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_no_findings(self):
-        with open("unittests/scans/nuclei/no_findings.json") as testfile:
+        with open("unittests/scans/nuclei/no_findings.json", encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_issue_9201(self):
-        with open("unittests/scans/nuclei/issue_9201.json") as testfile:
+        with open("unittests/scans/nuclei/issue_9201.json", encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -33,7 +32,7 @@ class TestNucleiParser(DojoTestCase):
             self.assertEqual("example.com", finding.unsaved_endpoints[0].host)
 
     def test_parse_many_findings(self):
-        with open("unittests/scans/nuclei/many_findings.json") as testfile:
+        with open("unittests/scans/nuclei/many_findings.json", encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -152,7 +151,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("mysql-native-password-bruteforce", finding.vuln_id_from_tool)
 
     def test_parse_many_findings_new(self):
-        with open("unittests/scans/nuclei/many_findings_new.json") as testfile:
+        with open("unittests/scans/nuclei/many_findings_new.json", encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -175,7 +174,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("CVE-2018-15473", finding.vuln_id_from_tool)
                 vulnerability_ids = finding.unsaved_vulnerability_ids
                 self.assertEqual(1, len(vulnerability_ids))
-                self.assertIn('CVE-2018-15473', vulnerability_ids)
+                self.assertIn("CVE-2018-15473", vulnerability_ids)
                 self.assertEqual(362, finding.cwe)
                 self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", finding.cvssv3)
                 self.assertEqual(5.3, finding.cvssv3_score)
@@ -185,7 +184,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("Exposed Prometheus metrics", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual(1, finding.nb_occurences)
-                self.assertEqual('', finding.description)
+                self.assertEqual("", finding.description)
                 self.assertIn("config", finding.unsaved_tags)
                 self.assertIn("exposure", finding.unsaved_tags)
                 self.assertIn("prometheus", finding.unsaved_tags)
@@ -193,7 +192,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("prometheus-metrics", finding.vuln_id_from_tool)
 
     def test_parse_many_findings_third(self):
-        with open("unittests/scans/nuclei/many_findings_third.json") as testfile:
+        with open("unittests/scans/nuclei/many_findings_third.json", encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -227,7 +226,7 @@ class TestNucleiParser(DojoTestCase):
                 self.assertEqual("asp.net-favicon", finding.component_name)
 
     def test_parse_many_findings_v3(self):
-        with open("unittests/scans/nuclei/multiple_v3.json") as testfile:
+        with open("unittests/scans/nuclei/multiple_v3.json", encoding="utf-8") as testfile:
             parser = NucleiParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -237,3 +236,14 @@ class TestNucleiParser(DojoTestCase):
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Info", finding.severity)
+
+    def test_parse_invalid_cwe(self):
+        with open("unittests/scans/nuclei/invalid_cwe.json", encoding="utf-8") as testfile:
+            parser = NucleiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
+            self.assertEqual(0, finding.cwe)

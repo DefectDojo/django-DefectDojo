@@ -357,7 +357,7 @@ to the hashcode configuration or calculation logic. We will mention this in the 
 To regenerate the hashcodes, use the `dedupe` management command:
 
 {{< highlight bash >}}
-docker-compose exec uwsgi ./manage.py dedupe --hash_code_only
+docker compose exec uwsgi ./manage.py dedupe --hash_code_only
 {{< / highlight >}}
 
 This will only regenerated the hashcodes, but will not run any deduplication logic on existing findings.
@@ -365,14 +365,14 @@ If you want to run deduplication again on existing findings to make sure any dup
 hashcode config are marked as such, run:
 
 {{< highlight bash >}}
-docker-compose exec uwsgi ./manage.py dedupe
+docker compose exec uwsgi ./manage.py dedupe
 {{< / highlight >}}
 
 The deduplication part of this command will run the deduplication for each finding in a celery task. If you want to
 run the deduplication in the foreground process, use:
 
 {{< highlight bash >}}
-docker-compose exec uwsgi ./manage.py dedupe --dedupe_sync
+docker compose exec uwsgi ./manage.py dedupe --dedupe_sync
 {{< / highlight >}}
 
 Please note the deduplication process is resource intensive and can take a long time to complete
@@ -388,8 +388,6 @@ details about the deduplication process : switch
 
 ### Deduplication - APIv2 parameters
 
-- `skip_duplicates`: if true, duplicates are not
-    inserted at all
 - `close_old_findings` : if true, findings that are not
     duplicates and that were in the previous scan of the same type
     (example ZAP) for the same engagement (or product in case of
@@ -504,10 +502,10 @@ You can of course change this default by modifying that stanza.
 ### Launching from the CLI
 
 You can also invoke the SLA notification function from the CLI. For
-example, if run from docker-compose:
+example, if run from docker compose:
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi /bin/bash -c 'python manage.py sla_notifications'
+$ docker compose exec uwsgi /bin/bash -c 'python manage.py sla_notifications'
 {{< / highlight >}}
 
 ## Reports
@@ -540,7 +538,7 @@ Custom reports, generated with the Report Builder, allow you to select specific 
 5.  Vulnerable Endpoints
 6.  Page Breaks
 
-DefectDojo's reports can be generated in HTML and AsciiDoc.
+DefectDojo's reports can be generated in HTML.
 
 ## Metrics
 

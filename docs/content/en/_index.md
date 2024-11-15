@@ -40,7 +40,7 @@ The open-source edition is [available on
 GitHub](https://github.com/DefectDojo/django-DefectDojo).
 
 A running example is available on [our demo server](https://demo.defectdojo.org),
-using the credentials `admin` / `defectdojo@demo#appsec`. Note: The demo
+using the credentials `admin` / `1Defectdojo@demo#appsec`. Note: The demo
 server is refreshed regularly and provisioned with some sample data.
 
 ### DefectDojo Pro and Enterprise

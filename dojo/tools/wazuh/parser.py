@@ -5,6 +5,7 @@ from dojo.models import Endpoint, Finding
 
 
 class WazuhParser:
+
     """
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
     https://github.com/wazuh/wazuh/issues/14560
@@ -61,7 +62,7 @@ class WazuhParser:
                     dupe_key = title + cve + agent_name + package_name + package_version
                 else:
                     dupe_key = title + cve + package_name + package_version
-                dupe_key = hashlib.sha256(dupe_key.encode('utf-8')).hexdigest()
+                dupe_key = hashlib.sha256(dupe_key.encode("utf-8")).hexdigest()
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]

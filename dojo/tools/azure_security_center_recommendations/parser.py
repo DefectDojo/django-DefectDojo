@@ -22,9 +22,8 @@ class AzureSecurityCenterRecommendationsParser:
     def get_findings(self, file, test):
         if file.name.lower().endswith(".csv"):
             return self.process_csv(file, test)
-        else:
-            msg = "Unknown file format"
-            raise ValueError(msg)
+        msg = "Unknown file format"
+        raise ValueError(msg)
 
     def process_csv(self, file, test):
         content = file.read()
@@ -47,7 +46,7 @@ class AzureSecurityCenterRecommendationsParser:
                 recommendation_id = row.get("recommendationId")
                 recommendation_name = row.get("recommendationName")
                 recommendation_display_name = row.get(
-                    "recommendationDisplayName"
+                    "recommendationDisplayName",
                 )
                 azure_description = row.get("description")
                 remediation_steps = row.get("remediationSteps")
@@ -57,7 +56,7 @@ class AzureSecurityCenterRecommendationsParser:
                 status_change_date = row.get("statusChangeDate")
                 controls = row.get("controls")
                 azure_portal_recommendation_link = row.get(
-                    "azurePortalRecommendationLink"
+                    "azurePortalRecommendationLink",
                 )
                 native_cloud_account_id = row.get("nativeCloudAccountId")
 
@@ -107,13 +106,13 @@ class AzureSecurityCenterRecommendationsParser:
                         references=azure_portal_recommendation_link,
                         mitigation=remediation_steps,
                         date=datetime.strptime(
-                            status_change_date[0:10], "%Y-%m-%d"
+                            status_change_date[0:10], "%Y-%m-%d",
                         ).date(),
                         vuln_id_from_tool=recommendation_name,
                         unique_id_from_tool=recommendation_id,
                         static_finding=True,
                         dynamic_finding=False,
-                    )
+                    ),
                 )
 
         return findings

@@ -1,0 +1,151 @@
+{
+    "id": "800160eb-28b3-459c-a878-1e3d195a4a10",
+    "projects": null,
+    "createdAt": "2024-07-22T06:59:56.73798427Z",
+    "startedAt": "0001-01-01T00:00:00Z",
+    "createdBy": {
+      "serviceAccount": {
+        "id": "12312312312312312"
+      }
+    },
+    "status": {
+      "state": "SUCCESS",
+      "verdict": "PASSED_BY_POLICY"
+    },
+    "policies": [
+      {
+        "id": "013bb6be-50b3-408e-8fbc-7a316756affc",
+        "name": "Default sensitive data policy",
+        "description": "Default built-in policy for sensitive data scanning",
+        "type": "SENSITIVE_DATA",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "AUDIT",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamssensitivedata",
+          "dataFindingSeverityThreshold": "",
+          "countThreshold": 0
+        }
+      },
+      {
+        "id": "6b4ccd22-b76a-45d1-98cf-30165587d718",
+        "name": "Default vulnerabilities policy",
+        "description": "Default built-in policy",
+        "type": "VULNERABILITIES",
+        "builtin": true,
+        "projects": null,
+        "policyLifecycleEnforcements": [
+          {
+            "enforcementMethod": "BLOCK",
+            "deploymentLifecycle": "CLI"
+          }
+        ],
+        "ignoreRules": null,
+        "lifecycleTargets": null,
+        "Default": false,
+        "params": {
+          "__typename": "cicdscanpolicyparamsvulnerabilities",
+          "severity": "CRITICAL",
+          "packageCountThreshold": 1,
+          "ignoreUnfixed": true,
+          "packageAllowList": [],
+          "detectionMethods": null,
+          "fixGracePeriodHours": 0,
+          "publishGracePeriodHours": 0
+        }
+      }
+    ],
+    "extraInfo": null,
+    "tags": null,
+    "outdatedPolicies": [],
+    "taggedResource": null,
+    "scanOriginResource": {
+      "__typename": "CICDScanOriginDirectory",
+      "name": "/Users/osama/Documents/testing"
+    },
+    "result": {
+      "__typename": "CICDDiskScanResult",
+      "osPackages": null,
+      "libraries": [
+        {
+          "name": "google.golang.org/protobuf",
+          "version": "1.28.1",
+          "path": "/grpc/proto/go.mod",
+          "vulnerabilities": [
+            {
+              "name": "CVE-2024-24786",
+              "severity": "MEDIUM",
+              "fixedVersion": "1.33.0",
+              "source": "https://github.com/advisories/GHSA-8r3f-844c-mc37",
+              "description": null,
+              "score": null,
+              "exploitabilityScore": null,
+              "cvssV3Metrics": null,
+              "cvssV2Metrics": null,
+              "hasExploit": false,
+              "hasCisaKevExploit": false,
+              "cisaKevReleaseDate": null,
+              "cisaKevDueDate": null,
+              "epssProbability": null,
+              "epssPercentile": null,
+              "epssSeverity": null,
+              "weightedSeverity": null,
+              "publishDate": null,
+              "fixPublishDate": null,
+              "gracePeriodEnd": null,
+              "gracePeriodRemainingHours": null,
+              "failedPolicyMatches": null,
+              "finding": null
+            }
+          ],
+          "detectionMethod": "LIBRARY",
+          "layerMetadata": null,
+          "failedPolicyMatches": []
+        }
+      ],
+      "applications": null,
+      "cpes": null,
+      "secrets": null,
+      "dataFindings": null,
+      "vulnerableSBOMArtifactsByNameVersion": null,
+      "hostConfiguration": null,
+      "failedPolicyMatches": [],
+      "analytics": {
+        "vulnerabilities": {
+          "infoCount": 0,
+          "lowCount": 0,
+          "mediumCount": 4,
+          "highCount": 2,
+          "criticalCount": 0,
+          "unfixedCount": 0,
+          "totalCount": 0
+        },
+        "secrets": {
+          "privateKeyCount": 0,
+          "publicKeyCount": 0,
+          "passwordCount": 0,
+          "certificateCount": 0,
+          "cloudKeyCount": 0,
+          "sshAuthorizedKeyCount": 0,
+          "dbConnectionStringCount": 0,
+          "gitCredentialCount": 0,
+          "presignedURLCount": 0,
+          "saasAPIKeyCount": 0,
+          "totalCount": 0
+        },
+        "hostConfiguration": null,
+        "filesScannedCount": 35,
+        "directoriesScannedCount": 18
+      }
+    },
+    "reportUrl": "https://app.wiz.io/findings/cicd-scans#"
+  }
+  

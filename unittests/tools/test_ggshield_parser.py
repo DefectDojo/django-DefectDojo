@@ -1,19 +1,18 @@
 from dojo.models import Test
 from dojo.tools.ggshield.parser import GgshieldParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestGgshieldParser(DojoTestCase):
 
     def test_parse_empty(self):
-        with open("unittests/scans/ggshield/no_finding.json") as testfile:
+        with open("unittests/scans/ggshield/no_finding.json", encoding="utf-8") as testfile:
             parser = GgshieldParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_one_finding(self):
-        with open("unittests/scans/ggshield/one_finding.json") as testfile:
+        with open("unittests/scans/ggshield/one_finding.json", encoding="utf-8") as testfile:
             parser = GgshieldParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -24,7 +23,7 @@ class TestGgshieldParser(DojoTestCase):
             self.assertEqual("2021-07-05", finding.date)
 
     def test_parse_many_finding(self):
-        with open("unittests/scans/ggshield/many_findings.json") as testfile:
+        with open("unittests/scans/ggshield/many_findings.json", encoding="utf-8") as testfile:
             parser = GgshieldParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))

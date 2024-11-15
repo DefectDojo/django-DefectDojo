@@ -10,19 +10,16 @@ logger = logging.getLogger(__name__)
 
 
 class VulnersImporter:
-    """
-    Import from Vulners API
-    """
+
+    """Import from Vulners API"""
 
     def get_findings(self, test):
         client, _config = self.prepare_client(test)
-        findings = client.get_findings()
-        return findings
+        return client.get_findings()
 
     def get_vulns_description(self, test, vulns_id):
         client, _config = self.prepare_client(test)
-        description = client.get_vulns_description(vulns_id)
-        return description
+        return client.get_vulns_description(vulns_id)
 
     def prepare_client(self, test):
         product = test.engagement.product
@@ -37,7 +34,7 @@ class VulnersImporter:
                 raise ValidationError(msg)
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
-                product=product, tool_configuration__tool_type__name="Vulners"
+                product=product, tool_configuration__tool_type__name="Vulners",
             )
             if configs.count() == 1:
                 config = configs.first()

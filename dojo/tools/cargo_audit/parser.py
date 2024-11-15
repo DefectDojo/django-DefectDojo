@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class CargoAuditParser:
-    """
-    A class that can be used to parse the cargo audit JSON report file
-    """
+
+    """A class that can be used to parse the cargo audit JSON report file"""
 
     def get_scan_types(self):
         return ["CargoAudit Scan"]
@@ -52,7 +51,7 @@ class CargoAuditParser:
                     )
 
                 references = f"{advisory.get('url')}\n" + "\n".join(
-                    advisory["references"]
+                    advisory["references"],
                 )
                 date = advisory.get("date")
 
@@ -73,8 +72,8 @@ class CargoAuditParser:
                     mitigation = "No information about patched version"
                 dupe_key = hashlib.sha256(
                     (vuln_id + date + package_name + package_version).encode(
-                        "utf-8"
-                    )
+                        "utf-8",
+                    ),
                 ).hexdigest()
 
                 if dupe_key in dupes:

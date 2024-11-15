@@ -13,7 +13,8 @@ class OpenVASParser:
         return "Import CSV or XML output of Greenbone OpenVAS report."
 
     def get_findings(self, filename, test):
-        if str(filename.name).endswith('.csv'):
+        if str(filename.name).endswith(".csv"):
             return OpenVASCSVParser().get_findings(filename, test)
-        elif str(filename.name).endswith('.xml'):
+        if str(filename.name).endswith(".xml"):
             return OpenVASXMLParser().get_findings(filename, test)
+        return None

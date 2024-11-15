@@ -53,21 +53,21 @@ class IbmAppParser:
                     if severity == "Informational":
                         severity = "Info"
                     issue_description = self.fetch_advisory_group(
-                        root, issue_data["advisory"]
+                        root, issue_data["advisory"],
                     )
 
                     for fix_recommendation_group in root.iter(
-                        "fix-recommendation-group"
+                        "fix-recommendation-group",
                     ):
                         for recommendation in fix_recommendation_group.iter(
-                            "item"
+                            "item",
                         ):
                             if (
                                 recommendation.attrib["id"]
                                 == issue_data["fix-recommendation"]
                             ):
                                 data = recommendation.find(
-                                    "general/fixRecommendation"
+                                    "general/fixRecommendation",
                                 )
                                 for data_text in data.iter("text"):
                                     recommendation_data += (
@@ -82,8 +82,8 @@ class IbmAppParser:
                     # endpoints
                     dupe_key = hashlib.md5(
                         str(issue_description + name + severity).encode(
-                            "utf-8"
-                        )
+                            "utf-8",
+                        ),
                     ).hexdigest()
                     # check if finding is a duplicate
                     if dupe_key in dupes:
@@ -100,11 +100,11 @@ class IbmAppParser:
                             severity=severity,
                             mitigation=recommendation_data,
                             references=ref_link,
-                            dynamic_finding=True
+                            dynamic_finding=True,
                         )
                         if vulnerability_id:
                             finding.unsaved_vulnerability_ids = [
-                                vulnerability_id
+                                vulnerability_id,
                             ]
                         finding.unsaved_endpoints = []
                         dupes[dupe_key] = finding
@@ -115,7 +115,7 @@ class IbmAppParser:
                         # urls
                         if url:
                             finding.unsaved_endpoints.append(
-                                Endpoint.from_uri(url)
+                                Endpoint.from_uri(url),
                             )
 
         return list(dupes.values())
@@ -129,7 +129,7 @@ class IbmAppParser:
                     "name": item.find("name").text,
                     "advisory": item.find("advisory/ref").text,
                     "fix-recommendation": item.find(
-                        "fix-recommendation/ref"
+                        "fix-recommendation/ref",
                     ).text,
                 }
 
@@ -148,14 +148,12 @@ class IbmAppParser:
 
     # this fetches Issue description
     def fetch_advisory_group(self, root, advisory):
-        """
-        Function that parse advisory-group in order to get the item's description
-        """
+        """Function that parse advisory-group in order to get the item's description"""
         for advisory_group in root.iter("advisory-group"):
             for item in advisory_group.iter("item"):
                 if item.attrib["id"] == advisory:
                     return item.find(
-                        "advisory/testTechnicalDescription/text"
+                        "advisory/testTechnicalDescription/text",
                     ).text
         return "N/A"
 

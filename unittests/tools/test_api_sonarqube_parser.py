@@ -11,32 +11,27 @@ from dojo.models import (
     Tool_Type,
 )
 from dojo.tools.api_sonarqube.parser import ApiSonarQubeParser
-
-from ..dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
 
 
 def dummy_product(self, *args, **kwargs):
-    with open("unittests/scans/api_sonarqube/product.json") as json_file:
-        data = json.load(json_file)
-        return data
+    with open("unittests/scans/api_sonarqube/product.json", encoding="utf-8") as json_file:
+        return json.load(json_file)
 
 
 def dummy_issues(self, *args, **kwargs):
-    with open("unittests/scans/api_sonarqube/issues.json") as json_file:
-        data = json.load(json_file)
-        return data
+    with open("unittests/scans/api_sonarqube/issues.json", encoding="utf-8") as json_file:
+        return json.load(json_file)
 
 
 def dummy_rule(self, *args, **kwargs):
-    with open("unittests/scans/api_sonarqube/rule.json") as json_file:
-        data = json.load(json_file)
-        return data
+    with open("unittests/scans/api_sonarqube/rule.json", encoding="utf-8") as json_file:
+        return json.load(json_file)
 
 
 def dummy_hotspot_rule(self, *args, **kwargs):
-    with open(get_unit_tests_path() + '/scans/api_sonarqube/hotspots/rule.json') as json_file:
-        data = json.load(json_file)
-        return data
+    with open(get_unit_tests_path() + "/scans/api_sonarqube/hotspots/rule.json", encoding="utf-8") as json_file:
+        return json.load(json_file)
 
 
 def empty_list(self, *args, **kwargs):
@@ -51,18 +46,18 @@ class TestApiSonarQubeParser(DojoTestCase):
         # build Sonarqube conf (the parser need it)
         tool_type, _ = Tool_Type.objects.get_or_create(name="SonarQube")
         tool_conf, _ = Tool_Configuration.objects.get_or_create(
-            name="SQ1_unittests", authentication_type="API", tool_type=tool_type, url='http://dummy.url.foo.bar/api'
+            name="SQ1_unittests", authentication_type="API", tool_type=tool_type, url="http://dummy.url.foo.bar/api",
         )
         pasc, _ = Product_API_Scan_Configuration.objects.get_or_create(
-            product=product, tool_configuration=tool_conf, service_key_1='ABCD'
+            product=product, tool_configuration=tool_conf, service_key_1="ABCD",
         )
         self.test = Test(engagement=engagement, api_scan_configuration=pasc)
 
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project", dummy_product)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule", dummy_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
-    @mock.patch('dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
     def test_get_findings(self):
         parser = ApiSonarQubeParser()
         findings = parser.get_findings(None, self.test)

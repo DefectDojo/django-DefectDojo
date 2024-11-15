@@ -6,14 +6,12 @@ from .api_client import EdgescanAPI
 
 
 class EdgescanImporter:
-    """
-    Import from Edgescan API
-    """
+
+    """Import from Edgescan API"""
 
     def get_findings(self, test):
         client, config = self.prepare_client(test)
-        findings = client.get_findings(config.service_key_1)
-        return findings
+        return client.get_findings(config.service_key_1)
 
     def prepare_client(self, test):
         product = test.engagement.product
@@ -27,7 +25,7 @@ class EdgescanImporter:
                 raise ValidationError(msg)
         else:
             configs = Product_API_Scan_Configuration.objects.filter(
-                product=product
+                product=product,
             )
             if configs.count() == 1:
                 config = configs.first()

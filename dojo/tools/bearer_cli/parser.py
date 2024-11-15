@@ -3,10 +3,9 @@ import json
 from dojo.models import Finding
 
 
-class BearerParser:
-    """
-    Bearer CLI tool is a SAST scanner for multiple languages
-    """
+class BearerCLIParser:
+
+    """Bearer CLI tool is a SAST scanner for multiple languages"""
 
     def get_scan_types(self):
         return ["Bearer CLI"]
@@ -29,8 +28,7 @@ class BearerParser:
 
                 if bearerfinding["fingerprint"] in dupes:
                     continue
-                else:
-                    dupes.add(bearerfinding["fingerprint"])
+                dupes.add(bearerfinding["fingerprint"])
 
                 finding = Finding(
                     title=bearerfinding["title"] + " in " + bearerfinding["filename"] + ":" + str(bearerfinding["line_number"]),

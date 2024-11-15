@@ -9,9 +9,8 @@ from dojo.models import Finding  # , Endpoint
 
 
 class CloudsploitParser:
-    """
-    AquaSecurity CloudSploit https://github.com/aquasecurity/cloudsploit
-    """
+
+    """AquaSecurity CloudSploit https://github.com/aquasecurity/cloudsploit"""
 
     def get_scan_types(self):
         return ["Cloudsploit Scan"]
@@ -56,7 +55,7 @@ class CloudsploitParser:
 
             # internal de-duplication
             dupe_key = hashlib.sha256(
-                str(description + title).encode("utf-8")
+                str(description + title).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -75,5 +74,4 @@ class CloudsploitParser:
             return "Medium"
         if status == "FAIL":
             return "Critical"
-        else:
-            return "Info"
+        return "Info"

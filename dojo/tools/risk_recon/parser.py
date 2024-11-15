@@ -36,6 +36,7 @@ class RiskReconParser:
                 findings = data.get("findings")
 
             return self._get_findings_internal(findings, test)
+        return None
 
     def _get_findings_internal(self, findings, test):
         dupes = {}
@@ -104,7 +105,7 @@ class RiskReconParser:
             finding.unsaved_tags = tags
 
             dupe_key = item.get(
-                "finding_id", title + "|" + tags + "|" + findingdetail
+                "finding_id", title + "|" + tags + "|" + findingdetail,
             )
 
             if dupe_key in dupes:

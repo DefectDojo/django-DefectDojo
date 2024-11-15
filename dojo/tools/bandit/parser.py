@@ -34,7 +34,7 @@ class BanditParser:
                     "```",
                     str(item.get("code")).replace("```", "\\`\\`\\`"),
                     "```",
-                ]
+                ],
             )
 
             finding = Finding(
@@ -48,7 +48,7 @@ class BanditParser:
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=":".join(
-                    [item["test_name"], item["test_id"]]
+                    [item["test_name"], item["test_id"]],
                 ),
                 nb_occurences=1,
             )
@@ -66,9 +66,8 @@ class BanditParser:
     def convert_confidence(self, value):
         if "high" == value.lower():
             return 2
-        elif "medium" == value.lower():
+        if "medium" == value.lower():
             return 3
-        elif "low" == value.lower():
+        if "low" == value.lower():
             return 6
-        else:
-            return None
+        return None

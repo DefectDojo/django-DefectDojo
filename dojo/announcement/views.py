@@ -28,7 +28,7 @@ def configure_announcement(request):
                     "message": announcement.message,
                     "style": announcement.style,
                     "dismissable": announcement.dismissable,
-                }
+                },
             )
             remove = True
         except Announcement.DoesNotExist:
@@ -64,14 +64,14 @@ def configure_announcement(request):
         request=request,
     )
     return render(
-        request, "dojo/announcement.html", {"form": form, "remove": remove}
+        request, "dojo/announcement.html", {"form": form, "remove": remove},
     )
 
 
 def dismiss_announcement(request):
     if request.method == "POST":
         deleted_count, _objects_deleted = UserAnnouncement.objects.filter(
-            user=request.user, announcement=1
+            user=request.user, announcement=1,
         ).delete()
         if deleted_count > 0:
             messages.add_message(
@@ -81,12 +81,11 @@ def dismiss_announcement(request):
                 extra_tags="alert-success",
             )
             return HttpResponseRedirect("dashboard")
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                _("Failed to remove announcement."),
-                extra_tags="alert-danger",
-            )
-            return render(request, "dojo/dismiss_announcement.html")
+        messages.add_message(
+            request,
+            messages.ERROR,
+            _("Failed to remove announcement."),
+            extra_tags="alert-danger",
+        )
+        return render(request, "dojo/dismiss_announcement.html")
     return render(request, "dojo/dismiss_announcement.html")

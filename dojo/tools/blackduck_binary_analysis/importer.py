@@ -1,8 +1,8 @@
 import csv
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .model import BlackduckBinaryAnalysisFinding
 
@@ -23,24 +23,20 @@ class BlackduckBinaryAnalysisImporter(Importer):
         return self._process_csvfile(report, orig_report_name)
 
     def _process_csvfile(self, report, orig_report_name):
-        """
-        If passed a CSV file, process.
-        """
+        """If passed a CSV file, process."""
         vulnerabilities = {}
-        with open(str(report)) as f:
+        with open(str(report), encoding="utf-8") as f:
             vulnerabilities = self.__partition_by_key(f)
 
         sha1_hash_keys = set(vulnerabilities.keys())
         return self._process_vuln_results(
-            sha1_hash_keys, report, orig_report_name, vulnerabilities
+            sha1_hash_keys, report, orig_report_name, vulnerabilities,
         )
 
     def _process_vuln_results(
-        self, sha1_hash_keys, report, orig_report_name, vulnerabilities
+        self, sha1_hash_keys, report, orig_report_name, vulnerabilities,
     ):
-        """
-        Process findings for each project.
-        """
+        """Process findings for each project."""
         for sha1_hash_key in sha1_hash_keys:
             for vuln in vulnerabilities[sha1_hash_key]:
                 vuln_dict = dict(vuln)
@@ -72,11 +68,11 @@ class BlackduckBinaryAnalysisImporter(Importer):
                     vuln_dict.get("Vulnerability URL"),
                     vuln_dict.get("Missing exploit mitigations"),
                     vuln_dict.get("BDSA"),
-                    vuln_dict.get("Version override type")
+                    vuln_dict.get("Version override type"),
                 )
 
     def __partition_by_key(self, csv_file):
-        csv_results = csv.DictReader(csv_file, delimiter=',', quotechar='"')
+        csv_results = csv.DictReader(csv_file, delimiter=",", quotechar='"')
         vulnerabilities = defaultdict(set)
 
         key = "Object SHA1"

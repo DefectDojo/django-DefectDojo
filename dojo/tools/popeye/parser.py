@@ -6,9 +6,8 @@ from dojo.models import Finding
 
 
 class PopeyeParser:
-    """
-    Popeye is a kubernetes cluster resource analyzer.
-    """
+
+    """Popeye is a kubernetes cluster resource analyzer."""
 
     def get_scan_types(self):
         return ["Popeye Scan"]
@@ -37,7 +36,7 @@ class PopeyeParser:
                                 + issue["message"]
                             )
                             severity = self.get_defect_dojo_severity(
-                                issue["level"]
+                                issue["level"],
                             )
                             description = (
                                 "**Sanitizer** : "
@@ -56,7 +55,7 @@ class PopeyeParser:
                                 + issue["message"]
                             )
                             vuln_id_from_tool = re.search(
-                                r"\[(POP-\d+)\].+", issue["message"]
+                                r"\[(POP-\d+)\].+", issue["message"],
                             ).group(1)
                             finding = Finding(
                                 title=title,
@@ -69,7 +68,7 @@ class PopeyeParser:
                             )
                             # internal de-duplication
                             dupe_key = hashlib.sha256(
-                                str(description + title).encode("utf-8")
+                                str(description + title).encode("utf-8"),
                             ).hexdigest()
                             if dupe_key not in dupes:
                                 dupes[dupe_key] = finding
@@ -78,15 +77,13 @@ class PopeyeParser:
     def get_popeye_level_string(self, level):
         if level == 1:
             return "Info"
-        elif level == 2:
+        if level == 2:
             return "Warning"
-        else:
-            return "Error"
+        return "Error"
 
     def get_defect_dojo_severity(self, level):
         if level == 1:
             return "Info"
-        elif level == 2:
+        if level == 2:
             return "Low"
-        else:
-            return "High"
+        return "High"

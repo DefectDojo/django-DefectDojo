@@ -16,60 +16,60 @@ from dojo.utils import add_breadcrumb
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized('dojo.add_regulation')
+@user_is_configuration_authorized("dojo.add_regulation")
 def new_regulation(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         tform = RegulationForm(request.POST, instance=Regulation())
         if tform.is_valid():
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Regulation Successfully Created.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('regulations', ))
+                                 "Regulation Successfully Created.",
+                                 extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("regulations"))
     else:
         tform = RegulationForm()
         add_breadcrumb(title="New regulation", top_level=False, request=request)
-    return render(request, 'dojo/new_regulation.html',
-                  {'form': tform})
+    return render(request, "dojo/new_regulation.html",
+                  {"form": tform})
 
 
-@user_is_configuration_authorized('dojo.change_regulation')
+@user_is_configuration_authorized("dojo.change_regulation")
 def edit_regulations(request, ttid):
     regulation = Regulation.objects.get(pk=ttid)
-    if request.method == 'POST' and request.POST.get('delete'):
-        user_has_configuration_permission_or_403(request.user, 'dojo.delete_regulation')
+    if request.method == "POST" and request.POST.get("delete"):
+        user_has_configuration_permission_or_403(request.user, "dojo.delete_regulation")
         Regulation.objects.filter(pk=ttid).delete()
         messages.add_message(request,
                              messages.SUCCESS,
-                             'Regulation Deleted.',
-                             extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('regulations', ))
-    elif request.method == 'POST':
+                             "Regulation Deleted.",
+                             extra_tags="alert-success")
+        return HttpResponseRedirect(reverse("regulations"))
+    if request.method == "POST":
         tform = RegulationForm(request.POST, instance=regulation)
         if tform.is_valid():
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Regulation Successfully Updated.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('regulations', ))
+                                 "Regulation Successfully Updated.",
+                                 extra_tags="alert-success")
+            return HttpResponseRedirect(reverse("regulations"))
     else:
         tform = RegulationForm(instance=regulation)
     add_breadcrumb(title="Edit Regulation", top_level=False, request=request)
 
     return render(request,
-                  'dojo/edit_regulation.html',
+                  "dojo/edit_regulation.html",
                   {
-                      'tform': tform,
+                      "tform": tform,
                   })
 
 
 @login_required
 def regulations(request):
-    confs = Regulation.objects.all().order_by('name')
+    confs = Regulation.objects.all().order_by("name")
     add_breadcrumb(title="Regulations", top_level=not len(request.GET), request=request)
     return render(request,
-                  'dojo/regulations.html',
-                  {'confs': confs,
+                  "dojo/regulations.html",
+                  {"confs": confs,
                    })

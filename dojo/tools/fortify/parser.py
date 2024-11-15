@@ -13,7 +13,9 @@ class FortifyParser:
         return "Import Findings in FPR or XML file format."
 
     def get_findings(self, filename, test):
-        if str(filename.name).endswith('.xml'):
+        if str(filename.name).endswith(".xml"):
             return FortifyXMLParser().parse_xml(filename, test)
-        elif str(filename.name).endswith('.fpr'):
+        if str(filename.name).endswith(".fpr"):
             return FortifyFPRParser().parse_fpr(filename, test)
+        msg = "Filename extension not recognized. Use .xml or .fpr"
+        raise ValueError(msg)
