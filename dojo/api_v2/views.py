@@ -1705,6 +1705,7 @@ class DojoMetaViewSet(
                 msg = f"Metadata {metadata.get('name')} not found for object."
                 raise ValidationError(msg)
 
+
 @extend_schema_view(**schema_with_prefetch())
 class ProductViewSet(
     prefetch.PrefetchListMixin,
