@@ -517,8 +517,12 @@ def generate_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list:
             .replace("{risk_acceptance_id}", str(risk_pending.id))
             .replace("{permission_key_id}", token)
         )
-        permission_keys.append(
-            {"username": user.username, "url": url})
+        permission_keys.append({
+                "username": user.username,
+                "url_accept": url.replace("{action}", "accept"),
+                "url_reject": url.replace("{action}", "reject")
+            })
+        print(permission_keys)
     return permission_keys
 
 
