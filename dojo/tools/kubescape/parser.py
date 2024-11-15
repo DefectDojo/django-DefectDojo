@@ -60,6 +60,8 @@ class KubescapeParser:
 
             for control in controls:
                 for rule in control["rules"]:
+                    if rule["status"] == "passed":
+                        continue
                     # This condition is true if the result doesn't contain the status for each control (old format)
                     retrocompatibility_condition = "status" not in control or "status" not in control["status"]
                     if retrocompatibility_condition or control["status"]["status"] == "failed":
@@ -101,20 +103,21 @@ class KubescapeParser:
                         steps_to_reproduce += "\t**Rules:** " + str(json.dumps(control["rules"], indent=4)) + "\n"
                         steps_to_reproduce += "Resource object may contain evidence:" + "\n"
                         steps_to_reproduce += "\t**Resource object:** " + str(json.dumps(resource["object"], indent=4))
-                        if rule["status"] != "passed":
-                            find = Finding(
-                                title=textwrap.shorten(title, 150),
-                                test=test,
-                                description=description,
-                                mitigation=mitigation,
-                                steps_to_reproduce=steps_to_reproduce,
-                                severity=severity,
-                                component_name=resourceid,
-                                static_finding=True,
-                                dynamic_finding=False,
-                            )
-                            if controlID is not None:
-                                find.unsaved_vulnerability_ids = []
-                                find.unsaved_vulnerability_ids.append(controlID)
-                            findings.append(find)
+
+                        find = Finding(
+                            title=textwrap.shorten(title, 150),
+                            test=test,
+                            description=description,
+                            mitigation=mitigation,
+                            steps_to_reproduce=steps_to_reproduce,
+                            references=f"https://hub.armosec.io/docs/{controlID.lower()}",
+                            severity=severity,
+                            component_name=resourceid,
+                            static_finding=True,
+                            dynamic_finding=False,
+                        )
+                        if controlID is not None:
+                            find.unsaved_vulnerability_ids = []
+                            find.unsaved_vulnerability_ids.append(controlID)
+                        findings.append(find)
         return findings
