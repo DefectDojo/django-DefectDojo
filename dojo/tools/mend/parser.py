@@ -37,6 +37,7 @@ class MendParser:
             component_version = None
             impact = None
             description = "No Description Available"
+            cvss3_score = None
             if "component" in node:
                 node["project"].get("name")
                 description = (
