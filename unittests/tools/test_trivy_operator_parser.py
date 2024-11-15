@@ -157,3 +157,9 @@ class TestTrivyOperatorParser(DojoTestCase):
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 18)
+
+    def test_findings_all_reports_in_dict(self):
+        with open(sample_path("all_reports_in_dict.json"), encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 43)
