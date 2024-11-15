@@ -40,7 +40,8 @@ class AnchoreCTLPoliciesParser:
                             image_name = result["tag"]
                             trigger_id = result["triggerId"]
                             repo, tag = image_name.split(":", 2)
-                            severity = map_gate_action_to_severity(status)
+                            severity = map_gate_action_to_severity(status, description)
+                            active = False if status == "go" else True
                             vulnerability_id = extract_vulnerability_id(trigger_id)
                             title = (
                                 policy_id
@@ -54,6 +55,7 @@ class AnchoreCTLPoliciesParser:
                                 test=test,
                                 description=description,
                                 severity=severity,
+                                active=active,
                                 references=f"Policy ID: {policy_id}\nTrigger ID: {trigger_id}",
                                 file_path=search_filepath(description),
                                 component_name=repo,
@@ -77,14 +79,13 @@ class AnchoreCTLPoliciesParser:
         return items
 
 
-def map_gate_action_to_severity(gate):
-    gate_action_to_severity = {
-        "stop": "Critical",
-        "warn": "Medium",
-    }
-    if gate in gate_action_to_severity:
-        return gate_action_to_severity[gate]
-    return "Low"
+def map_gate_action_to_severity(status, description):
+    parsed_severity = description.split()[0]
+    severity = "Info"
+    if status != "go":
+        severity = parsed_severity.lower().capitalize()
+
+    return severity
 
 
 def policy_name(policies, policy_id):
