@@ -82,7 +82,9 @@ class AnchoreCTLPoliciesParser:
 def map_gate_action_to_severity(status, description):
     parsed_severity = description.split()[0]
     severity = "Info"
-    if status != "go":
+    if parsed_severity == "UNKNOWN":
+        severity = "Info"
+    elif status != "go":
         severity = parsed_severity.lower().capitalize()
 
     return severity
