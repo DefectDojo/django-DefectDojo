@@ -1381,7 +1381,8 @@ def get_page_items_and_count(request, items, page_size, prefix="", do_count=True
 
 
 def handle_uploaded_threat(f, eng):
-    _name, extension = os.path.splitext(f.name)
+    path = Path(f.name)
+    extension = path.suffix
     # Check if threat folder exist.
     if not Path(settings.MEDIA_ROOT + "/threat/").is_dir():
         # Create the folder
@@ -1395,7 +1396,8 @@ def handle_uploaded_threat(f, eng):
 
 
 def handle_uploaded_selenium(f, cred):
-    _name, extension = os.path.splitext(f.name)
+    path = Path(f.name)
+    extension = path.suffix
     with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
               "wb+") as destination:
         for chunk in f.chunks():
@@ -2699,7 +2701,9 @@ def generate_file_response_from_file_path(
 ) -> FileResponse:
     """Serve an local file in a uniformed way."""
     # Determine the file path
-    file_path_without_extension, file_extension = os.path.splitext(file_path)
+    path = Path(file_path)
+    file_path_without_extension = path.parent / path.stem
+    file_extension = path.suffix
     # Determine the file name if not supplied
     if file_name is None:
         file_name = file_path_without_extension.rsplit("/")[-1]

@@ -141,7 +141,9 @@ class UniqueUploadNameProvider:
         self.keep_ext = keep_ext
 
     def __call__(self, model_instance, filename):
-        base, ext = os.path.splitext(filename)
+        path = Path(filename)
+        base = path.parent / path.stem
+        ext = path.suffix
         filename = f"{base}_{uuid4()}" if self.keep_basename else str(uuid4())
         if self.keep_ext:
             filename += ext
