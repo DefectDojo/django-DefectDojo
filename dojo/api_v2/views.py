@@ -3087,6 +3087,29 @@ class QuestionnaireEngagementSurveyViewSet(
     def get_queryset(self):
         return Engagement_Survey.objects.all().order_by("id")
 
+    @extend_schema(
+    request=OpenApiTypes.NONE,
+    parameters=[
+        OpenApiParameter(
+            "engagement_id", OpenApiTypes.INT, OpenApiParameter.PATH,
+        ),
+    ],
+    responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer},
+    )
+    @action(
+        detail=True, methods=["post"], url_path=r"link_engagement/(?P<engagement_id>\d+)",
+    )
+    def link_engagement(self, request, pk, engagement_id):
+        # Get the answered survey
+        engagement_survey = self.get_object()
+        # Safely get the engagement
+        engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
+        # Link the engagement
+        answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
+        # Send a favorable response
+        serialized_answered_survey = serializers.QuestionnaireAnsweredSurveySerializer(answered_survey)
+        return Response(serialized_answered_survey.data)
+
 
 @extend_schema_view(**schema_with_prefetch())
 class QuestionnaireAnsweredSurveyViewSet(
