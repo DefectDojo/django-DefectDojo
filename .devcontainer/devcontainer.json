@@ -8,6 +8,12 @@
 
 	// Configure tool-specific properties - https://containers.dev/supporting
 	"customizations": {
-		"extensions": ["ms-azuretools.vscode-docker", "ms-python.python", "ms-python.debugpy"]
+		"vscode": {
+			"extensions": [
+				"ms-azuretools.vscode-docker",
+				"ms-python.python",
+				"ms-python.debugpy"
+			]
+		}
 	}
 }
