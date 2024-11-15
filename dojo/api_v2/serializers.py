@@ -417,6 +417,51 @@ class MetaSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class MetadataSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=120)
+    value = serializers.CharField(max_length=300)
+
+
+class MetaMainSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
+    endpoint = serializers.PrimaryKeyRelatedField(
+        queryset=Endpoint.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
+    finding = serializers.PrimaryKeyRelatedField(
+        queryset=Finding.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
+    metadata = MetadataSerializer(many=True)
+
+    def validate(self, data):
+        product_id = data.get("product", None)
+        endpoint_id = data.get("endpoint", None)
+        finding_id = data.get("finding", None)
+        metadata = data.get("metadata")
+
+        for item in metadata:
+            # this will only verify that one and only one of product, endpoint, or finding is passed...
+            DojoMeta(product=product_id,
+                     endpoint=endpoint_id,
+                     finding=finding_id,
+                     name=item.get("name"),
+                     value=item.get("value")).clean()
+
+        return data
+
+
 class ProductMetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = DojoMeta
