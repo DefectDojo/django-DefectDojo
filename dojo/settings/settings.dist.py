@@ -155,7 +155,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ""),
     DD_SAML2_ENABLED=(bool, False),
     # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
-    DD_SAML2_AUTHENTICATION_BACKENDS=(str, "djangosaml2.backends.Saml2Backend"),
+    DD_SAML2_AUTHENTICATION_BACKENDS=(str, "dojo.backends.Saml2Backend"),
     # Force Authentication to make SSO possible with SAML2
     DD_SAML2_FORCE_AUTH=(bool, True),
     DD_SAML2_LOGIN_BUTTON_TEXT=(str, "Login with SAML"),
@@ -177,6 +177,11 @@ env = environ.FileAwareEnv(
         "Lastname": "last_name",
     }),
     DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
+    # similar to DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER, regular expression for which SAML2 groups to map to Dojo groups (with same name)
+    # Groups need to already exist in Dojo. And if value is not set, no group processing is done
+    DD_SAML2_GROUPS_FILTER=(str, ""),
+    # SAML2 attribute with groups to match in Dojo. And if value is not set, no group processing is done
+    DD_SAML2_GROUPS_ATTRIBUTE=(str, ""),
     # Authentication via HTTP Proxy which put username to HTTP Header REMOTE_USER
     DD_AUTH_REMOTEUSER_ENABLED=(bool, False),
     # Names of headers which will be used for processing user data.
@@ -1054,6 +1059,8 @@ if SAML2_ENABLED:
         },
         "valid_for": 24,  # how long is our metadata valid
     }
+    SAML2_GROUPS_ATTRIBUTE = env("DD_SAML2_GROUPS_ATTRIBUTE")
+    SAML2_GROUPS_FILTER = env("DD_SAML2_GROUPS_FILTER")
 
 # ------------------------------------------------------------------------------
 # REMOTE_USER
