@@ -49,9 +49,9 @@ class TestAwsProwlerV3plusParser(DojoTestCase):
             open("unittests/scans/aws_prowler_v3plus/no_vuln.ocsf.json", encoding="utf-8"))
         self.assertEqual(0, len(findings))
 
-    def test_aws_prowler_parser_before_4_5_0_with_critical_vuln_has_one_findings_ocsf_json(self):
+    def test_aws_prowler_parser_after_4_5_0_with_critical_vuln_has_one_findings_ocsf_json(self):
         findings = self.setup(
-            open("unittests/scans/aws_prowler_v3plus/one_vuln_before_4_5_0.ocsf.json", encoding="utf-8"))
+            open("unittests/scans/aws_prowler_v3plus/one_vuln_after_4_5_0.ocsf.json", encoding="utf-8"))
         self.assertEqual(1, len(findings))
         self.assertEqual("prowler-aws-iam_role_administratoraccess_policy_permissive_trust_relationship-123456789012-us-east-1-myAdministratorExecutionRole", findings[0].unique_id_from_tool)
         self.assertIn("Ensure IAM Roles with attached AdministratorAccess policy have a well defined trust relationship", findings[0].description)
@@ -59,9 +59,9 @@ class TestAwsProwlerV3plusParser(DojoTestCase):
         self.assertIn("https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege", findings[0].references)
         self.assertEqual(date.fromisoformat("2024-06-03"), findings[0].date)
 
-    def test_aws_prowler_parser_before_4_5_0_with_many_vuln_has_many_findings_ocsf_json(self):
+    def test_aws_prowler_parser_after_4_5_0_with_many_vuln_has_many_findings_ocsf_json(self):
         findings = self.setup(
-            open("unittests/scans/aws_prowler_v3plus/many_vuln_before_4_5_0.ocsf.json", encoding="utf-8"))
+            open("unittests/scans/aws_prowler_v3plus/many_vuln_after_4_5_0.ocsf.json", encoding="utf-8"))
         self.assertEqual(2, len(findings))
         with self.subTest(i=0):
             self.assertEqual("prowler-aws-iam_role_administratoraccess_policy_permissive_trust_relationship-123456789012-us-east-1-myAdministratorExecutionRole", findings[0].unique_id_from_tool)
