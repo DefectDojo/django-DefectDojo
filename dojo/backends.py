@@ -17,9 +17,9 @@ class Saml2Backend(_Saml2Backend):
 
     @cached_property
     def group_re(self):
-        if not settings.SAML2_ENABLED or not settings.SAML2_GROUPS_ATTRIBUTE or not settings.SAML2_GROUPS_FILTER:
-            return None
-        return re.compile(settings.SAML2_GROUPS_FILTER)
+        if settings.SAML2_ENABLED and settings.SAML2_GROUPS_ATTRIBUTE and settings.SAML2_GROUPS_FILTER:
+            return re.compile(settings.SAML2_GROUPS_FILTER)
+        return None
 
     def _update_user(
         self,
