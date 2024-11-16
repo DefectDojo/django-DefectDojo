@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class NspParser(object):
+class NspParser:
     def get_scan_types(self):
         return ["Node Security Platform Scan"]
 
@@ -17,8 +17,7 @@ class NspParser(object):
         tree = self.parse_json(json_output)
         if tree:
             return self.get_items(tree, test)
-        else:
-            return []
+        return []
 
     def parse_json(self, json_output):
         try:
@@ -28,7 +27,8 @@ class NspParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -55,7 +55,7 @@ def get_item(item_node, test):
     else:
         severity = "Critical"
 
-    finding = Finding(
+    return Finding(
         title=item_node["title"]
         + " - "
         + "("
@@ -88,5 +88,3 @@ def get_item(item_node, test):
         mitigated=None,
         impact="No impact provided",
     )
-
-    return finding

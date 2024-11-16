@@ -1,12 +1,12 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
-class TFSecParser(object):
-    """
-    A class that can be used to parse the tfsec JSON report file
-    """
+class TFSecParser:
+
+    """A class that can be used to parse the tfsec JSON report file"""
 
     # table to match tfsec severity to DefectDojo severity
     SEVERITY = {
@@ -32,11 +32,10 @@ class TFSecParser(object):
         data = json.load(filename)
         dupes = {}
         if "results" not in data:
-            raise ValueError(
-                "Incorrect TFSec scan, missing attribute 'results'"
-            )
+            msg = "Incorrect TFSec scan, missing attribute 'results'"
+            raise ValueError(msg)
         if data.get("results") is None:
-            return list()
+            return []
         for item in data.get("results"):
             if item.get("passed", None):
                 continue
@@ -47,7 +46,7 @@ class TFSecParser(object):
             start_line = item.get("location").get("start_line")
             end_line = item.get("location").get("end_line")
             description = "\n".join(
-                ["Rule ID: " + rule_id, item.get("description")]
+                ["Rule ID: " + rule_id, item.get("description")],
             )
             impact = item.get("impact")
             resolution = item.get("resolution")
@@ -67,7 +66,7 @@ class TFSecParser(object):
                     + file
                     + str(start_line)
                     + str(end_line)
-                ).encode("utf-8")
+                ).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:

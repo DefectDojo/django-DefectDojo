@@ -62,7 +62,7 @@
                             {% if system_settings.enable_github %}
                             <th class="text-center">GitHub</th>
                             {% endif %}
-                            <th class="text-center"> Active (Verified) Findings</th>
+                            <th class="text-center">{% dojo_sort request 'Active (Verified) Findings' 'findings_count' %}</th>
                             <th class="text-center"> Vulnerable Hosts / Endpoints</th>
                             <th> Contact</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -122,18 +122,20 @@
                                               <i class="fa-solid fa-pen-to-square"></i> Edit Custom Fields
                                             </a>
                                           </li>
-                                          <li role="separator" class="divider"></li>
+                                        {% endif %}
+                                        <li role="separator" class="divider"></li>
+                                        {% if prod|has_object_permission:"Product_API_Scan_Configuration_Edit" %}  
                                           <li role="presentation">
-                                              <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
-                                                  <i class="fa-solid fa-rectangle-list"></i> Add Scan API Configuration
-                                              </a>
-                                          </li>
-                                          <li role="presentation">
-                                              <a title="View API Scan configurations" href="{% url 'view_api_scan_configurations' prod.id %}">
-                                                <i class="fa-solid fa-clock-rotate-left"></i> View Scan API Configurations
-                                              </a>
+                                            <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
+                                              <i class="fa-solid fa-rectangle-list"></i> Add Scan API Configuration
+                                            </a>
                                           </li>
                                         {% endif %}
+                                        <li role="presentation">
+                                            <a title="View API Scan configurations" href="{% url 'view_api_scan_configurations' prod.id %}">
+                                              <i class="fa-solid fa-clock-rotate-left"></i> View Scan API Configurations
+                                            </a>
+                                        </li>
                                         {% if system_settings.enable_product_tracking_files %}
                                           <li role="separator" class="divider"></li>
                                           {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
@@ -325,97 +327,99 @@
             };
 
             // Mapping of table columns to objects for proper cleanup and data formatting
-            var dojoTable = $('#products').DataTable({
-                drawCallback: function(){
-                    $('#products .has-popover').hover(
-                        function() { $(this).popover('show'); }, // hover
-                        function() { $(this).popover('hide'); } // unhover
-                    );
-                 },
-                 colReorder: true,
-                 "columns": [
-                    { "data": "action", "searchable": false },
-                    { "data": "product" },
-                    { "data": "tags" },
-                    { "data": "criticality" , render: function (data, type, row) {
-                      const criticals = {
-                        'Very High': 5,
-                        'High': 4,
-                        'Medium': 3,
-                        'Low': 2,
-                        'Very Low': 1,
-                        'None': 0
-                      };
-                      if (type === 'sort') {
-                        return criticals[getDojoExportValueFromTag(data, 'i', 'data-content')]
-                      } else if (type === 'export') {
-                          return getDojoExportValueFromTag(data, 'i', 'data-content')
-                      } else if (data != undefined||data != null) {
-                          return data
+            {% if enable_table_filtering %}
+              var dojoTable = $('#products').DataTable({
+                  drawCallback: function(){
+                      $('#products .has-popover').hover(
+                          function() { $(this).popover('show'); }, // hover
+                          function() { $(this).popover('hide'); } // unhover
+                      );
+                  },
+                  colReorder: true,
+                  "columns": [
+                      { "data": "action", "searchable": false },
+                      { "data": "product" },
+                      { "data": "tags" },
+                      { "data": "criticality" , render: function (data, type, row) {
+                        const criticals = {
+                          'Very High': 5,
+                          'High': 4,
+                          'Medium': 3,
+                          'Low': 2,
+                          'Very Low': 1,
+                          'None': 0
+                        };
+                        if (type === 'sort') {
+                          return criticals[getDojoExportValueFromTag(data, 'i', 'data-content')]
+                        } else if (type === 'export') {
+                            return getDojoExportValueFromTag(data, 'i', 'data-content')
+                        } else if (data != undefined||data != null) {
+                            return data
+                        }
+                        return ""
+                      }},
+                      { "data": "metadata", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      } },
+                      { "data": "engagements", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      }},
+                      {% if system_settings.enable_jira %}
+                      { "data": "jira", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      }},
+                      {% endif %}
+                      {% if system_settings.enable_github %}
+                      { "data": "github", render: function (data, type, row) {
+                              return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
+                      }},
+                      {% endif %}
+                      { "data": "findings" },
+                      { "data": "endpoints" },
+                      { "data": "contacts" },
+                      { "data": "product_type" },
+                  ],
+                  order: [],
+                  columnDefs: [
+                      {
+                          "orderable": false,
+                          "targets": [0]
+                      },
+                      {
+                          targets: [0],
+                          className: 'noVis'
                       }
-                      return ""
-                    }},
-                    { "data": "metadata", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
-                    } },
-                    { "data": "engagements", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
-                    }},
-                    {% if system_settings.enable_jira %}
-                    { "data": "jira", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
-                    }},
-                    {% endif %}
-                    {% if system_settings.enable_github %}
-                    { "data": "github", render: function (data, type, row) {
-                            return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
-                    }},
-                    {% endif %}
-                    { "data": "findings" },
-                    { "data": "endpoints" },
-                    { "data": "contacts" },
-                    { "data": "product_type" },
-                ],
-                order: [],
-                columnDefs: [
-                    {
-                        "orderable": false,
-                        "targets": [0]
-                    },
-                    {
-                        targets: [0],
-                        className: 'noVis'
-                    }
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
+                  ],
+                  dom: 'Bfrtip',
+                  paging: false,
+                  info: false,
+                  buttons: [
+                      {
+                          extend: 'colvis',
+                          columns: ':not(.noVis)'
+                      },
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'copy'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'excel',
+                          autoFilter: true,
+                          sheetName: 'Exported data',
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'csv'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'pdf',
+                          orientation: 'landscape',
+                          pageSize: 'LETTER'
+                      }),
+                      $.extend( true, {}, buttonCommon, {
+                          extend: 'print'
+                      }),
+                  ],
+              });
+            {% endif %}
         });
     </script>
     {% include "dojo/filter_js_snippet.html" %}

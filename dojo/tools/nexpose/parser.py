@@ -1,14 +1,16 @@
-import html2text
 import re
-from defusedxml import ElementTree
-from hyperlink._url import SCHEME_PORT_MAP
 from datetime import datetime
+
+import html2text
+from defusedxml import ElementTree
 from django.conf import settings
+from hyperlink._url import SCHEME_PORT_MAP
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 
 
-class NexposeParser(object):
+class NexposeParser:
+
     """
     The objective of this class is to parse Nexpose's XML 2.0 Report.
 
@@ -106,7 +108,7 @@ class NexposeParser(object):
 
         @return vulns A list of vulnerabilities according to vulnsDefinitions
         """
-        vulns = list()
+        vulns = []
 
         for tests in node.findall("tests"):
             for test in tests.findall("test"):
@@ -140,10 +142,8 @@ class NexposeParser(object):
         return vulns
 
     def get_vuln_definitions(self, tree):
-        """
-        @returns vulns A dict of Vulnerability Definitions
-        """
-        vulns = dict()
+        """@returns vulns A dict of Vulnerability Definitions"""
+        vulns = {}
         url_index = 0
         for vulnsDef in tree.findall("VulnerabilityDefinitions"):
             for vulnDef in vulnsDef.findall("vulnerability"):
@@ -163,10 +163,10 @@ class NexposeParser(object):
                     "desc": "",
                     "name": vulnDef.get("title"),
                     "vector": vulnDef.get("cvssVector"),  # this is CVSS v2
-                    "refs": dict(),
+                    "refs": {},
                     "resolution": "",
                     "severity": sev,
-                    "tags": list(),
+                    "tags": [],
                 }
                 for item in list(vulnDef):
                     if item.tag == "description":
@@ -190,13 +190,13 @@ class NexposeParser(object):
                                 url_index += 1
                             else:
                                 vuln["refs"][ref.get("source")] = str(
-                                    ref.text
+                                    ref.text,
                                 ).strip()
 
                     elif item.tag == "solution":
                         for htmlType in list(item):
                             vuln["resolution"] += self.parse_html_type(
-                                htmlType
+                                htmlType,
                             )
 
                     # there is currently no method to register tags in vulns
@@ -208,14 +208,14 @@ class NexposeParser(object):
         return vulns
 
     def get_items(self, tree, vulns, test):
-        hosts = list()
+        hosts = []
         for nodes in tree.findall("nodes"):
             for node in nodes.findall("node"):
-                host = dict()
+                host = {}
                 host["name"] = node.get("address")
                 host["hostnames"] = set()
                 host["os"] = ""
-                host["services"] = list()
+                host["services"] = []
                 host["vulns"] = self.parse_tests_type(node, vulns)
 
                 host["vulns"].append(
@@ -223,7 +223,7 @@ class NexposeParser(object):
                         "name": "Host Up",
                         "desc": "Host is up because it replied on ICMP request or some TCP/UDP port is up",
                         "severity": "Info",
-                    }
+                    },
                 )
 
                 for names in node.findall("names"):
@@ -241,11 +241,11 @@ class NexposeParser(object):
                             for service in services.findall("service"):
                                 svc["name"] = service.get("name", "").lower()
                                 svc["vulns"] = self.parse_tests_type(
-                                    service, vulns
+                                    service, vulns,
                                 )
 
                                 for configs in service.findall(
-                                    "configurations"
+                                    "configurations",
                                 ):
                                     for config in configs.findall("config"):
                                         if "banner" in config.get("name"):
@@ -268,11 +268,11 @@ class NexposeParser(object):
                                                 "[^A-Za-z0-9]+",
                                                 "-",
                                                 service.get("name").lower(),
-                                            ).rstrip("-")
+                                            ).rstrip("-"),
                                         ]
                                         if service.get("name") != "<unknown>"
                                         else [],
-                                    }
+                                    },
                                 )
 
                         host["services"].append(svc)
@@ -286,7 +286,7 @@ class NexposeParser(object):
             for vuln in host["vulns"]:
                 dupe_key = vuln["severity"] + vuln["name"]
 
-                find = self.findings(dupe_key, dupes, test, vuln)
+                find = self.findings(dupe_key, dupes, vuln)
 
                 endpoint = Endpoint(host=host["name"])
                 find.unsaved_endpoints.append(endpoint)
@@ -297,7 +297,7 @@ class NexposeParser(object):
                 for vuln in service["vulns"]:
                     dupe_key = vuln["severity"] + vuln["name"]
 
-                    find = self.findings(dupe_key, dupes, test, vuln)
+                    find = self.findings(dupe_key, dupes, vuln)
 
                     endpoint = Endpoint(
                         host=host["name"],
@@ -307,7 +307,7 @@ class NexposeParser(object):
                         else service["protocol"],
                         fragment=service["protocol"].lower()
                         if service["name"] == "dns"
-                        else None
+                        else None,
                         # A little dirty hack but in case of DNS it is
                         # important to know if vulnerability is on TCP or UDP
                     )
@@ -317,7 +317,7 @@ class NexposeParser(object):
         return list(dupes.values())
 
     @staticmethod
-    def findings(dupe_key, dupes, test, vuln):
+    def findings(dupe_key, dupes, vuln):
         """ """
         if dupe_key in dupes:
             find = dupes[dupe_key]
@@ -334,7 +334,7 @@ class NexposeParser(object):
                 mitigation=html2text.html2text(vuln.get("resolution"))
                 if vuln.get("resolution")
                 else None,
-                impact=vuln.get("vector") if vuln.get("vector") else None,
+                impact=vuln.get("vector") or None,
                 false_p=False,
                 duplicate=False,
                 out_of_scope=False,
@@ -365,6 +365,6 @@ class NexposeParser(object):
             # update CVE
             if "CVE" in vuln.get("refs", {}):
                 find.unsaved_vulnerability_ids = [vuln["refs"]["CVE"]]
-            find.unsaved_endpoints = list()
+            find.unsaved_endpoints = []
             dupes[dupe_key] = find
         return find

@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class AnchoreCTLVulnsParser(object):
+class AnchoreCTLVulnsParser:
     def get_scan_types(self):
         return ["AnchoreCTL Vuln Report"]
 
@@ -15,7 +15,7 @@ class AnchoreCTLVulnsParser(object):
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-        dupes = dict()
+        dupes = {}
         for item in data:
             vulnerability_id = item.get("vuln")
 
@@ -92,7 +92,7 @@ class AnchoreCTLVulnsParser(object):
             dupe_key = "|".join(
                 [
                     item.get(
-                        "imageDigest", "None"
+                        "imageDigest", "None",
                     ),  # depending on version image_digest/imageDigest
                     item["feed"],
                     item["feedGroup"],
@@ -100,7 +100,7 @@ class AnchoreCTLVulnsParser(object):
                     item["packageVersion"],
                     item["packagePath"],
                     item["vuln"],
-                ]
+                ],
             )
 
             if dupe_key in dupes:

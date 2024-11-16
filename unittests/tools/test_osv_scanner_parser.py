@@ -1,35 +1,39 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
-from dojo.tools.osv_scanner.parser import OSVScannerParser
+from pathlib import Path
+
 from dojo.models import Test
+from dojo.tools.osv_scanner.parser import OSVScannerParser
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestOSVScannerParser(DojoTestCase):
     def test_no_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/osv_scanner/no_findings.json")) as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/osv_scanner/no_findings.json"), encoding="utf-8") as testfile:
             parser = OSVScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_some_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/osv_scanner/some_findings.json")) as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/osv_scanner/some_findings.json"), encoding="utf-8") as testfile:
             parser = OSVScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
             self.assertEqual(finding.cwe, "CWE-506")
             self.assertEqual(finding.title, "MAL-2023-1035_flot-axis")
-            self.assertEqual(finding.cve, "MAL-2023-1035")
+            self.assertEqual(finding.cve, None)
+            self.assertEqual(finding.unsaved_vulnerability_ids[0], "MAL-2023-1035")
             self.assertEqual(finding.severity, "Low")
 
     def test_many_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/osv_scanner/many_findings.json")) as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/osv_scanner/many_findings.json"), encoding="utf-8") as testfile:
             parser = OSVScannerParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(66, len(findings))
             finding = findings[0]
             self.assertEqual(finding.title, "GHSA-25mq-v84q-4j7r_guzzlehttp/guzzle")
-            self.assertEqual(finding.cve, "GHSA-25mq-v84q-4j7r")
+            self.assertEqual(finding.cve, None)
+            self.assertEqual(finding.unsaved_vulnerability_ids[0], "GHSA-25mq-v84q-4j7r")
             self.assertEqual(finding.severity, "High")
             finding = findings[3]
             self.assertEqual(finding.static_finding, True)

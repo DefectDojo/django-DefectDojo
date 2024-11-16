@@ -1,4 +1,7 @@
-import datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import datetime
 
 
 class SysdigData:
@@ -9,7 +12,7 @@ class SysdigData:
             "HIGH": "High",
             "MEDIUM": "Medium",
             "LOW": "Low",
-            "NEGLIGIBLE": "Informational"
+            "NEGLIGIBLE": "Informational",
         }
 
         return severity_mapping.get(severity, "Informational")

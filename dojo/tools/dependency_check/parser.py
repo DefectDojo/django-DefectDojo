@@ -1,19 +1,19 @@
+import datetime
 import hashlib
 import logging
 import re
-import dateutil
 
+import dateutil
 from cpe import CPE
 from defusedxml import ElementTree
 from packageurl import PackageURL
-from datetime import datetime
 
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 
-class DependencyCheckParser(object):
+class DependencyCheckParser:
     SEVERITY_MAPPING = {
         "info": "Info",
         "low": "Low",
@@ -29,32 +29,31 @@ class DependencyCheckParser(object):
                 str(finding.title),
                 str(finding.cwe),
                 str(finding.file_path).lower(),
-            ]
+            ],
         )
         key = hashlib.sha256(key_str.encode("utf-8")).hexdigest()
         if key not in dupes:
             dupes[key] = finding
 
     def get_filename_and_path_from_dependency(
-        self, dependency, related_dependency, namespace
+        self, dependency, related_dependency, namespace,
     ):
         if not related_dependency:
             return dependency.findtext(
-                f"{namespace}fileName"
+                f"{namespace}fileName",
             ), dependency.findtext(f"{namespace}filePath")
         if related_dependency.findtext(f"{namespace}fileName"):
             return related_dependency.findtext(
-                f"{namespace}fileName"
+                f"{namespace}fileName",
             ), related_dependency.findtext(f"{namespace}filePath")
-        else:
-            # without filename, it would be just a duplicate finding so we have to skip it. filename
-            # is only present for relateddependencies since v6.0.0
-            # logger.debug('related_dependency: %s',
-            # ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
-            return None, None
+        # without filename, it would be just a duplicate finding so we have to skip it. filename
+        # is only present for relateddependencies since v6.0.0
+        # logger.debug('related_dependency: %s',
+        # ElementTree.tostring(related_dependency, encoding='utf8', method='xml'))
+        return None, None
 
     def get_component_name_and_version_from_dependency(
-        self, dependency, related_dependency, namespace
+        self, dependency, related_dependency, namespace,
     ):
         identifiers_node = dependency.find(namespace + "identifiers")
         if identifiers_node:
@@ -75,7 +74,7 @@ class DependencyCheckParser(object):
                     if purl_parts["name"] and len(purl_parts["name"]) > 0
                     else ""
                 )
-                component_name = component_name if component_name else None
+                component_name = component_name or None
                 component_version = (
                     purl_parts["version"]
                     if purl_parts["version"] and len(purl_parts["version"]) > 0
@@ -94,7 +93,7 @@ class DependencyCheckParser(object):
             #     return component_name, component_version
 
             cpe_node = identifiers_node.find(
-                ".//" + namespace + 'identifier[@type="cpe"]'
+                ".//" + namespace + 'identifier[@type="cpe"]',
             )
             if cpe_node:
                 id = cpe_node.findtext(f"{namespace}name")
@@ -107,7 +106,7 @@ class DependencyCheckParser(object):
                 component_name += (
                     cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
                 )
-                component_name = component_name if component_name else None
+                component_name = component_name or None
                 component_version = (
                     cpe.get_version()[0]
                     if len(cpe.get_version()) > 0
@@ -116,11 +115,11 @@ class DependencyCheckParser(object):
                 return component_name, component_version
 
             maven_node = identifiers_node.find(
-                ".//" + namespace + 'identifier[@type="maven"]'
+                ".//" + namespace + 'identifier[@type="maven"]',
             )
             if maven_node:
                 maven_parts = maven_node.findtext(f"{namespace}name").split(
-                    ":"
+                    ":",
                 )
                 # logger.debug('maven_parts:' + str(maven_parts))
                 if len(maven_parts) == 3:
@@ -128,10 +127,10 @@ class DependencyCheckParser(object):
                     component_version = maven_parts[2]
                     return component_name, component_version
 
-        # TODO what happens when there multiple evidencecollectednodes with
+        # TODO: what happens when there multiple evidencecollectednodes with
         # product or version as type?
         evidence_collected_node = dependency.find(
-            namespace + "evidenceCollected"
+            namespace + "evidenceCollected",
         )
         if evidence_collected_node:
             # <evidenceCollected>
@@ -149,16 +148,16 @@ class DependencyCheckParser(object):
             # since 6.0.0 howoever it seems like there's always a packageurl above so not sure if we need the effort to
             # implement more logic here
             product_node = evidence_collected_node.find(
-                ".//" + namespace + 'evidence[@type="product"]'
+                ".//" + namespace + 'evidence[@type="product"]',
             )
             if product_node:
                 component_name = product_node.findtext(f"{namespace}value")
                 version_node = evidence_collected_node.find(
-                    ".//" + namespace + 'evidence[@type="version"]'
+                    ".//" + namespace + 'evidence[@type="version"]',
                 )
                 if version_node:
                     component_version = version_node.findtext(
-                        f"{namespace}value"
+                        f"{namespace}value",
                     )
 
                 return component_name, component_version
@@ -166,13 +165,13 @@ class DependencyCheckParser(object):
         return None, None
 
     def get_finding_from_vulnerability(
-        self, dependency, related_dependency, vulnerability, test, namespace
+        self, dependency, related_dependency, vulnerability, test, namespace,
     ):
         (
             dependency_filename,
             dependency_filepath,
         ) = self.get_filename_and_path_from_dependency(
-            dependency, related_dependency, namespace
+            dependency, related_dependency, namespace,
         )
         # logger.debug('dependency_filename: %s', dependency_filename)
 
@@ -185,7 +184,7 @@ class DependencyCheckParser(object):
         name = vulnerability.findtext(f"{namespace}name")
         if vulnerability.find(f"{namespace}cwes"):
             cwe_field = vulnerability.find(f"{namespace}cwes").findtext(
-                f"{namespace}cwe"
+                f"{namespace}cwe",
             )
         else:
             cwe_field = vulnerability.findtext(f"{namespace}cwe")
@@ -217,13 +216,13 @@ class DependencyCheckParser(object):
             component_name,
             component_version,
         ) = self.get_component_name_and_version_from_dependency(
-            dependency, related_dependency, namespace
+            dependency, related_dependency, namespace,
         )
 
         stripped_name = name
         # startswith CVE-XXX-YYY
         stripped_name = re.sub(
-            r"^CVE-\d{4}-\d{4,7}", "", stripped_name
+            r"^CVE-\d{4}-\d{4,7}", "", stripped_name,
         ).strip()
         # startswith CWE-XXX:
         stripped_name = re.sub(r"^CWE-\d+\:", "", stripped_name).strip()
@@ -232,9 +231,7 @@ class DependencyCheckParser(object):
 
         if component_name is None:
             logger.warning(
-                "component_name was None for File: {}, using dependency file name instead.".format(
-                    dependency_filename
-                )
+                f"component_name was None for File: {dependency_filename}, using dependency file name instead.",
             )
             component_name = dependency_filename
 
@@ -263,7 +260,7 @@ class DependencyCheckParser(object):
         if severity:
             if severity.strip().lower() not in self.SEVERITY_MAPPING:
                 logger.warning(
-                    f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value"
+                    f"Warning: Unknow severity value detected '{severity}'. Bypass to 'Medium' value",
                 )
                 severity = "Medium"
             else:
@@ -277,14 +274,14 @@ class DependencyCheckParser(object):
         if references_node is not None:
             reference_detail = ""
             for reference_node in references_node.findall(
-                namespace + "reference"
+                namespace + "reference",
             ):
                 ref_source = reference_node.findtext(f"{namespace}source")
                 ref_url = reference_node.findtext(f"{namespace}url")
                 ref_name = reference_node.findtext(f"{namespace}name")
                 if ref_url == ref_name:
                     reference_detail += (
-                        f"**Source:** {ref_source}\n" f"**URL:** {ref_url}\n\n"
+                        f"**Source:** {ref_source}\n**URL:** {ref_url}\n\n"
                     )
                 else:
                     reference_detail += (
@@ -296,28 +293,22 @@ class DependencyCheckParser(object):
         if related_dependency is not None:
             tags.append("related")
 
-        if vulnerability.tag == "{}suppressedVulnerability".format(namespace):
+        if vulnerability.tag == f"{namespace}suppressedVulnerability":
             if notes is None:
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("no_suppression_document")
-            mitigation = "**This vulnerability is mitigated and/or suppressed:** {}\n".format(
-                notes
-            )
+            mitigation = f"**This vulnerability is mitigated and/or suppressed:** {notes}\n"
             mitigation = (
                 mitigation
-                + "Update {}:{} to at least the version recommended in the description".format(
-                    component_name, component_version
-                )
+                + f"Update {component_name}:{component_version} to at least the version recommended in the description"
             )
-            mitigated = datetime.utcnow()
+            mitigated = datetime.datetime.now(datetime.UTC)
             is_Mitigated = True
             active = False
             tags.append("suppressed")
 
         else:
-            mitigation = "Update {}:{} to at least the version recommended in the description".format(
-                component_name, component_version
-            )
+            mitigation = f"Update {component_name}:{component_version} to at least the version recommended in the description"
             description += "\n**Filepath:** " + str(dependency_filepath)
             active = True
 
@@ -355,7 +346,7 @@ class DependencyCheckParser(object):
         return "OWASP Dependency Check output can be imported in Xml format."
 
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
         namespace = ""
         content = filename.read()
         #  'utf-8' This line is to pass a unittest in test_parsers.TestParsers.test_file_existence.
@@ -373,17 +364,17 @@ class DependencyCheckParser(object):
             projectInfo_node = scan.find(f"{namespace}projectInfo")
             if projectInfo_node.findtext(f"{namespace}reportDate"):
                 scan_date = dateutil.parser.parse(
-                    projectInfo_node.findtext(f"{namespace}reportDate")
+                    projectInfo_node.findtext(f"{namespace}reportDate"),
                 )
 
         if dependencies:
             for dependency in dependencies.findall(namespace + "dependency"):
                 vulnerabilities = dependency.find(
-                    namespace + "vulnerabilities"
+                    namespace + "vulnerabilities",
                 )
                 if vulnerabilities is not None:
                     for vulnerability in vulnerabilities.findall(
-                        namespace + "vulnerability"
+                        namespace + "vulnerability",
                     ):
                         if vulnerability:
                             finding = self.get_finding_from_vulnerability(
@@ -398,13 +389,13 @@ class DependencyCheckParser(object):
                             self.add_finding(finding, dupes)
 
                             relatedDependencies = dependency.find(
-                                namespace + "relatedDependencies"
+                                namespace + "relatedDependencies",
                             )
                             if relatedDependencies:
                                 for (
                                     relatedDependency
                                 ) in relatedDependencies.findall(
-                                    namespace + "relatedDependency"
+                                    namespace + "relatedDependency",
                                 ):
                                     finding = (
                                         self.get_finding_from_vulnerability(
@@ -421,7 +412,7 @@ class DependencyCheckParser(object):
                                         self.add_finding(finding, dupes)
 
                     for suppressedVulnerability in vulnerabilities.findall(
-                        namespace + "suppressedVulnerability"
+                        namespace + "suppressedVulnerability",
                     ):
                         if suppressedVulnerability:
                             finding = self.get_finding_from_vulnerability(

@@ -4,35 +4,26 @@ import json
 from dojo.models import Finding
 
 
-class TalismanParser(object):
-    """
-    A class that can be used to parse the Talisman JSON report files
-    """
+class TalismanParser:
+
+    """A class that can be used to parse the Talisman JSON report files"""
 
     def get_scan_types(self):
-        """
-        Get scan type
-        """
+        """Get scan type"""
         return ["Talisman Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        """
-        Get label for scan type
-        """
+        """Get label for scan type"""
         return scan_type
 
     def get_description_for_scan_types(self, scan_type):
-        """
-        Get description for scan type
-        """
+        """Get description for scan type"""
         return "Import Talisman Scan findings in JSON format."
 
     def get_findings(self, filename, test):
-        """
-        Converts a Talisman JSON report to DefectDojo findings
-        """
+        """Converts a Talisman JSON report to DefectDojo findings"""
         if filename is None:
-            return list()
+            return []
 
         json_data = json.load(filename)
         results = json_data.get("results")
@@ -76,7 +67,7 @@ class TalismanParser(object):
                             + file_path
                             + description
                             + severity
-                        ).encode("utf-8")
+                        ).encode("utf-8"),
                     ).hexdigest()
 
                     if key not in dupes:

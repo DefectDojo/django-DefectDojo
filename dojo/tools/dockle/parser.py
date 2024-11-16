@@ -1,12 +1,12 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
-class DockleParser(object):
-    """
-    A class that can be used to parse the Dockle JSON report files
-    """
+class DockleParser:
+
+    """A class that can be used to parse the Dockle JSON report files"""
 
     # table to match Dockle severity to DefectDojo severity
     SEVERITY = {
@@ -40,7 +40,7 @@ class DockleParser(object):
             description = sorted(item.get("alerts", []))
             description = "\n".join(description)
             dupe_key = hashlib.sha256(
-                (code + title).encode("utf-8")
+                (code + title).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:

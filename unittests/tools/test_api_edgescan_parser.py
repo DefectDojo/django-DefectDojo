@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from dojo.tools.api_edgescan.parser import ApiEdgescanParser
 from dojo.models import Test
+from dojo.tools.api_edgescan.parser import ApiEdgescanParser
 
 
 class TestApiEdgescanParser(TestCase):
@@ -20,7 +20,7 @@ class TestApiEdgescanParser(TestCase):
         parser = ApiEdgescanParser()
         self.assertEqual(
             parser.get_description_for_scan_types(scan_type),
-            "Edgescan findings can be imported by API or JSON file."
+            "Edgescan findings can be imported by API or JSON file.",
         )
 
     def test_requires_file(self):
@@ -32,13 +32,13 @@ class TestApiEdgescanParser(TestCase):
         self.assertEqual(parser.requires_tool_type("scan_type"), "Edgescan")
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        with open("unittests/scans/api_edgescan/no_vuln.json") as testfile:
+        with open("unittests/scans/api_edgescan/no_vuln.json", encoding="utf-8") as testfile:
             parser = ApiEdgescanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
-        with open("unittests/scans/api_edgescan/one_vuln.json") as testfile:
+        with open("unittests/scans/api_edgescan/one_vuln.json", encoding="utf-8") as testfile:
             parser = ApiEdgescanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -61,7 +61,7 @@ class TestApiEdgescanParser(TestCase):
             self.assertEqual(finding.unsaved_endpoints[0].protocol, None)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
-        with open("unittests/scans/api_edgescan/many_vulns.json") as testfile:
+        with open("unittests/scans/api_edgescan/many_vulns.json", encoding="utf-8") as testfile:
             parser = ApiEdgescanParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(2, len(findings))

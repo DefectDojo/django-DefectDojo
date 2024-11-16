@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import NamedTuple, List
+from typing import NamedTuple
 
 from django.db.models import QuerySet
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.decorators import action
@@ -9,22 +10,20 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
-from dojo.models import Risk_Acceptance, User, Vulnerability_Id
-from django.utils import timezone
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.models import Risk_Acceptance, User, Vulnerability_Id
 
-
-AcceptedRisk = NamedTuple('AcceptedRisk', (('vulnerability_id', str), ('justification', str), ('accepted_by', str)))
+AcceptedRisk = NamedTuple("AcceptedRisk", (("vulnerability_id", str), ("justification", str), ("accepted_by", str)))
 
 
 class AcceptedRiskSerializer(serializers.Serializer):
     vulnerability_id = serializers.CharField(
         max_length=50,
-        label='Vulnerability Id',
-        help_text='An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposure (CVE) or from other sources.')
-    justification = serializers.CharField(help_text='Justification for accepting findings with this vulnerability id')
-    accepted_by = serializers.CharField(max_length=200, help_text='Name or email of person who accepts the risk')
+        label="Vulnerability Id",
+        help_text="An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposure (CVE) or from other sources.")
+    justification = serializers.CharField(help_text="Justification for accepting findings with this vulnerability id")
+    accepted_by = serializers.CharField(max_length=200, help_text="Name or email of person who accepts the risk")
 
     def create(self, validated_data):
         return AcceptedRisk(**validated_data)
@@ -41,7 +40,7 @@ class AcceptedRisksMixin(ABC):
         request=AcceptedRiskSerializer(many=True),
         responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
     )
-    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer,
+    @action(methods=["post"], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer,
             filter_backends=[], pagination_class=None)
     def accept_risks(self, request, pk=None):
         model = self.get_object()
@@ -64,7 +63,7 @@ class AcceptedFindingsMixin(ABC):
         request=AcceptedRiskSerializer(many=True),
         responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
     )
-    @action(methods=['post'], detail=False, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
+    @action(methods=["post"], detail=False, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request):
         serializer = AcceptedRiskSerializer(data=request.data, many=True)
         if serializer.is_valid():
@@ -82,17 +81,17 @@ class AcceptedFindingsMixin(ABC):
         return Response(status=201, data=result.data)
 
 
-def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, owner: User):
+def _accept_risks(accepted_risks: list[AcceptedRisk], base_findings: QuerySet, owner: User):
     accepted = []
     for risk in accepted_risks:
         vulnerability_ids = Vulnerability_Id.objects \
             .filter(vulnerability_id=risk.vulnerability_id) \
-            .values('finding')
+            .values("finding")
         findings = base_findings.filter(id__in=vulnerability_ids)
         if findings.exists():
-            # TODO we could use risk.vulnerability_id to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
+            # TODO: we could use risk.vulnerability_id to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
             # so for now we add some timestamp based suffix
-            name = risk.vulnerability_id + ' via api at ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')
+            name = risk.vulnerability_id + " via api at " + timezone.now().strftime("%b %d, %Y, %H:%M:%S")
             acceptance = Risk_Acceptance.objects.create(owner=owner, name=name[:100],
                                                         decision=Risk_Acceptance.TREATMENT_ACCEPT,
                                                         decision_details=risk.justification,

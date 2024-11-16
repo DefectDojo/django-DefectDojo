@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class CheckovParser(object):
+class CheckovParser:
     def get_scan_types(self):
         return ["Checkov Scan"]
 
@@ -24,7 +24,8 @@ class CheckovParser(object):
         return findings
 
     def parse_json(self, json_output):
-        """Parse JSON report.
+        """
+        Parse JSON report.
         Checkov may return only one `check_type` (where the report is just a JSON)
         or more (where the report is an array of JSONs).
         To address all scenarios we force this method to return a list of JSON objects.
@@ -41,7 +42,8 @@ class CheckovParser(object):
             except BaseException:
                 deserialized = json.loads(data)
         except BaseException:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return (
             [deserialized] if not isinstance(

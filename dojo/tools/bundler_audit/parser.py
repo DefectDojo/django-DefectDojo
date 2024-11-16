@@ -6,7 +6,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class BundlerAuditParser(object):
+class BundlerAuditParser:
     def get_scan_types(self):
         return ["Bundler-Audit Scan"]
 
@@ -21,7 +21,7 @@ class BundlerAuditParser(object):
         if isinstance(lines, bytes):
             lines = lines.decode("utf-8")  # passes in unittests, but would fail in production
 
-        dupes = dict()
+        dupes = {}
         find_date = datetime.now()
         warnings = lines.split("\n\n")
 
@@ -92,7 +92,6 @@ class BundlerAuditParser(object):
                     dynamic_finding=False,
                     component_name=gem_name,
                     component_version=gem_version,
-                    cve=advisory_id,
                 )
                 if advisory_id:
                     find.unsaved_vulnerability_ids = [advisory_id]

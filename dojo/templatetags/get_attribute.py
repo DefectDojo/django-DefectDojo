@@ -1,4 +1,5 @@
 from django import template
+
 register = template.Library()
 
 
@@ -7,5 +8,4 @@ def get_attribute(obj, name):
 
     if hasattr(obj, name):
         return getattr(obj, name)
-    else:
-        return ''
+    return ""

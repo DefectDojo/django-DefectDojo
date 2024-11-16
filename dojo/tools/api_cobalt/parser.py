@@ -1,17 +1,17 @@
 import json
 import textwrap
 from datetime import datetime
-from dojo.models import Endpoint, Finding
-from .importer import CobaltApiImporter
 
+from dojo.models import Endpoint, Finding
+
+from .importer import CobaltApiImporter
 
 SCAN_COBALTIO_API = "Cobalt.io API Import"
 
 
-class ApiCobaltParser(object):
-    """
-    Import from Cobalt.io API /findings
-    """
+class ApiCobaltParser:
+
+    """Import from Cobalt.io API /findings"""
 
     def get_scan_types(self):
         return [SCAN_COBALTIO_API]
@@ -66,7 +66,7 @@ class ApiCobaltParser(object):
                     "",
                     "Cobalt.io link:",
                     links["ui"]["url"],
-                ]
+                ],
             )
             mitigation = resource["suggested_fix"]
             steps_to_reproduce = resource["proof_of_concept"]
@@ -131,8 +131,7 @@ class ApiCobaltParser(object):
 
         if resource["state"] in allowed_states:
             return True
-        else:
-            return False
+        return False
 
     def convert_endpoints(self, affected_targets):
         """Convert Cobalt affected_targets into DefectDojo endpoints"""
@@ -151,16 +150,15 @@ class ApiCobaltParser(object):
         """Convert severity value"""
         if cobalt_severity == "informational":
             return "Info"
-        elif cobalt_severity == "low":
+        if cobalt_severity == "low":
             return "Low"
-        elif cobalt_severity == "medium":
+        if cobalt_severity == "medium":
             return "Medium"
-        elif cobalt_severity == "high":
+        if cobalt_severity == "high":
             return "High"
-        elif cobalt_severity == "critical":
+        if cobalt_severity == "critical":
             return "Critical"
-        else:
-            return "Info"
+        return "Info"
 
     def is_active(self, cobalt_state):
         return (

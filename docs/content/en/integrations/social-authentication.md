@@ -15,7 +15,7 @@ leverage Auth0 to authenticate users on DefectDojo.
 2.  On the new application set the following fields:
     -   Name: "Defectdojo"
     -   Allowed Callback URLs:
-        [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/auth0/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/auth0/)
+        **https://the_hostname_you_have_dojo_deployed:your_server_port/complete/auth0/**
 3.  Copy the following info from the application:
     -   Domain
     -   Client ID
@@ -175,7 +175,7 @@ user, such as 'superuser'.
 
     -   <http://localhost:8080/complete/azuread-tenant-oauth2/>
     -   **OR**
-    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/azuread-tenant-oauth2/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/azuread-tenant-oauth2/)
+    -   **https://the_hostname_you_have_dojo_deployed:your_server_port/complete/azuread-tenant-oauth2/**
 
 4.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
@@ -236,13 +236,13 @@ Follow along below.
 
     -   <https://gitlab.com/profile/applications>
     -   **OR**
-    -   [https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications](https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications)
+    -   **https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications**
 
 2. Choose a name for your application
 3. For the Redirect URI, enter the DefectDojo URL with the following
     format
 
-    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/)
+    -   **https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/**
 
 4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
@@ -312,7 +312,7 @@ Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" 
  
 or, alternatively, for helm configuration, add this to the `extraConfig` section: 
 
-```
+```yaml
 DD_SESSION_COOKIE_SECURE: 'True'
 DD_CSRF_COOKIE_SECURE: 'True'
 DD_SECURE_SSL_REDIRECT: 'True'
@@ -331,7 +331,7 @@ Optionally, you *can* set `DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT` in order t
 2. Choose a name for your application
 3. For the Redirect URI, enter the DefectDojo URL with the following
     format
-    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github-enterprise/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github-enterprise/)
+    -   **https://the_hostname_you_have_dojo_deployed:your_server_port/complete/github-enterprise/**
 4. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
     {{< highlight python >}}  
@@ -453,7 +453,7 @@ Some Identity Providers are able to send list of groups to which should user bel
 
 You can bypass the login form if you are only using SSO/Social authentication for login in by enabling these two environment variables:
 
-```
+```yaml
 DD_SOCIAL_LOGIN_AUTO_REDIRECT: "true"
 DD_SOCIAL_AUTH_SHOW_LOGIN_FORM: "false"
 ```

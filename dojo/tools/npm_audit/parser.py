@@ -8,7 +8,7 @@ from dojo.tools.utils import get_npm_cwe
 logger = logging.getLogger(__name__)
 
 
-class NpmAuditParser(object):
+class NpmAuditParser:
     def get_scan_types(self):
         return ["NPM Audit Scan"]
 
@@ -24,7 +24,7 @@ class NpmAuditParser(object):
 
     def parse_json(self, json_output):
         if json_output is None:
-            return
+            return None
         try:
             data = json_output.read()
             try:
@@ -32,24 +32,21 @@ class NpmAuditParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format, unable to parse json.")
+            msg = "Invalid format, unable to parse json."
+            raise ValueError(msg)
 
         if tree.get("auditReportVersion"):
-            raise ValueError(
-                "npm7 with auditReportVersion 2 or higher not yet supported as it lacks the most important fields in the reports"
-            )
+            msg = "npm7 with auditReportVersion 2 or higher not yet supported as it lacks the most important fields in the reports"
+            raise ValueError(msg)
 
         if tree.get("error"):
             error = tree.get("error")
             code = error["code"]
             summary = error["summary"]
-            raise ValueError(
-                "npm audit report contains errors: %s, %s", code, summary
-            )
+            msg = "npm audit report contains errors: %s, %s"
+            raise ValueError(msg, code, summary)
 
-        subtree = tree.get("advisories")
-
-        return subtree
+        return tree.get("advisories")
 
     def get_items(self, tree, test):
         items = {}
@@ -148,7 +145,7 @@ def get_item(item_node, test):
     )
 
     if len(item_node["cves"]) > 0:
-        dojo_finding.unsaved_vulnerability_ids = list()
+        dojo_finding.unsaved_vulnerability_ids = []
         for vulnerability_id in item_node["cves"]:
             dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
 

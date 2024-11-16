@@ -3,10 +3,11 @@ import hashlib
 import io
 
 from dateutil import parser
+
 from dojo.models import Endpoint, Finding
 
 
-class BugCrowdParser(object):
+class BugCrowdParser:
     def get_scan_types(self):
         return ["BugCrowd Scan"]
 
@@ -24,20 +25,20 @@ class BugCrowdParser(object):
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         csvarray = []
 
         for row in reader:
             csvarray.append(row)
 
-        dupes = dict()
+        dupes = {}
         for row in csvarray:
             finding = Finding(test=test)
 
             url = row.get("bug_url", None)
             pre_description = self.split_description(
-                row.get("description", None)
+                row.get("description", None),
             )
             Description = (
                 pre_description.get("description", "")
@@ -119,7 +120,7 @@ class BugCrowdParser(object):
                 + row.get("vrt_lineage", "")
             )
             finding.steps_to_reproduce = pre_description.get(
-                "steps_to_reproduce", None
+                "steps_to_reproduce", None,
             )
             finding.references = References
             finding.severity = self.convert_severity(row.get("priority", 0))
@@ -128,7 +129,7 @@ class BugCrowdParser(object):
                 finding.date = parser.parse(row.get("submitted_at"))
 
             if url:
-                finding.unsaved_endpoints = list()
+                finding.unsaved_endpoints = []
                 finding.unsaved_endpoints.append(self.get_endpoint(url))
 
             if finding is not None:
@@ -138,7 +139,7 @@ class BugCrowdParser(object):
                     finding.description = ""
 
                 key = hashlib.md5(
-                    (finding.title + "|" + finding.description).encode("utf-8")
+                    (finding.title + "|" + finding.description).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:
@@ -172,7 +173,7 @@ class BugCrowdParser(object):
                 ret[
                     "steps_to_reproduce"
                 ] = "### Steps To Reproduce\n" + ret.get(
-                    "imsteps_to_reproducepact", ""
+                    "imsteps_to_reproducepact", "",
                 )
                 steps = skip = 1
                 poc = impact = 0

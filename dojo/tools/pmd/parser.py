@@ -1,10 +1,11 @@
-import io
 import csv
 import hashlib
+import io
+
 from dojo.models import Finding
 
 
-class PmdParser(object):
+class PmdParser:
     def get_scan_types(self):
         return ["PMD Scan"]
 
@@ -15,13 +16,13 @@ class PmdParser(object):
         return "CSV Report"
 
     def get_findings(self, filename, test):
-        dupes = dict()
+        dupes = {}
 
         content = filename.read()
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = list(
-            csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"')
+            csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"'),
         )
 
         for row in reader:
@@ -42,7 +43,7 @@ class PmdParser(object):
             finding.severity = priority
 
             description = "Description: {}\n".format(
-                row["Description"].strip()
+                row["Description"].strip(),
             )
             description += "Rule set: {}\n".format(row["Rule set"].strip())
             description += "Problem: {}\n".format(row["Problem"].strip())
@@ -54,14 +55,7 @@ class PmdParser(object):
             finding.mitigation = "No mitigation provided"
 
             key = hashlib.sha256(
-                "|".join(
-                    [
-                        finding.title,
-                        finding.description,
-                        finding.file_path,
-                        finding.line,
-                    ]
-                ).encode("utf-8")
+                f"{finding.title}|{finding.description}|{finding.file_path}|{finding.line}".encode(),
             ).hexdigest()
 
             if key not in dupes:

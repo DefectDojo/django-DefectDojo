@@ -3,10 +3,9 @@ import json
 from dojo.models import Finding
 
 
-class WhispersParser(object):
-    """
-    Identify hardcoded secrets in static structured text
-    """
+class WhispersParser:
+
+    """Identify hardcoded secrets in static structured text"""
 
     SEVERITY_MAP = {
         # Whispers 2.1
@@ -62,7 +61,7 @@ class WhispersParser(object):
                     references="https://cwe.mitre.org/data/definitions/798.html",
                     cwe=798,
                     severity=self.SEVERITY_MAP.get(
-                        vuln.get("severity"), "Info"
+                        vuln.get("severity"), "Info",
                     ),
                     file_path=vuln.get("file"),
                     line=int(vuln.get("line")),
@@ -70,7 +69,7 @@ class WhispersParser(object):
                     static_finding=True,
                     dynamic_finding=False,
                     test=test,
-                )
+                ),
             )
 
         return findings

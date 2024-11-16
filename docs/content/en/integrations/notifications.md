@@ -18,6 +18,7 @@ The following notification methods currently exist:
  - Email
  - Slack
  - Microsoft Teams
+ - Webhooks
  - Alerts within DefectDojo (default)
 
 You can set these notifications on a global scope (if you have
@@ -115,3 +116,17 @@ To activate notifications to Microsoft Teams, you have to:
 - Configure an Incoming Webhook in a Teams channel and copy the URL of the webhook to the clipboard
 - Activate `Enable Microsoft Teams notifications` in the System Settings
 - Paste the URL of the Incoming Webhook into the field `Msteams url`
+
+## Specific overrides
+
+System notification settings (scope: system) describe the sending of notifications to superadmins. User notification settings (scope: personal) describe sending notifications to the specific user.
+
+However, there is a specific use-case when the user decides to disable notifications (to decrease noise) but the system setting is used to override this behavior. These overrides apply only to `user_mentioned` and `review_requested` by default.
+
+The scope of this setting is customizable (see environmental variable `DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP`).
+
+For more information about this behavior see the [related pull request #9699](https://github.com/DefectDojo/django-DefectDojo/pull/9699/)
+
+## Webhooks (experimental)
+
+DefectDojo also supports webhooks that follow the same events as other notifications (you can be notified in the same situations). Details about setup are described in [related page](../notification_webhooks/).

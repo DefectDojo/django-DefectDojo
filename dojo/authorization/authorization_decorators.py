@@ -1,19 +1,20 @@
 import functools
+
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+
 from dojo.authorization.authorization import (
+    user_has_configuration_permission,
     user_has_global_permission_or_403,
     user_has_permission_or_403,
-    user_has_configuration_permission,
 )
 
 
 def user_is_authorized(model, permission, arg, lookup="pk", func=None):
     """Decorator for functions that ensures the user has permission on an object."""
-
     if func is None:
         return functools.partial(
-            user_is_authorized, model, permission, arg, lookup
+            user_is_authorized, model, permission, arg, lookup,
         )
 
     @functools.wraps(func)
@@ -39,7 +40,6 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
 
 def user_has_global_permission(permission, func=None):
     """Decorator for functions that ensures the user has a (global) permission"""
-
     if func is None:
         return functools.partial(user_has_global_permission, permission)
 
@@ -52,10 +52,7 @@ def user_has_global_permission(permission, func=None):
 
 
 def user_is_configuration_authorized(permission, func=None):
-    """
-    Decorator for views that checks whether a user has a particular permission enabled.
-    """
-
+    """Decorator for views that checks whether a user has a particular permission enabled."""
     if func is None:
         return functools.partial(user_is_configuration_authorized, permission)
 

@@ -1,12 +1,12 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
-class KICSParser(object):
-    """
-    A class that can be used to parse the KICS JSON report file
-    """
+class KICSParser:
+
+    """A class that can be used to parse the KICS JSON report file"""
 
     # table to match KICS severity to DefectDojo severity
     SEVERITY = {
@@ -44,7 +44,7 @@ class KICSParser(object):
                 expected_value = item.get("expected_value")
                 actual_value = item.get("actual_value")
 
-                description = f"{query.get('description','')}\n"
+                description = f"{query.get('description', '')}\n"
                 if platform:
                     description += f"**Platform:** {platform}\n"
                 if category:
@@ -53,8 +53,7 @@ class KICSParser(object):
                     description += f"**Issue type:** {issue_type}\n"
                 if actual_value:
                     description += f"**Actual value:** {actual_value}\n"
-                if description.endswith("\n"):
-                    description = description[:-1]
+                description = description.removesuffix("\n")
 
                 dupe_key = hashlib.sha256(
                     (
@@ -64,7 +63,7 @@ class KICSParser(object):
                         + file_name
                         + expected_value
                         + str(line_number)
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
 
                 if dupe_key in dupes:

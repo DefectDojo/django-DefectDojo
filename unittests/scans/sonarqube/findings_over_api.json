@@ -1,0 +1,208 @@
+{
+    "total": 42,
+    "p": 1,
+    "ps": 100,
+    "paging": {
+      "pageIndex": 1,
+      "pageSize": 100,
+      "total": 3
+    },
+    "effortTotal": 87,
+    "issues": [
+      {
+        "key": "fjioefjwoefijo",
+        "rule": "OWASP:UsingComponentWithKnownVulnerability",
+        "severity": "MAJOR",
+        "component": "testapplication",
+        "project": "testapplication",
+        "flows": [
+          {
+            "locations": [
+              {
+                "component": "asdfsdf",
+                "textRange": {
+                  "startLine": 1,
+                  "endLine": 2,
+                  "startOffset": 3,
+                  "endOffset": 4
+                },
+                "msg": "sdfasfdasfd",
+                "msgFormattings": []
+              }
+            ]
+          },
+          {
+            "locations": [
+              {
+                "component": "nonono",
+                "textRange": {
+                  "startLine": 2,
+                  "endLine": 4,
+                  "startOffset": 7,
+                  "endOffset": 9
+                },
+                "msg": "fghjfghjgfj",
+                "msgFormattings": []
+              }
+            ]
+          }
+        ],
+        "status": "OPEN",
+        "message": "Filename: package:1.1.2 | Reference: CVE-2024-2529 | CVSS Score: 6.4 | Category: CWE-120 | Versions of the package vulndescription .",
+        "author": "",
+        "tags": [
+          "cve",
+          "cwe",
+          "cwe-937",
+          "owasp-a9",
+          "vulnerability"
+        ],
+        "creationDate": "2023-10-16T15:05:35+0000",
+        "updateDate": "2023-11-03T08:00:46+0000",
+        "type": "VULNERABILITY",
+        "scope": "MAIN",
+        "quickFixAvailable": false,
+        "messageFormattings": [],
+        "codeVariants": []
+      },
+      {
+        "key": "asdfwfewfwefewf",
+        "rule": "Web:TableWithoutCaptionCheck",
+        "severity": "MINOR",
+        "component": "testapplication:src/app/pages/fjiowefjewio/fjwieof/fjiwoe/details.html",
+        "project": "testapplication",
+        "line": 59,
+        "hash": "1de6211e802eff1bb25bff705a0a4cf5",
+        "textRange": {
+          "startLine": 59,
+          "endLine": 59,
+          "startOffset": 6,
+          "endOffset": 113
+        },
+        "flows": [],
+        "status": "OPEN",
+        "message": "Add a description to this table.",
+        "effort": "5min",
+        "debt": "5min",
+        "author": "name.name@name.de",
+        "tags": [
+          "accessibility",
+          "wcag2-a"
+        ],
+        "creationDate": "2023-07-25T13:16:32+0000",
+        "updateDate": "2023-08-18T08:33:52+0000",
+        "type": "BUG",
+        "scope": "MAIN",
+        "quickFixAvailable": false,
+        "messageFormattings": [],
+        "codeVariants": []
+      },
+      {
+        "key": "fjoiewfjoweifjoihugu-",
+        "rule": "typescript:S1533",
+        "severity": "MINOR",
+        "component": "testapplication:src/app/services/fjweiofwefjiofiwofjwof.fjewoi",
+        "project": "testapplication",
+        "line": 15,
+        "hash": "fw0fu90weu90u3904u1094u1409",
+        "textRange": {
+          "startLine": 15,
+          "endLine": 15,
+          "startOffset": 49,
+          "endOffset": 56
+        },
+        "flows": [],
+        "status": "OPEN",
+        "message": "Replace this \"Boolean\" wrapper object with primitive type \"boolean\".",
+        "effort": "1min",
+        "debt": "1min",
+        "author": "name.name@name.de",
+        "tags": [
+          "pitfall"
+        ],
+        "creationDate": "2024-01-29T13:50:11+0000",
+        "updateDate": "2024-01-29T13:50:11+0000",
+        "type": "CODE_SMELL",
+        "scope": "MAIN",
+        "quickFixAvailable": true,
+        "messageFormattings": [],
+        "codeVariants": []
+      },
+      {
+        "key": "fjioefjwoefisdfjo",
+        "rule": "OWASP:UsingComponentWithKnownVulnerability",
+        "severity": "MAJOR",
+        "component": "testapplication",
+        "project": "testapplication",
+        "flows": [],
+        "status": "OPEN",
+        "message": "Filename: package:1.1.2 | Reference: GHSA-frr2-c345-p7c2 | CVSS Score: 6.4 | Category: CWE-120 | Versions of the package vulndescription .",
+        "author": "",
+        "tags": [
+          "cve",
+          "cwe",
+          "cwe-937",
+          "owasp-a9",
+          "vulnerability"
+        ],
+        "creationDate": "2023-10-16T15:05:35+0000",
+        "updateDate": "2023-11-03T08:00:46+0000",
+        "type": "VULNERABILITY",
+        "scope": "MAIN",
+        "quickFixAvailable": false,
+        "messageFormattings": [],
+        "codeVariants": []
+      },
+      {
+        "key": "fjioefjwoefisdfjo",
+        "rule": "OWASP:UsingComponentWithKnownVulnerability",
+        "severity": "CRITICAL",
+        "component": "testapplication",
+        "project": "testapplication",
+        "flows": [],
+        "status": "OPEN",
+        "message": "Filename: nimbus-jose-jwt-9.24.4.jar | Highest CVSS Score: 7.5 | Amount of CVSS: 1 | References: CVE-2023-52428 (7.5)",
+        "author": "",
+        "tags": [
+          "cve",
+          "cwe",
+          "cwe-937",
+          "owasp-a9",
+          "vulnerability"
+        ],
+        "creationDate": "2023-10-16T15:05:35+0000",
+        "updateDate": "2023-11-03T08:00:46+0000",
+        "type": "VULNERABILITY",
+        "scope": "MAIN",
+        "quickFixAvailable": false,
+        "messageFormattings": [],
+        "codeVariants": []
+      }
+    ],
+    "components": [
+      {
+        "key": "testapplication",
+        "enabled": true,
+        "qualifier": "TRK",
+        "name": "testapplication",
+        "longName": "testapplication"
+      },
+      {
+        "key": "testapplication:src/app/pages/fjiowefjewio/fjwieof/fjiwoe/details.html",
+        "enabled": true,
+        "qualifier": "FIL",
+        "name": "details.html",
+        "longName": "src/app/pages/fjiowefjewio/fjwieof/fjiwoe/details.html",
+        "path": "src/app/pages/fjiowefjewio/fjwieof/fjiwoe/details.html"
+      },
+      {
+        "key": "testapplication:src/app/services/fjweiofwefjiofiwofjwof.fjewoi",
+        "enabled": true,
+        "qualifier": "FIL",
+        "name": "fjweiofwefjiofiwofjwof.fjewoi",
+        "longName": "src/app/services/fjweiofwefjiofiwofjwof.fjewoi",
+        "path": "src/app/services/fjweiofwefjiofiwofjwof.fjewoi"
+      }
+    ],
+    "facets": []
+  }

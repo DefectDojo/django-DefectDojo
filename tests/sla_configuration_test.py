@@ -2,9 +2,8 @@ import os
 import sys
 import unittest
 
-from selenium.webdriver.common.by import By
-
 from base_test_class import BaseTestCase
+from selenium.webdriver.common.by import By
 
 
 class SLAConfigurationTest(BaseTestCase):
@@ -13,9 +12,9 @@ class SLAConfigurationTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "login")
         driver.find_element(By.ID, "id_username").clear()
-        driver.find_element(By.ID, "id_username").send_keys(os.environ['DD_ADMIN_USER'])
+        driver.find_element(By.ID, "id_username").send_keys(os.environ["DD_ADMIN_USER"])
         driver.find_element(By.ID, "id_password").clear()
-        driver.find_element(By.ID, "id_password").send_keys(os.environ['DD_ADMIN_PASSWORD'])
+        driver.find_element(By.ID, "id_password").send_keys(os.environ["DD_ADMIN_PASSWORD"])
         driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
         return driver
 
@@ -38,7 +37,7 @@ class SLAConfigurationTest(BaseTestCase):
         driver.find_element(By.ID, "id_critical").send_keys("4")
         driver.find_element(By.VALUE, "Submit").click()
 
-        self.assertTrue(self.is_success_message_present(text='SLA configuration Successfully Created.'))
+        self.assertTrue(self.is_success_message_present(text="SLA configuration Successfully Created."))
 
     def test_edit_sla_config(self):
         driver = self.driver
@@ -47,31 +46,31 @@ class SLAConfigurationTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Edited Test SLA Configuration test")
         driver.find_element(By.ID, "submit").click()
-        self.assertTrue(self.is_success_message_present(text='SLA configuration Successfully Updated.'))
+        self.assertTrue(self.is_success_message_present(text="SLA configuration Successfully Updated."))
 
     def test_delete_sla_config(self):
         driver = self.driver
         driver.get(self.base_url + "sla_config")
         driver.find_element(By.LINK_TEXT, "Edited Test SLA Configuration test").click()
         driver.find_element(By.ID, "delete").click()
-        self.assertTrue(self.is_success_message_present(text='SLA configuration Deleted.'))
+        self.assertTrue(self.is_success_message_present(text="SLA configuration Deleted."))
 
     def test_delete_default_sla(self):
         driver = self.driver
         driver.get(self.base_url + "sla_config")
         driver.find_element(By.LINK_TEXT, "Edited Test SLA Configuration test").click()
         driver.find_element(By.ID, "delete").click()
-        self.assertTrue(self.is_error_message_present(text='The Default SLA Configuration cannot be deleted.'))
+        self.assertTrue(self.is_error_message_present(text="The Default SLA Configuration cannot be deleted."))
 
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(BaseTestCase('disable_block_execution'))
-    suite.addTest(SLAConfigurationTest('test_add_sla_config'))
-    suite.addTest(SLAConfigurationTest('test_edit_sla_config'))
-    suite.addTest(SLAConfigurationTest('test_delete_sla_config'))
-    suite.addTest(SLAConfigurationTest('test_delete_default_sla'))
+    suite.addTest(BaseTestCase("test_login"))
+    suite.addTest(BaseTestCase("disable_block_execution"))
+    suite.addTest(SLAConfigurationTest("test_add_sla_config"))
+    suite.addTest(SLAConfigurationTest("test_edit_sla_config"))
+    suite.addTest(SLAConfigurationTest("test_delete_sla_config"))
+    suite.addTest(SLAConfigurationTest("test_delete_default_sla"))
     return suite
 
 

@@ -10,7 +10,7 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class TwistlockCSVParser(object):
+class TwistlockCSVParser:
     def parse_issue(self, row, test):
         if not row:
             return None
@@ -49,16 +49,14 @@ class TwistlockCSVParser(object):
             + "</p>",
             mitigation=data_fix_status,
             component_name=textwrap.shorten(
-                data_package_name, width=200, placeholder="..."
+                data_package_name, width=200, placeholder="...",
             ),
             component_version=data_package_version,
             false_p=False,
             duplicate=False,
             out_of_scope=False,
             mitigated=None,
-            severity_justification="(CVSS v3 base score: {})".format(
-                data_cvss
-            ),
+            severity_justification=f"(CVSS v3 base score: {data_cvss})",
             impact=data_severity,
         )
         finding.description = finding.description.strip()
@@ -69,13 +67,13 @@ class TwistlockCSVParser(object):
 
     def parse(self, filename, test):
         if filename is None:
-            return
+            return None
         content = filename.read()
-        dupes = dict()
+        dupes = {}
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         for row in reader:
             finding = self.parse_issue(row, test)
@@ -87,19 +85,19 @@ class TwistlockCSVParser(object):
                         + finding.title
                         + "|"
                         + finding.description
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
                 if key not in dupes:
                     dupes[key] = finding
         return list(dupes.values())
 
 
-class TwistlockJsonParser(object):
+class TwistlockJsonParser:
     def parse(self, json_output, test):
         tree = self.parse_json(json_output)
         items = []
         if tree:
-            items = [data for data in self.get_items(tree, test)]
+            items = list(self.get_items(tree, test))
         return items
 
     def parse_json(self, json_output):
@@ -110,7 +108,8 @@ class TwistlockJsonParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -123,7 +122,7 @@ class TwistlockJsonParser(object):
                 unique_key = node["id"] + str(
                     node["packageName"]
                     + str(node["packageVersion"])
-                    + str(node["severity"])
+                    + str(node["severity"]),
                 )
                 items[unique_key] = item
         return list(items.values())
@@ -179,9 +178,7 @@ def get_item(vulnerability, test):
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
-        severity_justification="{} (CVSS v3 base score: {})\n\n{}".format(
-            vector, cvss, riskFactors
-        ),
+        severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
         impact=severity,
     )
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
@@ -193,19 +190,18 @@ def get_item(vulnerability, test):
 def convert_severity(severity):
     if severity.lower() == "important":
         return "High"
-    elif severity.lower() == "moderate":
+    if severity.lower() == "moderate":
         return "Medium"
-    elif severity.lower() == "information":
+    if severity.lower() == "information":
         return "Info"
-    elif severity.lower() == "informational":
+    if severity.lower() == "informational":
         return "Info"
-    elif severity == "":
+    if severity == "":
         return "Info"
-    else:
-        return severity.title()
+    return severity.title()
 
 
-class TwistlockParser(object):
+class TwistlockParser:
     def get_scan_types(self):
         return ["Twistlock Image Scan"]
 
@@ -217,11 +213,11 @@ class TwistlockParser(object):
 
     def get_findings(self, filename, test):
         if filename is None:
-            return list()
+            return []
 
         if filename.name.lower().endswith(".json"):
             return TwistlockJsonParser().parse(filename, test)
-        elif filename.name.lower().endswith(".csv"):
+        if filename.name.lower().endswith(".csv"):
             return TwistlockCSVParser().parse(filename, test)
-        else:
-            raise ValueError("Unknown File Format")
+        msg = "Unknown File Format"
+        raise ValueError(msg)

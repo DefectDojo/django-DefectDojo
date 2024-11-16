@@ -2,10 +2,11 @@ import datetime
 
 from cpe import CPE
 from defusedxml.ElementTree import parse
+
 from dojo.models import Endpoint, Finding
 
 
-class NmapParser(object):
+class NmapParser:
     def get_scan_types(self):
         return ["Nmap Scan"]
 
@@ -18,14 +19,15 @@ class NmapParser(object):
     def get_findings(self, file, test):
         tree = parse(file)
         root = tree.getroot()
-        dupes = dict()
+        dupes = {}
         if "nmaprun" not in root.tag:
-            raise ValueError("This doesn't seem to be a valid Nmap xml file.")
+            msg = "This doesn't seem to be a valid Nmap xml file."
+            raise ValueError(msg)
 
         report_date = None
         try:
             report_date = datetime.datetime.fromtimestamp(
-                int(root.attrib["start"])
+                int(root.attrib["start"]),
             )
         except ValueError:
             pass
@@ -35,7 +37,7 @@ class NmapParser(object):
 
             ip = host.find("address[@addrtype='ipv4']").attrib["addr"]
             if ip is not None:
-                host_info += "**IP Address:** %s\n" % ip
+                host_info += f"**IP Address:** {ip}\n"
 
             fqdn = (
                 host.find("hostnames/hostname[@type='PTR']").attrib["name"]
@@ -43,7 +45,7 @@ class NmapParser(object):
                 else None
             )
             if fqdn is not None:
-                host_info += "**FQDN:** %s\n" % fqdn
+                host_info += f"**FQDN:** {fqdn}\n"
 
             host_info += "\n\n"
 
@@ -51,11 +53,11 @@ class NmapParser(object):
                 for os_match in os.iter("osmatch"):
                     if "name" in os_match.attrib:
                         host_info += (
-                            "**Host OS:** %s\n" % os_match.attrib["name"]
+                            "**Host OS:** {}\n".format(os_match.attrib["name"])
                         )
                     if "accuracy" in os_match.attrib:
-                        host_info += "**Accuracy:** {0}%\n".format(
-                            os_match.attrib["accuracy"]
+                        host_info += "**Accuracy:** {}%\n".format(
+                            os_match.attrib["accuracy"],
                         )
 
                 host_info += "\n\n"
@@ -63,7 +65,7 @@ class NmapParser(object):
             for port_element in host.findall("ports/port"):
                 protocol = port_element.attrib["protocol"]
                 endpoint = Endpoint(
-                    host=fqdn if fqdn else ip, protocol=protocol
+                    host=fqdn or ip, protocol=protocol,
                 )
                 if (
                     "portid" in port_element.attrib
@@ -74,44 +76,41 @@ class NmapParser(object):
                 # filter on open ports
                 if "open" != port_element.find("state").attrib.get("state"):
                     continue
-                title = "Open port: %s/%s" % (endpoint.port, endpoint.protocol)
+                title = f"Open port: {endpoint.port}/{endpoint.protocol}"
                 description = host_info
-                description += "**Port/Protocol:** %s/%s\n" % (
-                    endpoint.port,
-                    endpoint.protocol,
-                )
+                description += f"**Port/Protocol:** {endpoint.port}/{endpoint.protocol}\n"
 
                 service_info = "\n\n"
                 if port_element.find("service") is not None:
                     if "product" in port_element.find("service").attrib:
                         service_info += (
-                            "**Product:** %s\n"
-                            % port_element.find("service").attrib["product"]
+                            "**Product:** {}\n".format(port_element.find("service").attrib["product"])
                         )
 
                     if "version" in port_element.find("service").attrib:
                         service_info += (
-                            "**Version:** %s\n"
-                            % port_element.find("service").attrib["version"]
+                            "**Version:** {}\n".format(port_element.find("service").attrib["version"])
                         )
 
                     if "extrainfo" in port_element.find("service").attrib:
                         service_info += (
-                            "**Extra Info:** %s\n"
-                            % port_element.find("service").attrib["extrainfo"]
+                            "**Extra Info:** {}\n".format(port_element.find("service").attrib["extrainfo"])
                         )
-
                     description += service_info
-
+                if script := port_element.find("script"):
+                    if script_id := script.attrib.get("id"):
+                        description += f"**Script ID:** {script_id}\n"
+                    if script_output := script.attrib.get("output"):
+                        description += f"**Script Output:** {script_output}\n"
                 description += "\n\n"
 
                 # manage some script like
                 # https://github.com/vulnersCom/nmap-vulners
                 for script_element in port_element.findall(
-                    'script[@id="vulners"]'
+                    'script[@id="vulners"]',
                 ):
                     self.manage_vulner_script(
-                        test, dupes, script_element, endpoint, report_date
+                        test, dupes, script_element, endpoint, report_date,
                     )
 
                 severity = "Info"
@@ -129,7 +128,7 @@ class NmapParser(object):
                         mitigation="N/A",
                         impact="No impact provided",
                     )
-                    find.unsaved_endpoints = list()
+                    find.unsaved_endpoints = []
                     dupes[dupe_key] = find
                     if report_date:
                         find.date = report_date
@@ -138,32 +137,33 @@ class NmapParser(object):
         return list(dupes.values())
 
     def convert_cvss_score(self, raw_value):
-        """According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
+        """
+        According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
                         None 	0.0
         Low 	0.0-3.9 	Low 	0.1-3.9
         Medium 	4.0-6.9 	Medium 	4.0-6.9
         High 	7.0-10.0 	High 	7.0-8.9
-        Critical 	9.0-10.0"""
+        Critical 	9.0-10.0
+        """
         val = float(raw_value)
         if val == 0.0:
             return "Info"
-        elif val < 4.0:
+        if val < 4.0:
             return "Low"
-        elif val < 7.0:
+        if val < 7.0:
             return "Medium"
-        elif val < 9.0:
+        if val < 9.0:
             return "High"
-        else:
-            return "Critical"
+        return "Critical"
 
     def manage_vulner_script(
-        self, test, dupes, script_element, endpoint, report_date=None
+        self, test, dupes, script_element, endpoint, report_date=None,
     ):
         for component_element in script_element.findall("table"):
             component_cpe = CPE(component_element.attrib["key"])
             for vuln in component_element.findall("table"):
                 # convert elements in dict
-                vuln_attributes = dict()
+                vuln_attributes = {}
                 for elem in vuln.findall("elem"):
                     vuln_attributes[elem.attrib["key"].lower()] = elem.text
 

@@ -8,10 +8,9 @@ from dojo.models import Finding  # , Endpoint
 # from urllib.parse import urlparse
 
 
-class CloudsploitParser(object):
-    """
-    AquaSecurity CloudSploit https://github.com/aquasecurity/cloudsploit
-    """
+class CloudsploitParser:
+
+    """AquaSecurity CloudSploit https://github.com/aquasecurity/cloudsploit"""
 
     def get_scan_types(self):
         return ["Cloudsploit Scan"]
@@ -25,7 +24,7 @@ class CloudsploitParser(object):
     def get_findings(self, file, test):
         data = json.load(file)
         find_date = datetime.now()
-        dupes = dict()
+        dupes = {}
         for item in data:
             title = item["title"]
             if isinstance(item["region"], str):
@@ -56,7 +55,7 @@ class CloudsploitParser(object):
 
             # internal de-duplication
             dupe_key = hashlib.sha256(
-                str(description + title).encode("utf-8")
+                str(description + title).encode("utf-8"),
             ).hexdigest()
 
             if dupe_key in dupes:
@@ -75,5 +74,4 @@ class CloudsploitParser(object):
             return "Medium"
         if status == "FAIL":
             return "Critical"
-        else:
-            return "Info"
+        return "Info"

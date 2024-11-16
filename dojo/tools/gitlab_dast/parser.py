@@ -1,13 +1,13 @@
-import json
 import hashlib
+import json
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 
-class GitlabDastParser(object):
-    """
-    Import GitLab DAST Report in JSON format
-    """
+class GitlabDastParser:
+
+    """Import GitLab DAST Report in JSON format"""
 
     def get_scan_types(self):
         return ["GitLab DAST Report"]
@@ -34,14 +34,12 @@ class GitlabDastParser(object):
             item = self.get_item(node, test, scanner)
 
             item_key = hashlib.sha256(
-                "|".join(
-                    [item.severity, item.title, item.description]
-                ).encode()
+                f"{item.severity}|{item.title}|{item.description}".encode(),
             ).hexdigest()
 
             if item_key in items:
                 items[item_key].unsaved_endpoints.extend(
-                    item.unsaved_endpoints
+                    item.unsaved_endpoints,
                 )
                 items[item_key].nb_occurences += 1
             else:
@@ -65,7 +63,7 @@ class GitlabDastParser(object):
     def get_item(self, vuln, test, scanner):
         # scanner_confidence
         scanner_confidence = self.get_confidence_numeric(
-            vuln.get("confidence", "Could not be determined")
+            vuln.get("confidence", "Could not be determined"),
         )
 
         # description
@@ -89,7 +87,7 @@ class GitlabDastParser(object):
         # date
         if "discovered_at" in vuln:
             finding.date = datetime.strptime(
-                vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f"
+                vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f",
             )
 
         # id

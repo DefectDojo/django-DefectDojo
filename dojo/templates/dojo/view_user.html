@@ -5,7 +5,7 @@
 
 {% block content %}
     {{ block.super }}
-<h3 id="id_heading">{% blocktrans with full_name=user.get_full_name %}User {{ full_name }}{% endblocktrans %}</h3>
+<h3 id="id_heading">{% blocktrans with full_name=user.get_full_name %}User: {{ full_name }}{% endblocktrans %}</h3>
 <div class="row">
     <div id="tests" class="col-md-8">
         <div class="panel panel-default">
@@ -104,7 +104,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">{% trans "Product Type Membership" %}</h4>
+                    <h4 class="pull-left">{% trans "Product Types this User can access" %}</h4>
                     &nbsp;
                     <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
@@ -170,14 +170,14 @@
             </div>
             {% else %}
             <div class="panel-body">
-                <small class="text-muted"><em>{% trans "No product type members found." %}</em></small>
+                <small class="text-muted"><em>{% trans "This User is not assigned to any Product Types." %}</em></small>
             </div>
             {% endif %}
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">{% trans "Product Membership" %}</h4>
+                    <h4 class="pull-left">{% trans "Products this User can access" %}</h4>
                     &nbsp;
                     <a href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
@@ -243,7 +243,7 @@
             </div>
             {% else %}
             <div class="panel-body">
-                <small class="text-muted"><em>{% trans "No product members found." %}</em></small>
+                <small class="text-muted"><em>{% trans "This User is not assigned to any Products." %}</em></small>
             </div>
             {% endif %}
         </div>
@@ -251,7 +251,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">{% trans "Group Membership" %}</h4>
+                    <h4 class="pull-left">{% trans "Groups this User is a member of" %}</h4>
                     &nbsp;
                     <a href="https://documentation.defectdojo.com/usage/permissions/#groups" target="_blank">
                         <i class="fa-solid fa-circle-question"></i></a>
@@ -280,7 +280,7 @@
                     <tr>
                         <th></th>
                         <th>{% trans "Group" %}</th>
-                        <th>{% trans "Group role" %}</th>
+                        <th>{% trans "Role in this Group" %}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -317,7 +317,7 @@
             </div>
             {% else %}
             <div class="panel-body">
-                <small class="text-muted"><em>{% trans "No group members found." %}</em></small>
+                <small class="text-muted"><em>{% trans "This User is not a member of any Groups." %}</em></small>
             </div>
             {% endif %}
         </div>
@@ -365,6 +365,10 @@
                         <tr>
                             <td style="width: 200px;"><strong>{% trans "Global role" %}</strong></td>
                             <td>{% if user.global_role.role %} {{ user.global_role.role }} {% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 200px;"><strong>{% trans "Date Joined" %}</strong></td>
+                            <td>{{ user.date_joined }}</td>
                         </tr>
                         <tr>
                             <td style="width: 200px;"><strong>{% trans "Last Login" %}</strong></td>

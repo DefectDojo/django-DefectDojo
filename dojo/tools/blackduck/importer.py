@@ -4,8 +4,8 @@ import re
 import zipfile
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .model import BlackduckFinding
 
@@ -24,21 +24,20 @@ class BlackduckImporter(Importer):
 
         if zipfile.is_zipfile(str(report)):
             return self._process_zipfile(report)
-        else:
-            return self._process_csvfile(report)
+        return self._process_csvfile(report)
 
     def _process_csvfile(self, report):
         """
         If passed in a regular security.csv, process it.
         No file information then.
         """
-        security_issues = dict()
-        with open(str(report), "r") as f:
+        security_issues = {}
+        with open(str(report), encoding="utf-8") as f:
             security_issues = self.__partition_by_key(f)
 
         project_ids = set(security_issues.keys())
         return self._process_project_findings(
-            project_ids, security_issues, None
+            project_ids, security_issues, None,
         )
 
     def _process_zipfile(self, report):
@@ -46,8 +45,8 @@ class BlackduckImporter(Importer):
         Will take a zip file, look for security.csv and files.csv and union them on project id.
         This allows to have the file component for a vulnerability.
         """
-        files = dict()
-        security_issues = dict()
+        files = {}
+        security_issues = {}
 
         with zipfile.ZipFile(str(report)) as zip:
             for full_file_name in zip.namelist():
@@ -55,23 +54,21 @@ class BlackduckImporter(Importer):
                 # Backwards compatibility, newer versions of Blackduck have a source file rather
                 # than a "files" file.
                 if "source" in file_name or "files" in file_name:
-                    with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                    with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                         files = self.__partition_by_key(f)
                 elif "security" in file_name:
-                    with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                    with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                         security_issues = self.__partition_by_key(f)
 
         project_ids = set(files.keys()) & set(security_issues.keys())
         return self._process_project_findings(
-            project_ids, security_issues, files
+            project_ids, security_issues, files,
         )
 
     def _process_project_findings(
-        self, project_ids, security_issues, files=None
+        self, project_ids, security_issues, files=None,
     ):
-        """
-        Process findings per projects and return a BlackduckFinding object per the model
-        """
+        """Process findings per projects and return a BlackduckFinding object per the model"""
         for project_id in project_ids:
             locations = set()
             if files is not None:
@@ -80,7 +77,7 @@ class BlackduckImporter(Importer):
                     path = file_entry_dict.get("Path")
                     archive_context = file_entry_dict.get("Archive context")
                     if archive_context:
-                        full_path = "{}{}".format(archive_context, path[1:])
+                        full_path = f"{archive_context}{path[1:]}"
                     else:
                         full_path = path
 
@@ -97,7 +94,7 @@ class BlackduckImporter(Importer):
             for issue in security_issues[project_id]:
                 security_issue_dict = dict(issue)
                 cve = self.get_cve(
-                    security_issue_dict.get("Vulnerability id")
+                    security_issue_dict.get("Vulnerability id"),
                 ).upper()
                 location = ", ".join(locations)
 

@@ -20,19 +20,21 @@
             <div class="clearfix">
                 <h4 class="pull-left finding-title">
                     {% if host_view %}
-                      Host: {{ endpoint.host }} -
-                      {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} mitigated endpoints
+                        <span title="{{ endpoint.host }}">
+                            Host: {{ endpoint.host|url_shortener }} -
+                            {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} mitigated endpoints
+                        </span>
                     {% else %}
-                      Endpoint: {{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %} -
-                      {% if endpoint.mitigated %}
-                        Mitigated
-                      {% else %}
-                        {% if endpoint.active_findings_count > 0 %}
-                          Vulnerable
-                        {% else %}
-                          No active verified findings
-                        {% endif %}
-                      {% endif %}
+                        <span title="{{ endpoint }}">
+                            Endpoint: {{ endpoint|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %} -
+                            {% if endpoint.mitigated %}
+                                Mitigated
+                            {% elif endpoint.active_findings_count > 0 %}
+                                Vulnerable
+                            {% else %}
+                                No active verified findings
+                            {% endif %}
+                        </span>
                     {% endif %}
                 </h4>
 
@@ -176,13 +178,14 @@
                         <tr>
                             {% for item in row %}
                                 <td>{% if item %}
-                                      <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
+                                      <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}"
+                                         title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
                                       {% if item.vulnerable %}
                                         <span style="color:OrangeRed" class="fa-solid fa-xmark"></span>
                                       {% else %}
                                         <span style="color:LimeGreen" class="fa-solid fa-check"></span>
                                       {% endif %}
-                                      &nbsp;{{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                      &nbsp;{{ item|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% endif %}
                                 </td>
                             {% endfor %}
@@ -197,7 +200,8 @@
         {% else %}
             <div class="panel-heading"><h4>Host</h4></div>
             <div id="vuln_endpoints" class="panel-body table-responsive">
-                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.host }}" href="{% url 'view_endpoint_host' endpoint.id %}">{{ endpoint.host }}</a>
+                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.host }}"
+                   title="{{ endpoint.host }}" href="{% url 'view_endpoint_host' endpoint.id %}">{{ endpoint.host|url_shortener }}</a>
             </div>
         {% endif %}
     </div>

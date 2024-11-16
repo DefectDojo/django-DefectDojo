@@ -4,8 +4,10 @@ from json import JSONDecodeError
 from dojo.models import Finding
 
 
-class OssIndexDevauditParser(object):
-    """OssIndex Devaudit Results Parser
+class OssIndexDevauditParser:
+
+    """
+    OssIndex Devaudit Results Parser
     Parses files created by the Sonatype OssIndex Devaudit tool
     https://github.com/sonatype-nexus-community/DevAudit
     """
@@ -23,9 +25,8 @@ class OssIndexDevauditParser(object):
         tree = self.parse_json(json_file)
 
         if tree:
-            return list([data for data in self.get_items(tree, test)])
-        else:
-            return list()
+            return list(self.get_items(tree, test))
+        return []
 
     def parse_json(self, json_file):
         if json_file is None:
@@ -33,14 +34,15 @@ class OssIndexDevauditParser(object):
         try:
             tree = json.load(json_file)
         except JSONDecodeError:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
     def get_items(self, tree, test):
         items = {}
 
-        results = {key: value for (key, value) in tree.items()}
+        results = dict(tree.items())
         for package in results.get("Packages", []):
             package_data = package["Package"]
             if len(package.get("Vulnerabilities", [])) > 0:
@@ -59,7 +61,7 @@ class OssIndexDevauditParser(object):
 
 
 def get_item(
-    dependency_name, dependency_version, dependency_source, vulnerability, test
+    dependency_name, dependency_version, dependency_source, vulnerability, test,
 ):
     cwe_data = vulnerability.get("cwe", "CWE-1035")
     if cwe_data is None or cwe_data.startswith("CWE") is False:
@@ -67,11 +69,10 @@ def get_item(
     try:
         cwe = int(cwe_data.split("-")[1])
     except ValueError:
-        raise ValueError(
-            "Attempting to convert the CWE value to an integer failed"
-        )
+        msg = "Attempting to convert the CWE value to an integer failed"
+        raise ValueError(msg)
 
-    finding = Finding(
+    return Finding(
         title=dependency_source
         + ":"
         + dependency_name
@@ -96,8 +97,6 @@ def get_item(
         dynamic_finding=False,
         impact="No impact provided by scan",
     )
-
-    return finding
 
 
 def get_severity(cvss_score):

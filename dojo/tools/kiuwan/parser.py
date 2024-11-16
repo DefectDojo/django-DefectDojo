@@ -25,7 +25,7 @@ class Severityfilter:
             self.severity = "Info"
 
 
-class KiuwanParser(object):
+class KiuwanParser:
     def get_scan_types(self):
         return ["Kiuwan Scan"]
 
@@ -40,14 +40,14 @@ class KiuwanParser(object):
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         csvarray = []
 
         for row in reader:
             csvarray.append(row)
 
-        dupes = dict()
+        dupes = {}
         for row in csvarray:
             finding = Finding(test=test)
             findingdict = {}
@@ -124,7 +124,7 @@ class KiuwanParser(object):
                         + finding.description
                         + "|"
                         + str(finding.cwe)
-                    ).encode("utf-8")
+                    ).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:

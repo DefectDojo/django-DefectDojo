@@ -1,13 +1,14 @@
 import csv
 import io
-import zipfile
 import logging
+import zipfile
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
-class BlackduckCRImporter(object):
+class BlackduckCRImporter:
+
     """
     Importer for blackduck. V3 is different in that it creates a Finding in defect dojo
     for each vulnerable component version used in a project, for each license that is
@@ -29,8 +30,8 @@ class BlackduckCRImporter(object):
             report = Path(report.temporary_file_path())
         if zipfile.is_zipfile(str(report)):
             return self._process_zipfile(report)
-        else:
-            raise ValueError(f"File {report} not a zip!")
+        msg = f"File {report} not a zip!"
+        raise ValueError(msg)
 
     def _process_zipfile(self, report: Path) -> (dict, dict, dict):
         """
@@ -39,8 +40,8 @@ class BlackduckCRImporter(object):
         :param report: the file
         :return: (dict, dict, dict)
         """
-        components = dict()
-        source = dict()
+        components = {}
+        source = {}
         try:
             with zipfile.ZipFile(str(report)) as zip:
                 c_file = False
@@ -51,20 +52,21 @@ class BlackduckCRImporter(object):
                     file_name = full_file_name.split("/")[-1]
                     # Look for the component and security CSVs.
                     if "component" in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                        with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                             components = self.__get_components(f)
                             c_file = True
                     elif "security" in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                        with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                             security_issues = self.__get_security_risks(f)
                             s_file = True
                     elif "source" in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                        with io.TextIOWrapper(zip.open(full_file_name), encoding="utf-8") as f:
                             source = self.__get_source(f)
                 # Raise exception to error-out if the zip is missing either of
                 # these files.
                 if not (c_file and s_file):
-                    raise Exception("Zip file missing needed files!")
+                    msg = "Zip file missing needed files!"
+                    raise Exception(msg)
 
         except Exception:
             logger.exception("Could not process zip file")

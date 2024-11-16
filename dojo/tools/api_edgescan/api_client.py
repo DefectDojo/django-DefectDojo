@@ -1,12 +1,13 @@
-import requests
 import json
 from json.decoder import JSONDecodeError
 
+import requests
+from django.conf import settings
 
-class EdgescanAPI(object):
-    """
-    A simple client for the Edgescan API
-    """
+
+class EdgescanAPI:
+
+    """A simple client for the Edgescan API"""
 
     DEFAULT_URL = "https://live.edgescan.com"
 
@@ -16,11 +17,8 @@ class EdgescanAPI(object):
             self.url = tool_config.url or self.DEFAULT_URL
             self.options = self.get_extra_options(tool_config)
         else:
-            raise Exception(
-                "Edgescan Authentication type {} not supported".format(
-                    tool_config.authentication_type
-                )
-            )
+            msg = f"Edgescan Authentication type {tool_config.authentication_type} not supported"
+            raise Exception(msg)
 
     @staticmethod
     def get_extra_options(tool_config):
@@ -28,7 +26,9 @@ class EdgescanAPI(object):
             try:
                 return json.loads(tool_config.extras)
             except (JSONDecodeError, TypeError):
-                raise ValueError("JSON not provided in Extras field.")
+                msg = "JSON not provided in Extras field."
+                raise ValueError(msg)
+        return None
 
     def get_findings(self, asset_ids):
         if asset_ids:
@@ -43,18 +43,17 @@ class EdgescanAPI(object):
             url=url,
             headers=self.get_headers(),
             proxies=self.get_proxies(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
         response.raise_for_status()
         return response.json()
 
     def get_headers(self):
-        headers = {
+        return {
             "X-API-TOKEN": self.api_key,
             "Content-Type": "application/json",
             "User-Agent": "DefectDojo",
         }
-
-        return headers
 
     def get_proxies(self):
         if self.options and "proxy" in self.options:

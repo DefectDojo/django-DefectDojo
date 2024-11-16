@@ -1,12 +1,15 @@
 import json
+
 from cvss import parser as cvss_parser
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
 
 
-class AnchoreGrypeParser(object):
-    """Anchore Grype JSON report format generated with `-o json` option.
+class AnchoreGrypeParser:
+
+    """
+    Anchore Grype JSON report format generated with `-o json` option.
 
     command: `grype defectdojo/defectdojo-django:1.13.1 -o json > many_vulns.json`
     """
@@ -25,7 +28,7 @@ class AnchoreGrypeParser(object):
 
     def get_findings(self, file, test):
         data = json.load(file)
-        dupes = dict()
+        dupes = {}
         for item in data.get("matches", []):
             vulnerability = item["vulnerability"]
             vuln_id = vulnerability["id"]
@@ -52,7 +55,7 @@ class AnchoreGrypeParser(object):
                 rel_description = related_vulnerability.get("description")
                 rel_cvss = related_vulnerability.get("cvss")
             vulnerability_ids = self.get_vulnerability_ids(
-                vuln_id, related_vulnerabilities
+                vuln_id, related_vulnerabilities,
             )
 
             matches = item["matchDetails"]
@@ -95,7 +98,7 @@ class AnchoreGrypeParser(object):
                         f"\n**Matcher:** {matches[0]['matcher']}"
                     )
                     finding_tags = [
-                        matches[0]["matcher"].replace("-matcher", "")
+                        matches[0]["matcher"].replace("-matcher", ""),
                     ]
                 else:
                     finding_description += "\n**Matchers:**"
@@ -163,15 +166,15 @@ class AnchoreGrypeParser(object):
                 finding.nb_occurences += 1
             else:
                 dupes[dupe_key] = Finding(
-                    title=finding_title,
-                    description=finding_description,
+                    title=finding_title.replace("\x00", ""),
+                    description=finding_description.replace("\x00", ""),
                     cwe=1352,
                     cvssv3=finding_cvss3,
                     severity=vuln_severity,
                     mitigation=finding_mitigation,
                     references=finding_references,
                     component_name=artifact_name,
-                    component_version=artifact_version,
+                    component_version=artifact_version.replace("\x00", ""),
                     vuln_id_from_tool=vuln_id,
                     tags=finding_tags,
                     static_finding=True,
@@ -186,10 +189,9 @@ class AnchoreGrypeParser(object):
     def _convert_severity(self, val):
         if "Unknown" == val:
             return "Info"
-        elif "Negligible" == val:
+        if "Negligible" == val:
             return "Info"
-        else:
-            return val.title()
+        return val.title()
 
     def get_cvss(self, cvss):
         if cvss:
@@ -197,13 +199,13 @@ class AnchoreGrypeParser(object):
                 vector = cvss_item["vector"]
                 cvss_objects = cvss_parser.parse_cvss_from_text(vector)
                 if len(cvss_objects) > 0 and isinstance(
-                    cvss_objects[0], CVSS3
+                    cvss_objects[0], CVSS3,
                 ):
                     return vector
         return None
 
     def get_vulnerability_ids(self, vuln_id, related_vulnerabilities):
-        vulnerability_ids = list()
+        vulnerability_ids = []
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         if related_vulnerabilities:
@@ -212,5 +214,4 @@ class AnchoreGrypeParser(object):
                     vulnerability_ids.append(related_vulnerability.get("id"))
         if vulnerability_ids:
             return vulnerability_ids
-        else:
-            return None
+        return None

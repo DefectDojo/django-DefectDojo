@@ -1,30 +1,30 @@
 import logging
-from django.contrib import messages
-from django.urls import reverse
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, get_object_or_404
-from django.db.models import Count, Q
-from django.utils.translation import gettext as _
-
-from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
-from dojo.models import (
-    Benchmark_Type,
-    Benchmark_Category,
-    Benchmark_Requirement,
-    Benchmark_Product,
-    Product,
-    Benchmark_Product_Summary,
-)
-from dojo.utils import (
-    add_breadcrumb,
-    Product_Tab,
-    redirect_to_return_url_or_else,
-)
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
-from dojo.templatetags.display_tags import asvs_level
 
 from crum import get_current_user
+from django.contrib import messages
+from django.db.models import Count, Q
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.utils.translation import gettext as _
+
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
+from dojo.models import (
+    Benchmark_Category,
+    Benchmark_Product,
+    Benchmark_Product_Summary,
+    Benchmark_Requirement,
+    Benchmark_Type,
+    Product,
+)
+from dojo.templatetags.display_tags import asvs_level
+from dojo.utils import (
+    Product_Tab,
+    add_breadcrumb,
+    redirect_to_return_url_or_else,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +43,7 @@ def add_benchmark(queryset, product):
         pass
 
 
+@user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
 def update_benchmark(request, pid, _type):
     if request.method == "POST":
         bench_id = request.POST.get("bench_id")
@@ -78,18 +79,19 @@ def update_benchmark(request, pid, _type):
                                 "date": n.date.ctime(),
                             }
                             for n in notes
-                        ]
-                    }
+                        ],
+                    },
                 )
 
             bench.save()
             return JsonResponse({field: value})
 
     return redirect_to_return_url_or_else(
-        request, reverse("view_product_benchmark", args=(pid, _type))
+        request, reverse("view_product_benchmark", args=(pid, _type)),
     )
 
 
+@user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
 def update_benchmark_summary(request, pid, _type, summary):
     if request.method == "POST":
         field = request.POST.get("field")
@@ -110,7 +112,7 @@ def update_benchmark_summary(request, pid, _type, summary):
             return JsonResponse(data)
 
     return redirect_to_return_url_or_else(
-        request, reverse("view_product_benchmark", args=(pid, _type))
+        request, reverse("view_product_benchmark", args=(pid, _type)),
     )
 
 
@@ -179,7 +181,7 @@ def score_asvs(product, benchmark_type):
     )
     asvs_level_3_benchmark, asvs_level_3_score = return_score(asvs_level_3)
     benchmark_product_summary = Benchmark_Product_Summary.objects.get(
-        product=product, benchmark_type=benchmark_type
+        product=product, benchmark_type=benchmark_type,
     )
 
     benchmark_product_summary.asvs_level_1_benchmark = asvs_level_1_benchmark
@@ -197,34 +199,34 @@ def benchmark_view(request, pid, type, cat=None):
     product = get_object_or_404(Product, id=pid)
     benchmark_type = get_object_or_404(Benchmark_Type, id=type)
     benchmark_category = Benchmark_Category.objects.filter(
-        type=type, enabled=True
+        type=type, enabled=True,
     ).order_by("name")
 
     # Add requirements to the product
     new_benchmarks = Benchmark_Requirement.objects.filter(
-        category__type=type, category__type__enabled=True, enabled=True
+        category__type=type, category__type__enabled=True, enabled=True,
     ).exclude(
         id__in=Benchmark_Product.objects.filter(product=product).values_list(
-            "control_id", flat=True
-        )
+            "control_id", flat=True,
+        ),
     )
     add_benchmark(new_benchmarks, product)
 
     # Create the benchmark summary category
     try:
         benchmark_product_summary = Benchmark_Product_Summary.objects.get(
-            product=product, benchmark_type=benchmark_type
+            product=product, benchmark_type=benchmark_type,
         )
     except Exception:
         benchmark_product_summary = Benchmark_Product_Summary(
-            product=product, benchmark_type=benchmark_type
+            product=product, benchmark_type=benchmark_type,
         )
         benchmark_product_summary.save()
 
     if cat:
         benchmarks = (
             Benchmark_Product.objects.select_related(
-                "control", "control__category"
+                "control", "control__category",
             )
             .filter(
                 product=product.id,
@@ -239,7 +241,7 @@ def benchmark_view(request, pid, type, cat=None):
     else:
         benchmarks = (
             Benchmark_Product.objects.select_related(
-                "control", "control__category"
+                "control", "control__category",
             )
             .filter(
                 product=product.id,
@@ -252,7 +254,7 @@ def benchmark_view(request, pid, type, cat=None):
         )
 
     benchmark_summary_form = Benchmark_Product_SummaryForm(
-        instance=benchmark_product_summary
+        instance=benchmark_product_summary,
     )
 
     noted_benchmarks = (
@@ -268,7 +270,7 @@ def benchmark_view(request, pid, type, cat=None):
         key=lambda x: [int(_) for _ in x.control.objective_number.split(".")],
     )
     benchmark_category = sorted(
-        benchmark_category, key=lambda x: int(x.name[:3].strip("V: "))
+        benchmark_category, key=lambda x: int(x.name[:3].strip("V: ")),
     )
 
     product_tab = Product_Tab(product, title=_("Benchmarks"), tab="benchmarks")
@@ -295,7 +297,7 @@ def benchmark_view(request, pid, type, cat=None):
 def delete(request, pid, type):
     product = get_object_or_404(Product, id=pid)
     benchmark_product_summary = Benchmark_Product_Summary.objects.filter(
-        product=product, benchmark_type=type
+        product=product, benchmark_type=type,
     ).first()
     form = DeleteBenchmarkForm(instance=benchmark_product_summary)
 
@@ -305,11 +307,11 @@ def delete(request, pid, type):
             and str(benchmark_product_summary.id) == request.POST["id"]
         ):
             form = DeleteBenchmarkForm(
-                request.POST, instance=benchmark_product_summary
+                request.POST, instance=benchmark_product_summary,
             )
             if form.is_valid():
                 benchmark_product = Benchmark_Product.objects.filter(
-                    product=product, control__category__type=type
+                    product=product, control__category__type=type,
                 )
                 benchmark_product.delete()
                 benchmark_product_summary.delete()
@@ -322,7 +324,7 @@ def delete(request, pid, type):
                 return HttpResponseRedirect(reverse("product"))
 
     product_tab = Product_Tab(
-        product, title=_("Delete Benchmarks"), tab="benchmarks"
+        product, title=_("Delete Benchmarks"), tab="benchmarks",
     )
     return render(
         request,

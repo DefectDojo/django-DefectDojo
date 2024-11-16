@@ -1,18 +1,17 @@
 import csv
-import json
 import io
+import json
+from datetime import datetime
 
 from cvss import parser as cvss_parser
-from datetime import datetime
 from dateutil import parser
 from django.conf import settings
-
 from django.utils import timezone
 
 from dojo.models import Finding
 
 
-class VeracodeScaParser(object):
+class VeracodeScaParser:
     vc_severity_mapping = {
         1: "Info",
         2: "Low",
@@ -70,7 +69,7 @@ class VeracodeScaParser(object):
             vulnerability = issue.get("vulnerability")
             vuln_id = vulnerability.get("cve")
             if vuln_id and not (
-                vuln_id.startswith("cve") or vuln_id.startswith("CVE")
+                vuln_id.startswith(("cve", "CVE"))
             ):
                 vuln_id = "CVE-" + vuln_id
             cvss_score = issue.get("severity")
@@ -79,10 +78,10 @@ class VeracodeScaParser(object):
             severity = self.__cvss_to_severity(cvss_score)
 
             description = (
-                "Project name: {0}\n"
-                "Title: \n>{1}"
+                "Project name: {}\n"
+                "Title: \n>{}"
                 "\n\n-----\n\n".format(
-                    issue.get("project_name"), vulnerability.get("title")
+                    issue.get("project_name"), vulnerability.get("title"),
                 )
             )
 
@@ -114,23 +113,23 @@ class VeracodeScaParser(object):
             if vulnerability.get("cwe_id"):
                 cwe = vulnerability.get("cwe_id")
                 if cwe:
-                    if cwe.startswith("CWE-") or cwe.startswith("cwe-"):
+                    if cwe.startswith(("CWE-", "cwe-")):
                         cwe = cwe[4:]
                     if cwe.isdigit():
                         finding.cwe = int(cwe)
 
             finding.references = "\n\n" + issue.get("_links").get("html").get(
-                "href"
+                "href",
             )
             status = issue.get("issue_status")
             if (
-                issue.get("Ignored")
-                and issue.get("Ignored").capitalize() == "True"
-                or status
+                (issue.get("Ignored")
+                and issue.get("Ignored").capitalize() == "True")
+                or (status
                 and (
                     status.capitalize() == "Resolved"
                     or status.capitalize() == "Fixed"
-                )
+                ))
             ):
                 finding.is_mitigated = True
                 finding.mitigated = timezone.now()
@@ -145,7 +144,7 @@ class VeracodeScaParser(object):
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"'
+            io.StringIO(content), delimiter=",", quotechar='"',
         )
         csvarray = []
 
@@ -163,13 +162,13 @@ class VeracodeScaParser(object):
                 issueId = list(row.values())[0]
             library = row.get("Library", None)
             if row.get("Package manager") == "MAVEN" and row.get(
-                "Coordinate 2"
+                "Coordinate 2",
             ):
                 library = row.get("Coordinate 2")
             version = row.get("Version in use", None)
             vuln_id = row.get("CVE", None)
             if vuln_id and not (
-                vuln_id.startswith("cve") or vuln_id.startswith("CVE")
+                vuln_id.startswith(("cve", "CVE"))
             ):
                 vuln_id = "CVE-" + vuln_id
 
@@ -179,18 +178,18 @@ class VeracodeScaParser(object):
             try:
                 if settings.USE_FIRST_SEEN:
                     date = datetime.strptime(
-                        row.get("Issue opened: Scan date"), "%d %b %Y %H:%M%p %Z"
+                        row.get("Issue opened: Scan date"), "%d %b %Y %H:%M%p %Z",
                     )
                 else:
                     date = datetime.strptime(
-                        row.get("Issue opened: Scan date"), "%d %b %Y %H:%M%p %Z"
+                        row.get("Issue opened: Scan date"), "%d %b %Y %H:%M%p %Z",
                     )
             except Exception:
                 date = None
 
             description = (
-                "Project name: {0}\n"
-                "Title: \n>{1}"
+                "Project name: {}\n"
+                "Title: \n>{}"
                 "\n\n-----\n\n".format(row.get("Project"), row.get("Title"))
             )
 
@@ -213,10 +212,10 @@ class VeracodeScaParser(object):
                 finding.cvssv3_score = cvss_score
 
             if (
-                row.get("Ignored")
-                and row.get("Ignored").capitalize() == "True"
-                or row.get("Status")
-                and row.get("Status").capitalize() == "Resolved"
+                (row.get("Ignored")
+                and row.get("Ignored").capitalize() == "True")
+                or (row.get("Status")
+                and row.get("Status").capitalize() == "Resolved")
             ):
                 finding.is_mitigated = True
                 finding.mitigated = timezone.now()
@@ -238,11 +237,10 @@ class VeracodeScaParser(object):
     def __cvss_to_severity(cls, cvss):
         if cvss >= 9:
             return cls.vc_severity_mapping.get(5)
-        elif cvss >= 7:
+        if cvss >= 7:
             return cls.vc_severity_mapping.get(4)
-        elif cvss >= 4:
+        if cvss >= 4:
             return cls.vc_severity_mapping.get(3)
-        elif cvss > 0:
+        if cvss > 0:
             return cls.vc_severity_mapping.get(2)
-        else:
-            return cls.vc_severity_mapping.get(1)
+        return cls.vc_severity_mapping.get(1)

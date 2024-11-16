@@ -1,12 +1,13 @@
 import json
 import logging
-from dojo.models import Finding
 from datetime import datetime
+
+from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 
-class CheckmarxOsaParser(object):
+class CheckmarxOsaParser:
     def get_scan_types(self):
         return ["Checkmarx OSA"]
 
@@ -27,7 +28,8 @@ class CheckmarxOsaParser(object):
                 "Found %i elements",
                 len(tree),
             )
-            raise ValueError("Invalid format: bad structure")
+            msg = "Invalid format: bad structure"
+            raise ValueError(msg)
         libraries_dict = self.get_libraries(tree)
         vulnerabilities = self.get_vunlerabilities(tree)
         items = []
@@ -38,21 +40,19 @@ class CheckmarxOsaParser(object):
             library = libraries_dict[item["libraryId"]]
             self.check_mandatory(library, mandatory_library_fields)
             if "name" not in item["state"]:
-                raise ValueError(
-                    "Invalid format: missing mandatory field state.name"
-                )
+                msg = "Invalid format: missing mandatory field state.name"
+                raise ValueError(msg)
             if "name" not in item["severity"]:
-                raise ValueError(
-                    "Invalid format: missing mandatory field severity.name"
-                )
+                msg = "Invalid format: missing mandatory field severity.name"
+                raise ValueError(msg)
 
             # Possible status as per checkmarx 9.2: TO_VERIFY, NOT_EXPLOITABLE,
             # CONFIRMED, URGENT, PROPOSED_NOT_EXPLOITABLE
             status = item["state"]["name"]
             vulnerability_id = item.get("cveName", "NC")
             finding_item = Finding(
-                title="{0} {1} | {2}".format(
-                    library["name"], library["version"], vulnerability_id
+                title="{} {} | {}".format(
+                    library["name"], library["version"], vulnerability_id,
                 ),
                 severity=item["severity"]["name"],
                 description=item.get("description", "NC"),
@@ -69,14 +69,14 @@ class CheckmarxOsaParser(object):
                 cwe=1035,
                 cvssv3_score=item.get("score", None),
                 publish_date=datetime.strptime(
-                    item["publishDate"], "%Y-%m-%dT%H:%M:%S"
+                    item["publishDate"], "%Y-%m-%dT%H:%M:%S",
                 )
                 if "publishDate" in item
                 else None,
                 static_finding=True,
                 dynamic_finding=False,
                 scanner_confidence=self.checkmarx_confidence_to_defectdojo_confidence(
-                    library["confidenceLevel"]
+                    library["confidenceLevel"],
                 )
                 if "confidenceLevel" in library
                 else None,
@@ -115,13 +115,12 @@ class CheckmarxOsaParser(object):
     # 100% = Certain
     # 70% = Firm
     def checkmarx_confidence_to_defectdojo_confidence(
-        self, checkmarx_confidence
+        self, checkmarx_confidence,
     ):
         return round((100 - checkmarx_confidence) / 10) + 1
 
     def check_mandatory(self, item, mandatory_vulnerability_fields):
         for field in mandatory_vulnerability_fields:
             if field not in item:
-                raise ValueError(
-                    "Invalid format: missing mandatory field %s" % field
-                )
+                msg = f"Invalid format: missing mandatory field {field}"
+                raise ValueError(msg)

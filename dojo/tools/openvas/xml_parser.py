@@ -1,17 +1,18 @@
 from xml.dom import NamespaceErr
+
 from defusedxml import ElementTree as ET
+
 from dojo.models import Finding
 
 
-class OpenVASXMLParser(object):
+class OpenVASXMLParser:
     def get_findings(self, filename, test):
         findings = []
         tree = ET.parse(filename)
         root = tree.getroot()
         if "report" not in root.tag:
-            raise NamespaceErr(
-                "This doesn't seem to be a valid Greenbone OpenVAS XML file."
-            )
+            msg = "This doesn't seem to be a valid Greenbone OpenVAS XML file."
+            raise NamespaceErr(msg)
         report = root.find("report")
         results = report.find("results")
         for result in results:
@@ -40,7 +41,7 @@ class OpenVASXMLParser(object):
                 description="\n".join(description),
                 severity=severity,
                 dynamic_finding=True,
-                static_finding=False
+                static_finding=False,
             )
             findings.append(finding)
         return findings
@@ -49,11 +50,10 @@ class OpenVASXMLParser(object):
         val = float(raw_value)
         if val == 0.0:
             return "Info"
-        elif val < 4.0:
+        if val < 4.0:
             return "Low"
-        elif val < 7.0:
+        if val < 7.0:
             return "Medium"
-        elif val < 9.0:
+        if val < 9.0:
             return "High"
-        else:
-            return "Critical"
+        return "Critical"

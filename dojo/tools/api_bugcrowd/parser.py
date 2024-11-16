@@ -1,13 +1,15 @@
 import json
+import logging
+import re
 import textwrap
 from datetime import datetime
-from dojo.models import Endpoint, Finding
-from .importer import BugcrowdApiImporter
-import re
+
 import dateutil.parser
-import logging
 from django.core.exceptions import ValidationError
 
+from dojo.models import Endpoint, Finding
+
+from .importer import BugcrowdApiImporter
 
 SCAN_BUGCROWD_API = "Bugcrowd API Import"
 
@@ -16,10 +18,9 @@ pattern_title_authorized = re.compile(r"^[a-zA-Z0-9_\s+-.]*$")
 logger = logging.getLogger(__name__)
 
 
-class ApiBugcrowdParser(object):
-    """
-    Import from Bugcrowd API /submissions
-    """
+class ApiBugcrowdParser:
+
+    """Import from Bugcrowd API /submissions"""
 
     def get_scan_types(self):
         return [SCAN_BUGCROWD_API]
@@ -60,11 +61,11 @@ class ApiBugcrowdParser(object):
             if test.api_scan_configuration:
                 config = test.api_scan_configuration
                 links = "https://tracker.bugcrowd.com/{}{}".format(
-                    str(config.service_key_1), entry["links"]["self"]
+                    str(config.service_key_1), entry["links"]["self"],
                 )
             if api_scan_config is not None:
                 links = "https://tracker.bugcrowd.com/{}{}".format(
-                    str(api_scan_config.service_key_1), entry["links"]["self"]
+                    str(api_scan_config.service_key_1), entry["links"]["self"],
                 )
             else:
                 links = None
@@ -92,23 +93,19 @@ class ApiBugcrowdParser(object):
                         "://" in entry["attributes"]["bug_url"]
                     ):  # is the host full uri?
                         bug_endpoint = Endpoint.from_uri(
-                            entry["attributes"]["bug_url"].strip()
+                            entry["attributes"]["bug_url"].strip(),
                         )
                         # can raise exception if the host is not valid URL
                     else:
                         bug_endpoint = Endpoint.from_uri(
-                            "//" + entry["attributes"]["bug_url"].strip()
+                            "//" + entry["attributes"]["bug_url"].strip(),
                         )
                         # can raise exception if there is no way to parse the
                         # host
                 except (
                     ValueError
                 ):  # We don't want to fail the whole import just for 1 error in the bug_url
-                    logger.error(
-                        "Error parsing bugcrowd bug_url : {}".format(
-                            entry["attributes"]["bug_url"].strip()
-                        )
-                    )
+                    logger.error("Error parsing bugcrowd bug_url : %s", entry["attributes"]["bug_url"].strip())
                 bug_url = entry["attributes"]["bug_url"]
 
             description = "\n".join(
@@ -116,11 +113,11 @@ class ApiBugcrowdParser(object):
                     entry["attributes"]["description"],
                     "",
                     "Bugcrowd details:",
-                    f"- Severity: P{ bugcrowd_severity }",
-                    f"- Bug Url: [{bug_url}]({ bug_url })",
+                    f"- Severity: P{bugcrowd_severity}",
+                    f"- Bug Url: [{bug_url}]({bug_url})",
                     "",
                     f"Bugcrowd link: [{links}]({links})",
-                ]
+                ],
             )
             mitigation = entry["attributes"]["remediation_advice"]
             steps_to_reproduce = entry["attributes"]["description"]
@@ -158,15 +155,11 @@ class ApiBugcrowdParser(object):
                         finding.unsaved_endpoints = [bug_endpoint]
                     except Exception as e:
                         logger.error(
-                            "{} bug url from bugcrowd failed to parse to endpoint, error= {}".format(
-                                str(bug_endpoint), e
-                            )
+                            f"{str(bug_endpoint)} bug url from bugcrowd failed to parse to endpoint, error= {e}",
                         )
                 except ValidationError:
                     logger.error(
-                        "Broken Bugcrowd endpoint {} was skipped.".format(
-                            bug_endpoint.host
-                        )
+                        f"Broken Bugcrowd endpoint {bug_endpoint.host} was skipped.",
                     )
 
             findings.append(finding)
@@ -201,12 +194,12 @@ class ApiBugcrowdParser(object):
 
         if entry["attributes"]["state"] in allowed_states:
             return True
-        else:
-            raise ValueError(
-                "{} not in allowed bugcrowd submission states".format(
-                    entry["attributes"]["state"]
-                )
+        msg = (
+            "{} not in allowed bugcrowd submission states".format(
+                entry["attributes"]["state"],
             )
+        )
+        raise ValueError(msg)
 
     def convert_log_timestamp(self, timestamp):
         """Convert a log entry's timestamp to a DefectDojo date"""
@@ -217,16 +210,15 @@ class ApiBugcrowdParser(object):
         """Convert severity value"""
         if bugcrowd_severity == 5:
             return "Info"
-        elif bugcrowd_severity == 4:
+        if bugcrowd_severity == 4:
             return "Low"
-        elif bugcrowd_severity == 3:
+        if bugcrowd_severity == 3:
             return "Medium"
-        elif bugcrowd_severity == 2:
+        if bugcrowd_severity == 2:
             return "High"
-        elif bugcrowd_severity == 1:
+        if bugcrowd_severity == 1:
             return "Critical"
-        else:
-            return "Info"
+        return "Info"
 
     def is_active(self, bugcrowd_state):
         return (bugcrowd_state == "unresolved") or not (

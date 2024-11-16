@@ -44,17 +44,21 @@ jobs:
       
       - name: Update version numbers in key files
         run: |
-          sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number_dev }}'/" dojo/__init__.py
-          sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number_dev }}\"/" helm/defectdojo/Chart.yaml
-          sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number_dev }}\"/" components/package.json
+          sed -ri 's/__version__ = ".*"/__version__ = "${{ github.event.inputs.release_number_dev }}"/' dojo/__init__.py
+          sed -ri 's/"version": ".*"/"version": "${{ github.event.inputs.release_number_dev }}"/' components/package.json
+          sed -ri 's/appVersion: ".*"/appVersion: "${{ github.event.inputs.release_number_dev }}"/' helm/defectdojo/Chart.yaml
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
       
+      - name: Update settings SHA
+        run: sha256sum dojo/settings/settings.dist.py | cut -d ' ' -f1 > dojo/settings/.settings.dist.py.sha256sum
+
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
+          cat dojo/settings/.settings.dist.py.sha256sum
 
       - name: Create upgrade notes to documentation
         run: |
@@ -73,7 +77,7 @@ jobs:
         if: endsWith(github.event.inputs.release_number_new, '.0') && endsWith(github.event.inputs.release_number_dev, '.0-dev')
 
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v5.0.0
+        uses: stefanzweifel/git-auto-commit-action@v5.0.1
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"
@@ -132,14 +136,18 @@ jobs:
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
       
+      - name: Update settings SHA
+        run: sha256sum dojo/settings/settings.dist.py | cut -d ' ' -f1 > dojo/settings/.settings.dist.py.sha256sum
+
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
+          cat dojo/settings/.settings.dist.py.sha256sum
       
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v5.0.0
+        uses: stefanzweifel/git-auto-commit-action@v5.0.1
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"

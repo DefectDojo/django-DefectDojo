@@ -6,7 +6,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class ColumnMappingStrategy(object):
+class ColumnMappingStrategy:
     mapped_column = None
 
     def __init__(self):
@@ -28,18 +28,18 @@ class ColumnMappingStrategy(object):
 class DateColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "date"
-        super(DateColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.date = datetime.strptime(
-            column_value, "%Y-%m-%d %H:%M:%S"
+            column_value, "%Y-%m-%d %H:%M:%S",
         ).date()
 
 
 class TitleColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "title"
-        super(TitleColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.title = column_value
@@ -48,7 +48,7 @@ class TitleColumnMappingStrategy(ColumnMappingStrategy):
 class DescriptionColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "description"
-        super(DescriptionColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.description = column_value
@@ -57,13 +57,13 @@ class DescriptionColumnMappingStrategy(ColumnMappingStrategy):
 class MitigationColumnMappingStrategy(ColumnMappingStrategy):
     def __init__(self):
         self.mapped_column = "mitigation"
-        super(MitigationColumnMappingStrategy, self).__init__()
+        super().__init__()
 
     def map_column_value(self, finding, column_value):
         finding.mitigation = column_value
 
 
-class SKFParser(object):
+class SKFParser:
     def get_scan_types(self):
         return ["SKF Scan"]
 
@@ -96,14 +96,14 @@ class SKFParser(object):
         if isinstance(content, bytes):
             content = content.decode("utf-8")
 
-        column_names = dict()
+        column_names = {}
         chain = self.create_chain()
 
         row_number = 0
         reader = csv.reader(
-            io.StringIO(content), delimiter=",", quotechar='"', escapechar="\\"
+            io.StringIO(content), delimiter=",", quotechar='"', escapechar="\\",
         )
-        dupes = dict()
+        dupes = {}
         for row in reader:
             finding = Finding(test=test)
             finding.severity = "Info"
@@ -116,7 +116,7 @@ class SKFParser(object):
             column_number = 0
             for column in row:
                 chain.process_column(
-                    column_names[column_number], column, finding
+                    column_names[column_number], column, finding,
                 )
                 column_number += 1
 
@@ -127,8 +127,8 @@ class SKFParser(object):
                         + "|"
                         + finding.title
                         + "|"
-                        + finding.description
-                    ).encode("utf-8")
+                        + finding.description,
+                    ).encode("utf-8"),
                 ).hexdigest()
 
                 if key not in dupes:

@@ -4,10 +4,9 @@ import json
 from dojo.models import Finding
 
 
-class GitleaksParser(object):
-    """
-    A class that can be used to parse the Gitleaks JSON report files
-    """
+class GitleaksParser:
+
+    """A class that can be used to parse the Gitleaks JSON report files"""
 
     def get_scan_types(self):
         return ["Gitleaks Scan"]
@@ -19,15 +18,13 @@ class GitleaksParser(object):
         return "Import Gitleaks Scan findings in JSON format."
 
     def get_findings(self, filename, test):
-        """
-        Converts a Gitleaks report to DefectDojo findings
-        """
+        """Converts a Gitleaks report to DefectDojo findings"""
         issues = json.load(filename)
         # empty report are just null object
         if issues is None:
-            return list()
+            return []
 
-        dupes = dict()
+        dupes = {}
 
         for issue in issues:
             if issue.get("rule"):
@@ -35,7 +32,8 @@ class GitleaksParser(object):
             elif issue.get("Description"):
                 self.get_finding_current(issue, test, dupes)
             else:
-                raise ValueError("Format is not recognized for Gitleaks")
+                msg = "Format is not recognized for Gitleaks"
+                raise ValueError(msg)
 
         return list(dupes.values())
 
@@ -60,10 +58,10 @@ class GitleaksParser(object):
         description += "**Reason:** " + reason + "\n"
         description += "**Path:** " + file_path + "\n"
         if "lineNumber" in issue:
-            description += "**Line:** %i\n" % issue["lineNumber"]
+            description += f"**Line:** {issue['lineNumber']}\n"
             line = issue["lineNumber"]
         if "operation" in issue:
-            description += "**Operation:** " + issue["operation"] + "\n"
+            description += f"**Operation:** {issue['operation']}\n"
         if "leakURL" in issue:
             description += (
                 "**Leak URL:** ["
@@ -97,7 +95,7 @@ class GitleaksParser(object):
         finding.unsaved_tags = issue.get("tags", "").split(", ")
 
         dupe_key = hashlib.sha256(
-            (issue["offender"] + file_path + str(line)).encode("utf-8")
+            (issue["offender"] + file_path + str(line)).encode("utf-8"),
         ).hexdigest()
 
         if dupe_key not in dupes:
@@ -151,7 +149,7 @@ class GitleaksParser(object):
         severity = "High"
 
         dupe_key = hashlib.md5(
-            (title + secret + str(line)).encode("utf-8")
+            (title + secret + str(line)).encode("utf-8"),
         ).hexdigest()
 
         if dupe_key in dupes:
@@ -172,7 +170,7 @@ class GitleaksParser(object):
                 line=line,
                 dynamic_finding=False,
                 static_finding=True,
-                nb_occurences=1
+                nb_occurences=1,
             )
             if tags:
                 finding.unsaved_tags = tags

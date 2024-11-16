@@ -1,10 +1,10 @@
 import requests
+from django.conf import settings
 
 
 class CobaltAPI:
-    """
-    A simple client for the Cobalt.io API
-    """
+
+    """A simple client for the Cobalt.io API"""
 
     cobalt_api_url = "https://api.cobalt.io"
 
@@ -14,11 +14,8 @@ class CobaltAPI:
             self.api_token = tool_config.api_key
             self.org_token = tool_config.extras
         else:
-            raise Exception(
-                "Cobalt.io Authentication type {} not supported".format(
-                    tool_config.authentication_type
-                )
-            )
+            msg = f"Cobalt.io Authentication type {tool_config.authentication_type} not supported"
+            raise Exception(msg)
 
     def get_asset(self, asset_id):
         """
@@ -32,23 +29,25 @@ class CobaltAPI:
             if asset["resource"]["id"] == asset_id:
                 return asset
 
-        raise Exception("Asset {} not found in organisation".format(asset_id))
+        msg = f"Asset {asset_id} not found in organisation"
+        raise Exception(msg)
 
     def get_assets(self):
         """Returns all org assets"""
         response = self.session.get(
-            url="{}/assets?limit=1000".format(self.cobalt_api_url),
+            url=f"{self.cobalt_api_url}/assets?limit=1000",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
             return response.json().get("data")
-        else:
-            raise Exception(
-                "Unable to get assets due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8")
-                )
+        msg = (
+            "Unable to get assets due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8"),
             )
+        )
+        raise Exception(msg)
 
     def get_findings(self, asset_id):
         """
@@ -57,49 +56,50 @@ class CobaltAPI:
         :return:
         """
         response = self.session.get(
-            url="{}/findings?limit=1000&asset={}".format(
-                self.cobalt_api_url, asset_id
-            ),
+            url=f"{self.cobalt_api_url}/findings?limit=1000&asset={asset_id}",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
             return response.json()
-        else:
-            raise Exception(
-                "Unable to get asset findings due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8")
-                )
+        msg = (
+            "Unable to get asset findings due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8"),
             )
+        )
+        raise Exception(msg)
 
     def test_connection(self):
         # Request orgs for the org name
         response_orgs = self.session.get(
-            url="{}/orgs".format(self.cobalt_api_url),
+            url=f"{self.cobalt_api_url}/orgs",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         # Request assets to validate the org token
         response_assets = self.session.get(
-            url="{}/assets".format(self.cobalt_api_url),
+            url=f"{self.cobalt_api_url}/assets",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response_orgs.ok and response_assets.ok:
             data = response_orgs.json().get("data")
             orgs = filter(
-                lambda org: org["resource"]["token"] == self.org_token, data
+                lambda org: org["resource"]["token"] == self.org_token, data,
             )
             org = list(orgs)[0]
             org_name = org["resource"]["name"]
             return f'You have access to the "{org_name}" organization'
-        else:
-            raise Exception(
-                "Connection failed (error: {} - {})".format(
-                    response_assets.status_code,
-                    response_assets.content.decode("utf-8"),
-                )
+        msg = (
+            "Connection failed (error: {} - {})".format(
+                response_assets.status_code,
+                response_assets.content.decode("utf-8"),
             )
+        )
+        raise Exception(msg)
 
     def test_product_connection(self, api_scan_configuration):
         asset = self.get_asset(api_scan_configuration.service_key_1)
@@ -111,7 +111,7 @@ class CobaltAPI:
     def get_headers(self):
         headers = {
             "accept": "application/vnd.cobalt.v1+json",
-            "Authorization": "Bearer {}".format(self.api_token),
+            "Authorization": f"Bearer {self.api_token}",
             "User-Agent": "DefectDojo",
         }
 

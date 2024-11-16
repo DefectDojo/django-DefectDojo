@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class GitlabDepScanParser(object):
+class GitlabDepScanParser:
     def get_scan_types(self):
         return ["GitLab Dependency Scanning Report"]
 
@@ -15,11 +15,12 @@ class GitlabDepScanParser(object):
 
     def get_findings(self, json_output, test):
         if json_output is None:
-            return
+            return None
 
         tree = self.parse_json(json_output)
         if tree:
             return self.get_items(tree, test)
+        return None
 
     def parse_json(self, json_output):
         try:
@@ -29,7 +30,8 @@ class GitlabDepScanParser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 

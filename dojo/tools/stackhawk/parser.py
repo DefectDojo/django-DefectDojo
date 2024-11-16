@@ -1,7 +1,8 @@
 import json
 
-from dojo.models import Endpoint, Finding
 from django.utils.dateparse import parse_datetime
+
+from dojo.models import Endpoint, Finding
 
 
 class StackHawkScanMetadata:
@@ -14,10 +15,9 @@ class StackHawkScanMetadata:
         self.service = completed_scan["scan"]["application"]
 
 
-class StackHawkParser(object):
-    """
-    DAST findings from StackHawk
-    """
+class StackHawkParser:
+
+    """DAST findings from StackHawk"""
 
     def get_scan_types(self):
         return ["StackHawk HawkScan"]
@@ -32,12 +32,10 @@ class StackHawkParser(object):
         completed_scan = self.__parse_json(json_output)
 
         metadata = StackHawkScanMetadata(completed_scan)
-        findings = self.__extract_findings(completed_scan, metadata, test)
-
-        return findings
+        return self.__extract_findings(completed_scan, metadata, test)
 
     def __extract_findings(
-        self, completed_scan, metadata: StackHawkScanMetadata, test
+        self, completed_scan, metadata: StackHawkScanMetadata, test,
     ):
         findings = {}
 
@@ -48,19 +46,19 @@ class StackHawkParser(object):
                 key = raw_finding["pluginId"]
                 if key not in findings:
                     finding = self.__extract_finding(
-                        raw_finding, metadata, test
+                        raw_finding, metadata, test,
                     )
                     findings[key] = finding
 
         # Update the test description these scan results are linked to.
         test.description = "View scan details here: " + self.__hyperlink(
-            completed_scan["scan"]["scanURL"]
+            completed_scan["scan"]["scanURL"],
         )
 
         return list(findings.values())
 
     def __extract_finding(
-        self, raw_finding, metadata: StackHawkScanMetadata, test
+        self, raw_finding, metadata: StackHawkScanMetadata, test,
     ) -> Finding:
         steps_to_reproduce = "Use a specific message link and click 'Validate' to see the cURL!\n\n"
 
@@ -82,10 +80,10 @@ class StackHawkParser(object):
             endpoints.append(endpoint)
 
         are_all_endpoints_risk_accepted = self.__are_all_endpoints_in_status(
-            paths, "RISK_ACCEPTED"
+            paths, "RISK_ACCEPTED",
         )
         are_all_endpoints_false_positive = self.__are_all_endpoints_in_status(
-            paths, "FALSE_POSITIVE"
+            paths, "FALSE_POSITIVE",
         )
 
         finding = Finding(
@@ -123,12 +121,13 @@ class StackHawkParser(object):
             # Specifically, that the attributes accessed when parsing the finding will always exist.
             # See our documentation for more details on this data:
             # https://docs.stackhawk.com/workflow-integrations/webhook.html#scan-completed
-            raise ValueError(
+            msg = (
                 " Unexpected JSON format provided. "
                 "Need help? "
                 "Check out the StackHawk Docs at "
                 "https://docs.stackhawk.com/workflow-integrations/defect-dojo.html"
             )
+            raise ValueError(msg)
 
         return report["scanCompleted"]
 
@@ -140,12 +139,11 @@ class StackHawkParser(object):
     def __endpoint_status(status: str) -> str:
         if status == "NEW":
             return "** - New**"
-        elif status == "RISK_ACCEPTED":
+        if status == "RISK_ACCEPTED":
             return '** - Marked "Risk Accepted"**'
-        elif status == "FALSE_POSITIVE":
+        if status == "FALSE_POSITIVE":
             return '** - Marked "False Positive"**'
-        else:
-            return ""
+        return ""
 
     @staticmethod
     def __are_all_endpoints_in_status(paths, check_status: str) -> bool:

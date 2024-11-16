@@ -1,8 +1,9 @@
 import json
+
 from dojo.models import Finding
 
 
-class Crunch42Parser(object):
+class Crunch42Parser:
 
     def get_scan_types(self):
         return ["Crunch42 Scan"]
@@ -21,7 +22,8 @@ class Crunch42Parser(object):
             except Exception:
                 tree = json.loads(data)
         except Exception:
-            raise ValueError("Invalid format")
+            msg = "Invalid format"
+            raise ValueError(msg)
 
         return tree
 
@@ -36,8 +38,7 @@ class Crunch42Parser(object):
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
             return temp
-        else:
-            return self.process_tree(reportTree, test)
+        return self.process_tree(reportTree, test)
 
     def get_items(self, tree, test):
         items = {}
@@ -47,7 +48,7 @@ class Crunch42Parser(object):
             for key, node in results.items():
                 for issue in node["issues"]:
                     item = self.get_item(
-                        issue, key, test
+                        issue, key, test,
                     )
                     items[iterator] = item
                     iterator += 1
@@ -56,7 +57,7 @@ class Crunch42Parser(object):
     def get_item(self, issue, title, test):
         fingerprint = issue["fingerprint"]
         pointer = issue["pointer"]
-        message = issue["specificDescription"] if 'specificDescription' in issue else title
+        message = issue["specificDescription"] if "specificDescription" in issue else title
         score = issue["score"]
         criticality = issue["criticality"]
         if criticality == 1:
@@ -70,7 +71,7 @@ class Crunch42Parser(object):
         else:
             severity = "Critical"
         # create the finding object
-        finding = Finding(
+        return Finding(
             unique_id_from_tool=fingerprint,
             title=title,
             test=test,
@@ -85,4 +86,3 @@ class Crunch42Parser(object):
             static_finding=True,
             dynamic_finding=False,
         )
-        return finding

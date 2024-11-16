@@ -3,7 +3,7 @@ import json
 from dojo.models import Endpoint, Finding
 
 
-class DrHeaderParser(object):
+class DrHeaderParser:
     def get_scan_types(self):
         return ["DrHeader JSON Importer"]
 
@@ -50,7 +50,6 @@ class DrHeaderParser(object):
                 for finding in item["report"]:
                     items.append(self.return_finding(test=test, finding=finding, url=url))
             return items
-        else:
-            for finding in data:
-                items.append(self.return_finding(test=test, finding=finding))
-            return items
+        for finding in data:
+            items.append(self.return_finding(test=test, finding=finding))
+        return items

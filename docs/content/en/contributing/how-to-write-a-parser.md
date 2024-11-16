@@ -15,10 +15,10 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 - Checkout `dev` and make sure you're up to date with the latest changes.
 - It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name`.
 
-It is easiest to use the docker-compose deployment as it has hot-reload capbility for uWSGI.
-Set up your environment to use the debug environment:
+It is easiest to use the docker compose deployment as it has hot-reload capbility for uWSGI.
+Set up your environment to use the dev environment:
 
-`$ docker/setEnv.sh debug`
+`$ docker/setEnv.sh dev`
 
 Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) for more details.
 
@@ -27,7 +27,7 @@ Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDoj
 You will want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
 
 {{< highlight bash >}}
-$ docker-compose build --build-arg uid=1000
+$ docker compose build --build-arg uid=1000
 {{< /highlight >}}
 
 ## Which files do you need to modify?
@@ -43,7 +43,7 @@ $ docker-compose build --build-arg uid=1000
 
 ## Factory contract
 
-Parser are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
+Parsers are loaded dynamicaly with a factory pattern. To have your parser loaded and works correctly, you need to implement the contract.
 
 1. your parser **MUST** be in a sub-module of module `dojo.tools`
    - ex: `dojo.tools.my_tool.parser` module
@@ -94,7 +94,7 @@ class MyToolParser(object):
 
 ## API Parsers
 
-DefectDojo has a limited number of API parsers. While we won’t remove these connectors, adding API connectors has been problematic and thus we cannot accept new API parsers / connectors from the community at this time for supportability reasonsing. To maintain a high quality API connector, it is necessary to have a license to the tool. To get that license requires partnership with the author or vendor. We're close to announcing a new program to help address this and bring API connectors to DefectDojo.
+DefectDojo has a limited number of API parsers. While we won't remove these connectors, adding API connectors has been problematic and thus we cannot accept new API parsers / connectors from the community at this time for supportability reasonsing. To maintain a high quality API connector, it is necessary to have a license to the tool. To get that license requires partnership with the author or vendor. We're close to announcing a new program to help address this and bring API connectors to DefectDojo.
 
 ## Template Generator
 
@@ -142,6 +142,12 @@ Very bad example:
     finding.unsaved_endpoints = [endpoint]
 ```
 
+### Use the right libraries to parse information
+Various file formats are handled through libraries. In order to keep DefectDojo slim and also don't extend the attack surface, keep the number of libraries used minimal and take other parsers as an example.
+
+#### defusedXML in favour of lxml
+As xml is by default an unsecure format, the information parsed from various xml output has to be parsed in a secure way. Within an evaluation, we determined that defusedXML is the library which we will use in the future to parse xml files in parsers as this library is rated more secure. Thus, we will only accept PRs with the defusedxml library. 
+
 ### Not all attributes are mandatory
 
 Parsers may have many fields, out of which many of them may be optional.
@@ -157,7 +163,7 @@ Good example:
 
 ```python
    if "mykey" in data:
-       finding.cve = data["mykey"]
+       finding.cwe = data["mykey"]
 ```
 
 ### Do not parse CVSS by hand (vector, score or severity)
@@ -244,7 +250,7 @@ For ex:
             self.assertEqual(True, finding.verified)
             self.assertEqual(False, finding.duplicate)
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertEqual("CVE-2020-36234", finding.cve)
+            self.assertEqual("CVE-2020-36234", finding.vulnerability_ids[0])
             self.assertEqual(261, finding.cwe)
             self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
             self.assertIn("security", finding.tags)
@@ -253,9 +259,27 @@ For ex:
             self.assertEqual("TEST1", finding.vuln_id_from_tool)
 ```
 
+### Use with to open example files
+
+In order to make certain that file handles are closed properly, please use the with pattern to open files.
+Instead of:
+```python
+    testfile = open("path_to_file.json")
+    ...
+    testfile.close()
+```
+
+use:
+```python
+    with open("path_to_file.json") as testfile:
+        ...
+```
+
+This ensures the file is closed at the end of the with statement, even if an exception occurs somewhere in the block.
+
 ### Test database
 
-To test your unit tests locally, you first need to grant some rights. Get your MySQL root password from the docker-compose logs, login as root and issue the following commands:
+To test your unit tests locally, you first need to grant some rights. Get your MySQL root password from the docker compose logs, login as root and issue the following commands:
 
 {{< highlight mysql >}}
 MYSQL> grant all privileges on test_defectdojo.* to defectdojo@'%';
@@ -267,17 +291,29 @@ MYSQL> flush privileges;
 This local command will launch the unit test for your new parser
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test unittests.tools.<your_unittest_py_file>.<main_class_name> -v2'
+$ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.<your_unittest_py_file>.<main_class_name> -v2'
+{{< /highlight >}}
+
+or like this:
+
+{{< highlight bash >}}
+$ ./dc-unittest.sh --test-case unittests.tools.<your_unittest_py_file>.<main_class_name>
 {{< /highlight >}}
 
 Example for the blackduck hub parser:
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
+$ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
+{{< /highlight >}}
+
+or like this:
+
+{{< highlight bash >}}
+$ ./dc-unittest.sh --test-case unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser
 {{< /highlight >}}
 
 {{% alert title="Information" color="info" %}}
-If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
+If you want to run all unit tests, simply run `$ docker compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
 {{% /alert %}}
 
 ### Endpoint validation
@@ -306,7 +342,7 @@ In the event where you'd have to change the model, e.g. to increase a database c
 * Create a new migration file in dojo/db_migrations by running and including as part of your PR
 
     {{< highlight bash >}}
-    $ docker-compose exec uwsgi bash -c 'python manage.py makemigrations -v2'
+    $ docker compose exec uwsgi bash -c 'python manage.py makemigrations -v2'
     {{< /highlight >}}
 
 ### Accept a different type of file to upload

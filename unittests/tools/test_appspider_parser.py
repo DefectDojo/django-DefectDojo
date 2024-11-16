@@ -1,7 +1,9 @@
 from os import path
-from ..dojo_test_case import DojoTestCase
+from pathlib import Path
+
+from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.appspider.parser import AppSpiderParser
-from dojo.models import Product, Engagement, Test, Finding
+from unittests.dojo_test_case import DojoTestCase
 
 
 class TestAppSpiderParser(DojoTestCase):
@@ -9,7 +11,7 @@ class TestAppSpiderParser(DojoTestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        testfile = open(path.join(path.dirname(__file__), "../scans/appspider/one_vuln.xml"))
+        testfile = open(path.join(Path(__file__).parent, "../scans/appspider/one_vuln.xml"), encoding="utf-8")
         parser = AppSpiderParser()
         findings = parser.get_findings(testfile, test)
         for finding in findings:

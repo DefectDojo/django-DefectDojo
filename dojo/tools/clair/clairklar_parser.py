@@ -1,11 +1,13 @@
 import logging
+
 from dojo.models import Finding
+
 logger = logging.getLogger(__name__)
 
 
-class ClairKlarScan(object):
+class ClairKlarScan:
     def get_items_klar(self, tree, test):
-        items = list()
+        items = []
         clair_severities = [
             "Unknown",
             "Negligible",
@@ -17,12 +19,12 @@ class ClairKlarScan(object):
         ]
         for clair_severity in clair_severities:
             items.extend(
-                self.set_items_for_severity(tree, test, clair_severity)
+                self.set_items_for_severity(tree, test, clair_severity),
             )
         return items
 
     def set_items_for_severity(self, tree, test, severity):
-        items = list()
+        items = []
         tree_severity = tree.get(severity)
         if tree_severity:
             for data in self.get_items_clairklar(tree_severity, test):
@@ -58,7 +60,7 @@ class ClairKlarScan(object):
             )
         if "FeatureVersion" in item_node:
             description += " Vulnerable Versions: " + str(
-                item_node["FeatureVersion"]
+                item_node["FeatureVersion"],
             )
 
         mitigation = ""
@@ -77,7 +79,7 @@ class ClairKlarScan(object):
         if "Link" in item_node:
             link = item_node["Link"]
 
-        finding = Finding(
+        return Finding(
             title=item_node["Name"]
             + " - "
             + "("
@@ -99,4 +101,3 @@ class ClairKlarScan(object):
             dynamic_finding=False,
             impact="No impact provided",
         )
-        return finding

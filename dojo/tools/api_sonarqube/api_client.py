@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 from requests.exceptions import JSONDecodeError as RequestsJSONDecodeError
 
 from dojo.utils import prepare_for_view
@@ -38,9 +39,8 @@ class SonarQubeAPI:
                 entry in supported_issue_types for entry in split_issue_types
             )
             if not all_clean:
-                raise Exception(
-                    f"Deteced unsupported issue type! Supported types are {', '.join(supported_issue_types)}"
-                )
+                msg = f"Detected unsupported issue type! Supported types are {', '.join(supported_issue_types)}"
+                raise Exception(msg)
 
         self.session = requests.Session()
         self.default_headers = {"User-Agent": "DefectDojo"}
@@ -53,9 +53,8 @@ class SonarQubeAPI:
         elif tool_config.authentication_type == "API":
             self.session.auth = (tool_config.api_key, "")
         else:
-            raise Exception(
-                f"SonarQube Authentication type {tool_config.authentication_type} not supported"
-            )
+            msg = f"SonarQube Authentication type {tool_config.authentication_type} not supported"
+            raise Exception(msg)
 
     def find_project(self, project_name, organization=None, branch=None):
         """
@@ -77,18 +76,20 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/components/search",
             params=parameters,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to find the project {project_name} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
         for component in response.json().get("components", []):
             if component["name"] == project_name:
                 return component
-        raise Exception(
+        msg = (
             f"""
                 'Expected Project "{project_name}", but it returned '
                 '{[x.get('name') for x in response.json().get('components')]}. \n'
@@ -96,6 +97,7 @@ class SonarQubeAPI:
                 'Alternatively it can also be specified the Project Key at Product configuration.
                 """
         )
+        raise Exception(msg)
 
     def get_project(self, project_key, organization=None, branch=None):
         """
@@ -120,13 +122,15 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/components/show",
             params=parameters,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to find the project {project_key} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
         return response.json().get("component")
 
@@ -146,7 +150,6 @@ class SonarQubeAPI:
         :param types: issue types (comma separated values). e.g. BUG,VULNERABILITY,CODE_SMELL
         :return:
         """
-
         if self.extras is not None:
             types = self.extras
 
@@ -173,13 +176,15 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/issues/search",
                 params=request_filter,
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if not response.ok:
-                raise Exception(
+                msg = (
                     f"Unable to find the issues for component {component_key} "
                     f'due to {response.status_code} - {response.content.decode("utf-8")}'
                 )
+                raise Exception(msg)
 
             issues_page = response.json().get("issues")
             if not issues_page:
@@ -214,13 +219,15 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/hotspots/search",
                 params=request_filter,
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if not response.ok:
-                raise Exception(
+                msg = (
                     f"Unable to find the hotspots for project {project_key} "
                     f"due to {response.status_code} - {response.content}"
                 )
+                raise Exception(msg)
 
             hotspots_page = response.json().get("hotspots")
             if not hotspots_page:
@@ -248,24 +255,27 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/issues/search",
             params=request_filter,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to get issue {issue_key} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
         issues = response.json().get("issues", [])
         for issue in issues:
             if issue["key"] == issue_key:
                 return issue
-        raise Exception(
-            f"Expected Issue \"{issue_key}\", but it returned"
+        msg = (
+            f'Expected Issue "{issue_key}", but it returned'
             f"{[x.get('key') for x in response.json().get('issues')]}. "
             "Full response: "
             f"{response.json()}"
         )
+        raise Exception(msg)
 
     def get_rule(self, rule_id, organization=None):
         """
@@ -276,7 +286,7 @@ class SonarQubeAPI:
         rule = self.rules_cache.get(rule_id)
         if not rule:
             request_filter = {
-                "key": rule_id
+                "key": rule_id,
             }
             if organization:
                 request_filter["organization"] = organization
@@ -286,12 +296,14 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/rules/show",
                 params=request_filter,
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
             if not response.ok:
-                raise Exception(
+                msg = (
                     f"Unable to get the rule {rule_id} "
                     f'due to {response.status_code} - {response.content.decode("utf-8")}'
                 )
+                raise Exception(msg)
 
             rule = response.json()["rule"]
             self.rules_cache.update({rule_id: rule})
@@ -309,12 +321,14 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/hotspots/show",
                 params={"hotspot": rule_id},
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
             if not response.ok:
-                raise Exception(
+                msg = (
                     f"Unable to get the hotspot rule {rule_id} "
                     f"due to {response.status_code} - {response.content}"
                 )
+                raise Exception(msg)
 
             rule = response.json()["rule"]
             self.rules_cache.update({rule_id: rule})
@@ -351,13 +365,15 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/issues/do_transition",
             data={"issue": issue_key, "transition": transition},
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to transition {transition} the issue {issue_key} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
     def add_comment(self, issue_key, text):
         """
@@ -371,17 +387,17 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/issues/add_comment",
             data={"issue": issue_key, "text": text},
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to add a comment into issue {issue_key} "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
     def test_connection(self):
-        """
-        Returns number of components (projects) or raise error.
-        """
+        """Returns number of components (projects) or raise error."""
         parameters = {"qualifiers": "TRK"}
 
         if self.org_id is not None:
@@ -391,29 +407,32 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/components/search",
             params=parameters,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
-            raise Exception(
+            msg = (
                 f"Unable to connect and search in SonarQube "
                 f'due to {response.status_code} - {response.content.decode("utf-8")}'
             )
+            raise Exception(msg)
 
         try:
             num_projects = response.json()["paging"]["total"]
         except RequestsJSONDecodeError:
-            raise Exception(
+            msg = (
                 f""" Test request was successful (there was no HTTP-4xx or HTTP-5xx) but response doesn't contain
                 expected JSON response. SonarQube responded with HTTP-{response.status_code} ({response.reason}).
                 This is full response: {response.text}
                 """
             )
+            raise Exception(msg)
         return f"You have access to {num_projects} projects"
 
     def test_product_connection(self, api_scan_configuration):
         organization = api_scan_configuration.service_key_2 or None
         project = self.get_project(
-            api_scan_configuration.service_key_1, organization=organization
+            api_scan_configuration.service_key_1, organization=organization,
         )
         project_name = project.get("name")
         message_prefix = "You have access to project"
