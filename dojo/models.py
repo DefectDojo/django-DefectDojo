@@ -273,9 +273,11 @@ class UserContactInfo(models.Model):
 class Dojo_Group(models.Model):
     AZURE = "AzureAD"
     REMOTE = "Remote"
+    SAML = "SAML2"
     SOCIAL_CHOICES = (
         (AZURE, _("AzureAD")),
         (REMOTE, _("Remote")),
+        (SAML, _("SAML2")),
     )
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
