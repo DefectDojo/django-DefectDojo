@@ -64,7 +64,7 @@ class MobsfscanParser:
                 files.append(("", 0, ""))
 
             for file_path, line, snippet in files:
-                    
+
                 finding = Finding(
                     title=f"{key}",
                     test=test,
