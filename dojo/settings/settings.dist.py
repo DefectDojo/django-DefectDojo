@@ -1268,7 +1268,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "NeuVector (compliance)": ["title", "vuln_id_from_tool", "description"],
     "Wpscan": ["title", "description", "severity"],
     "Popeye Scan": ["title", "description"],
-    "Nuclei Scan": ["title", "cwe", "severity"],
+    "Nuclei Scan": ["title", "cwe", "severity", "component_name"],
     "KubeHunter Scan": ["title", "description"],
     "kube-bench Scan": ["title", "vuln_id_from_tool", "description"],
     "Threagile risks report": ["title", "cwe", "severity"],
