@@ -21,4 +21,7 @@ urlpatterns = [
     re_path(r"^engine_tools/delete_finding_exclusion$",
             views.finding_exclusion,
             name="finding_exclusion"),
+    re_path(r"^engine_tools/show_finding_exclusion/(?P<fxid>\d+)$",
+            views.show_find_exclusion,
+            name="show_finding_exclusion"),
 ]

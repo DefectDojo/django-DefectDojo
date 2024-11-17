@@ -1,6 +1,7 @@
 from dojo.utils import get_page_items, add_breadcrumb
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib import messages
+from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.urls import reverse
 from dojo.engine_tools.models import FindingExclusion
@@ -55,3 +56,27 @@ def create_finding_exclusion(request):
         "form": form,
         "name": "Create finding exclusion",
     })
+
+
+def show_find_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
+    """Show a find exclusion and the proccess status
+
+    Args:
+        request (HttpRequest): Http request object
+        fxid (str): Finding exclusion ID
+
+    Returns:
+        HttpResponse: HttpResponse object via django template
+    """
+    
+    finding_exclusion = get_object_or_404(FindingExclusion, int(fxid))
+
+    add_breadcrumb(title=finding_exclusion.name,
+                   top_level=False,
+                   request=request)
+
+    return render(request, "dojo/show_finding_exclusion.html", {
+        "finding_exclusion": finding_exclusion,
+        "name": f"Finding exclusion | {finding_exclusion.unique_id_from_tool}",
+    })
+    
