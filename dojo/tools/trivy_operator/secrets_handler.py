@@ -55,6 +55,6 @@ class TrivySecretsHandler:
                 service=service,
             )
             if resource_namespace != "":
-                finding.tags=resource_namespace,
+                finding.tags = resource_namespace
             findings.append(finding)
         return findings
