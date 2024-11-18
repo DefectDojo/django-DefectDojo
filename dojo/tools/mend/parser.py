@@ -40,25 +40,25 @@ class MendParser:
             cvss3_score = None
             if "component" in node:
                 description = (
-                    "**Vulnerability Description** : "
+                    "**Vulnerability Description**: "
                     + node["vulnerability"].get("description", "No Description Available")
                     + "\n\n"
-                    + "**Component Name** : "
+                    + "**Component Name**: "
                     + node["component"].get("name", "")
-                    + "\n\n"
-                    + "**Component Type** : "
+                    + "\n"
+                    + "**Component Type**: "
                     + node["component"].get("componentType", "")
-                    + "\n\n"
+                    + "\n"
                     + "**Root Library** : "
                     + str(node["component"].get("rootLibrary", ""))
-                    + "\n\n"
-                    + "**Library Type** : "
+                    + "\n"
+                    + "**Library Type**: "
                     + node["component"].get("libraryType", "")
-                    + "\n\n"
-                    + "**Location Found** : "
+                    + "\n"
+                    + "**Location Found**: "
                     + node["component"].get("path", "")
-                    + "\n\n"
-                    + "**Direct or Transitive Dependency** : "
+                    + "\n"
+                    + "**Direct or Transitive Dependency**: "
                     + node["component"].get("dependencyType", "")
                     + "\n"
                 )
