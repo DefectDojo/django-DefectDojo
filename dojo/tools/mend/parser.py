@@ -50,7 +50,7 @@ class MendParser:
                     + "**Component Type**: "
                     + node["component"].get("componentType", "")
                     + "\n"
-                    + "**Root Library** : "
+                    + "**Root Library**: "
                     + str(node["component"].get("rootLibrary", ""))
                     + "\n"
                     + "**Library Type**: "
