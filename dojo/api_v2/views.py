@@ -1650,6 +1650,61 @@ class DojoMetaViewSet(
     def get_queryset(self):
         return get_authorized_dojo_meta(Permissions.Product_View)
 
+    @extend_schema(
+        methods=["post", "patch"],
+        request=serializers.MetaMainSerializer,
+        responses={status.HTTP_200_OK: serializers.MetaMainSerializer},
+        filters=False,
+    )
+    @action(
+        detail=False, methods=["post", "patch"], pagination_class=None,
+    )
+    def batch(self, request, pk=None):
+        serialized_data = serializers.MetaMainSerializer(data=request.data)
+        if serialized_data.is_valid(raise_exception=True):
+            if request.method == "POST":
+                self.process_post(request.data)
+            if request.method == "PATCH":
+                self.process_patch(request.data)
+
+        return Response(status=status.HTTP_201_CREATED, data=serialized_data.data)
+
+    def process_post(self: object, data: dict):
+        product = Product.objects.filter(id=data.get("product")).first()
+        finding = Finding.objects.filter(id=data.get("finding")).first()
+        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+        metalist = data.get("metadata")
+        for metadata in metalist:
+            try:
+                DojoMeta.objects.create(
+                    product=product,
+                    finding=finding,
+                    endpoint=endpoint,
+                    name=metadata.get("name"),
+                    value=metadata.get("value"),
+                    )
+            except (IntegrityError) as ex:  # this should not happen as the data was validated in the batch call
+                raise ValidationError(str(ex))
+
+    def process_patch(self: object, data: dict):
+        product = Product.objects.filter(id=data.get("product")).first()
+        finding = Finding.objects.filter(id=data.get("finding")).first()
+        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+        metalist = data.get("metadata")
+        for metadata in metalist:
+            dojometa = DojoMeta.objects.filter(product=product, finding=finding, endpoint=endpoint, name=metadata.get("name"))
+            if dojometa:
+                try:
+                    dojometa.update(
+                        name=metadata.get("name"),
+                        value=metadata.get("value"),
+                        )
+                except (IntegrityError) as ex:
+                    raise ValidationError(str(ex))
+            else:
+                msg = f"Metadata {metadata.get('name')} not found for object."
+                raise ValidationError(msg)
+
 
 @extend_schema_view(**schema_with_prefetch())
 class ProductViewSet(
@@ -3086,6 +3141,29 @@ class QuestionnaireEngagementSurveyViewSet(
 
     def get_queryset(self):
         return Engagement_Survey.objects.all().order_by("id")
+
+    @extend_schema(
+    request=OpenApiTypes.NONE,
+    parameters=[
+        OpenApiParameter(
+            "engagement_id", OpenApiTypes.INT, OpenApiParameter.PATH,
+        ),
+    ],
+    responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer},
+    )
+    @action(
+        detail=True, methods=["post"], url_path=r"link_engagement/(?P<engagement_id>\d+)",
+    )
+    def link_engagement(self, request, pk, engagement_id):
+        # Get the answered survey
+        engagement_survey = self.get_object()
+        # Safely get the engagement
+        engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
+        # Link the engagement
+        answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
+        # Send a favorable response
+        serialized_answered_survey = serializers.QuestionnaireAnsweredSurveySerializer(answered_survey)
+        return Response(serialized_answered_survey.data)
 
 
 @extend_schema_view(**schema_with_prefetch())

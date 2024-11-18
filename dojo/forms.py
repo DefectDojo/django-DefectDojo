@@ -4,6 +4,7 @@ import pickle
 import re
 import warnings
 from datetime import date, datetime
+from pathlib import Path
 
 import tagulous
 from crispy_forms.bootstrap import InlineCheckboxes, InlineRadios
@@ -754,7 +755,8 @@ class UploadThreatForm(forms.Form):
 
     def clean(self):
         if (file := self.cleaned_data.get("file", None)) is not None:
-            ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+            path = Path(file.name)
+            ext = path.suffix
             valid_extensions = [".jpg", ".png", ".pdf"]
             if ext.lower() not in valid_extensions:
                 if accepted_extensions := f"{', '.join(valid_extensions)}":
@@ -872,7 +874,8 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
         for form in self.forms:
             file = form.cleaned_data.get("file", None)
             if file:
-                ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+                path = Path(file.name)
+                ext = path.suffix
                 valid_extensions = settings.FILE_UPLOAD_TYPES
                 if ext.lower() not in valid_extensions:
                     if accepted_extensions := f"{', '.join(valid_extensions)}":
