@@ -74,11 +74,11 @@ class MendParser:
                         mitigation = (
                             "**Resolution**: "
                             + "\n"
-                            + topfix_node.get("date"),
+                            + topfix_node.get("date", ""),
                             + "\n"
-                            + topfix_node.get("message"),
+                            + topfix_node.get("message", ""),
                             + "\n"
-                            + topfix_node.get("fixResolution"),
+                            + topfix_node.get("fixResolution", ""),
                             + "\n"
                         )
                     except Exception:
@@ -140,17 +140,17 @@ class MendParser:
             )
             cwe = 1035  # default OWASP a9 until the report actually has them
 
-           # comment out the below for now - working on adding this into the above conditional statements since format can be slightly different
-           # mitigation = "N/A"
-           # if "topFix" in node:
-           #     try:
-           #         topfix_node = node.get("topFix")
-           #         mitigation = "**Resolution** ({}): {}\n".format(
-           #             topfix_node.get("date"),
-           #             topfix_node.get("fixResolution"),
-           #         )
-           #     except Exception:
-           #         logger.exception("Error handling topFix node.")
+            # comment out the below for now - working on adding this into the above conditional statements since format can be slightly different
+            # mitigation = "N/A"
+            # if "topFix" in node:
+            #     try:
+            #         topfix_node = node.get("topFix")
+            #         mitigation = "**Resolution** ({}): {}\n".format(
+            #             topfix_node.get("date"),
+            #             topfix_node.get("fixResolution"),
+            #         )
+            #     except Exception:
+            #         logger.exception("Error handling topFix node.")
 
             filepaths = []
             if "sourceFiles" in node:
