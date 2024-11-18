@@ -38,6 +38,7 @@ class MendParser:
             impact = None
             description = "No Description Available"
             cvss3_score = None
+            migiation = "N/A"
             if "component" in node:
                 description = (
                     "**Vulnerability Description**: "
@@ -67,6 +68,21 @@ class MendParser:
                 component_version = node["component"].get("version")
                 impact = node["component"].get("dependencyType")
                 cvss3_score = node["vulnerability"].get("score", None)
+                if "topFix" in node:
+                    try:
+                        topfix_node = node.get("topFix")
+                        mitigation = (
+                            "**Resolution**: "
+                            + "\n"
+                            + topfix_node.get("date"),
+                            + "\n"
+                            + topfix_node.get("message"),
+                            + "\n"
+                            + topfix_node.get("fixResolution"),
+                            + "\n"
+                        )
+                    except Exception:
+                        logger.exception("Error handling topFix node.")
 
             elif "library" in node:
                 node.get("project")
@@ -91,6 +107,15 @@ class MendParser:
                 component_name = node["library"].get("artifactId")
                 component_version = node["library"].get("version")
                 cvss3_score = node.get("cvss3_score", None)
+                if "topFix" in node:
+                    try:
+                        topfix_node = node.get("topFix")
+                        mitigation = "**Resolution** ({}): {}\n".format(
+                            topfix_node.get("date"),
+                            topfix_node.get("fixResolution"),
+                        )
+                    except Exception:
+                        logger.exception("Error handling topFix node.")
             else:
                 description = node.get("description", "Unknown")
 
@@ -115,16 +140,17 @@ class MendParser:
             )
             cwe = 1035  # default OWASP a9 until the report actually has them
 
-            mitigation = "N/A"
-            if "topFix" in node:
-                try:
-                    topfix_node = node.get("topFix")
-                    mitigation = "**Resolution** ({}): {}\n".format(
-                        topfix_node.get("date"),
-                        topfix_node.get("fixResolution"),
-                    )
-                except Exception:
-                    logger.exception("Error handling topFix node.")
+           # comment out the below for now - working on adding this into the above conditional statements since format can be slightly different
+           # mitigation = "N/A"
+           # if "topFix" in node:
+           #     try:
+           #         topfix_node = node.get("topFix")
+           #         mitigation = "**Resolution** ({}): {}\n".format(
+           #             topfix_node.get("date"),
+           #             topfix_node.get("fixResolution"),
+           #         )
+           #     except Exception:
+           #         logger.exception("Error handling topFix node.")
 
             filepaths = []
             if "sourceFiles" in node:
