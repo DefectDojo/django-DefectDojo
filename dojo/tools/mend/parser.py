@@ -39,7 +39,6 @@ class MendParser:
             description = "No Description Available"
             cvss3_score = None
             if "component" in node:
-                node["project"].get("name")
                 description = (
                     "**Vulnerability Description** : "
                     + node["vulnerability"].get("description", "No Description Available")
@@ -68,10 +67,8 @@ class MendParser:
                 component_version = node["component"].get("version")
                 impact = node["component"].get("dependencyType")
                 cvss3_score = node["vulnerability"].get("score", None)
-            else:
-                description = node.get("vulnerability", {}).get("description", "Unknown")
 
-            if "library" in node:
+            elif "library" in node:
                 node.get("project")
                 description = (
                     "**Description** : "
