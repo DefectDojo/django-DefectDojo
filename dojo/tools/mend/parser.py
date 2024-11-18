@@ -38,7 +38,7 @@ class MendParser:
             impact = None
             description = "No Description Available"
             cvss3_score = None
-            migiation = "N/A"
+            mitigation = "N/A"
             if "component" in node:
                 description = (
                     "**Vulnerability Description**: "
