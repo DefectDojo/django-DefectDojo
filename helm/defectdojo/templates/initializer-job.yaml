@@ -15,7 +15,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if and (int .Values.initializer.keepSeconds) (gt (int .Values.initializer.keepSeconds) 0) }}
   ttlSecondsAfterFinished: {{ .Values.initializer.keepSeconds }}
+  {{- end }}
   template:
     metadata:
       labels:
