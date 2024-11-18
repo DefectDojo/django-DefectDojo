@@ -169,7 +169,7 @@ from dojo.reports.views import (
 )
 from dojo.risk_acceptance import api as ra_api
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
-from dojo.risk_acceptance.risk_pending import accept_risk_pending_bullk 
+from dojo.risk_acceptance.risk_pending import accept_risk_pending_bulk 
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
@@ -731,14 +731,16 @@ class RiskAcceptanceViewSet(
             product = eng.product
             product_type = product.prod_type
             permission_key = request.data.get("permission_key", None)
+            action = request.data.get("actions", None)
         except Exception as e:
             logger.error("Failed accept bullk {e}")
             ApiError.internal_server_error(detail=str(e))
 
-        accept_risk_pending_bullk(eng, risk_acceptance,
+        accept_risk_pending_bulk(eng, risk_acceptance,
                                   product,
                                   product_type,
-                                  permission_key)
+                                  permission_key,
+                                  action)
         return http_response.ok(message="Acceptance process completed")
 
 

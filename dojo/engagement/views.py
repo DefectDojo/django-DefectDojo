@@ -1823,7 +1823,7 @@ def accept_risk_acceptance(request, eid, raid):
     eng = get_object_or_404(Engagement, pk=eid)
     product = eng.product
     product_type = product.get_product_type
-    rp_helper.accept_risk_pending_bullk(eng, risk_acceptance, product, product_type)
+    rp_helper.accept_risk_pending_bulk(eng, risk_acceptance, product, product_type)
     logger.debug("Risk Accepted all")
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 

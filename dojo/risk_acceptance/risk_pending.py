@@ -16,7 +16,8 @@ from dojo.models import (
     Product,
     Product_Type,
     System_Settings,
-    PermissionKey
+    PermissionKey,
+    Dojo_User
     )
 from dojo.api_v2.api_error import ApiError
 from dojo.risk_acceptance.helper import post_jira_comments, handle_from_provider_risk
@@ -149,16 +150,28 @@ def get_user_with_permission_key(permission_key=None):
     raise ApiError.network_authentication_required(detail="Token is expired")
     
 
-def risk_acceptante_pending(eng: Engagement,
-                            finding: Finding,
-                            risk_acceptance: Risk_Acceptance,
-                            product: Product,
-                            product_type: Product_Type,
-                            permission_key=None):
+def user_has_permission_on_risk_acceptance(finding: Finding,
+                                           product_type: Product_Type,
+                                           user: Dojo_User,
+                                           product: Product,
+                                           risk_acceptance: Risk_Acceptance):
+    """Validate if user has permission on risk_acceptance
 
-    user = get_user_with_permission_key(permission_key)
-    status = "Failed"
-    message = "Cannot perform action"
+    Args:
+        finding (Finding): finding request permission
+        product_type (Product_Type): product_type request permission
+        user (Dojo_User): User request permission
+        product (Product): Product request permission
+        risk_acceptance (Risk_Acceptance):  risk_acceptance request permission
+    
+    Returns:
+        status_permission (dict): Dictionary of status permission of user on risk_acceptance
+    """
+    status_permission = {
+        "status" : "Failed",
+        "message": "Cannot perform action",
+        "number_of_acceptors_required": -1
+    }
     number_of_acceptors_required = (
         settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity)
         .get("type_contacts")
@@ -177,9 +190,25 @@ def risk_acceptante_pending(eng: Engagement,
     ):
         finding.accepted_by = user.username
         risk_accepted_succesfully(finding, risk_acceptance)
-        message = "Finding Accept successfully from risk acceptance."
-        status = "OK"
+        status_permission.update(
+            {"stasus": "OK",
+             "message": "Finding Accept successfully from risk acceptance.",
+             "number_of_acceptors_required": number_of_acceptors_required})
+    return status_permission
+        
 
+def risk_acceptante_pending(eng: Engagement,
+                            finding: Finding,
+                            risk_acceptance: Risk_Acceptance,
+                            product: Product,
+                            product_type: Product_Type,
+                            permission_key=None):
+    user = get_user_with_permission_key(permission_key)
+    status_permission = user_has_permission_on_risk_acceptance(finding,
+                                                               product_type,
+                                                               user,
+                                                               product,
+                                                               risk_acceptance)
     if finding.risk_status in ["Risk Pending", "Risk Rejected"]:
         confirmed_acceptances = get_confirmed_acceptors(finding)
         if is_permissions_risk_acceptance(eng, finding, user, product, product_type):
@@ -187,7 +216,7 @@ def risk_acceptante_pending(eng: Engagement,
                 message = "The user has already accepted the risk"
                 status = "Failed"
                 return Response(status=status, message=message)
-            if len(confirmed_acceptances) < number_of_acceptors_required:
+            if len(confirmed_acceptances) < status_permission.get("number_of_acceptors_required"):
                 if finding.accepted_by is None or finding.accepted_by == "":
                     finding.accepted_by = user.username
                 else:
@@ -195,7 +224,7 @@ def risk_acceptante_pending(eng: Engagement,
                 if finding.risk_status == "Risk Rejected":
                     finding.risk_status = "Risk Pending"
                 finding.save()
-                if number_of_acceptors_required == len(
+                if status_permission.get("number_of_acceptors_required") == len(
                     get_confirmed_acceptors(finding)
                 ):
                     risk_accepted_succesfully(finding, risk_acceptance)
@@ -429,7 +458,7 @@ def risk_unaccept(finding):
         ra_helper.post_jira_comment(finding, ra_helper.unaccepted_message_creator)
 
 
-def accept_risk_pending_bullk(eng, risk_acceptance, product, product_type, permission_key=None):
+def accept_risk_pending_bulk(eng, risk_acceptance, product, product_type, permission_key=None):
     for accepted_finding in risk_acceptance.accepted_findings.all():
         logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
         risk_acceptante_pending(eng,
