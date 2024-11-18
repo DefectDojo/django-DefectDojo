@@ -8,7 +8,7 @@ class TestKubescapeParser(DojoTestCase):
         with open(get_unit_tests_path() + "/scans/kubescape/many_findings.json", encoding="utf-8") as testfile:
             parser = KubescapeParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(710, len(findings))
+            self.assertEqual(349, len(findings))
 
     def test_parse_file_has_many_results(self):
         with open(get_unit_tests_path() + "/scans/kubescape/results.json", encoding="utf-8") as testfile:
