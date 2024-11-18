@@ -74,11 +74,11 @@ class MendParser:
                         mitigation = (
                             "**Resolution**: "
                             + "\n"
-                            + topfix_node.get("date", ""),
+                            + topfix_node.get("date", "")
                             + "\n"
-                            + topfix_node.get("message", ""),
+                            + topfix_node.get("message", "")
                             + "\n"
-                            + topfix_node.get("fixResolution", ""),
+                            + topfix_node.get("fixResolution", "")
                             + "\n"
                         )
                     except Exception:
