@@ -73,7 +73,6 @@ class MendParser:
                         topfix_node = node.get("topFix")
                         mitigation = (
                             "**Resolution**: "
-                            + "\n"
                             + topfix_node.get("date", "")
                             + "\n"
                             + topfix_node.get("message", "")
