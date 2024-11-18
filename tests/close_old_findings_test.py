@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import unittest
+from pathlib import Path
 
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest
@@ -12,7 +13,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 
 logger = logging.getLogger(__name__)
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = Path(os.path.realpath(__file__)).parent
 
 
 class CloseOldTest(BaseTestCase):
@@ -22,7 +23,7 @@ class CloseOldTest(BaseTestCase):
     # --------------------------------------------------------------------------------------------------------
     def setUp(self):
         super().setUp()
-        self.relative_path = os.path.dirname(os.path.realpath(__file__))
+        self.relative_path = Path(os.path.realpath(__file__)).parent
 
     @on_exception_html_source_logger
     def test_delete_findings(self):
