@@ -1,4 +1,5 @@
 from dojo.models import Finding
+from dojo.tools.trivy_operator.uniform_vulnid import UniformTrivyVulnID
 
 TRIVY_SEVERITIES = {
     "CRITICAL": "Critical",
@@ -47,6 +48,6 @@ class TrivyChecksHandler:
                 tags=[resource_namespace],
             )
             if check_id:
-                finding.unsaved_vulnerability_ids = [check_id]
+                finding.unsaved_vulnerability_ids = [UniformTrivyVulnID().return_uniformed_vulnid(check_id)]
             findings.append(finding)
         return findings
