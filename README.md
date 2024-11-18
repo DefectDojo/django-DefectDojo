@@ -14,6 +14,7 @@
                 <a href="https://github.com/DefectDojo/django-DefectDojo/releases/latest"><img src="https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg" alt="GitHub release"></a>
                 <a href="https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ"><img src="https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg" alt="YouTube Subscribe"></a>
                 <a href="https://twitter.com/defectdojo/"><img src="https://img.shields.io/twitter/follow/defectdojo.svg?style=social&amp;label=Follow" alt="Twitter Follow"></a>
+                <a href="https://gurubase.io/g/defectdojo"><img src="https://img.shields.io/badge/Gurubase-Ask%20DefectDojo%20Guru-006BFF" alt="Gurubase"></a>
             </p>
             <p>
                 <a href="https://github.com/DefectDojo/django-DefectDojo/actions"><img src="https://github.com/DefectDojo/django-DefectDojo/actions/workflows/unit-tests.yml/badge.svg?branch=master" alt="Unit Tests"></a>
