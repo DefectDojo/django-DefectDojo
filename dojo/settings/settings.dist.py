@@ -1296,6 +1296,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
 if len(env("DD_HASHCODE_FIELDS_PER_SCANNER")) > 0:
     env_hashcode_fields_per_scanner = json.loads(env("DD_HASHCODE_FIELDS_PER_SCANNER"))
     for key, value in env_hashcode_fields_per_scanner.items():
+        if not isinstance(value, list):
+            msg = f"Fields definition '{value}' for hashcode calculation of '{key}' is not valid. It needs to be list of strings but it is {type(value)}."
+            raise TypeError(msg)
+        if not all(isinstance(field, str) for field in value):
+            msg = f"Fields for hashcode calculation for {key} are not valid. It needs to be list of strings. Some of fields are not string."
+            raise AttributeError(msg)
         if key in HASHCODE_FIELDS_PER_SCANNER:
             logger.info(f"Replacing {key} with value {value} (previously set to {HASHCODE_FIELDS_PER_SCANNER[key]}) from env var DD_HASHCODE_FIELDS_PER_SCANNER")
             HASHCODE_FIELDS_PER_SCANNER[key] = value
@@ -1376,6 +1382,13 @@ DEDUPE_ALGO_HASH_CODE = "hash_code"
 # unique_id_from_tool or hash_code
 # Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = "unique_id_from_tool_or_hash_code"
+
+DEDUPE_ALGOS = [
+    DEDUPE_ALGO_LEGACY,
+    DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    DEDUPE_ALGO_HASH_CODE,
+    DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+]
 
 # Allows to deduplicate with endpoints if endpoints is not included in the hashcode.
 # Possible values are: scheme, host, port, path, query, fragment, userinfo, and user. For a details description see https://hyperlink.readthedocs.io/en/latest/api.html#attributes.
@@ -1526,6 +1539,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
 if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
     env_dedup_algorithm_per_parser = json.loads(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER"))
     for key, value in env_dedup_algorithm_per_parser.items():
+        if value not in DEDUPE_ALGOS:
+            msg = f"DEDUP algorithm '{value}' for '{key}' is not valid. Use one of following values: {', '.join(DEDUPE_ALGOS)}"
+            raise AttributeError(msg)
         if key in DEDUPLICATION_ALGORITHM_PER_PARSER:
             logger.info(f"Replacing {key} with value {value} (previously set to {DEDUPLICATION_ALGORITHM_PER_PARSER[key]}) from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
@@ -1744,9 +1760,14 @@ VULNERABILITY_URLS = {
     "ELSA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
     "ELBA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELBA-2024-7457.html
     "RXSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
+    "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
+    "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
+    "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html
     "CWE": "https://cwe.mitre.org/data/definitions/&&.html",  # e.g. https://cwe.mitre.org/data/definitions/79.html
     "TEMP": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/TEMP-0841856-B18BAF
+    "DSA": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/DSA-5791-1
+    "RLSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RLSA-2024:7001
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
