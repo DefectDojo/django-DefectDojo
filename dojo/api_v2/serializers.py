@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+from collections import UserList
 from datetime import datetime
 
 import six
@@ -280,7 +281,7 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
-class RequestResponseDict(list):
+class RequestResponseDict(UserList):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
         list.__init__(self, *args, **kwargs)
