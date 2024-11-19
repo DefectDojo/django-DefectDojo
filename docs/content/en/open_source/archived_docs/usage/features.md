@@ -244,7 +244,7 @@ The environment variable will override the settings in `settings.dist.py`, repla
 
 The available algorithms are:
 
-DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL (value for `DD_DEDUPLICATION_ALGORITHM_PER_PARSER`: `unique_id_from_tool`)
 :   The deduplication occurs based on
     finding.unique_id_from_tool which is a unique technical
     id existing in the source tool. Few scanners populate this
@@ -266,12 +266,12 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
             able to recognise that findings found in previous
             scans are actually the same as the new findings.
 
-DEDUPE_ALGO_HASH_CODE
+DEDUPE_ALGO_HASH_CODE (value for `DD_DEDUPLICATION_ALGORITHM_PER_PARSER`: `hash_code`)
 :   The deduplication occurs based on finding.hash_code. The
     hash_code itself is configurable for each scanner in
     parameter `HASHCODE_FIELDS_PER_SCANNER`.
 
-DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE (value for `DD_DEDUPLICATION_ALGORITHM_PER_PARSER`: `unique_id_from_tool_or_hash_code`)
 :   A finding is a duplicate with another if they have the same
     unique_id_from_tool OR the same hash_code.
 
@@ -284,7 +284,7 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
             cross-parser deduplication
 
 
-DEDUPE_ALGO_LEGACY
+DEDUPE_ALGO_LEGACY (value for `DD_DEDUPLICATION_ALGORITHM_PER_PARSER`: `legacy`)
 :   This is algorithm that was in place before the configuration
     per parser was made possible, and also the default one for
     backward compatibility reasons.
