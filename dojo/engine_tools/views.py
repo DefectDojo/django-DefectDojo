@@ -22,7 +22,7 @@ def finding_exclusion(request):
     return render(request, "dojo/view_finding_exclusion.html", {
         "exclusions": paged_finding_exclusion,
         "filtered": finding_exclusions,
-        "name": "FindingExclusion",
+        "name": "Finding Exclusions",
     })
 
 
@@ -58,7 +58,7 @@ def create_finding_exclusion(request):
     })
 
 
-def show_find_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
+def show_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
     """Show a find exclusion and the proccess status
 
     Args:
@@ -69,10 +69,10 @@ def show_find_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
         HttpResponse: HttpResponse object via django template
     """
     
-    finding_exclusion = get_object_or_404(FindingExclusion, int(fxid))
+    finding_exclusion = get_object_or_404(FindingExclusion, pk=fxid)
 
-    add_breadcrumb(title=finding_exclusion.name,
-                   top_level=False,
+    add_breadcrumb(title=finding_exclusion.unique_id_from_tool,
+                   top_level=True,
                    request=request)
 
     return render(request, "dojo/show_finding_exclusion.html", {

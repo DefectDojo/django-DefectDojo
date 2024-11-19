@@ -29,7 +29,6 @@
     <div class="col-md-10">
         <div class="panel panel-default">
             <div class="panel-heading">
-                Black List
                 {% if "dojo.add_engagement_survey"|has_configuration_permission:request %}
                 <a title="Add Exclusion" class="pull-right btn btn-sm btn-primary" href="{% url 'create_finding_exclusion' %}"><span class="fa-solid fa-plus"></span></a>
                 {% endif %}
@@ -41,11 +40,9 @@
             <table id="groups" class="tablesorter-bootstrap table table-condensed table-striped">
                 <thead>
                     <tr>
-                        <th>Id</th>
+                        <th>Finding Id</th>
                         <th>Create Date</th>
                         <th>Expired Date</th>
-                        <th>User History</th>
-                        <th>Product</th>
                         <th>Reason</th>
                         <th>Type</th>
                         <th>Status</th>
@@ -57,8 +54,6 @@
                                 <td>{{exclusion.unique_id_from_tool}}</td>
                                 <td>{{exclusion.create_date}}</td>
                                 <td>{{exclusion.expiration_date}}</td>
-                                <td>{{exclusion.user_history}}</td>
-                                <td>{{exclusion.product}}</td>
                                 <td>{{exclusion.reason}}</td>
                                 <td>{{exclusion.type}}</td>
                                 {% if exclusion.status == "Pending"%}

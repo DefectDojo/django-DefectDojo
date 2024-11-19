@@ -1,5 +1,202 @@
 {% extends "base.html" %}
 {% load authorization_tags %}
+{% load display_tags %}
+{% load multiply %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% block add_styles %}
+    {{ block.super }}
+    .tooltip-inner {
+        max-width: 650px;
+    }
+    .process-timeline-horizontal {
+        margin-top: 20px;
+        margin-left: 10px;
+    }
+    .timeline-row {
+        position: relative;
+        display: flex;
+    }
+    .timeline-step {
+        position: relative;
+        text-align: center;
+        padding: 20px;
+        background-color: #f4f4f4;
+        opacity: 0.5;
+        border-right: 1px solid #ddd;
+        width: 33.3%;
+    }
+    .timeline-step:last-child {
+        border-right: none;
+    }
+    .timeline-step.active {
+        opacity: 1;
+        background-color: #e9ecef;
+    }
+    .timeline-step::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 20px;
+        background-color: #6c757d;
+        border-radius: 50%;
+    }
+    .timeline-step.active::before {
+        background-color: #28a745;
+    }
+    .timeline-content {
+        position: relative;
+        z-index: 1;
+    }
+{% endblock %}
+
 {% block content %}
-    
+<div id="main-finding-exclusion">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h3 class="pull-left finding-title">
+                    {{ finding_exclusion.unique_id_from_tool }}
+                    {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
+                    <small>Last Status Update: {{ finding_exclusion.last_status_update | naturalday }}, </small>
+                    <small>Created:
+                      {{ finding_exclusion.create_date | naturalday }}
+                    </small>
+                </h3>
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                data-toggle="dropdown" aria-expanded="true">
+                            <span class="fa-solid fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1"> 
+                            <li role="presentation">
+                                <a rel="noopener noreferrer" href="">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit Finding Exclusion
+                                </a>
+
+                            </li>
+                            <li role="presentation">
+                                <a rel="noopener noreferrer" href="">
+                                    <i class="fa-solid fa-fire-extinguisher"></i> Close Finding Exclusion
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a rel="noopener noreferrer" href="">
+                                    <i class="fa-solid fa-circle-exclamation"></i> Accept Finding Exclusion
+                                </a>
+                            </li>
+                        </ul>
+                        
+                        
+                    </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="notes" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    {% block header_head %}
+                        <th>ID</th>
+                        <th>Vulnerability unique ID</th>
+                        <th>Type</th>
+                        <th>Created by</th>
+                    {% endblock header_head %}
+                </tr>
+                <tr>
+                    {% block header_body %}
+                        <td>{{ finding_exclusion.uuid }}</td>
+                        <td>{{ finding_exclusion.unique_id_from_tool }}</td>
+                        <td>{{ finding_exclusion.type }}</td>    
+                        <td>{{ finding_exclusion.created_by }}</td>             
+                    {% endblock header_body %}
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="view-finding">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Reason <span class="pull-right"><a rel="noopener noreferrer" data-toggle="collapse" href="#vuln_desc"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_desc" class="panel-body finding-description collapse in">
+              <pre>{{ finding_exclusion.reason }}</pre>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Process <span class="pull-right"><a rel="noopener noreferrer" data-toggle="collapse" href="#vuln_procs"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_procs" class="panel-body finding-description collapse in">
+                {% if finding_exclusion %}
+                <div class="container-fluid process-timeline-horizontal">
+                    <div class="row timeline-row">
+                        <div class="col-4 timeline-step {% if finding_exclusion.create_date %}active{% endif %}">
+                            <div class="timeline-content">
+                                <pre><strong>Created</strong></pre>
+                                <p>
+                                    <pre>{{ finding_exclusion.create_date|date:"d M Y H:i" }}</pre>
+                                    <br>
+                                    <pre><strong>By:</strong> {{ finding_exclusion.created_by.username }}</pre>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 timeline-step {% if finding_exclusion.reviewed_at %}active{% endif %}">
+                            <div class="timeline-content">
+                                <pre><strong>Reviewed</strong></pre>
+                                <p>
+                                    {% if finding_exclusion.reviewed_at %}
+                                        <pre>{{ finding_exclusion.reviewed_at|date:"d M Y H:i" }}</pre>
+                                        <br>
+                                        <pre><strong>By:</strong> {{ finding_exclusion.reviewed_by.username }}</pre>
+                                    {% else %}
+                                        <pre>Pending Review</pre>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 timeline-step {% if finding_exclusion.final_status %}active{% endif %}">
+                            <div class="timeline-content">
+                                <pre><strong>Final Status</strong></pre>
+                                <p>
+                                    {% if finding_exclusion.final_status %}
+                                        <pre><strong>
+                                        {% if finding_exclusion.final_status == 'approved' %}
+                                            <span class="text-success">Approved</span>
+                                        {% else %}
+                                            <span class="text-danger">Rejected</span>
+                                        {% endif %}
+                                        </strong></pre>
+                                        <br>
+                                        <pre>{{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}</pre>
+                                    {% else %}
+                                        <pre>Awaiting Decision</pre>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Discussion <span class="pull-right"><a rel="noopener noreferrer" data-toggle="collapse" href="#vuln_disc"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_disc" class="panel-body finding-description collapse in">
+                
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

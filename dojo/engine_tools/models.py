@@ -1,5 +1,8 @@
 from django.db import models
+from django.contrib import admin
 from django.utils.translation import gettext as _
+
+import uuid
 
 
 class FindingExclusion(models.Model):
@@ -9,6 +12,7 @@ class FindingExclusion(models.Model):
     STATUS_CHOICES = [("Accepted", "Accepted"),
                       ("Pending", "Pending"),
                       ("Rejected", "Rejected")]
+    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True)
     type = models.CharField(max_length=12, choices=TYPE_CHOICES)
     unique_id_from_tool = models.CharField(
         blank=True,
@@ -18,6 +22,7 @@ class FindingExclusion(models.Model):
 
     create_date = models.DateTimeField(auto_now=True)
     expiration_date = models.DateTimeField()
+    last_status_update = models.DateTimeField(auto_now=True)
     user_history = models.IntegerField(null=True)
     product = models.ForeignKey("Product",
                                 null=True,
@@ -33,6 +38,13 @@ class FindingExclusion(models.Model):
                                     null=True,
                                     blank=True,
                                     on_delete=models.CASCADE)
+    created_by = models.ForeignKey("Dojo_User",
+                                   null=True,
+                                   blank=True,
+                                   on_delete=models.CASCADE,
+                                   related_name="dojo_user_created")
     
     class Meta:
         db_table = "dojo_finding_exlusion"
+
+admin.site.register(FindingExclusion)
