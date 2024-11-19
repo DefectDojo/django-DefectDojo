@@ -28,6 +28,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Version</th>
+                        <th>Engagement Name</th>
                         <th class="text-center">Active Findings</th>
                         <th class="text-center">Duplicate Findings</th>
                         <th class="text-center">Total Findings</th>
@@ -43,6 +44,10 @@
                             </a>
                         </td>
                         <td>{{ result.version }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'view_engagement' result.engagement.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}"> 
+                             {{ result.engagement_name }}
+                            </a></td>
                         <td class="text-center">
                             {% if result.active_findings %}
                             <a href="{% url 'open_findings' %}?component_id={{ result.id }}">
@@ -131,6 +136,7 @@
                 "columns": [
                         { "data": "Component_name" },
                         { "data": "Version" },
+                        { "data": "Engagement_name"},
                         { "data": "Active" },
                         { "data": "Duplicate" },
                         { "data": "Total" },

@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from django.shortcuts import render
 from dojo.models import Component
 from dojo.authorization.roles_permissions import Permissions
@@ -10,23 +10,24 @@ from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
 def components(request):
     add_breadcrumb(title="Components", top_level=True, request=request)
     
-    # Obtener los engagements a los que el usuario tiene acceso
+    # Obtain authorized engagements
     authorized_engagements = get_authorized_engagements(Permissions.Engagement_View)
 
-    # Filtrar componentes basados en los engagements autorizados
+    # Filter components based in authorized engagements
     component_query = Component.objects.filter(engagement__in=authorized_engagements)
 
-    # Agregar anotaciones para contar findings asociados a cada componente
+    # Add annotations to count findings
     component_query = component_query.annotate(
-        total_findings=Count('finding__id', distinct=True),  # Contar todos los findings asociados
-        active_findings=Count('finding__id', filter=Q(finding__active=True), distinct=True),  # Contar findings activos
-        duplicate_findings=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True)  # Contar findings duplicados
+        total_findings=Count('finding__id', distinct=True), 
+        active_findings=Count('finding__id', filter=Q(finding__active=True), distinct=True),
+        duplicate_findings=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True),
+        engagement_name=F('engagement__name')
     )
 
-    # Ordenar por el número total de findings
+    # Order by total findings
     component_query = component_query.order_by("-total_findings")
 
-    # Aplicar filtros según la configuración del sistema
+    # Apply filters
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ComponentFilterWithoutObjectLookups if filter_string_matching else ComponentFilter
     comp_filter = filter_class(request.GET, queryset=component_query)
@@ -34,7 +35,7 @@ def components(request):
     # Paginación
     result = get_page_items(request, comp_filter.qs, 25)
 
-    # Autocompletado para los nombres de los componentes
+    # Autocomplete component names
     component_words = component_query.exclude(name__isnull=True).values_list("name", flat=True)
 
     # Renderizar la vista con la plantilla

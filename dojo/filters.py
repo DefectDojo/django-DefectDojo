@@ -875,6 +875,22 @@ class ProductComponentFilter(DojoFilter):
         },
     )
 
+    engagement = ModelMultipleChoiceFilter(
+        queryset=Engagement.objects.none(),
+        label="Engagement")
+
+    def __init__(self, *args, **kwargs):
+        parent_product = kwargs.pop("parent_product", None)
+        super().__init__(*args, **kwargs)
+        if parent_product:
+            self.form.fields[
+                "engagement"
+            ].queryset = get_authorized_engagements(Permissions.Engagement_View).filter(product=parent_product)
+        else:
+            self.form.fields[
+                "engagement"
+            ].queryset = get_authorized_engagements(Permissions.Engagement_View)
+
 
 class ComponentFilterWithoutObjectLookups(ProductComponentFilter):
     test__engagement__product__prod_type__name = CharFilter(
@@ -906,18 +922,22 @@ class ComponentFilter(ProductComponentFilter):
     engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
-    engagement = ModelMultipleChoiceFilter(
-        queryset=Engagement.objects.none(),
-        label="Engagement")
 
     def __init__(self, *args, **kwargs):
+        parent_product = kwargs.pop("parent_product", None)
         super().__init__(*args, **kwargs)
         self.form.fields[
             "engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
         self.form.fields[
             "engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
-        self.form.fields[
-            "engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
+        if parent_product:
+            self.form.fields[
+                "engagement"
+            ].queryset = get_authorized_engagements(Permissions.Engagement_View).filter(product=parent_product)
+        else:
+            self.form.fields[
+                "engagement"
+            ].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class EngagementDirectFilterHelper(FilterSet):

@@ -9,10 +9,9 @@ from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from django.contrib.postgres.aggregates import StringAgg
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import DEFAULT_DB_ALIAS, connection
+from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, F, Max, OuterRef, Prefetch, Q, Subquery, Sum
 from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
@@ -29,7 +28,6 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.components.sql_group_concat import Sql_GroupConcat
 from dojo.filters import (
     EngagementFilter,
     EngagementFilterWithoutObjectLookups,
@@ -319,10 +317,15 @@ def view_product_components(request, pid):
     component_query = component_query.annotate(
         total_findings=Count('finding__id', distinct=True),
         active_findings=Count('finding__id', filter=Q(finding__active=True), distinct=True),
-        duplicate_findings=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True)
+        duplicate_findings=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True),
+        engagement_name=F('engagement__name')
     )
 
-    comp_filter = ProductComponentFilter(request.GET, queryset=component_query)
+    component_query = component_query.order_by("-total_findings")
+
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ProductComponentFilter
+    comp_filter = filter_class(request.GET, queryset=component_query, parent_product=prod)
     result = get_page_items(request, comp_filter.qs, 25)
 
 
