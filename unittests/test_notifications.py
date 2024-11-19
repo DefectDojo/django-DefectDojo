@@ -15,8 +15,8 @@ from dojo.importers.base_importer import BaseImporter
 from dojo.models import (
     DEFAULT_NOTIFICATION,
     Alerts,
-    Dojo_User,
     Development_Environment,
+    Dojo_User,
     Endpoint,
     Engagement,
     Finding,
@@ -32,6 +32,7 @@ from dojo.models import (
     get_current_datetime,
 )
 from dojo.notifications.helper import (
+    AlertNotificationManger,
     NotificationManager,
     create_notification,
     webhook_status_cleanup,
@@ -89,7 +90,7 @@ class TestNotifications(DojoTestCase):
         self.assertEqual(len(merged_notifications.other), 3)
         self.assertEqual(merged_notifications.other, {"alert", "mail", "slack"})
 
-    @patch("dojo.notifications.helper.NotificationManager.send_alert_notification", wraps=NotificationManager.send_alert_notification)
+    @patch("dojo.notifications.helper.AlertNotificationManger.send_alert_notification", wraps=AlertNotificationManger.send_alert_notification)
     def test_notifications_system_level_trump(self, mock):
         notif_user, _ = Notifications.objects.get_or_create(user=User.objects.get(username="admin"))
         notif_system, _ = Notifications.objects.get_or_create(user=None, template=False)
@@ -132,7 +133,7 @@ class TestNotifications(DojoTestCase):
             self.assertEqual(mock.call_count, last_count + 1)
         last_count = mock.call_count
 
-    @patch("dojo.notifications.helper.NotificationManager.send_alert_notification", wraps=NotificationManager.send_alert_notification)
+    @patch("dojo.notifications.helper.AlertNotificationManger.send_alert_notification", wraps=AlertNotificationManger.send_alert_notification)
     def test_non_default_other_notifications(self, mock):
         notif_user, _ = Notifications.objects.get_or_create(user=User.objects.get(username="admin"))
         notif_system, _ = Notifications.objects.get_or_create(user=None, template=False)
@@ -150,7 +151,7 @@ class TestNotifications(DojoTestCase):
             notif_user.save()
             create_notification(event="dummy_foo_event", title="title_for_dummy_foo_event", description="description_for_dummy_foo_event", recipients=["admin"])
             self.assertEqual(mock.call_count, last_count + 1)
-            self.assertEqual(mock.call_args_list[0].args[0], "dummy_foo_event")
+            self.assertEqual(mock.call_args_list[0].args[1], "dummy_foo_event")
             alert = Alerts.objects.get(title="title_for_dummy_foo_event")
             self.assertEqual(alert.source, "Dummy Foo Event")
 
@@ -530,7 +531,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.subTest("active"):
             wh = Notification_Webhooks.objects.filter(owner=None).first()
             manager = NotificationManager()
-            manager._webhook_reactivation(endpoint_id=wh.pk)
+            manager._webhook_reactivation(manager, endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
             self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE)
@@ -549,7 +550,7 @@ class TestNotificationWebhooks(DojoTestCase):
 
             with self.assertLogs("dojo.notifications.helper", level="DEBUG") as cm:
                 manager = NotificationManager()
-                manager._webhook_reactivation(endpoint_id=wh.pk)
+                manager._webhook_reactivation(manager, endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
             self.assertEqual(updated_wh.status, Notification_Webhooks.Status.STATUS_ACTIVE_TMP)
