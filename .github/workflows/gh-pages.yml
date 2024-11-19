@@ -36,7 +36,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-          ref: 'master'
 
       - run: cd docs && npm ci && hugo --minify --config /config/production/hugo.toml
 
