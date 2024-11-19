@@ -32,13 +32,11 @@ def components(request):
     filter_class = ComponentFilterWithoutObjectLookups if filter_string_matching else ComponentFilter
     comp_filter = filter_class(request.GET, queryset=component_query)
 
-    # Paginación
     result = get_page_items(request, comp_filter.qs, 25)
 
     # Autocomplete component names
     component_words = component_query.exclude(name__isnull=True).values_list("name", flat=True)
 
-    # Renderizar la vista con la plantilla
     return render(
         request,
         "dojo/components.html",
