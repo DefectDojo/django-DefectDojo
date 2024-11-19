@@ -48,6 +48,8 @@ jobs:
     steps:
       - name: Load OAS files from artifacts
         uses: actions/download-artifact@v4
+        with:
+          pattern: oas-*
 
       - name: Upload Release Asset - OpenAPI Specification - YAML
         id: upload-release-asset-yaml
