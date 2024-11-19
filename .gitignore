@@ -144,3 +144,4 @@ docs/.prettierrc.yaml
 docs/.codesandbox/tasks.json
 docs/.devcontainer/devcontainer.json
 docs/.devcontainer/Dockerfile
+docs/LICENSE
