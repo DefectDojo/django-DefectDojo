@@ -136,3 +136,11 @@ docs/public
 docs/node_modules
 docs/resources
 docs/hugo_stats.json
+docs/.gitpod.yml
+docs/.npmignore
+docs/.npmrc
+docs/.prettierignore
+docs/.prettierrc.yaml
+docs/.codesandbox/tasks.json
+docs/.devcontainer/devcontainer.json
+docs/.devcontainer/Dockerfile
