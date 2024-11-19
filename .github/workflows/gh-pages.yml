@@ -17,13 +17,13 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: '0.81.0'
+          hugo-version: '0.125.3'
           extended: true
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '22.5.1'
 
       - name: Cache dependencies
         uses: actions/cache@v4
