@@ -146,3 +146,4 @@ docs/.devcontainer/devcontainer.json
 docs/.devcontainer/Dockerfile
 docs/LICENSE
 docs/.hugo_build.lock
+docs/package-lock.json
