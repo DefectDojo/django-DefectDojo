@@ -1,4 +1,5 @@
 from os import path
+from pathlib import Path
 
 from dojo.models import Test
 from dojo.tools.rapplex.parser import RapplexParser
@@ -8,13 +9,13 @@ from unittests.dojo_test_case import DojoTestCase
 class TestRapplexParser(DojoTestCase):
 
     def test_rapplex_parser_with_no_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/rapplex/rapplex_zero_vul.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/rapplex/rapplex_zero_vul.json"), encoding="utf-8") as testfile:
             parser = RapplexParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_rapplex_parser_with_one_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/rapplex/rapplex_one_vul.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/rapplex/rapplex_one_vul.json"), encoding="utf-8") as testfile:
             parser = RapplexParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -26,7 +27,7 @@ class TestRapplexParser(DojoTestCase):
             self.assertIsNotNone(finding.references)
 
     def test_rapplex_parser_with_many_findings(self):
-        with open(path.join(path.dirname(__file__), "../scans/rapplex/rapplex_many_vul.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/rapplex/rapplex_many_vul.json"), encoding="utf-8") as testfile:
             parser = RapplexParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(8, len(findings))

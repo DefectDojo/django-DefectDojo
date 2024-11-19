@@ -1,3 +1,4 @@
+import collections
 import json
 import logging
 import re
@@ -280,10 +281,10 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
-class RequestResponseDict(list):
+class RequestResponseDict(collections.UserList):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
-        list.__init__(self, *args, **kwargs)
+        collections.UserList.__init__(self, *args, **kwargs)
         self.pretty_print = pretty_print
 
     def __add__(self, rhs):
@@ -2695,6 +2696,11 @@ class ReportGenerateSerializer(serializers.Serializer):
     finding_notes = FindingToNotesSerializer(
         many=True, allow_null=True, required=False,
     )
+
+
+class EngagementUpdateJiraEpicSerializer(serializers.Serializer):
+    epic_name = serializers.CharField(required=False, max_length=200)
+    epic_priority = serializers.CharField(required=False, allow_null=True)
 
 
 class TagSerializer(serializers.Serializer):

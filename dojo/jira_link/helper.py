@@ -1251,7 +1251,9 @@ def close_epic(eng, push_to_jira, **kwargs):
                 r = requests.post(
                     url=req_url,
                     auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
-                    json=json_data)
+                    json=json_data,
+                    timeout=settings.REQUESTS_TIMEOUT,
+                )
                 if r.status_code != 204:
                     logger.warning(f"JIRA close epic failed with error: {r.text}")
                     return False
@@ -1289,7 +1291,14 @@ def update_epic(engagement, **kwargs):
             if not epic_name:
                 epic_name = engagement.name
 
-            issue.update(summary=epic_name, description=epic_name)
+            epic_priority = kwargs.get("epic_priority", None)
+
+            jira_issue_update_kwargs = {
+                "summary": epic_name,
+                "description": epic_name,
+                "priority": {"name": epic_priority},
+            }
+            issue.update(**jira_issue_update_kwargs)
             return True
         except JIRAError as e:
             logger.exception(e)

@@ -639,6 +639,36 @@ class EngagementViewSet(
         # send file
         return generate_file_response(file_object)
 
+    @extend_schema(
+        request=serializers.EngagementUpdateJiraEpicSerializer,
+        responses={status.HTTP_200_OK: serializers.EngagementUpdateJiraEpicSerializer},
+    )
+    @action(
+        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+    )
+    def update_jira_epic(self, request, pk=None):
+        engagement = self.get_object()
+        try:
+
+            if engagement.has_jira_issue:
+                jira_helper.update_epic(engagement, **request.data)
+                response = Response(
+                    {"info": "Jira Epic update query sent"},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                jira_helper.add_epic(engagement, **request.data)
+                response = Response(
+                    {"info": "Jira Epic create query sent"},
+                    status=status.HTTP_200_OK,
+                )
+            return response
+        except ValidationError:
+            return Response(
+                {"error": "Bad Request!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
 
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
