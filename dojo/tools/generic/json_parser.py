@@ -45,6 +45,8 @@ class GenericJSONParser:
                 "date",
                 "cwe",
                 "cve",
+                "epss_score",
+                "epss_percentile",
                 "cvssv3",
                 "cvssv3_score",
                 "mitigation",
