@@ -46,8 +46,8 @@
                             </a>
                         </td>
                         <td>{{ result.version }}</td>
-                        <td class="text-center">
-                            <a href="{% url 'view_engagement' result.engagement.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}"> 
+                        <td>
+                            <a href="{% url 'view_engagement' result.engagement.id %}" data-toggle="tooltip" data-placement="bottom"> 
                              {{ result.engagement_name }}
                             </a></td>
                         <td class="text-center">
