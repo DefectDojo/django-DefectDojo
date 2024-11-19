@@ -2,6 +2,8 @@
 title: "Upgrading"
 description: "Release specific upgrading instructions"
 draft: false
+sidebar:
+    collapsed: true
 weight: 2
 ---
 
