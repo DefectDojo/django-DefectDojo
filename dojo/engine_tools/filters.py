@@ -6,4 +6,4 @@ class FindingExclusionFilter(filter.FilterSet):
 
     class Meta:
         model = FindingExclusion
-        fields = ["type", "product"]
+        fields = ["type"]

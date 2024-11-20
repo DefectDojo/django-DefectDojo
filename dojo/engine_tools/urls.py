@@ -17,5 +17,8 @@ urlpatterns = [
             name="create_finding_exclusion"),
     re_path(r"^engine_tools/finding_exclusion/(?P<fxid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
             views.show_finding_exclusion,
-            name="finding_exclusion")
+            name="finding_exclusion"),
+    re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/add-discussion/$', 
+            views.add_finding_exclusion_discussion, 
+            name='add_finding_exclusion_discussion'),
 ]

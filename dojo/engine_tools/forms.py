@@ -1,6 +1,6 @@
 from django import forms
-from dojo.models import Finding, Product, Dojo_User
-from dojo.engine_tools.models import FindingExclusion
+from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
+from dojo.engine_tools.helpers import Constants
 
 
 class FindingExclusionForm(forms.ModelForm):
@@ -15,13 +15,21 @@ class CreateFindingExclusionForm(forms.ModelForm):
     unique_id_from_tool = forms.CharField(
         required=True,
         max_length=500,
-        help_text="Vulnerability technical id from the source tool. Allows to track unique vulnerabilities.")
+        help_text=Constants.VULNERABILITY_ID_HELP_TEXT.value)
     expiration_date = forms.DateTimeField()
-    user_history = forms.IntegerField(required=True)
     reason = forms.CharField(max_length=200, required=True,
                              widget=forms.Textarea,
                              label="Reason")
 
     class Meta:
         model = FindingExclusion
-        exclude = ["product", "accepted_by", "status", "finding"]
+        exclude = ["uuid", "product", "user_history", "created_by", "accepted_by", "status", "finding"]
+        
+
+class FindingExclusionDiscussionForm(forms.ModelForm):
+    class Meta:
+        model = FindingExclusionDiscussion
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Agregar un comentario...'})
+        }

@@ -47,4 +47,20 @@ class FindingExclusion(models.Model):
     class Meta:
         db_table = "dojo_finding_exlusion"
 
+
+class FindingExclusionDiscussion(models.Model):
+    finding_exclusion = models.ForeignKey("FindingExclusion", on_delete=models.CASCADE, related_name='discussions')
+    author = models.ForeignKey("Dojo_User", on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Discussion by {self.author.username} on {self.created_at}"
+    
+    class Meta:
+        db_table = "dojo_finding_exclusion_discussion"
+
+
 admin.site.register(FindingExclusion)
+admin.site.register(FindingExclusionDiscussion)

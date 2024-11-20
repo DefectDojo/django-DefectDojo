@@ -3,7 +3,6 @@
 {% load display_tags %}
 {% load multiply %}
 {% load humanize %}
-{% load static %}
 {% load i18n %}
 {% block add_styles %}
     {{ block.super }}
@@ -52,9 +51,42 @@
         position: relative;
         z-index: 1;
     }
+    .discussion-item {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .discussion-right {
+        align-self: flex-end;
+        text-align: end;
+        background-color: #e6f2ff;
+        border-radius: 10px;
+        padding: 10px;
+        width: 300px;
+        margin-left: auto; /* This will push it to the right */
+    }
+    
+    .discussion-left {
+        align-self: flex-start;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        padding: 10px;
+        width: 300px;
+        margin-right: auto; /* This will keep it on the left */
+    }
+    .sticky-form {
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        padding: 15px;
+        border-top: 1px solid #ddd;
+        z-index: 1000;
+    }
 {% endblock %}
 
 {% block content %}
+{{ block.super }}
 <div id="main-finding-exclusion">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -194,7 +226,29 @@
                         class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_disc" class="panel-body finding-description collapse in">
+                {% for discussion in finding_exclusion.discussions.all %}
+                    <div class="discussion-item {% if discussion.author == request.user %}discussion-right{% else %}discussion-left{% endif %}">
+                        <div class="discussion-header">
+                            <strong>{{ discussion.author.username }}</strong>
+                            <small class="text-muted">{{ discussion.created_at|date:"F d, Y H:i" }}</small>
+                        </div>
+                        <div class="discussion-content">
+                            {{ discussion.content|linebreaks }}
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>There are no discussions yet.</p>
+                {% endfor %}
                 
+                <div class="sticky-form">
+                    <form method="post" action="{% url 'add_finding_exclusion_discussion' finding_exclusion.uuid|stringformat:'s' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ discussion_form.content }}
+                        </div>
+                        <button type="submit" class="btn" label="Submit" name="Submit" value="Submit">Submit</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
