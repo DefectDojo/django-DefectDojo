@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from collections import UserList
+import collections
 from datetime import datetime
 
 import six
