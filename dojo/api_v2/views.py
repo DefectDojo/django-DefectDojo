@@ -504,7 +504,7 @@ class EngagementViewSet(
                 )
 
             notes = engagement.notes.filter(note_type=note_type).first()
-            if notes and note_type.is_single:
+            if notes and note_type and note_type.is_single:
                 return Response("Only one instance of this note_type allowed on an engagement.", status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
@@ -1054,7 +1054,7 @@ class FindingViewSet(
 
             if finding.notes:
                 notes = finding.notes.filter(note_type=note_type).first()
-                if notes and note_type.is_single:
+                if notes and note_type and note_type.is_single:
                     return Response("Only one instance of this note_type allowed on a finding.", status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
@@ -2058,7 +2058,7 @@ class TestsViewSet(
                 )
 
             notes = test.notes.filter(note_type=note_type).first()
-            if notes and note_type.is_single:
+            if notes and note_type and note_type.is_single:
                 return Response("Only one instance of this note_type allowed on a test.", status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
