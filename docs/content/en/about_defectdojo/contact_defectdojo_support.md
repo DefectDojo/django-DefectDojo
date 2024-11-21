@@ -3,7 +3,7 @@ title: "Contact DefectDojo Support"
 description: "For Pro users: support@defectdojo.com + other options"
 draft: "false"
 pro-feature: true
-weight: 1
+weight: 3
 ---
 
 For DefectDojo Pro users, DefectDojo's Support team can be contacted in a variety of ways.
