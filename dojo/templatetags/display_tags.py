@@ -830,7 +830,7 @@ def jiraencode_component(value):
 
 
 @register.filter
-def jira_project(obj, use_inheritance=True):
+def jira_project(obj, *, use_inheritance=True):
     return jira_helper.get_jira_project(obj, use_inheritance)
 
 
@@ -908,7 +908,7 @@ def class_name(value):
 
 
 @register.filter(needs_autoescape=True)
-def jira_project_tag(product_or_engagement, autoescape=True):
+def jira_project_tag(product_or_engagement, *, autoescape=True):
     if autoescape:
         esc = conditional_escape
     else:
@@ -963,7 +963,7 @@ def full_name(user):
 
 
 @register.filter(needs_autoescape=True)
-def import_settings_tag(test_import, autoescape=True):
+def import_settings_tag(test_import, *, autoescape=True):
     if not test_import or not test_import.import_settings:
         return ""
 
@@ -1005,7 +1005,7 @@ def import_settings_tag(test_import, autoescape=True):
 
 
 @register.filter(needs_autoescape=True)
-def import_history(finding, autoescape=True):
+def import_history(finding, *, autoescape=True):
     if not finding or not settings.TRACK_IMPORT_HISTORY:
         return ""
 
