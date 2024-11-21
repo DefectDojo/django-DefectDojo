@@ -263,7 +263,7 @@ class CheckmarxOneParser:
         file_path = vulnerability.get("data").get("nodes")[0].get("fileName")
         unique_id_from_tool = vulnerability.get("id", vulnerability.get("similarityId"))
         if description is None:
-            description = vulnerability.get("severity").title() + " " + vulnerability.get("id")
+            description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
 
         return Finding(
             description=description,
@@ -284,7 +284,7 @@ class CheckmarxOneParser:
         file_path = vulnerability.get("data").get("filename", vulnerability.get("data").get("fileName"))
         unique_id_from_tool = vulnerability.get("id", vulnerability.get("similarityId"))
         if description is None:
-            description = vulnerability.get("severity").title() + " " + vulnerability.get("id")
+            description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
 
         return Finding(
             title=description,
@@ -305,7 +305,7 @@ class CheckmarxOneParser:
         description = vulnerability.get("description")
         unique_id_from_tool = vulnerability.get("id", vulnerability.get("similarityId"))
         if description is None:
-            description = vulnerability.get("severity").title() + " " + vulnerability.get("id")
+            description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
 
         finding = Finding(
             title=description,
