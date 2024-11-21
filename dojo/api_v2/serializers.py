@@ -281,7 +281,7 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
-class RequestResponseDict(UserList):
+class RequestResponseDict(collections.UserList):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
         UserList.__init__(self, *args, **kwargs)
