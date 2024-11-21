@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% load humanize %}
+{% load display_tags %}
+{% load static %}
 {% block content %}
     {{ block.super }}
 
@@ -22,50 +25,54 @@
             {% include "dojo/paging_snippet.html" with page=result page_size=True %}
         </div>
         <div class="panel panel-default table-responsive">
-            <table id="components-table" class="tablesorter-bootstrap table table-condensed table-striped">
+            <table id="components" class="tablesorter-bootstrap table table-condensed table-striped">
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Version</th>
-                        <th class="text-center">Active</th>
-                        <th class="text-center">Duplicate</th>
-                        <th class="text-center">Total</th>
+                        <th>Engagement Name</th>
+                        <th class="text-center">Active Findings</th>
+                        <th class="text-center">Duplicate Findings</th>
+                        <th class="text-center">Total Findings</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    {% for result in result  %}
+                    {% for result in result %}
                     <tr>
-                        <td data-order="{{ result.component_name }}">
-                            {% if result.component_name == none%}
-                               <a rel="noopener noreferrer" href="{% url 'all_findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.component_name }}</b></a>
-                            {% else %}
-                               <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.component_name }}&test__engagement__product={{prod.id}}"><b>{{ result.component_name }}</b></a>
-                            {% endif %}
+                        <td>
+                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.name }}&test__engagement__product={{result.engagement.product.id}}">
+                                <b>{{ result.name }}</b>
+                            </a>
                         </td>
-                        <td>{{result.component_version}} </td>
-                        <td class="text-center" data-order="{{ result.active }}">
-                            {% if result.active and result.component_name == none %}
-                            <a rel="noopener noreferrer" href="{% url 'open_findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.active }}</b></a>
-                            {% elif result.active %}
-                            <a rel="noopener noreferrer" href="{% url 'open_findings' %}?component_name={{ result.component_name }}&test__engagement__product={{prod.id}}"><b>{{ result.active }}</b></a>
-                            {% else %}
-                            0
-                            {% endif %}
-                        </td>
-                        <td class="text-center" data-order="{{ result.duplicate }}">
-                            {% if result.duplicate and result.component_name == none %}
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?has_component=false&test__engagement__product={{prod.id}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
-                            {% elif result.duplicate %}
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.component_name }}&test__engagement__product={{prod.id}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                        <td>{{ result.version }}</td>
+                        <td>
+                            <a href="{% url 'view_engagement' result.engagement.id %}" data-toggle="tooltip" data-placement="bottom"> 
+                             {{ result.engagement_name }}
+                            </a></td>
+                        <td class="text-center">
+                            {% if result.active_findings %}
+                            <a href="{% url 'open_findings' %}?component_id={{ result.id }}&test__engagement__product={{result.engagement.product.id}}">
+                                <b>{{ result.active_findings }}</b>
+                            </a>
                             {% else %}
                             0
                             {% endif %}
                         </td>
-                        <td class="text-center" data-order="{{ result.total }}">
-                            {% if result.total and result.component_name == none %}
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.total }}</b></a>
-                            {% elif result.total %}
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.component_name }}&test__engagement__product={{prod.id}}"><b>{{ result.total }}</b></a>
+                        <td class="text-center">
+                            {% if result.duplicate_findings %}
+                            <a href="{% url 'all_findings' %}?component_id={{ result.id }}&duplicate=1&test__engagement__product={{result.engagement.product.id}}">
+                                <b>{{ result.duplicate_findings }}</b>
+                            </a>
+                            {% else %}
+                            0
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if result.total_findings %}
+                            <a href="{% url 'all_findings' %}?component_id={{ result.id }}&test__engagement__product={{result.engagement.product.id}}">
+                                <b>{{ result.total_findings }}</b>
+                            </a>
                             {% else %}
                             0
                             {% endif %}
@@ -85,14 +92,15 @@
     {{ block.super }}
 <script>
         $(function () {
-            //Ensures dropdown has proper zindex
+            // Ensures dropdown has proper z-index
             $('.table-responsive').on('show.bs.dropdown', function () {
-              $('.table-responsive').css( "overflow", "inherit" );
+                $('.table-responsive').css("overflow", "inherit");
             });
 
             $('.table-responsive').on('hide.bs.dropdown', function () {
-              $('.table-responsive').css( "overflow", "auto" );
-            })
+                $('.table-responsive').css("overflow", "auto");
+            });
+
             var availableTags = [
                 {% for word in component_words %}
                     "{{word}}",
@@ -103,10 +111,10 @@
             });
         });
 </script>
-    <script nonce="{{request.csp_nonce}}">
-    // DataTables setup
-    $(document).ready(function() {
-        date =  new Date().toISOString().slice(0, 10);
+<script nonce="{{request.csp_nonce}}">
+    // DataTables setup with search, column visibility, and export options
+    $(document).ready(function () {
+        var date = new Date().toISOString().slice(0, 10);
         var fileDated = 'Product_Components_' + date;
         var buttonCommon = {
             exportOptions: {
@@ -119,58 +127,58 @@
             title: 'Product Components'
         };
 
-        // Mapping of table columns to objects for proper cleanup and data formatting
-        {% if enable_table_filtering %}
-            var dojoTable = $('#components-table').DataTable({
-                drawCallback: function(){
-                    $('#components-table .has-popover').hover(
-                        function() { $(this).popover('show'); }, // hover
-                        function() { $(this).popover('hide'); } // unhover
-                    );
+        // DataTables initialization
+        var dojoTable = $('#components').DataTable({
+            drawCallback: function () {
+                $('#components .has-popover').hover(
+                    function () { $(this).popover('show'); }, // hover
+                    function () { $(this).popover('hide'); } // unhover
+                );
+            },
+            "columns": [
+                { "data": "Component_name" },
+                { "data": "Version" },
+                { "data": "Engagement_name"},
+                { "data": "Active" },
+                { "data": "Duplicate" },
+                { "data": "Total" },
+            ],
+            order: [],  // Default order (can be customized)
+            columnDefs: [
+                {
+                    "orderable": false,  // Disable ordering for certain columns if necessary
                 },
-                "columns": [
-                    null, // Component_name
-                    { "data": "Version" },
-                    null, // Active
-                    null, // Duplicate
-                    null, // Total
-                ],
-                order: [],
-                columnDefs: [
-                    {
-                        "orderable": false,
-                    },
-                ],
-                dom: 'Bfrtip',
-                paging: false,
-                info: false,
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        columns: ':not(.noVis)'
-                    },
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'copy'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'pdf',
-                        orientation: 'landscape',
-                        pageSize: 'LETTER'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'print'
-                    }),
-                ],
-            });
-        {% endif %}
+            ],
+            dom: 'Bfrtip',  // Layout for buttons and search input
+            paging: false,   // Enable pagination
+            searching: true, // Enable search feature
+            info: false, // Show table information
+            buttons: [
+                {
+                    extend: 'colvis',
+                    columns: ':not(.noVis)',  // Column visibility
+                },
+                $.extend(true, {}, buttonCommon, {
+                    extend: 'copy',
+                }),
+                $.extend(true, {}, buttonCommon, {
+                    extend: 'excel',
+                    autoFilter: true,
+                    sheetName: 'Exported data',
+                }),
+                $.extend(true, {}, buttonCommon, {
+                    extend: 'csv',
+                }),
+                $.extend(true, {}, buttonCommon, {
+                    extend: 'pdf',
+                    orientation: 'landscape',
+                    pageSize: 'LETTER',
+                }),
+                $.extend(true, {}, buttonCommon, {
+                    extend: 'print',
+                }),
+            ],
+        });
     });
 </script>
 {% include "dojo/filter_js_snippet.html" %}

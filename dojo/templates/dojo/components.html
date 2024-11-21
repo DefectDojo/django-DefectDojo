@@ -28,46 +28,49 @@
                     <tr>
                         <th>Name</th>
                         <th>Version</th>
-                        <th class="text-center">Active</th>
-                        <th class="text-center">Duplicate</th>
-                        <th class="text-center">Total</th>
+                        <th>Engagement Name</th>
+                        <th class="text-center">Active Findings</th>
+                        <th class="text-center">Duplicate Findings</th>
+                        <th class="text-center">Total Findings</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    {% for result in result  %}
+                    {% for result in result %}
                     <tr>
                         <td>
-                            {% if result.component_name == none %}
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?has_component=false"><b>{{ result.component_name }}</b></a>
-                            {% else %}
-                                <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.component_name }}"><b>{{ result.component_name }}</b></a>
-                            {% endif %}
+                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.name }}">
+                                <b>{{ result.name }}</b>
+                            </a>
                         </td>
-
-                        <td>{{result.component_version}} </td>
+                        <td>{{ result.version }}</td>
+                        <td>
+                            <a href="{% url 'view_engagement' result.engagement.id %}" data-toggle="tooltip" data-placement="bottom""> 
+                             {{ result.engagement_name }}
+                            </a></td>
                         <td class="text-center">
-                            {% if result.active and result.component_name == none %}
-                            <a rel="noopener noreferrer" href="{% url 'open_findings' %}?has_component=false"><b>{{ result.active }}</b></a>
-                            {% elif result.active%}
-                            <a rel="noopener noreferrer" href="{% url 'open_findings' %}?component_name={{ result.component_name }}"><b>{{ result.active }}</b></a>
-                            {% else %}
-                            0
-                            {% endif %}
-                        </td>
-                        <td class="text-center">
-                            {% if result.duplicate and result.component_name == none %}
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?has_component=false&duplicate=1"><b>{{ result.duplicate }}</b></a>
-                            {% elif result.duplicate %}
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.component_name }}&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            {% if result.active_findings %}
+                            <a href="{% url 'open_findings' %}?component_id={{ result.id }}">
+                                <b>{{ result.active_findings }}</b>
+                            </a>
                             {% else %}
                             0
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            {% if result.total and result.component_name == none %}
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?has_component=false"><b>{{ result.total }}</b></a>
-                            {% elif result.total %}
-                            <a rel="noopener noreferrer" href="{% url 'all_findings' %}?component_name={{ result.component_name }}"><b>{{ result.total }}</b></a>
+                            {% if result.duplicate_findings %}
+                            <a href="{% url 'all_findings' %}?component_id={{ result.id }}&duplicate=1">
+                                <b>{{ result.duplicate_findings }}</b>
+                            </a>
+                            {% else %}
+                            0
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if result.total_findings %}
+                            <a href="{% url 'all_findings' %}?component_id={{ result.id }}">
+                                <b>{{ result.total_findings }}</b>
+                            </a>
                             {% else %}
                             0
                             {% endif %}
@@ -133,6 +136,7 @@
                 "columns": [
                         { "data": "Component_name" },
                         { "data": "Version" },
+                        { "data": "Engagement_name"},
                         { "data": "Active" },
                         { "data": "Duplicate" },
                         { "data": "Total" },

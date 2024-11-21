@@ -1,67 +1,41 @@
-from django.contrib.postgres.aggregates import StringAgg
-from django.db import connection
-from django.db.models import Count, Q
-from django.db.models.expressions import Value
+from django.db.models import Count, Q, F
 from django.shortcuts import render
-
+from dojo.models import Component
 from dojo.authorization.roles_permissions import Permissions
-from dojo.components.sql_group_concat import Sql_GroupConcat
 from dojo.filters import ComponentFilter, ComponentFilterWithoutObjectLookups
-from dojo.finding.queries import get_authorized_findings
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
 
 
 def components(request):
     add_breadcrumb(title="Components", top_level=True, request=request)
-    separator = ", "
-    # Get components ordered by component_name and concat component versions
-    # to the same row
+    
+    # Obtain authorized engagements
+    authorized_engagements = get_authorized_engagements(Permissions.Engagement_View)
 
-    component_query = get_authorized_findings(Permissions.Finding_View)
+    # Filter components based in authorized engagements
+    component_query = Component.objects.filter(engagement__in=authorized_engagements)
 
-    if connection.vendor == "postgresql":
-        component_query = (
-            component_query.values("component_name")
-            .order_by("component_name")
-            .annotate(
-                component_version=StringAgg(
-                    "component_version", delimiter=separator, distinct=True, default=Value(""),
-                ),
-            )
-        )
-    else:
-        component_query = component_query.values("component_name").order_by(
-            "component_name",
-        )
-        component_query = component_query.annotate(
-            component_version=Sql_GroupConcat(
-                "component_version", separator=separator, distinct=True,
-            ),
-        )
-
-    # Append counts
-    component_query = component_query.annotate(total=Count("id")).order_by(
-        "component_name",
-    )
+    # Add annotations to count findings
     component_query = component_query.annotate(
-        active=Count("id", filter=Q(active=True)),
+        total_findings=Count('finding__id', distinct=True), 
+        active_findings=Count('finding__id', filter=Q(finding__active=True), distinct=True),
+        duplicate_findings=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True),
+        engagement_name=F('engagement__name')
     )
-    component_query = component_query.annotate(
-        duplicate=(Count("id", filter=Q(duplicate=True))),
-    )
-    component_query = component_query.order_by(
-        "-total",
-    )  # Default sort by total descending
 
+    # Order by total findings
+    component_query = component_query.order_by("-total_findings")
+
+    # Apply filters
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ComponentFilterWithoutObjectLookups if filter_string_matching else ComponentFilter
     comp_filter = filter_class(request.GET, queryset=component_query)
+
     result = get_page_items(request, comp_filter.qs, 25)
 
-    # Filter out None values for auto-complete
-    component_words = component_query.exclude(
-        component_name__isnull=True,
-    ).values_list("component_name", flat=True)
+    # Autocomplete component names
+    component_words = component_query.exclude(name__isnull=True).values_list("name", flat=True)
 
     return render(
         request,

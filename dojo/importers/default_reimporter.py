@@ -10,6 +10,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
+from dojo.importers.utils import get_or_create_component
 from dojo.models import (
     Development_Environment,
     Finding,
@@ -179,6 +180,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
+        if not self.engagement:
+            self.engagement = self.test.engagement
+
         for non_clean_unsaved_finding in parsed_findings:
             # make sure the severity is something is digestible
             unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
@@ -186,6 +190,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
+
+            if hasattr(unsaved_finding, "component_name") and hasattr(unsaved_finding, "component_version"):
+                component_name = unsaved_finding.component_name
+                component_version = unsaved_finding.component_version
+                if component_name and component_version:
+                    component = get_or_create_component(
+                        component_name,
+                        component_version,
+                        self.engagement
+                    )
+
+                    unsaved_finding.component = component
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
             if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:

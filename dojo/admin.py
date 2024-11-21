@@ -3,7 +3,7 @@ from django.contrib import admin
 from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 from django.db.migrations.recorder import MigrationRecorder
 from dojo.models import Question, TextQuestion, ChoiceQuestion, Choice, \
-    Answer, TextAnswer, ChoiceAnswer, Engagement_Survey, Answered_Survey
+    Answer, TextAnswer, ChoiceAnswer, Engagement_Survey, Answered_Survey, Component
 
 admin.site.unregister(LogEntry)
 
