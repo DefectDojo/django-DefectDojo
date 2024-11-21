@@ -4,6 +4,7 @@ import logging
 import re
 from datetime import datetime
 
+from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
@@ -18,7 +19,6 @@ def parse_csv(csv_file) -> [Finding]:
         csv_file:
     Returns:
     """
-
     content = csv_file.read()
     if isinstance(content, bytes):
         content = content.decode("utf-8")
@@ -27,21 +27,19 @@ def parse_csv(csv_file) -> [Finding]:
     )
 
     report_findings = get_report_findings(csv_reader)
-    dojo_findings = build_findings_from_dict(report_findings)
-
-    return dojo_findings
+    return build_findings_from_dict(report_findings)
 
 
 def get_report_findings(csv_reader) -> [dict]:
     """
     Filters out the unneeded information at the beginning of the Qualys CSV report.
+
     Args:
         csv_reader:
 
     Returns:
 
     """
-
     report_findings = []
 
     for row in csv_reader:
@@ -58,13 +56,14 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
 
     This is done because the raw values come with additional characters that cannot be parsed with the cvss library.
         Example: 6.7 (AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H)
+
     Args:
         cvss_base:
         cvss_temporal:
     Returns:
         A CVSS3 Vector including both Base and Temporal if available
-    """
 
+    """
     vector_pattern = r"^\d{1,2}.\d \((.*)\)"
     cvss_vector = "CVSS:3.0/"
 
@@ -92,6 +91,7 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
                 )
 
         return cvss_vector
+    return None
 
 
 def _clean_cve_data(cve_string: str) -> list:
@@ -130,8 +130,7 @@ def get_severity(value: str) -> str:
 
     if settings.USE_QUALYS_LEGACY_SEVERITY_PARSING:
         return legacy_severity_lookup.get(value, "Info")
-    else:
-        return qualys_severity_lookup.get(value, "Info")
+    return qualys_severity_lookup.get(value, "Info")
 
 
 def build_findings_from_dict(report_findings: [dict]) -> [Finding]:

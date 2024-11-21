@@ -74,8 +74,7 @@ def view_finding_group(request, fgid):
             if jira_issue:
                 # See if the submitted issue was a issue key or the full URL
                 jira_instance = jira_helper.get_jira_project(finding_group).jira_instance
-                if jira_issue.startswith(jira_instance.url + "/browse/"):
-                    jira_issue = jira_issue[len(jira_instance.url + "/browse/"):]
+                jira_issue = jira_issue.removeprefix(jira_instance.url + "/browse/")
 
                 if finding_group.has_jira_issue and not jira_issue == jira_helper.get_jira_key(finding_group):
                     jira_helper.unlink_jira(request, finding_group)

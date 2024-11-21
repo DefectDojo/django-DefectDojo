@@ -38,7 +38,7 @@ def new_cred(request):
     return render(request, "dojo/new_cred.html", {"tform": tform})
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
+@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def all_cred_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     creds = Cred_Mapping.objects.filter(product=prod).order_by("cred_id__name")
@@ -641,10 +641,8 @@ def delete_cred_controller(request, destination_url, id, ttid):
 
         if destination_url == "cred":
             return HttpResponseRedirect(reverse(destination_url))
-        else:
-            return HttpResponseRedirect(reverse(destination_url, args=(id, )))
-    else:
-        tform = CredMappingForm(instance=cred)
+        return HttpResponseRedirect(reverse(destination_url, args=(id, )))
+    tform = CredMappingForm(instance=cred)
 
     add_breadcrumb(title="Delete Credential", top_level=False, request=request)
     product_tab = None

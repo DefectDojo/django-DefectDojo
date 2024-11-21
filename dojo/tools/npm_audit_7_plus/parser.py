@@ -22,6 +22,7 @@ is added to each
 
 
 class NpmAudit7PlusParser:
+
     """Represents the parser class."""
 
     def get_scan_types(self):
@@ -44,7 +45,7 @@ class NpmAudit7PlusParser:
     def parse_json(self, json_output):
         """Parse the json format to get findings."""
         if json_output is None:
-            return
+            return None
         try:
             data = json_output.read()
             try:
@@ -121,7 +122,10 @@ def get_item(item_node, tree, test):
     elif item_node["via"] and isinstance(item_node["via"][0], dict):
         title = item_node["via"][0]["title"]
         component_name = item_node["nodes"][0]
-        cwe = item_node["via"][0]["cwe"][0]
+        if len(item_node["via"][0]["cwe"]) > 0:
+            cwe = item_node["via"][0]["cwe"][0]
+        else:
+            cwe = None
         references.append(item_node["via"][0]["url"])
         unique_id_from_tool = str(item_node["via"][0]["source"])
         cvssv3 = item_node["via"][0]["cvss"]["vectorString"]
@@ -144,15 +148,11 @@ def get_item(item_node, tree, test):
             if isinstance(vuln, dict):
                 references.append(vuln["url"])
 
-    if len(cwe):
-        cwe = int(cwe.split("-")[1])
-
     dojo_finding = Finding(
         title=title,
         test=test,
         severity=severity,
         description=description,
-        cwe=cwe,
         mitigation=mitigation,
         references=", ".join(references),
         component_name=component_name,
@@ -165,6 +165,10 @@ def get_item(item_node, tree, test):
         dynamic_finding=False,
         vuln_id_from_tool=unique_id_from_tool,
     )
+
+    if cwe is not None:
+        cwe = int(cwe.split("-")[1])
+        dojo_finding.cwe = cwe
 
     if (cvssv3 is not None) and (len(cvssv3) > 0):
         dojo_finding.cvssv3 = cvssv3

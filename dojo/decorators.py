@@ -43,8 +43,7 @@ def dojo_async_task(func):
         countdown = kwargs.pop("countdown", 0)
         if we_want_async(*args, func=func, **kwargs):
             return func.apply_async(args=args, kwargs=kwargs, countdown=countdown)
-        else:
-            return func(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return __wrapper__
 
@@ -78,8 +77,7 @@ def dojo_model_to_id(_func=None, *, parameter=0):
     if _func is None:
         # decorator called without parameters
         return dojo_model_to_id_internal
-    else:
-        return dojo_model_to_id_internal(_func)
+    return dojo_model_to_id_internal(_func)
 
 
 # decorator with parameters needs another wrapper layer
@@ -123,8 +121,7 @@ def dojo_model_from_id(_func=None, *, model=Finding, parameter=0):
     if _func is None:
         # decorator called without parameters
         return dojo_model_from_id_internal
-    else:
-        return dojo_model_from_id_internal(_func)
+    return dojo_model_from_id_internal(_func)
 
 
 def get_parameter_froms_args_kwargs(args, kwargs, parameter):
@@ -145,22 +142,6 @@ def get_parameter_froms_args_kwargs(args, kwargs, parameter):
         logger.error("unable to get parameter: " + parameter)
 
     return model_or_id
-
-
-def on_exception_log_kwarg(func):
-    def wrapper(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-
-        except Exception:
-            logger.info(f"exception occured at url: {self.driver.current_url}")
-            logger.info(f"page source: {self.driver.page_source}")
-            f = open("/tmp/selenium_page_source.html", "w", encoding="utf-8")
-            f.writelines(self.driver.page_source)
-            # time.sleep(30)
-            raise
-
-    return wrapper
 
 
 def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, block=False):

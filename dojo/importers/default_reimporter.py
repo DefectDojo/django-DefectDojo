@@ -1,5 +1,4 @@
 import logging
-from typing import List, Tuple
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import deserialize, serialize
@@ -51,6 +50,7 @@ class DefaultReImporterOptions(ImporterOptions):
 
 
 class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
+
     """
     The classic reimporter process used by DefectDojo
 
@@ -58,6 +58,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     vulnerabilities is the ultimate tool for getting a current
     point time view of security of a given product
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(
             self,
@@ -71,7 +72,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         scan: TemporaryUploadedFile,
         *args: list,
         **kwargs: dict,
-    ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
+    ) -> tuple[Test, int, int, int, int, int, Test_Import]:
         """
         The full step process of taking a scan report, and converting it to
         findings in the database. This entails the the following actions:
@@ -147,11 +148,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             test_import_history,
         )
 
+    def determine_deduplication_algorithm(self) -> str:
+        """
+        Determines what dedupe algorithm to use for the Test being processed.
+        :return: A string representing the dedupe algorithm to use.
+        """
+        return self.test.deduplication_algorithm
+
     def process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> Tuple[List[Finding], List[Finding], List[Finding], List[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Saves findings in memory that were parsed from the scan report into the database.
         This process involves first saving associated objects such as endpoints, files,
@@ -159,8 +167,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         the finding may be appended to a new or existing group based upon user selection
         at import time
         """
-
-        self.deduplication_algorithm = self.test.deduplication_algorithm
+        self.deduplication_algorithm = self.determine_deduplication_algorithm()
         self.original_items = list(self.test.finding_set.all())
         self.new_items = []
         self.reactivated_items = []
@@ -171,9 +178,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
-        for unsaved_finding in parsed_findings:
+        for non_clean_unsaved_finding in parsed_findings:
             # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(unsaved_finding)
+            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
             # Filter on minimum severity if applicable
             if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
@@ -248,9 +255,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
     def close_old_findings(
         self,
-        findings: List[Finding],
+        findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Updates the status of findings that were detected as "old" by the reimport
         process findings methods
@@ -267,7 +274,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 self.mitigate_finding(
                     finding,
                     f"Mitigated by {self.test.test_type} re-upload.",
-                    self.findings_groups_enabled,
+                    finding_groups_enabled=self.findings_groups_enabled,
                 )
                 mitigated_findings.append(finding)
         # push finding groups to jira since we only only want to push whole groups
@@ -281,7 +288,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Determine how to parse the findings based on the presence of the
         `get_tests` function on the parser object
@@ -299,7 +306,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Parses the findings from file and assigns them to the test
         that was supplied
@@ -312,7 +319,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Uses the parser to fetch any tests that may have been created
         by the API based parser, aggregates all findings from each test
@@ -323,9 +330,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
     def async_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> Tuple[List[Finding], List[Finding], List[Finding], List[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Processes findings in chunks within N number of processes. The
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
@@ -380,10 +387,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     def match_new_finding_to_existing_finding(
         self,
         unsaved_finding: Finding,
-    ) -> List[Finding]:
-        """
-        Matches a single new finding to N existing findings and then returns those matches
-        """
+    ) -> list[Finding]:
+        """Matches a single new finding to N existing findings and then returns those matches"""
         # This code should match the logic used for deduplication out of the re-import feature.
         # See utils.py deduplicate_* functions
         deduplicationLogger.debug("return findings bases on algorithm: %s", self.deduplication_algorithm)
@@ -392,12 +397,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 test=self.test,
                 hash_code=unsaved_finding.hash_code,
             ).exclude(hash_code=None).order_by("id")
-        elif self.deduplication_algorithm == "unique_id_from_tool":
+        if self.deduplication_algorithm == "unique_id_from_tool":
             return Finding.objects.filter(
                 test=self.test,
                 unique_id_from_tool=unsaved_finding.unique_id_from_tool,
             ).exclude(unique_id_from_tool=None).order_by("id")
-        elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+        if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             query = Finding.objects.filter(
                 Q(test=self.test),
                 (Q(hash_code__isnull=False) & Q(hash_code=unsaved_finding.hash_code))
@@ -405,7 +410,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             ).order_by("id")
             deduplicationLogger.debug(query.query)
             return query
-        elif self.deduplication_algorithm == "legacy":
+        if self.deduplication_algorithm == "legacy":
             # This is the legacy reimport behavior. Although it's pretty flawed and doesn't match the legacy algorithm for deduplication,
             # this is left as is for simplicity.
             # Re-writing the legacy deduplication here would be complicated and counter-productive.
@@ -416,15 +421,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     test=self.test,
                     severity=unsaved_finding.severity,
                     numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity)).order_by("id")
-        else:
-            logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
-            return None
+        logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
+        return None
 
     def process_matched_finding(
         self,
         unsaved_finding: Finding,
         existing_finding: Finding,
-    ) -> Tuple[Finding, bool]:
+    ) -> tuple[Finding, bool]:
         """
         Determine how to handle the an existing finding based on the status
         that is possesses at the time of reimport
@@ -434,22 +438,21 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 unsaved_finding,
                 existing_finding,
             )
-        elif existing_finding.is_mitigated:
+        if existing_finding.is_mitigated:
             return self.process_matched_mitigated_finding(
                 unsaved_finding,
                 existing_finding,
             )
-        else:
-            return self.process_matched_active_finding(
-                unsaved_finding,
-                existing_finding,
-            )
+        return self.process_matched_active_finding(
+            unsaved_finding,
+            existing_finding,
+        )
 
     def process_matched_special_status_finding(
         self,
         unsaved_finding: Finding,
         existing_finding: Finding,
-    ) -> Tuple[Finding, bool]:
+    ) -> tuple[Finding, bool]:
         """
         Determine if there is parity between statuses of the new and existing finding.
         If so, do not touch either finding, and move on to the next unsaved finding
@@ -469,6 +472,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         ):
             self.unchanged_items.append(existing_finding)
             return existing_finding, True
+        # If the finding is risk accepted and inactive in Defectdojo we do not sync the status from the scanner
+        # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
+        # (Risk accepted findings are not set to mitigated by Defectdojo)
+        # We however do not exit the loop as we do want to update the endpoints (in case some endpoints were fixed)
+        if existing_finding.risk_accepted and not existing_finding.active:
+            self.unchanged_items.append(existing_finding)
+            return existing_finding, False
         # The finding was not an exact match, so we need to add more details about from the
         # new finding to the existing. Return False here to make process further
         return existing_finding, False
@@ -477,7 +487,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
         existing_finding: Finding,
-    ) -> Tuple[Finding, bool]:
+    ) -> tuple[Finding, bool]:
         """
         Determine how mitigated the existing and new findings really are. We need
         to cover circumstances where mitigation timestamps are different, and
@@ -507,47 +517,44 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 logger.debug(msg)
                 # Return True here to force the loop to continue
                 return existing_finding, True
-            else:
-                # even if there is no mitigation time, skip it, because both the current finding and
-                # the reimported finding are is_mitigated
-                # Return True here to force the loop to continue
-                return existing_finding, True
-        else:
-            if self.do_not_reactivate:
-                logger.debug(
-                    "Skipping reactivating by user's choice do_not_reactivate: "
-                    f" - {existing_finding.id}: {existing_finding.title} "
-                    f"({existing_finding.component_name} - {existing_finding.component_version})",
-                )
-                # Search for an existing note that this finding has been skipped for reactivation
-                # before this current time
-                reactivated_note_text = f"Finding has skipped reactivation from {self.scan_type} re-upload with user decision do_not_reactivate."
-                existing_note = existing_finding.notes.filter(
+            # even if there is no mitigation time, skip it, because both the current finding and
+            # the reimported finding are is_mitigated
+            # Return True here to force the loop to continue
+            return existing_finding, True
+        if self.do_not_reactivate:
+            logger.debug(
+                "Skipping reactivating by user's choice do_not_reactivate: "
+                f" - {existing_finding.id}: {existing_finding.title} "
+                f"({existing_finding.component_name} - {existing_finding.component_version})",
+            )
+            # Search for an existing note that this finding has been skipped for reactivation
+            # before this current time
+            reactivated_note_text = f"Finding has skipped reactivation from {self.scan_type} re-upload with user decision do_not_reactivate."
+            existing_note = existing_finding.notes.filter(
+                entry=reactivated_note_text,
+                author=self.user,
+            )
+            # If a note has not been left before, we can skip this finding
+            if len(existing_note) == 0:
+                note = Notes(
                     entry=reactivated_note_text,
                     author=self.user,
                 )
-                # If a note has not been left before, we can skip this finding
-                if len(existing_note) == 0:
-                    note = Notes(
-                        entry=reactivated_note_text,
-                        author=self.user,
-                    )
-                    note.save()
-                    existing_finding.notes.add(note)
-                    existing_finding.save(dedupe_option=False)
-                # Return True here to force the loop to continue
-                return existing_finding, True
-            else:
-                logger.debug(
-                    f"Reactivating:  - {existing_finding.id}: {existing_finding.title} "
-                    f"({existing_finding.component_name} - {existing_finding.component_version})",
-                )
-                existing_finding.mitigated = None
-                existing_finding.is_mitigated = False
-                existing_finding.mitigated_by = None
-                existing_finding.active = True
-                if self.verified is not None:
-                    existing_finding.verified = self.verified
+                note.save()
+                existing_finding.notes.add(note)
+                existing_finding.save(dedupe_option=False)
+            # Return True here to force the loop to continue
+            return existing_finding, True
+        logger.debug(
+            f"Reactivating:  - {existing_finding.id}: {existing_finding.title} "
+            f"({existing_finding.component_name} - {existing_finding.component_version})",
+        )
+        existing_finding.mitigated = None
+        existing_finding.is_mitigated = False
+        existing_finding.mitigated_by = None
+        existing_finding.active = True
+        if self.verified is not None:
+            existing_finding.verified = self.verified
 
         component_name = getattr(unsaved_finding, "component_name", None)
         component_version = getattr(unsaved_finding, "component_version", None)
@@ -575,7 +582,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
         existing_finding: Finding,
-    ) -> Tuple[Finding, bool]:
+    ) -> tuple[Finding, bool]:
         """
         The existing finding must be active here, so we need to compare it
         closely with the new finding coming in and determine how to proceed
@@ -635,9 +642,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> Finding:
-        """
-        Create a new finding from the one parsed from the report
-        """
+        """Create a new finding from the one parsed from the report"""
         # Set some explicit settings
         unsaved_finding.reporter = self.user
         unsaved_finding.last_reviewed = self.now
@@ -690,9 +695,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             finding.unsaved_files = finding_from_report.unsaved_files
         self.process_files(finding)
         # Process vulnerability IDs
-        finding = self.process_vulnerability_ids(finding)
+        if finding_from_report.unsaved_vulnerability_ids:
+            finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids
 
-        return finding
+        return self.process_vulnerability_ids(finding)
 
     def process_groups_for_all_findings(
         self,
@@ -727,7 +733,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     def process_results(
         self,
         **kwargs: dict,
-    ) -> Tuple[List[Finding], List[Finding], List[Finding], List[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Determine how to to return the results based on whether the process was
         ran asynchronous or not
@@ -751,8 +757,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 serialized_to_mitigate,
                 serialized_untouched,
             )
-        else:
-            return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
+        return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
     def calculate_unsaved_finding_hash_code(
         self,

@@ -5,9 +5,8 @@ from dojo.tools.sysdig_reports.sysdig_data import SysdigData
 
 
 class CSVParser:
-    """
-    Sysdig CSV Data Parser
-    """
+
+    """Sysdig CSV Data Parser"""
 
     def parse(self, filename) -> SysdigData:
 

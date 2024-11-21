@@ -38,11 +38,18 @@ class AquaParser:
         for node in vulnerabilitytree:
             resource = node.get("resource")
             vulnerabilities = node.get("vulnerabilities", [])
+            sensitive_items = resource.get("sensitive_items", [])
             if vulnerabilities is None:
                 vulnerabilities = []
             for vuln in vulnerabilities:
                 item = get_item(resource, vuln, test)
                 unique_key = resource.get("cpe") + vuln.get("name", "None") + resource.get("path", "None")
+                self.items[unique_key] = item
+            if sensitive_items is None:
+                sensitive_items = []
+            for sensitive_item in sensitive_items:
+                item = get_item_sensitive_data(resource, sensitive_item, test)
+                unique_key = resource.get("cpe") + resource.get("path", "None") + str(sensitive_item)
                 self.items[unique_key] = item
 
 
@@ -51,7 +58,9 @@ def get_item(resource, vuln, test):
     resource_version = resource.get("version", "No version")
     vulnerability_id = vuln.get("name", "No CVE")
     fix_version = vuln.get("fix_version", "None")
-    description = vuln.get("description", "No description.")
+    description = vuln.get("description", "No description.") + "\n"
+    if resource.get("path"):
+        description += "**Path:** " + resource.get("path") + "\n"
     cvssv3 = None
 
     url = ""
@@ -127,7 +136,10 @@ def get_item(resource, vuln, test):
     )
     if vulnerability_id != "No CVE":
         finding.unsaved_vulnerability_ids = [vulnerability_id]
-
+    if vuln.get("epss_score"):
+        finding.epss_score = vuln.get("epss_score")
+    if vuln.get("epss_percentile"):
+        finding.epss_percentile = vuln.get("epss_percentile")
     return finding
 
 
@@ -161,27 +173,51 @@ def get_item_v2(item, test):
     return finding
 
 
+def get_item_sensitive_data(resource, sensitive_item, test):
+    resource_name = resource.get("name", "None")
+    resource_path = resource.get("path", "None")
+    vulnerability_id = resource_name
+    description = "**Senstive Item:** " + sensitive_item + "\n"
+    description += "**Layer:** " + resource.get("layer", "None") + "\n"
+    description += "**Layer_Digest:** " + resource.get("layer_digest", "None") + "\n"
+    description += "**Path:** " + resource.get("path", "None") + "\n"
+    finding = Finding(
+        title=vulnerability_id
+        + " - "
+        + resource_name
+        + " ("
+        + resource_path
+        + ") ",
+        test=test,
+        severity="Info",
+        description=description.strip(),
+        component_name=resource.get("name"),
+    )
+    if vulnerability_id != "No CVE":
+        finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+    return finding
+
+
 def aqua_severity_of(score):
     if score == "high":
         return "High"
     if score == "medium":
         return "Medium"
-    elif score == "low":
+    if score == "low":
         return "Low"
-    elif score == "negligible":
+    if score == "negligible":
         return "Info"
-    else:
-        return "Critical"
+    return "Critical"
 
 
 def severity_of(score):
     if score == 0:
         return "Info"
-    elif score < 4:
+    if score < 4:
         return "Low"
-    elif 4.0 < score < 7.0:
+    if 4.0 < score < 7.0:
         return "Medium"
-    elif 7.0 < score < 9.0:
+    if 7.0 < score < 9.0:
         return "High"
-    else:
-        return "Critical"
+    return "Critical"

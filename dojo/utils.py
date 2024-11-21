@@ -1,13 +1,17 @@
 import binascii
 import calendar as tcalendar
 import hashlib
+import importlib
 import logging
 import mimetypes
 import os
+import pathlib
 import re
 from calendar import monthrange
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+from pathlib import Path
 
 import bleach
 import crum
@@ -72,7 +76,8 @@ Helper functions for DefectDojo
 
 
 def do_false_positive_history(finding, *args, **kwargs):
-    """Replicate false positives across product.
+    """
+    Replicate false positives across product.
 
     Mark finding as false positive if the same finding was previously marked
     as false positive in the same product, beyond that, retroactively mark
@@ -84,6 +89,7 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     Args:
         finding (:model:`dojo.Finding`): Finding to be replicated
+
     """
     to_mark_as_fp = set()
 
@@ -132,7 +138,8 @@ def do_false_positive_history(finding, *args, **kwargs):
 
 
 def match_finding_to_existing_findings(finding, product=None, engagement=None, test=None):
-    """Customizable lookup that returns all existing findings for a given finding.
+    """
+    Customizable lookup that returns all existing findings for a given finding.
 
     Takes one finding as an argument and returns all findings that are equal to it
     on the same product, engagement or test. For now, only one custom filter can
@@ -144,6 +151,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         product (:model:`dojo.Product`, optional): Product to filter findings by
         engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
         test (:model:`dojo.Test`, optional): Test to filter findings by
+
     """
     if product:
         custom_filter_type = "product"
@@ -178,7 +186,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             .order_by("id")
         )
 
-    elif deduplication_algorithm == "unique_id_from_tool":
+    if deduplication_algorithm == "unique_id_from_tool":
         return (
             Finding.objects.filter(
                 **custom_filter,
@@ -188,7 +196,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             .order_by("id")
         )
 
-    elif deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+    if deduplication_algorithm == "unique_id_from_tool_or_hash_code":
         query = Finding.objects.filter(
             Q(**custom_filter),
             (
@@ -199,7 +207,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         deduplicationLogger.debug(query.query)
         return query
 
-    elif deduplication_algorithm == "legacy":
+    if deduplication_algorithm == "legacy":
         # This is the legacy reimport behavior. Although it's pretty flawed and
         # doesn't match the legacy algorithm for deduplication, this is left as is for simplicity.
         # Re-writing the legacy deduplication here would be complicated and counter-productive.
@@ -214,9 +222,8 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
             ).order_by("id")
         )
 
-    else:
-        logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
-        return None
+    logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
+    return None
 
 
 # true if both findings are on an engagement that have a different "deduplication on engagement" configuration
@@ -295,6 +302,9 @@ def do_dedupe_finding_task(new_finding, *args, **kwargs):
 
 
 def do_dedupe_finding(new_finding, *args, **kwargs):
+    if dedupe_method := get_custom_method("FINDING_DEDUPE_METHOD"):
+        return dedupe_method(new_finding, *args, **kwargs)
+
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -316,6 +326,7 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             deduplicate_legacy(new_finding)
     else:
         deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
+    return None
 
 
 def deduplicate_legacy(new_finding):
@@ -669,12 +680,14 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             counts.append(start_of_period.strftime("%b %Y"))
-        counts.append(o_count["zero"])
-        counts.append(o_count["one"])
-        counts.append(o_count["two"])
-        counts.append(o_count["three"])
-        counts.append(total)
-        counts.append(o_count["closed"])
+        counts.extend((
+            o_count["zero"],
+            o_count["one"],
+            o_count["two"],
+            o_count["three"],
+            total,
+            o_count["closed"],
+        ))
 
         stuff.append(counts)
         o_stuff.append(counts[:-1])
@@ -687,11 +700,13 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
                 + end_of_period.strftime("%b %d"))
         else:
             a_counts.append(start_of_period.strftime("%b %Y"))
-        a_counts.append(a_count["zero"])
-        a_counts.append(a_count["one"])
-        a_counts.append(a_count["two"])
-        a_counts.append(a_count["three"])
-        a_counts.append(a_total)
+        a_counts.extend((
+            a_count["zero"],
+            a_count["one"],
+            a_count["two"],
+            a_count["three"],
+            a_total,
+        ))
         a_stuff.append(a_counts)
 
 
@@ -704,8 +719,7 @@ def add_breadcrumb(parent=None,
     if clear:
         request.session["dojo_breadcrumbs"] = None
         return
-    else:
-        crumbs = request.session.get("dojo_breadcrumbs", None)
+    crumbs = request.session.get("dojo_breadcrumbs", None)
 
     if top_level or crumbs is None:
         crumbs = [
@@ -784,7 +798,7 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
         first_sunday = start_date - relativedelta(weekday=SU(-1))
         last_sunday = start_date + relativedelta(weeks=weeks)
 
-        # reminder: The first week of a year is the one that contains the year’s first Thursday
+        # reminder: The first week of a year is the one that contains the year's first Thursday
         # so we could have for 29/12/2019: week=1 and year=2019 :-D. So using week number from db is not practical
         if view == "Finding":
             severities_by_day = objs.filter(created__date__gte=first_sunday).filter(created__date__lt=last_sunday) \
@@ -833,27 +847,26 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
             if created < start_of_week:
                 raise ValueError("date found outside supported range: " + str(created))
+            if created >= start_of_week and created < start_of_next_week:
+                # add day count to current week data
+                day_counts[day_offset[created.weekday()]] = day_count
+                highest_day_count = max(highest_day_count, day_count)
             else:
-                if created >= start_of_week and created < start_of_next_week:
-                    # add day count to current week data
-                    day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)
-                else:
-                    # created >= start_of_next_week, so store current week, prepare for next
-                    while created >= start_of_next_week:
-                        week_data, label = get_week_data(start_of_week, tick, day_counts)
-                        punchcard.extend(week_data)
-                        ticks.append(label)
-                        tick += 1
+                # created >= start_of_next_week, so store current week, prepare for next
+                while created >= start_of_next_week:
+                    week_data, label = get_week_data(start_of_week, tick, day_counts)
+                    punchcard.extend(week_data)
+                    ticks.append(label)
+                    tick += 1
 
-                        # new week, new values!
-                        day_counts = [0, 0, 0, 0, 0, 0, 0]
-                        start_of_week = start_of_next_week
-                        start_of_next_week += relativedelta(weeks=1)
+                    # new week, new values!
+                    day_counts = [0, 0, 0, 0, 0, 0, 0]
+                    start_of_week = start_of_next_week
+                    start_of_next_week += relativedelta(weeks=1)
 
-                    # finally a day that falls into the week bracket
-                    day_counts[day_offset[created.weekday()]] = day_count
-                    highest_day_count = max(highest_day_count, day_count)
+                # finally a day that falls into the week bracket
+                day_counts[day_offset[created.weekday()]] = day_count
+                highest_day_count = max(highest_day_count, day_count)
 
         # add week in progress + empty weeks on the end if needed
         while tick < weeks + 1:
@@ -875,8 +888,8 @@ def get_punchcard_data(objs, start_date, weeks, view="Finding"):
 
         return punchcard, ticks
 
-    except Exception as e:
-        logger.exception("Not showing punchcard graph due to exception gathering data", e)
+    except Exception:
+        logger.exception("Not showing punchcard graph due to exception gathering data")
         return None, None
 
 
@@ -1127,71 +1140,135 @@ def opened_in_period(start_date, end_date, **kwargs):
         end_date.month,
         end_date.day,
         tzinfo=timezone.get_current_timezone())
-    opened_in_period = Finding.objects.filter(
-        date__range=[start_date, end_date],
-        **kwargs,
-        verified=True,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated__isnull=True,
-        severity__in=(
-            "Critical", "High", "Medium",
-            "Low")).values("numerical_severity").annotate(
-                Count("numerical_severity")).order_by("numerical_severity")
-    total_opened_in_period = Finding.objects.filter(
-        date__range=[start_date, end_date],
-        **kwargs,
-        verified=True,
-        false_p=False,
-        duplicate=False,
-        out_of_scope=False,
-        mitigated__isnull=True,
-        severity__in=("Critical", "High", "Medium", "Low")).aggregate(
-            total=Sum(
-                Case(
-                    When(
-                        severity__in=("Critical", "High", "Medium", "Low"),
-                        then=Value(1)),
-                    output_field=IntegerField())))["total"]
-
-    oip = {
-        "S0":
-        0,
-        "S1":
-        0,
-        "S2":
-        0,
-        "S3":
-        0,
-        "Total":
-        total_opened_in_period,
-        "start_date":
-        start_date,
-        "end_date":
-        end_date,
-        "closed":
-        Finding.objects.filter(
-            mitigated__date__range=[start_date, end_date],
+    if get_system_setting("enforce_verified_status", True):
+        opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
             **kwargs,
+            verified=True,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            severity__in=(
+                "Critical", "High", "Medium",
+                "Low")).values("numerical_severity").annotate(
+                    Count("numerical_severity")).order_by("numerical_severity")
+        total_opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
+            **kwargs,
+            verified=True,
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated__isnull=True,
             severity__in=("Critical", "High", "Medium", "Low")).aggregate(
                 total=Sum(
                     Case(
                         When(
                             severity__in=("Critical", "High", "Medium", "Low"),
                             then=Value(1)),
-                        output_field=IntegerField())))["total"],
-        "to_date_total":
-        Finding.objects.filter(
-            date__lte=end_date.date(),
-            verified=True,
+                        output_field=IntegerField())))["total"]
+
+        oip = {
+            "S0":
+            0,
+            "S1":
+            0,
+            "S2":
+            0,
+            "S3":
+            0,
+            "Total":
+            total_opened_in_period,
+            "start_date":
+            start_date,
+            "end_date":
+            end_date,
+            "closed":
+            Finding.objects.filter(
+                mitigated__date__range=[start_date, end_date],
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(
+                            When(
+                                severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"],
+            "to_date_total":
+            Finding.objects.filter(
+                date__lte=end_date.date(),
+                verified=True,
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                mitigated__isnull=True,
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).count(),
+        }
+    else:
+        opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
+            **kwargs,
             false_p=False,
             duplicate=False,
             out_of_scope=False,
             mitigated__isnull=True,
+            severity__in=(
+                "Critical", "High", "Medium",
+                "Low")).values("numerical_severity").annotate(
+                    Count("numerical_severity")).order_by("numerical_severity")
+        total_opened_in_period = Finding.objects.filter(
+            date__range=[start_date, end_date],
             **kwargs,
-            severity__in=("Critical", "High", "Medium", "Low")).count(),
-    }
+            false_p=False,
+            duplicate=False,
+            out_of_scope=False,
+            mitigated__isnull=True,
+            severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                total=Sum(
+                    Case(
+                        When(
+                            severity__in=("Critical", "High", "Medium", "Low"),
+                            then=Value(1)),
+                        output_field=IntegerField())))["total"]
+
+        oip = {
+            "S0":
+            0,
+            "S1":
+            0,
+            "S2":
+            0,
+            "S3":
+            0,
+            "Total":
+            total_opened_in_period,
+            "start_date":
+            start_date,
+            "end_date":
+            end_date,
+            "closed":
+            Finding.objects.filter(
+                mitigated__date__range=[start_date, end_date],
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(
+                            When(
+                                severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"],
+            "to_date_total":
+            Finding.objects.filter(
+                date__lte=end_date.date(),
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                mitigated__isnull=True,
+                **kwargs,
+                severity__in=("Critical", "High", "Medium", "Low")).count(),
+        }
 
     for o in opened_in_period:
         oip[o["numerical_severity"]] = o["numerical_severity__count"]
@@ -1208,8 +1285,7 @@ class FileIterWrapper:
         data = self.flo.read(self.chunk_size)
         if data:
             return data
-        else:
-            raise StopIteration
+        raise StopIteration
 
     def __iter__(self):
         return self
@@ -1229,9 +1305,7 @@ def get_cal_event(start_date, end_date, summary, description, uid):
 
 
 def named_month(month_number):
-    """
-    Return the name of the month, given the number.
-    """
+    """Return the name of the month, given the number."""
     return date(1900, month_number, 1).strftime("%B")
 
 
@@ -1244,7 +1318,8 @@ def normalize_query(query_string,
 
 
 def build_query(query_string, search_fields):
-    """ Returns a query, that is a combination of Q objects. That combination
+    """
+    Returns a query, that is a combination of Q objects. That combination
     aims to search keywords within a model by testing the given search fields.
 
     """
@@ -1279,9 +1354,7 @@ def template_search_helper(fields=None, query_string=None):
         return findings
 
     entry_query = build_query(query_string, fields)
-    found_entries = findings.filter(entry_query)
-
-    return found_entries
+    return findings.filter(entry_query)
 
 
 def get_page_items(request, items, page_size, prefix=""):
@@ -1308,11 +1381,12 @@ def get_page_items_and_count(request, items, page_size, prefix="", do_count=True
 
 
 def handle_uploaded_threat(f, eng):
-    _name, extension = os.path.splitext(f.name)
+    path = Path(f.name)
+    extension = path.suffix
     # Check if threat folder exist.
-    if not os.path.isdir(settings.MEDIA_ROOT + "/threat/"):
+    if not Path(settings.MEDIA_ROOT + "/threat/").is_dir():
         # Create the folder
-        os.mkdir(settings.MEDIA_ROOT + "/threat/")
+        Path(settings.MEDIA_ROOT + "/threat/").mkdir()
     with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
               "wb+") as destination:
         for chunk in f.chunks():
@@ -1322,7 +1396,8 @@ def handle_uploaded_threat(f, eng):
 
 
 def handle_uploaded_selenium(f, cred):
-    _name, extension = os.path.splitext(f.name)
+    path = Path(f.name)
+    extension = path.suffix
     with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
               "wb+") as destination:
         for chunk in f.chunks():
@@ -1423,8 +1498,7 @@ def decrypt(key, iv, encrypted_text):
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
-    decrypted_text = _unpad_string(decrypted_text)
-    return decrypted_text
+    return _unpad_string(decrypted_text)
 
 
 def _pad_string(value):
@@ -1513,14 +1587,18 @@ def calculate_grade(product, *args, **kwargs):
 
     if system_settings.enable_product_grade:
         logger.debug("calculating product grade for %s:%s", product.id, product.name)
-        severity_values = Finding.objects.filter(
-            ~Q(severity="Info"),
-            active=True,
-            duplicate=False,
-            verified=True,
-            false_p=False,
-            test__engagement__product=product).values("severity").annotate(
-                Count("numerical_severity")).order_by()
+        findings = Finding.objects.filter(
+                ~Q(severity="Info"),
+                active=True,
+                duplicate=False,
+                false_p=False,
+                test__engagement__product=product)
+
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True)
+
+        severity_values = findings.values("severity").annotate(
+                    Count("numerical_severity")).order_by()
 
         low = 0
         medium = 0
@@ -1560,7 +1638,6 @@ def get_work_days(start: date, end: date):
     about specific country holidays or extra working days.
     https://stackoverflow.com/questions/3615375/number-of-days-between-2-dates-excluding-weekends/71977946#71977946
     """
-
     # if the start date is on a weekend, forward the date to next Monday
     if start.weekday() > WEEKDAY_FRIDAY:
         start = start + timedelta(days=7 - start.weekday())
@@ -1720,9 +1797,8 @@ def get_full_url(relative_url):
 def get_site_url():
     if settings.SITE_URL:
         return settings.SITE_URL
-    else:
-        logger.warning("SITE URL undefined in settings, full_url cannot be created")
-        return "settings.SITE_URL"
+    logger.warning("SITE URL undefined in settings, full_url cannot be created")
+    return "settings.SITE_URL"
 
 
 @receiver(post_save, sender=User)
@@ -1779,7 +1855,7 @@ def get_return_url(request):
         # for some reason using request.GET.get('return_url') never works
         return_url = request.GET["return_url"] if "return_url" in request.GET else None
 
-    return return_url if return_url else None
+    return return_url or None
 
 
 def redirect_to_return_url_or_else(request, or_else):
@@ -1788,11 +1864,10 @@ def redirect_to_return_url_or_else(request, or_else):
     if return_url:
         # logger.debug('redirecting to %s: ', return_url.strip())
         return redirect(request, return_url.strip())
-    elif or_else:
+    if or_else:
         return redirect(request, or_else)
-    else:
-        messages.add_message(request, messages.ERROR, "Unable to redirect anywhere.", extra_tags="alert-danger")
-        return redirect(request, request.get_full_path())
+    messages.add_message(request, messages.ERROR, "Unable to redirect anywhere.", extra_tags="alert-danger")
+    return redirect(request, request.get_full_path())
 
 
 def redirect(request, redirect_to):
@@ -1872,9 +1947,9 @@ def sla_compute_and_notify(*args, **kwargs):
             period = "day"
             if abs_sla_age > 1:
                 period = "days"
-            title += "SLA breached by %d %s! Overdue notice" % (abs_sla_age, period)
+            title += f"SLA breached by {abs_sla_age} {period}! Overdue notice"
         elif kind == "prebreach":
-            title += "SLA pre-breach warning - %d day(s) left" % (sla_age)
+            title += f"SLA pre-breach warning - {sla_age} day(s) left"
         elif kind == "breaching":
             title += "SLA is breaching today"
 
@@ -1965,6 +2040,14 @@ def sla_compute_and_notify(*args, **kwargs):
             for finding in findings:
                 total_count += 1
                 sla_age = finding.sla_days_remaining()
+
+                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
+                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
+                severity, enforce = finding.get_sla_period()
+                if not enforce:
+                    logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
+                    continue
+
                 # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
                 if sla_age is None:
                     sla_age = 0
@@ -2145,7 +2228,8 @@ def add_field_errors_to_response(form):
 
 
 def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix=""):
-    """ Using the default for model in queryset can be slow for large querysets. Even
+    """
+    Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
     this process very well if we can process the models ordered by id.
     In that case we don't need LIMIT or OFFSET, but can keep track of the latest id that
@@ -2166,7 +2250,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
         # get maximum, which is the first due to descending order
         last_id = models.first().id + 1
     else:
-        msg = "order must be ""asc"" or ""desc"""
+        msg = "order must be asc or desc"
         raise ValueError(msg)
     # use filter to make count fast on mysql
     total_count = models.filter(id__gt=0).count()
@@ -2211,7 +2295,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
 
 def to_str_typed(obj):
-    """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    """For code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
     return f"{type(obj)}: {obj}"
 
 
@@ -2231,6 +2315,7 @@ def get_product(obj):
 
     if isinstance(obj, Product):
         return obj
+    return None
 
 
 def prod_name(obj):
@@ -2354,33 +2439,22 @@ def log_user_login(sender, request, user, **kwargs):
     # to cover more complex cases:
     # http://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
 
-    logger.info("login user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("login user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_logged_out)
 def log_user_logout(sender, request, user, **kwargs):
 
-    logger.info("logout user: {user} via ip: {ip}".format(
-        user=user.username,
-        ip=request.META.get("REMOTE_ADDR"),
-    ))
+    logger.info("logout user: %s via ip: %s", user.username, request.META.get("REMOTE_ADDR"))
 
 
 @receiver(user_login_failed)
 def log_user_login_failed(sender, credentials, request, **kwargs):
 
     if "username" in credentials:
-        logger.warning("login failed for: {credentials} via ip: {ip}".format(
-            credentials=credentials["username"],
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.warning("login failed for: %s via ip: %s", credentials["username"], request.META["REMOTE_ADDR"])
     else:
-        logger.error("login failed because of missing username via ip: {ip}".format(
-            ip=request.META["REMOTE_ADDR"],
-        ))
+        logger.error("login failed because of missing username via ip: %s", request.META["REMOTE_ADDR"])
 
 
 def get_password_requirements_string():
@@ -2446,7 +2520,7 @@ def calculate_finding_age(f):
         else:
             diff = timezone.now().date() - start_date
         days = diff.days
-    return days if days > 0 else 0
+    return max(0, days)
 
 
 def get_open_findings_burndown(product):
@@ -2586,8 +2660,26 @@ def get_open_findings_burndown(product):
     return past_90_days
 
 
+def get_custom_method(setting_name: str) -> Callable | None:
+    """
+    Attempts to load and return the method specified by fully-qualified name at the given setting.
+
+    :param setting_name: The name of the setting that holds the fqname of the Python method we want to load
+    :return: The callable if it was able to be loaded, else None
+    """
+    if fq_name := getattr(settings, setting_name, None):
+        try:
+            mn, _, fn = fq_name.rpartition(".")
+            m = importlib.import_module(mn)
+            return getattr(m, fn)
+        except ModuleNotFoundError:
+            pass
+    return None
+
+
 def generate_file_response(file_object: FileUpload) -> FileResponse:
-    """Serve an uploaded file in a uniformed way.
+    """
+    Serve an uploaded file in a uniformed way.
 
     This function assumes all permissions have previously validated/verified
     by the caller of this function.
@@ -2598,14 +2690,34 @@ def generate_file_response(file_object: FileUpload) -> FileResponse:
         raise TypeError(msg)
     # Determine the path of the file on disk within the MEDIA_ROOT
     file_path = f"{settings.MEDIA_ROOT}/{file_object.file.url.lstrip(settings.MEDIA_URL)}"
-    _, file_extension = os.path.splitext(file_path)
+
+    return generate_file_response_from_file_path(
+        file_path, file_name=file_object.title, file_size=file_object.file.size,
+    )
+
+
+def generate_file_response_from_file_path(
+    file_path: str, file_name: str | None = None, file_size: int | None = None,
+) -> FileResponse:
+    """Serve an local file in a uniformed way."""
+    # Determine the file path
+    path = Path(file_path)
+    file_path_without_extension = path.parent / path.stem
+    file_extension = path.suffix
+    # Determine the file name if not supplied
+    if file_name is None:
+        file_name = file_path_without_extension.rsplit("/")[-1]
+    # Determine the file size if not supplied
+    if file_size is None:
+        file_size = pathlib.Path(file_path).stat().st_size
     # Generate the FileResponse
+    full_file_name = f"{file_name}{file_extension}"
     response = FileResponse(
         open(file_path, "rb"),
-        filename=f"{file_object.title}{file_extension}",
+        filename=full_file_name,
         content_type=f"{mimetypes.guess_type(file_path)}",
     )
     # Add some important headers
-    response["Content-Disposition"] = f'attachment; filename="{file_object.title}{file_extension}"'
-    response["Content-Length"] = file_object.file.size
+    response["Content-Disposition"] = f'attachment; filename="{full_file_name}"'
+    response["Content-Length"] = file_size
     return response

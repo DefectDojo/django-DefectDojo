@@ -30,14 +30,14 @@ def new_object(request, pid):
                                  "Added Tracked File to a Product",
                                  extra_tags="alert-success")
             return HttpResponseRedirect(reverse("view_objects", args=(pid,)))
-    else:
-        tform = ObjectSettingsForm()
-        product_tab = Product_Tab(prod, title="Add Tracked Files to a Product", tab="settings")
+        return None
+    tform = ObjectSettingsForm()
+    product_tab = Product_Tab(prod, title="Add Tracked Files to a Product", tab="settings")
 
-        return render(request, "dojo/new_object.html",
-                      {"tform": tform,
-                       "product_tab": product_tab,
-                       "pid": prod.id})
+    return render(request, "dojo/new_object.html",
+                  {"tform": tform,
+                   "product_tab": product_tab,
+                   "pid": prod.id})
 
 
 @user_is_authorized(Product, Permissions.Product_Tracking_Files_View, "pid")
@@ -101,8 +101,7 @@ def delete_object(request, pid, ttid):
                              "Tracked Product Files Deleted.",
                              extra_tags="alert-success")
         return HttpResponseRedirect(reverse("view_objects", args=(pid,)))
-    else:
-        tform = DeleteObjectsSettingsForm(instance=object)
+    tform = DeleteObjectsSettingsForm(instance=object)
 
     product_tab = Product_Tab(product, title="Delete Product Tool Configuration", tab="settings")
     return render(request,

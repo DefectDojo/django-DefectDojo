@@ -70,7 +70,7 @@ class DojoLoginView(LoginView):
         messages.add_message(
             self.request,
             messages.SUCCESS,
-            _(f'Hello {name}! Your last login was {naturaltime(last_login)} ({last_login.strftime("%Y-%m-%d %I:%M:%S %p")})'),
+            _("Hello %s! Your last login was %s (%s)") % (name, naturaltime(last_login), last_login.strftime("%Y-%m-%d %I:%M:%S %p")),
             extra_tags="alert-success")
         return response
 
@@ -158,13 +158,12 @@ def logout_view(request):
 
     if not settings.SHOW_LOGIN_FORM:
         return login_view(request)
-    else:
-        messages.add_message(request,
-                         messages.SUCCESS,
-                         _("You have logged out successfully."),
-                         extra_tags="alert-success")
+    messages.add_message(request,
+                     messages.SUCCESS,
+                     _("You have logged out successfully."),
+                     extra_tags="alert-success")
 
-        return HttpResponseRedirect(reverse("login"))
+    return HttpResponseRedirect(reverse("login"))
 
 
 @user_passes_test(lambda u: u.is_active)

@@ -17,6 +17,7 @@ import os
 import warnings
 from datetime import timedelta
 from email.utils import getaddresses
+from pathlib import Path
 
 import environ
 from celery.schedules import crontab
@@ -139,7 +140,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, "https://gitlab.com"),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid"]),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid", "read_api", "read_repository"]),
     DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ""),
     DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ""),
@@ -276,12 +277,15 @@ env = environ.FileAwareEnv(
     DD_DELETE_PREVIEW=(bool, True),
     # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
     DD_FILE_UPLOAD_TYPES=(list, [".txt", ".pdf", ".json", ".xml", ".csv", ".yml", ".png", ".jpeg",
-                                 ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip"]),
+                                 ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr"]),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
+    # Enable endpoint which allow user to get API token when user+pass is provided
+    # It is useful to disable when non-local authentication (like SAML, Azure, ...) is in place
+    DD_API_TOKEN_AUTH_ENDPOINT_ENABLED=(bool, True),
     # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
     # Set fields used by the hashcode generator for deduplication, via en env variable that contains a JSON string
@@ -301,25 +305,27 @@ env = environ.FileAwareEnv(
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
     # Use System notification settings to override user's notification settings
     DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
+    # When enabled, force the password field to be required for creating/updating users
+    DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
+    # For HTTP requests, how long connection is open before timeout
+    # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
+    DD_REQUESTS_TIMEOUT=(int, 30),
 )
 
 
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
     result_list = []
-    result_list.append(scheme)
-    result_list.append(":")
+    result_list.extend((scheme, ":"))
     if double_slashes:
         result_list.append("//")
     result_list.append(user)
     if len(password) > 0:
-        result_list.append(":")
-        result_list.append(password)
+        result_list.extend((":", password))
     if len(user) > 0 or len(password) > 0:
         result_list.append("@")
     result_list.append(host)
     if port >= 0:
-        result_list.append(":")
-        result_list.append(str(port))
+        result_list.extend((":", str(port)))
     if len(path) > 0 and path[0] != "/":
         result_list.append("/")
     result_list.append(path)
@@ -330,7 +336,7 @@ def generate_url(scheme, double_slashes, user, password, host, port, path, param
 
 
 # Read .env file as default or from the command line, DD_ENV_PATH
-if os.path.isfile(root("dojo/settings/.env.prod")) or "DD_ENV_PATH" in os.environ:
+if Path(root("dojo/settings/.env.prod")).is_file() or "DD_ENV_PATH" in os.environ:
     env.read_env(root("dojo/settings/" + env.str("DD_ENV_PATH", ".env.prod")))
 
 # ------------------------------------------------------------------------------
@@ -442,7 +448,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(os.path.dirname(DOJO_ROOT), "components", "node_modules"),
+    os.path.join(Path(DOJO_ROOT).parent, "components", "node_modules"),
 )
 
 # List of finder classes that know how to find static files in
@@ -527,6 +533,7 @@ SOCIAL_AUTH_PIPELINE = (
 
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
+REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
@@ -750,6 +757,8 @@ DJANGO_ADMIN_ENABLED = env("DD_DJANGO_ADMIN_ENABLED")
 
 API_TOKENS_ENABLED = env("DD_API_TOKENS_ENABLED")
 
+API_TOKEN_AUTH_ENDPOINT_ENABLED = env("DD_API_TOKEN_AUTH_ENDPOINT_ENABLED")
+
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -932,7 +941,7 @@ if SAML2_ENABLED:
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env("DD_SAML2_ATTRIBUTES_MAP"))
     SAML_FORCE_AUTH = env("DD_SAML2_FORCE_AUTH")
     SAML_ALLOW_UNKNOWN_ATTRIBUTES = env("DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE")
-    BASEDIR = path.dirname(path.abspath(__file__))
+    BASEDIR = Path(path.abspath(__file__)).parent
     if len(env("DD_SAML2_ENTITY_ID")) == 0:
         SAML2_ENTITY_ID = f"{SITE_URL}/saml2/metadata/"
     else:
@@ -1085,14 +1094,14 @@ if AUTH_REMOTEUSER_ENABLED:
 # Celery settings
 CELERY_BROKER_URL = env("DD_CELERY_BROKER_URL") \
     if len(env("DD_CELERY_BROKER_URL")) > 0 else generate_url(
-    env("DD_CELERY_BROKER_SCHEME"),
-    True,
-    env("DD_CELERY_BROKER_USER"),
-    env("DD_CELERY_BROKER_PASSWORD"),
-    env("DD_CELERY_BROKER_HOST"),
-    env("DD_CELERY_BROKER_PORT"),
-    env("DD_CELERY_BROKER_PATH"),
-    env("DD_CELERY_BROKER_PARAMS"),
+    scheme=env("DD_CELERY_BROKER_SCHEME"),
+    double_slashes=True,
+    user=env("DD_CELERY_BROKER_USER"),
+    password=env("DD_CELERY_BROKER_PASSWORD"),
+    host=env("DD_CELERY_BROKER_HOST"),
+    port=env("DD_CELERY_BROKER_PORT"),
+    path=env("DD_CELERY_BROKER_PATH"),
+    params=env("DD_CELERY_BROKER_PARAMS"),
 )
 CELERY_TASK_IGNORE_RESULT = env("DD_CELERY_TASK_IGNORE_RESULT")
 CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
@@ -1140,6 +1149,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.risk_acceptance.helper.expiration_handler",
         "schedule": crontab(minute=0, hour="*/3"),  # every 3 hours
     },
+    "notification_webhook_status_cleanup": {
+        "task": "dojo.notifications.helper.webhook_status_cleanup",
+        "schedule": timedelta(minutes=1),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1149,7 +1162,6 @@ CELERY_BEAT_SCHEDULE = {
     #     'task': 'dojo.tasks.fix_loop_duplicates_task',
     #     'schedule': timedelta(hours=12)
     # },
-
 
 }
 
@@ -1162,10 +1174,12 @@ PROMETHEUS_EXPORT_MIGRATIONS = False
 # django metrics for monitoring
 if env("DD_DJANGO_METRICS_ENABLED"):
     DJANGO_METRICS_ENABLED = env("DD_DJANGO_METRICS_ENABLED")
-    INSTALLED_APPS = INSTALLED_APPS + ("django_prometheus",)
-    MIDDLEWARE = ["django_prometheus.middleware.PrometheusBeforeMiddleware"] + \
-        MIDDLEWARE + \
-        ["django_prometheus.middleware.PrometheusAfterMiddleware"]
+    INSTALLED_APPS = (*INSTALLED_APPS, "django_prometheus")
+    MIDDLEWARE = [
+        "django_prometheus.middleware.PrometheusBeforeMiddleware",
+        *MIDDLEWARE,
+        "django_prometheus.middleware.PrometheusAfterMiddleware",
+]
     database_engine = DATABASES.get("default").get("ENGINE")
     DATABASES["default"]["ENGINE"] = database_engine.replace("django.", "django_prometheus.", 1)
     # CELERY_RESULT_BACKEND.replace('django.core','django_prometheus.', 1)
@@ -1191,6 +1205,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Anchore Grype": ["title", "severity", "component_name", "component_version"],
     "Aqua Scan": ["severity", "vulnerability_ids", "component_name", "component_version"],
     "Bandit Scan": ["file_path", "line", "vuln_id_from_tool"],
+    "Burp Enterprise Scan": ["title", "severity", "cwe"],
     "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
     "Checkmarx Scan": ["cwe", "severity", "file_path"],
     "Checkmarx OSA": ["vulnerability_ids", "component_name"],
@@ -1263,6 +1278,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "HCLAppScan XML": ["title", "description"],
     "KICS Scan": ["file_path", "line", "severity", "description", "title"],
     "MobSF Scan": ["title", "description", "severity"],
+    "MobSF Scorecard Scan": ["title", "description", "severity"],
     "OSV Scan": ["title", "description", "severity"],
     "Snyk Code Scan": ["vuln_id_from_tool", "file_path"],
     "Deepfence Threatmapper Report": ["title", "description", "severity"],
@@ -1272,12 +1288,25 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kubescape JSON Importer": ["title", "component_name"],
     "Kiuwan SCA Scan": ["description", "severity", "component_name", "component_version", "cwe"],
     "Rapplex Scan": ["title", "endpoints", "severity"],
+    "AppCheck Web Application Scanner": ["title", "severity"],
+    "AWS Inspector2 Scan": ["title", "severity", "description"],
+    "Legitify Scan": ["title", "endpoints", "severity"],
+    "ThreatComposer Scan": ["title", "description"],
+    "Invicti Scan": ["title", "description", "severity"],
+    "HackerOne Cases": ["title", "severity"],
+    "KrakenD Audit Scan": ["description", "mitigation", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
 if len(env("DD_HASHCODE_FIELDS_PER_SCANNER")) > 0:
     env_hashcode_fields_per_scanner = json.loads(env("DD_HASHCODE_FIELDS_PER_SCANNER"))
     for key, value in env_hashcode_fields_per_scanner.items():
+        if not isinstance(value, list):
+            msg = f"Fields definition '{value}' for hashcode calculation of '{key}' is not valid. It needs to be list of strings but it is {type(value)}."
+            raise TypeError(msg)
+        if not all(isinstance(field, str) for field in value):
+            msg = f"Fields for hashcode calculation for {key} are not valid. It needs to be list of strings. Some of fields are not string."
+            raise AttributeError(msg)
         if key in HASHCODE_FIELDS_PER_SCANNER:
             logger.info(f"Replacing {key} with value {value} (previously set to {HASHCODE_FIELDS_PER_SCANNER[key]}) from env var DD_HASHCODE_FIELDS_PER_SCANNER")
             HASHCODE_FIELDS_PER_SCANNER[key] = value
@@ -1334,6 +1363,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Wazuh": True,
     "Nuclei Scan": True,
     "Threagile risks report": True,
+    "AWS Inspector2 Scan": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1357,6 +1387,13 @@ DEDUPE_ALGO_HASH_CODE = "hash_code"
 # unique_id_from_tool or hash_code
 # Makes it possible to deduplicate on a technical id (same parser) and also on some functional fields (cross-parsers deduplication)
 DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = "unique_id_from_tool_or_hash_code"
+
+DEDUPE_ALGOS = [
+    DEDUPE_ALGO_LEGACY,
+    DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    DEDUPE_ALGO_HASH_CODE,
+    DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+]
 
 # Allows to deduplicate with endpoints if endpoints is not included in the hashcode.
 # Possible values are: scheme, host, port, path, query, fragment, userinfo, and user. For a details description see https://hyperlink.readthedocs.io/en/latest/api.html#attributes.
@@ -1385,6 +1422,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AWS Security Finding Format (ASFF) Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Burp REST API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Bandit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Burp Enterprise Scan": DEDUPE_ALGO_HASH_CODE,
     "CargoAudit Scan": DEDUPE_ALGO_HASH_CODE,
     "Checkmarx Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Checkmarx Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1485,20 +1523,31 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "HCLAppScan XML": DEDUPE_ALGO_HASH_CODE,
     "KICS Scan": DEDUPE_ALGO_HASH_CODE,
     "MobSF Scan": DEDUPE_ALGO_HASH_CODE,
+    "MobSF Scorecard Scan": DEDUPE_ALGO_HASH_CODE,
     "OSV Scan": DEDUPE_ALGO_HASH_CODE,
     "Nosey Parker Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Bearer CLI": DEDUPE_ALGO_HASH_CODE,
-    "Wiz Scan": DEDUPE_ALGO_HASH_CODE,
+    "Wiz Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Deepfence Threatmapper Report": DEDUPE_ALGO_HASH_CODE,
     "Kubescape JSON Importer": DEDUPE_ALGO_HASH_CODE,
     "Kiuwan SCA Scan": DEDUPE_ALGO_HASH_CODE,
     "Rapplex Scan": DEDUPE_ALGO_HASH_CODE,
+    "AppCheck Web Application Scanner": DEDUPE_ALGO_HASH_CODE,
+    "AWS Inspector2 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
+    "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
+    "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var
 if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
     env_dedup_algorithm_per_parser = json.loads(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER"))
     for key, value in env_dedup_algorithm_per_parser.items():
+        if value not in DEDUPE_ALGOS:
+            msg = f"DEDUP algorithm '{value}' for '{key}' is not valid. Use one of following values: {', '.join(DEDUPE_ALGOS)}"
+            raise AttributeError(msg)
         if key in DEDUPLICATION_ALGORITHM_PER_PARSER:
             logger.info(f"Replacing {key} with value {value} (previously set to {DEDUPLICATION_ALGORITHM_PER_PARSER[key]}) from env var DD_DEDUPLICATION_ALGORITHM_PER_PARSER")
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
@@ -1526,11 +1575,8 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
 )
 
 if env("DD_JIRA_EXTRA_ISSUE_TYPES") != "":
-    if env("DD_JIRA_EXTRA_ISSUE_TYPES").count(",") > 0:
-        for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
-            JIRA_ISSUE_TYPE_CHOICES_CONFIG += (extra_type, extra_type)
-    else:
-        JIRA_ISSUE_TYPE_CHOICES_CONFIG += (env("DD_JIRA_EXTRA_ISSUE_TYPES"), env("DD_JIRA_EXTRA_ISSUE_TYPES"))
+    for extra_type in env("DD_JIRA_EXTRA_ISSUE_TYPES").split(","):
+        JIRA_ISSUE_TYPE_CHOICES_CONFIG += ((extra_type, extra_type),)
 
 JIRA_SSL_VERIFY = env("DD_JIRA_SSL_VERIFY")
 
@@ -1714,6 +1760,20 @@ VULNERABILITY_URLS = {
     "RHBA": "https://access.redhat.com/errata/",
     "RHEA": "https://access.redhat.com/errata/",
     "FEDORA": "https://bodhi.fedoraproject.org/updates/",
+    "ALSA": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
+    "USN": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "DLA": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/DLA-3917-1
+    "ELSA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
+    "ELBA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELBA-2024-7457.html
+    "RXSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
+    "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
+    "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
+    "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
+    "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html
+    "CWE": "https://cwe.mitre.org/data/definitions/&&.html",  # e.g. https://cwe.mitre.org/data/definitions/79.html
+    "TEMP": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/TEMP-0841856-B18BAF
+    "DSA": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/DSA-5791-1
+    "RLSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RLSA-2024:7001
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
@@ -1739,6 +1799,11 @@ USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
 NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
 
 # ------------------------------------------------------------------------------
+# Timeouts
+# ------------------------------------------------------------------------------
+REQUESTS_TIMEOUT = env("DD_REQUESTS_TIMEOUT")
+
+# ------------------------------------------------------------------------------
 # Ignored Warnings
 # ------------------------------------------------------------------------------
 # These warnings are produce by polymorphic beacuser of weirdness around cascade deletes. We had to do
@@ -1750,8 +1815,8 @@ warnings.filterwarnings("ignore", message="PolymorphicModelBase._default_manager
 
 
 # The setting is here to avoid RemovedInDjango60Warning. It is here only for transition period.
-# TODO - Remove this setting in Django 6.0
-# TODO More info:
+# TODO: - Remove this setting in Django 6.0
+# TODO: More info:
 # Context:
 # uwsgi-1  |   File "/app/dojo/forms.py", line 515, in ImportScanForm
 # uwsgi-1  |     source_code_management_uri = forms.URLField(max_length=600, required=False, help_text="Resource link to source code")

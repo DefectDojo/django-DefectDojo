@@ -1,10 +1,10 @@
 import requests
+from django.conf import settings
 
 
 class CobaltAPI:
-    """
-    A simple client for the Cobalt.io API
-    """
+
+    """A simple client for the Cobalt.io API"""
 
     cobalt_api_url = "https://api.cobalt.io"
 
@@ -37,17 +37,17 @@ class CobaltAPI:
         response = self.session.get(
             url=f"{self.cobalt_api_url}/assets?limit=1000",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
             return response.json().get("data")
-        else:
-            msg = (
-                "Unable to get assets due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8"),
-                )
+        msg = (
+            "Unable to get assets due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8"),
             )
-            raise Exception(msg)
+        )
+        raise Exception(msg)
 
     def get_findings(self, asset_id):
         """
@@ -58,29 +58,31 @@ class CobaltAPI:
         response = self.session.get(
             url=f"{self.cobalt_api_url}/findings?limit=1000&asset={asset_id}",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
             return response.json()
-        else:
-            msg = (
-                "Unable to get asset findings due to {} - {}".format(
-                    response.status_code, response.content.decode("utf-8"),
-                )
+        msg = (
+            "Unable to get asset findings due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8"),
             )
-            raise Exception(msg)
+        )
+        raise Exception(msg)
 
     def test_connection(self):
         # Request orgs for the org name
         response_orgs = self.session.get(
             url=f"{self.cobalt_api_url}/orgs",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         # Request assets to validate the org token
         response_assets = self.session.get(
             url=f"{self.cobalt_api_url}/assets",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response_orgs.ok and response_assets.ok:
@@ -91,14 +93,13 @@ class CobaltAPI:
             org = list(orgs)[0]
             org_name = org["resource"]["name"]
             return f'You have access to the "{org_name}" organization'
-        else:
-            msg = (
-                "Connection failed (error: {} - {})".format(
-                    response_assets.status_code,
-                    response_assets.content.decode("utf-8"),
-                )
+        msg = (
+            "Connection failed (error: {} - {})".format(
+                response_assets.status_code,
+                response_assets.content.decode("utf-8"),
             )
-            raise Exception(msg)
+        )
+        raise Exception(msg)
 
     def test_product_connection(self, api_scan_configuration):
         asset = self.get_asset(api_scan_configuration.service_key_1)

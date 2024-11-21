@@ -59,6 +59,9 @@ class UserTest(BaseTestCase):
         # username
         driver.find_element(By.ID, "id_username").clear()
         driver.find_element(By.ID, "id_username").send_keys("userWriter")
+        # password
+        driver.find_element(By.ID, "id_password").clear()
+        driver.find_element(By.ID, "id_password").send_keys("Def3ctD0jo&")
         # First Name
         driver.find_element(By.ID, "id_first_name").clear()
         driver.find_element(By.ID, "id_first_name").send_keys("Writer")
@@ -210,7 +213,7 @@ class UserTest(BaseTestCase):
         driver.find_element(By.ID, "id_email").send_keys("propersam@example.com")
         driver.find_element(By.ID, "reset-password").click()
 
-        self.assertTrue(self.is_text_present_on_page(text="We’ve emailed you instructions for setting your password"))
+        self.assertTrue(self.is_text_present_on_page(text="We've emailed you instructions for setting your password"))
 
     def test_user_edit_configuration(self):
 

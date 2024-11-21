@@ -4,6 +4,7 @@ import pickle
 import re
 import warnings
 from datetime import date, datetime
+from pathlib import Path
 
 import tagulous
 from crispy_forms.bootstrap import InlineCheckboxes, InlineRadios
@@ -31,6 +32,7 @@ from tagulous.forms import TagField
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 from dojo.models import (
@@ -71,6 +73,7 @@ from dojo.models import (
     JIRA_Project,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Objects_Product,
     Product,
@@ -138,6 +141,7 @@ class MultipleSelectWithPop(forms.SelectMultiple):
 
 
 class MonthYearWidget(Widget):
+
     """
     A Widget that splits date input into two <select> boxes for month and year,
     with 'day' defaulting to the first of the month.
@@ -146,6 +150,7 @@ class MonthYearWidget(Widget):
 
     django/trunk/django/forms/extras/widgets.py
     """
+
     none_value = (0, "---")
     month_field = "%s_month"
     year_field = "%s_year"
@@ -284,7 +289,7 @@ class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
 class Test_TypeForm(forms.ModelForm):
     class Meta:
         model = Test_Type
-        exclude = [""]
+        exclude = ["dynamically_generated"]
 
 
 class Development_EnvironmentForm(forms.ModelForm):
@@ -320,6 +325,8 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
+        if prod_type_id := getattr(kwargs.get("instance", Product()), "prod_type_id"):  # we are editing existing instance
+            self.fields["prod_type"].queryset |= Product_Type.objects.filter(pk=prod_type_id)  # even if user does not have permission for any other ProdType we need to add at least assign ProdType to make form submittable (otherwise empty list was here which generated invalid form)
 
         # if this product has findings being asynchronously updated, disable the sla config field
         if self.instance.async_updating:
@@ -579,10 +586,10 @@ class ImportScanForm(forms.Form):
         file = cleaned_data.get("file")
         tool_type = requires_tool_type(scan_type)
         if requires_file(scan_type) and not file:
-            msg = _(f"Uploading a Report File is required for {scan_type}")
+            msg = _("Uploading a Report File is required for %s") % scan_type
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
             raise forms.ValidationError(msg)
         if tool_type:
             api_scan_configuration = cleaned_data.get("api_scan_configuration")
@@ -593,8 +600,7 @@ class ImportScanForm(forms.Form):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -607,8 +613,7 @@ class ImportScanForm(forms.Form):
         return date
 
     def get_scan_type(self):
-        TGT_scan = self.cleaned_data["scan_type"]
-        return TGT_scan
+        return self.cleaned_data["scan_type"]
 
 
 class ReImportScanForm(forms.Form):
@@ -694,7 +699,7 @@ class ReImportScanForm(forms.Form):
             msg = _("Uploading a report file is required for re-uploading findings.")
             raise forms.ValidationError(msg)
         if file and is_scan_file_too_large(file):
-            msg = _(f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB")
+            msg = _("Report file is too large. Maximum supported size is %d MB") % settings.SCAN_FILE_MAX_SIZE
             raise forms.ValidationError(msg)
         tool_type = requires_tool_type(self.scan_type)
         if tool_type:
@@ -747,6 +752,24 @@ class UploadThreatForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".jpg,.png,.pdf"}),
         label="Select Threat Model")
+
+    def clean(self):
+        if (file := self.cleaned_data.get("file", None)) is not None:
+            path = Path(file.name)
+            ext = path.suffix
+            valid_extensions = [".jpg", ".png", ".pdf"]
+            if ext.lower() not in valid_extensions:
+                if accepted_extensions := f"{', '.join(valid_extensions)}":
+                    msg = (
+                        "Unsupported extension. Supported extensions are as "
+                        f"follows: {accepted_extensions}"
+                    )
+                else:
+                    msg = (
+                        "File uploads are prohibited due to the list of acceptable "
+                        "file extensions being empty"
+                    )
+                raise ValidationError(msg)
 
 
 class MergeFindings(forms.ModelForm):
@@ -851,7 +874,8 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
         for form in self.forms:
             file = form.cleaned_data.get("file", None)
             if file:
-                ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+                path = Path(file.name)
+                ext = path.suffix
                 valid_extensions = settings.FILE_UPLOAD_TYPES
                 if ext.lower() not in valid_extensions:
                     if accepted_extensions := f"{', '.join(valid_extensions)}":
@@ -1142,8 +1166,7 @@ class AddFindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1220,8 +1243,7 @@ class AdHocFindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1278,8 +1300,7 @@ class PromoteFindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1402,8 +1423,7 @@ class FindingForm(forms.ModelForm):
         endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data["endpoints_to_add"])
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_add_list = endpoints_to_add_list
+        self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 
@@ -1673,8 +1693,7 @@ class AddEndpointForm(forms.Form):
         endpoints_to_add_list, errors = validate_endpoints_to_add(endpoint)
         if errors:
             raise forms.ValidationError(errors)
-        else:
-            self.endpoints_to_process = endpoints_to_add_list
+        self.endpoints_to_process = endpoints_to_add_list
 
         return cleaned_data
 
@@ -2165,8 +2184,9 @@ class ChangePasswordForm(forms.Form):
 
 
 class AddDojoUserForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
     password = forms.CharField(widget=forms.PasswordInput,
-        required=False,
+        required=settings.REQUIRE_PASSWORD_ON_USER,
         validators=[validate_password],
         help_text="")
 
@@ -2183,6 +2203,7 @@ class AddDojoUserForm(forms.ModelForm):
 
 
 class EditDojoUserForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
 
     class Meta:
         model = Dojo_User
@@ -2381,9 +2402,8 @@ def get_jira_issue_template_dir_choices():
         #     template_list.append((os.path.join(base_dir, filename), filename))
 
         for dirname in dirnames:
-            if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
-                base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
-            template_dir_list.append((os.path.join(base_dir, dirname), dirname))
+            clean_base_dir = base_dir.removeprefix(settings.TEMPLATE_DIR_PREFIX)
+            template_dir_list.append((os.path.join(clean_base_dir, dirname), dirname))
 
     logger.debug("templates: %s", template_dir_list)
     return template_dir_list
@@ -2422,7 +2442,7 @@ class BaseJiraForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class JIRAForm(BaseJiraForm):
+class AdvancedJIRAForm(BaseJiraForm):
     issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
                                        help_text="Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.")
@@ -2442,8 +2462,11 @@ class JIRAForm(BaseJiraForm):
         exclude = [""]
 
 
-class ExpressJIRAForm(BaseJiraForm):
+class JIRAForm(BaseJiraForm):
     issue_key = forms.CharField(required=True, help_text="A valid issue ID is required to gather the necessary information.")
+    issue_template_dir = forms.ChoiceField(required=False,
+                                       choices=JIRA_TEMPLATE_CHOICES,
+                                       help_text="Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.")
 
     class Meta:
         model = JIRA_Instance
@@ -2679,9 +2702,7 @@ class ObjectSettingsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
     def clean(self):
-        form_data = self.cleaned_data
-
-        return form_data
+        return self.cleaned_data
 
 
 class CredMappingForm(forms.ModelForm):
@@ -2775,6 +2796,32 @@ class NotificationsForm(forms.ModelForm):
         exclude = ["template"]
 
 
+class NotificationsWebhookForm(forms.ModelForm):
+    class Meta:
+        model = Notification_Webhooks
+        exclude = []
+
+    def __init__(self, *args, **kwargs):
+        is_superuser = kwargs.pop("is_superuser", False)
+        super().__init__(*args, **kwargs)
+        if not is_superuser:  # Only superadmins can edit owner
+            self.fields["owner"].disabled = True  # TODO: needs to be tested
+
+
+class DeleteNotificationsWebhookForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].disabled = True
+        self.fields["url"].disabled = True
+
+    class Meta:
+        model = Notification_Webhooks
+        fields = ["id", "name", "url"]
+
+
 class ProductNotificationsForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -2829,7 +2876,7 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ["product", "engagement"]
-        fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "jira_labels", "default_assignee", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "product_jira_sla_notification", "risk_acceptance_expiration_notification"]
+        fields = ["inherit_from_product", "jira_instance", "project_key", "issue_template_dir", "epic_issue_type_name", "component", "custom_fields", "jira_labels", "default_assignee", "enabled", "add_vulnerability_id_to_jira_label", "push_all_issues", "enable_engagement_epic_mapping", "push_notes", "product_jira_sla_notification", "risk_acceptance_expiration_notification"]
 
     def __init__(self, *args, **kwargs):
         from dojo.jira_link import helper as jira_helper
@@ -2867,6 +2914,7 @@ class JIRAProjectForm(forms.ModelForm):
                 self.fields["custom_fields"].disabled = False
                 self.fields["default_assignee"].disabled = False
                 self.fields["jira_labels"].disabled = False
+                self.fields["enabled"].disabled = False
                 self.fields["add_vulnerability_id_to_jira_label"].disabled = False
                 self.fields["push_all_issues"].disabled = False
                 self.fields["enable_engagement_epic_mapping"].disabled = False
@@ -2891,6 +2939,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.initial["custom_fields"] = jira_project_product.custom_fields
                     self.initial["default_assignee"] = jira_project_product.default_assignee
                     self.initial["jira_labels"] = jira_project_product.jira_labels
+                    self.initial["enabled"] = jira_project_product.enabled
                     self.initial["add_vulnerability_id_to_jira_label"] = jira_project_product.add_vulnerability_id_to_jira_label
                     self.initial["push_all_issues"] = jira_project_product.push_all_issues
                     self.initial["enable_engagement_epic_mapping"] = jira_project_product.enable_engagement_epic_mapping
@@ -2906,6 +2955,7 @@ class JIRAProjectForm(forms.ModelForm):
                     self.fields["custom_fields"].disabled = True
                     self.fields["default_assignee"].disabled = True
                     self.fields["jira_labels"].disabled = True
+                    self.fields["enabled"].disabled = True
                     self.fields["add_vulnerability_id_to_jira_label"].disabled = True
                     self.fields["push_all_issues"].disabled = True
                     self.fields["enable_engagement_epic_mapping"].disabled = True
@@ -2942,9 +2992,9 @@ class JIRAProjectForm(forms.ModelForm):
             if self.target == "engagement":
                 msg = "JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, or choose to inherit settings from product"
                 raise ValidationError(msg)
-            else:
-                msg = "JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup"
-                raise ValidationError(msg)
+            msg = "JIRA Project needs a JIRA Instance, JIRA Project Key, and Epic issue type name, leave empty to have no JIRA integration setup"
+            raise ValidationError(msg)
+        return None
 
 
 class GITHUBFindingForm(forms.Form):
@@ -3029,7 +3079,7 @@ class JIRAFindingForm(forms.Form):
         elif self.cleaned_data.get("push_to_jira", None):
             active = self.finding_form["active"].value()
             verified = self.finding_form["verified"].value()
-            if not active or not verified:
+            if not active or (not verified and get_system_setting("enforce_verified_status", True)):
                 logger.debug("Findings must be active and verified to be pushed to JIRA")
                 error_message = "Findings must be active and verified to be pushed to JIRA"
                 self.add_error("push_to_jira", ValidationError(error_message, code="not_active_or_verified"))
@@ -3128,8 +3178,7 @@ class LoginBanner(forms.Form):
     )
 
     def clean(self):
-        cleaned_data = super().clean()
-        return cleaned_data
+        return super().clean()
 
 
 class AnnouncementCreateForm(forms.ModelForm):
@@ -3154,8 +3203,8 @@ class AnnouncementRemoveForm(AnnouncementCreateForm):
 # Show in admin a multichoice list of validator names
 # pass this to form using field_name='validator_name' ?
 class QuestionForm(forms.Form):
-    """ Base class for a Question
-    """
+
+    """Base class for a Question"""
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -3363,7 +3412,7 @@ class AddGeneralQuestionnaireForm(forms.ModelForm):
             if expiration < today:
                 msg = "The expiration cannot be in the past"
                 raise forms.ValidationError(msg)
-            elif expiration.day == today.day:
+            if expiration.day == today.day:
                 msg = "The expiration cannot be today"
                 raise forms.ValidationError(msg)
         else:
@@ -3453,8 +3502,7 @@ class MultiWidgetBasic(forms.widgets.MultiWidget):
     def decompress(self, value):
         if value:
             return pickle.loads(value)
-        else:
-            return [None, None, None, None, None, None]
+        return [None, None, None, None, None, None]
 
     def format_output(self, rendered_widgets):
         return "<br/>".join(rendered_widgets)
@@ -3548,6 +3596,18 @@ class AddEngagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product"].queryset = get_authorized_products(Permissions.Engagement_Add)
+
+
+class ExistingEngagementForm(forms.Form):
+    engagement = forms.ModelChoiceField(
+        queryset=Engagement.objects.none(),
+        required=True,
+        widget=forms.widgets.Select(),
+        help_text="Select which Engagement to link the Questionnaire to")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["engagement"].queryset = get_authorized_engagements(Permissions.Engagement_Edit).order_by("-target_start")
 
 
 class ConfigurationPermissionsForm(forms.Form):

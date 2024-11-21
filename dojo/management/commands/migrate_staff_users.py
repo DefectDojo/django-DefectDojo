@@ -10,10 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
+
     """
     This management command creates a group for staff users with all configuration
     permissions staff users had in previous releases.
     """
+
     help = "Usage: manage.py migrate_staff_users"
 
     def handle(self, *args, **options):

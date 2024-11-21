@@ -6,6 +6,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
+from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q, QuerySet
 from django.http import HttpResponseRedirect
@@ -97,9 +98,8 @@ def get_endpoint_ids(endpoints):
         key = f"{e.host}-{e.product.id}"
         if key in hosts:
             continue
-        else:
-            hosts.append(key)
-            ids.append(e.id)
+        hosts.append(key)
+        ids.append(e.id)
     return ids
 
 
@@ -178,7 +178,7 @@ def view_endpoint_host(request, eid):
     return process_endpoint_view(request, eid, host_view=True)
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, "eid")
+@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, "eid")
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
@@ -306,8 +306,7 @@ def add_meta_data(request, eid):
                                  extra_tags="alert-success")
             if "add_another" in request.POST:
                 return HttpResponseRedirect(reverse("add_endpoint_meta_data", args=(eid,)))
-            else:
-                return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
+            return HttpResponseRedirect(reverse("view_endpoint", args=(eid,)))
     else:
         form = DojoMetaDataForm()
 
@@ -326,12 +325,12 @@ def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
     if request.method == "POST":
-        for key, value in request.POST.items():
+        for key, orig_value in request.POST.items():
             if key.startswith("cfv_"):
                 cfv_id = int(key.split("_")[1])
                 cfv = get_object_or_404(DojoMeta, id=cfv_id)
 
-                value = value.strip()
+                value = orig_value.strip()
                 if value:
                     cfv.value = value
                     cfv.save()
@@ -467,6 +466,9 @@ def prefetch_for_endpoints(endpoints):
 
 
 def migrate_endpoints_view(request):
+
+    if not request.user.is_superuser:
+        raise PermissionDenied
 
     view_name = "Migrate endpoints"
 

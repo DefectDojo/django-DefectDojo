@@ -51,7 +51,7 @@ class TenableXMLParser:
                 return None
             if isinstance(element_text, str):
                 return element_text if len(element_text) > 0 else None
-            if isinstance(element_text, (int, float)):
+            if isinstance(element_text, int | float):
                 return element_text or None
         return None
 
@@ -254,11 +254,11 @@ class TenableXMLParser:
                     if fqdn is not None and "://" in fqdn:
                         endpoint = Endpoint.from_uri(fqdn)
                     elif protocol == "general":
-                        endpoint = Endpoint(host=fqdn if fqdn else ip)
+                        endpoint = Endpoint(host=fqdn or ip)
                     else:
                         endpoint = Endpoint(
                             protocol=protocol,
-                            host=fqdn if fqdn else ip,
+                            host=fqdn or ip,
                             port=port,
                         )
                     find.unsaved_endpoints.append(endpoint)

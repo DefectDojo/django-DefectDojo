@@ -485,7 +485,7 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.save(dedupe_option=True)
         self.assert_finding(finding_new, not_pk=2, duplicate=True, duplicate_finding_id=finding_4.duplicate_finding.id, hash_code=finding_2.hash_code)
 
-    # TODO not usefile with ZAP?
+    # TODO: not usefile with ZAP?
     def test_identical_except_line_hash_code(self):
         # 4 is already a duplicate of 2, let's see what happens if we create an identical finding with different line (and reset status)
         # 2 has an endpoint ftp://localhost, 4 has no endpoint
@@ -505,7 +505,7 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.save(dedupe_option=True)
         self.assert_finding(finding_new, not_pk=2, duplicate=True, duplicate_finding_id=finding_4.duplicate_finding.id, hash_code=finding_2.hash_code)
 
-    # TODO not usefile with ZAP?
+    # TODO: not usefile with ZAP?
     def test_identical_except_filepath_hash_code(self):
         # 4 is already a duplicate of 2, let's see what happens if we create an identical finding with different file_path (and reset status)
         # expect: marked as duplicate
@@ -1044,7 +1044,7 @@ class TestDuplicationLogic(DojoTestCase):
         self.assertEqual(finding_new.hash_code, None)
 
         finding_new.save()
-        self.assertTrue(finding_new.hash_code)  # True -> not None
+        self.assertIsNotNone(finding_new.hash_code)
         hash_code_at_creation = finding_new.hash_code
 
         finding_new.title = "new_title"
@@ -1111,17 +1111,17 @@ class TestDuplicationLogic(DojoTestCase):
         finding_new.save(dedupe_option=False)
 
         # save skips hash_code generation if dedupe_option==False
-        self.assertFalse(finding_new.hash_code)
+        self.assertIsNone(finding_new.hash_code)
 
         finding_new.save(dedupe_option=True)
 
-        self.assertTrue(finding_new.hash_code)
+        self.assertIsNotNone(finding_new.hash_code)
 
         finding_new, _finding_124 = self.copy_and_reset_finding(id=124)
         finding_new.save()
 
         # by default hash_code should be generated
-        self.assertTrue(finding_new.hash_code)
+        self.assertIsNotNone(finding_new.hash_code)
 
     # # utility methods
 
@@ -1248,11 +1248,11 @@ class TestDuplicationLogic(DojoTestCase):
 
         self.assertEqual(finding.duplicate, duplicate)
         if not duplicate:
-            self.assertFalse(finding.duplicate_finding)  # False -> None
+            self.assertIsNone(finding.duplicate_finding)
 
         if duplicate_finding_id:
             logger.debug("asserting that finding %i is a duplicate of %i", finding.id if finding.id is not None else "None", duplicate_finding_id if duplicate_finding_id is not None else "None")
-            self.assertTrue(finding.duplicate_finding)  # True -> not None
+            self.assertIsNotNone(finding.duplicate_finding)
             self.assertEqual(finding.duplicate_finding.id, duplicate_finding_id)
 
         if not_hash_code:

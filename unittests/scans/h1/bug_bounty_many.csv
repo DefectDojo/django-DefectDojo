@@ -1,0 +1,5 @@
+id,title,severity_rating,severity_score,state,substate,weakness,reported_at,first_response_at,triaged_at,closed_at,awarded_at,assigned,reporter,source,bounty,bonus,public,reference,reference_url,structured_scope,structured_scope_reference,original_report_id,cve_ids,collaborating_users,duplicate_report_ids
+2501687,Sensitive Account Balance Information Exposure via example's DaviPlata Payment Link Integration,medium,,open,triaged,Information Disclosure,2024-05-12 04:05:27 UTC,2024-05-14 22:14:16 UTC,2024-08-28 19:35:16 UTC,,2024-08-28 19:40:24 UTC,Group example.co Team,reporter,,400.0,,no,,,1489537348,,,"",,
+2710467,Acceso no autorizado a soporte premium sin pagar,critical,9.1,open,new,,2024-09-10 15:38:20 UTC,,,,,,reporter,,,,no,,,example.co,,,"",,
+2682608,XSS - stg.pse.mock.example.co,none,0.0,closed,duplicate,,2024-08-25 07:27:18 UTC,2024-08-27 18:19:23 UTC,,2024-08-27 18:19:23 UTC,,,reporter,,,,no,,,,,2311675,"",,
+2616856,example.co/File creation via HTTP method PUT,critical,,closed,duplicate,,2024-07-22 17:54:36 UTC,2024-07-22 20:57:56 UTC,,2024-07-22 20:57:56 UTC,,,reporter,,,,no,,,example.co,,2597854,CVE-2017-12615,,

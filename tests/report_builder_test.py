@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+from pathlib import Path
 
 from base_test_class import BaseTestCase
 from product_test import ProductTest
@@ -9,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = Path(os.path.realpath(__file__)).parent
 
 
 class ReportBuilderTest(BaseTestCase):
@@ -41,7 +42,7 @@ class ReportBuilderTest(BaseTestCase):
         Select(driver.find_element(By.ID, "id_report_type")).select_by_visible_text("HTML")
         driver.find_element(By.ID, "id_report_name").send_keys("Test Report")
         driver.find_element(By.CLASS_NAME, "run_report").click()
-        self.assertTrue(driver.current_url == self.base_url + "reports/custom")
+        self.assertEqual(driver.current_url, self.base_url + "reports/custom")
 
     def test_product_type_report(self):
         driver = self.driver

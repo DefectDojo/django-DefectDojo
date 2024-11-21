@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 
 
 class RiskReconAPI:
@@ -33,6 +34,7 @@ class RiskReconAPI:
         response = self.session.get(
             url=f"{self.url}/toes",
             headers={"accept": "application/json", "Authorization": self.key},
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
@@ -50,7 +52,7 @@ class RiskReconAPI:
                 name = item.get("toe_short_name", None)
                 if not comps or name in name_list:
                     filters = comps.get(name, None)
-                    self.toe_map[toe_id] = filters if filters else self.data
+                    self.toe_map[toe_id] = filters or self.data
         else:
             msg = f"Unable to query Target of Evaluations due to {response.status_code} - {response.content}"
             raise Exception(msg)
@@ -75,6 +77,7 @@ class RiskReconAPI:
                     "accept": "application/json",
                     "Authorization": self.key,
                 },
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if response.ok:

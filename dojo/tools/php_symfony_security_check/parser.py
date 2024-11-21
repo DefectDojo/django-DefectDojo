@@ -19,7 +19,7 @@ class PhpSymfonySecurityCheckParser:
 
     def parse_json(self, json_file):
         if json_file is None:
-            return
+            return None
         try:
             data = json_file.read()
             try:
@@ -63,11 +63,11 @@ def get_item(dependency_name, dependency_version, advisory, test):
         + advisory["cve"]
         + ")",
         test=test,
-        # TODO decide how to handle the fact we don't have a severity. None
+        # TODO: decide how to handle the fact we don't have a severity. None
         # will lead to problems handling minimum severity on import
         severity="Info",
         description=advisory["title"],
-        # TODO Decide if the default '1035: vulnerable 3rd party component' is
+        # TODO: Decide if the default '1035: vulnerable 3rd party component' is
         # OK to use?
         cwe=1035,
         mitigation="upgrade",

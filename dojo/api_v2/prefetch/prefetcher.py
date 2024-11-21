@@ -3,20 +3,28 @@ import sys
 
 from rest_framework.serializers import ModelSerializer
 
+from dojo.models import FileUpload
+
 from . import utils
 
 # Reduce the scope of search for serializers.
 SERIALIZER_DEFS_MODULE = "dojo.api_v2.serializers"
 
+preferred_serializers = {
+    FileUpload: "FileSerializer",
+}
+
 
 class _Prefetcher:
     @staticmethod
     def _build_serializers():
-        """Returns a map model -> serializer where model is a django model and serializer is the corresponding
+        """
+        Returns a map model -> serializer where model is a django model and serializer is the corresponding
         serializer used to serialize the model
 
         Returns:
             dict[model, serializer]: map of model to their serializer
+
         """
 
         def _is_model_serializer(obj):
@@ -31,7 +39,11 @@ class _Prefetcher:
 
         for _, serializer in available_serializers:
             model = serializer.Meta.model
-            serializers[model] = serializer
+            if model in preferred_serializers:
+                if serializer.__name__ == preferred_serializers[model]:
+                    serializers[model] = serializer
+            else:
+                serializers[model] = serializer
         # We add object->None to have a more uniform processing later on
         serializers[object] = None
 
@@ -42,13 +54,15 @@ class _Prefetcher:
         self._prefetch_data = {}
 
     def _find_serializer(self, field_type):
-        """Find the best suited serializer for the given type.
+        """
+        Find the best suited serializer for the given type.
 
         Args:
             field_type (django.db.models.fields): the field type for which we need to find a serializer
 
         Returns:
             rest_framework.serializers.ModelSerializer: The serializer if one has been found or None
+
         """
         # If the type is represented in the map then return the serializer
         if field_type in self._serializers:
@@ -62,11 +76,13 @@ class _Prefetcher:
         return self._find_serializer(parent_class)
 
     def _prefetch(self, entry, fields_to_fetch):
-        """Apply prefetching for the given field on the given entry
+        """
+        Apply prefetching for the given field on the given entry
 
         Args:
             entry (ModelInstance): Instance of a model as returned by a django queryset
             field_to_fetch (list[string]): fields to prefetch
+
         """
         for field_to_fetch in fields_to_fetch:
             # Get the field from the instance

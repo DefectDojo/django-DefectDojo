@@ -102,7 +102,11 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{- define "initializer.jobname" -}}
+{{- if .Values.initializer.staticName -}}
+{{ .Release.Name }}-initializer
+{{- else -}}
 {{ .Release.Name }}-initializer-{{- printf "%s" now | date "2006-01-02-15-04" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -136,13 +140,12 @@ Create chart name and version as used by the chart label.
   command:
   - sh
   - -c
-  # - tail -f /dev/null
   - while ! /app/manage.py migrate --check; do echo "Database is not migrated to the latest state yet"; sleep 5; done;
   image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
   imagePullPolicy: {{ .Values.imagePullPolicy }}
   {{- if .Values.securityContext.enabled }}
   securityContext:
-    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+    {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 4 }}
   {{- end }}
   envFrom:
   - configMapRef:
@@ -166,8 +169,8 @@ Create chart name and version as used by the chart label.
           key: postgresql-postgres-password
         {{- end }}
   {{- if .Values.extraEnv }}
-  {{- toYaml .Values.extraEnv | nindent 8 }}
+  {{- toYaml .Values.extraEnv | nindent 2 }}
   {{- end }}
   resources:
-    {{- toYaml .Values.django.uwsgi.resources | nindent 10 }}
+    {{- toYaml .Values.dbMigrationChecker.resources | nindent 4 }}
 {{- end -}}

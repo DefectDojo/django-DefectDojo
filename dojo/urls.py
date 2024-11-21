@@ -40,6 +40,7 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     NotificationsViewSet,
+    NotificationWebhooksViewSet,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -145,6 +146,7 @@ v2_api.register(r"network_locations", NetworkLocationsViewset, basename="network
 v2_api.register(r"notes", NotesViewSet, basename="notes")
 v2_api.register(r"note_type", NoteTypeViewSet, basename="note_type")
 v2_api.register(r"notifications", NotificationsViewSet, basename="notifications")
+v2_api.register(r"notification_webhooks", NotificationWebhooksViewSet)
 v2_api.register(r"products", ProductViewSet, basename="product")
 v2_api.register(r"product_api_scan_configurations", ProductAPIScanConfigurationViewSet, basename="product_api_scan_configuration")
 v2_api.register(r"product_groups", ProductGroupViewSet, basename="product_group")
@@ -215,8 +217,8 @@ api_v2_urls = [
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
 ]
 
-if hasattr(settings, "API_TOKENS_ENABLED"):
-    if settings.API_TOKENS_ENABLED:
+if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):
+    if settings.API_TOKENS_ENABLED and settings.API_TOKEN_AUTH_ENDPOINT_ENABLED:
         api_v2_urls += [
             re_path(
                 f"^{get_system_setting('url_prefix')}api/v2/api-token-auth/",
@@ -240,7 +242,7 @@ urlpatterns += [
     re_path(r"^{}api/v2/oa3/schema/".format(get_system_setting("url_prefix")), SpectacularAPIView.as_view(), name="schema_oa3"),
     re_path(r"^{}api/v2/oa3/swagger-ui/".format(get_system_setting("url_prefix")), SpectacularSwaggerView.as_view(url=get_system_setting("url_prefix") + "/api/v2/oa3/schema/?format=json"), name="swagger-ui_oa3"),
 
-    re_path(r"^robots.txt", lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
+    re_path(r"^robots.txt", lambda _: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
     re_path(r"^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$", views.manage_files, name="manage_files"),
     re_path(r"^access_file/(?P<fid>\d+)/(?P<oid>\d+)/(?P<obj_type>\w+)$", views.access_file, name="access_file"),
     re_path(r"^{}/(?P<path>.*)$".format(settings.MEDIA_URL.strip("/")), views.protected_serve, {"document_root": settings.MEDIA_ROOT}),

@@ -13,12 +13,10 @@ class MinLengthValidator:
             raise ValidationError(
                 self.get_help_text(),
                 code="password_too_short")
-        else:
-            return None
+        return
 
     def get_help_text(self):
-        return gettext("Password must be at least {minimum_length} characters long.".format(
-            minimum_length=get_system_setting("minimum_password_length")))
+        return gettext("Password must be at least %s characters long.") % get_system_setting("minimum_password_length")
 
 
 class MaxLengthValidator:
@@ -27,12 +25,10 @@ class MaxLengthValidator:
             raise ValidationError(
                 self.get_help_text(),
                 code="password_too_short")
-        else:
-            return None
+        return
 
     def get_help_text(self):
-        return gettext("Password must be less than {maximum_length} characters long.".format(
-            maximum_length=get_system_setting("maximum_password_length")))
+        return gettext("Password must be less than %s characters long.") % get_system_setting("maximum_password_length")
 
 
 class NumberValidator:
@@ -41,8 +37,7 @@ class NumberValidator:
             raise ValidationError(
                 self.get_help_text(),
                 code="password_no_number")
-        else:
-            return None
+        return
 
     def get_help_text(self):
         return gettext("Password must contain at least 1 digit, 0-9.")
@@ -54,8 +49,7 @@ class UppercaseValidator:
             raise ValidationError(
                 self.get_help_text(),
                 code="password_no_upper")
-        else:
-            return None
+        return
 
     def get_help_text(self):
         return gettext("Password must contain at least 1 uppercase letter, A-Z.")
@@ -67,8 +61,7 @@ class LowercaseValidator:
             raise ValidationError(
                 self.get_help_text(),
                 code="password_no_lower")
-        else:
-            return None
+        return
 
     def get_help_text(self):
         return gettext("Password must contain at least 1 lowercase letter, a-z.")
@@ -81,8 +74,7 @@ class SymbolValidator:
             raise ValidationError(
                 self.get_help_text(),
                 code="password_no_symbol")
-        else:
-            return None
+        return
 
     def get_help_text(self):
         return gettext("The password must contain at least 1 special character, "
@@ -93,5 +85,4 @@ class DojoCommonPasswordValidator(CommonPasswordValidator):
     def validate(self, password, user=None):
         if get_system_setting("non_common_password_required"):
             return super().validate(password, user)
-        else:
-            return None
+        return None

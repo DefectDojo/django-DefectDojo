@@ -11,7 +11,9 @@ XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
 
 
 class VeracodeXMLParser:
-    """This parser is written for Veracode Detailed XML reports, version 1.5.
+
+    """
+    This parser is written for Veracode Detailed XML reports, version 1.5.
 
     Version is annotated in the report, `detailedreport/@report_format_version`.
     see https://help.veracode.com/r/t_download_XML_report
@@ -243,9 +245,7 @@ class VeracodeXMLParser:
 
         _sast_source_obj = xml_node.attrib.get("functionprototype")
         if isinstance(_sast_source_obj, str):
-            finding.sast_source_object = (
-                _sast_source_obj if _sast_source_obj else None
-            )
+            finding.sast_source_object = _sast_source_obj or None
 
         finding.unsaved_tags = ["sast"]
 
@@ -274,12 +274,11 @@ class VeracodeXMLParser:
         cweSearch = re.search("CWE-(\\d+)", val, re.IGNORECASE)
         if cweSearch:
             return int(cweSearch.group(1))
-        else:
-            return None
+        return None
 
     @classmethod
     def __xml_sca_flaw_to_finding(
-        cls, test, report_date, vendor, library, version, xml_node,
+        cls, test, report_date, _vendor, library, version, xml_node,
     ):
         # Defaults
         finding = Finding()

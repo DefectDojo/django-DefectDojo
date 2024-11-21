@@ -1,15 +1,19 @@
+# ruff: noqa: F821
 import logging
 import os
 import re
 import shutil
 import sys
 import unittest
+from pathlib import Path
 
 import git
 from base_test_class import BaseTestCase
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+
+dir_path = Path(os.path.realpath(__file__)).parent
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +22,9 @@ class ScannerTest(BaseTestCase):
     def setUp(self):
         super().setUp(self)
         self.repo_path = dir_path + "/scans"
-        if os.path.isdir(self.repo_path):
+        if Path(self.repo_path).is_dir():
             shutil.rmtree(self.repo_path)
-        os.mkdir(self.repo_path)
+        Path(self.repo_path).mkdir()
         git.Repo.clone_from("https://github.com/DefectDojo/sample-scan-files", self.repo_path)
         self.remove_items = ["__init__.py", "__init__.pyc", "factory.py", "factory.pyc",
                         "factory.py", "LICENSE", "README.md", ".gitignore", ".git", "__pycache__"]
@@ -51,38 +55,11 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in missing_tests:
                 logger.info(test)
-        assert len(missing_tests) == 0
-
-    def test_check_for_doc(self):
-        driver = self.driver
-        driver.get("https://documentation.defectdojo.com/integrations/import/")
-        integration_index = integration_text.index("Integrations") + len("Integrations") + 1
-        usage_index = integration_text.index("Usage Examples") - len("Models") - 2
-        integration_text = integration_text[integration_index:usage_index].lower()
-        integration_text = integration_text.replace("_", " ").replace("-", " ").replace(".", "").split("\n")
-        acronyms = []
-        for words in integration_text:
-            acronyms += ["".join(word[0] for word in words.split())]
-
-        missing_docs = []
-        for tool in self.tools:
-            reg = re.compile(".*" + tool.replace("_", " ") + ".*")
-            if len(list(filter(reg.search, integration_text))) < 1:
-                if len(list(filter(reg.search, acronyms))) < 1:
-                    missing_docs += [tool]
-
-        if len(missing_docs) > 0:
-            logger.info("The following scanners are missing documentation")
-            logger.info("Names must match those listed in /dojo/tools")
-            logger.info("Documentation can be added here:")
-            logger.info("https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs\n")
-            for tool in missing_docs:
-                logger.info(tool)
-        assert len(missing_docs) == 0
+        self.assertEqual(len(missing_tests), 0)
 
     def test_check_for_forms(self):
         forms_path = dir_path[:-5] + "dojo/forms.py"
-        file = open(forms_path, "r+")
+        file = open(forms_path, "r+", encoding="utf-8")
         forms = file.readlines()
         file.close()
 
@@ -115,12 +92,12 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/forms.py\n")
             for tool in missing_forms:
                 logger.info(tool)
-        assert len(missing_forms) == 0
+        self.assertEqual(len(missing_forms), 0)
 
     @unittest.skip("Deprecated since Dynamic Parser infrastructure")
     def test_check_for_options(self):
         template_path = dir_path[:-5] + "dojo/templates/dojo/import_scan_results.html"
-        file = open(template_path, "r+")
+        file = open(template_path, "r+", encoding="utf-8")
         templates = file.readlines()
         file.close()
 
@@ -155,7 +132,7 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/templates/dojo/import_scan_results.html\n")
             for tool in missing_templates:
                 logger.info(tool)
-        assert len(missing_templates) == 0
+        self.assertEqual(len(missing_templates), 0)
 
     def test_engagement_import_scan_result(self):
         driver = self.driver
@@ -240,7 +217,7 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in failed_tests:
                 logger.info(test)
-        assert len(failed_tests) == 0
+        self.assertEqual(len(failed_tests), 0)
 
     def tearDown(self):
         super().tearDown(self)

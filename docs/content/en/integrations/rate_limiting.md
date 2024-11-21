@@ -2,7 +2,7 @@
 title: "Rate Limiting"
 description: "Configurable rate limiting on the login page to mitigate brute force attacks"
 draft: false
-weight: 9
+weight: 11
 ---
 
 
