@@ -235,6 +235,39 @@ class FindingSLAFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.field_name)
 
 
+class FindingHasJIRAFilter(ChoiceFilter):
+    def any(self, qs, name):
+        return qs.filter(Q(jira_issue=None) | Q(finding_group__jira_issue=None))
+
+    def has_jira_not_grouped(self, qs, name):
+        return qs.filter(Q(jira_issue=True) & Q(finding_group__jira_issue=False))
+
+    def has_jira_only_grouped(self, qs, name):
+        return qs.filter(Q(jira_issue=False) | Q(finding_group__jira_issue=True))
+
+    def has_any_jira(self, qs, name):
+        return qs.filter(Q(jira_issue=True) | Q(finding_group__jira_issue=True))
+
+    options = {
+        None: (_("Has No JIRA"), any),
+        0: (_("Has JIRA Non-grouped"), has_jira_not_grouped),
+        1: (_("Has JIRA Grouped Only"), has_jira_only_grouped),
+        2: (_("Has Any JIRA"), has_any_jira),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs["choices"] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = None
+        return self.options[value][1](self, qs, self.field_name)
+
+
 class ProductSLAFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
@@ -1576,6 +1609,7 @@ class FindingFilterHelper(FilterSet):
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
+
     has_component = BooleanFilter(
         field_name="component_name",
         lookup_expr="isnull",
@@ -1610,6 +1644,7 @@ class FindingFilterHelper(FilterSet):
                 lookup_expr="isnull",
                 exclude=True,
                 label="Has Group JIRA")
+            has_any_jira = FindingHasJIRAFilter(label="Has Any JIRA")
 
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
