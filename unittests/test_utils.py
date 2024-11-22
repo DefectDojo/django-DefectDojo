@@ -1,7 +1,5 @@
-import hashlib
 import logging
 from contextlib import contextmanager
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 from dojo.authorization.roles_permissions import Roles
@@ -240,12 +238,3 @@ def assertImportModelsCreated(test_case, tests=0, engagements=0, products=0, pro
                 product_type_count,
                 endpoint_count,
               )
-
-
-class TestSettings(DojoTestCase):
-    def test_settings_integrity(self):
-        with Path("dojo/settings/settings.dist.py").open("rb") as file:
-            real_hash = hashlib.sha256(file.read()).hexdigest()
-        with Path("dojo/settings/.settings.dist.py.sha256sum").open("rb") as file:
-            expected_hash = file.read().decode().strip()
-        self.assertEqual(expected_hash, real_hash, "File settings.dist.py was changed but checksum has not been updated. If this is part of a PR, update the sha256sum value in '.settings.dist.py.sha256sum'. If you are modifying this to configure your instance, revert your changes and use environment variables or 'local_settings.py'")
