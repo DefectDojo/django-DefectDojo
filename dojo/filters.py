@@ -2393,6 +2393,7 @@ class EndpointFilterHelper(FilterSet):
         fields=(
             ("product", "product"),
             ("host", "host"),
+            ("id", "id"),
         ),
     )
 
@@ -2630,6 +2631,7 @@ class ApiEndpointFilter(DojoFilter):
         fields=(
             ("host", "host"),
             ("product", "product"),
+            ("id", "id"),
         ),
     )
 
