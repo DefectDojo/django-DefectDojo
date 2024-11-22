@@ -236,23 +236,18 @@ class FindingSLAFilter(ChoiceFilter):
 
 
 class FindingHasJIRAFilter(ChoiceFilter):
-    def any(self, qs, name):
+    def no_jira(self, qs, name):
+        return qs.filter(Q(jira_issue=None) & Q(finding_group__jira_issue=None))
+
+    def any_jira(self, qs, name):
+        return qs.filter(~Q(jira_issue=None) | ~Q(finding_group__jira_issue=None))
+
+    def all_items(self, qs, name):
         return qs.filter(Q(jira_issue=None) | Q(finding_group__jira_issue=None))
 
-    def has_jira_not_grouped(self, qs, name):
-        return qs.filter(Q(jira_issue=True) & Q(finding_group__jira_issue=False))
-
-    def has_jira_only_grouped(self, qs, name):
-        return qs.filter(Q(jira_issue=False) | Q(finding_group__jira_issue=True))
-
-    def has_any_jira(self, qs, name):
-        return qs.filter(Q(jira_issue=True) | Q(finding_group__jira_issue=True))
-
     options = {
-        None: (_("Has No JIRA"), any),
-        0: (_("Has JIRA Non-grouped"), has_jira_not_grouped),
-        1: (_("Has JIRA Grouped Only"), has_jira_only_grouped),
-        2: (_("Has Any JIRA"), has_any_jira),
+        0: (_("Yes"), any_jira),
+        1: (_("No"), no_jira),
     }
 
     def __init__(self, *args, **kwargs):
@@ -264,7 +259,8 @@ class FindingHasJIRAFilter(ChoiceFilter):
         try:
             value = int(value)
         except (ValueError, TypeError):
-            value = None
+            return self.all_items(qs, self.field_name)
+
         return self.options[value][1](self, qs, self.field_name)
 
 
