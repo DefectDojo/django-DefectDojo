@@ -24,7 +24,7 @@ from dojo.forms import (
     Edit_Product_Type_MemberForm,
     Product_TypeForm,
 )
-from dojo.models import Endpoint, Product_Type, Product_Type_Group, Product_Type_Member, Role
+from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
     get_authorized_global_groups_for_product_type,
@@ -127,7 +127,6 @@ def view_product_type(request, ptid):
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
     prod_filter = filter_class(request.GET, queryset=products, user=request.user)
-    name_words = products.values_list("name", flat=True)
 
     add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/view_product_type.html", {
@@ -139,7 +138,6 @@ def view_product_type(request, ptid):
         "global_groups": global_groups,
         "global_members": global_members,
         "prod_filter": prod_filter,
-        "name_words": sorted(set(name_words)),
         "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
     })
 
