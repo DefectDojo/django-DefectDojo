@@ -328,7 +328,10 @@ def action_log_entry(value, autoescape=None):
     history = json.loads(value)
     text = ""
     for k in history.keys():
-        text += k.capitalize() + ' changed from "' + \
+        if isinstance(history[k], dict):
+            text += k.capitalize() + " operation: " + history[k].get("operation", "unknown") + ": " + str(history[k].get("objects", "unknown"))
+        else:
+            text += k.capitalize() + ' changed from "' + \
                 history[k][0] + '" to "' + history[k][1] + '"\n'
     return text
 
