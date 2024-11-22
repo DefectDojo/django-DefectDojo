@@ -11,10 +11,11 @@
 {% if engagement.product.enable_full_risk_acceptance %}
     {% if engagement|has_object_permission:"Risk_Acceptance_Bulk" and engagement|has_risk_acceptance_pending:accepted_findings%}
         <li role="presentation">
-                <a class="accept-risk_acceptance" href="" title="Accept all Risk" id="id_bullk_risk_accepted" data-eid={{engagement.id}} data-raid={{risk_acceptance.id}} >
+                <a class="accept-risk_acceptance" data-raid="{{risk_acceptance.id}}" href="#" title="Accept all Risk">
                     <i class="fa-solid fa-check-double"></i> Accept All Risk
                 </a>
         </li>
+        
     {% endif %}
     {% if engagement|has_object_permission:"Risk_Acceptance_Refresh_Permission_key" %}
         <li role="separator" class="divider"></li>

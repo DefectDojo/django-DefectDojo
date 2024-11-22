@@ -1824,7 +1824,7 @@ def accept_risk_acceptance(request, eid, raid):
     product = eng.product
     product_type = product.get_product_type
     rp_helper.accept_or_reject_risk_bulk(eng, risk_acceptance, product, product_type, action="accept", permission_key=None)
-    return reverse("view_risk_acceptance", args=(eid, raid))
+    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def reinstate_risk_acceptance(request, eid, raid):
