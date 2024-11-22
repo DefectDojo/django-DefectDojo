@@ -13,7 +13,7 @@ from django.utils.translation import gettext as _
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.authorization_decorators import user_has_global_permission, user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.filters import ProductTypeFilter
+from dojo.filters import ProductFilter, ProductFilterWithoutObjectLookups, ProductTypeFilter
 from dojo.forms import (
     Add_Product_Type_GroupForm,
     Add_Product_Type_MemberForm,
@@ -24,7 +24,7 @@ from dojo.forms import (
     Edit_Product_Type_MemberForm,
     Product_TypeForm,
 )
-from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role
+from dojo.models import Endpoint, Product_Type, Product_Type_Group, Product_Type_Member, Role
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
     get_authorized_global_groups_for_product_type,
@@ -38,6 +38,7 @@ from dojo.utils import (
     async_delete,
     get_page_items,
     get_setting,
+    get_system_setting,
     is_title_in_breadcrumbs,
 )
 
@@ -123,7 +124,11 @@ def view_product_type(request, ptid):
     groups = get_authorized_groups_for_product_type(pt, Permissions.Product_Type_View)
     global_groups = get_authorized_global_groups_for_product_type(pt, Permissions.Product_Type_View)
     products = get_authorized_products(Permissions.Product_View).filter(prod_type=pt)
-    products = get_page_items(request, products, 25)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
+    prod_filter = filter_class(request.GET, queryset=products, user=request.user)
+    name_words = products.values_list("name", flat=True)
+
     add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/view_product_type.html", {
         "name": page_name,
@@ -133,6 +138,9 @@ def view_product_type(request, ptid):
         "members": members,
         "global_groups": global_groups,
         "global_members": global_members,
+        "prod_filter": prod_filter,
+        "name_words": sorted(set(name_words)),
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
     })
 
 
