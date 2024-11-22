@@ -128,7 +128,7 @@ class SonarQubeApiImporter:
                 organization=organization,
                 branch=test.branch_tag,
             )
-            logging.info(
+            logger.info(
                 f'Found {len(issues)} issues for component {component["key"]}',
             )
 
@@ -247,7 +247,7 @@ class SonarQubeApiImporter:
                 organization=organization,
                 branch=test.branch_tag,
             )
-            logging.info(
+            logger.info(
                 f'Found {len(hotspots)} hotspots for project {component["key"]}',
             )
             sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL
