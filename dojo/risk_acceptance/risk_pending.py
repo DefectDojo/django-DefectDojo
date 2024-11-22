@@ -193,7 +193,7 @@ def rules_for_direct_acceptance(finding: Finding,
         finding.accepted_by = user.username
         risk_accepted_succesfully(finding, risk_acceptance)
         status_permission.update(
-            {"stasus": "OK",
+            {"status": "OK",
              "message": "Finding Accept successfully from risk acceptance.",
              "number_of_acceptors_required": number_of_acceptors_required})
     return status_permission
@@ -204,7 +204,7 @@ def risk_acceptante_pending(eng: Engagement,
                             risk_acceptance: Risk_Acceptance,
                             product: Product,
                             product_type: Product_Type,
-                            permission_key=None):
+                            permission_key):
     user = get_user_with_permission_key(permission_key)
     status_permission = rules_for_direct_acceptance(finding,
                                                     product_type,
@@ -216,8 +216,8 @@ def risk_acceptante_pending(eng: Engagement,
         if is_permissions_risk_acceptance(eng, finding, user, product, product_type):
             if user.username in confirmed_acceptances:
                 message = "The user has already accepted the risk"
-                status = "Failed"
-                return Response(status=status, message=message)
+                status_permission["status"] = "Failed"
+                return Response(status=status_permission["status"], message=message)
             if len(confirmed_acceptances) < status_permission.get("number_of_acceptors_required"):
                 if finding.accepted_by is None or finding.accepted_by == "":
                     finding.accepted_by = user.username
@@ -231,7 +231,7 @@ def risk_acceptante_pending(eng: Engagement,
                 ):
                     risk_accepted_succesfully(finding, risk_acceptance)
                 message = "Finding Accept successfully from risk acceptance."
-                status = "OK"
+                status_permission["status"] = "OK"
             else:
                 raise ValueError(
                     f"""Error number of acceptors {len(confirmed_acceptances)} > number of acceptors required
@@ -240,7 +240,7 @@ def risk_acceptante_pending(eng: Engagement,
     else:
         message = "The risk is already accepted"
 
-    return Response(status=status, message=message)
+    return Response(status=status_permission["status"], message=message)
 
 
 def get_confirmed_acceptors(finding: Finding):
@@ -465,13 +465,13 @@ def accept_or_reject_risk_bulk(eng: Engagement,
                                risk_acceptance: Risk_Acceptance,
                                product: Product,
                                product_type: Product_Type,
-                               action: str,
-                               permission_key: str):
-
+                               action,
+                               permission_key):
+    response = None
     for accepted_finding in risk_acceptance.accepted_findings.all():
         if action == "accept":
             logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
-            risk_acceptante_pending(eng,
+            response = risk_acceptante_pending(eng,
                                     accepted_finding,
                                     risk_acceptance,
                                     product,
@@ -479,9 +479,10 @@ def accept_or_reject_risk_bulk(eng: Engagement,
                                     permission_key)
         elif action == "reject":
             logger.debug(f"Reject risk accepted id: {accepted_finding.id}")
-            risk_acceptance_decline(eng, accepted_finding, risk_acceptance)
+            response = risk_acceptance_decline(eng, accepted_finding, risk_acceptance)
         else:
             ApiError.forbidden(detail="The parameter *action* must be accept or reject")
+    return response
 
 
 def validate_list_findings(conf_risk, type, finding, eng):

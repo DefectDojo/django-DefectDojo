@@ -1662,7 +1662,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if "risk_accept_pending" in request.POST:
             finding = get_object_or_404(Finding,
                                         pk=request.POST["risk_accept_finding_id"])
-            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance, product, product_type)
+            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance, product, product_type, permission_key=None)
         if "risk_accept_decline" in request.POST:
             finding = get_object_or_404(Finding,
                                         pk=request.POST["risk_accept_finding_id"])
@@ -1823,9 +1823,8 @@ def accept_risk_acceptance(request, eid, raid):
     eng = get_object_or_404(Engagement, pk=eid)
     product = eng.product
     product_type = product.get_product_type
-    rp_helper.accept_or_reject_risk_bulk(eng, risk_acceptance, product, product_type)
-    logger.debug("Risk Accepted all")
-    return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
+    rp_helper.accept_or_reject_risk_bulk(eng, risk_acceptance, product, product_type, action="accept", permission_key=None)
+    return reverse("view_risk_acceptance", args=(eid, raid))
 
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def reinstate_risk_acceptance(request, eid, raid):
