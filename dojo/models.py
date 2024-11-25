@@ -4615,7 +4615,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Dojo_User, exclude_fields=["password"])
     auditlog.register(Endpoint)
     auditlog.register(Engagement)
-    auditlog.register(Finding)
+    auditlog.register(Finding, m2m_fields={"reviewers"})
     auditlog.register(Finding_Group)
     auditlog.register(Product_Type)
     auditlog.register(Product)
@@ -4624,6 +4624,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Finding_Template)
     auditlog.register(Cred_User, exclude_fields=["password"])
     auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
+
 
 from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
 
