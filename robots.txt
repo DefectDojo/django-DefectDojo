@@ -1,1 +1,3 @@
 User-agent: *
+Disallow: /admin/
+Sitemap: http://documentation.defectdojo.com/sitemap.xml
