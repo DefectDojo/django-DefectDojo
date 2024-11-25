@@ -116,9 +116,6 @@ def add_product_type(request):
 
 @user_is_authorized(Product_Type, Permissions.Product_Type_View, "ptid")
 def view_product_type(request, ptid):
-    msg = f"\n\n\n\n\n\nName: {request.GET}\n\n\n\n\n\n"
-    logger.info(msg)
-
     page_name = _("View Product Type")
     pt = get_object_or_404(Product_Type, pk=ptid)
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_View)
@@ -129,20 +126,18 @@ def view_product_type(request, ptid):
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
     prod_filter = filter_class(request.GET, queryset=products, user=request.user)
-    name_words = products.values_list("name", flat=True)
+    products = get_page_items(request, prod_filter.qs, 25)
 
     add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/view_product_type.html", {
         "name": page_name,
         "pt": pt,
-        "prod_list": products,
+        "products": products,
+        "prod_filter": prod_filter,
         "groups": groups,
         "members": members,
         "global_groups": global_groups,
         "global_members": global_members,
-        "prod_filter": prod_filter,
-        "name_words": sorted(set(name_words)),
-        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
     })
 
 

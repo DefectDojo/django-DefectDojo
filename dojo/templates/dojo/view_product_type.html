@@ -53,39 +53,35 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="clearfix">
-                        <h3 class="has-filters">
-                            <h4 class="pull-left">{% trans "Products" %}</h4>
-                            
-                            <div class="dropdown pull-right">
+                        <h4 class="pull-left">{% trans "Products" %}</h4>
+                        <div class="dropdown pull-right">
+                            <div class="btn-group">
                                 <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                        data-toggle="dropdown" aria-expanded="true">
-                                    <span class="fa-solid fa-screwdriver-wrench"></span>
-                                    <span class="caret"></span>
-                                </button>
                                 {% if pt|has_object_permission:"Product_Type_Add_Product" %}
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu"
-                                    aria-labelledby="dropdownMenu1">
-                                        <li role="presentation">
-                                            <a href="{% url 'new_product' %}">
-                                                <i class="fa-solid fa-plus"></i> {% trans "Add Product" %}
-                                            </a>
+                                    <button class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                                                <span class="fa-solid fa-bars"></span>
+                                                <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                        <li>
+                                            <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
+                                            <i class="fa-solid fa-plus"></i> {% trans "Add Product" %}</a>
                                         </li>
-                                </ul>
+                                    </ul>
                                 {% endif %}
                             </div>
-                        </h3>
+                        </div>
                     </div>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">                    
+                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
-                {% if prod_list %}
+                {% if products %}
                     <div class="clearfix pagination-in-panel">
-                        {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
+                        {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                     </div>
                     <div class="table-responsive">
-                        <table id="products" class="tablesorter-bootstrap table table-condensed table-striped">
+                        <table class="tablesorter-bootstrap table table-condensed table-striped">
                             <thead>
                             <tr>
                                 <th>Name</th>
@@ -96,12 +92,12 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for product in prod_list %}                            
+                            {% for product in products %}
                                 <tr>
                                     <td><a href="{% url 'view_product' product.id %}">{{ product.name }}</a></td>
                                     <!-- Tags column -->
                                     <td class="text-center">
-                                        {% include "dojo/snippets/tags.html" with tags=product.tags.all %}                                        
+                                        {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
                                     </td>
                                     <!-- End of Tags Column -->
                                     <td class="text-center">{{ product.business_criticality|business_criticality_icon }}</td>
@@ -126,7 +122,7 @@
                         </table>
                     </div>
                     <div class="clearfix pagination-in-panel">
-                        {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
+                        {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                     </div>
                 {% else %}
                     <div class="panel-body">
@@ -334,27 +330,5 @@
     </div>
 {% endblock %}
 {% block postscript %}
-    {{ block.super }}
-    <script>
-        $(function () {
-            //Ensures dropdown has proper zindex
-            $('.table-responsive').on('show.bs.dropdown', function () {
-              $('.table-responsive').css( "overflow", "inherit" );
-            });
-
-            $('.table-responsive').on('hide.bs.dropdown', function () {
-              $('.table-responsive').css( "overflow", "auto" );
-            })
-            var availableTags = [
-                {% for word in name_words %}
-                    "{{word}}",
-                {% endfor %}
-            ];
-            $("#id_name").autocomplete({
-                source: availableTags
-            });
-        });
-    </script>
-
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
