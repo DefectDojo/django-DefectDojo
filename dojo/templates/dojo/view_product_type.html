@@ -77,12 +77,12 @@
                         </h3>
                     </div>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">                    
                     {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
-                {% if products %}
+                {% if prod_list %}
                     <div class="clearfix pagination-in-panel">
-                        {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                        {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
                     </div>
                     <div class="table-responsive">
                         <table id="products" class="tablesorter-bootstrap table table-condensed table-striped">
@@ -96,12 +96,12 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for product in products %}
+                            {% for product in prod_list %}                            
                                 <tr>
                                     <td><a href="{% url 'view_product' product.id %}">{{ product.name }}</a></td>
                                     <!-- Tags column -->
                                     <td class="text-center">
-                                        {% include "dojo/snippets/tags.html" with tags=product.tags.all %}
+                                        {% include "dojo/snippets/tags.html" with tags=product.tags.all %}                                        
                                     </td>
                                     <!-- End of Tags Column -->
                                     <td class="text-center">{{ product.business_criticality|business_criticality_icon }}</td>
@@ -126,7 +126,7 @@
                         </table>
                     </div>
                     <div class="clearfix pagination-in-panel">
-                        {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                        {% include "dojo/paging_snippet.html" with page=prod_list page_size=True %}
                     </div>
                 {% else %}
                     <div class="panel-body">
@@ -355,99 +355,6 @@
             });
         });
     </script>
-    <script>
-        // DataTables setup
-        $(document).ready(function() {
-            date =  new Date().toISOString().slice(0, 10);
-            var fileDated = 'Product_List_' + date;
-            var buttonCommon = {
-                exportOptions: {
-                    columns: ':not(:eq(0))',
-                    stripHtml: true,
-                    stripNewlines: true,
-                    trim: true,
-                    orthogonal: 'export'
-                },
-                filename: fileDated,
-                title: 'Product List'
-            };
 
-            // Mapping of table columns to objects for proper cleanup and data formatting
-            {% if enable_table_filtering %}
-              var dojoTable = $('#products').DataTable({
-                  drawCallback: function(){
-                      $('#products .has-popover').hover(
-                          function() { $(this).popover('show'); }, // hover
-                          function() { $(this).popover('hide'); } // unhover
-                      );
-                  },
-                  colReorder: true,
-                  "columns": [
-                      { "data": "action", "searchable": false },
-                      { "data": "name" },
-                      { "data": "tags" },
-                      { "data": "criticality" , render: function (data, type, row) {
-                        const criticals = {
-                          'Very High': 5,
-                          'High': 4,
-                          'Medium': 3,
-                          'Low': 2,
-                          'Very Low': 1,
-                          'None': 0
-                        };
-                        if (type === 'sort') {
-                          return criticals[getDojoExportValueFromTag(data, 'i', 'data-content')]
-                        } else if (type === 'export') {
-                            return getDojoExportValueFromTag(data, 'i', 'data-content')
-                        } else if (data != undefined||data != null) {
-                            return data
-                        }
-                        return ""
-                      }},
-                      { "data": "findings" },
-                  ],
-                  order: [],
-                  columnDefs: [
-                      {
-                          "orderable": false,
-                          "targets": [0]
-                      },
-                      {
-                          targets: [0],
-                          className: 'noVis'
-                      }
-                  ],
-                  dom: 'Bfrtip',
-                  paging: false,
-                  info: false,
-                  buttons: [
-                      {
-                          extend: 'colvis',
-                          columns: ':not(.noVis)'
-                      },
-                      $.extend( true, {}, buttonCommon, {
-                          extend: 'copy'
-                      }),
-                      $.extend( true, {}, buttonCommon, {
-                          extend: 'excel',
-                          autoFilter: true,
-                          sheetName: 'Exported data',
-                      }),
-                      $.extend( true, {}, buttonCommon, {
-                          extend: 'csv'
-                      }),
-                      $.extend( true, {}, buttonCommon, {
-                          extend: 'pdf',
-                          orientation: 'landscape',
-                          pageSize: 'LETTER'
-                      }),
-                      $.extend( true, {}, buttonCommon, {
-                          extend: 'print'
-                      }),
-                  ],
-              });
-            {% endif %}
-        });
-    </script>
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
