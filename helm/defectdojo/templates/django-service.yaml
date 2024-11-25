@@ -9,6 +9,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- if .Values.django.service.annotations }}
   annotations:
   {{- range $key, $value := .Values.django.service.annotations }}

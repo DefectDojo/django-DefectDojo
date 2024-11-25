@@ -33,6 +33,7 @@ def parse_csv(csv_file) -> [Finding]:
 def get_report_findings(csv_reader) -> [dict]:
     """
     Filters out the unneeded information at the beginning of the Qualys CSV report.
+
     Args:
         csv_reader:
 
@@ -55,11 +56,13 @@ def _extract_cvss_vectors(cvss_base, cvss_temporal):
 
     This is done because the raw values come with additional characters that cannot be parsed with the cvss library.
         Example: 6.7 (AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H)
+
     Args:
         cvss_base:
         cvss_temporal:
     Returns:
         A CVSS3 Vector including both Base and Temporal if available
+
     """
     vector_pattern = r"^\d{1,2}.\d \((.*)\)"
     cvss_vector = "CVSS:3.0/"

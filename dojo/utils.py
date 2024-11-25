@@ -11,6 +11,7 @@ from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+from pathlib import Path
 
 import bleach
 import crum
@@ -88,6 +89,7 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     Args:
         finding (:model:`dojo.Finding`): Finding to be replicated
+
     """
     to_mark_as_fp = set()
 
@@ -149,6 +151,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         product (:model:`dojo.Product`, optional): Product to filter findings by
         engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
         test (:model:`dojo.Test`, optional): Test to filter findings by
+
     """
     if product:
         custom_filter_type = "product"
@@ -1378,11 +1381,12 @@ def get_page_items_and_count(request, items, page_size, prefix="", do_count=True
 
 
 def handle_uploaded_threat(f, eng):
-    _name, extension = os.path.splitext(f.name)
+    path = Path(f.name)
+    extension = path.suffix
     # Check if threat folder exist.
-    if not os.path.isdir(settings.MEDIA_ROOT + "/threat/"):
+    if not Path(settings.MEDIA_ROOT + "/threat/").is_dir():
         # Create the folder
-        os.mkdir(settings.MEDIA_ROOT + "/threat/")
+        Path(settings.MEDIA_ROOT + "/threat/").mkdir()
     with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
               "wb+") as destination:
         for chunk in f.chunks():
@@ -1392,7 +1396,8 @@ def handle_uploaded_threat(f, eng):
 
 
 def handle_uploaded_selenium(f, cred):
-    _name, extension = os.path.splitext(f.name)
+    path = Path(f.name)
+    extension = path.suffix
     with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
               "wb+") as destination:
         for chunk in f.chunks():
@@ -2696,7 +2701,9 @@ def generate_file_response_from_file_path(
 ) -> FileResponse:
     """Serve an local file in a uniformed way."""
     # Determine the file path
-    file_path_without_extension, file_extension = os.path.splitext(file_path)
+    path = Path(file_path)
+    file_path_without_extension = path.parent / path.stem
+    file_extension = path.suffix
     # Determine the file name if not supplied
     if file_name is None:
         file_name = file_path_without_extension.rsplit("/")[-1]

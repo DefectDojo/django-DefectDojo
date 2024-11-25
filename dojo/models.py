@@ -141,7 +141,9 @@ class UniqueUploadNameProvider:
         self.keep_ext = keep_ext
 
     def __call__(self, model_instance, filename):
-        base, ext = os.path.splitext(filename)
+        path = Path(filename)
+        base = path.parent / path.stem
+        ext = path.suffix
         filename = f"{base}_{uuid4()}" if self.keep_basename else str(uuid4())
         if self.keep_ext:
             filename += ext
@@ -1784,7 +1786,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.path = self.path.replace(remove_str, "%00")
-                    logging.error(f'Path "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error(f'Path "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
             if self.path == "":
                 self.path = None
 
@@ -1797,7 +1799,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.query = self.query.replace(remove_str, "%00")
-                    logging.error(f'Query "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error(f'Query "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
             if self.query == "":
                 self.query = None
 
@@ -1810,7 +1812,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.fragment = self.fragment.replace(remove_str, "%00")
-                    logging.error(f'Fragment "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error(f'Fragment "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
             if self.fragment == "":
                 self.fragment = None
 
@@ -3598,9 +3600,9 @@ class Check_List(models.Model):
 
     @staticmethod
     def get_status(pass_fail):
-        if pass_fail == "Pass":
+        if pass_fail == "Pass":  # noqa: S105
             return "success"
-        if pass_fail == "Fail":
+        if pass_fail == "Fail":  # noqa: S105
             return "danger"
         return "warning"
 
@@ -3685,7 +3687,7 @@ class Risk_Acceptance(models.Model):
         # logger.debug('path: "%s"', self.path)
         if not self.path:
             return None
-        return os.path.basename(self.path.name)
+        return Path(self.path.name).name
 
     @property
     def name_and_expiration_info(self):
