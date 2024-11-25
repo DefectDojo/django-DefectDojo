@@ -1,0 +1,2 @@
+# Overrides for production environment
+baseurl = "http://documentation.defectdojo.com/"
