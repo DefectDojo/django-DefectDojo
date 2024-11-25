@@ -34,7 +34,7 @@ def truncate_str(value: str, maxlen: int):
 
 # Parse 'CWE-XXXX' format to strip just the numbers
 def get_cwe(cwe):
-    cweSearch = re.search("CWE-([0-9]*)", cwe, re.IGNORECASE)
+    cweSearch = re.search(r"CWE-([0-9]*)", cwe, re.IGNORECASE)
     if cweSearch:
         return cweSearch.group(1)
     return 0

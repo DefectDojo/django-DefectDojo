@@ -205,7 +205,7 @@ class BaseEngineParser:
     #####
     # For parsing CVEs
     #####
-    CVE_PATTERN = re.compile("CVE-[0-9]+-[0-9]+", re.IGNORECASE)
+    CVE_PATTERN = re.compile(r"CVE-[0-9]+-[0-9]+", re.IGNORECASE)
 
     def is_cve(self, c: str) -> bool:
         return bool(c and isinstance(c, str) and self.CVE_PATTERN.fullmatch(c))
