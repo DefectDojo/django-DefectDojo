@@ -2,6 +2,7 @@ import json
 from json.decoder import JSONDecodeError
 
 import requests
+from django.conf import settings
 
 
 class EdgescanAPI:
@@ -42,6 +43,7 @@ class EdgescanAPI:
             url=url,
             headers=self.get_headers(),
             proxies=self.get_proxies(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
         response.raise_for_status()
         return response.json()

@@ -2989,6 +2989,11 @@ class EngagementSurveyTest(BaseClass.BaseClassTest):
         self.deleted_objects = 5
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_link_engagement_questionnaire(self):
+        end_url = self.url + "4/link_engagement/2/"
+        result = self.client.post(end_url)
+        self.assertEqual(result.status_code, status.HTTP_200_OK, f"Failed to link enagement survey to engagement: {result.content} on {end_url}")
+
 
 class AnsweredSurveyTest(BaseClass.BaseClassTest):
     fixtures = ["questionnaire_testdata.json"]

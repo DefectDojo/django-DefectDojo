@@ -16,6 +16,9 @@ createPostgresqlHaPgpoolSecret: false
 # - enabled, enables tracking configuration changes based on SHA256
 # trackConfig: disabled
 
+# extraLabels: {}
+# Add extra labels for k8s
+
 # Enables application network policy
 # For more info follow https://kubernetes.io/docs/concepts/services-networking/network-policies/
 networkPolicy:
@@ -234,13 +237,29 @@ django:
   tolerations: []
   uwsgi:
     livenessProbe:
-      # Enable liveness checks on uwsgi container. Those values are use on nginx readiness checks as well.
+      # Enable liveness checks on uwsgi container.
       enabled: true
       failureThreshold: 6
-      initialDelaySeconds: 3
+      initialDelaySeconds: 0
       periodSeconds: 10
       successThreshold: 1
       timeoutSeconds: 5
+    readinessProbe:
+      # Enable readiness checks on uwsgi container.
+      enabled: true
+      failureThreshold: 6
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    startupProbe:
+      # Enable startup checks on uwsgi container.
+      enabled: true
+      failureThreshold: 30
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      successThreshold: 1
+      timeoutSeconds: 1
     resources:
       requests:
         cpu: 100m
@@ -459,7 +478,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.37.1
+    tag: 1.37.2
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
