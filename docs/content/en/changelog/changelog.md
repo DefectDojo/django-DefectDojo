@@ -1,9 +1,20 @@
 ---
-title: "Changes & New Features"
+title: "DefectDojo Pro Changelog"
 description: "DefectDojo Changelog"
 ---
 
-Here are the release notes for DefectDojo Pro (Cloud Version) releases.  For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases).
+Here are the release notes for **DefectDojo Pro (Cloud Version) releases**.  For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases).
+
+## Nov 25, 2024
+**Version 2.40.4**
+
+- **(Beta UI)**  Improved Metadata tables with Parent object relationships for Products, Engagements, Tests, Findings, Endpoints/Hosts
+- **(Beta UI)**  Deleting an object now returns you to a page which makes more sense.
+- **(Endpoints)**  Endpoints can now be sorted by ID.
+- **(Review Request)**  When a user requests a review, both the requester and the requestee are now captured in audit logs.
+- **(Tools)**  Trivy Operator now parses the ‘cluster compliance report’ from scans.
+- **(Tools)**  CheckMarx One parser can now handle cases where a result has no description.
+- **(Tools)**  AnchorCTL Policies tool has been fortified to handle new severity values.
 
 
 ## Nov 17, 2024
