@@ -1,0 +1,190 @@
+{
+    "results": [
+        {
+            "type": "sast",
+            "label": "sast",
+            "id": "1ZOFSPJzlZAqW4XH/43v0l2qI7w=",
+            "similarityId": "587440289",
+            "status": "RECURRENT",
+            "state": "TO_VERIFY",
+            "severity": "LOW",
+            "created": "2024-11-18T15:05:11Z",
+            "firstFoundAt": "2024-07-22T14:05:10Z",
+            "foundAt": "2024-11-18T15:05:11Z",
+            "firstScanId": "6f25a9f8-551f-4601-923f-d8582b3c57b9",
+            "data": {
+                "queryId": 9509477347196366877,
+                "queryName": "Insufficiently_Protected_Credentials",
+                "group": "Java_Low_Visibility",
+                "resultHash": "1ZOFSPJzlZAqW4XH/43v0l2qI7w=",
+                "languageName": "Java",
+                "nodes": [
+                    {
+                        "id": "UxUup49ByptYWuChHWZoBchsZd8=",
+                        "line": 24,
+                        "name": "query",
+                        "column": 30,
+                        "length": 1,
+                        "nodeID": 67173,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/MissingAccessControlUserRepository.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.MissingAccessControlUserRepository.jdbcTemplate.query",
+                        "methodLine": 23
+                    },
+                    {
+                        "id": "eDR+tHqxvcYE2rgp7B3f983Dq04=",
+                        "line": 57,
+                        "name": "findAllUsers",
+                        "column": 54,
+                        "length": 1,
+                        "nodeID": 67713,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.MissingFunctionACUsers.userRepository.findAllUsers",
+                        "methodLine": 53
+                    },
+                    {
+                        "id": "/hXgmF9sr5y4seOsFuhCqb1lEtk=",
+                        "line": 57,
+                        "name": "allUsers",
+                        "column": 16,
+                        "length": 8,
+                        "nodeID": 67709,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.MissingFunctionACUsers.listUsers.allUsers",
+                        "methodLine": 53
+                    },
+                    {
+                        "id": "oMZ/Q99zBPxILDltpl6l3ddtR0A=",
+                        "line": 58,
+                        "name": "allUsers",
+                        "column": 33,
+                        "length": 8,
+                        "nodeID": 67734,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.MissingFunctionACUsers.listUsers.allUsers",
+                        "methodLine": 53
+                    },
+                    {
+                        "id": "VfswcWP4EzOl6XMvPn8SkMTrSvc=",
+                        "line": 61,
+                        "name": "allUsers",
+                        "column": 22,
+                        "length": 8,
+                        "nodeID": 67759,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.MissingFunctionACUsers.listUsers.allUsers",
+                        "methodLine": 53
+                    },
+                    {
+                        "id": "CnToQc0fEqfrjai8Mo8iUroxv68=",
+                        "line": 61,
+                        "name": "user",
+                        "column": 15,
+                        "length": 4,
+                        "nodeID": 67785,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.MissingFunctionACUsers.listUsers.user",
+                        "methodLine": 53
+                    },
+                    {
+                        "id": "/ui2MhZkLzZXPFwpCiDhUBLLaU8=",
+                        "line": 62,
+                        "name": "user",
+                        "column": 40,
+                        "length": 4,
+                        "nodeID": 67776,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/MissingFunctionACUsers.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.MissingFunctionACUsers.listUsers.user",
+                        "methodLine": 53
+                    },
+                    {
+                        "id": "3F7euZ73MP4t3ztmwv21yChSdtw=",
+                        "line": 42,
+                        "name": "user",
+                        "column": 27,
+                        "length": 4,
+                        "nodeID": 66862,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/DisplayUser.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.DisplayUser.DisplayUser.user",
+                        "methodLine": 42
+                    },
+                    {
+                        "id": "F8Q12rQW6CQtmEFwW3SWNhVYVMg=",
+                        "line": 43,
+                        "name": "user",
+                        "column": 21,
+                        "length": 4,
+                        "nodeID": 66874,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/DisplayUser.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.DisplayUser.DisplayUser.user",
+                        "methodLine": 42
+                    },
+                    {
+                        "id": "rAn4QPxFVCelr/RJLQqicCn60es=",
+                        "line": 44,
+                        "name": "user",
+                        "column": 18,
+                        "length": 4,
+                        "nodeID": 66884,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/DisplayUser.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.DisplayUser.DisplayUser.user",
+                        "methodLine": 42
+                    },
+                    {
+                        "id": "ZAMbHREBMi+/+KFaFf1dk1iD3pc=",
+                        "line": 47,
+                        "name": "user",
+                        "column": 55,
+                        "length": 4,
+                        "nodeID": 66911,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/DisplayUser.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.DisplayUser.DisplayUser.user",
+                        "methodLine": 42
+                    },
+                    {
+                        "id": "W1j8VcWjryKeRe0m9I7TQoTK56s=",
+                        "line": 47,
+                        "name": "getPassword",
+                        "column": 71,
+                        "length": 1,
+                        "nodeID": 66914,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/DisplayUser.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.DisplayUser.DisplayUser.user.getPassword",
+                        "methodLine": 42
+                    },
+                    {
+                        "id": "0KiaSGj0VNOrzTBqcbiZOFvIoYE=",
+                        "line": 53,
+                        "name": "password",
+                        "column": 56,
+                        "length": 8,
+                        "nodeID": 67027,
+                        "fileName": "/src/main/java/org/owasp/webgoat/lessons/missingac/DisplayUser.java",
+                        "fullName": "org.owasp.webgoat.lessons.missingac.DisplayUser.genUserHash.password",
+                        "methodLine": 53
+                    }
+                ]
+            },
+            "comments": {},
+            "vulnerabilityDetails": {
+                "cweId": 522,
+                "cvss": {},
+                "compliances": [
+                    "OWASP Top 10 2021",
+                    "FISMA 2014",
+                    "MOIS(KISA) Secure Coding 2021",
+                    "OWASP Top 10 2017",
+                    "PCI DSS v3.2.1",
+                    "ASD STIG 5.3",
+                    "CWE top 25",
+                    "NIST SP 800-53",
+                    "OWASP ASVS",
+                    "OWASP Top 10 2013",
+                    "SANS top 25",
+                    "PCI DSS v4.0"
+                ]
+            }
+        }
+    ],
+    "totalCount": 1,
+    "scanID": "7083ee4e-2eff-4e2f-9d98-1aae8023169f"
+}
