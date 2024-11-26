@@ -44,7 +44,7 @@ jobs:
         uses: actions/configure-pages@v4
       
       - name: Install dependencies
-        run: npm ci"
+        run: npm ci
       
       - name: Build production website
         env:
