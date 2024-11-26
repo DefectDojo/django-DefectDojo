@@ -1696,7 +1696,7 @@ def request_finding_review(request, fid):
                 jira_helper.push_to_jira(finding.finding_group)
 
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
-            reviewers_string = f", ".join([f"{user} ({user.id})" for user in reviewers])
+            reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
             logger.debug(f"Asking {reviewers_string} for review")
 
