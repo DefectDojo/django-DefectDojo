@@ -33,11 +33,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          submodules: recursive
+          fetch-depth: 0
 
-      - run: cd docs && npm ci && hugo --minify --config /config/production/hugo.toml
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v4
+      
+      - name: Install dependencies
+        run: npm ci"
+      
+      - name: Build production website
+        env:
+          HUGO_ENVIRONMENT: production
+          HUGO_ENV: production
+        run: cd docs && npm run build -- --baseURL "${{ steps.pages.outputs.base_url }}/"
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
