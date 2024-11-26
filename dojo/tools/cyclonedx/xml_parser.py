@@ -104,7 +104,7 @@ class CycloneDXXMLParser:
                 [
                     f"**Ref:** {ref}",
                     f"**Id:** {vuln_id}",
-                    f"**Severity:** {str(severity)}",
+                    f"**Severity:** {severity}",
                 ],
             )
         if component_name is None:

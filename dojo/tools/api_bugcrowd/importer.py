@@ -16,7 +16,7 @@ class BugcrowdApiImporter:
     def get_findings(self, test):
         client, config = self.prepare_client(test)
         logger.debug(
-            f"Fetching submissions program {str(config.service_key_1)} and target {str(config.service_key_2)}",
+            f"Fetching submissions program {config.service_key_1} and target {config.service_key_2}",
         )
 
         submissions_paged = client.get_findings(

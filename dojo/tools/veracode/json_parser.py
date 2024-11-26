@@ -129,7 +129,7 @@ class VeracodeJSONParser:
                 if uncleaned_cvss.startswith(("CVSS:3.1/", "CVSS:3.0/")):
                     finding.cvssv3 = CVSS3(str(uncleaned_cvss)).clean_vector(output_prefix=True)
                 elif not uncleaned_cvss.startswith("CVSS"):
-                    finding.cvssv3 = CVSS3(f"CVSS:3.1/{str(uncleaned_cvss)}").clean_vector(output_prefix=True)
+                    finding.cvssv3 = CVSS3(f"CVSS:3.1/{uncleaned_cvss}").clean_vector(output_prefix=True)
             elif isinstance(uncleaned_cvss, float | int):
                 finding.cvssv3_score = float(uncleaned_cvss)
         # Fill in extra info based on the scan type
@@ -238,7 +238,7 @@ class VeracodeJSONParser:
             # See if the CVSS has already been set. If not, use the one here
             if not finding.cvssv3:
                 if cvss_vector := cve_dict.get("cvss3", {}).get("vector"):
-                    finding.cvssv3 = CVSS3(f"CVSS:3.1/{str(cvss_vector)}").clean_vector(output_prefix=True)
+                    finding.cvssv3 = CVSS3(f"CVSS:3.1/{cvss_vector}").clean_vector(output_prefix=True)
         # Put the product ID in the metadata
         if product_id := finding_details.get("product_id"):
             finding.description += f"**Product ID**: {product_id}\n"
