@@ -13,7 +13,7 @@ Some tools will require additional API\-related fields beyond **Location** and *
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/988476659/ceba1d2432ceef4f8ddd43ab/E4fVPzan1qaSwnVt96hVz2yE_ByLc8_Db-vmEezGHdmEQfWWPiawiSCV3gl-01VaJgWOx63uotxQjGl9cj6TG-Pb9AScvyRV12Q5dEU0gt4Qr5aoEUwYYa0HPQF_5iLTbz7Av2tAKqIRgj_9vE13328?expires=1729720800&signature=959e698083b3f013ebf4f44d7cd171460891ce0f88bacbc1abf9725763656363&req=fSgvEs54m4RWFb4f3HP0gDOvGCQsUdne6p9SGA1J6JbofhdNIhHVi1tX81ms%0A7sI%3D%0A)
+![image](images/connectors_tool_reference.png)
 Each tool has different API requirements, and this guide is intended to help you set up the tool's API so that DefectDojo can connect.
 
 
@@ -137,7 +137,7 @@ DefectDojo's Checkmarx ONE connector calls the Checkmarx API to fetch data.
 ​
 
 
-![](https://downloads.intercomcdn.com/i/o/1109449914/5ea92d383f2d09af8459a6ed/Screenshot+2024-07-10+at+2_57_34+PM.png?expires=1729720800&signature=d72362ec01a93727039ea6b52e32856d8fca74fb8f8751de50665f5779842968&req=dSEnH816lIheXfMW1HO4zW3Rem0XHydNRIiZJHcwnXoqZgIXk5Jl9kZAXhIg%0A8EbF%0A)
+![image](images/connectors_tool_reference_2.png)
 2. Enter a valid API key. You may need to generate a new one: see [Checkmarx API Documentation](https://docs.checkmarx.com/en/34965-68618-generating-an-api-key.html#UUID-f3b6481c-47f4-6cd8-9f0d-990896e36cd6_UUID-39ccc262-c7cb-5884-52ed-e1692a635e08) for details.
 3. Enter your tenant location in the **Location** field. This URL is formatted as follows:  
 ​`https://<your-region>.ast.checkmarx.net/` . Your Region can be found at the beginning of your Checkmarx URL when using the Checkmarx app. **<https://ast.checkmarx.net>** is the primary US server (which has no region prefix).

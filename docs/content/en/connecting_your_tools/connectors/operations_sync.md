@@ -33,7 +33,7 @@ To have DefectDojo run a Sync operation off\-schedule:
 ​
 2. From this page, click the **Sync** button. This button is located next to the **Mapped Records** header.
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1004529047/60f9b6df50f0d760de32f4f8/tLFaONBcKeFaybG7_YPdNx0Pk8yU2aSaANDTWiWkRL1NK9LJKyw7YMOD9Q0W6KUj6rQT8G9WvSeQrpzmVFyHWPaCTN3H_pvvdNYQo3queMqyyiB33wdbJFzBDm_QDbUGdRpRcsr8gzIH4arl2_6zLeQ?expires=1729720800&signature=824ac56f5e429a6841c7230f3097512452145aeb02b356d875b7a527e3f15e72&req=dSAnEsx8lIFbXvMW1HO4zSTetF5h5nFufHIHQsC%2F9kC8JSzNlTSMZg1aDUs5%0A89TQ%0A)
+![image](images/operations_sync.png)
 
 # Next Steps
 

@@ -15,7 +15,7 @@ New Dashboard tiles can be added by opening the **\+** (plus icon)menu on the Da
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1099242883/d09d09f605fa9c0c98d48da0/AD_4nXffF2tsgbJPbwaqtzDJsLNehJTI5sVTtweUKKcjlZSbYW6mGSGG3-p5lwnhzvjID3ILgUJY5zp5eIhdfcNkXE22WQSAUZZLL3IPN2NWvP9LPQkdjZjwj4PyttAzEVlv6NsL6SDr681vc1HjlQsJUwyWg5Y?expires=1729720800&signature=fda39a3ac402f593b4de9106165c30ecba372d0639a621d9183a68da5e89f865&req=dSAuH8t6n4lXWvMW1HO4zZXQQjy5PbqnpMBkHB25%2BKjWEA6rK2wKVSwRBNjm%0A4Yn%2B%0A)
+![image](images/How-To:_Add,_Edit_or_Delete_Dashboard_Tiles.png)
 
 Select the kind of Tile you want to add, which will then bring you to the Add Dashboard Tile form.
 
@@ -37,12 +37,12 @@ From here you can set your Dashboard Tile’s options:
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1099242892/0f6d28c17eb945dc9a664f12/AD_4nXfwA_eCPCfAA35-lMO4ffSlKcvHfRXwVCfFDwhhILI4jjUZMzwGrpuze1U96t0j4qyHvA1qas-A2uyPNjTezdaiyifnvU0ek_M0u6cQrEy_5l6q-VHfH3GOyqKu9xMCwgptjGZ2seU0MFI1Xkcu9dR1kI9h?expires=1729720800&signature=c1f05273e9a6b61f544c2e7f553d40964e42b4ee754cfda648f04da8f88e335f&req=dSAuH8t6n4lWW%2FMW1HO4zfHMOEzjomzC7%2FartNm051WDmNHk8wVBaG7sAp8N%0A5VWd%0A)* Select an **Icon** for your tile (**1\)**
+![image](images/How-To:_Add,_Edit_or_Delete_Dashboard_Tiles_2.png)
 * Set the **Header** textfor your tile **(3\)**
 * Set the **Footer** textfor your tile
 * Set the **Color** of your icon
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1099242903/bb5ab796524526528cd1d7fd/AD_4nXeXuNIrQ5AXGATNXhoh6Z5hXpLdx7yp-_7A64YDXxXvnWfmYmK6BYTGsecP_z7ZPCVJoNELKotvd-zwwF1yCiQkgq8K4JY6eMUo6Nt8y0oGuHiZWs5x0EvkfgVRDHfwIEgt9VqCfshIYXtwOGjlOsn3kRjJ?expires=1729720800&signature=d3ee3511691e6818c6e3da833f64365971ca7a3167c290acf2775d4c73cbc1e4&req=dSAuH8t6n4hfWvMW1HO4zQZnKZov%2FceWz7096CXLjrLzFiy69E4isnopgvGw%0AHYNn%0A)
+![image](images/How-To:_Add,_Edit_or_Delete_Dashboard_Tiles_3.png)
 
 ## Dynamic Color Tile
 

@@ -46,7 +46,7 @@ If you need to access an API token for a script or another integration, you can 
 
 
 
-![](https://downloads.intercomcdn.com/i/o/1194909638/703454b50036cf2ca1a81f32/AD_4nXfIr4WW26929_IyD_QPSwgKNOuCOGjAmWDgSG8xspkV9wTnaSoAAZfDALaryqiB2oveX28Q6vjDKHvwmb0ifQeLHgBu0wiBj_3koRlREsgeVlqoaCXQsF0aKrEFRvW9nHbAcN7j3sZ5CYBf8PAlyIVdUUrv?expires=1729720800&signature=e40de8269826823a00522ded678a3c30dc87de5a6e19eeea8fc3af90cad39c9b&req=dSEuEsB%2BlIdcUfMW1HO4zeLU2UHEgkjAHhhk9dUYCHZLgsIxMijLHi39L0MB%0AIeeQ%0A)
+![image](images/api_pipeline_modelling.png)
 ## General API Considerations
 
 
