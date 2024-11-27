@@ -16,17 +16,19 @@ Dojo-CLI has the same functionality as Universal Importer but also includes the 
 1. Use the DefectDojo UI to download the appropriate binary for your operating system from the platform.
 
 2. Locate “External Tools” from your User Profile menu:
+
 ![image](images/external-tools.png)
 
 3. Extract the downloaded archive within a directory of your choice.
 Optional: Add the directory containing the extracted binary to your system's $PATH for repeat access.
 
+**Note that Macintosh users may be blocked from running Dojo-CLI or Universal Importer as they are apps from an unidentified developer.  See [Apple Support](https://support.apple.com/en-ca/guide/mac-help/mh40616/mac) for instructions on how to override the block from Apple.**  
 
 ## Configuration
 The Universal Importer can be configured using flags, environment variables, or a configuration file. The most important configuration is the API token, which must be set as an environment variable:
 
 1. Add your API key to your environment variables. 
-You can retrieve your API key from: https://YOUR_INSTANCE.cloud.defectdojo.com/api/key-v2
+You can retrieve your API key from: `https://YOUR_INSTANCE.cloud.defectdojo.com/api/key-v2`
 
 or 
 
@@ -36,12 +38,12 @@ in the user dropdown in the top-right corner:
 ![image](images/api-token.png)
 
 2. Set your environment variable for the API token.
-	export DD_IMPORTER_DOJO_API_TOKEN=YOUR_API_KEY
+	`export DD_IMPORTER_DOJO_API_TOKEN=YOUR_API_KEY`
 
 Note: On Windows, use `set` instead of `export`.
 
 ## Command Line Options
-The following options can be used when calling the Universal Importer:
+The following options can be used when calling the Universal Importer.
 
 ### Common Options (applicable to all commands):
 
@@ -58,23 +60,57 @@ Show help information for the command.
 Print the version of the Universal Importer.
 ```
 
-### Import / Reimport Options
-The following options apply to both import and reimport, and can be reviewed using the following 2 commands:
+## Usage: Import / Reimport
+The Universal Importer supports two main commands: import and reimport.  Dojo-CLI supports those two commands, and also supports export.
 
-```
-universal-importer import --help
-      or
-universal-importer reimport --help
-```
+### Import Command
+Use the import command to import new findings into DefectDojo.
 
-In the case of Dojo-CLI, use
+**Import Basic syntax:**
 ```
-defectdojo-cli import --help
-      or
-defectdojo-cli reimport --help
+universal-importer import [options]
 ```
 
-The following are the command parameters, definition, and supported environment variables.
+**Import Example:**
+```
+universal-importer import \
+  --defectdojo-url "https://YOUR_INSTANCE.cloud.defectdojo.com/" \
+  --scan-type "burp scan" \
+  --report-path "./examples/burp_findings.xml" \
+  --product-name "dev" \
+  --engagement-name "dev" \
+  --product-type-name "Research and Development" \
+  --test-name "burp-test-dev" \
+  --verified \
+  --active \
+  --minimum-severity "info" \
+  --tag "dev" --tag "tools" --tag "burp" --tag "test-dev" \
+  --test-version "0.0.1" \
+  --auto-create-context
+```
+
+### Reimport Command
+Use the `reimport` command to extend an existing Test with Findings from a new report.
+
+**Reimport Basic syntax:**
+`universal-importer reimport [options]`
+
+**Reimport Example:**
+```
+universal-importer reimport \
+  --defectdojo-url "https://YOUR_INSTANCE.cloud.defectdojo.com/" \
+  --scan-type "Nancy Scan" \
+  --report-path "./examples/nancy_findings.json" \
+  --test-id 11 \
+  --verified \
+  --active \
+  --minimum-severity "info" \
+  --tag "dev" --tag "tools" --tag "nancy" --tag "test-dev" \
+  --test-version "1.0" \
+  --auto-create-context
+```
+### Import/Reimport Options
+The following are the command parameters, definition, and supported environment variables for the Import function.
 
 ```
 --defectdojo-url value, -u value
@@ -84,7 +120,7 @@ $DD_IMPORTER_DEFECTDOJO_URL
 The path to the report to import. 
 $DD_IMPORTER_REPORT_PATH
 --scan-type value, -s value
-The scan type of the tool - https://documentation.defectdojo.com/integrations/parsers/file/. 
+The scan type of the tool. 
 $DD_IMPORTER_SCAN_TYPE
 --product-type-name value, --pt value: 
 The name of the Product Type to import findings into. 
@@ -122,12 +158,6 @@ $DD_IMPORTER_AUTO_CREATE_CONTEXT
 --config value, -c value 
 The path to the configuration file. 
 $DD_IMPORTER_CONFIG_FILE
-```
-
-### Specific Options:
-Import Specific - Imports will create a new test within an engagement.
-
-```
 --engagement-id value, --ei value
 The ID of the Engagement to import findings into. (default: 0) 
 $DD_IMPORTER_ENGAGEMENT_ID
@@ -137,57 +167,7 @@ The ID of the Test to reimport findings into. (default: 0)
 $DD_IMPORTER_TEST_ID
 ```
 
-## Usage
-The Universal Importer supports two main commands: import and reimport.  Dojo-CLI supports those two commands, and also supports export.
-
-### Import Command
-Use the import command to import new findings into DefectDojo.
-
-**Import Basic syntax:**
-```
-universal-importer import [options]
-```
-
-**Import Example:**
-```
-universal-importer import \
-  --defectdojo-url "https://YOUR_INSTANCE.cloud.defectdojo.com/" \
-  --scan-type "burp scan" \
-  --report-path "./examples/burp_findings.xml" \
-  --product-name "dev" \
-  --engagement-name "dev" \
-  --product-type-name "Research and Development" \
-  --test-name "burp-test-dev" \
-  --verified \
-  --active \
-  --minimum-severity "info" \
-  --tag "dev" --tag "tools" --tag "burp" --tag "test-dev" \
-  --test-version "0.0.1" \
-  --auto-create-context
-```
-
-### Reimport Command
-Use the `reimport` command to import a new scan / findings into an existing test.
-
-**Reimport Basic syntax:**
-`universal-importer reimport [options]`
-
-**Reimport Example:**
-```
-universal-importer reimport \
-  --defectdojo-url "https://YOUR_INSTANCE.cloud.defectdojo.com/" \
-  --scan-type "Nancy Scan" \
-  --report-path "./examples/nancy_findings.json" \
-  --test-id 11 \
-  --verified \
-  --active \
-  --minimum-severity "info" \
-  --tag "dev" --tag "tools" --tag "nancy" --tag "test-dev" \
-  --test-version "1.0" \
-  --auto-create-context
-```
-
-### Export Command
+## Usage: Export Command
 Note that this command is only available with Dojo-CLI.
 
 To export Findings from Dojo-CLI, you will need to supply a configuration file which contains details explaining which Findings you wish to export.  This is similar to the GET Findings method via the API.
@@ -200,7 +180,7 @@ defectdojo-cli export \
 	--defectdojo-url "https://your-dojo-instance.cloud.defectdojo.com/"
 ```
 
-#### Output Destination:
+### Set Output Destination
 
 Specify one or both of these options depending on the export format you want to use:
 
@@ -212,7 +192,7 @@ Note that Dojo-CLI will attempt to create a .csv or .json file if one does not e
 
 You can also create the file in advance with `touch findings.csv`, for example.
 
-#### Filter Findings for Export:
+### Filter Findings for Export
 
 These flags are all optional and can be used to filter out a specific list of Findings to be included in the export file.  You can use any or all of these flags.
 ```
