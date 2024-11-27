@@ -119,10 +119,7 @@ class MendParser:
                 description = node.get("description", "Unknown")
 
             cve = node.get("name")
-            if cve is None:
-                title = "CVE-None | " + lib_name
-            else:
-                title = cve + " | " + lib_name
+            title = "CVE-None | " + lib_name if cve is None else cve + " | " + lib_name
             # cvss2 by default in CLI, but cvss3 in UI. Adapting to have
             # homogeneous behavior.
             if "cvss3_severity" in node:
@@ -175,10 +172,7 @@ class MendParser:
                         "Error handling local paths for vulnerability.",
                     )
 
-            if locations:
-                filepaths = locations
-            else:
-                filepaths = filepaths
+            filepaths = locations or filepaths
 
             new_finding = Finding(
                 title=title,

@@ -178,10 +178,7 @@ class MonthYearWidget(Widget):
 
         output = []
 
-        if "id" in self.attrs:
-            id_ = self.attrs["id"]
-        else:
-            id_ = f"id_{name}"
+        id_ = self.attrs.get("id", f"id_{name}")
 
         month_choices = list(MONTHS.items())
         if not (self.required and value):
@@ -2538,7 +2535,7 @@ class ToolTypeForm(forms.ModelForm):
         exclude = ["product"]
 
     def __init__(self, *args, **kwargs):
-        instance = kwargs.get("instance", None)
+        instance = kwargs.get("instance")
         self.newly_created = True
         if instance is not None:
             self.newly_created = instance.pk is None
@@ -3247,10 +3244,7 @@ class TextQuestionForm(QuestionForm):
             question=self.question,
         )
 
-        if initial_answer.exists():
-            initial_answer = initial_answer[0].answer
-        else:
-            initial_answer = ""
+        initial_answer = initial_answer[0].answer if initial_answer.exists() else ""
 
         self.fields["answer"] = forms.CharField(
             label=self.question.text,

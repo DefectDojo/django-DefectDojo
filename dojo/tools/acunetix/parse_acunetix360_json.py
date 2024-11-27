@@ -51,10 +51,7 @@ class AcunetixJSONParser:
                         + references
                     )
             url = item["Url"]
-            if item["Impact"] is not None:
-                impact = text_maker.handle(item.get("Impact", ""))
-            else:
-                impact = None
+            impact = text_maker.handle(item.get("Impact", "")) if item["Impact"] is not None else None
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             if request is None or len(request) <= 0:

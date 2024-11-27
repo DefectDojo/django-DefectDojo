@@ -52,10 +52,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
     def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
 
-        if fid:
-            args = (eid, fid)
-        else:
-            args = (eid, )
+        args = (eid, fid) if fid else (eid,)
 
         response = self.client.post(reverse("add_risk_acceptance", args=args), data_risk_accceptance)
         self.assertEqual(302, response.status_code, response.content[:1000])
@@ -65,19 +62,13 @@ class RiskAcceptanceTestUI(DojoTestCase):
         if not all(finding.active for finding in findings):
             return False
 
-        if not any(finding.risk_accepted for finding in findings):
-            return True
-
-        return False
+        return bool(not any(finding.risk_accepted for finding in findings))
 
     def assert_all_inactive_risk_accepted(self, findings):
         if any(finding.active for finding in findings):
             return False
 
-        if all(finding.risk_accepted for finding in findings):
-            return True
-
-        return False
+        return bool(all(finding.risk_accepted for finding in findings))
 
     def test_add_risk_acceptance_single_findings_accepted(self):
         ra_data = copy.copy(self.data_risk_accceptance)

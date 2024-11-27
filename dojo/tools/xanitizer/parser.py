@@ -85,15 +85,9 @@ class XanitizerParser:
         cl = finding.find("class")
         file = finding.find("file")
         if pckg is not None and cl is not None:
-            if line:
-                title = f"{title} ({pckg.text}.{cl.text}:{line})"
-            else:
-                title = f"{title} ({pckg.text}.{cl.text})"
+            title = f"{title} ({pckg.text}.{cl.text}:{line})" if line else f"{title} ({pckg.text}.{cl.text})"
         else:
-            if line:
-                title = f"{title} ({file.text}:{line})"
-            else:
-                title = f"{title} ({file.text})"
+            title = f"{title} ({file.text}:{line})" if line else f"{title} ({file.text})"
 
         return title
 

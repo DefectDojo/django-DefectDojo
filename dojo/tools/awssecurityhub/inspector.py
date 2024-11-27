@@ -12,10 +12,7 @@ class Inspector:
         impact = []
         references = []
         unsaved_vulnerability_ids = []
-        if finding.get("EpssScore") is not None:
-            epss_score = finding.get("EpssScore")
-        else:
-            epss_score = None
+        epss_score = finding.get("EpssScore")
         description = f"This is an Inspector Finding\n{finding.get('Description', '')}" + "\n"
         description += f"**AWS Finding ARN:** {finding_id}\n"
         description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
@@ -46,7 +43,7 @@ class Inspector:
         else:
             is_Mitigated = True
             active = False
-            if finding.get("LastObservedAt", None):
+            if finding.get("LastObservedAt"):
                 try:
                     mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
                 except Exception:

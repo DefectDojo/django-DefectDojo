@@ -23,7 +23,7 @@ class GuardDuty:
             mitigated = None
         else:
             is_Mitigated = True
-            if finding.get("LastObservedAt", None):
+            if finding.get("LastObservedAt"):
                 try:
                     mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
                 except Exception:

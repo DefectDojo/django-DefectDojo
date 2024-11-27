@@ -25,12 +25,7 @@ class CargoAuditParser:
                 advisory = item.get("advisory")
                 vuln_id = advisory.get("id")
                 vulnerability_ids = [advisory.get("id")]
-                if "categories" in advisory:
-                    categories = (
-                        f"**Categories:** {', '.join(advisory['categories'])}"
-                    )
-                else:
-                    categories = ""
+                categories = f"**Categories:** {', '.join(advisory['categories'])}" if "categories" in advisory else ""
                 description = (
                     categories
                     + f"\n**Description:** `{advisory.get('description')}`"
@@ -62,10 +57,7 @@ class CargoAuditParser:
                 package_version = item.get("package").get("version")
                 title = f"[{package_name} {package_version}] {advisory.get('title')}"
                 severity = "High"
-                if "keywords" in advisory:
-                    tags = advisory.get("keywords")
-                else:
-                    tags = []
+                tags = advisory.get("keywords") if "keywords" in advisory else []
                 try:
                     mitigation = f"**Update {package_name} to** {', '.join(item['versions']['patched'])}"
                 except KeyError:
