@@ -187,9 +187,7 @@ class AnchoreGrypeParser:
         return list(dupes.values())
 
     def _convert_severity(self, val):
-        if "Unknown" == val:
-            return "Info"
-        if "Negligible" == val:
+        if val == "Unknown" or val == "Negligible":
             return "Info"
         return val.title()
 

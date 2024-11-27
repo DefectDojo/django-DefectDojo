@@ -30,7 +30,7 @@ class NiktoJSONParser:
                 references=vulnerability.get("references"),
             )
             # manage if we have an ID from OSVDB
-            if "OSVDB" in vulnerability and "0" != vulnerability.get("OSVDB"):
+            if "OSVDB" in vulnerability and vulnerability.get("OSVDB") != "0":
                 finding.unique_id_from_tool = "OSVDB-" + vulnerability.get(
                     "OSVDB",
                 )

@@ -1,3 +1,4 @@
+import contextlib
 import logging
 
 from crum import get_current_user
@@ -37,10 +38,8 @@ def add_benchmark(queryset, product):
         benchmark_product.control = requirement
         requirements.append(benchmark_product)
 
-    try:
+    with contextlib.suppress(Exception):
         Benchmark_Product.objects.bulk_create(requirements)
-    except Exception:
-        pass
 
 
 @user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")

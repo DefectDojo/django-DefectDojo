@@ -45,9 +45,7 @@ class ClairKlarScan:
     def get_item_clairklar(self, item_node, test):
         if item_node["Severity"] == "Negligible":
             severity = "Info"
-        elif item_node["Severity"] == "Unknown":
-            severity = "Critical"
-        elif item_node["Severity"] == "Defcon1":
+        elif item_node["Severity"] == "Unknown" or item_node["Severity"] == "Defcon1":
             severity = "Critical"
         else:
             severity = item_node["Severity"]
