@@ -1640,7 +1640,7 @@ class FindingFilterHelper(FilterSet):
                 lookup_expr="isnull",
                 exclude=True,
                 label="Has Group JIRA")
-            has_any_jira = FindingHasJIRAFilter(label="Has Any JIRA")
+        has_any_jira = FindingHasJIRAFilter(label="Has Any JIRA")
 
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
