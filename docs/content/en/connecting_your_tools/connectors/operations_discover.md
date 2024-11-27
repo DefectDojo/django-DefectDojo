@@ -12,7 +12,7 @@ You can manage all of these processes from the **Manage Records \& Operations** 
 
 
 
-![](https://downloads.intercomcdn.com/i/o/991931761/2369607091f047ab7d9fc8f7/Screenshot+2024-03-14+at+3_58_06+PM.png?expires=1729720800&signature=a4514b13c28657c59684f62d83a2a341a021974c3039c4c1eb589378813803cd&req=fSkmH8p%2FmodeFb4f3HP0gD4PB4jnqjGHlvfM6JxkdxjjZLvtUsa3sBPCZn0%2F%0Au4Q%3D%0A)
+![image](images/operations_discover.png)
 
 # Creating New Records
 
@@ -30,7 +30,7 @@ Each time your Connector runs a **Discover** operation, it will look for new **V
 
 
 
-![](https://downloads.intercomcdn.com/i/o/1004625297/5617e086a605102544ec5e37/Screenshot+2024-03-27+at+15_50_38+%281%29.png?expires=1729720800&signature=39ed2d006535fe6f3734ded90af212341d18725ac189fd6c93ef22efe83f22f0&req=dSAnEs98mINWXvMW1HO4zTo0ZAoA6if8rY3f2TjKX%2F98dBmwNaEs4%2B5s07hV%0Ab4FT%0A)
+![image](images/operations_discover_2.png)
 
 
 ## Run Discover Manually
@@ -41,7 +41,7 @@ Each time your Connector runs a **Discover** operation, it will look for new **V
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1004506539/8f01b33b93821550f5198bd5/v8-yUUR6-EVcDMgbo4hOYp_5Q8gT96Zua_yqvPK2yubDZS0s_SVwFBwfKq4lPjuUJEfYtaLOL5syqJi0y_jND2aQj89l2xogKQaD4lO_alleK76L4WRbttxODT2Edui0erbhJ1xQApA0pws8X-opzc4?expires=1729720800&signature=5514f4b5a2d991188e7053d287a8e61f60301eb83cdae8384090808f224577b3&req=dSAnEsx%2Bm4RcUPMW1HO4zXucwJiAhf5WfVviwSTTFchq7bwThIMffCCban%2Bv%0AzwFl%0A)
+![image](images/operations_discover_3.png)
 
 # **Next Steps:**
 
