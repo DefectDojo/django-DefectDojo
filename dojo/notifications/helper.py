@@ -392,7 +392,11 @@ class WebhookNotificationManger(NotificationManagerHelpers):
                         endpoint.first_error = now
                     endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_TMP
                     # In case of failure within one day, endpoint can be deactivated temporally only for one minute
-                    self._webhook_reactivation.apply_async(args=[self], kwargs={"endpoint_id": endpoint.pk}, countdown=60)
+                    self._webhook_reactivation.apply_async(
+                        args=[self],
+                        kwargs={"endpoint_id": endpoint.pk},
+                        countdown=60,
+                    )
             # There is no reason to keep endpoint active if it is returning 4xx errors
             else:
                 endpoint.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
@@ -411,12 +415,12 @@ class WebhookNotificationManger(NotificationManagerHelpers):
             return Notification_Webhooks.objects.none()
         return endpoints
 
-    def _webhooks_notification_request(
+    def _generate_request_details(
         self,
         endpoint: Notification_Webhooks,
         event: str | None = None,
         **kwargs: dict,
-    ) -> requests.Response:
+    ) -> tuple[dict, dict]:
         headers = {
             "User-Agent": f"DefectDojo-{dd_version}",
             "X-DefectDojo-Event": event,
@@ -428,6 +432,15 @@ class WebhookNotificationManger(NotificationManagerHelpers):
         yaml_data = self._create_notification_message(event, endpoint.owner, "webhooks", kwargs)
         data = yaml.safe_load(yaml_data)
 
+        return headers, data
+
+    def _webhooks_notification_request(
+        self,
+        endpoint: Notification_Webhooks,
+        event: str | None = None,
+        **kwargs: dict,
+    ) -> requests.Response:
+        headers, data = self._generate_request_details(endpoint, event=event, **kwargs)
         return requests.request(
             method="POST",
             url=endpoint.url,
@@ -491,11 +504,6 @@ class AlertNotificationManger(NotificationManagerHelpers):
 
 
 class NotificationManager(
-    SlackNotificationManger,
-    MSTeamsNotificationManger,
-    EmailNotificationManger,
-    WebhookNotificationManger,
-    AlertNotificationManger,
     NotificationManagerHelpers,
 ):
 
@@ -621,6 +629,21 @@ class NotificationManager(
         notifications_set.user = user
         self._process_notifications(event, notifications=notifications_set, **kwargs)
 
+    def _get_manager_class(self, alert_type: str) -> type[NotificationManagerHelpers]:
+        if alert_type == "slack":
+            return SlackNotificationManger
+        if alert_type == "msteams":
+            return MSTeamsNotificationManger
+        if alert_type == "mail":
+            return EmailNotificationManger
+        if alert_type == "webhooks":
+            return WebhookNotificationManger
+        if alert_type == "alert":
+            return AlertNotificationManger
+
+        msg = f"Unsupported alert type: {alert_type}"
+        raise TypeError(msg)
+
     def _process_notifications(
         self,
         event: str | None,
@@ -641,7 +664,7 @@ class NotificationManager(
             getattr(notifications, "other"),
         ):
             logger.debug("Sending Slack Notification")
-            self.send_slack_notification(event, user=notifications.user, **kwargs)
+            self._get_manager_class("slack").send_slack_notification(event, user=notifications.user, **kwargs)
 
         if self.system_settings.enable_msteams_notifications and "msteams" in getattr(
             notifications,
@@ -649,7 +672,7 @@ class NotificationManager(
             getattr(notifications, "other"),
         ):
             logger.debug("Sending MSTeams Notification")
-            self.send_msteams_notification(event, user=notifications.user, **kwargs)
+            self._get_manager_class("msteams").send_msteams_notification(event, user=notifications.user, **kwargs)
 
         if self.system_settings.enable_mail_notifications and "mail" in getattr(
             notifications,
@@ -657,7 +680,7 @@ class NotificationManager(
             getattr(notifications, "other"),
         ):
             logger.debug("Sending Mail Notification")
-            self.send_mail_notification(event, user=notifications.user, **kwargs)
+            self._get_manager_class("mail").send_mail_notification(event, user=notifications.user, **kwargs)
 
         if self.system_settings.enable_webhooks_notifications and "webhooks" in getattr(
             notifications,
@@ -665,11 +688,11 @@ class NotificationManager(
             getattr(notifications, "other"),
         ):
             logger.debug("Sending Webhooks Notification")
-            self.send_webhooks_notification(event, user=notifications.user, **kwargs)
+            self._get_manager_class("webhooks").send_webhooks_notification(event, user=notifications.user, **kwargs)
 
         if "alert" in getattr(notifications, event, getattr(notifications, "other")):
             logger.debug(f"Sending Alert to {notifications.user}")
-            AlertNotificationManger.send_alert_notification(self, event, user=notifications.user, **kwargs)
+            self._get_manager_class("alert").send_alert_notification(self, event, user=notifications.user, **kwargs)
 
 
 @app.task(ignore_result=True)
