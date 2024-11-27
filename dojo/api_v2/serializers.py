@@ -1288,9 +1288,8 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(msg)
 
         if finding:
-            linked_finding = jira_helper.jira_already_linked(finding, data.get("jira_key"), data.get("jira_id"))
-            if linked_finding:
-                msg = "JIRA issue " + data.get("jira_key") + " already linked to " + reverse("view_finding", args=(linked_finding,))
+            if (linked_finding := jira_helper.jira_already_linked(finding, data.get("jira_key"), data.get("jira_id"))) is not None:
+                msg = "JIRA issue " + data.get("jira_key") + " already linked to " + reverse("view_finding", args=(linked_finding.id,))
                 raise serializers.ValidationError(msg)
 
         return data
