@@ -14,19 +14,19 @@ The Report Builder can be opened from the **📄Reports** page on the sidebar.
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668657/d149242028cea25e8114b666/qiA-SC4CLojnPIBQFJ7HkqQ5P7QQT-Hbo_4ZL1U5SLtvOjauQfK5nr276tyG28BWkHWpxbXyBlRyKEMoBJhIU05923KW7do0TdloBdZ339JIVvjTSRKC_FFW1FpUnG2xnM3LgKKXuOsgMvn5vQ-7yYo?expires=1729720800&signature=86da67f31863d06a6d6066e37461ebc3ab4fa7d1ed1e31d78dccdb6ae091293a&req=dSAiH894lYdaXvMW1HO4zYTHA4kYzFbXGD3pjms%2FaPWm4NRJKHCIfFYxrKIu%0APBVL%0A)
+![image](images/Using_the_Report_Builder.png)
 
 The report builder page is organized in two columns. The left **Report Format** column is where you can design your report, using widgets from the right **Available Widgets** column.
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668681/fc43eee902f2d9892c2858ad/di7AqHpuoVBD527GMbmUU4g3xViyrzF4nDIZRmKKLXKmgpu5FJU837mn-Txa0egjF7gqs10vl1ls8b6zZHFmmu4Ceu33gPd7R9LPzHXLU79-_QDiVjXNkJHOmjl6uGPmzvkrtrJmMT3bacpoRo7-a4k?expires=1729720800&signature=474de3f5c935cad8cb4564e89868ee57da2368fc8492dbe7c4f56eb5332fe0f2&req=dSAiH894lYdXWPMW1HO4zUkXPkPuwVumZ1gLKNFFUSpoSVwSph0rDjPojnwd%0Af6RA%0A)
+![image](images/Using_the_Report_Builder_2.png)
 
 # Step 1: Set Report Options
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668702/757104b09b49cbcf83d3b6fc/Zl2lKAU3KWuVtlCunSK2bVyrw398CQeh8CCAOY72GVW5WMxlME59qTrQawLiuq5e8E0Da6elvpBs0Fo9HIMfMaV1O7Uvkvj_lK4uciDFgA1puiyWwss5MCWEyrLaiy6ijUoK9iJ7ygzb5afbJ4dBkKo?expires=1729720800&signature=9d421bb96e18b0407be5a6ab4b113f63a7059e469a31251d1c1d58a779632bf6&req=dSAiH894lYZfW%2FMW1HO4zd38o20biDfaLBNaWL2wZpj9WooJDzcHaIKkCAIv%0AJ%2BmV%0A)
+![image](images/Using_the_Report_Builder_3.png)
 From the Report Options section, you can take the following actions:
 
 
@@ -48,7 +48,7 @@ The image will automatically resize to fit the document, and will render directl
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668715/d62e5d01e6322c4de5753c46/75kSgNSTofd59iGYCZvmGKYKc68QCGuKvihvQ1Ghd3jwJRdbLp6YAlqa7EIUQWVk8X6scpk-ctAPx4ON67i64AeaKXtMulH4B_J41A-4PiFxPssV3yPital5bahMDRnq8BYJvA78cpzZynq07Fo5dTM?expires=1729720800&signature=dd455f58ada29c952a3bd0ff8054837692bacd7f52500f8c7c3c9d50df514dd2&req=dSAiH894lYZeXPMW1HO4zaIJOBeuo49c5ejU69mXwasRIZ6a6Gft8W1Oux2i%0AoHQt%0A)
+![image](images/Using_the_Report_Builder_4.png)
 
 # Step 2: Add content to your report with Widgets
 
@@ -75,7 +75,7 @@ The Cover Page Widget allows you to set a Heading, Sub heading and additional me
 ## 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668733/2522de823fd048e072c972f8/Z06otmw5EcLKbfx6JzBDqqrvkO8T6AHAgMrYYsS3RCd3PqoKZ2lL-tSoTrA-MMvnSuhPTO7kwIWbBFg6yGCKR-HpyCFCWiCztoOUVYQ7oQTJGZPTkFLpKiK_dolIHCjHRlmaZVlXpI4I0IbmGoNVGgQ?expires=1729720800&signature=1a0e94643a63175a9203668f2de2eb1ba324e9d0f4ba4402be7c8f31826a8267&req=dSAiH894lYZcWvMW1HO4zTwHGAjzTDMbJMT9RA4HP84r3prZFbAKtBemB7fA%0AD0%2B8%0A)
+![image](images/Using_the_Report_Builder_5.png)
 ## Executive Summary Widget
 
 
@@ -83,7 +83,7 @@ The Executive Summary widget is intended to summarize your report at a glance. I
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668750/9ef673c9e58e4648397a72d7/Q9_fk5LqZlgHS2N4tL2HyVB1lg5RW7ek0mipaOEWUFgi0sHmQCmJYBKngawpR7Oo7NrEuebFbWIIMHpaTEHIgB0tyCuWMgSUTqtYDi9CSZCATrobCSFvNI5fxq4xKyGJFvN9RQOpBw-ISDZfkXZoX2w?expires=1729720800&signature=d2af7dc8ca8926eddd8c3c0e6fc4b3e3800bdc6c6a75261ab4c3e797a17e4e1e&req=dSAiH894lYZaWfMW1HO4zSgZrnEu4v9f8iDvHdpabgdb31RLyLi%2B5lw286sJ%0AQXqH%0A)
+![image](images/Using_the_Report_Builder_6.png)
 You can also **Include SLAs** in your executive summary. To add images, markup formatting or anything beyond pure text, consider adding a **WYSIWYG Content Widget** immediately after the executive summary.
 
 
@@ -98,7 +98,7 @@ As each organization will have different definitions for each severity level, th
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668769/4ed67d61b24d76230e199027/vBzduetm_xuyj-Id_ea3XrWj39N90ZRakQsQTJAeghNhZjIlVJlbNiwI8DnjPkEcc0h_c7QA_Bt90bv0j4tlLbZH5Tov5Dtzp8twGcHMmWRgzuOrVbiESxHTZhA5ZHhUL-tJ32L4FzlfB4qVLtL69HM?expires=1729720800&signature=3708e508a8a083efd2b06dcf93e1c747ba81f281a92d65c0562394dc5c317465&req=dSAiH894lYZZUPMW1HO4zWi%2FMsH6d%2BF7zDGqlenGyd1o7J6UGLbpIIAdseIH%0Ax%2Buj%0A)
+![image](images/Using_the_Report_Builder_7.png)
 ## Table Of Contents Widget
 
 
@@ -106,7 +106,7 @@ The Table Of Contents Widget creates a list of each Finding in your report, for 
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668783/ac40a1a4cf6754b045f2a95d/z6MDXX6XbQULSPzJ7pS334JRAsqj_ozIuEiKD4t6yYSEywEA66N-u0rLZtx4wYvUtVv0LcIgLgB7cnmvPLKJURndFWwvcmr5u_LBPdOlILkwjig1_VNqRrCTcUruAYkiaT8qzloYx9Qk8vFbzVA-g_A?expires=1729720800&signature=f3cfefa777f03101e6c2317a84ab4b68830b21d60b0467d876658109db3711ff&req=dSAiH894lYZXWvMW1HO4zTVqo38kvEyYe4VstbFGMYhKkv9412DDgaRnG631%0Ak%2BgB%0A)* Set an optional **Heading** for your Table Of Contents if you wish.
+![image](images/Using_the_Report_Builder_8.png)
 * You can add a section of **Custom Content**, which will add text underneath the Heading.
 * You can upload an image to the Table Of Contents by clicking the **Choose File** button next to the **Image** line. The uploaded image will render directly above the **Heading** selected. Images will be resized to fit the document.
 
@@ -118,7 +118,7 @@ The WYSIWYG (What You See Is What You Get) widget can be used to add a section c
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668799/7e2d199dfb523e6e9b8575e0/Zl0xqUXPzqIAHnxPqoti3dIi9Ok8BsUpVBiYj3WEy3R24b3y9t2dP4tL3CFsfRW88Py0FQL64i4X-uDL9hRUUI1CAzUOriTOmqYEYEjR7WD2PtbeDo0iN8a6SiFn2gBRGw9y36zTqol6zAE-KlNI56I?expires=1729720800&signature=669d522b6f16047bbe7e71394143d3f55fbe39fdbb35964f6ab10d2d39a1b7ee&req=dSAiH894lYZWUPMW1HO4zTHuMUGRWo1X3HdWDZf%2FwZLsh3h5gPVX4gN0Sqv7%0AO6Mu%0A)
+![image](images/Using_the_Report_Builder_9.png)
 * WYSIWYG Content can include an optional Heading.
 * Images can be added to a WYSIWYG widget by dragging and dropping them directly into the **Content** box. Images inserted into the Content box will render at their full resolution.
 * You can add multiple WYSIWYG widgets to a report.
@@ -139,7 +139,7 @@ To apply filters to your Findings widget, set the filter parameters and click th
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668827/54fbccc5dc6c37e974544f67/9tAorgi2LtsrutVn2oAi---8TxULQRm3WdUBXXYnG4Un8Hxvn-lLMF9YeyZprenDpMpn_pXlfqV0HPCxMleeKrAAfISpqCakc9DWGtChyWpy1fSTDKDJKhUqbZhXK853ILnOodbMRPMUOW3JMWyRmmA?expires=1729720800&signature=07e89018412575f5452488734e335ca52ec7c5c386a3c5b4820ed72ea44264b6&req=dSAiH894lYldXvMW1HO4zeRXczzna2ND%2FjJ5fjQdd42%2BX0Al7y0N38CoHXcQ%0ArAOZ%0A)* The resulting list of Findings will be split up into sections by **Severity Level**. Note that DefectDojo data model components (Test, Engagement or Product) will not be represented in the report, only a list of Findings.
+![image](images/Using_the_Report_Builder_10.png)
 * As with Widgets, the Filters section can be expanded and collapsed by clicking the gret Filters header.
 * You can add multiple separate Findings Widgets to your report with different filter parameters if you want the report to contain more than one list of Findings.
 * Only the Findings you are authorized to view are included in these listings, with respect to Role\-Based Access Control
@@ -151,7 +151,7 @@ To apply filters to your Findings widget, set the filter parameters and click th
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668863/33ab8747223d12cc74452025/JGKDzkDo79C7U2L2T0cC9_UKd0aCrI2R3NWZA3bAo1lcAtH3TsSNirvToX15TpDLIzdZ6qVOTWAa9tpE0bXpeZ6OLgTCA3_nMUerraHYsrhu7ZbAINVWNkd-sWs_MMg3ZwhE5Q4RYWj1_xWrcD2A1Zk?expires=1729720800&signature=9bd3481d52352937f34305772f9eb7ea6a79c191a9f2268785ce15c8dc4b32cf&req=dSAiH894lYlZWvMW1HO4zV%2Bgt3R5%2FTAnT7RYCBj%2Frv4IjWgmaLlIyRPCTtWH%0Am%2F%2Ff%0A)
+![image](images/Using_the_Report_Builder_11.png)
 
 ## Vulnerable Endpoints Widget
 
@@ -168,7 +168,7 @@ As with the Findings Widget, the Vulnerable Endpoints Widget is divided into a F
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668880/0e1efc285e326249be4179e0/Szk-7f4eMk_NKNKPAUpkzRsO5VNFwwYAGFco85IbJg4lCEHYObQFHTm0vooxwV4750IKjLkcelCD6UqYP3j2Mw2io9KGGWWxGZfLmNrL4gCIeSz91yMPVCXf4K6GKQM1sLRbwG-avNp3_OlrsFTNJeA?expires=1729720800&signature=27d50b0bb16547abf2882c11ce905c850748330b931813277d046e46b29de2fb&req=dSAiH894lYlXWfMW1HO4zVU6RSjhv0UByCQSNwvLkLTsBMiDy%2FB3c%2F2aDaSl%0AI2gy%0A)
+![image](images/Using_the_Report_Builder_12.png)
 Select the parameters for the Endpoints you wish to include here and click the **Apply Findings** button at the bottom. You can preview the results of your filter by checking the Endpoints list located underneath the Filters section.
 
 
@@ -184,7 +184,7 @@ This Widget will render a light grey horizontal line to divide between sections.
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668908/6329423a4a2af18a5c1d4a7b/LUGV4_gdfMrrqWEYcVUipme5N2vHUyhHTq1K6I04-sYnApm2F7GmmgJ-WXOZBVG2hh9HqJ3szm_OipCW2jh6KLY5I3w2viOUZYhWLdduoBFeeNq5qG99Ct0erE1KJVK-NCJx03hw05roWuxsQtQGhnU?expires=1729720800&signature=f311c841a18fa3c43ace8dff97da3ecfc0d592f245e49e9588eec50c1cbcc61b&req=dSAiH894lYhfUfMW1HO4zSn2LKgUlf6SVJsVNa7AJPTnjquPDCFg66OloIGc%0ACs%2F0%0A)
+![image](images/Using_the_Report_Builder_13.png)
 
 # Step 3: Publishing and viewing your Report
 
@@ -201,7 +201,7 @@ Once your report has generated, you can view it by either clicking on the **Stat
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668933/94b598eda87056948041d01a/3p-IVZqmk3TFbZth5i8j8E6nAn4U4PRCGIZ1kUiPLqCmFXXB0VQr4r5Fod0I4Z5cgxaFtaFq1JuQJvWaxpiOEIPCUyYBsOLWEaSEsDs6gFhtSrZ3ryiVolap1Cr7Z0w0jmzufsLe_3Lfgv78U1CAALE?expires=1729720800&signature=efd7cced529fbcdf08ea0fb6c91c2dd96fa15104bc2e69abb811542f3bf4f42b&req=dSAiH894lYhcWvMW1HO4zU7eIAlzp8yFaVkMjW00jNSD7WxnDKf7klUA3Vaw%0Avkcv%0A)
+![image](images/Using_the_Report_Builder_14.png)
 
 # Step 4: Exporting a Report
 
@@ -214,7 +214,7 @@ The easiest method to use is to Print To PDF \- with an HTML Report open, open a
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059668954/b704c7ddaac96d4eb64cf5e4/JKKw_F3C8W6glSYytDhXMkewmRpKoxjwLzkU32E_YJEanOvfHEpcwnEILqet46Sep5cRqS2F4KkrwjXqF2Wu6en0d1RtfctRP-_-Sva2pbcqvHwZb3L51y6iKX1uORlK1MAjsyPxIgL1B3C2bCNxiXk?expires=1729720800&signature=a111990b482823eafc2bff32c1d23233ec1520d3ab1794c3a5c72dc526287782&req=dSAiH894lYhaXfMW1HO4zf8CfRrJhPkgv7slZsXFhSnKeIbnMRCyo37GDmYC%0ADPz1%0A)
+![image](images/Using_the_Report_Builder_15.png)
 
 # Report formatting suggestions
 

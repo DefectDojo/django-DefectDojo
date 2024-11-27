@@ -20,7 +20,7 @@ Records are created and updated during the **[Discover](https://support.defectdo
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1004512180/25e5f0ff8bba23800a7c622d/l-b4Vm_oV1tyCZVwQPo2KJm2DTsVPZCOwQTSV2xXSw5CB9sc9OwBZDcKyNSGXqFjOBaDxaFADjbQ_tJGM_nVn6rFFr2Vdmdx7zMwRcMUIBT3aEjSKF5iMEksZwuJigydkUP2ZuxIUZlzQ9fVvmVYEpo?expires=1729720800&signature=6306cb7f1aa9afa737ccedcaa74cda82c3e2e8c3956166fa0891abce583e830f&req=dSAnEsx%2Fn4BXWfMW1HO4zcnC6uhR8d3wWPDnXoQJQeY5bTtW3w2ujN9NrzRk%0A4ZsY%0A)
+![image](images/manage_records.png)
 
 Records have various attributes, including:
 
@@ -79,7 +79,7 @@ Once a Record is Mapped, DefectDojo will be ready to import your tool’s scans 
 * All data created via a connector will be stored under a single Engagement called **Global Connectors**. That Engagement will create a separate Test for each Connector mapped to the Product.   
 ​
 
-![](https://downloads.intercomcdn.com/i/o/1013197785/3dbf123a6fda3b38a7185bc7/Connectors+A.jpg?expires=1729720800&signature=c7f75935ff962f5f2e688fae915642793b545842c26db385f3da67e60afefba9&req=dSAmFch3moZXXPMW1HO4zbyD24POnHMJT72woKj99bWzm7uSUFDBRDBKiIRK%0AM7Le%0A)
+![image](images/manage_records_2.jpg)
 This makes it possible to send scan data from multiple Connectors to the same Product. All of the data will be stored in the same Engagement, but each Connector will store data in a separate Test.
 
 

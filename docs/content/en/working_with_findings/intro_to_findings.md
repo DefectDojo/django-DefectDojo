@@ -40,7 +40,7 @@ The Finding Page contains various components. Each will be populated by the Impo
 
 
 
-![](https://downloads.intercomcdn.com/i/o/tj2vh1ie/1204626420/d4b31aeb933a01a91c8f9fcbab53/AD_4nXeCuL73nA2NQtVBVqVJPKGjtd-RbuuqPn2CpxasGuOplzjTfVjR_VaOyfWqxaOueQOzf9OXNnCCWZttl6OGDA5jVtYhG3gT0kqAKXQw7m0MADYtJ8WocQ5FWHDys6UhIc54DdQtlwhRJqLqM06ApretgQ8b?expires=1729720800&signature=5fdaf3b96d90627f967590cbbcd16a974954e553b5fca4a45d8cdf70040b15e8&req=dSInEs98m4VdWfMW1HO4zR0l5%2BsqlD4BklyhzEusXAB9j0VOFPYkQ%2B7zhpyj%0ARB4q%0A)
+![image](images/Introduction_to_Findings.png)
 1. **The Title of the Finding:** Usually this is a descriptive shorthand which identifies the vulnerability or issue detected. This section is also where user\-created Tags are displayed if they exist.  
 ​
 2. **Finding Overview:** This section contains five separate pages of relevant information for the Finding: Description, Mitigation, Impact, References and Notes. These fields can be populated automatically based on the incoming vulnerability data, or they can be edited by a DefectDojo user to provide additional context.  

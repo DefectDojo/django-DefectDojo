@@ -33,7 +33,7 @@ The Smart Upload menu is stored in a collapsible section of the sidebar.
 * **Unassigned Findings lists all Findings from Smart Upload which have yet to be assigned to a Product.**
 
 
-![](https://downloads.intercomcdn.com/i/o/1194910967/0360afc3606c62b972b29fb0/AD_4nXeghMk_jectcbz_xSEWILQ6TKfMAkJFaYqtLjaeCgjscW0-H0BAM5M2oFQxB4aY4-R6qRcFp4G1-6HP3z9uc7_mICl5JSkxw9lRnKtH4OQBkoRuRYFbtBKMhENVa0HRsuEmH8n-S3vc7s0F_3uTyPOh8Rk?expires=1729720800&signature=182c23fcf2186f97130f369f44608461240088b1545d6053de9e107a589b3ee0&req=dSEuEsB%2FnYhZXvMW1HO4zQ9CTDLAIv7psFxRziJwPE1a%2B1rCBkMxAnkniABG%0AsM3u%0A)
+![image](images/smart_upload.png)
 
 ## The Smart Upload Form
 
@@ -43,7 +43,7 @@ The Smart Upload Import Scan form is essentially the same as the Import Scan for
 
 
 
-![](https://downloads.intercomcdn.com/i/o/1194910970/28b48ec77b1b3fd2ff19d0ea/AD_4nXddw4i_wM6uS34D1FgNp6XXc4jS-LymrQ6-CrkG2zle6mAq9Kwec0c_OrrNiyyBVfm6val4zOm6Luw_NpJcENyk2QX3eGDaPFjQDutPDHq8mbIW5UZ5wTM5va2FfKi9iJszc90_Mmv5aK6SY5wxtN_fuqGF?expires=1729720800&signature=d3665007fd8712695fb627563c2d805a1805cc9b23aaf12c4ddee2bece914413&req=dSEuEsB%2FnYhYWfMW1HO4zXr9jg9CVymHsc8jFHm%2BzRoBsZZTnkdGy3G57DLP%0A1xVl%0A)
+![image](images/smart_upload_2.png)
 
 # Unassigned Findings
 
@@ -60,7 +60,7 @@ Unassigned Findings are not included in the Product Hierarchy and will not appea
 
 
 
-![](https://downloads.intercomcdn.com/i/o/1194910969/b302152dd308050bc2cabb3f/AD_4nXf4caWaw6HYn1LqY5zv42mQztXQyeNWMmDwQVFRZ7smFzH7rvmZ4NCmDEA3gMVBkGwl51bSvK4sSAf7o8NjtDtuaxVJsC9PLLLbLU5coe0SFHDkoAS_WnqCYSyQbDWmpoNx7dfkLoDQDg9yCj6n8mnuWXqi?expires=1729720800&signature=b68b7f0d6ad8b8761fbd5abd6e390626dbd1a5eefc32911cd11fd94ffb0eb669&req=dSEuEsB%2FnYhZUPMW1HO4zdffFk2MwOJJkdNLPpAJSJFznXtdp%2Fn2TAS3J7sE%0A5jzx%0A)
+![image](images/smart_upload_3.png)
 
 You can select one or more Unassigned Findings for sorting with the checkbox, and perform one of the following actions:
 

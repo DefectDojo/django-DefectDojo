@@ -80,7 +80,7 @@ The JSON returned from this URL will contain all of your Jira custom fields, mos
 
 
 
-![](https://downloads.intercomcdn.com/i/o/882536565/71741c46128f8c200eb369d5/Screenshot+2023-11-13+at+11.34.09+AM.png?expires=1729720800&signature=612c1c48aacf9036950b2a32be5de4b8e556bdb9f32d3c306af32959d8ffebdf&req=fCglE8p4mIdaFb4f3HP0gIHfoSgHpBIypMppgUBUzbLDThlL4NbgBKy13LHV%0As7g%3D%0A)⬆ Here is an example of a Custom URL Field on an issue, how the Custom URL Field appears in the JSON output.
+![image](images/Using_Custom_Fields.png)
 
 
 
@@ -122,7 +122,7 @@ As before, API output will contain lots of `customfield_##` object parameters wi
 
 
 
-![](https://downloads.intercomcdn.com/i/o/856601116/bd33f642bb614d0baddfb47e/Screenshot+2023-10-18+at+3.14.28+PM.png?expires=1729720800&signature=b7ec0c6e661235aedbc07cf80dd4338d46ace4929aa5737efd43af8a950ecd6b&req=fCUhEMl%2FnIBZFb4f3HP0gNDIh6YnvjmzgZRTCVsNiixkS%2BgiAgilIPc87YcO%0AJVg%3D%0A)
+![image](images/Using_Custom_Fields_2.png)
 **Example:**  
 We know that `customfield_10050` represents the DefectDojo Custom URL Field because we recorded it in Step 2\. We can now see that `customfield_10050` contains a value of `“https://google.com”` in the `EXAMPLE-123` issue.
 

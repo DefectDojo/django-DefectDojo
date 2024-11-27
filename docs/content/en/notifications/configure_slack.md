@@ -13,7 +13,7 @@ Here is an example of a Slack Notification sent from DefectDojo:
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/962178718/43edf527dd90ff3cdb9091d2/R4qt835O2gUnuDNS77H-7sIbmyOMPUy4V5H74MtLMGA9bQsINUdNYvzQTSkf1HQqvUfGHpCU3Qv0xIqkjqD3rlAMvoPleJv6RzZMzVSQRbQT5byXCezD_Sa-NzHQvpGu6ul7KAi_79io_HMfTPLLcL4?expires=1729720800&signature=cb78397a3593ea0ea17310b2aa4fc2a975cffcd207e869bfdf53b64fd55c793d&req=fSYlF852moBXFb4f3HP0gN2UAA5Sb1IfVjD8vnOmZttQHSPf7f6HcXfGzZbM%0AeFM%3D%0A)
+![image](images/Configure_a_Slack_Integration.png)
 
 DefectDojo does not have a dedicated Slack app, but one can be easily created for your workspace by following this guide. A Slack app is required for both System and Personal notifications to be sent correctly.
 
@@ -91,7 +91,7 @@ You’ll now need to configure the Slack integration on DefectDojo to complete t
 ​**
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/962178744/a59023b7d47dedbcbb7cd3d4/na4CvmsQk_CMrPS2ZvVvVebWIjUkx9GE7NntAIC7Wb1u5vuHByReMjwuYNIekAZIL-tFkYZ9g7c2OS2sP-p9DAUSHlFsE_kkojG5QvjZ1iLO4GYWUa_ZUox2v7yCFNHu46cZyJLAeuC00CogZxsszq4?expires=1729720800&signature=97966950516e644f0268e0286c505926b19b66fa2f719ef53a279a73bd34e7f5&req=fSYlF852moVbFb4f3HP0gOK4lfqm2vEPAzPt%2FdIJ5HOzq9vFYtr%2BpYja6TZI%0A6R8%3D%0A)
+![image](images/Configure_a_Slack_Integration_2.png)
 3. Open DefectDojo in a new tab, and navigate to **Configuration \> System Settings** from the sidebar.
 4. Check the **Enable Slack notifications** box.
 5. Paste the **Bot User OAuth Token** from Step 1 in the **Slack token** field.
@@ -102,7 +102,7 @@ Once this process is complete, DefectDojo can send System\-wide notifications to
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/962178761/a5f24f6490b1a043a188441c/R4qt835O2gUnuDNS77H-7sIbmyOMPUy4V5H74MtLMGA9bQsINUdNYvzQTSkf1HQqvUfGHpCU3Qv0xIqkjqD3rlAMvoPleJv6RzZMzVSQRbQT5byXCezD_Sa-NzHQvpGu6ul7KAi_79io_HMfTPLLcL4?expires=1729720800&signature=d43c41e2c6db5c91e49f9c56cbfd21b97e7d84003c3523e65ea07d6d8c154d93&req=fSYlF852modeFb4f3HP0gCrJC5g33foXGAruLI5W3hglBldbY7jvtb8I8wvC%0AwQ0%3D%0A)
+![image](images/Configure_a_Slack_Integration_3.png)
 
 ## Notes on System\-Wide Notifications in Slack**:**
 
@@ -126,7 +126,7 @@ If your team has a Slack integration enabled (through the above process), indivi
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/962178777/e91b86cd53793fdfd1b9e9e5/P8dPmKcDtxlXDUHl0gndW0vV_7yYSYczHwF2YkB7Q_xBIvww8ezjJfvu9FIY-4AJn7LWHHZRNY285MmC-5jHQmbwd2O251o_0iOVIbJ_BTnErP4gH_9kfV1Jz1CGtBVqDe9lnIGxbqErHGvnElDvekM?expires=1729720800&signature=69aaeabbb05167d590c91797a44a3e204bd8053091482f9d3b969bf2e1db68ec&req=fSYlF852moZYFb4f3HP0gLhK3cg%2BSrGOEvpkHTnb%2BmHfKk8Tj4wCUH9CmhTy%0AfqI%3D%0A)
+![image](images/Configure_a_Slack_Integration_4.png)
 2. Set your **Slack Email Address** in the menu. This field is nested underneath **Additional Contact Information** in DefectDojo.
 
 

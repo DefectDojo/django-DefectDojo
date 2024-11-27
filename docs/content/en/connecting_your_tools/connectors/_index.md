@@ -71,7 +71,7 @@ Let's say you have a BurpSuite tool, which is set up to scan five different repo
 
 
 
-![](https://downloads.intercomcdn.com/i/o/1004622773/fe375ad7f2ee3717a3688901/Screenshot+2024-03-27+at+15_50_38+%281%29.png?expires=1729720800&signature=85f08ec969cd4a5301882380414de0c3dfd2bf15a949aaec061d45f28f58cbd4&req=dSAnEs98n4ZYWvMW1HO4zYmbfqRB1Lp1LMtjuVEv4eEqMiwOkI085QOf4I6W%0AxAQ%2B%0A)
+![image](images/_index.png)
 
 Once your **Record** mappings are set up, DefectDojo will start importing scan data on a regular basis. You'll be kept up to date on any new vulnerabilities detected by the tool, and you can start working with existing vulnerabilities immediately, using DefectDojo's **Findings** system.
 

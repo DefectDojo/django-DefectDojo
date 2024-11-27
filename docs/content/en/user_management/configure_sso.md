@@ -30,12 +30,12 @@ If you would like to add DefectDojo to your SAML Identity Provider, here is the 
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/962203362/711708ba18887c909eb7e315/9UD98h1gZT6IlhmTeHCFrypNcbJnRjqXLvrL4YOShDvR5DPTrr1sG8ohEkWS8d0NSPs2-Kz7jRM3CKvMfmO3CVx6V8OpiT98V75L8IyEA5iq4m1YIZmiBSsYshvuFZYcppzueBz3pA7A_5q_BuQSj2A?expires=1729720800&signature=d0240c843f37d66039cb98dd73ebee04e450002e9e31644517a207a0c54c7565&req=fSYlFMl9noddFb4f3HP0gNqGPNxDYkTTpt0uyAWrCi5EKyiDsGePVH3rfF2a%0AjNo%3D%0A)
+![image](images/Configure_Single-Sign_On_Login.png)
 2. Open the SAML tab from this page to configure your sign\-on settings.  
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/962203371/122013c5bd92a17058bffcc9/WxdWys-zS52WnnWj8hN_MSd181XqoLt0ovx28_1TxiXGngclO0rZx3rHM1d6NBvbAuZLzT9YNjsrIPhlJx7UOOLkftWL2fcUzFwKzEzHxzhp30cqaECI-XTwiTekk7UNCofh7xyDyMJ4E7-MjqhEApM?expires=1729720800&signature=8783a41b09e02104c10c696be712ce843d80406da16acc9091b843057d41bb50&req=fSYlFMl9noZeFb4f3HP0gOOiXRyUrpec5LNNWeTj47Yz9rMjGNIySCYTH1xh%0AiKE%3D%0A)
+![image](images/Configure_Single-Sign_On_Login_2.png)
 3. Complete the SAML form. Start by setting an **Entity ID** \- this is either a label or a URL which your SAML Identity Provider can point to, and use to identify DefectDojo. This is a required field.  
 ​
 4. If you wish, set **Login Button Text** in DefectDojo. This text will appear on the button or link users click to initiate the login process.  
@@ -65,7 +65,7 @@ This is a required field for this form.
 11. Finally, check the **Enable SAML** checkbox at the bottom of this form to confirm that you want to use SAML to log in. Once this is enabled, you will see the **Login With SAML** button on the DefectDojo Login Page.
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/962203378/5569f32d153fb51d9a725e54/OCJmjuI1gLuEbNaMjpore21_xlbVFZCfcChthYdnXjkDE1W_-HyfSTDbJfASHNZX0myFYWWL0eqV0oyQ-4gOBJrSCtwn47SXDli8dPopFNZb34k9i4T2GfPfkhPi1-1J-X9-Op0EVIRvx41BPx3w0Yw?expires=1729720800&signature=512df502470da5028b0e41bfb4e1b3671260b9292f5e49ec1bc72298259fb602&req=fSYlFMl9noZXFb4f3HP0gDNvSgyDTmnMnfcjRvKa660M%2BhNfabgrDzvgB6QV%0AiX4%3D%0A)
+![image](images/Configure_Single-Sign_On_Login_3.png)
 
 ## Additional SAML Options:
 
@@ -103,12 +103,12 @@ This is a required field for this form.
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/962203384/0f0a7284a08e975fc6d274ad/9UD98h1gZT6IlhmTeHCFrypNcbJnRjqXLvrL4YOShDvR5DPTrr1sG8ohEkWS8d0NSPs2-Kz7jRM3CKvMfmO3CVx6V8OpiT98V75L8IyEA5iq4m1YIZmiBSsYshvuFZYcppzueBz3pA7A_5q_BuQSj2A?expires=1729720800&signature=ebc69ccc466b50855ef4e021678302c910e5122b1efe85a4f3177125c13d4818&req=fSYlFMl9nolbFb4f3HP0gDJIgX6Exhy5n7%2FXJaBEZZbyHTcVfeAqpDsS9WA7%0AgI8%3D%0A)
+![image](images/Configure_Single-Sign_On_Login_4.png)
 2. From here, navigate to the OAuth tab and select the service you want to configure from the list.  
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/962203390/feb13027b266b7f1a56c3c6a/lyWcUB9Jyf5ZQzDXvjrX830ShYi0AduEa7UJmtmZhabeNpjLhbHGNlcDtEXj6H44KFGJMmpE-ym55m-T5jvPDHoWabIMjo5hoRgOsr2fJk5EpCMyzmZ2fSE-JWMgIfDz8g6fTB2vuFQf703pcQILAgY?expires=1729720800&signature=bc4fb3d86492eaba3420063f792926ab3aaa884a36a988ad1cdd6ae6aae3d74e&req=fSYlFMl9nohfFb4f3HP0gM6xKW5NsJPRtLYFcZOwplcZ%2Bfx5dKJvKR%2BMjmNV%0AoOE%3D%0A)
+![image](images/Configure_Single-Sign_On_Login_5.png)
 3. Complete the relevant OAuth form.  
 ​
 4. Finally, check the **Enable \_\_ OAuth** button from below, and click **Submit**.   

@@ -10,12 +10,12 @@ Deduplication can be implemented at either a Product level or at a more narrow E
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1124595466/23510e2be09c57c31794ddbf/AD_4nXc_etHPxb2G3QGrOuEK3jNUcQevdHrW7fhe1DF-Oeom5oZFFdTmTmnM1tZpABw6ROzUbbu9DN9szFMKHCUxNWjqBOWKxk-AsYaVwpM4CPAAuKrMju_BqRLrl1vGIABLQaiXTEhVOSJOG5r71eSLuYMs1ZUQ?expires=1729720800&signature=15fe9ccd68bea2289aafaf51e2a0158bb8170f03cc21b6e2b5c8936eee5ba3f5&req=dSElEsx3mIVZX%2FMW1HO4zUxInD5pTrydt8XM8g5%2FosYwTdr%2FFJmlu8o7z1Ey%0AypWn%0A)
+![image](images/Enabling_Product-Level_Deduplication.png)
 2. **Deduplication and Finding Settings** are at the top of the **System Settings** menu.  
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1124595482/5c6e4140b748d743380db52a/AD_4nXczFRPMaaBteblXtLfkioIjnUmaYz5Z2voT_wskuvTBDFBoqWV7F8Ncte1qYrgwhZ-TYhvFYTNbQoEjj_dgbpGfnvWt-nJ3Jxo046VxDAA1YmPcZRmJQwprmTWpkNNKAoROh_lUWEtZiehwJ-v-MU8mqNR9?expires=1729720800&signature=477386cba875c6d0eef54c5a9657ccd17320ac1f5355e6d5c2604a81049065a2&req=dSElEsx3mIVXW%2FMW1HO4zfS9u6vQjS6vS8fDvrkeJ6fkTP%2FTlmiDVWCQsro%2F%0Aqjfg%0A)
+![image](images/Enabling_Product-Level_Deduplication_2.png)
 
 ## Enable Finding Deduplication
 

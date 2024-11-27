@@ -42,7 +42,7 @@ By default, the first account created on a new DefectDojo instance will have Sup
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/921088885/49c62c711a3c48cda2d0f46a/4tacIUafivFb_ju8ii4dvCF4qnCGT1ZUPLAFP2uHdkcO0nntMgLk4V2m6BO3Hd_aRjK_Ivx7HKEa_x3lFVTZJ2Sr-llUBnG4OIsJLppyFl7zzVEOFDlV69pPtNy4Qz8fslEt_ofwCWw9xeXipYcHxFQ?expires=1729720800&signature=e68d2f5001311dc6ed0709309f255315c8a98c54f7a907d6794db9069af0baae&req=fSImFsF2lYlaFb4f3HP0gBqwDj2FOqeiaXGhVvQWwTRLmeyM7l6AyrQ%2FJiOn%0AYUc%3D%0A)
+![image](images/Set_a_User's_Permissions.png)
 ​
 2. Click the name of the account that you wish to give Superuser privileges to. This will bring you to their User Page.  
 ​
@@ -50,7 +50,7 @@ By default, the first account created on a new DefectDojo instance will have Sup
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/921088889/3e17242c961974a7123f628a/Q8IgH7ucjqbqGd2-b94pc-zQgSVHqW2Olj7m-jENbpaOZNZrOj9WkYiptya-zeMa3u-GXtunys7BBipAIxoSHtQoVhTTAelcNIvWiYC71lZsWxThEwUFecZF3TVyy4PmluxMkSBjPiHDvT-zjvYjHsw?expires=1729720800&signature=93c6b6dc04a176f903de40fecdf2b4042ee177d8f5eb20574eef3d7432b33892&req=fSImFsF2lYlWFb4f3HP0gNz3X5m3J2OGLTvs0YS0wl7%2BnHULfElrbz%2FcFDbF%0An3E%3D%0A)
+![image](images/Set_a_User's_Permissions_2.png)
   
 ​
 4. From the Edit User page:   
@@ -61,7 +61,7 @@ To assign a Global Role, select one from the dropdown Global Role menu at the bo
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/921088893/dc5a8396e99a2d90e09bf5e9/Q8IgH7ucjqbqGd2-b94pc-zQgSVHqW2Olj7m-jENbpaOZNZrOj9WkYiptya-zeMa3u-GXtunys7BBipAIxoSHtQoVhTTAelcNIvWiYC71lZsWxThEwUFecZF3TVyy4PmluxMkSBjPiHDvT-zjvYjHsw?expires=1729720800&signature=22d9f11705570d018ab011b4b0cf3861e9d60e81a403f05b6c3385cddedc3df4&req=fSImFsF2lYhcFb4f3HP0gEHWxU%2Fw7IhY1p%2B8xccylok4xhfqgvF8k4tVqRb6%0AuKw%3D%0A)
+![image](images/Set_a_User's_Permissions_3.png)
 ​
 5. Click Submit to accept these changes.  
  ​
@@ -93,14 +93,14 @@ If a user has already been added as a Product Type member, and does not require 
 
 
 
-![](https://downloads.intercomcdn.com/i/o/921087191/89e6c1560a6f12458bfd60ab/Untitled+drawing+%281%29.png?expires=1729720800&signature=96ecb577cdc13498af657fd587b0fa8092b851d1a4420bdb5bb92f0e1dfdba75&req=fSImFsF5nIheFb4f3HP0gH8G8wzNAN%2F5uhd6ytu1ZIqaHRpLkQ5g7uSKvc6n%0ARW4%3D%0A)
+![image](images/Set_a_User's_Permissions_4.png)
 2. Locate the **Members** heading, click the **☰** menu, and select **\+ Add Users**.
 3. This will take you to a page where you can **Register new Members**. Select a User from the dropdown Users menu.
 4. Select the Role that you want that User to have on this Product or Product Type: **API Importer, Reader, Writer, Maintainer** or **Owner.**  
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/921088898/911644c75e529f4f36408a33/3KQGHqXCpiCIntLoKJCTnJTIPDumnQ288VSGAirzzQLv0P4w4tGKzeBoupA9Y8g-e_9emazzpJ59sywnkkVpJk5DhmWHwhkQjvu76JhIw_gyvCIZBPKogIb_bI3wr-eZDApCEfvpL6UuPcO3q3sSBcQ?expires=1729720800&signature=3b6df84cb44e7e1d8b070d2e015bd374dc3bae4f56f5a56af3d283cd79ea480c&req=fSImFsF2lYhXFb4f3HP0gC3Dcl8NRYb791Gt2hJngopsfDqm3RlIMSPLOXJH%0AASg%3D%0A)
+![image](images/Set_a_User's_Permissions_5.png)
 
 
 Users cannot be assigned as Members on a Product or Product Type without also having a Role. If you're not sure which Role you want a new user to have, **Reader** is a good 'default' option. This will keep your Product state secure until you make your final decision about their Role.
@@ -117,7 +117,7 @@ Within the **Product** or **Product Type** page, navigate to the **Members** hea
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/921088901/4d9da1df5f52f9457422f991/vz995X6_fV0KC8i0mGZm6A3YYlTXBiJquoqXf4jUZ-ric3WqFj5IC9QmWsB5vAw6CLqPz8oxuMX9KFV2wlDi0W2UvOitNl-ID4hYEA5GUWN8pslt7n0gpdrmk9-Lg7cqlTjAN15y9Vc0tfpReatFiAc?expires=1729720800&signature=5a205bf6a5b9f12ff144cde08633a1e510494d71180932b03d7d8daed770e3d8&req=fSImFsF2lIFeFb4f3HP0gLeO3ql9vXX0terru04tP2SCmsisptfRp%2BPTjgid%0Ae%2BA%3D%0A)
+![image](images/Set_a_User's_Permissions_6.png)
 📝 **Edit** will take you to the **Edit Member** screen, where you can change this user's **Role** (from **API Importer, Reader, Writer, Maintainer** or **Owner** to a different choice).
 
 
@@ -190,7 +190,7 @@ Configuration Permissions are not related to a specific Product or Product Type 
 ​
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/921088906/449d16d74c2ddbf786af42c3/4tacIUafivFb_ju8ii4dvCF4qnCGT1ZUPLAFP2uHdkcO0nntMgLk4V2m6BO3Hd_aRjK_Ivx7HKEa_x3lFVTZJ2Sr-llUBnG4OIsJLppyFl7zzVEOFDlV69pPtNy4Qz8fslEt_ofwCWw9xeXipYcHxFQ?expires=1729720800&signature=f40bb9c5be475ca93773f4e967a62929ba8d6c1e74998ae4f3cf2b2ce60b9dfd&req=fSImFsF2lIFZFb4f3HP0gC9vVNNi8Mjqu8Pj33LrnUR7spDzj5S4DmrcT56Z%0A244%3D%0A)
+![image](images/Set_a_User's_Permissions_7.png)
   
 ​
 2. Click the name of the account that you wish to edit.  

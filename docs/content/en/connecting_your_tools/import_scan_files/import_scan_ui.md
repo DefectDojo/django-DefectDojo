@@ -33,7 +33,7 @@ The Import Scan form can be accessed from multiple locations:
 
 
 
-![](https://downloads.intercomcdn.com/i/o/1194906679/a60baa110d050daaa532a102/AD_4nXcEnbN_x3AjBNKGsmncJsN8_L1IlYrBpTMJZxytGO_e_VB8WJku0fWpCRW0b1TsvEYkBgPgQzO9qa4qhfu1PNFZA8SVuUXbnITNbsOcy4I4VUa-r2biSV8HZQ8YkF6-ymWuVITT4yJr6faw2pU4YoeOK7v-?expires=1729720800&signature=850b7c98efd22ee1657f19fb2dbb322a31a44ba2ae5c6bd9d20c14ba4597b79b&req=dSEuEsB%2Bm4dYUPMW1HO4zU0nB9s5bQTJ2NRVzn8adEyCFbo8CH9pmXxFmv4P%0AqUkB%0A)
+![image](images/import_scan_ui.png)
 The Import Scan form will create a new Test nested under an Engagement, which will contain a unique Finding for each vulnerability contained within your scan file.
 
 
