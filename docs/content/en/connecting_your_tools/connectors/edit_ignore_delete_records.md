@@ -16,7 +16,7 @@ From the Records table, click the blue ▼ Arrow next to the State column on a g
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/991861519/038163776895e87723a52384/T6IvYbAUMdmrbVWj8fe_rYCn_MzgFXI9aEOu-PvVERtgZ7FjdurerkkobRY3R9uZfBuOO-7okvDSdEdjZLKpvEwbXAKlSHbiTEYOCfmfKXC-_eHsPXdX8sfMlQPL-A-NU9IiVJ5esQtdwcNSlsuD_u0?expires=1729720800&signature=f36d18c3de5b05361f4af20d4e7d3374f1d25358dfeffbf439f3462377d87054&req=fSkmHs9%2FmIBWFb4f3HP0gEja47GdQdb%2B%2BLFrIsBuvBMOnN0G6SdozTFKik%2BB%0AVx0%3D%0A)
+![image](images/edit_ignore_delete_records.png)
 
 # Edit a Record
 
@@ -26,7 +26,7 @@ Clicking **Edit Record** will open a window which allows you to change the desti
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/991861534/aaf6ffb16062460fa2876879/TRC8bfnFqHV6U3TZgqM92vSVg81pP_WgV1PJ8V4DnZ3dAdHlNTr0jTJdz6ojNOjCI9YQtmpczZQu2nSKMeReW-PLn7fx_kXYdryw2JCpmmlLkzqCHTW-cKnkZmTosww7Yjgm50IIedC-cTD4okrMj28?expires=1729720800&signature=5e419291cf110bce4ca16eb2b22faffc9fedd19e3125b2a994a333d342048612&req=fSkmHs9%2FmIJbFb4f3HP0gIkWHYe6PkjxMsN25eARnSCqNIbbjH8DQpCnmqYa%0AYZQ%3D%0A)
+![image](images/edit_ignore_delete_records_2.png)
 
 ## **Change the Mapping of a Record**
 

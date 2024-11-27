@@ -14,7 +14,7 @@ To access a Connector's Operations Page, open **Manage Records \& Operations** f
 # The Operations Table
 
 
-![](https://downloads.intercomcdn.com/i/o/991827471/4d72c3317f0291cd32911fa5/Screenshot+2024-03-14+at+2_10_33+PM.png?expires=1729720800&signature=383e48f88441677a74ca34118c501306bab4113071dccf81990a7c9d90f74c23&req=fSkmHst5mYZeFb4f3HP0gOmBiHLaYOL69I6UJegg%2FgTo8pPwwq0puToKhHMk%0AtVk%3D%0A)
+![image](images/operations_page.png)
 Each entry on the Operations Table is a record of an operation event, with the following traits:
 
 

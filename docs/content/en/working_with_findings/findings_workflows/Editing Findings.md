@@ -14,13 +14,13 @@ You can update a Finding by opening the **⚙️ Gear** **Menu** in the top and 
 
 
 
-![](https://downloads.intercomcdn.com/i/o/tj2vh1ie/1204632847/caabbaa73e3ef1bad6d5afd0c0c3/AD_4nXc-cAVmWrNapE3BCbl21cYhzGEzqrV0o4zodyvkqLDjYjqvNrBM67_otDPrXN2vsMYkNLdcZFzvVqezCgTUrRmQIzgtNvb4cRTE9kdpc88bpV8oSXOvNcHywzO-huexpt4P6fxGgPEsSDO6zJk8N3z5ZWUo?expires=1729720800&signature=22b34d4835d8a263cf7a88501eed00e460d632f75e0053937123db9133e7a411&req=dSInEs99n4lbXvMW1HO4zfYhXR6UzORlNJ7u6J8QRDrXXi9HNu3VCLIi6oKU%0ApZLf%0A)
+![image](images/Editing_Findings.png)
 
 This will open the **Edit Finding** form, where you can edit the metadata, change the Finding’s Status and add additional information.
 
 
 
-![](https://downloads.intercomcdn.com/i/o/tj2vh1ie/1204632848/e42a82139f528b871c01165d9b4c/AD_4nXdFNE-8nMU2l4QB-XtB6-VIYSQQkBQV6ftDNSZVGQP8EMft5gsns2T-XW82aqa0qDFGvDe2lI6IBiz6doLZMQDQf3UhHROVy5IvrctL5CozTO2RbD_E_ucl75_dHk327Oh2Zi3Pw8wnkrtk_4iadpPdXlIP?expires=1729720800&signature=80692fc66497b589d53b91a22e47873bb3cc79201110a484add3a47969f5cff7&req=dSInEs99n4lbUfMW1HO4zbhYFPglAYUL38JRhBdLBlt3Yjr8W%2FF3HwChTLmN%0A5gmh%0A)
+![image](images/Editing_Findings_2.png)
 ## Edit Finding Form: Fields
 
 

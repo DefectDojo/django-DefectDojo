@@ -79,7 +79,7 @@ When a Finding is Under Review, it needs to be reviewed by a team member. You ca
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/985091935/822f376964d68879e7a4681b/QFGEwU-GN1KKusdUrgO79c-tO2xHoxGf_KJKGAly5-kbFqUgrZ4ucsbvdeoEU1KGqppGGIA-8A3gtLc76DOTwxb9QCdswOB9DDZQISGWbxdp97qnTnYjeXwQVRirdSWmFxhk3kDJxHhUs1w5z8vxaXA?expires=1729720800&signature=c8cee4ebaf9ec90f9865a4615ea2cafbb127a24c1e799570703b3fe5f0375a45&req=fSgiFsB%2FlIJaFb4f3HP0gJeA1SZaCA1dNNYzqvbz6cG3w4UWa9xdE2Lq7jiz%0Ap4k%3D%0A)
+![image](images/Finding_Status_Definitions.png)
 
 ## **Risk Accepted**
 

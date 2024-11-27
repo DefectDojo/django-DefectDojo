@@ -47,17 +47,17 @@ Risk Acceptances can be added to a Finding in two ways:
 * Using the **Bulk Edit** menu, when looking at a list of Findings
 * Using the **Add Risk Acceptance** button on an individual Finding
 
-![](https://downloads.intercomcdn.com/i/o/tj2vh1ie/1204636819/b9dd073262332f1944c0cfacfd2a/AD_4nXfy5v0NTmT2-wzbXdnxwNZtiYLk18QuyFJM0t6uhv_8RToYIsjB0d9jKIKeYoVF2jEIL_XSnYVgGsnMP2D5EdkyuJg0ilLdjR--1QhI_l81yP8yPmmlpO4UkUlANShbUsvOT6VqSFD5jNKPAqenonX7GnSM?expires=1729720800&signature=1115c41a7aa8dec8ac1854137467fcba167b85c3b479cdd97a625b19a75ab611&req=dSInEs99m4leUPMW1HO4zeaRgo0pTnme8fBYAl4WbyXDzvLafNSr2o%2BGMLsB%0AcNM2%0A)## 
+![image](images/Risk_Acceptances.png) 
 
 
-![](https://downloads.intercomcdn.com/i/o/tj2vh1ie/1204636820/11762eeeaf483c78d521d7446ca1/AD_4nXe9Mit2Y220ayEJR0rbzABrWY24WQ1LUfZJCZgBsM_0V24ZMJcWGr6U6REZYP2PMGmSuN0Dk60kT_2LSDkG9Jo2XC3t_uumxIOFlWJ7Qg4f7clfC1S_DZWvy811Gzrj4dTm1WJzR1Z7XIkVBgZn5jXrjTt1?expires=1729720800&signature=1cf2c1b627251a1063864290fc3e005c24c43ac5caddc7721ae5e2a5e9270fd7&req=dSInEs99m4ldWfMW1HO4zRkGaztiDiOJcg%2Bp%2FR3%2FI2bFU4DBwLfqHSfAvvJw%0ACeTp%0A)
+![image](images/Risk_Acceptances_2.png)
 To create a New Risk Acceptance, complete the Add to New Risk Acceptance form on a Finding you wish to Risk Accept.
 
 
 # 
 
 
-![](https://downloads.intercomcdn.com/i/o/tj2vh1ie/1204636818/9419eeece88da46563d490017da3/AD_4nXcEwS6HnTQUszfs2jHj7pEXXZnDqskbX2sVw-pWhBfvuuzr5fowhUuz53rMWLbkLJCEg0jMSA-41MIgLXoksJEDHswtmkX5gExVwSmYme6KqR4Y4Pav-vWPz47vJ6fVvj1v7ZE4VqEEieLQNkuIVYVevMI?expires=1729720800&signature=3a873d6c6f98ce933165f4225de1333a537f3c67f38936f57a7328af1d7262a3&req=dSInEs99m4leUfMW1HO4zWGsfrz%2FC8qjBdsvsU%2BkGkqvMVSR%2FYsJZwwE%2FuT0%0AoDt6%0A)1. Create a **Name** for the Risk Acceptance.
+![image](images/Risk_Acceptances_3.png)
 2. Select the **Owner** of the Risk Acceptance \- this is generally meant to be the DefectDojo team member responsible for the decision to Risk Accept the Finding
 3. Complete the **Optional Fields** with any relevant information. If you want to set an Expiration Date or a Warning for that Expiration Date, you can do so here as well. If you don’t specify a date, the Default Risk Acceptance / Default Risk Acceptance Expiration days will be used from the **System Settings** page.
 4. Select whether you want to **Reactivate** or **Restart SLAs** on any associated Findings once the Risk Acceptance expires.
@@ -89,4 +89,4 @@ The sidebar in DefectDojo allows you to quickly find any Risk Accepted Findings 
 
 
 
-![](https://downloads.intercomcdn.com/i/o/tj2vh1ie/1204640131/447a5095df2fb468d8fbe43d4a1d/Screenshot+2024-10-04+at+2_23_38%E2%80%AFPM.png?expires=1729720800&signature=127f9a6b5dd30515098838117a5fbe61b2464fadfa93d6f630c9fd8c39b48ca9&req=dSInEs96nYBcWPMW1HO4zT2bUZxwU%2FbqrPBD4qx8knM3HZEXsp9ooOlsDdne%0A5t8q%0A)
+![image](images/Risk_Acceptances_4.png)
