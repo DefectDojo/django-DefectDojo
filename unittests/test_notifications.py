@@ -1,6 +1,6 @@
 import datetime
 import logging
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from auditlog.context import set_actor
 from crum import impersonate
@@ -33,7 +33,6 @@ from dojo.models import (
 )
 from dojo.notifications.helper import (
     AlertNotificationManger,
-    NotificationManager,
     WebhookNotificationManger,
     create_notification,
     webhook_status_cleanup,
