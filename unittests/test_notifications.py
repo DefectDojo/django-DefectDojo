@@ -1,6 +1,6 @@
 import datetime
 import logging
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from auditlog.context import set_actor
 from crum import impersonate
@@ -34,6 +34,7 @@ from dojo.models import (
 from dojo.notifications.helper import (
     AlertNotificationManger,
     NotificationManager,
+    WebhookNotificationManger,
     create_notification,
     webhook_status_cleanup,
 )
@@ -90,107 +91,115 @@ class TestNotifications(DojoTestCase):
         self.assertEqual(len(merged_notifications.other), 3)
         self.assertEqual(merged_notifications.other, {"alert", "mail", "slack"})
 
-    @patch("dojo.notifications.helper.AlertNotificationManger.send_alert_notification", wraps=AlertNotificationManger.send_alert_notification)
-    def test_notifications_system_level_trump(self, mock):
+    # @patch("dojo.notifications.helper.AlertNotificationManger.send_alert_notification", wraps=AlertNotificationManger.send_alert_notification)
+    @patch("dojo.notifications.helper.NotificationManager._get_manager_instance")
+    def test_notifications_system_level_trump(self, mock_get_manager_instance):
+        mock_manager = Mock(wraps=AlertNotificationManger())
+        mock_get_manager_instance.return_value = mock_manager
+
         notif_user, _ = Notifications.objects.get_or_create(user=User.objects.get(username="admin"))
         notif_system, _ = Notifications.objects.get_or_create(user=None, template=False)
 
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("user off, system off"):
             notif_user.user_mentioned = ()  # no alert
             notif_user.save()
             notif_system.user_mentioned = ()  # no alert
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count)
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count)
 
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("user off, system on"):
             notif_user.user_mentioned = ()  # no alert
             notif_user.save()
             notif_system.user_mentioned = DEFAULT_NOTIFICATION  # alert only
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count + 1)
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
 
         # Small note for this test-cast: Trump works only in positive direction - system is not able to disable some kind of notification if user enabled it
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("user on, system off"):
             notif_user.user_mentioned = DEFAULT_NOTIFICATION  # alert only
             notif_user.save()
             notif_system.user_mentioned = ()  # no alert
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count + 1)
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
 
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("user on, system on"):
             notif_user.user_mentioned = DEFAULT_NOTIFICATION  # alert only
             notif_user.save()
             notif_system.user_mentioned = DEFAULT_NOTIFICATION  # alert only
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count + 1)
-        last_count = mock.call_count
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
+        last_count = mock_manager.send_alert_notification.call_count
 
-    @patch("dojo.notifications.helper.AlertNotificationManger.send_alert_notification", wraps=AlertNotificationManger.send_alert_notification)
-    def test_non_default_other_notifications(self, mock):
+    # @patch("dojo.notifications.helper.AlertNotificationManger.send_alert_notification", wraps=AlertNotificationManger.send_alert_notification)
+    @patch("dojo.notifications.helper.NotificationManager._get_manager_instance")
+    def test_non_default_other_notifications(self, mock_get_manager_instance):
+        mock_manager = Mock(wraps=AlertNotificationManger())
+        mock_get_manager_instance.return_value = mock_manager
+
         notif_user, _ = Notifications.objects.get_or_create(user=User.objects.get(username="admin"))
         notif_system, _ = Notifications.objects.get_or_create(user=None, template=False)
 
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("do not notify other"):
             notif_user.other = ()  # no alert
             notif_user.save()
             create_notification(event="dummy_bar_event", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count)
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count)
 
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("notify other"):
             notif_user.other = DEFAULT_NOTIFICATION  # alert only
             notif_user.save()
             create_notification(event="dummy_foo_event", title="title_for_dummy_foo_event", description="description_for_dummy_foo_event", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count + 1)
-            self.assertEqual(mock.call_args_list[0].args[1], "dummy_foo_event")
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
+            self.assertEqual(mock_manager.send_alert_notification.call_args_list[0].args[0], "dummy_foo_event")
             alert = Alerts.objects.get(title="title_for_dummy_foo_event")
             self.assertEqual(alert.source, "Dummy Foo Event")
 
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("user off, system off"):
             notif_user.user_mentioned = ()  # no alert
             notif_user.save()
             notif_system.user_mentioned = ()  # no alert
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count + 0)
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 0)
 
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("user off, system on"):
             notif_user.user_mentioned = ()  # no alert
             notif_user.save()
             notif_system.user_mentioned = DEFAULT_NOTIFICATION  # alert only
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count + 1)
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
 
         # Small note for this test-cast: Trump works only in positive direction - system is not able to disable some kind of notification if user enabled it
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("user on, system off"):
             notif_user.user_mentioned = DEFAULT_NOTIFICATION  # alert only
             notif_user.save()
             notif_system.user_mentioned = ()  # no alert
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count + 1)
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
 
-        last_count = mock.call_count
+        last_count = mock_manager.send_alert_notification.call_count
         with self.subTest("user on, system on"):
             notif_user.user_mentioned = DEFAULT_NOTIFICATION  # alert only
             notif_user.save()
             notif_system.user_mentioned = DEFAULT_NOTIFICATION  # alert only
             notif_system.save()
             create_notification(event="user_mentioned", title="user_mentioned", recipients=["admin"])
-            self.assertEqual(mock.call_count, last_count + 1)
+            self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
 
 
 class TestNotificationTriggers(DojoTestCase):
@@ -427,7 +436,7 @@ class TestNotificationWebhooks(DojoTestCase):
         # test data contains 2 entries but we need to test missing definition
         Notification_Webhooks.objects.all().delete()
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy")
         self.assertIn("URLs for Webhooks not configured: skipping system notification", cm.output[0])
 
@@ -435,7 +444,7 @@ class TestNotificationWebhooks(DojoTestCase):
         # test data contains 2 entries but we need to test missing definition
         Notification_Webhooks.objects.all().delete()
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy", user=Dojo_User.objects.get(username="admin"))
         self.assertIn("URLs for Webhooks not configured for user '(admin)': skipping user notification", cm.output[0])
 
@@ -443,13 +452,13 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
         self.sys_wh.save()
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy")
         self.assertIn("URL for Webhook 'My webhook endpoint' is not active: Permanently inactive (inactive_permanent)", cm.output[0])
 
     def test_system_webhook_sucessful(self):
         with self.assertLogs("dojo.notifications.helper", level="DEBUG") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy")
         self.assertIn("Message sent to endpoint 'My webhook endpoint' successfully.", cm.output[-1])
 
@@ -463,7 +472,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy", title="Dummy event")
         self.assertIn("Error when sending message to Webhooks 'My webhook endpoint' (status: 400)", cm.output[-1])
 
@@ -477,7 +486,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
@@ -496,7 +505,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
@@ -517,7 +526,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
@@ -530,7 +539,7 @@ class TestNotificationWebhooks(DojoTestCase):
     def test_webhook_reactivation(self):
         with self.subTest("active"):
             wh = Notification_Webhooks.objects.filter(owner=None).first()
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager._webhook_reactivation(manager, endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
@@ -549,7 +558,7 @@ class TestNotificationWebhooks(DojoTestCase):
             wh.save()
 
             with self.assertLogs("dojo.notifications.helper", level="DEBUG") as cm:
-                manager = NotificationManager()
+                manager = WebhookNotificationManger()
                 manager._webhook_reactivation(manager, endpoint_id=wh.pk)
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
@@ -650,7 +659,7 @@ class TestNotificationWebhooks(DojoTestCase):
         system_settings.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
@@ -666,7 +675,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.save()
 
         with self.assertLogs("dojo.notifications.helper", level="ERROR") as cm:
-            manager = NotificationManager()
+            manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy", title="Dummy event")
 
         updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
