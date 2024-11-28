@@ -65,8 +65,9 @@ def get_authorized_products(permission, user=None):
         | Q(prod_type__authorized_group=True) | Q(authorized_group=True))
 
 
-def get_authorized_members_for_product(product, permission):
-    user = get_current_user()
+def get_authorized_members_for_product(product, permission, user=None):
+    if user is None:
+        user = get_current_user()
 
     if user.is_superuser or user_has_permission(user, product, permission):
         return Product_Member.objects.filter(product=product).order_by("user__first_name", "user__last_name").select_related("role", "user")
