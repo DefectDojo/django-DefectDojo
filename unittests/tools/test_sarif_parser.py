@@ -238,7 +238,7 @@ add_core(ptr, offset, val);
         with open(path.join(path.dirname(__file__), "../scans/sarif/njsscan.sarif"), encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(2, len(findings))
+            self.assertEqual(3, len(findings))
             # finding 0
             finding = findings[0]
             self.assertEqual(
@@ -313,7 +313,7 @@ add_core(ptr, offset, val);
         with open(path.join(path.dirname(__file__), "../scans/sarif/mobsfscan.json"), encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(9, len(findings))
+            self.assertEqual(18, len(findings))
             for finding in findings:
                 self.common_checks(finding)
 
