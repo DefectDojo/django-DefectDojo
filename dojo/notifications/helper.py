@@ -33,7 +33,10 @@ from dojo.models import (
     UserContactInfo,
     get_current_datetime,
 )
-from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
+from dojo.user.queries import (
+    get_authorized_users_for_product_and_product_type,
+    get_authorized_users_for_product_type,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +59,16 @@ def create_notification(
     """Create an instance of a NotificationManager and dispatch the notification."""
     default_manager = NotificationManager
     notification_manager_class = default_manager
-    if isinstance((notification_manager := getattr(settings, "NOTIFICATION_MANAGER", default_manager)), str):
+    if isinstance(
+        (
+            notification_manager := getattr(
+                settings,
+                "NOTIFICATION_MANAGER",
+                default_manager,
+            )
+        ),
+        str,
+    ):
         with suppress(ModuleNotFoundError):
             module_name, _separator, class_name = notification_manager.rpartition(".")
             module = importlib.import_module(module_name)
@@ -82,20 +94,26 @@ class NotificationManagerHelpers:
 
     """Common functions for use in the Mangers."""
 
-    def __init__(self, *_args: list, **_kwargs: dict) -> None:
-        self._set_notifications_object()
-        self._set_system_settings()
+    def __init__(
+        self,
+        *_args: list,
+        system_notifications: Notifications | None = None,
+        system_settings: System_Settings | None = None,
+        **_kwargs: dict,
+    ) -> None:
+        self.system_notifications = system_notifications or self._get_notifications_object()
+        self.system_settings = system_settings or self._get_system_settings()
 
-    def _set_notifications_object(self) -> None:
+    def _get_notifications_object(self) -> Notifications:
         """Set the system Notifications object on the class."""
         try:
-            self.system_notifications: Notifications = Notifications.objects.get(user=None, template=False)
+            return Notifications.objects.get(user=None, template=False)
         except Exception:
-            self.system_notifications: Notifications = Notifications()
+            return Notifications()
 
-    def _set_system_settings(self) -> None:
+    def _get_system_settings(self) -> System_Settings:
         """Set the system settings object in the class."""
-        self.system_settings = System_Settings.objects.get()
+        return System_Settings.objects.get()
 
     def _create_description(self, event: str, kwargs: dict) -> str:
         if kwargs.get("description") is None:
@@ -131,13 +149,22 @@ class NotificationManagerHelpers:
             logger.debug("Rendering from the template %s", template)
         except TemplateDoesNotExist as e:
             # In some cases, template includes another templates, if the interior one is missing, we will see it in "specifically" section
-            logger.debug(f"template not found or not implemented yet: {template} (specifically: {e.args})")
+            logger.debug(
+                f"template not found or not implemented yet: {template} (specifically: {e.args})",
+            )
         except Exception as e:
-            logger.error("error during rendering of template %s exception is %s", template, e)
+            logger.error(
+                "error during rendering of template %s exception is %s",
+                template,
+                e,
+            )
         finally:
             if not notification_message:
                 kwargs["description"] = self._create_description(event, kwargs)
-                notification_message = render_to_string(f"notifications/{notification_type}/other.tpl", kwargs)
+                notification_message = render_to_string(
+                    f"notifications/{notification_type}/other.tpl",
+                    kwargs,
+                )
 
         return notification_message or ""
 
@@ -168,7 +195,12 @@ class SlackNotificationManger(NotificationManagerHelpers):
 
     @dojo_async_task
     @app.task
-    def send_slack_notification(self, event: str, user: Dojo_User | None = None, **kwargs: dict):
+    def send_slack_notification(
+        self,
+        event: str,
+        user: Dojo_User | None = None,
+        **kwargs: dict,
+    ):
         try:
             # If the user has slack information on profile and chooses to receive slack notifications
             # Will receive a DM
@@ -178,9 +210,13 @@ class SlackNotificationManger(NotificationManagerHelpers):
                     slack_user_id = user.usercontactinfo.slack_user_id
                     if not slack_user_id:
                         # Lookup the slack userid the first time, then save it.
-                        slack_user_id = self._get_slack_user_id(user.usercontactinfo.slack_username)
+                        slack_user_id = self._get_slack_user_id(
+                            user.usercontactinfo.slack_username,
+                        )
                         if slack_user_id:
-                            slack_user_save = UserContactInfo.objects.get(user_id=user.id)
+                            slack_user_save = UserContactInfo.objects.get(
+                                user_id=user.id,
+                            )
                             slack_user_save.slack_user_id = slack_user_id
                             slack_user_save.save()
                     # only send notification if we managed to find the slack_user_id
@@ -188,15 +224,22 @@ class SlackNotificationManger(NotificationManagerHelpers):
                         channel = f"@{slack_user_id}"
                         self._post_slack_message(event, user, channel, **kwargs)
                 else:
-                    logger.info("The user %s does not have a email address informed for Slack in profile.", user)
+                    logger.info(
+                        "The user %s does not have a email address informed for Slack in profile.",
+                        user,
+                    )
             else:
                 # System scope slack notifications, and not personal would still see this go through
                 if self.system_settings.slack_channel is not None:
                     channel = self.system_settings.slack_channel
-                    logger.info(f"Sending system notification to system channel {channel}.")
+                    logger.info(
+                        f"Sending system notification to system channel {channel}.",
+                    )
                     self._post_slack_message(event, user, channel, **kwargs)
                 else:
-                    logger.debug("slack_channel not configured: skipping system notification")
+                    logger.debug(
+                        "slack_channel not configured: skipping system notification",
+                    )
 
         except Exception as exception:
             logger.exception(exception)
@@ -230,14 +273,22 @@ class SlackNotificationManger(NotificationManagerHelpers):
                         logger.debug(f"Slack user ID is {user_id}")
                         slack_user_is_found = True
                 else:
-                    logger.warning(f"A user with email {user_email} could not be found in this Slack workspace.")
+                    logger.warning(
+                        f"A user with email {user_email} could not be found in this Slack workspace.",
+                    )
 
             if not slack_user_is_found:
                 logger.warning("The Slack user was not found.")
 
         return user_id
 
-    def _post_slack_message(self, event: str, user: Dojo_User, channel: str, **kwargs: dict) -> None:
+    def _post_slack_message(
+        self,
+        event: str,
+        user: Dojo_User,
+        channel: str,
+        **kwargs: dict,
+    ) -> None:
         res = requests.request(
             method="POST",
             url="https://slack.com/api/chat.postMessage",
@@ -261,7 +312,12 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
 
     @dojo_async_task
     @app.task
-    def send_msteams_notification(self, event: str, user: Dojo_User | None = None, **kwargs: dict):
+    def send_msteams_notification(
+        self,
+        event: str,
+        user: Dojo_User | None = None,
+        **kwargs: dict,
+    ):
         try:
             # Microsoft Teams doesn't offer direct message functionality, so no MS Teams PM functionality here...
             if user is None:
@@ -270,15 +326,24 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
                     res = requests.request(
                         method="POST",
                         url=self.system_settings.msteams_url,
-                        data=self._create_notification_message(event, None, "msteams", kwargs),
+                        data=self._create_notification_message(
+                            event,
+                            None,
+                            "msteams",
+                            kwargs,
+                        ),
                     )
                     if res.status_code != 200:
                         logger.error("Error when sending message to Microsoft Teams")
                         logger.error(res.status_code)
                         logger.error(res.text)
-                        raise RuntimeError("Error posting message to Microsoft Teams: " + res.text)
+                        raise RuntimeError(
+                            "Error posting message to Microsoft Teams: " + res.text,
+                        )
                 else:
-                    logger.info("Webhook URL for Microsoft Teams not configured: skipping system notification")
+                    logger.info(
+                        "Webhook URL for Microsoft Teams not configured: skipping system notification",
+                    )
         except Exception as exception:
             logger.exception(exception)
             self._log_alert(
@@ -296,7 +361,12 @@ class EmailNotificationManger(NotificationManagerHelpers):
 
     @dojo_async_task
     @app.task
-    def send_mail_notification(self, event: str, user: Dojo_User | None = None, **kwargs: dict):
+    def send_mail_notification(
+        self,
+        event: str,
+        user: Dojo_User | None = None,
+        **kwargs: dict,
+    ):
         # Attempt to get the "to" address
         if (recipient := kwargs.get("recipient")) is not None:
             address = recipient
@@ -343,7 +413,12 @@ class WebhookNotificationManger(NotificationManagerHelpers):
 
     @dojo_async_task
     @app.task
-    def send_webhooks_notification(self, event: str, user: Dojo_User | None = None, **kwargs: dict):
+    def send_webhooks_notification(
+        self,
+        event: str,
+        user: Dojo_User | None = None,
+        **kwargs: dict,
+    ):
         for endpoint in self._get_webhook_endpoints(user=user):
             error = None
             if endpoint.status not in [
@@ -359,7 +434,9 @@ class WebhookNotificationManger(NotificationManagerHelpers):
                 logger.debug(f"Sending webhook message to endpoint '{endpoint.name}'")
                 res = self._webhooks_notification_request(endpoint, event, **kwargs)
                 if 200 <= res.status_code < 300:
-                    logger.debug(f"Message sent to endpoint '{endpoint.name}' successfully.")
+                    logger.debug(
+                        f"Message sent to endpoint '{endpoint.name}' successfully.",
+                    )
                     continue
                 # HTTP request passed successfully but we still need to check status code
                 if 500 <= res.status_code < 600 or res.status_code == 429:
@@ -374,7 +451,9 @@ class WebhookNotificationManger(NotificationManagerHelpers):
             except requests.exceptions.Timeout as e:
                 error = self.ERROR_TEMPORARY
                 endpoint.note = f"Requests exception: {e}"
-                logger.error(f"Timeout when sending message to Webhook '{endpoint.name}'")
+                logger.error(
+                    f"Timeout when sending message to Webhook '{endpoint.name}'",
+                )
             except Exception as exception:
                 error = self.ERROR_PERMANENT
                 endpoint.note = f"Exception: {exception}"[:1000]
@@ -405,13 +484,20 @@ class WebhookNotificationManger(NotificationManagerHelpers):
             endpoint.last_error = now
             endpoint.save()
 
-    def _get_webhook_endpoints(self, user: Dojo_User | None = None) -> QuerySet[Notification_Webhooks]:
+    def _get_webhook_endpoints(
+        self,
+        user: Dojo_User | None = None,
+    ) -> QuerySet[Notification_Webhooks]:
         endpoints = Notification_Webhooks.objects.filter(owner=user)
         if not endpoints.exists():
             if user:
-                logger.info(f"URLs for Webhooks not configured for user '{user}': skipping user notification")
+                logger.info(
+                    f"URLs for Webhooks not configured for user '{user}': skipping user notification",
+                )
             else:
-                logger.info("URLs for Webhooks not configured: skipping system notification")
+                logger.info(
+                    "URLs for Webhooks not configured: skipping system notification",
+                )
             return Notification_Webhooks.objects.none()
         return endpoints
 
@@ -429,7 +515,12 @@ class WebhookNotificationManger(NotificationManagerHelpers):
         }
         if endpoint.header_name is not None:
             headers[endpoint.header_name] = endpoint.header_value
-        yaml_data = self._create_notification_message(event, endpoint.owner, "webhooks", kwargs)
+        yaml_data = self._create_notification_message(
+            event,
+            endpoint.owner,
+            "webhooks",
+            kwargs,
+        )
         data = yaml.safe_load(yaml_data)
 
         return headers, data
@@ -450,7 +541,11 @@ class WebhookNotificationManger(NotificationManagerHelpers):
         )
 
     def _test_webhooks_notification(self, endpoint: Notification_Webhooks) -> None:
-        res = self._webhooks_notification_request(endpoint, "ping", description="Test webhook notification")
+        res = self._webhooks_notification_request(
+            endpoint,
+            "ping",
+            description="Test webhook notification",
+        )
         res.raise_for_status()
         # in "send_webhooks_notification", we are doing deeper analysis, why it failed
         # for now, "raise_for_status" should be enough
@@ -472,7 +567,12 @@ class AlertNotificationManger(NotificationManagerHelpers):
 
     """Manger for slack notifications and their helpers."""
 
-    def send_alert_notification(self, event: str, user: Dojo_User | None = None, **kwargs: dict):
+    def send_alert_notification(
+        self,
+        event: str,
+        user: Dojo_User | None = None,
+        **kwargs: dict,
+    ):
         logger.debug("sending alert notification to %s", user)
         try:
             # no need to differentiate between user/no user
@@ -484,7 +584,12 @@ class AlertNotificationManger(NotificationManagerHelpers):
             alert = Alerts(
                 user_id=user,
                 title=kwargs.get("title")[:250],
-                description=self._create_notification_message(event, user, "alert", kwargs)[:2000],
+                description=self._create_notification_message(
+                    event,
+                    user,
+                    "alert",
+                    kwargs,
+                )[:2000],
                 url=kwargs.get("url", reverse("alerts")),
                 icon=icon[:25],
                 source=source,
@@ -503,9 +608,7 @@ class AlertNotificationManger(NotificationManagerHelpers):
             )
 
 
-class NotificationManager(
-    NotificationManagerHelpers,
-):
+class NotificationManager(NotificationManagerHelpers):
 
     """Manage the construction and dispatch of notifications."""
 
@@ -521,7 +624,11 @@ class NotificationManager(
             # send system notifications to all admin users
             self._process_objects(**kwargs)
             # System notifications are sent one with user=None, which will trigger email to configured system email, to global slack channel, etc.
-            self._process_notifications(event, notifications=self.system_notifications, **kwargs)
+            self._process_notifications(
+                event,
+                notifications=self.system_notifications,
+                **kwargs,
+            )
             # All admins will also receive system notifications, but as part of the person global notifications section below
             # This time user is set, so will trigger email to personal email, to personal slack channel (mention), etc.
             # only retrieve users which have at least one notification type enabled for this event type.
@@ -550,11 +657,19 @@ class NotificationManager(
                 )
                 merged_notifications.user = recipient_notifications.user
                 logger.debug("Sent notification to %s", merged_notifications.user)
-                self._process_notifications(event, notifications=merged_notifications, **kwargs)
+                self._process_notifications(
+                    event,
+                    notifications=merged_notifications,
+                    **kwargs,
+                )
             else:
                 # Do not trump user preferences and send notifications as usual
                 logger.debug("Sent notification to %s", recipient_notifications.user)
-                self._process_notifications(event, notifications=recipient_notifications, **kwargs)
+                self._process_notifications(
+                    event,
+                    notifications=recipient_notifications,
+                    **kwargs,
+                )
 
     def _process_objects(self, **kwargs: dict) -> None:
         """Extract the product and product type from the kwargs."""
@@ -590,7 +705,9 @@ class NotificationManager(
             .prefetch_related(
                 Prefetch(
                     "notifications_set",
-                    queryset=Notifications.objects.filter(Q(product_id=self.product) | Q(product__isnull=True)),
+                    queryset=Notifications.objects.filter(
+                        Q(product_id=self.product) | Q(product__isnull=True),
+                    ),
                     to_attr="applicable_notifications",
                 ),
             )
@@ -605,16 +722,29 @@ class NotificationManager(
         # only send to authorized users or admin/superusers
         logger.debug("Filtering users for the product %s", self.product)
         if self.product is not None:
-            users = get_authorized_users_for_product_and_product_type(users, self.product, Permissions.Product_View)
+            users = get_authorized_users_for_product_and_product_type(
+                users,
+                self.product,
+                Permissions.Product_View,
+            )
         elif self.product_type is not None:
-            users = get_authorized_users_for_product_type(users, self.product_type, Permissions.Product_Type_View)
+            users = get_authorized_users_for_product_type(
+                users,
+                self.product_type,
+                Permissions.Product_Type_View,
+            )
         else:
             # nor product_type nor product defined, we should not make noise and send only notifications to admins
             logger.debug("Product is not specified, making it silent")
             users = users.filter(is_superuser=True)
         return users
 
-    def _send_single_notification_to_user(self, user: Dojo_User, event: str | None = None, **kwargs: dict) -> None:
+    def _send_single_notification_to_user(
+        self,
+        user: Dojo_User,
+        event: str | None = None,
+        **kwargs: dict,
+    ) -> None:
         """Send a notification to a single user."""
         logger.debug("Authorized user for the product %s", user)
         # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
@@ -625,21 +755,30 @@ class NotificationManager(
             logger.debug("User %s is superuser", user)
             applicable_notifications.append(self.system_notifications)
 
-        notifications_set = Notifications.merge_notifications_list(applicable_notifications)
+        notifications_set = Notifications.merge_notifications_list(
+            applicable_notifications,
+        )
         notifications_set.user = user
         self._process_notifications(event, notifications=notifications_set, **kwargs)
 
-    def _get_manager_class(self, alert_type: str) -> type[NotificationManagerHelpers]:
+    def _get_manager_instance(
+        self,
+        alert_type: str,
+    ) -> type[NotificationManagerHelpers]:
+        kwargs = {
+            "system_notifications": self.system_notifications,
+            "system_settings": self.system_settings,
+        }
         if alert_type == "slack":
-            return SlackNotificationManger
+            return SlackNotificationManger(**kwargs)
         if alert_type == "msteams":
-            return MSTeamsNotificationManger
+            return MSTeamsNotificationManger(**kwargs)
         if alert_type == "mail":
-            return EmailNotificationManger
+            return EmailNotificationManger(**kwargs)
         if alert_type == "webhooks":
-            return WebhookNotificationManger
+            return WebhookNotificationManger(**kwargs)
         if alert_type == "alert":
-            return AlertNotificationManger
+            return AlertNotificationManger(**kwargs)
 
         msg = f"Unsupported alert type: {alert_type}"
         raise TypeError(msg)
@@ -655,7 +794,9 @@ class NotificationManager(
             logger.warning("no notifications!")
             return
 
-        logger.debug("sending notification " + ("asynchronously" if we_want_async() else "synchronously"))
+        logger.debug(
+            "sending notification " + ("asynchronously" if we_want_async() else "synchronously"),
+        )
         logger.debug("process notifications for %s", notifications.user)
 
         if self.system_settings.enable_slack_notifications and "slack" in getattr(
@@ -664,7 +805,11 @@ class NotificationManager(
             getattr(notifications, "other"),
         ):
             logger.debug("Sending Slack Notification")
-            self._get_manager_class("slack").send_slack_notification(event, user=notifications.user, **kwargs)
+            self._get_manager_instance("slack").send_slack_notification(
+                event,
+                user=notifications.user,
+                **kwargs,
+            )
 
         if self.system_settings.enable_msteams_notifications and "msteams" in getattr(
             notifications,
@@ -672,7 +817,11 @@ class NotificationManager(
             getattr(notifications, "other"),
         ):
             logger.debug("Sending MSTeams Notification")
-            self._get_manager_class("msteams").send_msteams_notification(event, user=notifications.user, **kwargs)
+            self._get_manager_instance("msteams").send_msteams_notification(
+                event,
+                user=notifications.user,
+                **kwargs,
+            )
 
         if self.system_settings.enable_mail_notifications and "mail" in getattr(
             notifications,
@@ -680,7 +829,11 @@ class NotificationManager(
             getattr(notifications, "other"),
         ):
             logger.debug("Sending Mail Notification")
-            self._get_manager_class("mail").send_mail_notification(event, user=notifications.user, **kwargs)
+            self._get_manager_instance("mail").send_mail_notification(
+                event,
+                user=notifications.user,
+                **kwargs,
+            )
 
         if self.system_settings.enable_webhooks_notifications and "webhooks" in getattr(
             notifications,
@@ -688,11 +841,19 @@ class NotificationManager(
             getattr(notifications, "other"),
         ):
             logger.debug("Sending Webhooks Notification")
-            self._get_manager_class("webhooks").send_webhooks_notification(event, user=notifications.user, **kwargs)
+            self._get_manager_instance("webhooks").send_webhooks_notification(
+                event,
+                user=notifications.user,
+                **kwargs,
+            )
 
         if "alert" in getattr(notifications, event, getattr(notifications, "other")):
             logger.debug(f"Sending Alert to {notifications.user}")
-            self._get_manager_class("alert").send_alert_notification(self, event, user=notifications.user, **kwargs)
+            self._get_manager_instance("alert").send_alert_notification(
+                event,
+                user=notifications.user,
+                **kwargs,
+            )
 
 
 @app.task(ignore_result=True)
