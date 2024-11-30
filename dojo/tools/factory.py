@@ -114,8 +114,8 @@ def requires_tool_type(scan_type):
 
 
 # iterate through the modules in the current package
-package_dir = str(Path(__file__).resolve().parent)
-for module_name in os.listdir(package_dir):
+package_dir = Path(str(Path(__file__).resolve().parent))
+for module_name in any(package_dir.iterdir()):
     # check if it's dir
     if Path(os.path.join(package_dir, module_name)).is_dir():
         try:
