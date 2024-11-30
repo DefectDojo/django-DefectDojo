@@ -33,8 +33,8 @@ def rename_mend_finding():
     logger.info("######## Updating Hashcodes - deduplication is done in the background upon finding save ########")
     for finding in findings:
         logger.info("Updating Mend Finding with id: %d", finding.id)
-        lib_name_begin = re.search("\\*\\*Library Filename\\*\\* : ", finding.description).span(0)[1]
-        lib_name_end = re.search("\\*\\*Library Description\\*\\*", finding.description).span(0)[0]
+        lib_name_begin = re.search(r"\*\*Library Filename\*\* : ", finding.description).span(0)[1]
+        lib_name_end = re.search(r"\*\*Library Description\*\*", finding.description).span(0)[0]
         lib_name = finding.description[lib_name_begin:lib_name_end - 1]
         if finding.cve is None:
             finding.title = "CVE-None | " + lib_name

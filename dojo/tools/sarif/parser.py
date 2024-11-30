@@ -156,7 +156,7 @@ def get_message_from_multiformatMessageString(data, rule):
 
 def cve_try(val):
     # Match only the first CVE!
-    cveSearch = re.search("(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
+    cveSearch = re.search(r"(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
     if cveSearch:
         return cveSearch.group(1).upper()
     return None
