@@ -31,13 +31,13 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
         with self.subTest(""):
             self.assertEqual(("", ""), get_component_name_version(""))
         with self.subTest("gav://org.yaml:snakeyaml:1.16"):
-            self.assertEqual(("gav://org.yaml:snakeyaml", "1.16"), get_component_name_version("gav://org.yaml:snakeyaml:1.16"))
+            self.assertEqual(("snakeyaml", "1.16"), get_component_name_version("gav://org.yaml:snakeyaml:1.16"))
         with self.subTest("npm://desopmo:1.33.7"):
-            self.assertEqual(("npm://desopmo", "1.33.7"), get_component_name_version("npm://desopmo:1.33.7"))
+            self.assertEqual(("desopmo", "1.33.7"), get_component_name_version("npm://desopmo:1.33.7"))
         with self.subTest("pypi://django:4.1.4"):
-            self.assertEqual(("pypi://django", "4.1.4"), get_component_name_version("pypi://django:4.1.4"))
+            self.assertEqual(("django", "4.1.4"), get_component_name_version("pypi://django:4.1.4"))
         with self.subTest("alpine://3.18:libcrypto3:3.1.1-r1"):
-            self.assertEqual(("alpine://3.18:libcrypto3", "3.1.1-r1"), get_component_name_version("alpine://3.18:libcrypto3:3.1.1-r1"))
+            self.assertEqual(("libcrypto3", "3.1.1-r1"), get_component_name_version("alpine://3.18:libcrypto3:3.1.1-r1"))
         with self.subTest("npm://desopmo"):
             self.assertEqual(("npm://desopmo", ""), get_component_name_version("npm://desopmo"))
 
@@ -69,7 +69,7 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
             self.assertEqual("High", findings[0].severity)
             self.assertIn("sqlparse is a non-validating SQL parser module for Python", findings[0].description)
             self.assertIn("- [0.4.4]", findings[0].mitigation)
-            self.assertEqual("pypi://sqlparse", findings[0].component_name)
+            self.assertEqual("sqlparse", findings[0].component_name)
             self.assertEqual("0.4.3", findings[0].component_version)
             self.assertIn("pypi://django:4.1.4", findings[0].impact)
             self.assertIn("https://github.com/andialbrecht/sqlparse/commit/", findings[0].references)
