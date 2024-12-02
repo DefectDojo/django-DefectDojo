@@ -28,9 +28,9 @@ class TestParsers(DojoTestCase):
                 "wizcli_common_parsers",  # common class for other wizcli parsers
             ]:
                 with self.subTest(parser=parser_dir.name, category="docs"):
-                    doc_file = os.path.join(basedir, "docs", "content", "en", "integrations", "parsers", category, f"{doc_name}.md")
+                    doc_file = os.path.join(basedir, "docs", "content", "en", "connecting_your_tools", "parsers", category, f"{doc_name}.md")
                     self.assertTrue(
-                        os.path.isfile(doc_file),
+                        Path(doc_file).is_file(),
                         f"Documentation file '{doc_file}' is missing or using different name",
                                     )
 
@@ -55,7 +55,7 @@ class TestParsers(DojoTestCase):
                 with self.subTest(parser=parser_dir.name, category="parser"):
                     parser_test_file = os.path.join(basedir, "unittests", "tools", f"test_{parser_dir.name}_parser.py")
                     self.assertTrue(
-                        os.path.isfile(parser_test_file),
+                        Path(parser_test_file).is_file(),
                         f"Unittest of parser '{parser_test_file}' is missing or using different name",
                     )
 
@@ -66,7 +66,7 @@ class TestParsers(DojoTestCase):
                 with self.subTest(parser=parser_dir.name, category="testfiles"):
                     scan_dir = os.path.join(basedir, "unittests", "scans", parser_dir.name)
                     self.assertTrue(
-                        os.path.isdir(scan_dir),
+                        Path(scan_dir).is_dir(),
                         f"Test files for unittest of parser '{scan_dir}' are missing or using different name",
                     )
 
@@ -78,7 +78,7 @@ class TestParsers(DojoTestCase):
                     with self.subTest(parser=parser_dir.name, category="importer"):
                         importer_test_file = os.path.join(basedir, "unittests", "tools", f"test_{parser_dir.name}_importer.py")
                         self.assertTrue(
-                            os.path.isfile(importer_test_file),
+                            Path(importer_test_file).is_file(),
                             f"Unittest of importer '{importer_test_file}' is missing or using different name",
                         )
             for file in os.scandir(os.path.join(basedir, "dojo", "tools", parser_dir.name)):
@@ -103,13 +103,13 @@ class TestParsers(DojoTestCase):
                                 i = 0
 
     def test_parser_existence(self):
-        for docs in os.scandir(os.path.join(basedir, "docs", "content", "en", "integrations", "parsers", "file")):
+        for docs in os.scandir(os.path.join(basedir, "docs", "content", "en", "connecting_your_tools", "parsers", "file")):
             if docs.name not in [
                 "_index.md", "codeql.md", "edgescan.md",
             ]:
                 with self.subTest(parser=docs.name.split(".md")[0], category="parser"):
                     parser = os.path.join(basedir, "dojo", "tools", f"{docs.name.split('.md')[0]}", "parser.py")
                     self.assertTrue(
-                        os.path.isfile(parser),
+                        Path(parser).is_file(),
                         f"Parser '{parser}' is missing or using different name",
                                     )

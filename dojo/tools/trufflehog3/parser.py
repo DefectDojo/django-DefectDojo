@@ -101,10 +101,7 @@ class TruffleHog3Parser:
             severity = severity.capitalize()
         file = json_data.get("path")
         line = json_data.get("line")
-        if line:
-            line = int(line)
-        else:
-            line = 0
+        line = int(line) if line else 0
         secret = json_data.get("secret")
         context = json_data.get("context")
         json_data.get("id")

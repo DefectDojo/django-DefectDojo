@@ -4,6 +4,7 @@ import logging
 import os
 from functools import wraps
 from itertools import chain
+from pathlib import Path
 from pprint import pformat
 
 from django.test import TestCase
@@ -39,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_unit_tests_path():
-    return os.path.dirname(os.path.realpath(__file__))
+    return str(Path(os.path.realpath(__file__)).parent)
 
 
 def toggle_system_setting_boolean(flag_name, value):

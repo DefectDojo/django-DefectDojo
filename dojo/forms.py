@@ -4,6 +4,7 @@ import pickle
 import re
 import warnings
 from datetime import date, datetime
+from pathlib import Path
 
 import tagulous
 from crispy_forms.bootstrap import InlineCheckboxes, InlineRadios
@@ -177,10 +178,7 @@ class MonthYearWidget(Widget):
 
         output = []
 
-        if "id" in self.attrs:
-            id_ = self.attrs["id"]
-        else:
-            id_ = f"id_{name}"
+        id_ = self.attrs.get("id", f"id_{name}")
 
         month_choices = list(MONTHS.items())
         if not (self.required and value):
@@ -754,7 +752,8 @@ class UploadThreatForm(forms.Form):
 
     def clean(self):
         if (file := self.cleaned_data.get("file", None)) is not None:
-            ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+            path = Path(file.name)
+            ext = path.suffix
             valid_extensions = [".jpg", ".png", ".pdf"]
             if ext.lower() not in valid_extensions:
                 if accepted_extensions := f"{', '.join(valid_extensions)}":
@@ -872,7 +871,8 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
         for form in self.forms:
             file = form.cleaned_data.get("file", None)
             if file:
-                ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+                path = Path(file.name)
+                ext = path.suffix
                 valid_extensions = settings.FILE_UPLOAD_TYPES
                 if ext.lower() not in valid_extensions:
                     if accepted_extensions := f"{', '.join(valid_extensions)}":
@@ -2535,7 +2535,7 @@ class ToolTypeForm(forms.ModelForm):
         exclude = ["product"]
 
     def __init__(self, *args, **kwargs):
-        instance = kwargs.get("instance", None)
+        instance = kwargs.get("instance")
         self.newly_created = True
         if instance is not None:
             self.newly_created = instance.pk is None
@@ -3244,10 +3244,7 @@ class TextQuestionForm(QuestionForm):
             question=self.question,
         )
 
-        if initial_answer.exists():
-            initial_answer = initial_answer[0].answer
-        else:
-            initial_answer = ""
+        initial_answer = initial_answer[0].answer if initial_answer.exists() else ""
 
         self.fields["answer"] = forms.CharField(
             label=self.question.text,

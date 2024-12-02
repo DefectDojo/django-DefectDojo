@@ -137,7 +137,7 @@ def create_notification(event=None, **kwargs):
 
 
 def create_description(event, *args, **kwargs):
-    if "description" not in kwargs.keys():
+    if "description" not in kwargs:
         if event == "product_added":
             kwargs["description"] = _("Product %s has been created successfully.") % kwargs["title"]
         elif event == "product_type_added":
@@ -227,7 +227,9 @@ def send_slack_notification(event, user=None, *args, **kwargs):
                 "channel": channel,
                 "username": get_system_setting("slack_username"),
                 "text": create_notification_message(event, user, "slack", *args, **kwargs),
-            })
+            },
+            timeout=settings.REQUESTS_TIMEOUT,
+        )
 
         if "error" in res.text:
             logger.error("Slack is complaining. See raw text below.")
@@ -268,7 +270,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
     except Exception as e:
         logger.exception(e)
-        log_alert(e, "Slack Notification", title=kwargs["title"], description=str(e), url=kwargs.get("url", None))
+        log_alert(e, "Slack Notification", title=kwargs["title"], description=str(e), url=kwargs.get("url"))
 
 
 @dojo_async_task
@@ -284,7 +286,9 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
                 res = requests.request(
                     method="POST",
                     url=get_system_setting("msteams_url"),
-                    data=create_notification_message(event, None, "msteams", *args, **kwargs))
+                    data=create_notification_message(event, None, "msteams", *args, **kwargs),
+                    timeout=settings.REQUESTS_TIMEOUT,
+                )
                 if res.status_code != 200:
                     logger.error("Error when sending message to Microsoft Teams")
                     logger.error(res.status_code)
@@ -438,10 +442,7 @@ def send_webhooks_notification(event, user=None, *args, **kwargs):
                 continue
 
             # HTTP request passed successfully but we still need to check status code
-            if 500 <= res.status_code < 600 or res.status_code == 429:
-                error = ERROR_TEMPORARY
-            else:
-                error = ERROR_PERMANENT
+            error = ERROR_TEMPORARY if 500 <= res.status_code < 600 or res.status_code == 429 else ERROR_PERMANENT
 
             endpoint.note = f"Response status code: {res.status_code}"
             logger.error(f"Error when sending message to Webhooks '{endpoint.name}' (status: {res.status_code}): {res.text}")
@@ -518,7 +519,9 @@ def get_slack_user_id(user_email):
     res = requests.request(
         method="POST",
         url="https://slack.com/api/users.lookupByEmail",
-        data={"token": get_system_setting("slack_token"), "email": user_email})
+        data={"token": get_system_setting("slack_token"), "email": user_email},
+        timeout=settings.REQUESTS_TIMEOUT,
+    )
 
     user = json.loads(res.text)
 
@@ -576,10 +579,7 @@ def notify_scan_added(test, updated_count, new_findings=[], findings_mitigated=[
 
     title = "Created/Updated " + str(updated_count) + " findings for " + str(test.engagement.product) + ": " + str(test.engagement.name) + ": " + str(test)
 
-    if updated_count == 0:
-        event = "scan_added_empty"
-    else:
-        event = "scan_added"
+    event = "scan_added_empty" if updated_count == 0 else "scan_added"
 
     create_notification(event=event, title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
                         finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,
