@@ -11,7 +11,7 @@ TRIVY_SEVERITIES = {
 SECRET_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
 **Match:** {match}
-"""
+"""  # noqa: S105
 
 
 class TrivySecretsHandler:

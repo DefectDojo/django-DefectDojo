@@ -58,7 +58,7 @@ class ContrastParser:
             finding.unsaved_endpoints = []
             if row.get("Request URI"):
                 endpoint = Endpoint(
-                    host="0.0.0.0",
+                    host="0.0.0.0",  # noqa: S104
                     path=row.get("Request URI"),
                     protocol=row.get("Request Protocol"),
                 )

@@ -238,7 +238,7 @@ class TestCyclonedxParser(DojoTestCase):
             self.assertEqual(7, len(findings))
             for finding in findings:
                 finding.clean()
-                if "c7129ff8-08bc-4afe-82ec-7d97b9491741" == finding.vuln_id_from_tool:
+                if finding.vuln_id_from_tool == "c7129ff8-08bc-4afe-82ec-7d97b9491741":
                     with self.subTest(i="CVE-2021-33203"):
                         self.assertIn(finding.severity, Finding.SEVERITIES)
                         self.assertEqual("Django:2.0 | c7129ff8-08bc-4afe-82ec-7d97b9491741", finding.title)
@@ -254,7 +254,7 @@ class TestCyclonedxParser(DojoTestCase):
                             finding.description,
                         )
                         self.assertEqual(datetime.date(2022, 1, 28), datetime.datetime.date(finding.date))
-                elif "c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0":
                     with self.subTest(i="CVE-2018-7536"):
                         self.assertEqual("Django:2.0 | c9b6a6a5-01a4-4d4c-b480-b9d6825dc4d0", finding.title)
                         self.assertEqual("Medium", finding.severity)
@@ -269,7 +269,7 @@ class TestCyclonedxParser(DojoTestCase):
                             finding.description,
                         )
                         self.assertEqual(datetime.date(2022, 1, 28), datetime.datetime.date(finding.date))
-                elif "90cfba6a-ddc9-4708-b131-5d875e8c558d" == finding.vuln_id_from_tool:
+                elif finding.vuln_id_from_tool == "90cfba6a-ddc9-4708-b131-5d875e8c558d":
                     with self.subTest(i="CVE-2018-6188"):
                         self.assertEqual("High", finding.severity)
                         self.assertEqual("Django", finding.component_name)

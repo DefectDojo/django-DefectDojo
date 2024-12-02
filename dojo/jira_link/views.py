@@ -100,10 +100,10 @@ def webhook(request, secret=None):
             findings = None
             # Determine what type of object we will be working with
             if jissue.finding:
-                logging.debug(f"Received issue update for {jissue.jira_key} for finding {jissue.finding.id}")
+                logger.debug(f"Received issue update for {jissue.jira_key} for finding {jissue.finding.id}")
                 findings = [jissue.finding]
             elif jissue.finding_group:
-                logging.debug(f"Received issue update for {jissue.jira_key} for finding group {jissue.finding_group}")
+                logger.debug(f"Received issue update for {jissue.jira_key} for finding group {jissue.finding_group}")
                 findings = jissue.finding_group.findings.all()
             elif jissue.engagement:
                 return webhook_responser_handler("debug", "Update for engagement ignored")
@@ -228,7 +228,7 @@ def check_for_and_create_comment(parsed_json):
         jissue = JIRA_Issue.objects.get(jira_id=jid)
     except JIRA_Instance.DoesNotExist:
         return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
-    logging.debug(f"Received issue comment for {jissue.jira_key}")
+    logger.debug(f"Received issue comment for {jissue.jira_key}")
     logger.debug("jissue: %s", vars(jissue))
 
     jira_usernames = JIRA_Instance.objects.values_list("username", flat=True)
