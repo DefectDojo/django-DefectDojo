@@ -212,8 +212,9 @@ class TwistlockJsonParser:
         items = {}
         if "results" in tree:
             vulnerabilityTree = tree["results"][0].get("vulnerabilities", [])
+            baseImage = tree.get("baseImage", "")
             for node in vulnerabilityTree:
-                item = get_item(node, test)
+                item = get_item(node, test, baseImage)
                 unique_key = node["id"] + str(
                     node["packageName"]
                     + str(node["packageVersion"])
@@ -223,7 +224,7 @@ class TwistlockJsonParser:
         return list(items.values())
 
 
-def get_item(vulnerability, test):
+def get_item(vulnerability, test, baseImage):
     severity = (
         convert_severity(vulnerability["severity"])
         if "severity" in vulnerability
@@ -264,7 +265,9 @@ def get_item(vulnerability, test):
         + vulnerability["packageName"]
         + "</p><p> Current Version: "
         + str(vulnerability["packageVersion"])
-        + "</p>",
+        + "</p>"
+        + "<p> Base Image: "
+        + baseImage,
         mitigation=status.title(),
         references=vulnerability.get("link"),
         component_name=vulnerability["packageName"],
