@@ -9,6 +9,7 @@ import dateutil
 from dojo.models import Finding
 from django.conf import settings
 from functools import reduce
+from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,17 @@ class TwistlockCSVParser:
         data_found_in = row.get("Found In", "")
         data_purl = row.get("PURL", "")
         data_risk_factors = row.get("Risk Factors", "")
+        data_hostname = row.get("Hostname", "")
+        data_distro = row.get("Distro", "")
+        data_compliance_id = row.get("Compliance ID", "")
+        data_result = row.get("Result", "")
+        data_packages = row.get("Packages", "")
+        data_source_package = row.get("Source Package", "")
+        data_published = row.get("Published", "")
+        data_services = row.get("Services", "")
+        data_vulnerability_link = row.get("Vulnerability Link", "")
+        data_account_id = row.get("Account ID", "")
+        data_discovered = row.get("Discovered", "")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -79,7 +91,19 @@ class TwistlockCSVParser:
                                             , data_cause
                                             , data_found_in
                                             , data_purl
-                                            , data_risk_factors),
+                                            , data_risk_factors
+                                            , data_hostname
+                                            , data_distro
+                                            , data_compliance_id
+                                            , data_result
+                                            , data_packages
+                                            , data_source_package
+                                            , data_published
+                                            , data_services
+                                            , data_vulnerability_link
+                                            , data_account_id
+                                            , data_discovered
+                                            ),
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),
             component_name=textwrap.shorten(
@@ -118,7 +142,19 @@ class TwistlockCSVParser:
                         data_cause,
                         data_found_in,
                         data_purl,
-                        data_risk_factors):
+                        data_risk_factors,
+                        data_hostname,
+                        data_distro,
+                        data_compliance_id,
+                        data_result,
+                        data_packages,
+                        data_source_package,
+                        data_published,
+                        data_services,
+                        data_vulnerability_link,
+                        data_account_id,
+                        data_discovered,
+                        ):
         return "<p><strong>Description:</strong> " \
                 + data_description \
                 + "</p><p><strong>Type:</strong> " \
@@ -158,7 +194,54 @@ class TwistlockCSVParser:
                 + "</p>" \
                 + "</p><p><strong>PURL:</strong> " \
                 + str(data_purl) \
+                + "</p>" \
+                + "</p><p><strong>Hostname:</strong> " \
+                + str(data_hostname) \
+                + "</p>" \
+                + "</p><p><strong>Distro:</strong> " \
+                + str(data_distro) \
+                + "</p>" \
+                + "</p><p><strong>Compliance ID:</strong> " \
+                + str(data_compliance_id) \
+                + "</p>" \
+                + "</p><p><strong>Result:</strong> " \
+                + str(data_result) \
+                + "</p>" \
+                + "</p><p><strong>Data Packages:</strong> " \
+                + str(data_packages) \
+                + "</p>" \
+                + "</p><p><strong>Data Source Package:</strong> " \
+                + str(data_source_package) \
+                + "</p>" \
+                + "</p><p><strong>Published:</strong> " \
+                + str(data_published) \
+                + "</p>" \
+                + "</p><p><strong>Services:</strong> " \
+                + str(data_services) \
+                + "</p>" \
+                + "</p><p><strong>Vulnerability Link:</strong> " \
+                + str(data_vulnerability_link) \
+                + "</p>" \
+                + "</p><p><strong>Account ID:</strong> " \
+                + str(data_account_id) \
+                + "</p>" \
+                + "</p><p><strong>Discovered:</strong> " \
+                + str(data_discovered) \
                 + "</p>"
+
+    def procces_executor(self, row, test):
+        finding = self.parse_issue(row, test)
+        if finding is not None:
+            key = hashlib.md5(
+                (
+                    finding.severity
+                    + "|"
+                    + finding.title
+                    + "|"
+                    + finding.description
+                ).encode("utf-8"),
+            ).hexdigest()
+        return key, finding
 
     def parse(self, filename, test):
         if filename is None:
@@ -170,18 +253,12 @@ class TwistlockCSVParser:
         reader = csv.DictReader(
             io.StringIO(content), delimiter=",", quotechar='"',
         )
-        for row in reader:
-            finding = self.parse_issue(row, test)
-            if finding is not None:
-                key = hashlib.md5(
-                    (
-                        finding.severity
-                        + "|"
-                        + finding.title
-                        + "|"
-                        + finding.description
-                    ).encode("utf-8"),
-                ).hexdigest()
+        with ThreadPoolExecutor(max_workers=25) as executor:
+            futures = []
+            for row in reader:
+                futures.append(executor.submit(self.procces_executor, row, test))
+            for future in futures:
+                key, finding = future.result()
                 if key not in dupes:
                     dupes[key] = finding
         return list(dupes.values())
