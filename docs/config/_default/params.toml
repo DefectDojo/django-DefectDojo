@@ -1,6 +1,6 @@
 # Hugo
-title = "My Docs"
-description = "Congrats on setting up a new Doks project!"
+title = "DefectDojo Documentation"
+description = "Documentation for DefectDojo"
 images = ["cover.png"]
 
 # mainSections
