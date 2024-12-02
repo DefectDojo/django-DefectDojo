@@ -116,7 +116,9 @@ def get_role_members(user, product: Product, product_type: Product_Type):
     user_members = None
     user_members_product_type: Product_Type_Member = get_authorized_product_type_members_for_user(user, Permissions.Risk_Acceptance)
     user_members = list(user_members_product_type)
-    user_members_product: Product_Member = get_authorized_members_for_product(product=product, permission=Permissions.Risk_Acceptance)
+    user_members_product: Product_Member = get_authorized_members_for_product(product=product,
+                                                                              permission=Permissions.Risk_Acceptance,
+                                                                              user=user)
     if user_members_product:
         user_members += list(user_members_product)
     if not user_members:
@@ -139,15 +141,17 @@ def role_has_exclusive_permissions(user):
     return False
 
 
-def get_user_with_permission_key(permission_key=None):
+def get_user_with_permission_key(permission_key=None, raise_exception=True) -> Dojo_User:
     if permission_key is None:
         return crum.get_current_user()
     permission_key = PermissionKey.objects.get(token=permission_key)
-    if permission_key.status and permission_key.is_expired:
-        user = permission_key.user
-        logger.debug(f"User {user} with Permmission key ****")
-        return user
-    raise ApiError.network_authentication_required(detail="Token is expired")
+
+    if raise_exception and not permission_key.is_active():
+        raise ApiError.network_authentication_required(detail="Token is expired")
+
+    user = permission_key.user
+    logger.debug(f"User {user} with Permmission key ****")
+    return user
     
 
 def rules_for_direct_acceptance(finding: Finding,
@@ -211,6 +215,7 @@ def risk_acceptante_pending(eng: Engagement,
                                                     user,
                                                     product,
                                                     risk_acceptance)
+    message = ""
     if finding.risk_status in ["Risk Pending", "Risk Rejected"]:
         confirmed_acceptances = get_confirmed_acceptors(finding)
         if is_permissions_risk_acceptance(eng, finding, user, product, product_type):
@@ -237,6 +242,8 @@ def risk_acceptante_pending(eng: Engagement,
                     f"""Error number of acceptors {len(confirmed_acceptances)} > number of acceptors required
                      {status_permission.get("number_of_acceptors_required")}"""
                 )
+        else:
+            raise ApiError.unauthorized(detail="No permissions")
     else:
         message = "The risk is already accepted"
 
@@ -467,22 +474,21 @@ def accept_or_reject_risk_bulk(eng: Engagement,
                                product_type: Product_Type,
                                action,
                                permission_key):
-    response = None
     for accepted_finding in risk_acceptance.accepted_findings.all():
         if action == "accept":
             logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
-            response = risk_acceptante_pending(eng,
-                                    accepted_finding,
-                                    risk_acceptance,
-                                    product,
-                                    product_type,
-                                    permission_key)
+            risk_acceptante_pending(
+                eng,
+                accepted_finding,
+                risk_acceptance,
+                product,
+                product_type,
+                permission_key)
         elif action == "reject":
             logger.debug(f"Reject risk accepted id: {accepted_finding.id}")
-            response = risk_acceptance_decline(eng, accepted_finding, risk_acceptance)
+            risk_acceptance_decline(eng, accepted_finding, risk_acceptance)
         else:
-            ApiError.forbidden(detail="The parameter *action* must be accept or reject")
-    return response
+            raise ApiError.forbidden(detail="The parameter *action* must be accept or reject")
 
 
 def validate_list_findings(conf_risk, type, finding, eng):

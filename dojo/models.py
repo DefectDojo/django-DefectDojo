@@ -4260,6 +4260,9 @@ class Notifications(models.Model):
     risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_("Risk Acceptance Request"),
         help_text=_("Send notification to the contacts of the product type"))
+    risk_acceptance_confirmed = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
+        verbose_name=_("Risk Acceptance Confirmed"),
+        help_text=_("Send notification to confirm acceptance process"))
     transfer_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_("Transfer Finding"),
         help_text=_("Send notification to the contacts of the product"))
@@ -4308,6 +4311,7 @@ class Notifications(models.Model):
                 result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
                 result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
                 result.risk_acceptance_request = {*result.risk_acceptance_request, *notifications.risk_acceptance_request}
+                result.risk_acceptance_confirmed = {*result.risk_acceptance_confirmed, *notifications.risk_acceptance_confirmed}
         return result
 
 
@@ -4808,7 +4812,7 @@ class PermissionKey(models.Model):
     created = models.DateTimeField(auto_now=True)
     expiration = models.DateTimeField()
 
-    def is_expired(self):
+    def is_active(self):
         return self.status
     
     def expire(self):
