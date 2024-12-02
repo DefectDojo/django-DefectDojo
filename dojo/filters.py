@@ -243,7 +243,7 @@ class FindingHasJIRAFilter(ChoiceFilter):
         return qs.filter(~Q(jira_issue=None) | ~Q(finding_group__jira_issue=None))
 
     def all_items(self, qs, name):
-        return qs.filter(Q(jira_issue=None) | Q(finding_group__jira_issue=None))
+        return qs
 
     options = {
         0: (_("Yes"), any_jira),
