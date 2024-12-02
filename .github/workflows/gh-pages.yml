@@ -57,3 +57,4 @@ jobs:
         with: # publishes to the `gh-pages` branch by default
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/public
+          cname: docs.defectdojo.com
