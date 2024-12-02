@@ -39,8 +39,8 @@ steps:
 
       echo -e "\033[94m--------python install-----------\033[0m"
       python -m pip install --upgrade pip
-      sudo apt-get install libmysqlclient-dev 
-      sudo apt-get install libmariadb-dev-compat 
+      sudo apt-get install libmysqlclient-dev
+      sudo apt-get install libmariadb-dev-compat
       sudo apt-get install libcurl4-gnutls-dev
       sudo apt-get install python3.12-dev
       sudo apt-get install libgnutls28-dev
@@ -65,11 +65,11 @@ steps:
       python manage.py migrate
 
       coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
-        exit 1; 
+        exit 1;
       }
       coverage report
       coverage run -a --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
-        exit 1; 
+        exit 1;
       }
       coverage report
       coverage xml
@@ -118,7 +118,7 @@ steps:
     inputs:
       PathtoPublish: "$(Build.ArtifactStagingDirectory)/$(DefinitionName).zip"
       ArtifactName: "$(DefinitionName)_artifact"
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/trunk'))
 
   - task: ArtifactoryGenericUpload@2
     displayName: "Artifactory Generic Upload"
