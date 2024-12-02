@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 
 
 class RiskReconAPI:
@@ -33,6 +34,7 @@ class RiskReconAPI:
         response = self.session.get(
             url=f"{self.url}/toes",
             headers={"accept": "application/json", "Authorization": self.key},
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
@@ -49,7 +51,7 @@ class RiskReconAPI:
                 toe_id = item.get("toe_id", None)
                 name = item.get("toe_short_name", None)
                 if not comps or name in name_list:
-                    filters = comps.get(name, None)
+                    filters = comps.get(name)
                     self.toe_map[toe_id] = filters or self.data
         else:
             msg = f"Unable to query Target of Evaluations due to {response.status_code} - {response.content}"
@@ -60,7 +62,7 @@ class RiskReconAPI:
         if not filters:
             return False
 
-        for filter_item in filters.keys():
+        for filter_item in filters:
             filter_list = filters.get(filter_item, None)
             if filter_list and finding[filter_item] not in filter_list:
                 return True
@@ -68,13 +70,14 @@ class RiskReconAPI:
         return False
 
     def get_findings(self):
-        for toe in self.toe_map.keys():
+        for toe in self.toe_map:
             response = self.session.get(
                 url=f"{self.url}/findings/{toe}",
                 headers={
                     "accept": "application/json",
                     "Authorization": self.key,
                 },
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if response.ok:

@@ -14,7 +14,7 @@ from selenium.webdriver.support.ui import Select, WebDriverWait
 from user_test import UserTest
 
 logger = logging.getLogger(__name__)
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = Path(os.path.realpath(__file__)).parent
 
 
 class FindingTest(BaseTestCase):
@@ -74,7 +74,7 @@ class FindingTest(BaseTestCase):
                 file_found = True
                 break
         self.assertTrue(file_found, f"Cannot find {file_name}")
-        os.remove(file_name)
+        Path(file_name).unlink()
 
     def test_csv_export(self):
         driver = self.driver

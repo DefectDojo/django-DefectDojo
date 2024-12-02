@@ -8,6 +8,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 data:
   DD_ADMIN_USER: {{ .Values.admin.user | default "admin" }}
   DD_ADMIN_MAIL: {{ .Values.admin.Mail | default "admin@defectdojo.local" }}
@@ -45,5 +48,5 @@ data:
 {{- if  .Values.django.uwsgi.certificates.enabled }}
   REQUESTS_CA_BUNDLE: {{ .Values.django.uwsgi.certificates.certMountPath }}{{ .Values.django.uwsgi.certificates.certFileName }}
 {{- end }}
-{{- if  .Values.extraConfigs  }}
-{{ toYaml .Values.extraConfigs | indent 2 }}{{- end }}
+{{- with .Values.extraConfigs  }}
+  {{- toYaml . | nindent 2 }}{{- end }}

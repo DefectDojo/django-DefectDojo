@@ -200,10 +200,7 @@ def get_unique_vulnerabilities(
         if access_path is not None:
             urls += [url.text for url in access_path.iter("URL")]
         payloads = vuln.find("PAYLOADS")
-        if payloads is not None:
-            req_resps = get_request_response(payloads)
-        else:
-            req_resps = [[], []]
+        req_resps = get_request_response(payloads) if payloads is not None else [[], []]
 
         if is_info:
             raw_finding_date = vuln.findtext("LAST_TIME_DETECTED")
@@ -267,10 +264,7 @@ def get_vulnerabilities(
         if access_path is not None:
             urls += [url.text for url in access_path.iter("URL")]
         payloads = vuln.find("PAYLOADS")
-        if payloads is not None:
-            req_resps = get_request_response(payloads)
-        else:
-            req_resps = [[], []]
+        req_resps = get_request_response(payloads) if payloads is not None else [[], []]
 
         if is_info:
             raw_finding_date = vuln.findtext("LAST_TIME_DETECTED")
@@ -292,7 +286,7 @@ def get_vulnerabilities(
         else:
             finding_date = None
 
-        finding = findings.get(qid, None)
+        finding = findings.get(qid)
         findings[qid] = attach_extras(
             urls, req_resps[0], req_resps[1], finding, finding_date, qid, test,
         )

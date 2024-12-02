@@ -10,6 +10,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- with .Values.initializer.jobAnnotations }}
     {{- toYaml . | nindent 4 }}
@@ -24,8 +27,11 @@ spec:
         defectdojo.org/component: initializer
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        {{- if .Values.initializer.labels }}
-        {{- toYaml .Values.initializer.labels | nindent 8 }}
+        {{- with .Values.extraLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end -}}
+        {{- with .Values.initializer.labels }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations:
       {{- with .Values.initializer.annotations }}
@@ -51,6 +57,26 @@ spec:
           {{- end }}
       {{- end }}
       initContainers:
+      {{- if .Values.cloudsql.enabled  }}
+      - name: cloudsql-proxy
+        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
+        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        restartPolicy: Always
+        securityContext:
+          runAsNonRoot: true
+        command: ["/cloud_sql_proxy"]
+        args:
+        - "-verbose={{ .Values.cloudsql.verbose }}"
+        {{- if eq .Values.database "postgresql" }}
+        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
+        {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
+        {{- end }}
+      {{- end }}
       - name: wait-for-db
         command:
         - '/bin/bash'
@@ -68,26 +94,11 @@ spec:
         - secretRef:
             name: {{ $fullName }}
             optional: true
+        env:
+        {{- with .Values.extraEnv }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
-      {{- if .Values.cloudsql.enabled  }}
-      - name: cloudsql-proxy
-        image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
-        imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
-        securityContext:
-          runAsNonRoot: true
-        command: ["/cloud_sql_proxy"]
-        args:
-        - "-verbose={{ .Values.cloudsql.verbose }}"
-        {{- if eq .Values.database "postgresql" }}
-        - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.primary.service.ports.postgresql }}"
-        {{- end }}
-        {{- if .Values.cloudsql.enable_iam_login }}
-        - "-enable_iam_login"
-        {{- end }}
-        {{- if .Values.cloudsql.use_private_ip }}
-        - "-ip_address_types=PRIVATE"
-        {{- end }}
-      {{- end }}
       - name: initializer
         image: "{{ template "initializer.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -120,8 +131,8 @@ spec:
               name: {{ .Values.postgresqlha.postgresql.existingSecret }}
               key: postgresql-postgres-password
               {{- end }}
-        {{- if .Values.extraEnv }}
-        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- with .Values.extraEnv }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
         resources:
           {{- toYaml .Values.initializer.resources | nindent 10 }}

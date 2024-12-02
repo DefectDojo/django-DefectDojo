@@ -29,7 +29,7 @@ class Compliance:
         if finding.get("Compliance", {}).get("Status", "PASSED") == "PASSED":
             is_Mitigated = True
             active = False
-            if finding.get("LastObservedAt", None):
+            if finding.get("LastObservedAt"):
                 try:
                     mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
                 except Exception:
