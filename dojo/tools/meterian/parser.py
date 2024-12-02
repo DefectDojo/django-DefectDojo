@@ -73,7 +73,7 @@ class MeterianParser:
                 )
 
                 if "cve" in advisory:
-                    if "N/A" != advisory["cve"]:
+                    if advisory["cve"] != "N/A":
                         finding.unsaved_vulnerability_ids = [advisory["cve"]]
 
                 if "cwe" in advisory:

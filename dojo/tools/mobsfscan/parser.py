@@ -46,10 +46,7 @@ class MobsfscanParser:
                 ],
             )
             references = metadata.get("reference")
-            if metadata.get("severity") in self.SEVERITY:
-                severity = self.SEVERITY[metadata.get("severity")]
-            else:
-                severity = "Info"
+            severity = self.SEVERITY.get(metadata.get("severity"), "Info")
 
             files = []
 

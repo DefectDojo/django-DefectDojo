@@ -118,7 +118,7 @@ def metrics(request, mtype):
     punchcard = []
     ticks = []
 
-    if "view" in request.GET and "dashboard" == request.GET["view"]:
+    if "view" in request.GET and request.GET["view"] == "dashboard":
         punchcard, ticks = get_punchcard_data(all_findings, filters["start_date"], filters["weeks_between"], view)
         page_name = _("%(team_name)s Metrics") % {"team_name": get_system_setting("team_name")}
         template = "dojo/dashboard-metrics.html"

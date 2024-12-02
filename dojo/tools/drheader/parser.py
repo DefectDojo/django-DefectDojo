@@ -15,10 +15,7 @@ class DrHeaderParser:
 
     def return_finding(self, test, finding, url=None):
         title = "Header : " + finding["rule"]
-        if url is not None:
-            message = finding["message"] + "\nURL : " + url
-        else:
-            message = finding["message"]
+        message = finding["message"] + "\nURL : " + url if url is not None else finding["message"]
         if finding.get("value") is not None:
             message += "\nObserved values: " + finding["value"]
         if finding.get("expected") is not None:

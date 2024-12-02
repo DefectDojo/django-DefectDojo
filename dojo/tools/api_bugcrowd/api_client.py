@@ -1,6 +1,7 @@
 from urllib.parse import urlencode
 
 import requests
+from django.conf import settings
 
 
 class BugcrowdAPI:
@@ -52,7 +53,10 @@ class BugcrowdAPI:
 
         next = f"{self.bugcrowd_api_url}/submissions?{params_encoded}"
         while next != "":
-            response = self.session.get(url=next)
+            response = self.session.get(
+                url=next,
+                timeout=settings.REQUESTS_TIMEOUT,
+            )
             response.raise_for_status()
             if response.ok:
                 data = response.json()
@@ -75,12 +79,14 @@ class BugcrowdAPI:
         # Request programs
         response_programs = self.session.get(
             url=f"{self.bugcrowd_api_url}/programs",
+            timeout=settings.REQUESTS_TIMEOUT,
         )
         response_programs.raise_for_status()
 
         # Request submissions to validate the org token
         response_subs = self.session.get(
             url=f"{self.bugcrowd_api_url}/submissions",
+            timeout=settings.REQUESTS_TIMEOUT,
         )
         response_subs.raise_for_status()
         if response_programs.ok and response_subs.ok:
@@ -95,6 +101,7 @@ class BugcrowdAPI:
             # Request targets to validate the org token
             response_targets = self.session.get(
                 url=f"{self.bugcrowd_api_url}/targets",
+                timeout=settings.REQUESTS_TIMEOUT,
             )
             response_targets.raise_for_status()
             if response_targets.ok:
