@@ -1,6 +1,7 @@
 import logging
 from datetime import UTC, datetime
 from os import path
+from pathlib import Path
 
 from dateutil.tz import tzlocal, tzoffset
 
@@ -255,7 +256,7 @@ class TestDependencyCheckParser(DojoTestCase):
 
     def test_parse_java_6_5_3(self):
         """Test with version 6.5.3"""
-        with open(path.join(path.dirname(__file__), "../scans/dependency_check/version-6.5.3.xml"), encoding="utf-8") as test_file:
+        with open(path.join(Path(__file__).parent, "../scans/dependency_check/version-6.5.3.xml"), encoding="utf-8") as test_file:
             parser = DependencyCheckParser()
             findings = parser.get_findings(test_file, Test())
             items = findings

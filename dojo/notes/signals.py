@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def delete_note_history(note):
-    logging.debug(f"Deleting history for note {note.id}")
+    logger.debug(f"Deleting history for note {note.id}")
     note.history.all().delete()
 
 

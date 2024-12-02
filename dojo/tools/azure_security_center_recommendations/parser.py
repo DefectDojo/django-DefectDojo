@@ -35,7 +35,7 @@ class AzureSecurityCenterRecommendationsParser:
         findings = []
 
         for row in reader:
-            if "unhealthy" == row.get("state").lower():
+            if row.get("state").lower() == "unhealthy":
                 subscription_id = row.get("subscriptionId")
                 subscription_name = row.get("subscriptionName")
                 resource_group = row.get("resourceGroup")

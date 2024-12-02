@@ -80,10 +80,7 @@ class KubescapeParser:
                         else:
                             severity = self.severity_mapper(controlSummary.get("scoreFactor", 0))
                             # Define mitigation if available
-                            if "mitigation" in controlSummary:
-                                mitigation = controlSummary["mitigation"]
-                            else:
-                                mitigation = ""
+                            mitigation = controlSummary.get("mitigation", "")
 
                         description = "**Summary:** " + f"The ressource '{resourceid}' has failed the control '{control_name}'." + "\n"
                         if controlSummary is not None and "description" in controlSummary:

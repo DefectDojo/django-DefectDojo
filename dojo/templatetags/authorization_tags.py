@@ -21,10 +21,7 @@ def has_global_permission(permission):
 
 @register.filter
 def has_configuration_permission(permission, request):
-    if request is None:
-        user = crum.get_current_user()
-    else:
-        user = crum.get_current_user() or request.user
+    user = crum.get_current_user() if request is None else crum.get_current_user() or request.user
     return configuration_permission(user, permission)
 
 
@@ -36,10 +33,7 @@ def get_user_permissions(user):
 @register.filter
 def user_has_configuration_permission_without_group(user, codename):
     permissions = get_user_permissions(user)
-    for permission in permissions:
-        if permission.codename == codename:
-            return True
-    return False
+    return any(permission.codename == codename for permission in permissions)
 
 
 @cache_for_request
@@ -49,10 +43,7 @@ def get_group_permissions(group):
 
 @register.filter
 def group_has_configuration_permission(group, codename):
-    for permission in get_group_permissions(group):
-        if permission.codename == codename:
-            return True
-    return False
+    return any(permission.codename == codename for permission in get_group_permissions(group))
 
 
 @register.simple_tag

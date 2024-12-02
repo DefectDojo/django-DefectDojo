@@ -185,10 +185,7 @@ class CrashtestSecurityXmlParser:
             title = re.sub(r" \([0-9]*\)$", "", title)
 
             # Attache CVEs
-            if "CVE" in title:
-                vulnerability_id = re.findall(r"CVE-\d{4}-\d{4,10}", title)[0]
-            else:
-                vulnerability_id = None
+            vulnerability_id = re.findall("CVE-\\d{4}-\\d{4,10}", title)[0] if "CVE" in title else None
             description = failure.get("message")
             severity = failure.get("type").capitalize()
 
