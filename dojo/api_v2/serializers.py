@@ -384,6 +384,15 @@ class RequestResponseSerializerField(serializers.ListSerializer):
         return value
 
 
+class BurpRawRequestResponseMultiSerializer(serializers.Serializer):
+    finding = serializers.PrimaryKeyRelatedField(
+        queryset=Finding.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
+
+
 class BurpRawRequestResponseSerializer(serializers.Serializer):
     req_resp = RequestResponseSerializerField(required=True)
 

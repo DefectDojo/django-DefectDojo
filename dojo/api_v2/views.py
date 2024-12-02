@@ -2682,6 +2682,21 @@ class NoteTypeViewSet(
         return Note_Type.objects.all().order_by("id")
 
 
+class BurpRawRequestResponseViewSet(
+    mixins.UpdateModelMixin,
+    viewsets.ReadOnlyModelViewSet,
+):
+    serializer_class = serializers.BurpRawRequestResponseMultiSerializer
+    queryset = BurpRawRequestResponse.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = [
+        "id",
+    ]
+
+    def get_queryset(self):
+        return BurpRawRequestResponse.objects.all().order_by("id")
+
+
 # Authorization: superuser
 class NotesViewSet(
     mixins.UpdateModelMixin,
