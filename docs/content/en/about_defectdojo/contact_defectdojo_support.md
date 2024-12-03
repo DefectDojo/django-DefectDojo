@@ -6,22 +6,25 @@ pro-feature: true
 weight: 3
 ---
 
-For DefectDojo Pro users, DefectDojo's Support team can be contacted in a variety of ways.
+DefectDojo Pro subscriptions come with full support from the DefectDojo Inc team during the initial trial period and beyond.
 
-## Contacting Support via Email
+Open Source users can receive assistance via the OWASP [Slack Channel](https://owasp.org/slack/invite), or on [GitHub](https://github.com/DefectDojo/django-DefectDojo).  See our [Community Site](https://defectdojo.com/community) for more information.
 
-Customers / Pro Users can always email our team directly at [support@defectdojo.com](mailto:support@defectdojo.com).
+# Accessing Pro Support
+### Email
 
-## Contacting Support through the DefectDojo app
+Customers / Pro Users can always email our team directly at [support@defectdojo.com](mailto:support@defectdojo.com) for assistance.
+
+### Within DefectDojo
 
 You can contact us through the DefectDojo App:
 
-* by opening **Cloud Manager \> Contact Support** from the left sidebar**,**
+* by opening **Cloud Manager \> Contact Support** from the left sidebar
 * or through **{your\-instance}.defectdojo.com/cloud\_portal/support**.
 
 ![image](images/contact_defectdojo_support.png)
 
-## Contact Support through the DefectDojo Cloud Portal
+### Through the Cloud Portal
 
 You can also contact our support team through your Cloud Portal:
 
