@@ -33,14 +33,6 @@ Once on the **Edit Subscription** page, enter the IP Address, Mask, and Label fo
 ![image](images/Using_the_Cloud_Manager_2.png)
 
 
-
-Firewall rules can also be updated from within your DefectDojo cloud instance. For more information on modifying firewall rules from within your instance, detailed documentation can be found here:
-
-
-*[https://documentation.defectdojo.com/proprietary\_plugins/01\_plus/cloud\_portal/\#firewall\-rules](https://documentation.defectdojo.com/proprietary_plugins/01_plus/cloud_portal/#firewall-rules)*
-
-
-
 # **Resources**
 
 
