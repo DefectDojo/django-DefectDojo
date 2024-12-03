@@ -84,7 +84,7 @@ This table shows each Import or Reimport as a single line with a **Timestamp**, 
 
 
 
-![image](images/Avoiding_Duplicates:_Reimport_Recurring_Tests.png)
+![image](images/Avoiding_Duplicates_Reimport_Recurring_Tests.png)
 ## Actions
 
 

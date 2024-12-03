@@ -15,7 +15,7 @@ New Dashboard tiles can be added by opening the **\+** (plus icon)menu on the Da
 
 
 
-![image](images/How-To:_Add,_Edit_or_Delete_Dashboard_Tiles.png)
+![image](images/How-To_Add,_Edit_or_Delete_Dashboard_Tiles.png)
 
 Select the kind of Tile you want to add, which will then bring you to the Add Dashboard Tile form.
 
@@ -37,12 +37,12 @@ From here you can set your Dashboard Tile’s options:
 
 
 
-![image](images/How-To:_Add,_Edit_or_Delete_Dashboard_Tiles_2.png)
+![image](images/How-To_Add,_Edit_or_Delete_Dashboard_Tiles_2.png)
 * Set the **Header** textfor your tile **(3\)**
 * Set the **Footer** textfor your tile
 * Set the **Color** of your icon
 
-![image](images/How-To:_Add,_Edit_or_Delete_Dashboard_Tiles_3.png)
+![image](images/How-To_Add,_Edit_or_Delete_Dashboard_Tiles_3.png)
 
 ## Dynamic Color Tile
 
