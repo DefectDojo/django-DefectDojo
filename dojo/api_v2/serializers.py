@@ -45,6 +45,7 @@ from dojo.models import (
     Answer,
     Answered_Survey,
     App_Analysis,
+    BurpRawRequestResponse,
     Check_List,
     ChoiceAnswer,
     ChoiceQuestion,
@@ -384,17 +385,23 @@ class RequestResponseSerializerField(serializers.ListSerializer):
         return value
 
 
-class BurpRawRequestResponseMultiSerializer(serializers.Serializer):
-    finding = serializers.PrimaryKeyRelatedField(
-        queryset=Finding.objects.all(),
-        required=False,
-        default=None,
-        allow_null=True,
-    )
-
-
 class BurpRawRequestResponseSerializer(serializers.Serializer):
     req_resp = RequestResponseSerializerField(required=True)
+
+
+class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
+    stringrequest = serializers.SerializerMethodField()
+    stringresponse = serializers.SerializerMethodField()
+
+    def get_stringrequest(self, obj):
+        return obj.string_request
+
+    def get_stringresponse(self, obj):
+        return obj.string_response
+
+    class Meta:
+        model = BurpRawRequestResponse
+        fields = "__all__"
 
 
 class MetaSerializer(serializers.ModelSerializer):

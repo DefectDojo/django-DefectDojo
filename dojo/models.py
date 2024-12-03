@@ -4,6 +4,7 @@ import hashlib
 import logging
 import os
 import re
+from typing import Optional
 import warnings
 from datetime import datetime
 from pathlib import Path
@@ -3618,6 +3619,14 @@ class BurpRawRequestResponse(models.Model):
     finding = models.ForeignKey(Finding, blank=True, null=True, on_delete=models.CASCADE)
     burpRequestBase64 = models.BinaryField()
     burpResponseBase64 = models.BinaryField()
+
+    @property
+    def string_response(self):
+        return self.get_response()
+
+    @property
+    def string_request(self):
+        return self.get_request()
 
     def get_request(self):
         return str(base64.b64decode(self.burpRequestBase64), errors="ignore")
