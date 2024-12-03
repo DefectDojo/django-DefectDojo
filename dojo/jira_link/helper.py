@@ -1428,6 +1428,13 @@ def add_simple_jira_comment(jira_instance, jira_issue, comment):
         return False
 
 
+def jira_already_linked(finding, jira_issue_key, jira_id) -> Finding | None:
+    jira_issues = JIRA_Issue.objects.filter(jira_id=jira_id, jira_key=jira_issue_key).exclude(engagement__isnull=False)
+    jira_issues = jira_issues.exclude(finding=finding)
+
+    return jira_issues.first()
+
+
 def finding_link_jira(request, finding, new_jira_issue_key):
     logger.debug("linking existing jira issue %s for finding %i", new_jira_issue_key, finding.id)
 
