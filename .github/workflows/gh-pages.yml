@@ -42,7 +42,7 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d # v4.0.0
-        # uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0 - use this after https://github.com/DefectDojo/django-DefectDojo/pull/11329
+        # uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0 - TODO: use this after https://github.com/DefectDojo/django-DefectDojo/pull/11329
       
       - name: Install dependencies
         run: cd docs && npm ci
