@@ -2705,13 +2705,9 @@ class BurpRawRequestResponseViewSet(
     @action(methods=["get"], detail=False, serializer_class=serializers.BurpRawRequestResponseMultiSerializer,
             filter_backends=[], pagination_class=None, url_path=r"finding/(?P<finding_id>\d+)")
     def finding(self, request, pk=None, finding_id=None):
-        # Safely get the engagement
         finding = get_object_or_404(Finding.objects, pk=finding_id)
-        # Link the engagement
-        if finding:
-            reqresp = finding.get_valid_request_response_pairs()
-        else:
-            reqresp = BurpRawRequestResponse.objects.all()
+
+        reqresp = finding.get_valid_request_response_pairs() if finding else BurpRawRequestResponse.objects.all()
 
         # Send a favorable response
         serialized_request_response = serializers.BurpRawRequestResponseMultiSerializer(reqresp, many=True)
