@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.urls import reverse
+from dojo.notifications.helper import create_notification
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm
@@ -27,13 +28,16 @@ def finding_exclusion(request):
 
 
 def create_finding_exclusion(request):
-    form = CreateFindingExclusionForm()
+    default_unique_id = request.GET.get('unique_id', '')
+    
+    form = CreateFindingExclusionForm(initial={'unique_id_from_tool': default_unique_id})
     finding_exclusion = None
 
     if request.method == "POST":
         form = CreateFindingExclusionForm(request.POST)
         if form.is_valid():
-            form.save()
+            exclusion = form.save(commit=False)
+            exclusion.created_by = request.user
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -82,9 +86,19 @@ def show_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
         'discussion_form': discussion_form,
     })
     
+    
 def add_finding_exclusion_discussion(request: HttpRequest, fxid: str) -> HttpResponse:
-    print(fxid)
+    """Add a discussion for an finding exclusion
+
+    Args:
+        request (HttpRequest): Http request object
+        fxid (str): Finding exclusion ID
+
+    Returns:
+        HttpResponse: Http response object via Django template
+    """
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+    
     
     if request.method == 'POST':
         form = FindingExclusionDiscussionForm(request.POST)
@@ -96,3 +110,22 @@ def add_finding_exclusion_discussion(request: HttpRequest, fxid: str) -> HttpRes
             return redirect('finding_exclusion', fxid=fxid)
     
     return redirect('finding_exclusion', fxid=fxid)
+
+
+def review_finding_exclusion_request(request: HttpRequest, fxid: str):
+    """_summary_
+
+    Args:
+        request (HttpRequest): _description_
+        fxid (str): _description_
+    """
+    if request.method == 'POST':
+        finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+        finding_exclusion.status = "Reviewed"
+        finding_exclusion.save()
+        
+        create_notification(event="stale_engagement",
+                            title="",
+                            description="",
+                            url=reverse("finding_exclusion", fxid=finding_exclusion.pk),
+                            recipients=[finding_exclusion.created_by])

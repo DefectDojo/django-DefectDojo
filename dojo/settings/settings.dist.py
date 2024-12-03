@@ -1449,6 +1449,15 @@ CELERY_BEAT_SCHEDULE = {
             month_of_year=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[3],
             day_of_week=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[4]),
         },
+    "check_finding_priorization": {
+        "task": "dojo.engine_tools.helpers.check_priorization",
+        "schedule": crontab(
+            month_of_year='1,4,7,10',
+            day_of_month=1,
+            hour=0,
+            minute=0
+        ),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),

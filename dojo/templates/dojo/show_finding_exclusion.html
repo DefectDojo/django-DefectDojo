@@ -122,6 +122,11 @@
                                     <i class="fa-solid fa-circle-exclamation"></i> Accept Finding Exclusion
                                 </a>
                             </li>
+                            <li role="presentation">
+                                <a rel="noopener noreferrer" href="">
+                                    <i class="fa-solid fa-circle-check"></i> Mark as Reviewed
+                                </a>
+                            </li>
                         </ul>
                         
                         
@@ -135,15 +140,27 @@
                         <th>ID</th>
                         <th>Vulnerability unique ID</th>
                         <th>Type</th>
+                        <th>Status</th>
                         <th>Created by</th>
+                        <th>Created at</th>
                     {% endblock header_head %}
                 </tr>
                 <tr>
                     {% block header_body %}
                         <td>{{ finding_exclusion.uuid }}</td>
                         <td>{{ finding_exclusion.unique_id_from_tool }}</td>
-                        <td>{{ finding_exclusion.type }}</td>    
-                        <td>{{ finding_exclusion.created_by }}</td>             
+                        <td>{{ finding_exclusion.type }}</td>
+                        {% if finding_exclusion.status == "Pending"%}
+                                <td><span style="background-color: #1B30DE;" class="pass_fail Pass">{{finding_exclusion.status}}</span></td>
+                            {% elif finding_exclusion.status == "Accepted"%}
+                                <td><span style="background-color: #096C11;" class="pass_fail Pass">{{finding_exclusion.status}}</span></td>
+                            {% elif finding_exclusion.status == "Rejected"%}
+                                <td><span style="background-color: #b97a0c;" class="pass_fail Pass">{{finding_exclusion.status}}</span></td>
+                        {%else%}
+                            <td>{{finding_exclusion.status}}</td>
+                        {%endif%}
+                        <td>{{ finding_exclusion.created_by }}</td>
+                        <td>{{ finding_exclusion.create_date|date:"d M Y H:i" }}</td>            
                     {% endblock header_body %}
                 </tr>
             </table>

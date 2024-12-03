@@ -11,6 +11,7 @@ class FindingExclusion(models.Model):
                     ("black_list", "black_list")]
     STATUS_CHOICES = [("Accepted", "Accepted"),
                       ("Pending", "Pending"),
+                      ("Reviewed", "Reviewed"),
                       ("Rejected", "Rejected")]
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True)
     type = models.CharField(max_length=12, choices=TYPE_CHOICES)
