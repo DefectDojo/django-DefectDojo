@@ -15,7 +15,7 @@ If you have not already requested an additional Cloud instance, please contact [
 ## Step 1: Open the New Subscription process
 
 
-You can start this process from the following link: <https://cloud.defectdojo.com/accounts/onboarding/>, or by clicking 🛒 **New Subscription** from the Cloud Manager page (cloud.defectdojo.com).
+You can start this process from the following link: <https://cloud.defectdojo.com/accounts/onboarding/step_1>, or by clicking 🛒 **New Subscription** from the Cloud Manager page (cloud.defectdojo.com).
 
 
 
