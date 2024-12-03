@@ -7,7 +7,7 @@ Superusers can choose which Metrics Charts are displayed on the Dashboard. To do
 
 
 
-![image](images/How-To:_Edit_Dashboard_Configuration.png)
+![image](images/How-To_Edit_Dashboard_Configuration.png)
 This will open the **Dashboard Configuration Settings** window.
 
 
@@ -16,7 +16,7 @@ This will open the **Dashboard Configuration Settings** window.
 ## Dashboard Configuration Options
 
 
-![image](images/How-To:_Edit_Dashboard_Configuration_2.png)
+![image](images/How-To_Edit_Dashboard_Configuration_2.png)
 * **Display Graphs** determines whether or not the **Historical Finding Severity** and **Reported Finding Severity** charts are visible.
 * **Display Surveys determines whether or not the Unassigned Answered Engagement Questionnaires table is visible.**
 * **Display Data Tables determines whether or not the Top 10 / Bottom 10 Graded Products tables are visible.**
@@ -31,7 +31,7 @@ If you would like to reset your Dashboard to a default state, you can do so by s
 
 
 
-![image](images/How-To:_Edit_Dashboard_Configuration_3.png)
+![image](images/How-To_Edit_Dashboard_Configuration_3.png)
 
 
 

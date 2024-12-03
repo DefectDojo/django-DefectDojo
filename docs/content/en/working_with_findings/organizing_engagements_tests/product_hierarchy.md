@@ -22,7 +22,7 @@ The first category of data you'll need to set up in DefectDojo is a Product Type
 * by development team
 * by security team
 
-![image](images/Product_Hierarchy:_Overview.png)
+![image](images/Product_Hierarchy_Overview.png)
 Product Types can have Role\-Based Access Control rules applied, which limit team members' ability to view and interact with their data (including any underlying Products with Engagement, Test and Finding data). For more information on user roles, see our **Introduction To Roles** article.
 
 
@@ -46,7 +46,7 @@ A **Product** in DefectDojo is intended to represent any project, program, or pr
 
 
 
-![image](images/Product_Hierarchy:_Overview_2.png)
+![image](images/Product_Hierarchy_Overview_2.png)
 
 
 * a unique **Name**

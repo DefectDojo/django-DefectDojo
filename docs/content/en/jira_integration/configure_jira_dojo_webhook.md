@@ -15,7 +15,7 @@ Your Jira Webhook is located on the System Settings form under **Jira Integratio
 
 
 
-![image](images/Configuring_the_Jira_<>_DefectDojo_Webhook.png)
+![image](images/Configuring_the_Jira_DefectDojo_Webhook.png)
 
 # Configuring Jira to send updates to your Webhook
 
