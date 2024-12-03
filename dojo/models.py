@@ -4,7 +4,6 @@ import hashlib
 import logging
 import os
 import re
-from typing import Optional
 import warnings
 from datetime import datetime
 from pathlib import Path

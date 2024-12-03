@@ -2699,13 +2699,8 @@ class BurpRawRequestResponseViewSet(
         return results.order_by("id")
 
     @extend_schema(
-        request=OpenApiTypes.NONE,
-        parameters=[
-            OpenApiParameter(
-                "finding_id", OpenApiTypes.INT, OpenApiParameter.PATH,
-            ),
-        ],
         responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseMultiSerializer(many=True)},
+        methods=["GET"],
     )
     @action(methods=["get"], detail=False, serializer_class=serializers.BurpRawRequestResponseMultiSerializer,
             filter_backends=[], pagination_class=None, url_path=r"finding/(?P<finding_id>\d+)")

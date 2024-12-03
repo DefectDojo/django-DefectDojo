@@ -392,12 +392,41 @@ class BurpRawRequestResponseSerializer(serializers.Serializer):
 class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
     stringrequest = serializers.SerializerMethodField()
     stringresponse = serializers.SerializerMethodField()
+    burpRequestBase64 = serializers.CharField(allow_null=True)
+    burpResponseBase64 = serializers.CharField(allow_null=True)
 
     def get_stringrequest(self, obj):
         return obj.string_request
 
     def get_stringresponse(self, obj):
         return obj.string_response
+
+    def create(self, validated_data):
+        b64request = validated_data.get("burpRequestBase64", None)
+        b64response = validated_data.get("burpResponseBase64", None)
+        finding = validated_data.get("finding", None)
+
+        b64request_response = None
+        if finding and b64request and b64response:
+            b64request_response = BurpRawRequestResponse.objects.create(finding=finding,
+                                                                        burpRequestBase64=b64request.encode("utf-8"),
+                                                                        burpResponseBase64=b64response.encode("utf-8"))
+
+        return b64request_response
+
+    def update(self, instance, validated_data):
+        b64request = validated_data.get("burpRequestBase64", None)
+        b64response = validated_data.get("burpResponseBase64", None)
+        instance.finding = validated_data.get("finding", instance.finding)
+
+        if b64request:
+            instance.burpRequestBase64 = b64request.encode("utf-8")
+
+        if b64response:
+            instance.burpResponseBase64 = b64response.encode("utf-8")
+
+        instance.save()
+        return instance
 
     class Meta:
         model = BurpRawRequestResponse
