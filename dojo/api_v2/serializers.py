@@ -395,10 +395,10 @@ class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
     burpRequestBase64 = serializers.CharField(allow_null=True)
     burpResponseBase64 = serializers.CharField(allow_null=True)
 
-    def get_stringrequest(self, obj):
+    def get_stringrequest(self, obj) -> str:
         return obj.string_request
 
-    def get_stringresponse(self, obj):
+    def get_stringresponse(self, obj) -> str:
         return obj.string_response
 
     def create(self, validated_data):
