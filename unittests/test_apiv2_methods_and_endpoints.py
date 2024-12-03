@@ -9,7 +9,6 @@ from dojo.models import (
     Benchmark_Product_Summary,
     Benchmark_Requirement,
     Benchmark_Type,
-    BurpRawRequestResponse,
     Choice,
     Contact,
     FileAccessToken,
