@@ -777,6 +777,8 @@ def vulnerability_url(vulnerability_id):
 
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
+            if key == "GLSA":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
             if key in ["AVD", "KHV", "C-"]:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if "&&" in settings.VULNERABILITY_URLS[key]:
