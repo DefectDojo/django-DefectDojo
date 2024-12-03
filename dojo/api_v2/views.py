@@ -2688,6 +2688,7 @@ class BurpRawRequestResponseViewSet(
     serializer_class = serializers.BurpRawRequestResponseMultiSerializer
     queryset = BurpRawRequestResponse.objects.none()
     filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["finding"]
 
     def get_queryset(self):
         results = BurpRawRequestResponse.objects.all()
