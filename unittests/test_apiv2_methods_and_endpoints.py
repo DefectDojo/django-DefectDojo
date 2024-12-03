@@ -92,7 +92,6 @@ class ApiEndpoints(DojoTestCase):
             Product_Line,
             Report_Type,
             CWE,
-            BurpRawRequestResponse,
             FileAccessToken,
             UserAnnouncement,
             BannerConf,
