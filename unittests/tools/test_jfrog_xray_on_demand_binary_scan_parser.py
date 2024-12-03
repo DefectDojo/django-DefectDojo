@@ -16,7 +16,7 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
         testfile.close()
         self.assertEqual(1, len(findings))
         item: Finding = findings[0]
-        self.assertEqual("gav://test", item.component_name)
+        self.assertEqual("gav_//test", item.component_name)
         self.assertEqual("CVE-2014-0114", item.unsaved_vulnerability_ids[0])
         self.assertEqual("High", item.severity)
 
@@ -31,15 +31,15 @@ class TestJFrogXrayOnDemandBinaryScanParser(DojoTestCase):
         with self.subTest(""):
             self.assertEqual(("", ""), get_component_name_version(""))
         with self.subTest("gav://org.yaml:snakeyaml:1.16"):
-            self.assertEqual(("snakeyaml", "1.16"), get_component_name_version("gav://org.yaml:snakeyaml:1.16"))
+            self.assertEqual(("org.yaml_snakeyaml", "1.16"), get_component_name_version("gav://org.yaml:snakeyaml:1.16"))
         with self.subTest("npm://desopmo:1.33.7"):
             self.assertEqual(("desopmo", "1.33.7"), get_component_name_version("npm://desopmo:1.33.7"))
         with self.subTest("pypi://django:4.1.4"):
             self.assertEqual(("django", "4.1.4"), get_component_name_version("pypi://django:4.1.4"))
         with self.subTest("alpine://3.18:libcrypto3:3.1.1-r1"):
-            self.assertEqual(("libcrypto3", "3.1.1-r1"), get_component_name_version("alpine://3.18:libcrypto3:3.1.1-r1"))
+            self.assertEqual(("3.18_libcrypto3", "3.1.1-r1"), get_component_name_version("alpine://3.18:libcrypto3:3.1.1-r1"))
         with self.subTest("npm://desopmo"):
-            self.assertEqual(("npm://desopmo", ""), get_component_name_version("npm://desopmo"))
+            self.assertEqual(("npm_//desopmo", ""), get_component_name_version("npm://desopmo"))
 
     def test_clean_title(self):
         with self.subTest(""):
