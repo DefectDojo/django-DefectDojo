@@ -2714,6 +2714,37 @@ class BurpRawRequestResponseViewSet(
         serialized_request_response = serializers.BurpRawRequestResponseMultiSerializer(reqresp, many=True)
         return Response(serialized_request_response.data)
 
+    def partial_update(self, request, pk=None):
+        data = {}
+        finding = request.data.get("finding", None)
+        b64request = request.data.get("burpRequestBase64", None)
+        b64response = request.data.get("burpResponseBase64", None)
+
+        burpRawResponseRequestObj = BurpRawRequestResponse.objects.filter(id=pk).first()
+
+        if finding is None:
+            finding = burpRawResponseRequestObj.finding.id
+        if not b64request:
+            b64request = burpRawResponseRequestObj.burpRequestBase64.decode("utf-8")
+        if not b64response:
+            b64response = burpRawResponseRequestObj.burpResponseBase64.decode("utf-8")
+
+        data["finding"] = finding
+        data["burpRequestBase64"] = b64request
+        data["burpResponseBase64"] = b64response
+
+        responseRequestSerialized = serializers.BurpRawRequestResponseMultiSerializer(data=data)
+        if responseRequestSerialized.is_valid():
+            burpRawResponseRequestObj.finding = Finding.objects.filter(id=finding).first()
+            burpRawResponseRequestObj.burpRequestBase64 = b64request.encode("utf-8")
+            burpRawResponseRequestObj.burpResponseBase64 = b64response.encode("utf-8")
+            burpRawResponseRequestObj.save()
+            data["stringrequest"] = str(base64.b64decode(b64request))
+            data["stringresponse"] = str(base64.b64decode(b64response))
+            return Response(data)
+
+        return Response(status.HTTP_400_BAD_REQUEST, "Data is not valid")
+
 
 # Authorization: superuser
 class NotesViewSet(

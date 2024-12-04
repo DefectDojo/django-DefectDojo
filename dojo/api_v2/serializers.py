@@ -1,3 +1,4 @@
+import base64
 import collections
 import json
 import logging
@@ -390,43 +391,61 @@ class BurpRawRequestResponseSerializer(serializers.Serializer):
 
 
 class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
-    stringrequest = serializers.SerializerMethodField()
-    stringresponse = serializers.SerializerMethodField()
-    burpRequestBase64 = serializers.CharField(allow_null=True)
-    burpResponseBase64 = serializers.CharField(allow_null=True)
+    stringrequest = serializers.SerializerMethodField(allow_null=True, required=False)
+    stringresponse = serializers.SerializerMethodField(allow_null=True, required=False)
+    burpRequestBase64 = serializers.CharField()
+    burpResponseBase64 = serializers.CharField()
 
     def get_stringrequest(self, obj) -> str:
-        return obj.string_request
+        result = ""
+        if isinstance(obj, dict):
+            result = obj.get("string_request", "")
+        elif obj.string_request:
+            result = obj.string_request
+
+        return result
 
     def get_stringresponse(self, obj) -> str:
-        return obj.string_response
+        result = ""
+        if isinstance(obj, dict):
+            result = obj.get("string_response", "")
+        elif obj.string_response:
+            result = obj.string_response
 
-    def create(self, validated_data):
-        b64request = validated_data.get("burpRequestBase64", None)
-        b64response = validated_data.get("burpResponseBase64", None)
-        finding = validated_data.get("finding", None)
+        return result
 
-        b64request_response = None
+    def validate(self, data):
+        b64request = data.get("burpRequestBase64", None)
+        b64response = data.get("burpResponseBase64", None)
+        finding = data.get("finding", None)
+
+        if self.instance:
+            burpRawResponseRequestObj = BurpRawRequestResponse.objects.get(id=self.instance.id)
+
+            if finding is None:
+                finding = burpRawResponseRequestObj.finding
+            if not b64request:
+                b64request = burpRawResponseRequestObj.burpRequestBase64
+
+            if not b64response:
+                b64response = burpRawResponseRequestObj.burpResponseBase64
+
+        else:
+            b64request = b64request.encode("utf-8")
+            b64response = b64response.encode("utf-8")
+
         if finding and b64request and b64response:
-            b64request_response = BurpRawRequestResponse.objects.create(finding=finding,
-                                                                        burpRequestBase64=b64request.encode("utf-8"),
-                                                                        burpResponseBase64=b64response.encode("utf-8"))
-
-        return b64request_response
-
-    def update(self, instance, validated_data):
-        b64request = validated_data.get("burpRequestBase64", None)
-        b64response = validated_data.get("burpResponseBase64", None)
-        instance.finding = validated_data.get("finding", instance.finding)
-
-        if b64request:
-            instance.burpRequestBase64 = b64request.encode("utf-8")
-
-        if b64response:
-            instance.burpResponseBase64 = b64response.encode("utf-8")
-
-        instance.save()
-        return instance
+            BurpRawRequestResponse(finding=finding,
+                                   burpRequestBase64=b64request,
+                                   burpResponseBase64=b64response).clean()
+            data["burpRequestBase64"] = b64request
+            data["burpResponseBase64"] = b64response
+            data["stringresponse"] = str(base64.b64decode(b64response))
+            data["stringrequest"] = str(base64.b64decode(b64request))
+        else:
+            msg = "Failed to validate data. finding, burpRequestBase64, and burpResponseBase64 cannot be null"
+            raise ValidationError(msg)
+        return data
 
     class Meta:
         model = BurpRawRequestResponse
