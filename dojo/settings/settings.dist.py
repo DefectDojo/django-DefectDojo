@@ -1456,7 +1456,7 @@ CELERY_BEAT_SCHEDULE = {
             day_of_month=1,
             hour=0,
             minute=0
-        ),
+        )
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',

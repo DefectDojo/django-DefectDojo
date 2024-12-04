@@ -11,7 +11,7 @@ from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusion
 
 
 # @user_is_configuration_authorized("dojo.view_engagement_survey")
-def finding_exclusion(request):
+def finding_exclusions(request):
     finding_exclusions = FindingExclusion.objects.all()
     finding_exclusions = FindingExclusionFilter(request.GET,
                                                 queryset=finding_exclusions)
@@ -43,7 +43,7 @@ def create_finding_exclusion(request):
                 messages.SUCCESS,
                 "Exclusion successfully created.",
                 extra_tags="alert-success")
-            return HttpResponseRedirect(reverse("finding_exclusion"))
+            return HttpResponseRedirect(reverse("finding_exclusions"))
         else:
             messages.add_message(
                 request,

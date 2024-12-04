@@ -10,8 +10,8 @@ admin.autodiscover()
 
 urlpatterns = [
     re_path(r"^engine_tools/finding_exclusions$",
-            views.finding_exclusion,
-            name="finding_exclusion"),
+            views.finding_exclusions,
+            name="finding_exclusions"),
     re_path(r"^engine_tools/create_finding_exclusion$",
             views.create_finding_exclusion,
             name="create_finding_exclusion"),
