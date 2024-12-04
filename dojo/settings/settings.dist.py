@@ -1,13 +1,7 @@
 #########################################################################################################
-# It is not allowed to edit file 'settings.dist.py', for production deployemnts.                        #
+# It is not recommended to edit file 'settings.dist.py', for production deployments.                        #
 # Any customization of variables need to be done via environmental variables or in 'local_settings.py'. #
 # For more information check https://documentation.defectdojo.com/getting_started/configuration/        #
-#########################################################################################################
-
-#########################################################################################################
-# If as a developer of a new feature, you need to perform an update of file 'settings.dist.py',         #
-# after the change, calculate the checksum and store it related file by calling the following command:  #
-# $ sha256sum settings.dist.py | cut -d ' ' -f1 > .settings.dist.py.sha256sum                           #
 #########################################################################################################
 
 # Django settings for DefectDojo
