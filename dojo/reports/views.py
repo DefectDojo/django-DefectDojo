@@ -876,7 +876,7 @@ class CSVExportView(View):
                 num_endpoints = 0
                 for endpoint in finding.endpoints.all():
                     num_endpoints += 1
-                    endpoint_value += f"{str(endpoint)}; "
+                    endpoint_value += f"{endpoint}; "
                 endpoint_value = endpoint_value.removesuffix("; ")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
                     endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."
@@ -889,7 +889,7 @@ class CSVExportView(View):
                     if num_vulnerability_ids > 5:
                         vulnerability_ids_value += "..."
                         break
-                    vulnerability_ids_value += f"{str(vulnerability_id)}; "
+                    vulnerability_ids_value += f"{vulnerability_id}; "
                 if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
                     vulnerability_ids_value += finding.cve
                 vulnerability_ids_value = vulnerability_ids_value.removesuffix("; ")
@@ -902,7 +902,7 @@ class CSVExportView(View):
                     if num_tags > 5:
                         tags_value += "..."
                         break
-                    tags_value += f"{str(tag)}; "
+                    tags_value += f"{tag}; "
                 tags_value = tags_value.removesuffix("; ")
                 fields.append(tags_value)
 
@@ -1025,7 +1025,7 @@ class ExcelExportView(View):
                 num_endpoints = 0
                 for endpoint in finding.endpoints.all():
                     num_endpoints += 1
-                    endpoint_value += f"{str(endpoint)}; \n"
+                    endpoint_value += f"{endpoint}; \n"
                 endpoint_value = endpoint_value.removesuffix("; \n")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
                     endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."
@@ -1039,7 +1039,7 @@ class ExcelExportView(View):
                     if num_vulnerability_ids > 5:
                         vulnerability_ids_value += "..."
                         break
-                    vulnerability_ids_value += f"{str(vulnerability_id)}; \n"
+                    vulnerability_ids_value += f"{vulnerability_id}; \n"
                 if finding.cve and vulnerability_ids_value.find(finding.cve) < 0:
                     vulnerability_ids_value += finding.cve
                 vulnerability_ids_value = vulnerability_ids_value.removesuffix("; \n")
@@ -1048,7 +1048,7 @@ class ExcelExportView(View):
                 # tags
                 tags_value = ""
                 for tag in finding.tags.all():
-                    tags_value += f"{str(tag)}; \n"
+                    tags_value += f"{tag}; \n"
                 tags_value = tags_value.removesuffix("; \n")
                 worksheet.cell(row=row_num, column=col_num, value=tags_value)
                 col_num += 1
