@@ -391,8 +391,6 @@ class BurpRawRequestResponseSerializer(serializers.Serializer):
 
 
 class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
-    stringrequest = serializers.SerializerMethodField(allow_null=True, required=False)
-    stringresponse = serializers.SerializerMethodField(allow_null=True, required=False)
     burpRequestBase64 = serializers.CharField()
     burpResponseBase64 = serializers.CharField()
 
@@ -419,29 +417,20 @@ class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
         b64response = data.get("burpResponseBase64", None)
         finding = data.get("finding", None)
 
-        if self.instance:
-            burpRawResponseRequestObj = BurpRawRequestResponse.objects.get(id=self.instance.id)
+        if not b64request or not b64response or not finding:
+            msg = "burpRequestBase64, burpResponseBase64, and finding are required."
+            raise ValidationError(msg)
 
-            if finding is None:
-                finding = burpRawResponseRequestObj.finding
-            if not b64request:
-                b64request = burpRawResponseRequestObj.burpRequestBase64
-
-            if not b64response:
-                b64response = burpRawResponseRequestObj.burpResponseBase64
-
-        else:
-            b64request = b64request.encode("utf-8")
-            b64response = b64response.encode("utf-8")
-
+        base64.b64decode(b64request, validate=True)
+        base64.b64decode(b64response, validate=True)
+        b64request = b64request
+        b64response = b64response
+        data["burpRequestBase64"] = b64request.encode("utf-8")
+        data["burpResponseBase64"] = b64response.encode("utf-8")
         if finding and b64request and b64response:
             BurpRawRequestResponse(finding=finding,
                                    burpRequestBase64=b64request,
                                    burpResponseBase64=b64response).clean()
-            data["burpRequestBase64"] = b64request
-            data["burpResponseBase64"] = b64response
-            data["stringresponse"] = str(base64.b64decode(b64response))
-            data["stringrequest"] = str(base64.b64decode(b64request))
         else:
             msg = "Failed to validate data. finding, burpRequestBase64, and burpResponseBase64 cannot be null"
             raise ValidationError(msg)
