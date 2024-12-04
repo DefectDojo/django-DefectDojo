@@ -241,10 +241,10 @@ def get_codeFlowsDescription(codeFlows):
                 snippet = ""
 
                 if "startLine" in region:
-                    start_line = f":L{str(region.get('startLine'))}"
+                    start_line = f":L{region.get('startLine')}"
 
                 if "startColumn" in region:
-                    start_column = f":C{str(region.get('startColumn'))}"
+                    start_column = f":C{region.get('startColumn')}"
 
                 if "snippet" in region:
                     snippet = f"\t-\t{region.get('snippet').get('text')}"
