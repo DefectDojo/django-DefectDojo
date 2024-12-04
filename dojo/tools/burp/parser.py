@@ -236,7 +236,7 @@ def get_item(item_node, test):
         references = text_maker.handle(references)
 
     severity = item_node.findall("severity")[0].text
-    if "information" == severity.lower():
+    if severity.lower() == "information":
         severity = "Info"
 
     scanner_confidence = item_node.findall("confidence")[0].text

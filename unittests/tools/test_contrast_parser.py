@@ -30,7 +30,7 @@ class TestContrastParser(DojoTestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("0.0.0.0", endpoint.host)
+                self.assertEqual("0.0.0.0", endpoint.host)  # noqa: S104
                 self.assertEqual("WebGoat/login.mvc", endpoint.path)
             with self.subTest(i=11):
                 finding = findings[11]
@@ -45,11 +45,11 @@ class TestContrastParser(DojoTestCase):
                 self.assertEqual(4, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("0.0.0.0", endpoint.host)
+                self.assertEqual("0.0.0.0", endpoint.host)  # noqa: S104
                 self.assertEqual("WebGoat/services/SoapRequest", endpoint.path)
                 endpoint = finding.unsaved_endpoints[1]
                 self.assertEqual("http", endpoint.protocol)
-                self.assertEqual("0.0.0.0", endpoint.host)
+                self.assertEqual("0.0.0.0", endpoint.host)  # noqa: S104
                 self.assertEqual("WebGoat/attack", endpoint.path)
 
     def test_example2_report(self):

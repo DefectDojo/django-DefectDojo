@@ -45,8 +45,9 @@ class TrivyChecksHandler:
                 static_finding=True,
                 dynamic_finding=False,
                 service=service,
-                tags=[resource_namespace],
             )
+            if resource_namespace != "":
+                finding.tags = resource_namespace
             if check_id:
                 finding.unsaved_vulnerability_ids = [UniformTrivyVulnID().return_uniformed_vulnid(check_id)]
             findings.append(finding)

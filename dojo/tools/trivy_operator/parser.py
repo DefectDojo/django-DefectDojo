@@ -3,6 +3,7 @@
 import json
 
 from dojo.tools.trivy_operator.checks_handler import TrivyChecksHandler
+from dojo.tools.trivy_operator.clustercompliance_handler import TrivyClusterComplianceHandler
 from dojo.tools.trivy_operator.compliance_handler import TrivyComplianceHandler
 from dojo.tools.trivy_operator.secrets_handler import TrivySecretsHandler
 from dojo.tools.trivy_operator.vulnerability_handler import TrivyVulnerabilityHandler
@@ -38,6 +39,7 @@ class TrivyOperatorParser:
         return findings
 
     def output_findings(self, data, test):
+        findings = []
         if data is None:
             return []
         metadata = data.get("metadata", None)
@@ -47,10 +49,6 @@ class TrivyOperatorParser:
         if labels is None:
             return []
         report = data.get("report", None)
-        benchmark = data.get("status", None)
-        if benchmark is not None:
-            benchmarkreport = benchmark.get("detailReport", None)
-        findings = []
         if report is not None:
             vulnerabilities = report.get("vulnerabilities", None)
             if vulnerabilities is not None:
@@ -61,6 +59,13 @@ class TrivyOperatorParser:
             secrets = report.get("secrets", None)
             if secrets is not None:
                 findings += TrivySecretsHandler().handle_secrets(labels, secrets, test)
-        elif benchmarkreport is not None:
-            findings += TrivyComplianceHandler().handle_compliance(benchmarkreport, test)
+        status = data.get("status", None)
+        if status is not None:
+            benchmarkreport = status.get("detailReport", None)
+            if benchmarkreport is not None:
+                findings += TrivyComplianceHandler().handle_compliance(benchmarkreport, test)
+            clustercompliance = status.get("summaryReport", None)
+            if clustercompliance is not None:
+                if int(status.get("summary").get("failCount", 0)) > 0:
+                    findings += TrivyClusterComplianceHandler().handle_clustercompliance(controls=data.get("spec").get("compliance").get("controls"), clustercompliance=clustercompliance, test=test)
         return findings

@@ -11,7 +11,7 @@ TRIVY_SEVERITIES = {
 SECRET_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
 **Match:** {match}
-"""
+"""  # noqa: S105
 
 
 class TrivySecretsHandler:
@@ -53,7 +53,8 @@ class TrivySecretsHandler:
                 static_finding=True,
                 dynamic_finding=False,
                 service=service,
-                tags=[resource_namespace],
             )
+            if resource_namespace != "":
+                finding.tags = resource_namespace
             findings.append(finding)
         return findings

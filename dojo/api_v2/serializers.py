@@ -1,3 +1,4 @@
+import collections
 import json
 import logging
 import re
@@ -280,10 +281,10 @@ class TaggitSerializer(serializers.Serializer):
         return (to_be_tagged, validated_data)
 
 
-class RequestResponseDict(list):
+class RequestResponseDict(collections.UserList):
     def __init__(self, *args, **kwargs):
         pretty_print = kwargs.pop("pretty_print", True)
-        list.__init__(self, *args, **kwargs)
+        collections.UserList.__init__(self, *args, **kwargs)
         self.pretty_print = pretty_print
 
     def __add__(self, rhs):
@@ -368,10 +369,7 @@ class RequestResponseSerializerField(serializers.ListSerializer):
         if not isinstance(value, RequestResponseDict):
             if not isinstance(value, list):
                 # this will trigger when a queryset is found...
-                if self.order_by:
-                    burps = value.all().order_by(*self.order_by)
-                else:
-                    burps = value.all()
+                burps = value.all().order_by(*self.order_by) if self.order_by else value.all()
                 value = [
                     {
                         "request": burp.get_request(),
@@ -414,6 +412,51 @@ class MetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = DojoMeta
         fields = "__all__"
+
+
+class MetadataSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=120)
+    value = serializers.CharField(max_length=300)
+
+
+class MetaMainSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+
+    product = serializers.PrimaryKeyRelatedField(
+        queryset=Product.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
+    endpoint = serializers.PrimaryKeyRelatedField(
+        queryset=Endpoint.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
+    finding = serializers.PrimaryKeyRelatedField(
+        queryset=Finding.objects.all(),
+        required=False,
+        default=None,
+        allow_null=True,
+    )
+    metadata = MetadataSerializer(many=True)
+
+    def validate(self, data):
+        product_id = data.get("product", None)
+        endpoint_id = data.get("endpoint", None)
+        finding_id = data.get("finding", None)
+        metadata = data.get("metadata")
+
+        for item in metadata:
+            # this will only verify that one and only one of product, endpoint, or finding is passed...
+            DojoMeta(product=product_id,
+                     endpoint=endpoint_id,
+                     finding=finding_id,
+                     name=item.get("name"),
+                     value=item.get("value")).clean()
+
+        return data
 
 
 class ProductMetaSerializer(serializers.ModelSerializer):
@@ -506,10 +549,7 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def create(self, validated_data):
-        if "password" in validated_data:
-            password = validated_data.pop("password")
-        else:
-            password = None
+        password = validated_data.pop("password", None)
 
         new_configuration_permissions = None
         if (
@@ -535,10 +575,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def validate(self, data):
-        if self.instance is not None:
-            instance_is_superuser = self.instance.is_superuser
-        else:
-            instance_is_superuser = False
+        instance_is_superuser = self.instance.is_superuser if self.instance is not None else False
         data_is_superuser = data.get("is_superuser", False)
         if not self.context["request"].user.is_superuser and (
             instance_is_superuser or data_is_superuser
@@ -1171,7 +1208,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def validate(self, data):
 
-        if not self.context["request"].method == "PATCH":
+        if self.context["request"].method != "PATCH":
             if "product" not in data:
                 msg = "Product is required"
                 raise serializers.ValidationError(msg)
@@ -1286,6 +1323,11 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
         else:
             msg = "Either engagement or finding or finding_group has to be set."
             raise serializers.ValidationError(msg)
+
+        if finding:
+            if (linked_finding := jira_helper.jira_already_linked(finding, data.get("jira_key"), data.get("jira_id"))) is not None:
+                msg = "JIRA issue " + data.get("jira_key") + " already linked to " + reverse("view_finding", args=(linked_finding.id,))
+                raise serializers.ValidationError(msg)
 
         return data
 
@@ -2202,7 +2244,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         """
         context = dict(data)
         # update some vars
-        context["scan"] = data.pop("file", None)
+        context["scan"] = data.pop("file")
 
         if context.get("auto_create_context"):
             environment = Development_Environment.objects.get_or_create(name=data.get("environment", "Development"))[0]
@@ -2247,7 +2289,7 @@ class CommonImportScanSerializer(serializers.Serializer):
 
         # engagement end date was not being used at all and so target_end would also turn into None
         # in this case, do not want to change target_end unless engagement_end exists
-        eng_end_date = context.get("engagement_end_date", None)
+        eng_end_date = context.get("engagement_end_date")
         if eng_end_date:
             context["target_end"] = context.get("engagement_end_date")
 
@@ -2695,6 +2737,11 @@ class ReportGenerateSerializer(serializers.Serializer):
     finding_notes = FindingToNotesSerializer(
         many=True, allow_null=True, required=False,
     )
+
+
+class EngagementUpdateJiraEpicSerializer(serializers.Serializer):
+    epic_name = serializers.CharField(required=False, max_length=200)
+    epic_priority = serializers.CharField(required=False, allow_null=True)
 
 
 class TagSerializer(serializers.Serializer):
