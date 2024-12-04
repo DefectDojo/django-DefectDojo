@@ -31,6 +31,7 @@ from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
 from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
+    BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
     CredentialsMappingViewSet,
     CredentialsViewSet,
@@ -3046,6 +3047,32 @@ class NotificationWebhooksTest(BaseClass.BaseClassTest):
             "header_name": "Auth",
             "header_value": "token x",
         }
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class BurpRawRequestResponseTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = BurpRawRequestResponse
+        self.endpoint_path = "request_response_pairs"
+        self.viewname = "request_response_pairs"
+        self.viewset = BurpRawRequestResponseViewSet
+        self.payload = {
+            "finding": 2,
+            "burpRequestBase64": "R0VUIC9hcnRpc3QucGhwP2lkPS0xJTIwT1IlMjAxNy03JTNkMTAgSFRUUC8xLjENCkhvc3Q6IHBocC50ZXN0c3Bhcmtlci5jb20NCkFjY2VwdDogdGV4dC9odG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCxhcHBsaWNhdGlvbi94bWw7cT0wLjksaW1hZ2Uvd2VicCxpbWFnZS9hcG5nLCovKjtxPTAuOA0KQWNjZXB0LUxhbmd1YWdlOiBlbi11cyxlbjtxPTAuNQ0KQ2FjaGUtQ29udHJvbDogbm8tY2FjaGUNCkNvb2tpZTogUEhQU0VTU0lEPWU1MmEwN2YwZmU1M2MwMjk0YWUyMTFiYzQ0ODEzMzJkDQpSZWZlcmVyOiBodHRwOi8vcGhwLnRlc3RzcGFya2VyLmNvbS9wcm9jZXNzLnBocD9maWxlPUdlbmVyaWNzL2luZGV4Lm5zcA0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvNzkuMC4zOTQ1LjAgU2FmYXJpLzUzNy4zNg0KWC1TY2FubmVyOiBBY3VuZXRpeDM2MA==",
+            "burpResponseBase64": "SFRUUC8xLjEgMjAwIE9LDQpTZXQtQ29va2llOiBQSFBTRVNTSUQ9ZTUyYTA3ZjBmZTUzYzAyOTRhZTIxMWJjNDQ4MTMzMmQ7IHBhdGg9Lw0KU2VydmVyOiBBcGFjaGUvMi4yLjggKFdpbjMyKSBQSFAvNS4yLjYNCkNvbnRlbnQtTGVuZ3RoOiAzMDYxDQpYLVBvd2VyZWQtQnk6IFBIUC81LjIuNg0KUHJhZ21hOiBuby1jYWNoZQ0KRXhwaXJlczogVGh1LCAxOSBOb3YgMTk4MSAwODo1MjowMCBHTVQ8IS0tIGVuZCAjZm9vdGVyIC0tPgo8L2JvZHk+CjwvaHRtbD4K",
+        }
+
+        # This fails due to the return being a bytes object and the input being a string...
+        self.update_fields = {
+            "finding": 2,
+            "burpRequestBase64": "R0VUIC9hcnRpc3QucGhwP2lkPS0xJTIwT1IlMjAxNy03JTNkMTAgSFRUUC8xLjENCkhvc3Q6IHBocC50ZXN0c3Bhcmtlci5jb20NCkFjY2VwdDogdGV4dC9odG1sLGFwcGxpY2F0aW9uL3hodG1sK3htbCxhcHBsaWNhdGlvbi94bWw7cT0wLjksaW1hZ2Uvd2VicCxpbWFnZS9hcG5nLCovKjtxPTAuOA0KQWNjZXB0LUxhbmd1YWdlOiBlbi11cyxlbjtxPTAuNQ0KQ2FjaGUtQ29udHJvbDogbm8tY2FjaGUNCkNvb2tpZTogUEhQU0VTU0lEPWU1MmEwN2YwZmU1M2MwMjk0YWUyMTFiYzQ0ODEzMzJkDQpSZWZlcmVyOiBodHRwOi8vcGhwLnRlc3RzcGFya2VyLmNvbS9wcm9jZXNzLnBocD9maWxlPUdlbmVyaWNzL2luZGV4Lm5zcA0KVXNlci1BZ2VudDogTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgeDY0KSBBcHBsZVdlYktpdC81MzcuMzYgKEtIVE1MLCBsaWtlIEdlY2tvKSBDaHJvbWUvNzkuMC4zOTQ1LjAgU2FmYXJpLzUzNy4zNg0KWC1TY2FubmVyOiBBY3VuZXRpeDM2MA==",
+            "burpResponseBase64": "SFRUUC8xLjEgMjAwIE9LDQpTZXQtQ29va2llOiBQSFBTRVNTSUQ9ZTUyYTA3ZjBmZTUzYzAyOTRhZTIxMWJjNDQ4MTMzMmQ7IHBhdGg9Lw0KU2VydmVyOiBBcGFjaGUvMi4yLjggKFdpbjMyKSBQSFAvNS4yLjYNCkNvbnRlbnQtTGVuZ3RoOiAzMDYxDQpYLVBvd2VyZWQtQnk6IFBIUC81LjIuNg0KUHJhZ21hOiBuby1jYWNoZQ0KRXhwaXJlczogVGh1LCAxOSBOb3YgMTk4MSAwODo1MjowMCBHTVQ8IS0tIGVuZCAjZm9vdGVyIC0tPgo8L2JvZHk+CjwvaHRtbD4K",
+        }
+
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
