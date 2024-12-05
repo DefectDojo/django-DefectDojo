@@ -47,7 +47,7 @@ Please note that this login method only works for the **Cloud Manager**, an admi
 
 
 
-## **I've lost access to my MFA codes**
+## I've lost access to my MFA codes
 
 * **For the Cloud Manager:** If you lose access to your MFA codes, or Authenticator App, please contact DefectDojo Support at [support@defectdojo.com](mailto:support@defectdojo.com).
 * **For a DefectDojo Instance:** It is not currently possible to remove MFA access from an account without an MFA code. The best option in this case is to create a new DefectDojo login, and re\-grant all necessary permissions to this account.
