@@ -489,7 +489,7 @@ def get_config_risk():
 def enable_flow_accept_risk(**kwargs):
     # add rule custom if necessary
     if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
-    and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-")).exists()):
+    and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")).exists()):
         return True
     return False
 
