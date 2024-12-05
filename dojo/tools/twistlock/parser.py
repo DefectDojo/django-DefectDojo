@@ -76,38 +76,41 @@ class TwistlockCSVParser:
             title=textwrap.shorten(title, width=255, placeholder="..."),
             test=test,
             severity=convert_severity(data_severity),
-            description= self.get_description(data_description
-                                            , data_type
-                                            , data_tag
-                                            , data_cluster
-                                            , data_namespaces
-                                            , data_package_name
-                                            , data_package_license
-                                            , data_package_version
-                                            , data_package_path
-                                            , data_name
-                                            , data_cloud_id
-                                            , data_runtime
-                                            , data_cause
-                                            , data_found_in
-                                            , data_purl
-                                            , data_risk_factors
-                                            , data_hostname
-                                            , data_distro
-                                            , data_compliance_id
-                                            , data_result
-                                            , data_packages
-                                            , data_source_package
-                                            , data_published
-                                            , data_services
-                                            , data_vulnerability_link
-                                            , data_account_id
-                                            , data_discovered
-                                            ),
+            description=self.get_description(
+                data_description,
+                data_type,
+                data_tag,
+                data_cluster,
+                data_namespaces,
+                data_package_name,
+                data_package_license,
+                data_package_version,
+                data_package_path,
+                data_name,
+                data_cloud_id,
+                data_runtime,
+                data_cause,
+                data_found_in,
+                data_purl,
+                data_risk_factors,
+                data_hostname,
+                data_distro,
+                data_compliance_id,
+                data_result,
+                data_packages,
+                data_source_package,
+                data_published,
+                data_services,
+                data_vulnerability_link,
+                data_account_id,
+                data_discovered,
+            ),
             mitigation=data_fix_status,
             references=row.get("Vulnerability Link", ""),
             component_name=textwrap.shorten(
-                data_package_name, width=200, placeholder="...",
+                data_package_name,
+                width=200,
+                placeholder="...",
             ),
             component_version=data_package_version,
             false_p=False,
@@ -116,129 +119,138 @@ class TwistlockCSVParser:
             mitigated=None,
             severity_justification=f"(CVSS v3 base score: {data_cvss})",
             impact=data_severity,
-            vuln_id_from_tool= data_vulnerability_id,
-            publish_date=dateutil.parser.parse(row.get('Published')) if row.get('Published', None) else None,
+            vuln_id_from_tool=data_vulnerability_id,
+            publish_date=(
+                dateutil.parser.parse(row.get("Published"))
+                if row.get("Published", None)
+                else None
+            ),
         )
-        finding.unsaved_tags = [row.get('Custom Tag') if row.get('Custom Tag', None) else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
+        finding.unsaved_tags = [
+            (
+                row.get("Custom Tag")
+                if row.get("Custom Tag", None)
+                else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")
+            )
+        ]
         finding.description = finding.description.strip()
         if data_vulnerability_id:
             finding.unsaved_vulnerability_ids = [data_vulnerability_id]
 
         return finding
 
-    def get_description(self,
-                        data_description,
-                        data_type,
-                        data_tag,
-                        data_cluster,
-                        data_namespaces,
-                        data_package_name,
-                        data_package_license,
-                        data_package_version,
-                        data_package_path,
-                        data_name,
-                        data_cloud_id,
-                        data_runtime,
-                        data_cause,
-                        data_found_in,
-                        data_purl,
-                        data_risk_factors,
-                        data_hostname,
-                        data_distro,
-                        data_compliance_id,
-                        data_result,
-                        data_packages,
-                        data_source_package,
-                        data_published,
-                        data_services,
-                        data_vulnerability_link,
-                        data_account_id,
-                        data_discovered,
-                        ):
-        return "<p><strong>Description:</strong> " \
-                + data_description \
-                + "</p><p><strong>Type:</strong> " \
-                + str(data_type) \
-                + "</p><p><strong>Tag:</strong> " \
-                + str(data_tag) \
-                + "</p><p><strong>Cluster:</strong> " \
-                + str(data_cluster) \
-                + "</p><p><strong>Namespaces:</strong> " \
-                + str(data_namespaces) \
-                + "</p><p><strong>Vulnerable Package:</strong> " \
-                + str(data_package_name) \
-                + "</p><p><strong>Vulnerable Package License:</strong> " \
-                + str(data_package_license) \
-                + "</p><p><strong>Current Version:</strong> " \
-                + str(data_package_version) \
-                + "</p><p><strong>Package path:</strong> " \
-                + str(data_package_path) \
-                + "</p>" \
-                + "</p><p><strong>Name:</strong> " \
-                + str(data_name) \
-                + "</p>" \
-                + "</p><p><strong>Cloud Id:</strong> " \
-                + str(data_cloud_id) \
-                + "</p>" \
-                + "</p><p><strong>Runtime:</strong> " \
-                + str(data_runtime) \
-                + "</p>" \
-                + "</p><p><strong>Risk Factors:</strong> " \
-                + str(data_risk_factors) \
-                + "</p>" \
-                + "</p><p><strong>Cause:</strong> " \
-                + str(data_cause) \
-                + "</p>" \
-                + "</p><p><strong>Found In:</strong> " \
-                + str(data_found_in) \
-                + "</p>" \
-                + "</p><p><strong>PURL:</strong> " \
-                + str(data_purl) \
-                + "</p>" \
-                + "</p><p><strong>Hostname:</strong> " \
-                + str(data_hostname) \
-                + "</p>" \
-                + "</p><p><strong>Distro:</strong> " \
-                + str(data_distro) \
-                + "</p>" \
-                + "</p><p><strong>Compliance ID:</strong> " \
-                + str(data_compliance_id) \
-                + "</p>" \
-                + "</p><p><strong>Result:</strong> " \
-                + str(data_result) \
-                + "</p>" \
-                + "</p><p><strong>Data Packages:</strong> " \
-                + str(data_packages) \
-                + "</p>" \
-                + "</p><p><strong>Data Source Package:</strong> " \
-                + str(data_source_package) \
-                + "</p>" \
-                + "</p><p><strong>Published:</strong> " \
-                + str(data_published) \
-                + "</p>" \
-                + "</p><p><strong>Services:</strong> " \
-                + str(data_services) \
-                + "</p>" \
-                + "</p><p><strong>Vulnerability Link:</strong> " \
-                + str(data_vulnerability_link) \
-                + "</p>" \
-                + "</p><p><strong>Account ID:</strong> " \
-                + str(data_account_id) \
-                + "</p>" \
-                + "</p><p><strong>Discovered:</strong> " \
-                + str(data_discovered) \
-                + "</p>"
+    def get_description(
+        self,
+        data_description,
+        data_type,
+        data_tag,
+        data_cluster,
+        data_namespaces,
+        data_package_name,
+        data_package_license,
+        data_package_version,
+        data_package_path,
+        data_name,
+        data_cloud_id,
+        data_runtime,
+        data_cause,
+        data_found_in,
+        data_purl,
+        data_risk_factors,
+        data_hostname,
+        data_distro,
+        data_compliance_id,
+        data_result,
+        data_packages,
+        data_source_package,
+        data_published,
+        data_services,
+        data_vulnerability_link,
+        data_account_id,
+        data_discovered,
+    ):
+        return (
+            "<p><strong>Description:</strong> "
+            + data_description
+            + "</p><p><strong>Type:</strong> "
+            + str(data_type)
+            + "</p><p><strong>Tag:</strong> "
+            + str(data_tag)
+            + "</p><p><strong>Cluster:</strong> "
+            + str(data_cluster)
+            + "</p><p><strong>Namespaces:</strong> "
+            + str(data_namespaces)
+            + "</p><p><strong>Vulnerable Package:</strong> "
+            + str(data_package_name)
+            + "</p><p><strong>Vulnerable Package License:</strong> "
+            + str(data_package_license)
+            + "</p><p><strong>Current Version:</strong> "
+            + str(data_package_version)
+            + "</p><p><strong>Package path:</strong> "
+            + str(data_package_path)
+            + "</p>"
+            + "</p><p><strong>Name:</strong> "
+            + str(data_name)
+            + "</p>"
+            + "</p><p><strong>Cloud Id:</strong> "
+            + str(data_cloud_id)
+            + "</p>"
+            + "</p><p><strong>Runtime:</strong> "
+            + str(data_runtime)
+            + "</p>"
+            + "</p><p><strong>Risk Factors:</strong> "
+            + str(data_risk_factors)
+            + "</p>"
+            + "</p><p><strong>Cause:</strong> "
+            + str(data_cause)
+            + "</p>"
+            + "</p><p><strong>Found In:</strong> "
+            + str(data_found_in)
+            + "</p>"
+            + "</p><p><strong>PURL:</strong> "
+            + str(data_purl)
+            + "</p>"
+            + "</p><p><strong>Hostname:</strong> "
+            + str(data_hostname)
+            + "</p>"
+            + "</p><p><strong>Distro:</strong> "
+            + str(data_distro)
+            + "</p>"
+            + "</p><p><strong>Compliance ID:</strong> "
+            + str(data_compliance_id)
+            + "</p>"
+            + "</p><p><strong>Result:</strong> "
+            + str(data_result)
+            + "</p>"
+            + "</p><p><strong>Data Packages:</strong> "
+            + str(data_packages)
+            + "</p>"
+            + "</p><p><strong>Data Source Package:</strong> "
+            + str(data_source_package)
+            + "</p>"
+            + "</p><p><strong>Published:</strong> "
+            + str(data_published)
+            + "</p>"
+            + "</p><p><strong>Services:</strong> "
+            + str(data_services)
+            + "</p>"
+            + "</p><p><strong>Vulnerability Link:</strong> "
+            + str(data_vulnerability_link)
+            + "</p>"
+            + "</p><p><strong>Account ID:</strong> "
+            + str(data_account_id)
+            + "</p>"
+            + "</p><p><strong>Discovered:</strong> "
+            + str(data_discovered)
+            + "</p>"
+        )
 
     def procces_executor(self, row, test):
         finding = self.parse_issue(row, test)
         if finding is not None:
             key = hashlib.md5(
                 (
-                    finding.severity
-                    + "|"
-                    + finding.title
-                    + "|"
-                    + finding.description
+                    finding.severity + "|" + finding.title + "|" + finding.description
                 ).encode("utf-8"),
             ).hexdigest()
         return key, finding
@@ -251,7 +263,9 @@ class TwistlockCSVParser:
         if isinstance(content, bytes):
             content = content.decode("utf-8")
         reader = csv.DictReader(
-            io.StringIO(content), delimiter=",", quotechar='"',
+            io.StringIO(content),
+            delimiter=",",
+            quotechar='"',
         )
         with ThreadPoolExecutor(max_workers=25) as executor:
             futures = []
@@ -289,9 +303,8 @@ class TwistlockJsonParser:
         items = {}
         if "results" in tree:
             vulnerabilityTree = tree["results"][0].get("vulnerabilities", [])
-            baseImage = tree.get("baseImage", "")
             for node in vulnerabilityTree:
-                item = get_item(node, test, baseImage)
+                item = get_item(node, test)
                 unique_key = node["id"] + str(
                     node["packageName"]
                     + str(node["packageVersion"])
@@ -301,7 +314,7 @@ class TwistlockJsonParser:
         return list(items.values())
 
 
-def get_item(vulnerability, test, baseImage):
+def get_item(vulnerability, test):
     severity = (
         convert_severity(vulnerability["severity"])
         if "severity" in vulnerability
@@ -317,16 +330,26 @@ def get_item(vulnerability, test, baseImage):
         if "status" in vulnerability
         else "There seems to be no fix yet. Please check description field."
     )
-    cvss = (
-        vulnerability["cvss"]
-        if "cvss" in vulnerability
-        else "No CVSS score yet."
-    )
+    cvss = vulnerability["cvss"] if "cvss" in vulnerability else "No CVSS score yet."
     riskFactors = (
         vulnerability["riskFactors"]
         if "riskFactors" in vulnerability
         else "No risk factors."
     )
+
+    description = (
+        vulnerability.get("description", "")
+        + "<p> Vulnerable Package: "
+        + vulnerability["packageName"]
+        + "</p><p> Current Version: "
+        + str(vulnerability["packageVersion"])
+        + "</p><p> Layer Instruction: "
+        + vulnerability.get("layerInstruction", "")
+        + "</p>"
+    )
+
+    if vulnerability.get("baseImage"):
+        description += "<p> Image Base: " + vulnerability["baseImage"] + "</p>"
 
     # create the finding object
     finding = Finding(
@@ -337,14 +360,7 @@ def get_item(vulnerability, test, baseImage):
         + vulnerability["packageVersion"],
         test=test,
         severity=severity,
-        description=vulnerability.get("description", "")
-        + "<p> Vulnerable Package: "
-        + vulnerability["packageName"]
-        + "</p><p> Current Version: "
-        + str(vulnerability["packageVersion"])
-        + "</p>"
-        + "<p> Base Image: "
-        + baseImage,
+        description=description,
         mitigation=status.title(),
         references=vulnerability.get("link"),
         component_name=vulnerability["packageName"],
@@ -355,11 +371,20 @@ def get_item(vulnerability, test, baseImage):
         mitigated=None,
         severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
         impact=severity,
-        vuln_id_from_tool= vulnerability['id'],
-        publish_date=dateutil.parser.parse(vulnerability.get('publishedDate')) if vulnerability.get('publishedDate', None) else None,
-
+        vuln_id_from_tool=vulnerability["id"],
+        publish_date=(
+            dateutil.parser.parse(vulnerability.get("publishedDate"))
+            if vulnerability.get("publishedDate", None)
+            else None
+        ),
     )
-    finding.unsaved_tags = [vulnerability['customTag'] if vulnerability.get('customTag', None) else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
+    finding.unsaved_tags = [
+        (
+            vulnerability["customTag"]
+            if vulnerability.get("customTag", None)
+            else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")
+        )
+    ]
     finding.unsaved_vulnerability_ids = [vulnerability["id"]]
     finding.description = finding.description.strip()
 

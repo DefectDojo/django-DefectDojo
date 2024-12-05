@@ -1390,7 +1390,7 @@ def add_risk_acceptance_pending(request, eid, fid):
             )
             .filter(
                 NOT_ACCEPTED_FINDINGS_QUERY
-                & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-"))
+                & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-"))
             )
             .order_by("title")
         )
@@ -1768,7 +1768,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                                                      active=True,
                                                      risk_accepted=False,
                                                      severity=risk_acceptance.severity,
-                                                     duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-")))
+                                                     duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")))
         if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
             unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
     else:
