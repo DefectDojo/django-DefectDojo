@@ -451,7 +451,8 @@ env = environ.FileAwareEnv(
         }
     }),
     # When enabled, force the password field to be required for creating/updating users
-    DD_REQUIRE_PASSWORD_ON_USER=(bool, True)
+    DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
+    AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
 )
 
 

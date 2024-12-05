@@ -2854,6 +2854,9 @@ class NotificationsSerializer(serializers.ModelSerializer):
     risk_acceptance_request = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
+    risk_acceptance_confirmed = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
     transfer_finding = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )

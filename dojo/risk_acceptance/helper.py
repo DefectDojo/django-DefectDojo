@@ -489,7 +489,7 @@ def get_config_risk():
 def enable_flow_accept_risk(**kwargs):
     # add rule custom if necessary
     if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
-    and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-")).exists()):
+    and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")).exists()):
         return True
     return False
 
@@ -498,6 +498,7 @@ def update_expiration_date_permission_key(risk_pending: Risk_Acceptance):
     permission_keys = risk_pending.permissionkey_set.all()
     for permission_key in permission_keys:
         permission_key.expiration = timezone.now() + timedelta(hours=settings.LIFETIME_HOURS_PERMISSION_KEY)
+        permission_key.status = True
         permission_key.save()
 
 def generate_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list:
