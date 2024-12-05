@@ -20,7 +20,7 @@ These attributes are supported for CSV:
 - Active: Indicator if the finding is active. Must be empty, TRUE or FALSE
 - Verified: Indicator if the finding has been verified. Must be empty, TRUE, or FALSE
 - FalsePositive: Indicator if the finding is a false positive. Must be TRUE, or FALSE.
-- Duplicate:Indicator if the finding is a duplicate. Must be TRUE, or FALSE
+- Duplicate: Indicator if the finding is a duplicate. Must be TRUE, or FALSE
 
 The CSV expects a header row with the names of the attributes.
 
