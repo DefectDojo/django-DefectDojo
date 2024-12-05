@@ -555,6 +555,9 @@ def set_duplicate(new_finding, existing_finding):
     existing_finding.severity = new_finding.severity
     existing_finding.vuln_id_from_tool = new_finding.vuln_id_from_tool
     existing_finding.unique_id_from_tool = new_finding.unique_id_from_tool
+    existing_finding.description = new_finding.description
+    existing_finding.impact = new_finding.impact
+    existing_finding.references = new_finding.references
     logger.debug("saving new finding: %d", new_finding.id)
     super(Finding, new_finding).save()
     logger.debug("saving existing finding: %d", existing_finding.id)
