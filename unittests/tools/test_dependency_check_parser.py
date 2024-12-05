@@ -37,7 +37,7 @@ class TestDependencyCheckParser(DojoTestCase):
             with self.subTest(i=i):
                 self.assertEqual(items[i].title, "org.owasp:library:6.7.8 | CVE-0000-0001")
                 self.assertEqual(items[i].severity, "Medium")
-                self.assertEqual(items[i].component_name, "org.owasp:library")
+                self.assertEqual(items[i].component_name, "org.owasp_library")
                 self.assertEqual(items[i].component_version, "6.7.8")
                 self.assertEqual(
                     items[i].mitigation,
@@ -63,7 +63,7 @@ class TestDependencyCheckParser(DojoTestCase):
             with self.subTest(i=0):
                 # identifier -> package url java + 2 relateddependencies
                 self.assertEqual(items[0].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
-                self.assertEqual(items[0].component_name, "org.dom4j:dom4j")
+                self.assertEqual(items[0].component_name, "org.dom4j_dom4j")
                 self.assertEqual(items[0].component_version, "2.1.1.redhat-00001")
                 self.assertIn(
                     "Description of a bad vulnerability.",
@@ -87,7 +87,7 @@ class TestDependencyCheckParser(DojoTestCase):
 
             with self.subTest(i=1):
                 self.assertEqual(items[1].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
-                self.assertEqual(items[1].component_name, "org.dom4j:dom4j")
+                self.assertEqual(items[1].component_name, "org.dom4j_dom4j")
                 self.assertEqual(items[1].component_version, "2.1.1.redhat-00001")
                 self.assertIn(
                     "Description of a bad vulnerability.",
@@ -109,7 +109,7 @@ class TestDependencyCheckParser(DojoTestCase):
 
             with self.subTest(i=2):
                 self.assertEqual(items[2].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
-                self.assertEqual(items[2].component_name, "org.dom4j:dom4j")
+                self.assertEqual(items[2].component_name, "org.dom4j_dom4j")
                 self.assertEqual(items[2].component_version, "2.1.1.redhat-00001")
                 self.assertIn(
                     "Description of a bad vulnerability.",
@@ -197,7 +197,7 @@ class TestDependencyCheckParser(DojoTestCase):
             with self.subTest(i=6):
                 # identifier -> cpe java
                 self.assertEqual(items[6].title, "org.dom4j:dom4j:2.1.1.redhat-00001 | CVE-0000-0001")
-                self.assertEqual(items[6].component_name, "org.dom4j:dom4j")
+                self.assertEqual(items[6].component_name, "org.dom4j_dom4j")
                 self.assertEqual(items[6].component_version, "2.1.1.redhat-00001")
                 self.assertEqual(items[6].severity, "High")
                 self.assertEqual(items[6].file_path, "adapter-ear2.ear: dom4j-2.1.1.jar")
@@ -263,7 +263,7 @@ class TestDependencyCheckParser(DojoTestCase):
 
             i = 0
             with self.subTest(i=i):
-                self.assertEqual(items[i].component_name, "org.apache.logging.log4j:log4j-api")
+                self.assertEqual(items[i].component_name, "org.apache.logging.log4j_log4j-api")
                 self.assertEqual(items[i].component_version, "2.12.4")
                 self.assertIn(
                     "Improper validation of certificate with host mismatch in Apache Log4j SMTP appender. This could allow an SMTPS connection to be intercepted by a man-in-the-middle attack which could leak any log messages sent through that appender.",
@@ -285,7 +285,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 logger.debug(items[0])
                 # identifier -> package url java + 2 relateddependencies
                 self.assertEqual(items[0].title, "org.apache.activemq:activemq-broker:5.16.5 | CVE-2015-3208")
-                self.assertEqual(items[0].component_name, "org.apache.activemq:activemq-broker")
+                self.assertEqual(items[0].component_name, "org.apache.activemq_activemq-broker")
                 self.assertEqual(items[0].component_version, "5.16.5")
                 self.assertIn(
                     "XML external entity (XXE) vulnerability in the XPath selector component in",
