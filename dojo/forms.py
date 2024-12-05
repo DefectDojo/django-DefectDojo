@@ -287,11 +287,14 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
 
+    exclusive_permission = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=False, label="Exclusive Permission")
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product_type"].disabled = True
         self.fields["user"].queryset = Dojo_User.objects.order_by("first_name", "last_name")
         self.fields["user"].disabled = True
+        self.fields["exclusive_permission"].queryset = Dojo_User.objects.all()
 
     class Meta:
         model = Product_Type_Member
