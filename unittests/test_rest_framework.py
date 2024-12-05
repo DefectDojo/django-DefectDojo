@@ -3076,3 +3076,49 @@ class BurpRawRequestResponseTest(BaseClass.BaseClassTest):
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    # Overriding the test_update because the response is a string of the byte encoding and we are going to strip that away....
+    # but otherwise do all the same stuff (most of it isn't needed, though)
+    @skipIfNotSubclass(UpdateModelMixin)
+    def test_update(self):
+        current_objects = self.client.get(self.url, format="json").data
+        relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
+        response = self.client.patch(relative_url, self.update_fields)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        # self.check_schema_response("patch", "200", response, detail=True)
+
+        for key, value in self.update_fields.items():
+            # some exception as push_to_jira has been implemented strangely in the update methods in the api
+            if key not in ["push_to_jira", "ssh", "password", "api_key"]:
+                # Convert data to sets to avoid problems with lists
+                if isinstance(value, list):
+                    clean_value = set(value)
+                else:
+                    clean_value = value
+                if isinstance(response.data[key], list):
+                    response_data = set(response.data[key])
+                elif isinstance(response.data[key], str):
+                    if response.data[key].startswith("b'") and response.data[key].endswith("'"):
+                        response_data = response.data[key][2:len(response.data[key]) - 1]
+                else:
+                    response_data = response.data[key]
+
+                self.assertEqual(clean_value, response_data)
+
+        self.assertNotIn("push_to_jira", response.data)
+        self.assertNotIn("ssh", response.data)
+        self.assertNotIn("password", response.data)
+        self.assertNotIn("api_key", response.data)
+
+        if hasattr(self.endpoint_model, "tags") and self.update_fields and self.update_fields.get("tags", None):
+            self.assertEqual(len(self.update_fields.get("tags")), len(response.data.get("tags", None)))
+            for tag in self.update_fields.get("tags"):
+                logger.debug("looking for tag %s in tag list %s", tag, response.data["tags"])
+                self.assertIn(tag, response.data["tags"])
+
+        response = self.client.put(
+            relative_url, self.payload)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        self.check_schema_response("put", "200", response, detail=True)
