@@ -514,7 +514,7 @@
                                             {% endif %}
                                         {% endif %}
                                         {% if True %}
-                                            {% if "dojo.view_engagement_survey"|has_configuration_permission:request or True%}
+                                            {% if "dojo.view_findingexclusion"|has_configuration_permission:request or True%}
                                                 <li>
                                                     <a rel="noopener noreferrer" href="#">
                                                         <i class="fa-solid fa fa-wrench fa-fw"></i>
@@ -522,7 +522,7 @@
                                                         <span class="glyphicon arrow"></span>
                                                     </a>
                                                     <ul class="nav nav-second-level">
-                                                        {% if "dojo.view_engagement_survey"|has_configuration_permission:request%}
+                                                        {% if "dojo.view_findingexclusion"|has_configuration_permission:request%}
                                                             <li>
                                                                 <a rel="noopener noreferrer" href="{% url 'finding_exclusions' %}">
                                                                     {% trans "Exclusion" %}

@@ -6,7 +6,6 @@ from .dojo_test_case import DojoTestCase
 # Utils
 from django.utils import timezone
 from datetime import timedelta
-from django.forms import ValidationError
 from django.urls import reverse
 
 

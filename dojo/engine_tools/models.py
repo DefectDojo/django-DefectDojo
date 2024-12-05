@@ -24,6 +24,12 @@ class FindingExclusion(models.Model):
     create_date = models.DateTimeField(auto_now=True)
     expiration_date = models.DateTimeField()
     last_status_update = models.DateTimeField(auto_now=True)
+    status_updated_at = models.DateTimeField(null=True)
+    status_updated_by = models.ForeignKey("Dojo_User",
+                                          null=True,
+                                          related_name="dojo_user_status_updated",
+                                          on_delete=models.CASCADE)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     user_history = models.IntegerField(null=True)
     product = models.ForeignKey("Product",
                                 null=True,

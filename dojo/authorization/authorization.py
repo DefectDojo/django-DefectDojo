@@ -29,6 +29,7 @@ from dojo.models import (
     Test,
     TransferFindingFinding,
 )
+from dojo.engine_tools.models import FindingExclusion
 from dojo.request_cache import cache_for_request
 logger = logging.getLogger(__name__)
 
@@ -107,6 +108,16 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(
             user, obj.test.engagement.product, permission,
         )
+    elif (
+        isinstance(obj, FindingExclusion)
+    ) and permission in Permissions.get_finding_exclusion_permissions():
+        roles = Dojo_Group_Member.objects.filter(user=user)
+        
+        for role in roles:
+            if role.role.name == 'Developer' or role.role.name == 'Cibersecurity':
+                return True
+        return False
+        
     elif (isinstance(obj, TransferFinding) and permission in Permissions.get_transfer_finding_permissions()):
         return custom_permissions_transfer_findings(user, obj, permission)
     elif (isinstance(obj, TransferFindingFinding) and permission in Permissions.get_transfer_finding_finding_permissions()):

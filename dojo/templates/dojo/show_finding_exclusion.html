@@ -123,9 +123,12 @@
                                 </a>
                             </li>
                             <li role="presentation">
-                                <a rel="noopener noreferrer" href="">
-                                    <i class="fa-solid fa-circle-check"></i> Mark as Reviewed
-                                </a>
+                                <form method="POST" action="{% url 'review_finding_exclusion_request' finding_exclusion.uuid %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-link p-0">
+                                        <i class="fa-solid fa-circle-check"></i> Mark as Reviewed
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                         

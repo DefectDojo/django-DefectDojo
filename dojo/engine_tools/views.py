@@ -1,17 +1,19 @@
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.authorization.roles_permissions import Permissions
 from dojo.utils import get_page_items, add_breadcrumb
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.urls import reverse
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import create_notification, send_mail_notification
 from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm
 
-
-# @user_is_configuration_authorized("dojo.view_engagement_survey")
-def finding_exclusions(request):
+@user_is_configuration_authorized("dojo.view_findingexclusion")
+def finding_exclusions(request: HttpRequest):
     finding_exclusions = FindingExclusion.objects.all()
     finding_exclusions = FindingExclusionFilter(request.GET,
                                                 queryset=finding_exclusions)
@@ -113,19 +115,27 @@ def add_finding_exclusion_discussion(request: HttpRequest, fxid: str) -> HttpRes
 
 
 def review_finding_exclusion_request(request: HttpRequest, fxid: str):
-    """_summary_
+    """Change the status of the finding exclusion to reviewed.
 
     Args:
-        request (HttpRequest): _description_
-        fxid (str): _description_
+        request (HttpRequest): Http request object
+        fxid (str): Finding exclusion ID
+        
+    Returns:
+        HttpResponse: Http response object via Django template
     """
     if request.method == 'POST':
         finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
         finding_exclusion.status = "Reviewed"
+        finding_exclusion.reviewed_at = None
         finding_exclusion.save()
         
-        create_notification(event="stale_engagement",
-                            title="",
-                            description="",
-                            url=reverse("finding_exclusion", fxid=finding_exclusion.pk),
+        create_notification(event="other",
+                            title=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}",
+                            description=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+                            url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
                             recipients=[finding_exclusion.created_by])
+        
+        return redirect('finding_exclusion', fxid=fxid)
+    
+    return redirect('finding_exclusion', fxid=fxid)

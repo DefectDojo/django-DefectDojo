@@ -154,6 +154,11 @@ class Permissions(IntEnum):
     Api_v2_Key = 2901
     Swagger_Documentation = 2902
     Defect_Dojo_Documentation = 2903
+    
+    Finding_Exclusion_View = 2911
+    Finding_Exclusion_Edit = 2912
+    Finding_Exclusion_Delete = 2913
+    Finding_Exclusion_Add = 2914
 
     @classmethod
     def has_value(cls, value):
@@ -237,6 +242,15 @@ class Permissions(IntEnum):
             Permissions.Transfer_Finding_Finding_Edit,
             Permissions.Transfer_Finding_Finding_Delete,
             Permissions.Transfer_Finding_Finding_Add,
+        }
+        
+    @classmethod
+    def get_finding_exclusion_permissions(cls):
+        return {
+            Permissions.Finding_Exclusion_Add,
+            Permissions.Finding_Exclusion_Edit,
+            Permissions.Finding_Exclusion_Delete,
+            Permissions.Finding_Exclusion_View,
         }
 
     @classmethod
@@ -601,6 +615,7 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Finding_View,
             Permissions.Transfer_Finding_Finding_Add,
+            Permissions.Finding_Exclusion_View
         },
         Roles.Leader: {
             Permissions.Product_Type_View,

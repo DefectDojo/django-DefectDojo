@@ -21,4 +21,7 @@ urlpatterns = [
     re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/add-discussion/$', 
             views.add_finding_exclusion_discussion, 
             name='add_finding_exclusion_discussion'),
+    re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/mark-as-reviewed/$', 
+            views.review_finding_exclusion_request, 
+            name='review_finding_exclusion_request'),
 ]
