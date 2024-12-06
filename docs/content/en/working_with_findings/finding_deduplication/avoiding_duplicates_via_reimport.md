@@ -84,7 +84,7 @@ This table shows each Import or Reimport as a single line with a **Timestamp**, 
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1072559379/da50b8239d865c6f98fc63c1/AD_4nXejcQLbylSeEMEkwYFrpxjGC1qkw7DQWwEQDCGhE7XrZSOGd_kNkAQNxHReNuFG3HivbQW-r6_NhC799O-rm3O2v_tBeTLtuqKFOuCDPng1qvmhQNeFwZ-whwp6CzdaQVy3Vir6pR3Kln9CRxzX2u6dTZY?expires=1729720800&signature=d5205cc3ff455b2643173a38835faf8a06f5ec4cc7c57c646ec7e78fa62678e4&req=dSAgFMx7lIJYUPMW1HO4ze2b3g1yLkBVYYHceZ4nu9nWxFX94Pj8EZWhdT2l%0ATMnX%0A)
+![image](images/Avoiding_Duplicates_Reimport_Recurring_Tests.png)
 ## Actions
 
 
