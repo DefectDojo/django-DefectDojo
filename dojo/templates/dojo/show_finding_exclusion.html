@@ -117,22 +117,22 @@
                                     <i class="fa-solid fa-fire-extinguisher"></i> Close Finding Exclusion
                                 </a>
                             </li>
+                            {% if "dojo.review_findingexclusion"|has_configuration_permission:request %}
                             <li role="presentation">
                                 <a rel="noopener noreferrer" href="">
                                     <i class="fa-solid fa-circle-exclamation"></i> Accept Finding Exclusion
                                 </a>
                             </li>
                             <li role="presentation">
-                                <form method="POST" action="{% url 'review_finding_exclusion_request' finding_exclusion.uuid %}">
+                                <a href="#" onclick="document.getElementById('reviewForm').submit(); return false;">
+                                    <i class="fa-solid fa-circle-check"></i> Mark as Reviewed
+                                </a>
+                                <form id="reviewForm" method="POST" action="{% url 'review_finding_exclusion_request' finding_exclusion.uuid %}" style="display:none;">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-link p-0">
-                                        <i class="fa-solid fa-circle-check"></i> Mark as Reviewed
-                                    </button>
                                 </form>
                             </li>
-                        </ul>
-                        
-                        
+                            {% endif %}
+                        </ul>       
                     </div>
             </div>
         </div>
@@ -146,6 +146,7 @@
                         <th>Status</th>
                         <th>Created by</th>
                         <th>Created at</th>
+                        <th>Expires at</th>
                     {% endblock header_head %}
                 </tr>
                 <tr>
@@ -163,7 +164,8 @@
                             <td>{{finding_exclusion.status}}</td>
                         {%endif%}
                         <td>{{ finding_exclusion.created_by }}</td>
-                        <td>{{ finding_exclusion.create_date|date:"d M Y H:i" }}</td>            
+                        <td>{{ finding_exclusion.create_date|date:"d M Y H:i" }}</td>
+                        <td>{{ finding_exclusion.expiration_date|date:"d M Y H:i" }}</td>          
                     {% endblock header_body %}
                 </tr>
             </table>
@@ -207,7 +209,7 @@
                                     {% if finding_exclusion.reviewed_at %}
                                         <pre>{{ finding_exclusion.reviewed_at|date:"d M Y H:i" }}</pre>
                                         <br>
-                                        <pre><strong>By:</strong> {{ finding_exclusion.reviewed_by.username }}</pre>
+                                        <pre><strong>By:</strong> DevSecOps Team</pre>
                                     {% else %}
                                         <pre>Pending Review</pre>
                                     {% endif %}

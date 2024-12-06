@@ -328,9 +328,6 @@
                                     <th>
                                         {% trans "EPSS Percentile" %}
                                     </th>
-                                    <th>
-                                        {% trans "Priorization" %}
-                                    </th>
                                     <th class="nowrap">
                                         {% if filter_name == 'Closed' %}
                                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -630,7 +627,6 @@
                                         <td class="nowrap">
                                             {{ finding.epss_percentile|format_epss }}
                                         </td>
-                                        <td>{% if finding.epss_percentile %}91{% else %}N.A.{% endif %}</td>
                                         {% if filter_name == 'Closed' %}
                                         <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">
                                             {{ finding.mitigated|date }}

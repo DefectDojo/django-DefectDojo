@@ -16,14 +16,26 @@ class CreateFindingExclusionForm(forms.ModelForm):
         required=True,
         max_length=500,
         help_text=Constants.VULNERABILITY_ID_HELP_TEXT.value)
-    expiration_date = forms.DateTimeField()
     reason = forms.CharField(max_length=200, required=True,
                              widget=forms.Textarea,
                              label="Reason")
 
     class Meta:
         model = FindingExclusion
-        exclude = ["uuid", "product", "user_history", "created_by", "accepted_by", "status", "finding"]
+        exclude = [
+            "uuid", 
+            "product", 
+            "user_history", 
+            "created_by", 
+            "accepted_by", 
+            "status", 
+            "finding", 
+            "expiration_date",
+            "status_updated_at",
+            "status_updated_by",
+            "reviewed_at",
+            "final_status"
+        ]
         
 
 class FindingExclusionDiscussionForm(forms.ModelForm):
@@ -31,5 +43,5 @@ class FindingExclusionDiscussionForm(forms.ModelForm):
         model = FindingExclusionDiscussion
         fields = ['content']
         widgets = {
-            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Agregar un comentario...'})
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Add a comment...'})
         }
