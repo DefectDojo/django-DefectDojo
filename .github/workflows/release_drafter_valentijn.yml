@@ -20,7 +20,7 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     steps:
-      - uses: valentijnscholten/release-drafter@master
+      - uses: valentijnscholten/release-drafter@master  # TODO: not maintained anymore - missing part is maybe already solved in the upstream
         with:
           version: ${{github.event.inputs.version}}  
           previous-version: ${{github.event.inputs.previous-version}} 
