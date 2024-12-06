@@ -412,6 +412,14 @@ class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
 
         return result
 
+    def to_representation(self, data):
+        return {
+            "id": data.id,
+            "finding": data.finding.id,
+            "burpRequestBase64": data.burpRequestBase64.decode("utf-8"),
+            "burpResponseBase64": data.burpResponseBase64.decode("utf-8"),
+        }
+
     def validate(self, data):
         b64request = data.get("burpRequestBase64", None)
         b64response = data.get("burpResponseBase64", None)

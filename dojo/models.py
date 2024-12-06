@@ -3619,14 +3619,6 @@ class BurpRawRequestResponse(models.Model):
     burpRequestBase64 = models.BinaryField()
     burpResponseBase64 = models.BinaryField()
 
-    @property
-    def string_response(self):
-        return self.get_response()
-
-    @property
-    def string_request(self):
-        return self.get_request()
-
     def get_request(self):
         return str(base64.b64decode(self.burpRequestBase64), errors="ignore")
 
