@@ -565,7 +565,7 @@ class WebhookNotificationManger(NotificationManagerHelpers):
 
 class AlertNotificationManger(NotificationManagerHelpers):
 
-    """Manger for slack notifications and their helpers."""
+    """Manger for alert notifications and their helpers."""
 
     def send_alert_notification(
         self,
