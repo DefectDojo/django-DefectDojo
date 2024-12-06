@@ -17,17 +17,11 @@ seo:
 pro-feature: true
 ---
 
-
 DefectDojo allows users to build sophisticated API integrations, and gives users full control over how their vulnerability data is organized. 
-
-
 
 But everyone needs a starting point, and that's where Connectors come in. Connectors are designed to get your security tools connected and importing data to DefectDojo as quickly as possible.
 
-
-
 We currently support Connectors for the following tools, with more on the way:
-
 
 * **AWS Security Hub**
 * **BurpSuite**
@@ -41,14 +35,9 @@ We currently support Connectors for the following tools, with more on the way:
 
 These Connectors provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 
-
-
-
-# Connectors Quick\-Start
-
+## Connectors Quick\-Start
 
 If you're using DefectDojo's **Auto\-Map** settings, you can have your first Connector up and running in no time.
-
 
 1. Set up a [Connector](https://docs.defectdojo.com/en/connecting_your_tools/connectors/add_edit_connectors/) from a supported tool.
 2. [Discover](https://docs.defectdojo.com/en/connecting_your_tools/connectors/operations_discover/) your tool's data hierarchy.
@@ -56,11 +45,7 @@ If you're using DefectDojo's **Auto\-Map** settings, you can have your first Con
 
 That's all, really! And remember, even if you create your Connector the 'easy' way, you can easily change the way things are set up later, without losing any of your work.
 
-
-
-
-# How Connectors Work
-
+## How Connectors Work
 
 As long as you have the API key from the tool you're trying to connect, a connector can be added in just a few minutes. Once the connection is working, DefectDojo will **Discover** your tool's environment to see how you're organizing your scan data.
 
@@ -72,7 +57,7 @@ Once your **Record** mappings are set up, DefectDojo will start importing scan d
 
 When you're ready to add more tools to DefectDojo, you can easily rearrange your import mappings to something else. Multiple tools can be set up to import vulnerabilities to the same destination, and you can always reorganize your setup for a better fit without losing any work.
 
-# My Connector isn't supported
+## My Connector isn't supported
 
 Fortunately, DefectDojo can still handle manual import for a wide range of security tools. Please see our [Supported Tool List](https://docs.defectdojo.com/en/connecting_your_tools/parsers/), as well as our guide to Importing data.
 

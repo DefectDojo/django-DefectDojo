@@ -12,7 +12,6 @@ All DefectDojo plans include a free 2\-week trial, which you can use to evaluate
 
 At the end of this process, you'll be put in touch with our Sales team, who will follow up to receive your billing information, and authorize and set up your company's trial instance.
 
-
 # **Requesting your Trial**
 
 In order to sign up for a trial, you'll need to create an account on our Cloud Portal, and then click the New Subscription menu option from the sidebar.
@@ -38,9 +37,7 @@ Select a Server Location from the drop\-down menu. We recommend selecting a serv
 
 ![image](images/request_a_trial_3.png)
 
-
 ## Step 4: Configure your Firewall Rules
-
 
 Enter the IP address ranges, subnet mask and labels that you want to allow to access DefectDojo. Additional IP addresses and rules can be added or changed by your team after your instance is up and running.
 
@@ -48,9 +45,7 @@ Enter the IP address ranges, subnet mask and labels that you want to allow to ac
 
 If you want to use external services with DefectDojo (GitHub or JIRA), check the appropriate boxes listed under **Select External Services.** 
 
-
 ## Step 5: Confirm your Plan type and Billing Frequency
-
 
 Before you complete the process, please confirm the plan you want to use along with your billing frequency \- monthly or annually.
 
@@ -58,14 +53,14 @@ Before you complete the process, please confirm the plan you want to use along w
 
 ## Step 6: Review and Submit your Request
 
-We'll prompt you to look over your request one more time. Once submitted, only Firewall rules can be changed by your team without assistance from Support. To contact Support, please email [support@defectdojo.com](mailto:support@defectdojo.com) or follow the instructions in [this article](https://support.defectdojo.com/en/articles/8461544-contact-defectdojo-support).
+We'll prompt you to look over your request one more time. Once submitted, only Firewall rules can be changed by your team without assistance from Support. To contact Support, please email [support@defectdojo.com](mailto:support@defectdojo.com) or follow the instructions in [this article](https://docs.defectdojo.com/en/about_defectdojo/contact_defectdojo_support/).
 
 ![image](images/request_a_trial_6.png)
 
 After reviewing and accepting DefectDojo's License and Support Agreement, you can click **Checkout With Stripe** or **Contact Sales**.
 
 * Checkout With Stripe will take you to a Stripe page where you can enter your billing information.
-* If you do not wish to enter your billing info at this time, you can click Contact Sales \- our Sales team will be in touch to set up your trial.
+* If you do not wish to enter your billing info at this time, you can click Contact Sales - our Sales team will be in touch to set up your trial.
 
 # Once your trial has been approved
 
