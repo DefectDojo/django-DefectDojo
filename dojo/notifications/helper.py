@@ -357,7 +357,7 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
 
 class EmailNotificationManger(NotificationManagerHelpers):
 
-    """Manger for slack notifications and their helpers."""
+    """Manger for email notifications and their helpers."""
 
     @dojo_async_task
     @app.task
