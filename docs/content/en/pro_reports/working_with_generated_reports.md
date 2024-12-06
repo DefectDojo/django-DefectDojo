@@ -10,7 +10,7 @@ Once you have created one or more **Reports** in DefectDojo you can take further
 * Re\-running a report with updated data
 * Deleting an old or unused reportsa
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059671281/7eebaaae55e5e8fb36a381af/3p-IVZqmk3TFbZth5i8j8E6nAn4U4PRCGIZ1kUiPLqCmFXXB0VQr4r5Fod0I4Z5cgxaFtaFq1JuQJvWaxpiOEIPCUyYBsOLWEaSEsDs6gFhtSrZ3ryiVolap1Cr7Z0w0jmzufsLe_3Lfgv78U1CAALE?expires=1729720800&signature=6877ef645bcd73141676996d52389b6b683b7c3874debd5cf651de9121942c39&req=dSAiH895nINXWPMW1HO4zWepnUDyncjCPKq3%2FkKW0dqikTePlld1Oi%2BUMCy5%0AbeAB%0A)
+![image](images/Working_with_Generated_Reports.png)
 
 # Use a report as a Template
 
@@ -33,7 +33,7 @@ Both of these pages can be found in the 📄 **Reports** tab on the sidebar.
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059671304/ccd08efd53df3d0970c451ba/SXnDhXKLNvsz3gPfQwW9ek2RLJ_TydFt3FNWemB1kSNTkyl0tXPmq493HmbFKMwKiMLyHSMF2d9gq6kYDwH0xRxm-heHzUmAalQv7LHkj2jnfHSPeQru-kgrt1qXqHbz-UElAFbwpQZu6p0gpmJlVZM?expires=1729720800&signature=a4ab9f2e4a32458a21e2e9894fa6056310cd22086d2844411782060e861ff6f1&req=dSAiH895nIJfXfMW1HO4zUL7Ism3uP7AGXfgyZwij4MGHxy3uKUdnG4sCf7w%0AZarK%0A)
+![image](images/Working_with_Generated_Reports_2.png)
 To access the **Report Templates** page, open 📄**Reports \> Report Templates** from the sidebar. From that table, you can open the report builder by clicking the **⋮** menu next to the report you wish to use as a template.
 
 
@@ -58,7 +58,7 @@ Selecting this option will create a new report in the **Generated Reports** list
 
 
 
-![](https://defectdojo-inc.intercom-attachments-7.com/i/o/1059671323/e1d821fba1ace5d7896bf482/jxJ7QWWvw1CKOUnS7zc5FI7UjCRKJ3qobQNSTC8lTHi663VJoqe_XbVboGcAEFR5Lulk9c0HPhfmmqaPUAxqQ54mggQG8WtpdtPSXQKOuiSXMRmREcItfJLmmqkX2l_aIcXQUbJLMGflmWIkbPTgc78?expires=1729720800&signature=acd68b15972699601dda8c6954e0fd8b812411a76f4bea58b1a37cb83dc56086&req=dSAiH895nIJdWvMW1HO4zffauUxOD2Xn6VQCrLltw35ImuPGf8piwAMDmWJL%0AHA6J%0A)
+![image](images/Working_with_Generated_Reports_3.png)
 
 # Deleting a Report
 
