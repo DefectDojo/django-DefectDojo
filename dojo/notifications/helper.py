@@ -406,7 +406,7 @@ class EmailNotificationManger(NotificationManagerHelpers):
 
 class WebhookNotificationManger(NotificationManagerHelpers):
 
-    """Manger for slack notifications and their helpers."""
+    """Manger for webhook notifications and their helpers."""
 
     ERROR_PERMANENT = "permanent"
     ERROR_TEMPORARY = "temporary"
