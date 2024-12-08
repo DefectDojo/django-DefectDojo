@@ -2680,6 +2680,39 @@ class NoteTypeViewSet(
         return Note_Type.objects.all().order_by("id")
 
 
+class BurpRawRequestResponseViewSet(
+    DojoModelViewSet,
+):
+    serializer_class = serializers.BurpRawRequestResponseMultiSerializer
+    queryset = BurpRawRequestResponse.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["finding"]
+
+    def get_queryset(self):
+        results = BurpRawRequestResponse.objects.all()
+        empty_value = base64.b64encode(b"")
+        results = results.exclude(
+            burpRequestBase64__exact=empty_value,
+            burpResponseBase64__exact=empty_value,
+        )
+        return results.order_by("id")
+
+    @extend_schema(
+        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseMultiSerializer(many=True)},
+        methods=["GET"],
+    )
+    @action(methods=["get"], detail=False, serializer_class=serializers.BurpRawRequestResponseMultiSerializer,
+            filter_backends=[], pagination_class=None, url_path=r"finding/(?P<finding_id>\d+)")
+    def finding(self, request, pk=None, finding_id=None):
+        finding = get_object_or_404(Finding.objects, pk=finding_id)
+
+        reqresp = finding.get_valid_request_response_pairs() if finding else BurpRawRequestResponse.objects.all()
+
+        # Send a favorable response
+        serialized_request_response = serializers.BurpRawRequestResponseMultiSerializer(reqresp, many=True)
+        return Response(serialized_request_response.data)
+
+
 # Authorization: superuser
 class NotesViewSet(
     mixins.UpdateModelMixin,
