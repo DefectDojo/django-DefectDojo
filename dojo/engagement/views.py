@@ -82,6 +82,7 @@ from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
     Risk_Acceptance,
+    SLA_Configuration,
     System_Settings,
     Test,
     Test_Import,
@@ -277,6 +278,7 @@ def edit_engagement(request, eid):
             # first save engagement details
             new_status = form.cleaned_data.get("status")
             engagement.product = form.cleaned_data.get("product")
+            initial_sla_config = Engagement.objects.get(pk=form.instance.id).sla_configuration
             engagement = form.save(commit=False)
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
@@ -285,10 +287,14 @@ def edit_engagement(request, eid):
             engagement.save()
             form.save_m2m()
 
+            msg = _("Engagement updated successfully.")
+            # check if the SLA config was changed, append additional context to message
+            if initial_sla_config != form.instance.sla_configuration:
+                msg += _(" All SLA expiration dates for findings within this product will be recalculated asynchronously for the newly assigned SLA configuration.")
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Engagement updated successfully.",
+                msg,
                 extra_tags="alert-success")
 
             success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, target="engagement", engagement=engagement, product=engagement.product)
@@ -469,6 +475,8 @@ class ViewEngagement(View):
         cred_eng = Cred_Mapping.objects.filter(
             engagement=eng.id).select_related("cred_id").order_by("cred_id")
 
+        sla = SLA_Configuration.objects.filter(id=eng.sla_configuration_id).first()
+
         add_breadcrumb(parent=eng, top_level=False, request=request)
 
         title = ""
@@ -495,6 +503,7 @@ class ViewEngagement(View):
                 "cred_eng": cred_eng,
                 "network": network,
                 "preset_test_type": preset_test_type,
+                "sla": sla,
             })
 
     def post(self, request, eid, *args, **kwargs):
