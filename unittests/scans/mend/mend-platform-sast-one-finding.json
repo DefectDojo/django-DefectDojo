@@ -1,0 +1,167 @@
+{
+  'response': [
+    {
+      'id': '42f09f21-7e77-45bb-9af0-1750b9664faf',
+      'scanId': 'b5e748b4-a6ff-4303-89a6-b051062fa5e3',
+      'snapshotId': 'e84dc715-b34e-43ba-8ad3-ff9303dcff54',
+      'projectId': '4a84dc99-256b-460f-8af3-7e33ad9e8f00',
+      'appId': 'd3faf1a5-65b5-4817-a6dc-c6862faebd63',
+      'type': {
+        'id': 55,
+        'commonId': 'crypto-missing-step-325',
+        'name': 'Missing Cryptographic Step',
+        'engineId': 101,
+        'language': 'Java*',
+        'sarif': 'java-crypto-missing-step',
+        'sarifLevel': '',
+        'order': 35,
+        'severity': 'Low',
+        'severityRating': 2.143,
+        'description': 'The application does not implement or incorrectly implements a necessary step in a cryptographic process. Such omission or error can lead to security vulnerabilities and weaken the overall effectiveness of the cryptographic process',
+        'recommendations': [
+          'Check if all the necessary steps for a cryptographic process have been implemented'
+        ],
+        'references': [
+          'https://cwe.mitre.org/data/definitions/325.html'
+        ],
+        'cwe': {
+          'id': 'CWE-325',
+          'title': 'CWE-325: Missing Cryptographic Step',
+          'url': 'https://cwe.mitre.org/data/definitions/325.html'
+        },
+        'pcidss': {
+          'section': '6.5.3',
+          'title': 'PCI DSS 6.5.3: Insecure Cryptographic Storage'
+        },
+        'nist': {
+          'control': 'SC-13',
+          'priority': 'P1',
+          'title': 'SC-13: Cryptographic Protection',
+          'url': 'https://nvd.nist.gov/800-53/Rev5/control/SC-13'
+        },
+        'hipaa': {
+          'control': '164.312 (a)(2)(iv)',
+          'title': '164.312 (a)(2)(iv): Access Control: Encryption and Decryption'
+        },
+        'hitrust': {
+          'control': '',
+          'title': ''
+        },
+        'owasp': {
+          'index': 'A3',
+          'title': 'A3: Sensitive Data Exposure',
+          'url': 'https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure'
+        },
+        'owasp2021': {
+          'index': 'A2',
+          'title': 'A2: Cryptographic Failures',
+          'url': 'https://owasp.org/Top10/A02_2021-Cryptographic_Failures/'
+        },
+        'capec': {
+          'id': '97',
+          'title': 'CAPEC-97: Cryptanalysis',
+          'url': 'https://capec.mitre.org/data/definitions/97.html'
+        },
+        'sansTop25': {
+          'rank': 0,
+          'title': ''
+        }
+      },
+      'description': "'init' method of 'javax.crypto.KeyGenerator' uses a crypto algorithm in a wrong way. Key size is not valid",
+      'createdTime': '2024-08-12T06:37:37.336Z',
+      'severity': 'Low',
+      'baseline': True,
+      'hasRemediation': False,
+      'suppressed': False,
+      'suppressedBy': '',
+      'suppressionTime': '0001-01-01T00:00:00Z',
+      'suppressionMessage': '',
+      'reviewed': False,
+      'IssueStatus': 0,
+      'sharedStep': {
+        'name': 'javax.crypto.KeyGenerator.init',
+        'kind': '',
+        'file': 'src/com/foxt/password/PasswordCryptFile.java',
+        'snippet': 'kg.init(klen);',
+        'line': 145,
+        'startLine': 141,
+        'endLine': 150,
+        'lineBlame': {
+          'commitId': '',
+          'file': '',
+          'line': 0
+        }
+      },
+      'dataFlows': [
+        {
+          'id': 'cfab7e98-23fb-4028-8f12-36c69355ec5c',
+          'createdTime': '2024-08-12T06:37:37.336Z',
+          'sink': 'javax.crypto.KeyGenerator.init',
+          'sinkKind': '',
+          'sinkFile': 'src/com/foxt/password/PasswordCryptFile.java',
+          'sinkSnippet': 'kg.init(klen);',
+          'sinkLine': 145,
+          'inputSource': 'kg',
+          'inputKind': 'variable',
+          'inputFlow': [
+            {
+              'name': 'kg',
+              'kind': 'variable',
+              'file': 'src/com/foxt/password/PasswordCryptFile.java',
+              'snippet': 'KeyGenerator kg = KeyGenerator.getInstance(s_algorithm);',
+              'line': 139,
+              'startLine': 135,
+              'endLine': 144
+            }
+          ],
+          'functionCalls': [
+            {
+              'name': 'javax.crypto.KeyGenerator.init',
+              'kind': '',
+              'file': 'src/com/foxt/password/PasswordCryptFile.java',
+              'snippet': 'kg.init(klen);',
+              'line': 145,
+              'startLine': 141,
+              'endLine': 150
+            }
+          ],
+          'filter': {
+            'isFiltered': False,
+            'filterTypes': []
+          },
+          'rating': 9.692307692307692,
+          'confidenceRating': 10,
+          'ageRating': 8
+        }
+      ],
+      'severityRating': 2.143,
+      'confidenceRating': 10,
+      'ageRating': 0,
+      'rating': 1.7144,
+      'almIssues': {
+        'jira': {
+          'issueId': '',
+          'project': ''
+        },
+        'azure': {
+          'workItemId': 0,
+          'project': ''
+        },
+        'jiraPlatform': {
+          'internalStatus': '',
+          'issueStatus': '',
+          'issueKey': '',
+          'publicLink': '',
+          'createdTime': '0001-01-01T00:00:00Z',
+          'createdBy': '',
+          'createdByName': ''
+        }
+      },
+      'comments': [],
+      'workflowViolationsCount': 0,
+      'workflowViolations': []
+    }
+  ],
+  'additionalData': None,
+  'supportToken': '4ca13f5d1a546e16da5e518408ea99ac6dc3b2d245aceff6'
+}
