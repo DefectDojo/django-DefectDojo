@@ -99,6 +99,7 @@ from dojo.models import (
     Tool_Type,
     User,
     UserContactInfo,
+    ExclusivePermission,
 )
 from dojo.group.queries import get_users_for_group
 from dojo.product.queries import get_authorized_products
@@ -287,14 +288,11 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
 
-    exclusive_permission = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=False, label="Exclusive Permission")
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product_type"].disabled = True
         self.fields["user"].queryset = Dojo_User.objects.order_by("first_name", "last_name")
         self.fields["user"].disabled = True
-        self.fields["exclusive_permission"].queryset = Dojo_User.objects.all()
 
     class Meta:
         model = Product_Type_Member
@@ -470,11 +468,28 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
 class Edit_Product_MemberForm(forms.ModelForm):
 
+    exclusive_permission = forms.ModelMultipleChoiceField(
+        queryset=ExclusivePermission.objects.none(),
+        required=False,
+        label="Exclusive Permission")
+
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         self.fields["product"].disabled = True
         self.fields["user"].queryset = Dojo_User.objects.order_by("first_name", "last_name")
         self.fields["user"].disabled = True
+        self.fields["exclusive_permission"].queryset = ExclusivePermission.objects.all()
+
+        if self.instance.pk:
+            self.fields["exclusive_permission"].initial = self.instance.exclusive_permission_product.all()
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if commit:
+            self.save_m2m()
+            instance.exclusive_permission_product.set(self.cleaned_data['exclusive_permission'])
+        return instance
 
     class Meta:
         model = Product_Member

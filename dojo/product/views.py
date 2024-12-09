@@ -1698,9 +1698,9 @@ def add_product_member(request, pid):
 @user_is_authorized(Product_Member, Permissions.Product_Manage_Members, "memberid")
 def edit_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
-    memberform = Edit_Product_MemberForm(instance=member)
+    memberform = Edit_Product_MemberForm(instance=member, user=request.user)
     if request.method == "POST":
-        memberform = Edit_Product_MemberForm(request.POST, instance=member)
+        memberform = Edit_Product_MemberForm(request.POST, instance=member, user=request.user)
         if memberform.is_valid():
             if member.role.is_owner and not user_has_permission(request.user, member.product,
                                                                 Permissions.Product_Member_Add_Owner):

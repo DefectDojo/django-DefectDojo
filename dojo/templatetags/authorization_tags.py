@@ -99,5 +99,5 @@ def enable_button(finding, button):
         raise ValueError("Not implemented rules button")
 
 @register.filter
-def has_object_exclusive_permission(object, permission):
-    return user_has_exclusive_permission(crum.get_current_user(), object, Permissions[permission])     
+def has_object_exclusive_permission(obj, permission):
+    return user_has_exclusive_permission(crum.get_current_user(), obj, Permissions[permission])     
