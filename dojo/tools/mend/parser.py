@@ -187,7 +187,7 @@ class MendParser:
                 cvssv3=cvss3_vector,
                 cvssv3_score=float(cvss3_score) if cvss3_score is not None else None,
                 impact=impact,
-                steps_to_reproduce=steps_to_reproduce if steps_to_reproduce is not None else None,
+                steps_to_reproduce=", ".join(locations) if locations is not None else None,
             )
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]
