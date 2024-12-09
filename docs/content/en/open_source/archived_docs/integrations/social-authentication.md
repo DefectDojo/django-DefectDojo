@@ -201,7 +201,7 @@ This will ensure the user is added to all the groups found in the Azure AD Token
 
 The Azure AD token returned by Azure will also need to be configured to include group IDs. Without this step, the
 token will not contain any notion of a group, and the mapping process will report that the current user is not a member of any 
-groups. To update the the format of the token, add a group claim that applies to whatever group type you are using.
+groups. To update the format of the token, add a group claim that applies to whatever group type you are using.
 If unsure of what type that is, select `All Groups`. Do not activate `Emit groups as role claims` within the Azure AD 
 "Token configuration" page.
 
