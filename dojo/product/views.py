@@ -1,7 +1,6 @@
 # #  product
 import base64
 import calendar as tcalendar
-import contextlib
 import logging
 from collections import OrderedDict
 from datetime import date, datetime, timedelta
@@ -958,8 +957,7 @@ def edit_product(request, pid):
 
             if get_system_setting("enable_github") and github_inst:
                 gform = GITHUB_Product_Form(request.POST, instance=github_inst)
-                # need to handle delete
-                with contextlib.suppress(Exception):
+                if gform.is_valid():
                     gform.save()
             elif get_system_setting("enable_github"):
                 gform = GITHUB_Product_Form(request.POST)
