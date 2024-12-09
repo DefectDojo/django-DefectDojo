@@ -170,7 +170,6 @@ class MendParser:
                     )
 
             filepaths = filepaths
-            steps_to_reproduce = locations
 
             new_finding = Finding(
                 title=title,
