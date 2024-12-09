@@ -172,5 +172,17 @@ def review_finding_exclusion_request(
     return redirect('finding_exclusion', fxid=fxid)
 
 
-def accept_find_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
-    pass
+def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
+    if request.method == 'POST':
+        finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+        finding_exclusion.status = "Accepted"
+        finding_exclusion.accepted_at = datetime.now()
+        finding_exclusion.status_updated_at = datetime.now()
+        finding_exclusion.status_updated_by = request.user
+        finding_exclusion.save()
+        
+        create_notification(event="other",
+                            title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
+                            description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+                            url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+                            recipients=[finding_exclusion.created_by])

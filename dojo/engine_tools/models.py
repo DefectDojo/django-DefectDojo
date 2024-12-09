@@ -68,6 +68,20 @@ class FindingExclusionDiscussion(models.Model):
     
     class Meta:
         db_table = "dojo_finding_exclusion_discussion"
+        
+
+class FindingWhitelist(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    cve = models.CharField(max_length=100,
+                           null=True,
+                           blank=False,
+                           verbose_name=_("Vulnerability Id"),
+                           )
+    finding_exclusion = models.ForeignKey(FindingExclusion, null=True, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = "dojo_finding_white_list"
 
 
 admin.site.register(FindingExclusion)
