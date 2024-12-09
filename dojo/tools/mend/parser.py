@@ -168,6 +168,9 @@ class MendParser:
                     logger.exception(
                         "Error handling local paths for vulnerability.",
                     )
+            if locations and len(", ".join(locations)) > 3999:
+                locations = [loc[:399] for loc in locations]
+                locations = ", ".join(locations)[:3999]
 
             filepaths = filepaths
 
