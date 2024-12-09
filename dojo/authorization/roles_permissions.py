@@ -48,6 +48,7 @@ class Permissions(IntEnum):
     Product_Edit = 1107
     Product_Delete = 1108
     Product_Tag_Red_Team = 1109
+    Product_Member_Add_Role = 1110
 
     Engagement_View = 1202
     Engagement_Add = 1203
@@ -436,6 +437,7 @@ def get_roles_with_permissions():
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
             Permissions.Product_Member_Add_Owner,
+            Permissions.Product_Member_Add_Role,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Engagement_View,
@@ -535,6 +537,8 @@ def get_roles_with_permissions():
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
             Permissions.Product_Member_Add_Owner,
+            Permissions.Product_Tag_Red_Team,
+            Permissions.Product_Member_Add_Role,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Product_Delete,

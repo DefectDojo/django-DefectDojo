@@ -30,6 +30,7 @@ from tagulous.forms import TagField
 
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.authorization import user_has_global_permission
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings, get_authorized_findings_by_status
@@ -100,6 +101,7 @@ from dojo.models import (
     User,
     UserContactInfo,
     ExclusivePermission,
+    Role,
 )
 from dojo.group.queries import get_users_for_group
 from dojo.product.queries import get_authorized_products
@@ -480,6 +482,7 @@ class Edit_Product_MemberForm(forms.ModelForm):
         self.fields["user"].queryset = Dojo_User.objects.order_by("first_name", "last_name")
         self.fields["user"].disabled = True
         self.fields["exclusive_permission"].queryset = ExclusivePermission.objects.all()
+        self.fields["role"].disabled = not user_has_global_permission(user, Permissions.Product_Member_Add_Role)
 
         if self.instance.pk:
             self.fields["exclusive_permission"].initial = self.instance.exclusive_permission_product.all()
@@ -498,10 +501,12 @@ class Edit_Product_MemberForm(forms.ModelForm):
 
 class Add_Product_MemberForm(forms.ModelForm):
     users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label="Users")
+    role = forms.ModelMultipleChoiceField(queryset=Role.objects.all(), required=True, label="Users", initial=Role.objects.filter(name="Developer"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["product"].disabled = True
+        self.fields["role"].disabled = True
         current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list("user", flat=True)
         self.fields["users"].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True)
