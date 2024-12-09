@@ -40,7 +40,7 @@ function get_current {
 # Tell to which environments we can switch
 function say_switch {
     echo "Using '${current_env}' configuration."
-    for one_env in dev debug unit_tests integration_tests release
+    for one_env in dev unit_tests integration_tests release
     do
         if [ "${current_env}" != ${one_env} ]; then
             echo "-> You can switch to '${one_env}' with '${0} ${one_env}'"
@@ -118,7 +118,7 @@ function set_integration_tests {
 # Change directory to allow working with relative paths.
 cd "${target_dir}" || exit
 
-if [ ${#} -eq 1 ] && [[ 'dev debug unit_tests unit_tests_cicd integration_tests release' =~ ${1} ]]
+if [ ${#} -eq 1 ] && [[ 'dev unit_tests unit_tests_cicd integration_tests release' =~ ${1} ]]
 then
     set_"${1}"
 else
