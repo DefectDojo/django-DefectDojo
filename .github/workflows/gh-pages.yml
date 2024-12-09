@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - master
-      - dev
-      - bugfix
 
 # Taken from https://github.com/marketplace/actions/hugo-setup#%EF%B8%8F-workflow-for-autoprefixer-and-postcss-cli
 # Both builds have to be one worflow as otherwise one publish will overwrite the other
