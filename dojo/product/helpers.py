@@ -54,5 +54,5 @@ def propagate_tags_on_product_sync(product):
 def propagate_tags_on_object_list(object_list):
     for obj in object_list:
         if obj and obj.id is not None:
-            logger.debug(f"\tPropagating tags to {str(type(obj))} - {str(obj)}")
+            logger.debug(f"\tPropagating tags to {type(obj)} - {obj}")
             obj.save()

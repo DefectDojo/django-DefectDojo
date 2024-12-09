@@ -66,7 +66,7 @@ def censor_path_hashes(path):
     if not path:
         return None
 
-    return re.sub("[a-f0-9]{64}", "censored_by_npm_audit", path)
+    return re.sub(r"[a-f0-9]{64}", "censored_by_npm_audit", path)
 
 
 def get_item(item_node, test):
