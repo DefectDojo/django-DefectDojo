@@ -3,9 +3,20 @@ title: "DefectDojo Pro Changelog"
 description: "DefectDojo Changelog"
 ---
 
-Here are the release notes for **DefectDojo Pro (Cloud Version)**.  
+Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrate notes](../../open_source/upgrading/upgrading_guide).
+
+## Dec 2, 2024: v2.41.0
+
+- **(Api)** `engagements/{id}/update_jira_epic` endpoint path added so that users can now push an updated Engagement to Jira, without creating a new Jira Epic.
+- **(Beta UI)** Columns can now be reordered in tables, by clicking and dragging the column header.
+
+![image](images/reorder-columns.png)
+
+- **(Beta UI)** Notes can now be added to a Test directly from the Test page.
+- **(Classic UI)** Reviewers are now displayed on Finding pages.
+- **(Docs)** New integrated docs site: https://docs.defectdojo.com/
 
 ## Nov 25, 2024: v2.40.4
 
