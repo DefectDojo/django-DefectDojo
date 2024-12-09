@@ -86,10 +86,22 @@ to be created. Closely follow the steps below to guarantee success.
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com', 'example.org']
     {{< /highlight >}}
 
+    As an environment variable: 
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = example.com,example.org
+    {{< /highlight >}}
+
     or
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
+    {{< /highlight >}}
+
+    As an environment variable: 
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = email@example.com,email2@example.com
     {{< /highlight >}}
 
 ## OKTA
