@@ -28,7 +28,7 @@ The Test will track and separate each scan version via **Import History,** so th
 
 
 
-![](https://downloads.intercomcdn.com/i/o/1194908628/52e2f3805bfbc2ef483e80f6/AD_4nXd1WNxopcweiK0ewbROIATPwKW6I4wRkMf83VQHOp3VGnwFbx3PIF_dKM_bTXxeRWdyOZRnXvlAIQUX4yPEwb0fg3P6NQZeRWY2qj6JN0T5BRaz2GZXGvbg-hWPmq2fhPCQHGUDdUMhQgFLkYN901McsDSw?expires=1729720800&signature=92270ab31ae91539655a6579d7f0b64bb18780ba93039b9457970b66e20edfbe&req=dSEuEsB%2BlYddUfMW1HO4zXlQLIbdnHicZ5UbPT1ZwpIiIYEWtY3aCewJOpvL%0Ab%2FjM%0A)
+![image](images/using_reimport.png)
 
 
 # Reimport Logic: Create, Ignore, Close or Reopen
@@ -88,7 +88,7 @@ The **Re\-Import Findings** form can be accessed on any Test page, under the **�
 ## 
 
 
-![](https://downloads.intercomcdn.com/i/o/1194908627/eb05840e395795550e54466f/AD_4nXfOUJldIKEa6Yr3NsphqeCAnOa-VlBgyLTYw0z_daFCQjNzdt_1way4w0t8nrX2ggjnllNAVqv6SfCn3BTfytYjATb6cf0tb6u-9ccz4QC6Qg8p_21aXACIMF1dTy2LeTSnpYtYwHEos9JKD5Hz7Ui4JUP7?expires=1729720800&signature=522addc1e53490316243b947db3014fcda398cf1a328d60f3473168682d55871&req=dSEuEsB%2BlYddXvMW1HO4zY5Pd0UWoQFJUVi4V0iRH%2B%2BKw1%2BMkgb%2BSEFmSpeX%0Ac54n%0A)## 
+![image](images/using_reimport_2.png) 
 
 
 The **Re\-import Findings** **Form** will **not** allow you to import a different scan type, or change the destination of the Findings you’re trying to upload. If you’re trying to do one of those things, you’ll need to use the **Import Scan Form**.
@@ -108,7 +108,7 @@ This table shows each Import or Reimport as a single line with a **Timestamp**, 
 
 
 
-![](https://downloads.intercomcdn.com/i/o/1194908626/72dc8e30a9f35b80e50c45d7/AD_4nXdjK_vtcbopS89UxEkLbbTF5yaKjNaEKoEbm15zq6m_yQcs8RTZWhGpD_FzaKFyp3p9ubrHfQPG1Hxa7mCuJN71_eK8f7gpiFRFrtLQavLz04J4odtBoN2HODhX-2bXgdK6hXZTQs5eoKiMU42BWc2aD7_s?expires=1729720800&signature=7e53ae3bd29381e3a20b8fdb72dd909c5271530c278fb5b1827217b0571218fa&req=dSEuEsB%2BlYddX%2FMW1HO4zaYdUMRuJgJFAp64fyc3gN8EIWfxL2bJjLRubpH%2B%0Amq%2Bo%0A)
+![image](images/using_reimport_3.png)
 ## Actions
 
 
