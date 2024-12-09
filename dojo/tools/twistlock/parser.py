@@ -31,7 +31,6 @@ class TwistlockCSVParser:
         data_type = row.get("Type")
         data_package_version = row.get("Package Version", "")
         data_package_license = row.get("Package License", "")
-        data_package_name = row.get("Package Name", "")
         data_cluster = row.get("Clusters", "")
         data_namespaces = row.get("Namespaces", "")
         data_package_path = row.get("Package Path", "")
@@ -53,6 +52,7 @@ class TwistlockCSVParser:
         data_vulnerability_link = row.get("Vulnerability Link", "")
         data_account_id = row.get("Account ID", "")
         data_discovered = row.get("Discovered", "")
+        data_unique_id = row.get("Custom Id")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -120,6 +120,7 @@ class TwistlockCSVParser:
             severity_justification=f"(CVSS v3 base score: {data_cvss})",
             impact=data_severity,
             vuln_id_from_tool=data_vulnerability_id,
+            unique_id_from_tool=data_unique_id,
             publish_date=(
                 dateutil.parser.parse(row.get("Published"))
                 if row.get("Published", None)
