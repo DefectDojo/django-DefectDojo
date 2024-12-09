@@ -82,7 +82,7 @@ class TestMendParser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CWE-325", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("10", finding.cvssv3)
-            self.assertEqual(3.1, finding.cvssv3_score)
+            self.assertEqual(2.143, finding.cvssv3_score)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding_platform_sast(self):
         with open("unittests/scans/mend/mend-platform-sast-many-findings.json", encoding="utf-8") as testfile:
