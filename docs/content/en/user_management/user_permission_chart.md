@@ -1,17 +1,14 @@
 ---
-title: "User Permission Charts"
+title: "User permission charts"
 description: "All user permissions in detail"
+weight: 4
 ---
 
-# Role Permission Chart
-
+## Role Permission Chart
 
 This chart is intended to list all permissions related to a Product or Product Type, as well as which permissions are available to each role.
 
-
-
-
-| **Section** | **Permission** | Reader | Writer | Maintainer | Owner | API Imp |
+| **Section** | **Permission** | Reader | Writer | Maintainer | Owner | API Importer |
 | --- | --- | --- | --- | --- | --- | --- |
 | **Product / Product Type Access** | View assigned Product or Product Type ¹ | ☑️ | ☑️ | ☑️ | ☑️ | ☑️ |
 |  | View nested Products, Engagements, Tests, Findings, Endpoints | ☑️ | ☑️ | ☑️ | ☑️ | ☑️ |
@@ -48,18 +45,11 @@ This chart is intended to list all permissions related to a Product or Product T
 2. When a new Product is added underneath a Product Type, all Product Type\-level Users will be added as Members of the new Product with their Product Type\-level Role.
 3. The user who wishes to make changes to a Group must also have **Edit Group** **Configuration Permissions**, and a **Maintainer or Owner** **Group Configuration Role** in the Group they wish to edit.
 
-
-# Configuration Permission Chart
-
+## Configuration Permission Chart
 
 Each Configuration Permission refers to a particular function in the software, and has an associated set of actions a user can perform related to this function.
 
-
-
 The majority of Configuration Permissions give users access to certain pages in the UI. 
-
-
-
 
 | **Configuration Permission** | **View ☑️** | **Add ☑️** | **Edit ☑️** | **Delete ☑️** |
 | --- | --- | --- | --- | --- |
@@ -84,12 +74,7 @@ The majority of Configuration Permissions give users access to certain pages in 
 
 1. Access to the Finding Templates page also requires the **Writer, Maintainer** or **Owner** Global Role for this user.
 
-
-
-# Group Configuration Permissions
-
-
-
+## Group Configuration Permissions
 
 | Configuration Permission | **Reader** | **Maintainer** | **Owner** |
 | --- | --- | --- | --- |
