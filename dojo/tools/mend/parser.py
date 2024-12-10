@@ -173,7 +173,7 @@ class MendParser:
             if locations and len(", ".join(locations)) > 3999:
                 locations = [loc[:3999] for loc in locations]
                 locations = ", ".join(locations)[:3999]
-                steps_to_reproduce=", ".join(locations) if locations is not None else None,
+                steps_to_reproduce= ", ".join(locations) if locations is not None else None
 
             filepaths = filepaths
 
