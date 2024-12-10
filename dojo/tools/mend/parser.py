@@ -66,7 +66,7 @@ class MendParser:
                 component_version = node["component"].get("version")
                 impact = node["component"].get("dependencyType")
                 cvss3_score = node["vulnerability"].get("score", None)
-                steps_to_reproduce = node["component"].get("path", None)
+                steps_to_reproduce = node["component"].get("path")
                 if "topFix" in node:
                     try:
                         topfix_node = node.get("topFix")
