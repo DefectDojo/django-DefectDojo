@@ -4,7 +4,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification, send_mail_notification
-from dojo.engine_tools.models import FindingExclusion
+from dojo.engine_tools.models import FindingExclusion, FindingWhitelist
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm
 
@@ -21,7 +21,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 @user_is_configuration_authorized("dojo.view_findingexclusion")
 def finding_exclusions(request: HttpRequest):
-    finding_exclusions = FindingExclusion.objects.all()
+    finding_exclusions = FindingExclusion.objects.all().order_by("-create_date")
     finding_exclusions = FindingExclusionFilter(request.GET,
                                                 queryset=finding_exclusions)
     paged_finding_exclusion = get_page_items(request,
@@ -90,7 +90,7 @@ def show_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
     discussion_form = FindingExclusionDiscussionForm()
     
     add_breadcrumb(title=finding_exclusion.unique_id_from_tool,
-                   top_level=True,
+                   top_level=False,
                    request=request)
 
     return render(request, "dojo/show_finding_exclusion.html", {
@@ -176,13 +176,29 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
     if request.method == 'POST':
         finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
         finding_exclusion.status = "Accepted"
+        finding_exclusion.final_status = "Accepted"
         finding_exclusion.accepted_at = datetime.now()
         finding_exclusion.status_updated_at = datetime.now()
         finding_exclusion.status_updated_by = request.user
         finding_exclusion.save()
+        
+        FindingWhitelist.objects.create(
+            cve=finding_exclusion.unique_id_from_tool,
+            finding_exclusion=finding_exclusion
+        )
         
         create_notification(event="other",
                             title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
                             description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
                             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
                             recipients=[finding_exclusion.created_by])
+        
+        messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Finding Exclusion accepted.",
+                extra_tags="alert-success")
+            
+        return redirect('finding_exclusion', fxid=fxid)
+    
+    return redirect('finding_exclusion', fxid=fxid)

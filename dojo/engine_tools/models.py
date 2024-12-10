@@ -7,14 +7,11 @@ import uuid
 
 class FindingExclusion(models.Model):
 
-    TYPE_CHOICES = [("white_list", "white_list"),
-                    ("black_list", "black_list")]
     STATUS_CHOICES = [("Accepted", "Accepted"),
                       ("Pending", "Pending"),
                       ("Reviewed", "Reviewed"),
                       ("Rejected", "Rejected")]
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True)
-    type = models.CharField(max_length=12, choices=TYPE_CHOICES)
     unique_id_from_tool = models.CharField(
         blank=True,
         max_length=500,
@@ -41,7 +38,7 @@ class FindingExclusion(models.Model):
                                 on_delete=models.CASCADE)
     reason = models.CharField(max_length=200, blank=True)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, blank=True, default="Pending")
-    final_status = models.CharField(choices=[('approved', 'Approved'), ('rejected', 'Rejected')], null=True)
+    final_status = models.CharField(choices=[("Accepted", "Accepted"), ("Rejected", "Rejected")], null=True)
     accepted_by = models.ForeignKey("Dojo_User",
                                     null=True,
                                     blank=True,
@@ -84,5 +81,6 @@ class FindingWhitelist(models.Model):
         db_table = "dojo_finding_white_list"
 
 
+admin.site.register(FindingWhitelist)
 admin.site.register(FindingExclusion)
 admin.site.register(FindingExclusionDiscussion)

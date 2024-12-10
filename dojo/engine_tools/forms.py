@@ -10,8 +10,6 @@ class FindingExclusionForm(forms.ModelForm):
 
 
 class CreateFindingExclusionForm(forms.ModelForm):
-    type = forms.ChoiceField(required=True,
-                             choices=FindingExclusion.TYPE_CHOICES)
     unique_id_from_tool = forms.CharField(
         required=True,
         max_length=500,
@@ -23,6 +21,7 @@ class CreateFindingExclusionForm(forms.ModelForm):
     class Meta:
         model = FindingExclusion
         exclude = [
+            "type",
             "uuid", 
             "product", 
             "user_history", 

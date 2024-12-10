@@ -33,6 +33,10 @@
         opacity: 1;
         background-color: #e9ecef;
     }
+    .timeline-step.danger {
+        opacity: 1;
+        background-color: #e9ecef;
+    }
     .timeline-step::before {
         content: '';
         position: absolute;
@@ -46,6 +50,9 @@
     }
     .timeline-step.active::before {
         background-color: #28a745;
+    }
+    .timeline-step.danger::before {
+        background-color: #d11d38;
     }
     .timeline-content {
         position: relative;
@@ -119,9 +126,12 @@
                             </li>
                             {% if "dojo.review_findingexclusion"|has_configuration_permission:request %}
                             <li role="presentation">
-                                <a rel="noopener noreferrer" href="">
+                                <a href="#" onclick="document.getElementById('acceptForm').submit(); return false;">
                                     <i class="fa-solid fa-circle-exclamation"></i> Accept Finding Exclusion
                                 </a>
+                                <form id="acceptForm" method="POST" action="{% url 'accept_finding_exclusion_request' finding_exclusion.uuid %}" style="display:none;">
+                                    {% csrf_token %}
+                                </form>
                             </li>
                             <li role="presentation">
                                 <a href="#" onclick="document.getElementById('reviewForm').submit(); return false;">
@@ -142,7 +152,6 @@
                     {% block header_head %}
                         <th>ID</th>
                         <th>Vulnerability unique ID</th>
-                        <th>Type</th>
                         <th>Status</th>
                         <th>Created by</th>
                         <th>Created at</th>
@@ -153,16 +162,21 @@
                     {% block header_body %}
                         <td>{{ finding_exclusion.uuid }}</td>
                         <td>{{ finding_exclusion.unique_id_from_tool }}</td>
-                        <td>{{ finding_exclusion.type }}</td>
-                        {% if finding_exclusion.status == "Pending"%}
-                                <td><span style="background-color: #1B30DE;" class="pass_fail Pass">{{finding_exclusion.status}}</span></td>
-                            {% elif finding_exclusion.status == "Accepted"%}
-                                <td><span style="background-color: #096C11;" class="pass_fail Pass">{{finding_exclusion.status}}</span></td>
-                            {% elif finding_exclusion.status == "Rejected"%}
-                                <td><span style="background-color: #b97a0c;" class="pass_fail Pass">{{finding_exclusion.status}}</span></td>
-                        {%else%}
-                            <td>{{finding_exclusion.status}}</td>
-                        {%endif%}
+                        <td>
+                            {% if finding_exclusion.status in "Pending,Accepted,Rejected,Reviewed" %}
+                                <span style="background-color: 
+                                    {% if finding_exclusion.status == 'Pending' %}#1B30DE
+                                    {% elif finding_exclusion.status == 'Accepted' %}#096C11
+                                    {% elif finding_exclusion.status == 'Rejected' %}#d11d38
+                                    {% else %}#b97a0c
+                                    {% endif %}" 
+                                    class="pass_fail Pass">
+                                    {{ finding_exclusion.status }}
+                                </span>
+                            {% else %}
+                                {{ finding_exclusion.status }}
+                            {% endif %}
+                        </td>
                         <td>{{ finding_exclusion.created_by }}</td>
                         <td>{{ finding_exclusion.create_date|date:"d M Y H:i" }}</td>
                         <td>{{ finding_exclusion.expiration_date|date:"d M Y H:i" }}</td>          
@@ -216,18 +230,16 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="col-4 timeline-step {% if finding_exclusion.final_status %}active{% endif %}">
+                        <div class="col-4 timeline-step {% if finding_exclusion.final_status == 'Accepted' %}active{% elif finding_exclusion.final_status == 'Rejected' %}danger{% endif %}">
                             <div class="timeline-content">
                                 <pre><strong>Final Status</strong></pre>
                                 <p>
                                     {% if finding_exclusion.final_status %}
-                                        <pre><strong>
-                                        {% if finding_exclusion.final_status == 'approved' %}
-                                            <span class="text-success">Approved</span>
+                                        {% if finding_exclusion.final_status == 'Accepted' %}
+                                            <pre class="text-success"><strong>Approved</strong></pre>
                                         {% else %}
-                                            <span class="text-danger">Rejected</span>
+                                            <pre class="text-danger"><strong>Rejected</strong></pre>
                                         {% endif %}
-                                        </strong></pre>
                                         <br>
                                         <pre>{{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}</pre>
                                     {% else %}
