@@ -296,7 +296,7 @@ def prefetch_for_expiration(risk_acceptances):
                                              )
 
 
-def simple_risk_accept(user: Dojo_User, finding: Finding, perform_save=True) -> None:
+def simple_risk_accept(user: Dojo_User, finding: Finding, *, perform_save=True) -> None:
     if not finding.test.engagement.product.enable_simple_risk_acceptance:
         raise PermissionDenied
 
@@ -319,7 +319,7 @@ def simple_risk_accept(user: Dojo_User, finding: Finding, perform_save=True) -> 
         ))
 
 
-def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True) -> None:
+def risk_unaccept(user: Dojo_User, finding: Finding, *, perform_save=True) -> None:
     logger.debug("unaccepting finding %i:%s if it is currently risk accepted", finding.id, finding)
     if finding.risk_accepted:
         logger.debug("unaccepting finding %i:%s", finding.id, finding)
