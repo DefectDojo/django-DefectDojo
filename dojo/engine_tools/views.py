@@ -40,7 +40,7 @@ def finding_exclusions(request: HttpRequest):
 
 
 @user_is_configuration_authorized("dojo.add_findingexclusion")
-def create_finding_exclusion(request):
+def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     default_unique_id = request.GET.get('unique_id', '')
     
     form = CreateFindingExclusionForm(initial={'unique_id_from_tool': default_unique_id})
@@ -48,6 +48,20 @@ def create_finding_exclusion(request):
 
     if request.method == "POST":
         form = CreateFindingExclusionForm(request.POST)
+        
+        duplicate_finding_exclusions = FindingExclusion.objects.filter(
+            unique_id_from_tool__in=[default_unique_id, request.POST.get(key='unique_id_from_tool')],
+        ).first()
+        
+        if duplicate_finding_exclusions:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                f"There is already a request in status '{duplicate_finding_exclusions.status}' for this CVE, please consult the id '{duplicate_finding_exclusions.uuid}' in this section.",
+                extra_tags="alert-danger")
+            
+            return HttpResponseRedirect(reverse("finding_exclusions"))
+        
         if form.is_valid():
             exclusion = form.save(commit=False)
             exclusion.created_by = request.user
