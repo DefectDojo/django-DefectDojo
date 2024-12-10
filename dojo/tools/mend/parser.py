@@ -57,9 +57,6 @@ class MendParser:
                     + "**Library Type**: "
                     + node["component"].get("libraryType", "")
                     + "\n"
-                    + "**Direct or Transitive Dependency**: "
-                    + node["component"].get("dependencyType", "")
-                    + "\n"
                 )
                 lib_name = node["component"].get("name")
                 component_name = node["component"].get("artifactId")
