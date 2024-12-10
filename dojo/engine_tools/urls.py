@@ -27,4 +27,7 @@ urlpatterns = [
     re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/mark-as-accepted/$', 
             views.accept_finding_exclusion_request, 
             name='accept_finding_exclusion_request'),
+    re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/mark-as-rejected/$', 
+            views.reject_finding_exclusion_request, 
+            name='reject_finding_exclusion_request'),
 ]

@@ -113,34 +113,43 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1"> 
-                            <li role="presentation">
-                                <a rel="noopener noreferrer" href="">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit Finding Exclusion
-                                </a>
-
-                            </li>
-                            <li role="presentation">
-                                <a rel="noopener noreferrer" href="">
-                                    <i class="fa-solid fa-fire-extinguisher"></i> Close Finding Exclusion
-                                </a>
-                            </li>
                             {% if "dojo.review_findingexclusion"|has_configuration_permission:request %}
-                            <li role="presentation">
-                                <a href="#" onclick="document.getElementById('acceptForm').submit(); return false;">
-                                    <i class="fa-solid fa-circle-exclamation"></i> Accept Finding Exclusion
-                                </a>
-                                <form id="acceptForm" method="POST" action="{% url 'accept_finding_exclusion_request' finding_exclusion.uuid %}" style="display:none;">
-                                    {% csrf_token %}
-                                </form>
-                            </li>
-                            <li role="presentation">
-                                <a href="#" onclick="document.getElementById('reviewForm').submit(); return false;">
-                                    <i class="fa-solid fa-circle-check"></i> Mark as Reviewed
-                                </a>
-                                <form id="reviewForm" method="POST" action="{% url 'review_finding_exclusion_request' finding_exclusion.uuid %}" style="display:none;">
-                                    {% csrf_token %}
-                                </form>
-                            </li>
+                                {% if finding_exclusion.status == 'Pending' %} 
+                                <li role="presentation">
+                                    <a href="#" onclick="document.getElementById('reviewForm').submit(); return false;">
+                                        <i class="fa-solid fa-circle-check"></i> Mark as Reviewed
+                                    </a>
+                                    <form id="reviewForm" method="POST" action="{% url 'review_finding_exclusion_request' finding_exclusion.uuid %}" style="display:none;">
+                                        {% csrf_token %}
+                                    </form>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if "dojo.accept_findingexclusion"|has_configuration_permission:request %}
+                                {% if finding_exclusion.status != 'Accepted' and finding_exclusion.status != 'Rejected' and finding_exclusion.status == 'Reviewed' %}
+                                <li role="presentation">
+                                    <a href="#" onclick="document.getElementById('acceptForm').submit(); return false;">
+                                        <i class="fa-solid fa-circle-exclamation"></i> Accept Finding Exclusion
+                                    </a>
+                                    <form id="acceptForm" method="POST" action="{% url 'accept_finding_exclusion_request' finding_exclusion.uuid %}" style="display:none;">
+                                        {% csrf_token %}
+                                    </form>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+
+                            {% if "dojo.reject_findingexclusion"|has_configuration_permission:request %}
+                                {% if finding_exclusion.status != 'Accepted' and finding_exclusion.status != 'Rejected' %}
+                                <li role="presentation">
+                                    <a href="#" onclick="document.getElementById('rejectForm').submit(); return false;">
+                                        <i class="fa-solid fa-circle-xmark"></i> Reject Finding Exclusion
+                                    </a>
+                                    <form id="rejectForm" method="POST" action="{% url 'reject_finding_exclusion_request' finding_exclusion.uuid %}" style="display:none;">
+                                        {% csrf_token %}
+                                    </form>
+                                </li>
+                                {% endif %}
                             {% endif %}
                         </ul>       
                     </div>

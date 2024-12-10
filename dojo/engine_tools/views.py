@@ -1,7 +1,7 @@
 # Dojo
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.models import Dojo_User
+from dojo.models import Dojo_User, Finding
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification, send_mail_notification
 from dojo.engine_tools.models import FindingExclusion, FindingWhitelist
@@ -17,6 +17,9 @@ from django.http.response import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import transaction
+from django.db.models import F
+from tagulous.models import TagField
 
 
 @user_is_configuration_authorized("dojo.view_findingexclusion")
@@ -99,7 +102,8 @@ def show_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
         'discussion_form': discussion_form,
     })
     
-    
+
+@user_is_configuration_authorized("dojo.add_findingexclusion")
 def add_finding_exclusion_discussion(request: HttpRequest, fxid: str) -> HttpResponse:
     """Add a discussion for an finding exclusion
 
@@ -172,20 +176,39 @@ def review_finding_exclusion_request(
     return redirect('finding_exclusion', fxid=fxid)
 
 
+@user_is_configuration_authorized("dojo.accept_findingexclusion")
 def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
     if request.method == 'POST':
-        finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
-        finding_exclusion.status = "Accepted"
-        finding_exclusion.final_status = "Accepted"
-        finding_exclusion.accepted_at = datetime.now()
-        finding_exclusion.status_updated_at = datetime.now()
-        finding_exclusion.status_updated_by = request.user
-        finding_exclusion.save()
-        
-        FindingWhitelist.objects.create(
-            cve=finding_exclusion.unique_id_from_tool,
-            finding_exclusion=finding_exclusion
-        )
+        try:
+            with transaction.atomic():
+                finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+                finding_exclusion.status = "Accepted"
+                finding_exclusion.final_status = "Accepted"
+                finding_exclusion.accepted_at = datetime.now()
+                finding_exclusion.status_updated_at = datetime.now()
+                finding_exclusion.status_updated_by = request.user
+                finding_exclusion.save()
+                
+                FindingWhitelist.objects.create(
+                    cve=finding_exclusion.unique_id_from_tool,
+                    finding_exclusion=finding_exclusion
+                )
+                
+                findings = Finding.objects.filter(cve=finding_exclusion.unique_id_from_tool)
+                
+                for finding in findings:
+                    if not 'white_list' in finding.tags:
+                        finding.tags.add("white_list")
+                    finding.sla_age = 999
+                    
+                
+        except Exception as e:
+            messages.add_message(
+                    request,
+                    messages.ERROR,
+                    f"An error occurred while accepting this finding exclusion, please try again later. Details: {e.with_traceback()}",
+                    extra_tags="alert-success")
+            return redirect('finding_exclusion', fxid=fxid)
         
         create_notification(event="other",
                             title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
@@ -197,6 +220,27 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                 request,
                 messages.SUCCESS,
                 "Finding Exclusion accepted.",
+                extra_tags="alert-success")
+            
+        return redirect('finding_exclusion', fxid=fxid)
+    
+    return redirect('finding_exclusion', fxid=fxid)
+
+
+@user_is_configuration_authorized("dojo.reject_findingexclusion")
+def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
+    if request.method == 'POST':
+        finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+        finding_exclusion.status = "Rejected"
+        finding_exclusion.final_status = "Rejected"
+        finding_exclusion.status_updated_at = datetime.now()
+        finding_exclusion.status_updated_by = request.user
+        finding_exclusion.save()
+        
+        messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Finding Exclusion rejected.",
                 extra_tags="alert-success")
             
         return redirect('finding_exclusion', fxid=fxid)
