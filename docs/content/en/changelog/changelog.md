@@ -26,7 +26,6 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 - **(Classic UI)** Reviewers are now displayed on Finding pages.
 - **(Docs)** New integrated docs site: https://docs.defectdojo.com/
 
-
 ## Nov 25, 2024: v2.40.4
 
 - **(Beta UI)**  Improved Metadata tables with Parent object relationships for Products, Engagements, Tests, Findings, Endpoints/Hosts
