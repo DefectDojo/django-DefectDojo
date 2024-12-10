@@ -39,6 +39,7 @@ class MendParser:
             description = "No Description Available"
             cvss3_score = None
             mitigation = "N/A"
+            steps_to_reproduce = None
             if "component" in node:
                 description = (
                     "**Vulnerability Description**: "
@@ -65,6 +66,7 @@ class MendParser:
                 component_version = node["component"].get("version")
                 impact = node["component"].get("dependencyType")
                 cvss3_score = node["vulnerability"].get("score", None)
+                steps_to_reproduce = node["component"].get("path", None)
                 if "topFix" in node:
                     try:
                         topfix_node = node.get("topFix")
@@ -169,8 +171,9 @@ class MendParser:
                         "Error handling local paths for vulnerability.",
                     )
             if locations and len(", ".join(locations)) > 3999:
-                locations = [loc[:399] for loc in locations]
+                locations = [loc[:3999] for loc in locations]
                 locations = ", ".join(locations)[:3999]
+                steps_to_reproduce=", ".join(locations) if locations is not None else None,
 
             filepaths = filepaths
 
@@ -189,7 +192,7 @@ class MendParser:
                 cvssv3=cvss3_vector,
                 cvssv3_score=float(cvss3_score) if cvss3_score is not None else None,
                 impact=impact,
-                steps_to_reproduce=", ".join(locations) if locations is not None else None,
+                steps_to_reproduce=steps_to_reproduce if steps_to_reproduce is not None else None,
             )
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]
