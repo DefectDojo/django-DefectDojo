@@ -42,7 +42,7 @@ class TestMendParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = list(findings)[0]
-            self.assertEqual("D:\\MendRepo\\test-product\\test-project\\test-project-subcomponent\\path\\to\\the\\Java\\commons-codec-1.6_donotuse.jar", finding.steps_to_reproduce)
+            self.assertEqual("**Locations Found**: D:\\MendRepo\\test-product\\test-project\\test-project-subcomponent\\path\\to\\the\\Java\\commons-codec-1.6_donotuse.jar", finding.steps_to_reproduce)
 
     def test_parse_file_with_no_vuln_has_no_findings_platform(self):
         with open("unittests/scans/mend/mend-sca-platform-api3-no-findings.json", encoding="utf-8") as testfile:
