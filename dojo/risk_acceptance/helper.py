@@ -22,11 +22,11 @@ def expire_now(risk_acceptance):
     reactivated_findings = []
     if risk_acceptance.reactivate_expired:
         for finding in risk_acceptance.accepted_findings.all():
-            if not finding.active: # not sure why this is important
+            if not finding.active:  # not sure why this is important
                 logger.debug("%i:%s: unaccepting/reactivating finding.", finding.id, finding)
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
-                risk_unaccept(None, finding, post_comments=False) #comments will be posted at end
+                risk_unaccept(None, finding, post_comments=False)  # comments will be posted at end
                 reactivated_findings.append(finding)
             else:
                 logger.debug("%i:%s already active, no changes made.", finding.id, finding)
