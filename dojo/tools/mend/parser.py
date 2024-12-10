@@ -61,7 +61,11 @@ class MendParser:
                 lib_name = node["component"].get("name")
                 component_name = node["component"].get("artifactId")
                 component_version = node["component"].get("version")
-                impact = node["component"].get("dependencyType")
+                impact = (
+                    "**Direct or Transitive Vulnerability**: "
+                    + node["component"].get("dependencyType")
+                    +"\n"
+                )
                 cvss3_score = node["vulnerability"].get("score", None)
                 component_path = node["component"].get("path", None)
                 if component_path:
