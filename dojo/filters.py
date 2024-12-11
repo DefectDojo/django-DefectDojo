@@ -1199,6 +1199,7 @@ class ProductEngagementFilterWithoutObjectLookups(ProductEngagementFilterHelper,
 class ApiEngagementFilter(DojoFilter):
     name = CharFilter(lookup_expr="icontains", label="Engagement name")
     product__prod_type = NumberInFilter(field_name="product__prod_type", lookup_expr="in")
+    product = NumberInFilter(field_name="product", lookup_expr="in")
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
     tags = CharFieldInFilter(field_name="tags__name", lookup_expr="in",
                              help_text="Comma separated list of exact tags")
