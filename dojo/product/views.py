@@ -91,6 +91,7 @@ from dojo.models import (
     System_Settings,
     Test,
     Test_Type,
+    ExclusivePermission,
 )
 from dojo.product.queries import (
     get_authorized_global_groups_for_product,
@@ -1655,9 +1656,9 @@ def edit_notifications(request, pid):
 @user_is_authorized(Product, Permissions.Product_Manage_Members, "pid")
 def add_product_member(request, pid):
     product = get_object_or_404(Product, pk=pid)
-    memberform = Add_Product_MemberForm(initial={"product": product.id})
+    memberform = Add_Product_MemberForm(initial={"product": product.id}, user=request.user)
     if request.method == "POST":
-        memberform = Add_Product_MemberForm(request.POST, initial={"product": product.id})
+        memberform = Add_Product_MemberForm(request.POST, initial={"product": product.id}, user=request.user)
         if memberform.is_valid():
             if memberform.cleaned_data["role"].is_owner and not user_has_permission(request.user, product,
                                                                                     Permissions.Product_Member_Add_Owner):
@@ -1681,6 +1682,10 @@ def add_product_member(request, pid):
                                 return validate_res
                             else:
                                 product_member.save()
+                                if memberform.cleaned_data["exclusive_permission"]:
+                                    logger.info("Adding exclusive permissions to product member")
+                                    product_member.exclusive_permission_product.add(*memberform.cleaned_data["exclusive_permission"])
+                                    product_member.save()
 
                 messages.add_message(request,
                                      messages.SUCCESS,
