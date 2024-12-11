@@ -22,7 +22,7 @@ jobs:
         file-type: [yaml, json]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: release/${{ env.release_version }}
 
@@ -51,7 +51,7 @@ jobs:
         run: docker compose down
 
       - name: Upload oas.${{ matrix.file-type }} as artifact
-        uses:  actions/upload-artifact@v4
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
         with:
           name: oas-${{ matrix.file-type }}
           path: oas.${{ matrix.file-type }}
