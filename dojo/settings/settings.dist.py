@@ -1289,6 +1289,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Invicti Scan": ["title", "description", "severity"],
     "HackerOne Cases": ["title", "severity"],
     "KrakenD Audit Scan": ["description", "mitigation", "severity"],
+    "Red Hat Satellite": ["description", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1533,6 +1534,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
     "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
