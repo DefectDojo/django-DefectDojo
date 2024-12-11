@@ -70,7 +70,6 @@ class MendParser:
                 component_path = node["component"].get("path", None)
                 if component_path:
                     locations.append(component_path)
-                steps_to_reproduce = locations
 
                 if "topFix" in node:
                     try:
@@ -198,7 +197,7 @@ class MendParser:
                 cvssv3=cvss3_vector,
                 cvssv3_score=float(cvss3_score) if cvss3_score is not None else None,
                 impact=impact,
-                steps_to_reproduce=steps_to_reproduce if steps_to_reproduce is not None else None
+                steps_to_reproduce=steps_to_reproduce if steps_to_reproduce is not None else None,
             )
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]
