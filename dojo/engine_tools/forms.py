@@ -24,10 +24,6 @@ class CreateFindingExclusionForm(forms.ModelForm):
         condition = kwargs.pop('disable_unique_id', False)
         
         super().__init__(*args, **kwargs)
-        
-        if condition:
-            self.fields['unique_id_from_tool'].widget.attrs['disabled'] = 'disabled'
-            self.fields['type'].widget.attrs['disabled'] = 'disabled'
 
     class Meta:
         model = FindingExclusion

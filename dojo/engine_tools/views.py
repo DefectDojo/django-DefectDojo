@@ -252,7 +252,9 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                 
                 for finding in findings:
                     if not 'white_list' in finding.tags:
-                        finding.tags.add("white_list")                 
+                        finding.tags.add("white_list")
+                    finding.active = False
+                    finding.save()       
                 
         except Exception as e:
             messages.add_message(

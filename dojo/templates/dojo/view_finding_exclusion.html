@@ -56,6 +56,7 @@
                     <tr>
                         <th>UUID</th>
                         <th>Finding Id</th>
+                        <th>Type</th>
                         <th>Create Date</th>
                         <th>Expired Date</th>
                         <th>Reason</th>
@@ -67,6 +68,7 @@
                             <tr>
                                 <td><a href="{% url 'finding_exclusion' exclusion.uuid %}">{{ exclusion.uuid }}</a></td>
                                 <td>{{exclusion.unique_id_from_tool}}</td>
+                                <td>{{exclusion.type}}</td>
                                 <td>{{exclusion.create_date}}</td>
                                 <td>{{exclusion.expiration_date}}</td>
                                 <td>{{exclusion.reason}}</td>
