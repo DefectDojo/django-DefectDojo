@@ -172,11 +172,8 @@ class ScannerTest(BaseTestCase):
                 index = list(found_matches.keys())[0]
                 scan_map[test] = options_text[index]
             elif len(found_matches) > 1:
-                try:
-                    index = list(found_matches.values()).index(temp_test)
-                    scan_map[test] = options_text[list(found_matches.keys())[index]]
-                except:
-                    pass
+                index = list(found_matches.values()).index(temp_test)
+                scan_map[test] = options_text[list(found_matches.keys())[index]]
 
         failed_tests = []
         for test in self.tests:
