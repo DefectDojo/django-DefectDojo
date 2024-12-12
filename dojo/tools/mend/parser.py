@@ -70,7 +70,6 @@ class MendParser:
                 component_path = node["component"].get("path", None)
                 if component_path:
                     locations.append(component_path)
-                steps_to_reproduce = "**Locations Found**: " + locations if locations is not None else None
 
                 if "topFix" in node:
                     try:
@@ -176,10 +175,7 @@ class MendParser:
                     )
             if locations and len(", ".join(locations)) > 3999:
                 locations = [loc[:3999] for loc in locations]
-                locations = ", ".join(locations)[:3999]
-                steps_to_reproduce = "**Locations Found**: " + locations if locations is not None else None
-            else:
-                steps_to_reproduce = ", ".join(locations)
+                steps_to_reproduce = "**Locations Found**: " + ", ".join(locations) if locations is not None else None
 
             filepaths = filepaths
 
