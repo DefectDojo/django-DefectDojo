@@ -2286,7 +2286,6 @@ class Finding(models.Model):
                       ('Risk Expired', 'Risk Expired'),
                       ('Risk Accepted', 'Risk Accepted'),
                       ('Risk Active', 'Risk Active'),
-                      ('Risk Inactive', 'Risk Inactive'),
                       ('Transfer Pending', 'Transfer Pending'),
                       ('Transfer Rejected', 'Transfer Rejected'),
                       ('Transfer Expired', 'Transfer Expired'),
