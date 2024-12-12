@@ -7,7 +7,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Dojo_User, Finding, Product
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification, send_mail_notification
-from dojo.engine_tools.models import FindingExclusion, FindingWhitelist
+from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm
 
@@ -86,11 +86,13 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
             exclusion.product = product
             exclusion.expiration_date = timezone.now() + timedelta(days=30)
             exclusion.save()
+            
             messages.add_message(
                 request,
                 messages.SUCCESS,
                 "Exclusion successfully created.",
                 extra_tags="alert-success")
+            
             return HttpResponseRedirect(reverse("finding_exclusions"))
         else:
             messages.add_message(
