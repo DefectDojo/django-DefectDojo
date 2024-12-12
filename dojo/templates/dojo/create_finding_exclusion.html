@@ -12,9 +12,6 @@
                     <input class="btn btn-primary" type="submit" label="Update exclusion" name="Update exclusion" value="Update Exclusion"/>
                     <input class="btn btn-primary" type="submit" label="add_exclusion" name="add_exclusion"
                            value="Edit Questions"/>
-                    {% if "dojo.delete_engagement_survey"|has_configuration_permission:request %}
-                    <a class="btn btn-danger" href="{% url 'delete_questionnaire' survey.id %}">Delete Questionnaire</a>
-                    {% endif %}
                 {% else %}
                     <input class="btn btn-primary" type="submit" label="creat_exclusion" name="create exclusion" value="Create Exclusion"/>
                     <input class="btn btn-primary" type="submit" label="add_exclusion" name="add_exclusion"

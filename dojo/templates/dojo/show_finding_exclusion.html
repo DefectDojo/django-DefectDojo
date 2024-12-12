@@ -113,7 +113,7 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1"> 
-                            {% if "dojo.review_findingexclusion"|has_configuration_permission:request %}
+                            {% if finding_exclusion.product|has_object_permission:"Finding_Exclusion_Review" %}
                                 {% if finding_exclusion.status == 'Pending' %} 
                                 <li role="presentation">
                                     <a href="#" onclick="document.getElementById('reviewForm').submit(); return false;">
@@ -126,7 +126,7 @@
                                 {% endif %}
                             {% endif %}
 
-                            {% if "dojo.accept_findingexclusion"|has_configuration_permission:request %}
+                            {% if finding_exclusion.product|has_object_permission:"Finding_Exclusion_Accept" %}
                                 {% if finding_exclusion.status != 'Accepted' and finding_exclusion.status != 'Rejected' and finding_exclusion.status == 'Reviewed' %}
                                 <li role="presentation">
                                     <a href="#" onclick="document.getElementById('acceptForm').submit(); return false;">
@@ -139,7 +139,7 @@
                                 {% endif %}
                             {% endif %}
 
-                            {% if "dojo.reject_findingexclusion"|has_configuration_permission:request %}
+                            {% if finding_exclusion.product|has_object_permission:"Finding_Exclusion_Reject" %}
                                 {% if finding_exclusion.status != 'Accepted' and finding_exclusion.status != 'Rejected' %}
                                 <li role="presentation">
                                     <a href="#" onclick="document.getElementById('rejectForm').submit(); return false;">

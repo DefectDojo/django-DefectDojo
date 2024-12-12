@@ -10,6 +10,8 @@ class FindingExclusionForm(forms.ModelForm):
 
 
 class CreateFindingExclusionForm(forms.ModelForm):
+    type = forms.ChoiceField(required=True,
+                             choices=FindingExclusion.TYPE_CHOICES)
     unique_id_from_tool = forms.CharField(
         required=True,
         max_length=500,
@@ -17,11 +19,19 @@ class CreateFindingExclusionForm(forms.ModelForm):
     reason = forms.CharField(max_length=200, required=True,
                              widget=forms.Textarea,
                              label="Reason")
+    
+    def __init__(self, *args, **kwargs):
+        condition = kwargs.pop('disable_unique_id', False)
+        
+        super().__init__(*args, **kwargs)
+        
+        if condition:
+            self.fields['unique_id_from_tool'].widget.attrs['disabled'] = 'disabled'
+            self.fields['type'].widget.attrs['disabled'] = 'disabled'
 
     class Meta:
         model = FindingExclusion
         exclude = [
-            "type",
             "uuid", 
             "product", 
             "user_history", 

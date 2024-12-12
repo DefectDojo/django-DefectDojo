@@ -111,12 +111,9 @@ def user_has_permission(user, obj, permission):
     elif (
         isinstance(obj, FindingExclusion)
     ) and permission in Permissions.get_finding_exclusion_permissions():
-        roles = Dojo_Group_Member.objects.filter(user=user)
-        
-        for role in roles:
-            if role.role.name == 'Developer' or role.role.name == 'Cibersecurity':
-                return True
-        return False
+        return user_has_permission(
+            user, obj.product, permission
+        )
         
     elif (isinstance(obj, TransferFinding) and permission in Permissions.get_transfer_finding_permissions()):
         return custom_permissions_transfer_findings(user, obj, permission)

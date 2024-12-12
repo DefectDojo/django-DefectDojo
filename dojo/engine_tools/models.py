@@ -6,12 +6,14 @@ import uuid
 
 
 class FindingExclusion(models.Model):
-
+    TYPE_CHOICES = [("white_list", "white_list"),
+                    ("black_list", "black_list")]
     STATUS_CHOICES = [("Accepted", "Accepted"),
                       ("Pending", "Pending"),
                       ("Reviewed", "Reviewed"),
                       ("Rejected", "Rejected")]
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    type = models.CharField(max_length=12, choices=TYPE_CHOICES)
     unique_id_from_tool = models.CharField(
         blank=True,
         max_length=500,

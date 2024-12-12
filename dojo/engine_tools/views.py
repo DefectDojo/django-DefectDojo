@@ -1,7 +1,10 @@
 # Dojo
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.authorization.authorization_decorators import (
+    user_is_configuration_authorized, user_is_authorized, user_has_global_permission_or_403
+)
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
-from dojo.models import Dojo_User, Finding
+from dojo.models import Dojo_User, Finding, Product
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification, send_mail_notification
 from dojo.engine_tools.models import FindingExclusion, FindingWhitelist
@@ -18,11 +21,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
-from django.db.models import F
-from tagulous.models import TagField
 
 
-@user_is_configuration_authorized("dojo.view_findingexclusion")
 def finding_exclusions(request: HttpRequest):
     finding_exclusions = FindingExclusion.objects.all().order_by("-create_date")
     finding_exclusions = FindingExclusionFilter(request.GET,
@@ -39,32 +39,51 @@ def finding_exclusions(request: HttpRequest):
     })
 
 
-@user_is_configuration_authorized("dojo.add_findingexclusion")
 def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     default_unique_id = request.GET.get('unique_id', '')
+    product_id = request.GET.get('product_id', '')
     
-    form = CreateFindingExclusionForm(initial={'unique_id_from_tool': default_unique_id})
+    if product_id:
+        product = get_object_or_404(Product, pk=product_id)
+        user_has_permission_or_403(request.user, product, Permissions.Finding_Exclusion_Add)
+    else:
+        product = None
+        user_has_global_permission_or_403(
+            request.user, Permissions.Finding_Exclusion_Add,
+        )
+    
+    duplicate_finding_exclusions = FindingExclusion.objects.filter(
+            unique_id_from_tool__in=[default_unique_id],
+    ).first()
+    
+    if duplicate_finding_exclusions:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            f"There is already a request in status '{duplicate_finding_exclusions.status}' for this CVE, please consult the id '{duplicate_finding_exclusions.uuid}' in this section.",
+            extra_tags="alert-danger")
+        
+        return HttpResponseRedirect(reverse("finding_exclusions"))
+    
+    if default_unique_id:
+        form = CreateFindingExclusionForm(initial={'unique_id_from_tool': default_unique_id},
+                                        disable_unique_id=True)
+    else:
+        form = CreateFindingExclusionForm()
     finding_exclusion = None
 
     if request.method == "POST":
         form = CreateFindingExclusionForm(request.POST)
         
-        duplicate_finding_exclusions = FindingExclusion.objects.filter(
-            unique_id_from_tool__in=[default_unique_id, request.POST.get(key='unique_id_from_tool')],
-        ).first()
-        
-        if duplicate_finding_exclusions:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                f"There is already a request in status '{duplicate_finding_exclusions.status}' for this CVE, please consult the id '{duplicate_finding_exclusions.uuid}' in this section.",
-                extra_tags="alert-danger")
-            
-            return HttpResponseRedirect(reverse("finding_exclusions"))
+        if request.POST.get(key="type") == "black_list":
+            user_has_global_permission_or_403(
+                request.user, Permissions.Finding_Exclusion_Review,
+        )
         
         if form.is_valid():
             exclusion = form.save(commit=False)
             exclusion.created_by = request.user
+            exclusion.product = product
             exclusion.expiration_date = timezone.now() + timedelta(days=30)
             exclusion.save()
             messages.add_message(
@@ -91,7 +110,6 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     })
 
 
-@user_is_configuration_authorized("dojo.view_findingexclusion")
 def show_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
     """Show a find exclusion and the proccess status
 
@@ -104,6 +122,16 @@ def show_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
     """
     
     finding_exclusion = get_object_or_404(FindingExclusion, pk=fxid)
+    
+    if finding_exclusion.product is not None: 
+        user_has_permission_or_403(
+            request.user, finding_exclusion, Permissions.Finding_Exclusion_View
+        )
+    else:
+        user_has_global_permission_or_403(
+            request.user, Permissions.Finding_Exclusion_View,
+        )
+    
     discussion_form = FindingExclusionDiscussionForm()
     
     add_breadcrumb(title=finding_exclusion.unique_id_from_tool,
@@ -117,7 +145,6 @@ def show_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
     })
     
 
-@user_is_configuration_authorized("dojo.add_findingexclusion")
 def add_finding_exclusion_discussion(request: HttpRequest, fxid: str) -> HttpResponse:
     """Add a discussion for an finding exclusion
 
@@ -143,7 +170,6 @@ def add_finding_exclusion_discussion(request: HttpRequest, fxid: str) -> HttpRes
     return redirect('finding_exclusion', fxid=fxid)
 
 
-@user_is_configuration_authorized("dojo.review_findingexclusion")
 def review_finding_exclusion_request(
     request: HttpRequest, fxid: str, **kwargs: dict[str, any]
     ) -> HttpResponse:
@@ -156,8 +182,18 @@ def review_finding_exclusion_request(
     Returns:
         HttpResponse: Http response object via Django template
     """
-    if request.method == 'POST':
+    if request.method == 'POST':      
         finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+        
+        if finding_exclusion.product is not None: 
+            user_has_permission_or_403(
+                request.user, finding_exclusion, Permissions.Finding_Exclusion_Review
+            )
+        else:
+            user_has_global_permission_or_403(
+                request.user, Permissions.Finding_Exclusion_Review,
+            )
+        
         finding_exclusion.status = "Reviewed"
         finding_exclusion.reviewed_at = datetime.now()
         finding_exclusion.status_updated_at = datetime.now()
@@ -190,12 +226,21 @@ def review_finding_exclusion_request(
     return redirect('finding_exclusion', fxid=fxid)
 
 
-@user_is_configuration_authorized("dojo.accept_findingexclusion")
 def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
     if request.method == 'POST':
         try:
             with transaction.atomic():
                 finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+                
+                if finding_exclusion.product is not None: 
+                    user_has_permission_or_403(
+                        request.user, finding_exclusion, Permissions.Finding_Exclusion_Accept
+                    )
+                else:
+                    user_has_global_permission_or_403(
+                        request.user, Permissions.Finding_Exclusion_Accept,
+                    )
+                    
                 finding_exclusion.status = "Accepted"
                 finding_exclusion.final_status = "Accepted"
                 finding_exclusion.accepted_at = datetime.now()
@@ -203,18 +248,11 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                 finding_exclusion.status_updated_by = request.user
                 finding_exclusion.save()
                 
-                FindingWhitelist.objects.create(
-                    cve=finding_exclusion.unique_id_from_tool,
-                    finding_exclusion=finding_exclusion
-                )
-                
                 findings = Finding.objects.filter(cve=finding_exclusion.unique_id_from_tool)
                 
                 for finding in findings:
                     if not 'white_list' in finding.tags:
-                        finding.tags.add("white_list")
-                    finding.sla_age = 999
-                    
+                        finding.tags.add("white_list")                 
                 
         except Exception as e:
             messages.add_message(
@@ -241,15 +279,32 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
     return redirect('finding_exclusion', fxid=fxid)
 
 
-@user_is_configuration_authorized("dojo.reject_findingexclusion")
 def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
     if request.method == 'POST':
         finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+        
+        if finding_exclusion.product is not None: 
+            user_has_permission_or_403(
+                request.user, finding_exclusion, Permissions.Finding_Exclusion_Reject
+            )
+        else:
+            user_has_global_permission_or_403(
+                request.user, Permissions.Finding_Exclusion_Reject,
+            )
+        
         finding_exclusion.status = "Rejected"
         finding_exclusion.final_status = "Rejected"
         finding_exclusion.status_updated_at = datetime.now()
         finding_exclusion.status_updated_by = request.user
         finding_exclusion.save()
+        
+        create_notification(
+            event="other",
+            title=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}",
+            description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+            url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+            recipients=[finding_exclusion.created_by]
+        )
         
         messages.add_message(
                 request,
