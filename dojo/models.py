@@ -2630,6 +2630,11 @@ class Finding(models.Model):
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add."))
     inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
 
+    priority = models.FloatField(null=True,
+                                blank=True,
+                                default=0.0,
+                                )
+    
     SEVERITIES = {"Info": 4, "Low": 3, "Medium": 2,
                   "High": 1, "Critical": 0}
 

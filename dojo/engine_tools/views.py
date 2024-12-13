@@ -74,8 +74,8 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
 
     if request.method == "POST":
         form = CreateFindingExclusionForm(request.POST)
-        
-        if request.POST.get(key="type") == "black_list":
+        list_type = request.POST.get(key="type")
+        if list_type == "black_list":
             user_has_global_permission_or_403(
                 request.user, Permissions.Finding_Exclusion_Review,
         )
@@ -86,6 +86,15 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
             exclusion.product = product
             exclusion.expiration_date = timezone.now() + timedelta(days=30)
             exclusion.save()
+            
+            cve = request.POST.get(key="unique_id_from_tool")
+            
+            create_notification(
+                event="other",
+                title=f"A new request has been created to add {cve} to the {list_type}.",
+                description=f"A new request has been created to add {cve} to the {list_type}.",
+                url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+            )
             
             messages.add_message(
                 request,
@@ -206,6 +215,7 @@ def review_finding_exclusion_request(
                             title=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}",
                             description=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
                             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+                            product=finding_exclusion.product,
                             recipients=[finding_exclusion.created_by])
         
         prisma_cyber_user =  Dojo_User(email=settings.PRISMA_CYBER_EMAIL)
@@ -270,6 +280,7 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                             title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
                             description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
                             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+                            product=finding_exclusion.product,
                             recipients=[finding_exclusion.created_by])
         
         messages.add_message(
@@ -307,6 +318,7 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
             title=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}",
             description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+            product=finding_exclusion.product,
             recipients=[finding_exclusion.created_by]
         )
         

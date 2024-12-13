@@ -328,6 +328,9 @@
                                     <th>
                                         {% trans "EPSS Percentile" %}
                                     </th>
+                                    <th>
+                                        {% trans "Priority" %}
+                                    </th>
                                     <th class="nowrap">
                                         {% if filter_name == 'Closed' %}
                                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -636,6 +639,9 @@
                                         <td class="nowrap">
                                             {{ finding.epss_percentile|format_epss }}
                                         </td>
+                                        <td>
+                                            {{ finding.priority }}
+                                        </td>
                                         {% if filter_name == 'Closed' %}
                                         <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">
                                             {{ finding.mitigated|date }}
@@ -773,6 +779,7 @@
                     { "data": "cve" },
                     { "data": "epss_score", "type": "num", "render": percentSort },
                     { "data": "epss_percentile", "type": "num", "render": percentSort },
+                    { "data": "priority", "type": "num"}
                     { "data": "found_date", render: function (data, type, row, meta) {
                         if(type === 'sort') {
                             var api = new $.fn.dataTable.Api(meta.settings);
