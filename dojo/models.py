@@ -2286,6 +2286,8 @@ class Finding(models.Model):
                       ('Risk Expired', 'Risk Expired'),
                       ('Risk Accepted', 'Risk Accepted'),
                       ('Risk Active', 'Risk Active'),
+                      ('On Whitelist', 'On Whitelist'),
+                      ('On Blacklist', 'On Blacklist'),
                       ('Transfer Pending', 'Transfer Pending'),
                       ('Transfer Rejected', 'Transfer Rejected'),
                       ('Transfer Expired', 'Transfer Expired'),
@@ -3026,6 +3028,10 @@ class Finding(models.Model):
             status += ["Risk pending"]
         if self.risk_status == "Risk Rejected":
             status += ["Risk Rejected"]
+        if self.risk_status == "On Whitelist":
+            status += ["On Whitelist"]
+        if self.risk_status == "On Blacklist":
+            status += ["On Blacklist"]
         if self.risk_status == "Risk Expired":
             status += ["Risk Expired"]
         elif self.risk_accepted:

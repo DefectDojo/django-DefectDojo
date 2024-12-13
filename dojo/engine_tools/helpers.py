@@ -1,6 +1,6 @@
 # Utils
 import random
-from django.db.models import QuerySet, Q
+from django.db.models import QuerySet
 from django.utils import timezone
 from enum import Enum
 from datetime import timedelta
@@ -8,6 +8,7 @@ from datetime import timedelta
 # Dojo
 from dojo.models import Finding
 from dojo.engine_tools.models import FindingExclusion
+from dojo.celery import app
 
 
 class Constants(Enum):
@@ -45,7 +46,7 @@ def calculate_vulnerability_priority(finding) -> float:
     severity_score = severity_map.get(finding.severity, 0)
 
     # Risk Score (0-100, random if it doesn't exist)
-    risk_score = random.randint(0, 100)
+    risk_score = random.randint(95, 100)
 
     # CVSS Score (0-10 multiplied by 10)
     cvss_score = (finding.cvssv3_score or 0) * 10
@@ -84,7 +85,9 @@ def identify_critical_vulnerabilities(findings: QuerySet) -> int:
         
         if priority > 90:
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve)
-
+            finding.risk_status = "On Blacklist"
+            finding.tags.add("black_list")
+            
             if not finding_exclusion.exists():
                 new_finding_exclusion = FindingExclusion(
                     type="black_list",
@@ -105,12 +108,13 @@ def identify_critical_vulnerabilities(findings: QuerySet) -> int:
                 finding_exclusion_list.append(new_finding_exclusion)
         finding_list.append(finding)
     
-    Finding.objects.bulk_update(finding_list, ['priority'])     
+    Finding.objects.bulk_update(finding_list, ["priority", "risk_status"])     
     FindingExclusion.objects.bulk_create(finding_exclusion_list)
             
     return len(finding_exclusion_list)
 
 
+@app.task
 def check_priorization():
     # Get all vulnerabilities
     

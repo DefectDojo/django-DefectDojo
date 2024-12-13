@@ -45,12 +45,8 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     
     if product_id:
         product = get_object_or_404(Product, pk=product_id)
-        user_has_permission_or_403(request.user, product, Permissions.Finding_Exclusion_Add)
     else:
         product = None
-        user_has_global_permission_or_403(
-            request.user, Permissions.Finding_Exclusion_Add,
-        )
     
     duplicate_finding_exclusions = FindingExclusion.objects.filter(
             unique_id_from_tool__in=[default_unique_id],
@@ -65,11 +61,9 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
         
         return HttpResponseRedirect(reverse("finding_exclusions"))
     
-    if default_unique_id:
-        form = CreateFindingExclusionForm(initial={'unique_id_from_tool': default_unique_id},
-                                        disable_unique_id=True)
-    else:
-        form = CreateFindingExclusionForm()
+
+    form = CreateFindingExclusionForm(initial={'unique_id_from_tool': default_unique_id})
+
     finding_exclusion = None
 
     if request.method == "POST":
@@ -93,7 +87,7 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
                 event="other",
                 title=f"A new request has been created to add {cve} to the {list_type}.",
                 description=f"A new request has been created to add {cve} to the {list_type}.",
-                url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+                url=reverse("finding_exclusion", args=[str(exclusion.pk)]),
             )
             
             messages.add_message(
@@ -260,13 +254,16 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                 finding_exclusion.status_updated_by = request.user
                 finding_exclusion.save()
                 
-                findings = Finding.objects.filter(cve=finding_exclusion.unique_id_from_tool)
+                findings = Finding.objects.filter(cve=finding_exclusion.unique_id_from_tool,
+                                                  active=True,
+                                                  tags__name__in=["prisma", "tenable"])
                 
                 for finding in findings:
                     if not 'white_list' in finding.tags:
                         finding.tags.add("white_list")
                     finding.active = False
-                    finding.save()       
+                    finding.risk_status = "On Whitelist"
+                    finding.save()    
                 
         except Exception as e:
             messages.add_message(

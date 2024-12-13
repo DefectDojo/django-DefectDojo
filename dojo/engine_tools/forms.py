@@ -20,11 +20,6 @@ class CreateFindingExclusionForm(forms.ModelForm):
                              widget=forms.Textarea,
                              label="Reason")
     
-    def __init__(self, *args, **kwargs):
-        condition = kwargs.pop('disable_unique_id', False)
-        
-        super().__init__(*args, **kwargs)
-
     class Meta:
         model = FindingExclusion
         exclude = [

@@ -43,8 +43,8 @@
     <div class="col-md-10">
         <div class="panel panel-default">
             <div class="panel-heading">
-                {% if "dojo.add_findingexclusion"|has_configuration_permission:request %}
-                <a title="Add Exclusion" class="pull-right btn btn-sm btn-primary" href="{% url 'create_finding_exclusion' %}"><span class="fa-solid fa-plus"></span></a>
+                {% if "Finding_Exclusion_Add"|has_global_permission %}
+                    <a title="Add Exclusion" class="pull-right btn btn-sm btn-primary" href="{% url 'create_finding_exclusion' %}"><span class="fa-solid fa-plus"></span></a>
                 {% endif %}
                 {{ name }}
             </div>
