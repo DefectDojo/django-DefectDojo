@@ -3,9 +3,28 @@ title: "DefectDojo Pro Changelog"
 description: "DefectDojo Changelog"
 ---
 
-Here are the release notes for **DefectDojo Pro (Cloud Version)**.  
+Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
+
+## Dec 9, 2024: v2.41.1
+
+- **(API)** When using the jira_finding_mappings API endpoint, trying to update a finding's Jira mapping with a Jira issue that is already assigned to another finding will now raise a validation error.
+- **(Beta UI)** A Test's Import History is now paginated by default.
+- **(Findings)** New Filter: 'Has Any JIRA' which accounts for Findings with single Issues or Findings that were pushed to Jira as part of a Group.
+- **(Classic UI)** Filters have been added to the Product Type view.  This is useful for when a single Product Type contains many Products which need to be filtered down.
+- **(Classic UI)** Reported Finding Severity by Month graph now tracks the X axis by month correctly.
+
+## Dec 2, 2024: v2.41.0
+
+- **(API)** `engagements/{id}/update_jira_epic` endpoint path added so that users can now push an updated Engagement to Jira, without creating a new Jira Epic.
+- **(Beta UI)** Columns can now be reordered in tables, by clicking and dragging the column header.
+
+![image](images/reorder-columns.png)
+
+- **(Beta UI)** Notes can now be added to a Test directly from the Test page.
+- **(Classic UI)** Reviewers are now displayed on Finding pages.
+- **(Docs)** New integrated docs site: https://docs.defectdojo.com/
 
 ## Nov 25, 2024: v2.40.4
 
@@ -128,7 +147,7 @@ configuration fields.
 
 
 
-## Sept 9, 2024: v2.39.1
+## Sept 9, 2024: v2.38.1
 
 - **(Beta UI)**  Clearing a date filter and re-applying it no longer throws a 400 error.
 - **(Dashboard)**  Dashboard Tag Filters now work correctly in both legacy and beta UIs.  
