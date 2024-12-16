@@ -661,7 +661,7 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_Finding_Add,
             Permissions.Finding_Exclusion_View,
             Permissions.Finding_Exclusion_Add,
-            Permissions.Finding_Exclusion_Edit
+            Permissions.Finding_Exclusion_Edit,
             Permissions.Risk_Acceptance_Refresh_Permission_key,
 
         },
