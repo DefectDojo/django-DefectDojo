@@ -29,6 +29,7 @@ from dojo.models import (
     TransferFindingFinding,
     TransferFinding,
     PermissionKey,
+    ExclusivePermission,
 )
 from dojo.urls import v2_api
 
@@ -117,6 +118,7 @@ class ApiEndpoints(DojoTestCase):
             Choice,
             TransferFindingFinding,
             PermissionKey,
+            ExclusivePermission,
         ]
 
     def test_is_defined(self):

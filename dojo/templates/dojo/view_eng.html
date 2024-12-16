@@ -260,6 +260,7 @@
                                 </thead>
                                 <tbody>
                                     {% for test in tests %}
+                                        {% if test|has_object_exclusive_permission:"Product_Tag_Red_Team" %}
                                         <tr>
                                             {% block test_body %}
                                             <td>
@@ -354,6 +355,7 @@
                                             {% endif %}
                                             {% endblock test_body %}
                                         </tr>
+                                        {% endif %}
                                     {% endfor %}
                                 </tbody>
                             </table>

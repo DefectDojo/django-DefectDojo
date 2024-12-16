@@ -76,6 +76,7 @@ from dojo.api_v2.views import (
     UsersViewSet,
     ComponentViewSet,
 )
+from dojo.exclusive_permission.view import ExclusivePermissionViewSet
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
@@ -161,6 +162,7 @@ v2_api.register(r"product_members", ProductMemberViewSet, basename="product_memb
 v2_api.register(r"product_types", ProductTypeViewSet, basename="product_type")
 v2_api.register(r"product_type_members", ProductTypeMemberViewSet, basename="product_type_member")
 v2_api.register(r"product_type_groups", ProductTypeGroupViewSet, basename="product_type_group")
+v2_api.register(r"exclusive_permission", ExclusivePermissionViewSet, basename="exclusive_permission")
 v2_api.register(r"regulations", RegulationsViewSet, basename="regulations")
 v2_api.register(r"reimport-scan", ReImportScanView, basename="reimportscan")
 v2_api.register(r"risk_acceptance", RiskAcceptanceViewSet, basename="risk_acceptance")

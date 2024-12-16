@@ -47,6 +47,9 @@ class Permissions(IntEnum):
     Product_Configure_Notifications = 1106
     Product_Edit = 1107
     Product_Delete = 1108
+    Product_Tag_Red_Team = 1109
+    Product_Member_Add_Role = 1110
+    Product_Member_Edit = 1111
 
     Engagement_View = 1202
     Engagement_Add = 1203
@@ -266,7 +269,7 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_product_member_permissions(cls):
-        return {Permissions.Product_View, Permissions.Product_Manage_Members, Permissions.Product_Member_Delete}
+        return {Permissions.Product_View, Permissions.Product_Manage_Members, Permissions.Product_Member_Delete, Permissions.Product_Tag_Red_Team}
 
     @classmethod
     def get_product_type_member_permissions(cls):
@@ -435,6 +438,8 @@ def get_roles_with_permissions():
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
             Permissions.Product_Member_Add_Owner,
+            Permissions.Product_Member_Add_Role,
+            Permissions.Product_Member_Edit,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Engagement_View,
@@ -482,6 +487,7 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Group_Add,
             Permissions.Product_Type_Group_Edit,
             Permissions.Product_Type_Group_Delete,
+            Permissions.Product_Tag_Red_Team,
             Permissions.Group_View,
             Permissions.Group_Edit,
             Permissions.Group_Manage_Members,
@@ -534,6 +540,9 @@ def get_roles_with_permissions():
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
             Permissions.Product_Member_Add_Owner,
+            Permissions.Product_Tag_Red_Team,
+            Permissions.Product_Member_Add_Role,
+            Permissions.Product_Member_Edit,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Product_Delete,
@@ -650,6 +659,10 @@ def get_roles_with_permissions():
             Permissions.Note_View_History,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
+            Permissions.Product_Member_Edit,
+            Permissions.Product_Manage_Members,
+            Permissions.Product_Member_Add_Role,
+            Permissions.Product_Tag_Red_Team,
             Permissions.Group_View,
             Permissions.Language_View,
             Permissions.Language_Add,

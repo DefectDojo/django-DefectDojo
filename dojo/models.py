@@ -4857,7 +4857,28 @@ class PermissionKey(models.Model):
             logger.error(f"Permission key not found for user {user.id} associated with risk acceptance {risk_acceptance.id}")
             raise e 
         return permission_key
+
+
+class ExclusivePermission(models.Model):
+    name = models.CharField(max_length=50,
+                           unique=True,
+                           blank=True,
+                           help_text=_("name permission")) 
+    description = models.CharField(max_length=128,
+                                  help_text=_("Short permit description"),
+                                  null=True,
+                                  blank=True) 
+    members = models.ManyToManyField(Product_Member,
+                                    related_name="exclusive_permission_product",
+                                    blank=True)
     
+    class Meta:
+        verbose_name = _("Exclusive Permission")
+        verbose_name_plural = _("Exclusive Permissions")
+
+    def __str__(self):
+        return self.description
+   
 
 
 if settings.ENABLE_AUDITLOG:
@@ -4919,6 +4940,7 @@ admin.site.register(Risk_Acceptance)
 admin.site.register(PermissionKey)
 admin.site.register(TransferFinding)
 admin.site.register(TransferFindingFinding)
+admin.site.register(ExclusivePermission)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
 admin.site.register(Endpoint_Params)

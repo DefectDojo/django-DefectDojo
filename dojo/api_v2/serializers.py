@@ -110,8 +110,8 @@ from dojo.models import (
     Vulnerability_Id_Template,
     get_current_date,
     TransferFinding,
-    TransferFindingFinding,
     Component,
+    ExclusivePermission
 )
 from dojo.risk_acceptance.helper import add_findings_to_risk_acceptance, remove_finding_from_risk_acceptance
 from dojo.tools.factory import (
@@ -3155,3 +3155,4 @@ class NotificationWebhooksSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification_Webhooks
         fields = "__all__"
+
