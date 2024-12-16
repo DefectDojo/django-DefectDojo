@@ -78,7 +78,7 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
             exclusion = form.save(commit=False)
             exclusion.created_by = request.user
             exclusion.product = product
-            exclusion.expiration_date = timezone.now() + timedelta(days=30)
+            exclusion.expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
             exclusion.save()
             
             cve = request.POST.get(key="unique_id_from_tool")
@@ -212,14 +212,16 @@ def review_finding_exclusion_request(
                             product=finding_exclusion.product,
                             recipients=[finding_exclusion.created_by])
         
-        prisma_cyber_user =  Dojo_User(email=settings.PRISMA_CYBER_EMAIL)
-
         kwargs["description"] = finding_exclusion.reason
         kwargs["title"] = f"Evaluación Elegibilidad Vulnerabilidad Lista Blanca {finding_exclusion.unique_id_from_tool}"
         kwargs["subject"] = f"Evaluación Elegibilidad Vulnerabilidad Lista Blanca {finding_exclusion.unique_id_from_tool}"
         kwargs["url"] = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
         
-        send_mail_notification("other", prisma_cyber_user, **kwargs)
+        cyber_emails = settings.EXCLUSION_CYBER_EMAIL
+        
+        for email in str(cyber_emails).split(","):
+            cyber_user =  Dojo_User(email=email)
+            send_mail_notification("other", cyber_user, **kwargs)
         
         messages.add_message(
                 request,

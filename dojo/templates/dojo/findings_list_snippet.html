@@ -455,26 +455,17 @@
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
-<<<<<<< HEAD
-                                                        {% endif %}
-                                                        {% if finding.test.engagement.product|has_object_permission:"Finding_Exclusion_Add" %}
-                                                            {% if finding.cve and not 'white_list' in finding.tags.all %}
-                                                                <li role="presentation">
-                                                                    <a rel="noopener noreferrer" href="{% url 'create_finding_exclusion' %}?unique_id={{ finding.cve }}&product_id={{ finding.test.engagement.product.id }}">
-                                                                        <i class="fas fa-list"></i> Add to White List
-                                                                    </a>
-                                                                </li>
-                                                            {% endif %}
-                                                        {% endif %}
-                                                        <li class="divider"></li>
-                                                        {% if finding|has_object_permission:"Risk_Acceptance" %}
-                                                            {% if finding.risk_accepted and "Unaccept Risk"|has_global_permission %}
-=======
                                                             {% if finding|has_object_permission:"Finding_Edit" %}
->>>>>>> f419d0250635d1526554a064453772aa2086e141
                                                                 <li role="presentation">
                                                                     <a rel="noopener noreferrer" href="{% url 'find_template_to_apply' finding.id %}">
                                                                         <i class="fa-solid fa-copy"></i> {% trans "Apply Template to Finding" %}
+                                                                    </a>
+                                                                </li>
+                                                            {% endif %}
+                                                            {% if finding.cve and not 'white_list' in finding.tags.all and 'prisma' in finding.tags.all %}
+                                                                <li role="presentation">
+                                                                    <a rel="noopener noreferrer" href="{% url 'create_finding_exclusion' %}?unique_id={{ finding.cve }}&product_id={{ finding.test.engagement.product.id }}">
+                                                                        <i class="fas fa-list"></i> Add to White List
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
@@ -647,6 +638,9 @@
                                             <td class="nowrap">
                                                 {{ finding.epss_percentile|format_epss }}
                                             </td>
+                                            <td>
+                                                {{ finding.priority }}
+                                            </td>
                                             {% if filter_name == 'Closed' %}
                                             <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">
                                                 {{ finding.mitigated|date }}
@@ -669,33 +663,7 @@
                                                 {% else %}
                                                     {{ finding.reporter }}
                                                 {% endif %}
-<<<<<<< HEAD
-                                            {% endwith %}
-                                        </td>
-                                        <td class="nowrap">
-                                            {{ finding.epss_score|format_epss }}
-                                        </td>
-                                        <td class="nowrap">
-                                            {{ finding.epss_percentile|format_epss }}
-                                        </td>
-                                        <td>
-                                            {{ finding.priority }}
-                                        </td>
-                                        {% if filter_name == 'Closed' %}
-                                        <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">
-                                            {{ finding.mitigated|date }}
-                                        {% else %}
-                                        <td class="nowrap" data-order="{{ finding.date|date:"U" }}">
-                                            {{ finding.date }}
-                                        {% endif %}
-                                        </td>
-                                        <td>
-                                            {{ finding.age }}
-                                        </td>
-                                        {% if system_settings.enable_finding_sla %}
-=======
                                             </td>
->>>>>>> f419d0250635d1526554a064453772aa2086e141
                                             <td>
                                                 {% if finding.found_by %}
                                                     <a rel="noopener noreferrer" target="#"
@@ -811,7 +779,7 @@
                     { "data": "cve" },
                     { "data": "epss_score", "type": "num", "render": percentSort },
                     { "data": "epss_percentile", "type": "num", "render": percentSort },
-                    { "data": "priority", "type": "num"}
+                    { "data": "priority", "type": "num"},
                     { "data": "found_date", render: function (data, type, row, meta) {
                         if(type === 'sort') {
                             var api = new $.fn.dataTable.Api(meta.settings);
