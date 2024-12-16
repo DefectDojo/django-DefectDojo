@@ -442,7 +442,7 @@ def handle_from_provider_risk(finding, acceptance_days):
             header=settings.PROVIDER_HEADER,
             token=settings.PROVIDER_TOKEN)
 
-@retry(tries=100, delay=10)
+@retry(tries=5, delay=2)
 def risk_accept_provider(
         finding_id: str,
         provider_endpoint: str,

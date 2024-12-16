@@ -279,7 +279,7 @@
                 &nbsp;
                 <a rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                     <i class="fa-solid fa-circle-question"></i></a>
-                {% if prod|has_object_permission:"Product_Manage_Members" %}
+                {% if prod|has_object_permission:"Product_Member_Add_Owner" %}
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductMember"
                             data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Member">
@@ -316,7 +316,7 @@
                                 <li class="dropdown" style="list-style:none;position:absolute">
                                     <a rel="noopener noreferrer" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
-                                        {% if prod|has_object_permission:"Product_Manage_Members" %}
+                                        {% if prod|has_object_permission:"Product_Member_Edit" %}
                                         <li>
                                             <a rel="noopener noreferrer" name="editProductMember" href="{% url 'edit_product_member' member.id %}">
                                             <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit" %}</a>
