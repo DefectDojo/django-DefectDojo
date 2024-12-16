@@ -68,7 +68,7 @@ drf-spectacular-sidecar==2024.12.1
 django-ratelimit==4.1.0
 argon2-cffi==23.1.0
 blackduck==1.1.3
-pycurl==7.45.3  # Required for Celery Broker AWS (SQS) support
+pycurl==7.45.4  # Required for Celery Broker AWS (SQS) support
 boto3==1.35.81  # Required for Celery Broker AWS (SQS) support
 netaddr==1.3.0
 vulners==2.2.3
