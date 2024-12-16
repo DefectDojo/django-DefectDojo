@@ -4,6 +4,7 @@ from time import strftime
 from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
+from django.db.utils import IntegrityError
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
 from fieldsignals import pre_save_changed
@@ -164,21 +165,22 @@ def create_finding_group(finds, finding_group_name):
 
     finding_group = Finding_Group(test=finds[0].test)
     finding_group.creator = get_current_user()
-    finding_group.name = finding_group_name + finding_group_name_dummy
-    finding_group.save()
+
+    if finding_group_name:
+        finding_group.name = finding_group_name
+    elif finding_group.components:
+        finding_group.name = finding_group.components
+    try:
+        finding_group.save()
+    except IntegrityError as ie:
+        if "already exists" in str(ie):
+            finding_group.name = finding_group_name + finding_group_name_dummy
+            finding_group.save()
+        else:
+            raise
+
     available_findings = [find for find in finds if not find.finding_group_set.all()]
     finding_group.findings.set(available_findings)
-
-    # if user provided a name, we use that, else:
-    # if we have components, we may set a nice name but catch 'name already exist' exceptions
-    try:
-        if finding_group_name:
-            finding_group.name = finding_group_name
-        elif finding_group.components:
-            finding_group.name = finding_group.components
-        finding_group.save()
-    except:
-        pass
 
     added = len(available_findings)
     skipped = len(finds) - added

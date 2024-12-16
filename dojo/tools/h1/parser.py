@@ -118,11 +118,8 @@ class HackerOneVulnerabilityDisclosureProgram:
             description += f"Triaged: {triaged_date}\n"
 
         # Try to grab CVSS
-        try:
-            cvss = content["relationships"]["severity"]["data"]["attributes"]["score"]
+        if cvss := content.get("relationships", {}).get("severity", {}).get("data", {}).get("attributes", {}).get("score"):
             description += f"CVSS: {cvss}\n"
-        except Exception:
-            pass
 
         # Build rest of description meat
         description += "##Report: \n{}\n".format(
@@ -130,12 +127,9 @@ class HackerOneVulnerabilityDisclosureProgram:
         )
 
         # Try to grab weakness if it's there
-        try:
-            weakness_title = content["relationships"]["weakness"]["data"]["attributes"]["name"]
-            weakness_desc = content["relationships"]["weakness"]["data"]["attributes"]["description"]
-            description += f"\n##Weakness: {weakness_title}\n{weakness_desc}"
-        except Exception:
-            pass
+        if weakness_title := content.get("relationships", {}).get("weakness", {}).get("data", {}).get("attributes", {}).get("name"):
+            if weakness_desc := content.get("relationships", {}).get("weakness", {}).get("data", {}).get("attributes", {}).get("description"):
+                description += f"\n##Weakness: {weakness_title}\n{weakness_desc}"
 
         return description
 
