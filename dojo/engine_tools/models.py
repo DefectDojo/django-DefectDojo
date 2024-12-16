@@ -21,6 +21,7 @@ class FindingExclusion(models.Model):
         help_text=_("Vulnerability technical id from the source tool. Allows to track unique vulnerabilities."))
 
     create_date = models.DateTimeField(auto_now_add=True)
+    notification_sent = models.BooleanField(default=False)
     expiration_date = models.DateTimeField(null=True)
     last_status_update = models.DateTimeField(auto_now=True)
     status_updated_at = models.DateTimeField(null=True)

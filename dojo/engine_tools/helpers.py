@@ -1,14 +1,16 @@
 # Utils
-import random
 from django.db.models import QuerySet
 from django.utils import timezone
+from django.urls import reverse
 from enum import Enum
 from datetime import timedelta
+import random
 
 # Dojo
 from dojo.models import Finding
 from dojo.engine_tools.models import FindingExclusion
 from dojo.celery import app
+from dojo.notifications.helper import create_notification
 
 
 class Constants(Enum):
@@ -129,3 +131,26 @@ def check_priorization():
     return {
         "message": f"{blacklist_new_items} added to blacklist"
     }
+    
+
+@app.task
+def check_expiring_findingexclusions():
+    days_before_expiration = 5
+    expiration_threshold = timezone.now() + timedelta(days=days_before_expiration)
+    
+    expiring_objects = FindingExclusion.objects.filter(
+        expiration_date__lte=expiration_threshold,
+        notification_sent=False
+    ).exclude(status__in=['Accepted', 'Rejected'])
+    
+    for fex in expiring_objects:
+        create_notification(
+            event="other",
+            title=f"{fex.unique_id_from_tool} | Whitelist request about to expire.",
+            description=f"The request to whitelist {fex.unique_id_from_tool} expires on {fex.expiration_date.date()}, it is recommended to review the request as soon as possible.",
+            url=reverse("finding_exclusion", args=[str(fex.pk)]),
+        )
+        
+        fex.notification_sent = True
+        fex.save()
+        

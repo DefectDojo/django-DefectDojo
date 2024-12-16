@@ -1463,6 +1463,10 @@ CELERY_BEAT_SCHEDULE = {
             minute=0
         )
     },
+    'check_expiring_findingexclusions': {
+        'task': 'dojo.engine_tools.helpers.check_expiring_findingexclusions',
+        'schedule': timedelta(days=1),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
