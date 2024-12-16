@@ -145,8 +145,8 @@ class ScannerTest(BaseTestCase):
         options_text = [scan.strip() for scan in options_text]
 
         mod_options = options_text
-        mod_options = [re.sub(" Scanner", "", scan) for scan in mod_options]
-        mod_options = [re.sub(" Scan", "", scan) for scan in mod_options]
+        mod_options = [re.sub(r" Scanner", "", scan) for scan in mod_options]
+        mod_options = [re.sub(r" Scan", "", scan) for scan in mod_options]
         mod_options = [scan.lower().replace("-", " ").replace(".", "") for scan in mod_options]
 
         acronyms = []
@@ -172,11 +172,8 @@ class ScannerTest(BaseTestCase):
                 index = list(found_matches.keys())[0]
                 scan_map[test] = options_text[index]
             elif len(found_matches) > 1:
-                try:
-                    index = list(found_matches.values()).index(temp_test)
-                    scan_map[test] = options_text[list(found_matches.keys())[index]]
-                except:
-                    pass
+                index = list(found_matches.values()).index(temp_test)
+                scan_map[test] = options_text[list(found_matches.keys())[index]]
 
         failed_tests = []
         for test in self.tests:
@@ -199,7 +196,7 @@ class ScannerTest(BaseTestCase):
                     driver.find_element(By.ID, "id_file").send_keys(test_location)
                     driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
                     EngagementTXT = "".join(driver.find_element(By.TAG_NAME, "BODY").text).split("\n")
-                    reg = re.compile("processed, a total of")
+                    reg = re.compile(r"processed, a total of")
                     matches = list(filter(reg.search, EngagementTXT))
                     if len(matches) != 1:
                         failed_tests += [test.upper() + " - " + case + ": Not imported"]

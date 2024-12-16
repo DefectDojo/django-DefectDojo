@@ -265,7 +265,7 @@ class NexposeParser:
                                         "severity": "Info",
                                         "tags": [
                                             re.sub(
-                                                "[^A-Za-z0-9]+",
+                                                r"[^A-Za-z0-9]+",
                                                 "-",
                                                 service.get("name").lower(),
                                             ).rstrip("-"),
