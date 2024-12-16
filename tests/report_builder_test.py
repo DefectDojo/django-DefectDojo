@@ -41,7 +41,7 @@ class ReportBuilderTest(BaseTestCase):
         Select(driver.find_element(By.ID, "id_report_type")).select_by_visible_text("HTML")
         driver.find_element(By.ID, "id_report_name").send_keys("Test Report")
         driver.find_element(By.CLASS_NAME, "run_report").click()
-        self.assertTrue(driver.current_url == self.base_url + "reports/custom")
+        self.assertEqual(driver.current_url, self.base_url + "reports/custom")
 
     def test_product_type_report(self):
         driver = self.driver

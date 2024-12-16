@@ -49,18 +49,6 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        env:
-          docker-image: ${{ matrix.docker-image }}
-        with:
-          path: /tmp/.buildx-cache-${{ env.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ env.workflow_name }}-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ env.workflow_name}}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-${{ env.workflow_name }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ matrix.os }}-
-
       - name: Build and push images with debian
         if: ${{ matrix.os  == 'debian' }}
         uses: docker/build-push-action@v6
@@ -73,8 +61,6 @@ jobs:
           tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}, ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:latest
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
-          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
-          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
 
       - name: Build and push images with alpine
         if: ${{ matrix.os  == 'alpine' }}
@@ -88,9 +74,3 @@ jobs:
           tags: ${{ env.REPO_ORG }}/defectdojo-${{ env.docker-image}}:${{ github.event.inputs.release_number }}-${{ matrix.os }}
           file: ./Dockerfile.${{ env.docker-image }}-${{ matrix.os }}
           context: .
-          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
-          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
-#           platforms: ${{ matrix.platform }}
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}

@@ -111,11 +111,12 @@ env = environ.FileAwareEnv(
     DD_DATABASE_NAME=(str, "defectdojo"),
     # default django database name for testing is test_<dbname>
     DD_TEST_DATABASE_NAME=(str, "test_defectdojo"),
-    DD_DATABASE_PASSWORD=(str, "defectdojo"),
+    DD_DATABASE_PASSWORD=(str, None),
     DD_DATABASE_PORT=(int, 3306),
-    DD_DATABASE_USER=(str, "defectdojo"),
+    DD_DATABASE_USER=(str, None),
     DD_DATABASE_REPLICA=(bool, False),
     DD_TABLES_REPLICA_DEFAULT=(list, []),
+    DD_SCHEMA_DB=(str, 'public'),
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_AUTHENTICATE_ADDITIONAL_DATA_KEY=(str, "."),
@@ -173,7 +174,7 @@ env = environ.FileAwareEnv(
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ""),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, "https://gitlab.com"),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid"]),
+    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid", "read_api", "read_repository"]),
     DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ""),
     DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ""),
@@ -357,16 +358,19 @@ env = environ.FileAwareEnv(
     DD_COMPLIANCE_FILTER_RISK=(str, ""),
     # Engin Tools
     DD_ENABLE_ENGINE_TOOLS=(bool, False),
+    # Microsoft Entra id for risk acceptance for email
+    DD_TENAN_ID=(str, ""),
+    DD_CLIENT_ID=(str, ""),
+    DD_CALLBACK_URL=(str, ""),
     # The varible that allows settings acceptance for email
     DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL=(bool, False),
-    DD_LIFETIME_MINUTE_PERMISSION_KEY=(int, 2880),
+    DD_LIFETIME_HOURS_PERMISSION_KEY=(int, 48),
     DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL=(str, "http://localhost/8080"),
     # System user for automated resource creation
     DD_SYSTEM_USER=(str, "admin"),
     # These variables are the params of providers name
-    DD_PROVIDER1=(str, ""),
-    DD_PROVIDER2=(str, ""),
-    DD_PROVIDER3=(str, ""),
+    DD_PROVIDERS=(str, ""),
+    DD_PROVIDER_ENDPOINT_MAPPING=(str, "{\"provider-1\": \"event-provider-1\", \"provider-2\": \"event-provider-2\"}"),
     # The variable that sets the provider risk accept api and credentials
     DD_PROVIDER_URL=(str, ""),
     DD_PROVIDER_HEADER=(str, ""),
@@ -453,6 +457,9 @@ env = environ.FileAwareEnv(
     
     # Finding exclusion - request expiration days
     DD_FINDING_EXCLUSION_EXPIRATION_DAYS=(int, 30)
+    # When enabled, force the password field to be required for creating/updating users
+    DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
+    AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
 )
 
 
@@ -546,6 +553,7 @@ DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
 MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
+SCHEMA_DB = env('DD_SCHEMA_DB')
 
 # ------------------------------------------------------------------------------
 # DATABASE
@@ -557,6 +565,9 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     DATABASES = {
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
+            "OPTIONS": {
+                "options": f"-c search_path={SCHEMA_DB}"
+            },
             "NAME": secret_database["dbname"],
             "TEST": {
                 "NAME": env("DD_TEST_DATABASE_NAME"),
@@ -571,6 +582,9 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
         REPLICA_TABLES_DEFAULT = env("DD_TABLES_REPLICA_DEFAULT")
         DATABASES["replica"] = {
             "ENGINE": env("DD_DATABASE_ENGINE"),
+            "OPTIONS": {
+                "options": f"-c search_path={SCHEMA_DB}"
+            },
             "NAME": secret_database["dbname"],
             "USER": secret_database["username"],
             "PASSWORD": secret_database["password"],
@@ -585,6 +599,9 @@ else:
         DATABASES = {
             "default": {
                 "ENGINE": env("DD_DATABASE_ENGINE"),
+                "OPTIONS": {
+                    "options": f"-c search_path={SCHEMA_DB}"
+                },
                 "NAME": env("DD_DATABASE_NAME"),
                 "TEST": {
                     "NAME": env("DD_TEST_DATABASE_NAME"),
@@ -731,6 +748,7 @@ SOCIAL_AUTH_PIPELINE = (
 
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
+REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
@@ -774,7 +792,7 @@ AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2
 AZURE_DEVOPS_PERMISSION_AUTO_IMPORT = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSION_AUTO_IMPORT")
 AZURE_DEVOPS_ORGANIZATION_URL = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL")
 AZURE_DEVOPS_TOKEN = (
-    get_secret(env("DD_SECRET_APP"))["dd_azuredevops_token"]
+    get_secret(env("DD_SECRET_AZURE_DEVOPS_TOKEN"))["token"]
     if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
     else env("DD_SOCIAL_AUTH_AZURE_DEVOPS_TOKEN")
 )
@@ -1467,6 +1485,11 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'dojo.engine_tools.helpers.check_expiring_findingexclusions',
         'schedule': timedelta(days=1),
     },
+    "notification_webhook_status_cleanup": {
+        "task": "dojo.notifications.helper.webhook_status_cleanup",
+        "schedule": timedelta(minutes=1),
+
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),
@@ -1613,6 +1636,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Legitify Scan": ["title", "endpoints", "severity"],
     "ThreatComposer Scan": ["title", "description"],
     "Invicti Scan": ["title", "description", "severity"],
+    "HackerOne Cases": ["title", "severity"],
+    "KrakenD Audit Scan": ["description", "mitigation", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1838,6 +1863,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
     "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
+    "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -2056,6 +2082,11 @@ VULNERABILITY_URLS = {
     "RHBA": "https://access.redhat.com/errata/",
     "RHEA": "https://access.redhat.com/errata/",
     "FEDORA": "https://bodhi.fedoraproject.org/updates/",
+    "ALSA": "https://osv.dev/vulnerability/",  # e.g. https://osv.dev/vulnerability/ALSA-2024:0827
+    "USN": "https://ubuntu.com/security/notices/",  # e.g. https://ubuntu.com/security/notices/USN-6642-1
+    "DLA": "https://security-tracker.debian.org/tracker/",  # e.g. https://security-tracker.debian.org/tracker/DLA-3917-1
+    "ELSA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
+    "RXSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
@@ -2093,14 +2124,18 @@ PRISMA_CYBER_EMAIL = env("DD_PRISMA_CYBER_EMAIL")
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
 # Acceptace for email
 ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
-LIFETIME_MINUTE_PERMISSION_KEY = env("DD_LIFETIME_MINUTE_PERMISSION_KEY")
+LIFETIME_HOURS_PERMISSION_KEY = env("DD_LIFETIME_HOURS_PERMISSION_KEY")
 HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
+
+TENAN_ID = env("DD_TENAN_ID")
+CLIENT_ID = env("DD_CLIENT_ID")
+CALLBACK_URL = env("DD_CALLBACK_URL")
+
 # System user for automated resource creation
 SYSTEM_USER = env("DD_SYSTEM_USER")
 # Engine Backend
-PROVIDER1 = env("DD_PROVIDER1")
-PROVIDER2 = env("DD_PROVIDER2")
-PROVIDER3 = env("DD_PROVIDER3")
+PROVIDERS = env("DD_PROVIDERS")
+PROVIDERS_ENDPOINT_MAPPING = env("DD_PROVIDER_ENDPOINT_MAPPING")
 PROVIDER_URL = env("DD_PROVIDER_URL")
 PROVIDER_HEADER = env("DD_PROVIDER_HEADER")
 # Abuse Control

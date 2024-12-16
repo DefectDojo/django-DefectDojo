@@ -8,9 +8,8 @@ SCAN_TYPE_ID = "BlackDuck API"
 
 
 class ApiBlackduckParser:
-    """
-    Import from Synopsys BlackDuck API /findings
-    """
+
+    """Import from Synopsys BlackDuck API /findings"""
 
     def get_scan_types(self):
         return [SCAN_TYPE_ID]

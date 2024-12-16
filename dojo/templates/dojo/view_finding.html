@@ -198,7 +198,7 @@
                                 {% endif %}
                             {% endif %}
                             {% if finding|has_object_permission:"Transfer_Finding_Add" and system_settings.enable_transfer_finding%}
-                                {% if finding|enable_button:"Add Risk Acceptance"%}
+                                {% if finding|enable_button:"Add Transfer Finding"%}
                                     <li role="presentation">
                                         <a rel="noopener noreferrer" href="{% url 'add_transfer_finding' finding.test.engagement.id finding.id %}">
                                             <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Transfer Finding..." %}
@@ -284,6 +284,9 @@
                             <th title="Findings that are marked as duplicate of this finding">Duplicates</th>
                         {% elif duplicate_cluster and finding.duplicate %}
                             <th title="Findings that are also marked as duplicates of the same original finding">Duplicate Cluster</th>
+                        {% endif %}
+                        {% if finding.under_review %}
+                        <th>Reviewers</th>
                         {% endif %}
                         <th>Type</th>
                         <th>Date discovered</th>
@@ -419,6 +422,17 @@
                                     </ul>
                                 </div>
                             </div>
+                        </td>
+                        {% endif %}
+                        {% if finding.under_review %}
+                        <td>
+                            {% for re in finding.reviewers.all|slice:":5" %}
+                                <a rel="noopener noreferrer"
+                                    class="fa-regular fa-eye fa-lg has-popover"
+                                    data-trigger="hover" data-placement="right"
+                                    data-content="{{ re }}"
+                                    data-container="body" data-original-title="Reviewer"></a>
+                            {% endfor %}
                         </td>
                         {% endif %}
                         <td>

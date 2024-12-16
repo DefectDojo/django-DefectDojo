@@ -60,7 +60,8 @@ class Permissions(IntEnum):
     Risk_Acceptance_Expire = 1212
     Risk_Acceptance_Reinstance = 1213
     Risk_Unaccept = 1214
-    Risk_Acceptance_Bullk = 1215
+    Risk_Acceptance_Bulk = 1215
+    Risk_Acceptance_Refresh_Permission_key = 1216
     
     Test_View = 1302
     Test_Add = 1303
@@ -83,6 +84,9 @@ class Permissions(IntEnum):
     Benchmark_Delete = 1607
 
     Component_View = 1702
+    Component_Add = 1703
+    Component_Edit = 1706
+    Component_Delete = 1707
 
     Note_View_History = 1802
     Note_Add = 1803
@@ -183,7 +187,8 @@ class Permissions(IntEnum):
             Permissions.Risk_Acceptance_Add,
             Permissions.Risk_Acceptance_Expire,
             Permissions.Risk_Acceptance_Reinstance,
-            Permissions.Risk_Acceptance_Bullk,
+            Permissions.Risk_Acceptance_Bulk,
+            Permissions.Risk_Acceptance_Refresh_Permission_key,
             Permissions.Risk_Unaccept,
             Permissions.Test_Add,
             Permissions.Import_Scan_Result,
@@ -191,6 +196,10 @@ class Permissions(IntEnum):
             Permissions.Note_Delete,
             Permissions.Note_Edit,
             Permissions.Note_View_History,
+            Permissions.Component_Add,
+            Permissions.Component_View,
+            Permissions.Component_Edit,
+            Permissions.Component_Delete,
 
         }.union(cls.get_test_permissions())
 
@@ -224,6 +233,14 @@ class Permissions(IntEnum):
             Permissions.Transfer_Finding_Add,
             Permissions.Finding_Code_Review
         }.union(cls.get_finding_group_permissions())
+
+    @classmethod
+    def get_component_permissions(cls):
+        return{
+            Permissions.Component_View,
+            Permissions.Component_Edit,
+            Permissions.Component_Delete,
+        }
     
     @classmethod
     def get_transfer_finding_permissions(cls):
@@ -367,6 +384,9 @@ def get_roles_with_permissions():
             Permissions.Finding_Group_View,
             Permissions.Endpoint_View,
             Permissions.Component_View,
+            Permissions.Component_Add,
+            Permissions.Component_Delete,
+            Permissions.Component_Edit,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
             Permissions.Technology_View,
@@ -375,6 +395,8 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_API_Scan_Configuration_Add,
             Permissions.Api_v2_Key,
+            Permissions.Risk_Acceptance,
+            Permissions.Risk_Acceptance_Add
         },
         Roles.Writer: {
             Permissions.Product_Type_View,
@@ -399,6 +421,7 @@ def get_roles_with_permissions():
             Permissions.Endpoint_Edit,
             Permissions.Benchmark_Edit,
             Permissions.Component_View,
+            Permissions.Component_Add,
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
@@ -439,9 +462,10 @@ def get_roles_with_permissions():
             Permissions.Engagement_Delete,
             Permissions.Risk_Acceptance,
             Permissions.Risk_Acceptance_Edit,
-            Permissions.Risk_Acceptance_Bullk,
+            Permissions.Risk_Acceptance_Bulk,
             Permissions.Risk_Unaccept,
             Permissions.Risk_Acceptance_Expire,
+            Permissions.Risk_Acceptance_Refresh_Permission_key,
             Permissions.Test_View,
             Permissions.Test_Add,
             Permissions.Test_Edit,
@@ -462,6 +486,9 @@ def get_roles_with_permissions():
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
             Permissions.Component_View,
+            Permissions.Component_Add,
+            Permissions.Component_Edit,
+            Permissions.Component_Delete,
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
@@ -560,6 +587,9 @@ def get_roles_with_permissions():
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
             Permissions.Component_View,
+            Permissions.Component_Add,
+            Permissions.Component_Edit,
+            Permissions.Component_Delete,
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
@@ -624,7 +654,7 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
-            Permissions.Risk_Acceptance_Bullk,
+            Permissions.Risk_Acceptance_Bulk,
             Permissions.Transfer_Finding_Add,
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Finding_View,
@@ -632,6 +662,8 @@ def get_roles_with_permissions():
             Permissions.Finding_Exclusion_View,
             Permissions.Finding_Exclusion_Add,
             Permissions.Finding_Exclusion_Edit
+            Permissions.Risk_Acceptance_Refresh_Permission_key,
+
         },
         Roles.Leader: {
             Permissions.Product_Type_View,
@@ -639,7 +671,7 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Edit,
             Permissions.Engagement_View,
             Permissions.Risk_Acceptance,
-            Permissions.Risk_Acceptance_Bullk,
+            Permissions.Risk_Acceptance_Bulk,
             Permissions.Test_View,
             Permissions.Finding_View,
             Permissions.Finding_Group_View,
@@ -688,13 +720,17 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
-            Permissions.Risk_Acceptance_Bullk,
             Permissions.Finding_Code_Review,
             Permissions.Finding_Exclusion_Accept,
             Permissions.Finding_Exclusion_Reject,
             Permissions.Finding_Exclusion_Review,
             Permissions.Finding_Exclusion_View,
             Permissions.Finding_Exclusion_Add,
+            Permissions.Risk_Acceptance_Bulk,
+            Permissions.Risk_Acceptance_Refresh_Permission_key,
+            Permissions.Finding_Code_Review,
+            Permissions.Metrics_Panel_Admin,
+
         },
         Roles.Risk: {
             Permissions.Product_Type_View,
@@ -721,7 +757,8 @@ def get_roles_with_permissions():
 
 
 def get_global_roles_with_permissions():
-    """
-    Extra permissions for global roles, on top of the permissions granted to the "normal" roles above.
-    """
-    return {Roles.Maintainer: {Permissions.Product_Type_Add}, Roles.Owner: {Permissions.Product_Type_Add}}
+    """Extra permissions for global roles, on top of the permissions granted to the "normal" roles above."""
+    return {
+        Roles.Maintainer: {Permissions.Product_Type_Add},
+        Roles.Owner: {Permissions.Product_Type_Add},
+    }

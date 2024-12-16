@@ -2,7 +2,7 @@
 title: "Languages and lines of code"
 description: "You can import an analysis of languages used in a project, including lines of code."
 draft: false
-weight: 9
+weight: 10
 ---
 
 ## Import of languages for a project

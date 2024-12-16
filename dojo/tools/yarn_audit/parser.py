@@ -25,13 +25,12 @@ class YarnAuditParser:
             lines = lines.split("\n")
             tree = (json.loads(line) for line in lines if "{" in line)
             return self.get_items_yarn(tree, test)
-        elif '"value"' in lines:
+        if '"value"' in lines:
             lines = lines.split("\n")
             tree = (json.loads(line) for line in lines if "{" in line)
             return self.get_items_yarn2(tree, test)
-        else:
-            tree = json.loads(lines)
-            return self.get_items_auditci(tree, test)
+        tree = json.loads(lines)
+        return self.get_items_auditci(tree, test)
 
     def get_items_yarn(self, tree, test):
         items = {}

@@ -24,7 +24,8 @@ class CheckovParser:
         return findings
 
     def parse_json(self, json_output):
-        """Parse JSON report.
+        """
+        Parse JSON report.
         Checkov may return only one `check_type` (where the report is just a JSON)
         or more (where the report is an array of JSONs).
         To address all scenarios we force this method to return a list of JSON objects.

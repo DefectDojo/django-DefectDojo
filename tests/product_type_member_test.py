@@ -186,7 +186,7 @@ class ProductTypeMemberTest(BaseTestCase):
             # Assert the message to determine success status
             self.assertTrue(self.is_success_message_present(text="Product type member deleted successfully."))
             # Query the site to determine if the member has been deleted
-            self.assertTrue(len(driver.find_elements(By.NAME, "member_user")) == 1)
+            self.assertEqual(len(driver.find_elements(By.NAME, "member_user")), 1)
         else:
             logger.info("--------------------------------")
             logger.info("test_product_delete_product_member: Not executed because legacy authorization is active")

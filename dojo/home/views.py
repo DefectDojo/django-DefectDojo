@@ -33,7 +33,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
 
     date_range = [today - timedelta(days=6), today]  # 7 days (6 days plus today)
     finding_count = findings\
-        .filter(created__date__range=date_range)\
+        .filter(date__range=date_range)\
         .count()
     mitigated_count = findings\
         .filter(mitigated__date__range=date_range)\

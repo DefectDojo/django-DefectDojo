@@ -18,6 +18,7 @@ from django.utils.deprecation import MiddlewareMixin
 
 
 class RequestCache(LocMemCache):
+
     """
     RequestCache is a customized LocMemCache which stores its data cache as an instance attribute, rather than
     a global. It's designed to live only as long as the request object that RequestCacheMiddleware attaches it to.
@@ -34,6 +35,7 @@ class RequestCache(LocMemCache):
 
 
 class RequestCacheMiddleware(MiddlewareMixin):
+
     """
     For every request, a fresh cache instance is stored in ``request.cache``.
     The cache instance lives only as long as request does.

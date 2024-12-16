@@ -5,9 +5,9 @@ from dojo.models import Endpoint, Finding
 
 
 class MSDefenderParser:
-    """
-    Import from MSDefender findings
-    """
+
+    """Import from MSDefender findings"""
+
     def __init__(self):
         self.findings = []
 
@@ -34,29 +34,28 @@ class MSDefenderParser:
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
             if zipdata.get("machines/") is None or zipdata.get("vulnerabilities/") is None:
                 return []
-            else:
-                vulnerabilityfiles = []
-                machinefiles = []
-                for content in list(zipdata):
-                    if "vulnerabilities/" in content and "vulnerabilities/" != content:
-                        vulnerabilityfiles.append(content)
-                    if "machines/" in content and "machines/" != content:
-                        machinefiles.append(content)
-                vulnerabilities = []
-                machines = {}
-                for vulnerabilityfile in vulnerabilityfiles:
-                    output = json.loads(zipdata[vulnerabilityfile].decode("ascii"))["value"]
-                    for data in output:
-                        vulnerabilities.append(data)
-                for machinefile in machinefiles:
-                    output = json.loads(zipdata[machinefile].decode("ascii"))["value"]
-                    for data in output:
-                        machines[data.get("id")] = data
-                for vulnerability in vulnerabilities:
-                    try:
-                        self.process_zip(vulnerability, machines[vulnerability["machineId"]])
-                    except (IndexError, KeyError):
-                        self.process_json(vulnerability)
+            vulnerabilityfiles = []
+            machinefiles = []
+            for content in list(zipdata):
+                if "vulnerabilities/" in content and "vulnerabilities/" != content:
+                    vulnerabilityfiles.append(content)
+                if "machines/" in content and "machines/" != content:
+                    machinefiles.append(content)
+            vulnerabilities = []
+            machines = {}
+            for vulnerabilityfile in vulnerabilityfiles:
+                output = json.loads(zipdata[vulnerabilityfile].decode("ascii"))["value"]
+                for data in output:
+                    vulnerabilities.append(data)
+            for machinefile in machinefiles:
+                output = json.loads(zipdata[machinefile].decode("ascii"))["value"]
+                for data in output:
+                    machines[data.get("id")] = data
+            for vulnerability in vulnerabilities:
+                try:
+                    self.process_zip(vulnerability, machines[vulnerability["machineId"]])
+                except (IndexError, KeyError):
+                    self.process_json(vulnerability)
         else:
             return []
         return self.findings
@@ -141,5 +140,4 @@ class MSDefenderParser:
     def severity_check(self, input):
         if input in ["Informational", "Low", "Medium", "High", "Critical"]:
             return input
-        else:
-            return "Informational"
+        return "Informational"

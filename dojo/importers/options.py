@@ -25,11 +25,13 @@ logger = logging.getLogger(__name__)
 
 
 class ImporterOptions:
+
     """
     Converts the supplied kwargs into a class for global mutability
     as well as making it more clear which fields are used in each
     function.
     """
+
     def __init__(
         self,
         *args: list,

@@ -42,14 +42,14 @@
 		<br/>
 		<br/>
 		{% if enable_acceptance_risk_for_email and permission_keys %}
-			If for some reason you cannot login to vultacker you have the option to accept it directly.
-			clicking on the following link will automatically accept all findings. use this functionality responsibly.
+			If for some reason you cannot login to vultacker you have the option to accept or reject it directly.
+			clicking on the following link will automatically accept or reject all findings. use this functionality responsibly.
 				{% for permission_key in permission_keys %}
 					{% if permission_key.username == user.username%}
-					<a href="{{permission_key.url}}" >Accept all risks</a>
+						<center><a href="{{permission_key.url_accept}}" class="proton-button-actions-accept" target="_blank">Accept</a></center>
+						<center><a href="{{permission_key.url_reject}}" class="proton-button-actions-reject" target="_blank">Reject</a></center>
 					{% endif %}
 				{% endfor %}
 		{% endif %}
 	{%endblock%}
-
 {%endblock%}

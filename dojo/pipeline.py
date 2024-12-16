@@ -36,7 +36,7 @@ def social_uid(backend, details, response, *args, **kwargs):
                 "first_name": first_name,
                 "last_name": last_name,
                 "uid": uid}
-    elif settings.GOOGLE_OAUTH_ENABLED and isinstance(backend, GoogleOAuth2):
+    if settings.GOOGLE_OAUTH_ENABLED and isinstance(backend, GoogleOAuth2):
         """Return user details from Google account"""
         if "sub" in response:
             google_uid = response["sub"]
@@ -56,15 +56,13 @@ def social_uid(backend, details, response, *args, **kwargs):
                 "first_name": first_name,
                 "last_name": last_name,
                 "uid": google_uid}
-    else:
-        uid = backend.get_user_id(details, response)
-        # Used for most backends
-        if uid:
-            return {"uid": uid}
-        # Until OKTA PR in social-core is merged
-        # This modified way needs to work
-        else:
-            return {"uid": response.get("preferred_username")}
+    uid = backend.get_user_id(details, response)
+    # Used for most backends
+    if uid:
+        return {"uid": uid}
+    # Until OKTA PR in social-core is merged
+    # This modified way needs to work
+    return {"uid": response.get("preferred_username")}
 
 
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
@@ -140,8 +138,7 @@ def search_azure_groups(kwargs, token, soc):
 def is_group_id(group):
     if re.search(r"^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$", group):
         return True
-    else:
-        return False
+    return False
 
 
 def assign_user_to_groups(user, group_names, social_provider):
@@ -381,7 +378,6 @@ def sanitize_username(username):
 
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if not settings.SOCIAL_AUTH_CREATE_USER:
-        return
-    else:
-        details["username"] = sanitize_username(details.get("username"))
-        return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)
+        return None
+    details["username"] = sanitize_username(details.get("username"))
+    return social_core.pipeline.user.create_user(strategy, details, backend, user, args, kwargs)

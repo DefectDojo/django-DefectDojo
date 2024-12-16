@@ -6,3 +6,8 @@ class RiskAcceptanceEmailSerializer(serializers.Serializer):
                                   min_length=60,
                                   allow_blank=False,
                                   trim_whitespace=True)
+
+    actions = serializers.CharField(max_length=10,
+                                    min_length=5,
+                                    allow_blank=True,
+                                    trim_whitespace=True)

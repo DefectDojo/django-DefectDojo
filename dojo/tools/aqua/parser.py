@@ -204,22 +204,20 @@ def aqua_severity_of(score):
         return "High"
     if score == "medium":
         return "Medium"
-    elif score == "low":
+    if score == "low":
         return "Low"
-    elif score == "negligible":
+    if score == "negligible":
         return "Info"
-    else:
-        return "Critical"
+    return "Critical"
 
 
 def severity_of(score):
     if score == 0:
         return "Info"
-    elif score < 4:
+    if score < 4:
         return "Low"
-    elif 4.0 < score < 7.0:
+    if 4.0 < score < 7.0:
         return "Medium"
-    elif 7.0 < score < 9.0:
+    if 7.0 < score < 9.0:
         return "High"
-    else:
-        return "Critical"
+    return "Critical"

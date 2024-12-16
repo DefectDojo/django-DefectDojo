@@ -22,9 +22,8 @@ class AzureSecurityCenterRecommendationsParser:
     def get_findings(self, file, test):
         if file.name.lower().endswith(".csv"):
             return self.process_csv(file, test)
-        else:
-            msg = "Unknown file format"
-            raise ValueError(msg)
+        msg = "Unknown file format"
+        raise ValueError(msg)
 
     def process_csv(self, file, test):
         content = file.read()

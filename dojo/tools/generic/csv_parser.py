@@ -105,5 +105,4 @@ class GenericCSVParser:
     def get_severity(self, input):
         if input in ["Info", "Low", "Medium", "High", "Critical"]:
             return input
-        else:
-            return "Info"
+        return "Info"

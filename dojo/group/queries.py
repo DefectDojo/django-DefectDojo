@@ -38,8 +38,7 @@ def get_authorized_group_members(permission):
 
 def get_authorized_group_members_for_user(user):
     groups = get_authorized_groups(Permissions.Group_View)
-    group_members = Dojo_Group_Member.objects.filter(user=user, group__in=groups).order_by("group__name").select_related("role", "group")
-    return group_members
+    return Dojo_Group_Member.objects.filter(user=user, group__in=groups).order_by("group__name").select_related("role", "group")
 
 
 def get_group_members_for_group(group):

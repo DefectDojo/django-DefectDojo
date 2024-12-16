@@ -5,9 +5,9 @@ draft: false
 weight: 5
 ---
 
-## Docker-compose
+## Docker compose
 
-When you deploy a vanilla docker-compose, it will create a persistent
+When you deploy a vanilla docker compose, it will create a persistent
 volume for your Postgres database. As long as your volume is there, you
 should not lose any data.
 
@@ -19,7 +19,7 @@ DockerHub to update.
 {{% /alert %}}
 
 
-The generic upgrade method for docker-compose are as follows:
+The generic upgrade method for docker compose are as follows:
 -   Pull the latest version
 
     ``` {.sourceCode .bash}
@@ -46,10 +46,10 @@ The generic upgrade method for docker-compose are as follows:
 -   Re-start DefectDojo, allowing for container recreation:
     `./dc-up-d.sh`
 -   Database migrations will be run automatically by the initializer.
-    Check the output via `docker-compose logs initializer` or relevant k8s command
+    Check the output via `docker compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the
     safe side), run the migration command:
-    `docker-compose exec uwsgi /bin/bash -c "python manage.py migrate"`
+    `docker compose exec uwsgi /bin/bash -c "python manage.py migrate"`
 
 ### Building your local images
 
@@ -64,7 +64,7 @@ first.
     git merge origin/master
     ```
 
-Then replace the first step of the above generic upgrade method for docker-compose with: `docker-compose build`
+Then replace the first step of the above generic upgrade method for docker compose with: `docker compose build`
 
 ## godojo installations
 

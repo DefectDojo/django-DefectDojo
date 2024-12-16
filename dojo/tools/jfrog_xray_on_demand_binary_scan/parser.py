@@ -9,6 +9,7 @@ from functools import reduce
 
 
 class JFrogXrayOnDemandBinaryScanParser:
+
     """jfrog_xray_scan JSON reports"""
 
     def get_scan_types(self):
@@ -43,10 +44,10 @@ class JFrogXrayOnDemandBinaryScanParser:
 
 
 def get_component_name_version(name):
-    match = re.match(r"([a-z]+://[a-z\d\.:-]+):([a-z\d\.\-].+)", name, re.IGNORECASE)
+    match = re.match(r"[a-z]+://([a-z\d\.\-\/:]+):([a-z\d\.\-].+)", name, re.IGNORECASE)
     if match is None:
-        return name, ""
-    return match[1], match[2]
+        return name.replace(":", "_"), ""
+    return match[1].replace(":", "_"), match[2]
 
 
 def get_severity(vulnerability):
@@ -70,8 +71,7 @@ def get_references(vulnerability):
             else:
                 ref += "- " + reference + "\n"
         return ref
-    else:
-        return None
+    return None
 
 
 def get_remediation(extended_information):
@@ -135,8 +135,7 @@ def process_component(component):
 
 def get_cve(vulnerability):
     if "cves" in vulnerability:
-        cves = vulnerability["cves"]
-        return cves
+        return vulnerability["cves"]
     return []
 
 
@@ -173,8 +172,8 @@ def get_item_set(vulnerability):
             cvss_v3 = cves[0]["cvss_v3_vector"]
             cvssv3 = CVSS3(cvss_v3).clean_vector()
 
-    for component_name, component in vulnerability.get("components", {}).items():
-        component_name, component_version = get_component_name_version(component_name)
+    for component_name_with_version, component in vulnerability.get("components", {}).items():
+        component_name, component_version = get_component_name_version(component_name_with_version)
         mitigation, impact = process_component(component)
         summary = reduce(
             lambda str, kv: str.replace(kv[0], kv[1]),

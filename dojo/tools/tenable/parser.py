@@ -19,8 +19,7 @@ class TenableParser:
             ".xml",
         ) or filename.name.lower().endswith(".nessus"):
             return TenableXMLParser().get_findings(filename, test)
-        elif filename.name.lower().endswith(".csv"):
+        if filename.name.lower().endswith(".csv"):
             return TenableCSVParser().get_findings(filename, test)
-        else:
-            msg = "Filename extension not recognized. Use .xml, .nessus or .csv"
-            raise ValueError(msg)
+        msg = "Filename extension not recognized. Use .xml, .nessus or .csv"
+        raise ValueError(msg)

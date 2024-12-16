@@ -144,4 +144,4 @@ class CycloneDXJSONParser:
             # tools don't provide it
             if "bom-ref" in component:
                 flatted_components[component["bom-ref"]] = component
-        return None
+        return

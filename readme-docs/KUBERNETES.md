@@ -288,7 +288,7 @@ helm install \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.ingress.secretName="minikube-tls" \
   --set django.replicas=3 \
-  --set celery.replicas=3 \
+  --set celery.worker.replicas=3 \
   --set redis.replicas=3 \
   --set createSecret=true \
   --set createRedisSecret=true \
@@ -302,7 +302,7 @@ helm install \
   --namespace="${K8S_NAMESPACE}" \
   --set host="defectdojo.${TLS_CERT_DOMAIN}" \
   --set django.replicas=3 \
-  --set celery.replicas=3 \
+  --set celery.worker.replicas=3 \
   --set redis.replicas=3 \
   --set django.ingress.secretName="minikube-tls" \
   --set database=postgresql \
@@ -374,6 +374,84 @@ extraEnv:
   - name: 'DD_CELERY_BROKER_PORT'
     value: '26379'
 ```
+
+
+### How to use an external PostgreSQL DB with Defectdojo
+
+#### Step 1: Create a Namespace for DefectDojo
+
+To begin, create a dedicated namespace for DefectDojo to isolate its resources:
+`kubectl create ns defectdojo`
+#### Step 2: Create a Secret for PostgreSQL Credentials
+
+Set up a Kubernetes Secret to securely store the PostgreSQL user password and database connection URL, which are essential for establishing a secure connection between DefectDojo and your PostgreSQL instance. Apply the secret using the following command: `kubectl apply -f secret.yaml -n defectdojo`. This secret will be referenced within the `extraEnv` section of the DefectDojo Helm values file.
+
+Sample secret template (replace the placeholders with your PostgreSQL credentials):
+```YAML
+apiversion: v1
+kind: Secret
+metadata:  
+  name: defectdojo-postgresql-specific  
+type: Opaque
+stringData:  # I chose stringData for better visualization of the credentials for debugging
+  postgresql-password: <user-password>
+  db-url: psql://<username>:<password>@<hostname>:<port>/<database-name> 
+```
+
+#### Step 2.5: Install PostgreSQL (Optional)
+
+If you need to simulate a PostgreSQL database external to DefectDojo, you can install PostgreSQL using the following Helm command:
+
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami 
+helm repo update
+helm install defectdojo-postgresql bitnami/postgresql -n defectdojo -f postgresql/values.yaml
+```
+
+
+Sample `values.yaml` file for PostgreSQL configuration:
+
+```YAML 
+auth:
+  username: defectdojo
+  password: <user-password>
+  postgresPassword: <admin-password>
+  database: defectdojo
+  primary:
+    persistence:
+    size: 10Gi
+```
+
+#### Step 3: Modify DefectDojo helm values
+
+Before installing the DefectDojo Helm chart, it's important to customize the `values.yaml` file. Key areas to modify include specifying the PostgreSQL connection details & the extraEnv block:
+
+```yaml
+database: postgresql
+postgresql:
+  postgresServer: "defectdojo-postgresql" # point to the hostname of your postgresql server
+  enabled: false
+
+# Specify the postgresql DB connection url for the external postgresql server
+extraEnv:
+  - name: DD_DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: defectdojo-postgresql-specific
+        key: db-url
+```
+
+#### Step 4: Deploy DefectDojo
+
+After modifying the `values.yaml` file as needed, deploy DefectDojo using Helm. This command also generates the required secrets for the DefectDojo admin UI and Redis:
+
+```bash
+helm install defectdojo defectdojo -f values.yaml -n defectdojo --set createSecret=true --set createRedisSecret=true
+```
+
+
+**NOTE**: It is important to highlight that this setup can also be utilized for achieving high availability (HA) in PostgreSQL. By placing a load balancer in front of the PostgreSQL cluster, read and write requests can be efficiently routed to the appropriate primary or standby servers as needed.
+
 
 ### kubectl commands
 

@@ -52,7 +52,7 @@ class TestMeterianParser(DojoTestCase):
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2020-26289", finding.unsaved_vulnerability_ids[0])
             self.assertEqual(400, finding.cwe)
-            self.assertTrue(finding.mitigation.startswith("## Remediation"))
+            self.assertTrue(finding.mitigation.startswith("## Remediation"), finding.mitigation)
             self.assertIn("Upgrade date-and-time to version 0.14.2 or higher.", finding.mitigation)
             self.assertIn("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-26289", finding.references, "found " + finding.references)
             self.assertIn("https://nvd.nist.gov/vuln/detail/CVE-2020-26289", finding.references, "found " + finding.references)
@@ -68,7 +68,7 @@ class TestMeterianParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
 
             finding = findings[0]
-            self.assertTrue(finding.mitigation.startswith("We were not able to provide a safe version for this library."))
+            self.assertTrue(finding.mitigation.startswith("We were not able to provide a safe version for this library."), finding.mitigation)
             self.assertIn("You should consider replacing this component as it could be an "
                 + "issue for the safety of your application.", finding.mitigation)
 

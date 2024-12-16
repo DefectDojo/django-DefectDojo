@@ -69,7 +69,7 @@ An import can be performed by specifying the names of these entities in the API 
 }
 ```
 
-When `auto_create_context` is `True`, the product and engagement will be created if needed. Make sure your user has sufficient [permissions](../usage/permissions) to do this.
+When `auto_create_context` is `True`, the product, engagement, and environment will be created if needed. Make sure your user has sufficient [permissions](../usage/permissions) to do this.
 
 A classic way of importing a scan is by specifying the ID of the engagement instead:
 

@@ -340,15 +340,6 @@ def reset_finding_related(finding):
         logger.error(e)
         raise ApiError.internal_server_error(detail=e)
 
-
-def enable_flow_transfer_finding(**kwargs):
-    # add rule custom if necessary
-    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
-    and kwargs["finding"].active is True):
-        return True
-    return False
-
-
 def get_sla_expiration_transfer_finding():
     expiration_delta_days = sla_expiration_transfer_finding('TransferFindingExpiration')
     logger.debug(f"Update RiskAcceptanceExpiration: {expiration_delta_days}")
@@ -367,3 +358,10 @@ def delete_transfer_finding_finding(transfer_finding):
         logger.error(e)
         raise ApiError.internal_server_error(detail=e)
     return True
+
+def enable_flow_transfer_finding(**kwargs):
+    # add rule custom if necessary
+    if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
+    and kwargs["finding"].active is True):
+        return True
+    return False

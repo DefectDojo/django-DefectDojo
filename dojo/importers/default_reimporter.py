@@ -10,6 +10,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
+from dojo.importers.utils import get_or_create_component
 from dojo.models import (
     Development_Environment,
     Finding,
@@ -51,6 +52,7 @@ class DefaultReImporterOptions(ImporterOptions):
 
 
 class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
+
     """
     The classic reimporter process used by DefectDojo
 
@@ -58,6 +60,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     vulnerabilities is the ultimate tool for getting a current
     point time view of security of a given product
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(
             self,
@@ -166,7 +169,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         the finding may be appended to a new or existing group based upon user selection
         at import time
         """
-
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         self.original_items = list(self.test.finding_set.all())
         self.new_items = []
@@ -178,13 +180,28 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
-        for unsaved_finding in parsed_findings:
+        if not self.engagement:
+            self.engagement = self.test.engagement
+
+        for non_clean_unsaved_finding in parsed_findings:
             # make sure the severity is something is digestible
-            unsaved_finding = self.sanitize_severity(unsaved_finding)
+            unsaved_finding = self.sanitize_severity(non_clean_unsaved_finding)
             # Filter on minimum severity if applicable
             if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
+
+            if hasattr(unsaved_finding, "component_name") and hasattr(unsaved_finding, "component_version"):
+                component_name = unsaved_finding.component_name
+                component_version = unsaved_finding.component_version
+                if component_name and component_version:
+                    component = get_or_create_component(
+                        component_name,
+                        component_version,
+                        self.engagement
+                    )
+
+                    unsaved_finding.component = component
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
             if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
@@ -388,9 +405,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> List[Finding]:
-        """
-        Matches a single new finding to N existing findings and then returns those matches
-        """
+        """Matches a single new finding to N existing findings and then returns those matches"""
         # This code should match the logic used for deduplication out of the re-import feature.
         # See utils.py deduplicate_* functions
         deduplicationLogger.debug("return findings bases on algorithm: %s", self.deduplication_algorithm)
@@ -399,12 +414,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 test=self.test,
                 hash_code=unsaved_finding.hash_code,
             ).exclude(hash_code=None).order_by("id")
-        elif self.deduplication_algorithm == "unique_id_from_tool":
+        if self.deduplication_algorithm == "unique_id_from_tool":
             return Finding.objects.filter(
                 test=self.test,
                 unique_id_from_tool=unsaved_finding.unique_id_from_tool,
             ).exclude(unique_id_from_tool=None).order_by("id")
-        elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
+        if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             query = Finding.objects.filter(
                 Q(test=self.test),
                 (Q(hash_code__isnull=False) & Q(hash_code=unsaved_finding.hash_code))
@@ -412,7 +427,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             ).order_by("id")
             deduplicationLogger.debug(query.query)
             return query
-        elif self.deduplication_algorithm == "legacy":
+        if self.deduplication_algorithm == "legacy":
             # This is the legacy reimport behavior. Although it's pretty flawed and doesn't match the legacy algorithm for deduplication,
             # this is left as is for simplicity.
             # Re-writing the legacy deduplication here would be complicated and counter-productive.
@@ -423,9 +438,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     test=self.test,
                     severity=unsaved_finding.severity,
                     numerical_severity=Finding.get_numerical_severity(unsaved_finding.severity)).order_by("id")
-        else:
-            logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
-            return None
+        logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
+        return None
 
     def process_matched_finding(
         self,
@@ -441,16 +455,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 unsaved_finding,
                 existing_finding,
             )
-        elif existing_finding.is_mitigated:
+        if existing_finding.is_mitigated:
             return self.process_matched_mitigated_finding(
                 unsaved_finding,
                 existing_finding,
             )
-        else:
-            return self.process_matched_active_finding(
-                unsaved_finding,
-                existing_finding,
-            )
+        return self.process_matched_active_finding(
+            unsaved_finding,
+            existing_finding,
+        )
 
     def process_matched_special_status_finding(
         self,
@@ -480,7 +493,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
         # (Risk accepted findings are not set to mitigated by Defectdojo)
         # We however do not exit the loop as we do want to update the endpoints (in case some endpoints were fixed)
-        elif existing_finding.risk_accepted and not existing_finding.active:
+        if existing_finding.risk_accepted and not existing_finding.active:
             self.unchanged_items.append(existing_finding)
             return existing_finding, False
         # The finding was not an exact match, so we need to add more details about from the
@@ -521,47 +534,44 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 logger.debug(msg)
                 # Return True here to force the loop to continue
                 return existing_finding, True
-            else:
-                # even if there is no mitigation time, skip it, because both the current finding and
-                # the reimported finding are is_mitigated
-                # Return True here to force the loop to continue
-                return existing_finding, True
-        else:
-            if self.do_not_reactivate:
-                logger.debug(
-                    "Skipping reactivating by user's choice do_not_reactivate: "
-                    f" - {existing_finding.id}: {existing_finding.title} "
-                    f"({existing_finding.component_name} - {existing_finding.component_version})",
-                )
-                # Search for an existing note that this finding has been skipped for reactivation
-                # before this current time
-                reactivated_note_text = f"Finding has skipped reactivation from {self.scan_type} re-upload with user decision do_not_reactivate."
-                existing_note = existing_finding.notes.filter(
+            # even if there is no mitigation time, skip it, because both the current finding and
+            # the reimported finding are is_mitigated
+            # Return True here to force the loop to continue
+            return existing_finding, True
+        if self.do_not_reactivate:
+            logger.debug(
+                "Skipping reactivating by user's choice do_not_reactivate: "
+                f" - {existing_finding.id}: {existing_finding.title} "
+                f"({existing_finding.component_name} - {existing_finding.component_version})",
+            )
+            # Search for an existing note that this finding has been skipped for reactivation
+            # before this current time
+            reactivated_note_text = f"Finding has skipped reactivation from {self.scan_type} re-upload with user decision do_not_reactivate."
+            existing_note = existing_finding.notes.filter(
+                entry=reactivated_note_text,
+                author=self.user,
+            )
+            # If a note has not been left before, we can skip this finding
+            if len(existing_note) == 0:
+                note = Notes(
                     entry=reactivated_note_text,
                     author=self.user,
                 )
-                # If a note has not been left before, we can skip this finding
-                if len(existing_note) == 0:
-                    note = Notes(
-                        entry=reactivated_note_text,
-                        author=self.user,
-                    )
-                    note.save()
-                    existing_finding.notes.add(note)
-                    existing_finding.save(dedupe_option=False)
-                # Return True here to force the loop to continue
-                return existing_finding, True
-            else:
-                logger.debug(
-                    f"Reactivating:  - {existing_finding.id}: {existing_finding.title} "
-                    f"({existing_finding.component_name} - {existing_finding.component_version})",
-                )
-                existing_finding.mitigated = None
-                existing_finding.is_mitigated = False
-                existing_finding.mitigated_by = None
-                existing_finding.active = True
-                if self.verified is not None:
-                    existing_finding.verified = self.verified
+                note.save()
+                existing_finding.notes.add(note)
+                existing_finding.save(dedupe_option=False)
+            # Return True here to force the loop to continue
+            return existing_finding, True
+        logger.debug(
+            f"Reactivating:  - {existing_finding.id}: {existing_finding.title} "
+            f"({existing_finding.component_name} - {existing_finding.component_version})",
+        )
+        existing_finding.mitigated = None
+        existing_finding.is_mitigated = False
+        existing_finding.mitigated_by = None
+        existing_finding.active = True
+        if self.verified is not None:
+            existing_finding.verified = self.verified
 
         component_name = getattr(unsaved_finding, "component_name", None)
         component_version = getattr(unsaved_finding, "component_version", None)
@@ -649,9 +659,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
     ) -> Finding:
-        """
-        Create a new finding from the one parsed from the report
-        """
+        """Create a new finding from the one parsed from the report"""
         # Set some explicit settings
         unsaved_finding.reporter = self.user
         unsaved_finding.last_reviewed = self.now
@@ -706,9 +714,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Process vulnerability IDs
         if finding_from_report.unsaved_vulnerability_ids:
             finding.unsaved_vulnerability_ids = finding_from_report.unsaved_vulnerability_ids
-        finding = self.process_vulnerability_ids(finding)
 
-        return finding
+        return self.process_vulnerability_ids(finding)
 
     def process_groups_for_all_findings(
         self,
@@ -767,8 +774,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 serialized_to_mitigate,
                 serialized_untouched,
             )
-        else:
-            return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
+        return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
     def calculate_unsaved_finding_hash_code(
         self,

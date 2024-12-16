@@ -121,6 +121,12 @@ class TestSemgrepParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
 
+    def test_parse_low_medium_high_severity(self):
+        with open("unittests/scans/semgrep/high-medium-low-severities.json", encoding="utf-8") as testfile:
+            parser = SemgrepParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(3, len(findings))
+
     def test_parse_sca_deployments_vulns(self):
         with open("unittests/scans/semgrep/sca-deployments-vulns.json", encoding="utf-8") as testfile:
             parser = SemgrepParser()

@@ -77,6 +77,7 @@ from dojo.models import (
     Note_Type,
     NoteHistory,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -110,6 +111,7 @@ from dojo.models import (
     get_current_date,
     TransferFinding,
     TransferFindingFinding,
+    Component,
 )
 from dojo.risk_acceptance.helper import add_findings_to_risk_acceptance, remove_finding_from_risk_acceptance
 from dojo.tools.factory import (
@@ -228,9 +230,7 @@ class TagListSerializerField(serializers.ListField):
             substrings = re.findall(r'(?:"[^"]*"|[^",]+)', s)
             data_safe.extend(substrings)
 
-        internal_value = tagulous.utils.render_tags(data_safe)
-
-        return internal_value
+        return tagulous.utils.render_tags(data_safe)
 
     def to_representation(self, value):
         if not isinstance(value, list):
@@ -306,8 +306,7 @@ class RequestResponseDict(list):
             return json.dumps(
                 self, sort_keys=True, indent=4, separators=(",", ": "),
             )
-        else:
-            return json.dumps(self)
+        return json.dumps(self)
 
 
 class RequestResponseSerializerField(serializers.ListSerializer):
@@ -431,6 +430,7 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.DateTimeField(read_only=True)
     last_login = serializers.DateTimeField(read_only=True, allow_null=True)
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(
         write_only=True,
         style={"input_type": "password"},
@@ -551,14 +551,13 @@ class UserSerializer(serializers.ModelSerializer):
             msg = "Only superusers are allowed to add or edit superusers."
             raise ValidationError(msg)
 
-        if (
-            self.context["request"].method in ["PATCH", "PUT"]
-            and "password" in data
-        ):
+        if self.context["request"].method in ["PATCH", "PUT"] and "password" in data:
             msg = "Update of password though API is not allowed"
             raise ValidationError(msg)
-        else:
-            return super().validate(data)
+        if self.context["request"].method == "POST" and "password" not in data and settings.REQUIRE_PASSWORD_ON_USER:
+            msg = "Passwords must be supplied for new users"
+            raise ValidationError(msg)
+        return super().validate(data)
 
 
 class UserContactInfoSerializer(serializers.ModelSerializer):
@@ -823,6 +822,7 @@ class FileSerializer(serializers.ModelSerializer):
                     )
                 raise ValidationError(msg)
             return data
+        return None
 
 
 class RawFileSerializer(serializers.ModelSerializer):
@@ -1075,8 +1075,7 @@ class EngagementToFilesSerializer(serializers.Serializer):
                     "title": file.title,
                 },
             )
-        new_data = {"engagement_id": engagement.id, "files": new_files}
-        return new_data
+        return {"engagement_id": engagement.id, "files": new_files}
 
 
 class EngagementCheckListSerializer(serializers.ModelSerializer):
@@ -1148,8 +1147,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
             if "finding, endpoint must make a unique set" in str(exc):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg) from exc
-            else:
-                raise
+            raise
 
     def create(self, validated_data):
         endpoint = validated_data.get("endpoint")
@@ -1162,8 +1160,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
             if "finding, endpoint must make a unique set" in str(ie):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg)
-            else:
-                raise
+            raise
         status.mitigated = validated_data.get("mitigated", False)
         status.false_positive = validated_data.get("false_positive", False)
         status.out_of_scope = validated_data.get("out_of_scope", False)
@@ -1179,8 +1176,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
             if "finding, endpoint must make a unique set" in str(ie):
                 msg = "This endpoint-finding relation already exists"
                 raise serializers.ValidationError(msg)
-            else:
-                raise
+            raise
 
 
 class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1441,8 +1437,7 @@ class TestToFilesSerializer(serializers.Serializer):
                     "title": file.title,
                 },
             )
-        new_data = {"test_id": test.id, "files": new_files}
-        return new_data
+        return {"test_id": test.id, "files": new_files}
 
 
 class TestImportFindingActionSerializer(serializers.ModelSerializer):
@@ -1469,7 +1464,8 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         instance = super().create(validated_data)
-        add_findings_to_risk_acceptance(instance, instance.accepted_findings.all())
+        user = getattr(self.context.get("request", None), "user", None)
+        add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
         return instance
 
     def update(self, instance, validated_data):
@@ -1483,11 +1479,12 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
         # Make the update in the database
         instance = super().update(instance, validated_data)
+        user = getattr(self.context.get("request", None), "user", None)
         # Add the new findings
-        add_findings_to_risk_acceptance(instance, findings_to_add)
+        add_findings_to_risk_acceptance(user, instance, findings_to_add)
         # Remove the ones that were not present in the payload
         for finding in findings_to_remove:
-            remove_finding_from_risk_acceptance(instance, finding)
+            remove_finding_from_risk_acceptance(user, instance, finding)
         return instance
 
     @extend_schema_field(serializers.CharField())
@@ -1532,7 +1529,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         findings = data.get("accepted_findings", [])
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
-        authed_findings = get_authorized_findings(Permissions.Finding_Edit).filter(id__in=findings_ids)
+        authed_findings = get_authorized_findings(Permissions.Risk_Acceptance_Add).filter(id__in=findings_ids)
         if len(findings) != len(authed_findings):
             msg = "You are not permitted to add one or more selected findings to this risk acceptance"
             raise PermissionDenied(msg)
@@ -1700,8 +1697,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             return FindingRelatedFieldsSerializer(
                 required=False,
             ).to_representation(obj)
-        else:
-            return None
+        return None
 
     def get_display_status(self, obj) -> str:
         return obj.status()
@@ -1745,8 +1741,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         # not sure why we are returning a tag_object, but don't want to change
         # too much now as we're just fixing a bug
-        tag_object = self._save_tags(instance, to_be_tagged)
-        return tag_object
+        return self._save_tags(instance, to_be_tagged)
 
     def validate(self, data):
         if self.context["request"].method == "PATCH":
@@ -1765,10 +1760,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             is_risk_accepted = data.get("risk_accepted", False)
 
         if (is_active or is_verified) and is_duplicate:
-            msg = "Duplicate findings cannot be" " verified or active"
+            msg = "Duplicate findings cannot be verified or active"
             raise serializers.ValidationError(msg)
         if is_false_p and is_verified:
-            msg = "False positive findings cannot " "be verified."
+            msg = "False positive findings cannot be verified."
             raise serializers.ValidationError(msg)
 
         if is_risk_accepted and not self.instance.risk_accepted:
@@ -1887,8 +1882,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         # not sure why we are returning a tag_object, but don't want to change
         # too much now as we're just fixing a bug
-        tag_object = self._save_tags(new_finding, to_be_tagged)
-        return tag_object
+        return self._save_tags(new_finding, to_be_tagged)
 
     def validate(self, data):
         if "reporter" not in data:
@@ -1945,6 +1939,8 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("cve",)
 
     def create(self, validated_data):
+        to_be_tagged, validated_data = self._pop_tags(validated_data)
+
         # Save vulnerability ids and pop them
         if "vulnerability_id_template_set" in validated_data:
             vulnerability_id_set = validated_data.pop(
@@ -1967,6 +1963,7 @@ class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
             )
             new_finding_template.save()
 
+        self._save_tags(new_finding_template, to_be_tagged)
         return new_finding_template
 
     def update(self, instance, validated_data):
@@ -2057,7 +2054,7 @@ class EngagementByProductResponseSerializer(TaggitSerializer, serializers.ModelS
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
-    findings_list = serializers.SerializerMethodField()
+    # findings_list = serializers.SerializerMethodField()
 
     tags = TagListSerializerField(required=False)
     product_meta = ProductMetaSerializer(read_only=True, many=True)
@@ -2084,11 +2081,11 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.findings_count
 
     # TODO: maybe extend_schema_field is needed here?
-    def get_findings_list(self, obj) -> List[int]:
-        return obj.open_findings_list
+    # def get_findings_list(self, obj) -> List[int]:
+    #     return obj.open_findings_list
 
 
-class ImportScanSerializer(serializers.Serializer):
+class CommonImportScanSerializer(serializers.Serializer):
     scan_date = serializers.DateField(
         required=False,
         help_text="Scan completion date will be used on all findings.",
@@ -2105,7 +2102,7 @@ class ImportScanSerializer(serializers.Serializer):
     verified = serializers.BooleanField(
         help_text="Override the verified setting from the tool.",
     )
-    scan_type = serializers.ChoiceField(choices=get_choices_sorted())
+
     # TODO: why do we allow only existing endpoints?
     endpoint_to_add = serializers.PrimaryKeyRelatedField(
         queryset=Endpoint.objects.all(),
@@ -2126,35 +2123,15 @@ class ImportScanSerializer(serializers.Serializer):
         required=False,
         help_text="Resource link to source code",
     )
-    engagement = serializers.PrimaryKeyRelatedField(
-        queryset=Engagement.objects.all(), required=False,
-    )
+
     test_title = serializers.CharField(required=False)
     auto_create_context = serializers.BooleanField(required=False)
     deduplication_on_engagement = serializers.BooleanField(required=False)
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True, default=None, queryset=User.objects.all(),
     )
-    tags = TagListSerializerField(
-        required=False, allow_empty=True, help_text="Add tags that help describe this scan.",
-    )
-    close_old_findings = serializers.BooleanField(
-        required=False,
-        default=False,
-        help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
-        "If service has been set, only the findings for this service will be closed.",
-    )
-    close_old_findings_product_scope = serializers.BooleanField(
-        required=False,
-        default=False,
-        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
-        "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
-    )
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
-    version = serializers.CharField(
-        required=False, help_text="Version that was scanned.",
-    )
     build_id = serializers.CharField(
         required=False, help_text="ID of the build that was scanned.",
     )
@@ -2188,9 +2165,6 @@ class ImportScanSerializer(serializers.Serializer):
     # extra fields populated in response
     # need to use the _id suffix as without the serializer framework gets
     # confused
-    test = serializers.IntegerField(
-        read_only=True,
-    )  # left for backwards compatibility
     test_id = serializers.IntegerField(read_only=True)
     engagement_id = serializers.IntegerField(read_only=True)
     product_id = serializers.IntegerField(read_only=True)
@@ -2204,76 +2178,6 @@ class ImportScanSerializer(serializers.Serializer):
         help_text="If set to True, the tags will be applied to the endpoints",
         required=False,
     )
-
-    def set_context(
-        self,
-        data: dict,
-    ) -> dict:
-        """
-        Process all of the user supplied inputs to massage them into the correct
-        format the importer is expecting to see
-        """
-        context = dict(data)
-        # update some vars
-        context["scan"] = data.pop("file", None)
-        context["environment"] = Development_Environment.objects.get(
-            name=data.get("environment", "Development"),
-        )
-        # Set the active/verified status based upon the overrides
-        if "active" in self.initial_data:
-            context["active"] = data.get("active")
-        else:
-            context["active"] = None
-        if "verified" in self.initial_data:
-            context["verified"] = data.get("verified")
-        else:
-            context["verified"] = None
-        # Change the way that endpoints are sent to the importer
-        if endpoints_to_add := data.get("endpoint_to_add"):
-            context["endpoints_to_add"] = [endpoints_to_add]
-        else:
-            context["endpoint_to_add"] = None
-        # Convert the tags to a list if needed. At this point, the
-        # TaggitListSerializer has already removed commas supplied
-        # by the user, so this operation will consistently return
-        # a list to be used by the importer
-        if tags := context.get("tags"):
-            if isinstance(tags, str):
-                context["tags"] = tags.split(", ")
-        # have to make the scan_date_time timezone aware otherwise uploads via
-        # the API would fail (but unit tests for api upload would pass...)
-        context["scan_date"] = (
-            timezone.make_aware(
-                datetime.combine(context.get("scan_date"), datetime.min.time()),
-            )
-            if context.get("scan_date")
-            else None
-        )
-        # Process the auto create context inputs
-        self.process_auto_create_create_context(context)
-
-        return context
-
-    def process_auto_create_create_context(
-        self,
-        context: dict,
-    ) -> None:
-        """
-        Extract all of the pertinent args used to auto create any product
-        types, products, or engagements. This function will also validate
-        those inputs for any required info that is not present. In the event
-        of an error, an exception will be raised and bubble up to the user
-        """
-        auto_create = AutoCreateContextManager()
-        # Process the context to make an conversions needed. Catch any exceptions
-        # in this case and wrap them in a DRF exception
-        try:
-            auto_create.process_import_meta_data_from_dict(context)
-            # Attempt to create an engagement
-            context["engagement"] = auto_create.get_or_create_engagement(**context)
-        except (ValueError, TypeError) as e:
-            # Raise an explicit drf exception here
-            raise ValidationError(str(e))
 
     def get_importer(
         self,
@@ -2316,29 +2220,6 @@ class ImportScanSerializer(serializers.Serializer):
         except ValueError as ve:
             raise Exception(ve)
 
-    def validate_file(self, value):
-        """
-        Validate that the file has an allowed extension.
-        """
-        if value.name:
-            allowed_extension = ["json", "csv", "xml", "sarif", "html"]
-            __, extension = os.path.splitext(value.name)
-            extension = extension[1:]
-            if len(extension.split('.')) == 1 and extension in allowed_extension:
-                return value
-            else:
-                raise serializers.ValidationError('file not allowed')
-
-    def save(self, push_to_jira=False):
-        # Go through the validate method
-        data = self.validated_data
-        # Extract the data from the form
-        context = self.set_context(data)
-        # set the jira option again as it was overridden
-        context["push_to_jira"] = push_to_jira
-        # Import the scan with all of the supplied data
-        self.process_scan(data, context)
-
     def validate(self, data: dict) -> dict:
         scan_type = data.get("scan_type")
         file = data.get("file")
@@ -2366,151 +2247,25 @@ class ImportScanSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg)
         return value
 
-
-class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
-    scan_date = serializers.DateField(
-        required=False,
-        help_text="Scan completion date will be used on all findings.",
-    )
-    minimum_severity = serializers.ChoiceField(
-        choices=SEVERITY_CHOICES,
-        default="Info",
-        help_text="Minimum severity level to be imported",
-    )
-    active = serializers.BooleanField(
-        help_text="Override the active setting from the tool.",
-    )
-    verified = serializers.BooleanField(
-        help_text="Override the verified setting from the tool.",
-    )
-    help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
-    do_not_reactivate = serializers.BooleanField(
-        default=False, required=False, help_text=help_do_not_reactivate,
-    )
-    scan_type = serializers.ChoiceField(
-        choices=get_choices_sorted(), required=True,
-    )
-    endpoint_to_add = serializers.PrimaryKeyRelatedField(
-        queryset=Endpoint.objects.all(),
-        required=False,
-        default=None,
-        help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
-    )
-    file = serializers.FileField(allow_empty_file=True, required=False)
-    product_type_name = serializers.CharField(required=False)
-    product_name = serializers.CharField(required=False)
-    engagement_name = serializers.CharField(required=False)
-    engagement_end_date = serializers.DateField(
-        required=False,
-        help_text="End Date for Engagement. Default is current time + 365 days. Required format year-month-day",
-    )
-    source_code_management_uri = serializers.URLField(
-        max_length=600,
-        required=False,
-        help_text="Resource link to source code",
-    )
-    test = serializers.PrimaryKeyRelatedField(
-        required=False, queryset=Test.objects.all(),
-    )
-    test_title = serializers.CharField(required=False)
-    auto_create_context = serializers.BooleanField(required=False)
-    deduplication_on_engagement = serializers.BooleanField(required=False)
-
-    push_to_jira = serializers.BooleanField(default=False)
-    # Close the old findings if the parameter is not provided. This is to
-    # mentain the old API behavior after reintroducing the close_old_findings parameter
-    # also for ReImport.
-    close_old_findings = serializers.BooleanField(
-        required=False,
-        default=True,
-        help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
-    )
-    close_old_findings_product_scope = serializers.BooleanField(
-        required=False,
-        default=False,
-        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
-        "By default, it is false meaning that only old findings of the same type in the engagement are in scope. "
-        "Note that this only applies on the first call to reimport-scan.",
-    )
-    version = serializers.CharField(
-        required=False,
-        help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.",
-    )
-    build_id = serializers.CharField(
-        required=False, help_text="ID of the build that was scanned.",
-    )
-    branch_tag = serializers.CharField(
-        required=False, help_text="Branch or Tag that was scanned.",
-    )
-    commit_hash = serializers.CharField(
-        required=False, help_text="Commit that was scanned.",
-    )
-    api_scan_configuration = serializers.PrimaryKeyRelatedField(
-        allow_null=True,
-        default=None,
-        queryset=Product_API_Scan_Configuration.objects.all(),
-    )
-    service = serializers.CharField(
-        required=False,
-        help_text="A service is a self-contained piece of functionality within a Product. "
-        "This is an optional field which is used in deduplication and closing of old findings when set. "
-        "This affects the whole engagement/product depending on your deduplication scope.",
-    )
-    environment = serializers.CharField(required=False)
-    lead = serializers.PrimaryKeyRelatedField(
-        allow_null=True, default=None, queryset=User.objects.all(),
-    )
-    tags = TagListSerializerField(
-        required=False,
-        allow_empty=True,
-        help_text="Modify existing tags that help describe this scan. (Existing test tags will be overwritten)",
-    )
-
-    group_by = serializers.ChoiceField(
-        required=False,
-        choices=Finding_Group.GROUP_BY_OPTIONS,
-        help_text="Choose an option to automatically group new findings by the chosen option.",
-    )
-    create_finding_groups_for_all_findings = serializers.BooleanField(
-        help_text="If set to false, finding groups will only be created when there is more than one grouped finding",
-        required=False,
-        default=True,
-    )
-
-    # extra fields populated in response
-    # need to use the _id suffix as without the serializer framework gets
-    # confused
-    test_id = serializers.IntegerField(read_only=True)
-    engagement_id = serializers.IntegerField(
-        read_only=True,
-    )  # need to use the _id suffix as without the serializer framework gets confused
-    product_id = serializers.IntegerField(read_only=True)
-    product_type_id = serializers.IntegerField(read_only=True)
-
-    statistics = ImportStatisticsSerializer(read_only=True, required=False)
-    apply_tags_to_findings = serializers.BooleanField(
-        help_text="If set to True, the tags will be applied to the findings",
-        required=False,
-    )
-    apply_tags_to_endpoints = serializers.BooleanField(
-        help_text="If set to True, the tags will be applied to the endpoints",
-        required=False,
-    )
-
-    def set_context(
-        self,
-        data: dict,
-    ) -> dict:
+    def setup_common_context(self, data: dict) -> dict:
         """
         Process all of the user supplied inputs to massage them into the correct
         format the importer is expecting to see
         """
         context = dict(data)
         # update some vars
-        context["scan"] = data.get("file", None)
-        context["environment"] = Development_Environment.objects.get(
-            name=data.get("environment", "Development"),
-        )
+        context["scan"] = data.pop("file", None)
+
+        if context.get("auto_create_context"):
+            environment = Development_Environment.objects.get_or_create(name=data.get("environment", "Development"))[0]
+        else:
+            try:
+                environment = Development_Environment.objects.get(name=data.get("environment", "Development"))
+            except:
+                msg = "Environment named " + data.get("environment") + " does not exist."
+                raise ValidationError(msg)
+
+        context["environment"] = environment
         # Set the active/verified status based upon the overrides
         if "active" in self.initial_data:
             context["active"] = data.get("active")
@@ -2541,8 +2296,137 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             if context.get("scan_date")
             else None
         )
+        return context
+
+
+class ImportScanSerializer(CommonImportScanSerializer):
+    scan_type = serializers.ChoiceField(choices=get_choices_sorted())
+    engagement = serializers.PrimaryKeyRelatedField(
+        queryset=Engagement.objects.all(), required=False,
+    )
+    tags = TagListSerializerField(
+        required=False, allow_empty=True, help_text="Add tags that help describe this scan.",
+    )
+    close_old_findings = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Select if old findings no longer present in the report get closed as mitigated when importing. "
+        "If service has been set, only the findings for this service will be closed.",
+    )
+    close_old_findings_product_scope = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
+        "By default, it is false meaning that only old findings of the same type in the engagement are in scope.",
+    )
+    version = serializers.CharField(
+        required=False, help_text="Version that was scanned.",
+    )
+    # extra fields populated in response
+    # need to use the _id suffix as without the serializer framework gets
+    # confused
+    test = serializers.IntegerField(
+        read_only=True,
+    )  # left for backwards compatibility
+
+    def set_context(
+        self,
+        data: dict,
+    ) -> dict:
+        context = self.setup_common_context(data)
+        # Process the auto create context inputs
+        self.process_auto_create_create_context(context)
 
         return context
+
+    def process_auto_create_create_context(
+        self,
+        context: dict,
+    ) -> None:
+        """
+        Extract all of the pertinent args used to auto create any product
+        types, products, or engagements. This function will also validate
+        those inputs for any required info that is not present. In the event
+        of an error, an exception will be raised and bubble up to the user
+        """
+        auto_create = AutoCreateContextManager()
+        # Process the context to make an conversions needed. Catch any exceptions
+        # in this case and wrap them in a DRF exception
+        try:
+            auto_create.process_import_meta_data_from_dict(context)
+            # Attempt to create an engagement
+            context["engagement"] = auto_create.get_or_create_engagement(**context)
+        except (ValueError, TypeError) as e:
+            # Raise an explicit drf exception here
+            raise ValidationError(str(e))
+
+    def validate_file(self, value):
+        """
+        Validate that the file has an allowed extension.
+        """
+        if value.name:
+            allowed_extension = ["json", "csv", "xml", "sarif", "html"]
+            __, extension = os.path.splitext(value.name)
+            extension = extension[1:]
+            if len(extension.split('.')) == 1 and extension in allowed_extension:
+                return value
+            else:
+                raise serializers.ValidationError('file not allowed')
+
+    def save(self, push_to_jira=False):
+        # Go through the validate method
+        data = self.validated_data
+        # Extract the data from the form
+        context = self.set_context(data)
+        # set the jira option again as it was overridden
+        context["push_to_jira"] = push_to_jira
+        # Import the scan with all of the supplied data
+        self.process_scan(data, context)
+
+
+class ReImportScanSerializer(TaggitSerializer, CommonImportScanSerializer):
+
+    help_do_not_reactivate = "Select if the import should ignore active findings from the report, useful for triage-less scanners. Will keep existing findings closed, without reactivating them. For more information check the docs."
+    do_not_reactivate = serializers.BooleanField(
+        default=False, required=False, help_text=help_do_not_reactivate,
+    )
+    scan_type = serializers.ChoiceField(
+        choices=get_choices_sorted(), required=True,
+    )
+    test = serializers.PrimaryKeyRelatedField(
+        required=False, queryset=Test.objects.all(),
+    )
+    # Close the old findings if the parameter is not provided. This is to
+    # maintain the old API behavior after reintroducing the close_old_findings parameter
+    # also for ReImport.
+    close_old_findings = serializers.BooleanField(
+        required=False,
+        default=True,
+        help_text="Select if old findings no longer present in the report get closed as mitigated when importing.",
+    )
+    close_old_findings_product_scope = serializers.BooleanField(
+        required=False,
+        default=False,
+        help_text="Select if close_old_findings applies to all findings of the same type in the product. "
+        "By default, it is false meaning that only old findings of the same type in the engagement are in scope. "
+        "Note that this only applies on the first call to reimport-scan.",
+    )
+    version = serializers.CharField(
+        required=False,
+        help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.",
+    )
+    tags = TagListSerializerField(
+        required=False,
+        allow_empty=True,
+        help_text="Modify existing tags that help describe this scan. (Existing test tags will be overwritten)",
+    )
+
+    def set_context(
+        self,
+        data: dict,
+    ) -> dict:
+
+        return self.setup_common_context(data)
 
     def process_auto_create_create_context(
         self,
@@ -2565,16 +2449,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         except (ValueError, TypeError) as e:
             # Raise an explicit drf exception here
             raise ValidationError(str(e))
-
-    def get_importer(
-        self,
-        **kwargs: dict,
-    ) -> BaseImporter:
-        """
-        Returns a new instance of an importer that extends
-        the BaseImporter class
-        """
-        return DefaultImporter(**kwargs)
 
     def get_reimporter(
         self,
@@ -2653,33 +2527,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         self.process_auto_create_create_context(auto_create_manager, context)
         # Import the scan with all of the supplied data
         self.process_scan(auto_create_manager, data, context)
-
-    def validate(self, data):
-        scan_type = data.get("scan_type")
-        file = data.get("file")
-        if not file and requires_file(scan_type):
-            msg = f"Uploading a Report File is required for {scan_type}"
-            raise serializers.ValidationError(msg)
-        if file and is_scan_file_too_large(file):
-            msg = f"Report file is too large. Maximum supported size is {settings.SCAN_FILE_MAX_SIZE} MB"
-            raise serializers.ValidationError(msg)
-        tool_type = requires_tool_type(scan_type)
-        if tool_type:
-            api_scan_configuration = data.get("api_scan_configuration")
-            if (
-                api_scan_configuration
-                and tool_type
-                != api_scan_configuration.tool_configuration.tool_type.name
-            ):
-                msg = f"API scan configuration must be of tool type {tool_type}"
-                raise serializers.ValidationError(msg)
-        return data
-
-    def validate_scan_date(self, value):
-        if value and value > timezone.localdate():
-            msg = "The scan_date cannot be in the future!"
-            raise serializers.ValidationError(msg)
-        return value
 
 
 class EndpointMetaImporterSerializer(serializers.Serializer):
@@ -2845,8 +2692,7 @@ class FindingToFilesSerializer(serializers.Serializer):
                     "title": file.title,
                 },
             )
-        new_data = {"finding_id": finding.id, "files": new_files}
-        return new_data
+        return {"finding_id": finding.id, "files": new_files}
 
 
 class FindingCloseSerializer(serializers.ModelSerializer):
@@ -3008,6 +2854,9 @@ class NotificationsSerializer(serializers.ModelSerializer):
     risk_acceptance_request = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
+    risk_acceptance_confirmed = MultipleChoiceField(
+        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
+    )
     transfer_finding = MultipleChoiceField(
         choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION
     )
@@ -3110,10 +2959,9 @@ class QuestionnaireQuestionSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         if isinstance(instance, TextQuestion):
             return TextQuestionSerializer(instance=instance).data
-        elif isinstance(instance, ChoiceQuestion):
+        if isinstance(instance, ChoiceQuestion):
             return ChoiceQuestionSerializer(instance=instance).data
-        else:
-            return QuestionSerializer(instance=instance).data
+        return QuestionSerializer(instance=instance).data
 
     class Meta:
         model = Question
@@ -3150,10 +2998,9 @@ class QuestionnaireAnswerSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         if isinstance(instance, TextAnswer):
             return TextAnswerSerializer(instance=instance).data
-        elif isinstance(instance, ChoiceAnswer):
+        if isinstance(instance, ChoiceAnswer):
             return ChoiceAnswerSerializer(instance=instance).data
-        else:
-            return AnswerSerializer(instance=instance).data
+        return AnswerSerializer(instance=instance).data
 
     class Meta:
         model = Answer
@@ -3260,5 +3107,51 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             if 'duplicate key value violates unique constraint "dojo_announcement_pkey"' in str(e):
                 msg = "No more than one Announcement is allowed"
                 raise serializers.ValidationError(msg)
-            else:
-                raise
+            raise
+
+class ComponentSerializer(serializers.ModelSerializer):
+    engagement_id = serializers.IntegerField()
+
+    class Meta:
+        model = Component
+        fields = ['id', 'name', 'version', 'date', 'engagement_id']
+
+    def validate(self, data):
+        name = data.get("name")
+        version = data.get("version")
+        engagement_id = data.get("engagement_id")
+
+        if Component.objects.filter(name=name, version=version, engagement_id=engagement_id).exists():
+            raise ValidationError({
+                "detail": _("A component with this name, version, and engagement_id already exists.")
+            })
+
+        return data
+
+    def create(self, validated_data):
+        engagement_id = validated_data.pop("engagement_id")
+        engagement = Engagement.objects.get(id=engagement_id)
+        try:
+            component = Component.objects.create(engagement=engagement, **validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError(
+                "A component with this name, version, and engagement_id already exists."
+            )
+        return component
+
+    def update(self, instance, validated_data):
+        engagement_id = validated_data.pop('engagement_id', None)
+        if engagement_id:
+            instance.engagement = Engagement.objects.get(id=engagement_id)
+        
+        instance.name = validated_data.get('name', instance.name)
+        instance.version = validated_data.get('version', instance.version)
+        instance.save()
+        
+        return instance
+
+
+class NotificationWebhooksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification_Webhooks
+        fields = "__all__"

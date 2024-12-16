@@ -27,6 +27,16 @@ class AsffParser:
     def get_description_for_scan_types(self, scan_type):
         return """AWS Security Finding Format (ASFF).
         https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-findings-format-syntax.html"""
+    
+    def get_item_resource_arns(self, item):
+        resource_arns = []
+        if isinstance(item.get("Resources"), list):
+            for resource_block in item["Resources"]:
+                if isinstance(resource_block, dict):
+                    resource_id = resource_block.get("Id")
+                    if resource_id:
+                        resource_arns.append(resource_id)
+        return resource_arns
 
     def get_resource_arn(self, item):
         resource_arn = ""
@@ -57,7 +67,31 @@ class AsffParser:
                 active = True
             else:
                 active = False
+            # Adding the Resources:0/Id value to the description.
+            #
+            # This is needed because every Finding in AWS from Security Hub has an
+            # associated ResourceId that contains the full AWS ARN and without it,
+            # it is much more difficult to track down the specific resource.
+            #
+            # This is different from the Finding Id - as that is from the Security Hub
+            # control and has no information about the offending resource.
+            #
+            # Retrieve the AWS ARN / Resource Id
+            resource_arns = self.get_item_resource_arns(item)
+
+            # Define the control_description
+            control_description = item.get("Description")
+
+            if resource_arns:
+                resource_arn_strings = ", ".join(resource_arns)
+                full_description = f"**AWS resource ARN:** {resource_arn_strings}\n\n{control_description}"
+                impact = resource_arn_strings
+            else:
+                full_description = control_description
+                impact = None
+
             vuln_id_tool = re.match(r"" + settings.DD_CUSTOM_TAG_PARSER.get("asff_regex"), item.get("Title"))
+
             finding = Finding(
                 title=item.get("Title"),
                 description=self.get_description(item),
@@ -67,7 +101,8 @@ class AsffParser:
                 severity=self.get_severity(item.get("Severity")),
                 active=active,
                 unique_id_from_tool=item.get("Id"),
-                vuln_id_from_tool=vuln_id_tool.group(0).upper() if vuln_id_tool else ""
+                vuln_id_from_tool=vuln_id_tool.group(0).upper() if vuln_id_tool else "",
+                impact=impact,
             )
             finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("asff")]
             
@@ -104,7 +139,7 @@ class AsffParser:
     def get_severity(self, data):
         if data.get("Label"):
             return SEVERITY_MAPPING[data.get("Label")]
-        elif isinstance(data.get("Normalized"), int):
+        if isinstance(data.get("Normalized"), int):
             # 0 - INFORMATIONAL
             # 1-39 - LOW
             # 40-69 - MEDIUM
@@ -112,12 +147,11 @@ class AsffParser:
             # 90-100 - CRITICAL
             if data.get("Normalized") > 89:
                 return "Critical"
-            elif data.get("Normalized") > 69:
+            if data.get("Normalized") > 69:
                 return "High"
-            elif data.get("Normalized") > 39:
+            if data.get("Normalized") > 39:
                 return "Medium"
-            elif data.get("Normalized") > 0:
+            if data.get("Normalized") > 0:
                 return "Low"
-            else:
-                return "Info"
+            return "Info"
         return None

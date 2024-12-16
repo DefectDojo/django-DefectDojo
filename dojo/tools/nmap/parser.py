@@ -137,23 +137,24 @@ class NmapParser:
         return list(dupes.values())
 
     def convert_cvss_score(self, raw_value):
-        """According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
+        """
+        According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
                         None 	0.0
         Low 	0.0-3.9 	Low 	0.1-3.9
         Medium 	4.0-6.9 	Medium 	4.0-6.9
         High 	7.0-10.0 	High 	7.0-8.9
-        Critical 	9.0-10.0"""
+        Critical 	9.0-10.0
+        """
         val = float(raw_value)
         if val == 0.0:
             return "Info"
-        elif val < 4.0:
+        if val < 4.0:
             return "Low"
-        elif val < 7.0:
+        if val < 7.0:
             return "Medium"
-        elif val < 9.0:
+        if val < 9.0:
             return "High"
-        else:
-            return "Critical"
+        return "Critical"
 
     def manage_vulner_script(
         self, test, dupes, script_element, endpoint, report_date=None,

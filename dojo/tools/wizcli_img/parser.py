@@ -4,9 +4,8 @@ from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
 
 
 class WizcliImgParser:
-    """
-    Wizcli Image Scan results in JSON file format.
-    """
+
+    """Wizcli Image Scan results in JSON file format."""
 
     def get_scan_types(self):
         return ["Wizcli Img Scan"]

@@ -43,9 +43,10 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
                 finding.description.startswith(
                     "The remote host is running a FTP service that allows cleartext logins over\n  unencrypted connections.",
                 ),
+                finding.description,
             )
             for section in ["**Impact**:", "**Detection**:", "**Technical Details**:"]:
-                self.assertTrue(section in finding.description)
+                self.assertIn(section, finding.description)
 
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
@@ -78,10 +79,11 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
                 finding.description.startswith(
                     "The dedicated port scanner found open ports on this host, along with other\nhost-specific information, which can be viewed in Technical Details.",
                 ),
+                finding.description,
             )
-            self.assertTrue(
-                "Host: 0.0.0.1 (0.0.0.1)\nHost is up, received user-set (0.015s latency).\nScanned at 2020-01-29 15:44:46 UTC for 15763s\nNot shown: 65527 filtered ports, 4 closed ports\nReason: 65527 no-responses and 4 resets\nSome closed ports may be reported as filtered due to --defeat-rst-ratelimit\nPORT      STATE SERVICE     REASON          VERSION\n21/tcp    open  ftp         syn-ack ttl 116 Microsoft ftpd\n45000/tcp open  ssl/asmp?   syn-ack ttl 116\n45010/tcp open  unknown     syn-ack ttl 116\n60001/tcp open  ssl/unknown syn-ack ttl 116\n60011/tcp open  unknown     syn-ack ttl 116\nService Info: OS: Windows; CPE: cpe:/o:microsoft:windows"
-                in finding.description,
+            self.assertIn(
+                "Host: 0.0.0.1 (0.0.0.1)\nHost is up, received user-set (0.015s latency).\nScanned at 2020-01-29 15:44:46 UTC for 15763s\nNot shown: 65527 filtered ports, 4 closed ports\nReason: 65527 no-responses and 4 resets\nSome closed ports may be reported as filtered due to --defeat-rst-ratelimit\nPORT      STATE SERVICE     REASON          VERSION\n21/tcp    open  ftp         syn-ack ttl 116 Microsoft ftpd\n45000/tcp open  ssl/asmp?   syn-ack ttl 116\n45010/tcp open  unknown     syn-ack ttl 116\n60001/tcp open  ssl/unknown syn-ack ttl 116\n60011/tcp open  unknown     syn-ack ttl 116\nService Info: OS: Windows; CPE: cpe:/o:microsoft:windows",
+                finding.description,
             )
 
             expected_ports = [21, 45000, 45010, 60001, 60011]
@@ -107,9 +109,9 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("8.0.32", finding.component_version)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("CVE-2016-6796", finding.unsaved_vulnerability_ids[0])
-            self.assertTrue(finding.description.startswith('**Product Background**\n\n**Apache Tomcat** is a free and open-source Java web application server. It provides a "pure Java" HTTP web server environment in which Java code can also run, implementing the Jakarta Servlet, Jakarta Expression Language, and WebSocket technologies. Tomcat is released with **Catalina** (a servlet and JSP Java Server Pages container), **Coyote** (an HTTP connector), **Coyote JK** (JK protocol proxy connector) and **Jasper** (a JSP engine). Tomcat can optionally be bundled with Java Enterprise Edition (Jakarta EE) as **Apache TomEE** to deliver a complete application server with enterprise features such as distributed computing and web services.\n\n**Vulnerability Summary**\n\nA malicious web application running on Apache Tomcat 9.0.0.M1 to 9.0.0.M9, 8.5.0 to 8.5.4, 8.0.0.RC1 to 8.0.36, 7.0.0 to 7.0.70 and 6.0.0 to 6.0.45 was able to bypass a configured SecurityManager via manipulation of the configuration parameters for the JSP Servlet.\n\n**References**\n\n* http://www.securitytracker.com/id/1038757\n\n* http://www.securitytracker.com/id/1037141\n\n* http://www.securityfocus.com/bid/93944\n\n* http://www.debian.org/security/2016/dsa-3720\n\n* https://access.redhat.com/errata/RHSA-2017:2247\n\n* https://access.redhat.com/errata/RHSA-2017:1552\n\n* https://access.redhat.com/errata/RHSA-2017:1550\n\n* https://access.redhat.com/errata/RHSA-2017:1549\n\n* https://access.redhat.com/errata/RHSA-2017:1548\n\n* https://access.redhat.com/errata/RHSA-2017:0456\n\n* https://access.redhat.com/errata/RHSA-2017:0455\n\n* http://rhn.redhat.com/errata/RHSA-2017-1551.html\n\n* http://rhn.redhat.com/errata/RHSA-2017-0457.html\n\n* https://security.netapp.com/advisory/ntap-20180605-0001/\n\n* https://usn.ubuntu.com/4557-1/\n\n* https://www.oracle.com/security-alerts/cpuoct2021.html\n\n'))
+            self.assertTrue(finding.description.startswith('**Product Background**\n\n**Apache Tomcat** is a free and open-source Java web application server. It provides a "pure Java" HTTP web server environment in which Java code can also run, implementing the Jakarta Servlet, Jakarta Expression Language, and WebSocket technologies. Tomcat is released with **Catalina** (a servlet and JSP Java Server Pages container), **Coyote** (an HTTP connector), **Coyote JK** (JK protocol proxy connector) and **Jasper** (a JSP engine). Tomcat can optionally be bundled with Java Enterprise Edition (Jakarta EE) as **Apache TomEE** to deliver a complete application server with enterprise features such as distributed computing and web services.\n\n**Vulnerability Summary**\n\nA malicious web application running on Apache Tomcat 9.0.0.M1 to 9.0.0.M9, 8.5.0 to 8.5.4, 8.0.0.RC1 to 8.0.36, 7.0.0 to 7.0.70 and 6.0.0 to 6.0.45 was able to bypass a configured SecurityManager via manipulation of the configuration parameters for the JSP Servlet.\n\n**References**\n\n* http://www.securitytracker.com/id/1038757\n\n* http://www.securitytracker.com/id/1037141\n\n* http://www.securityfocus.com/bid/93944\n\n* http://www.debian.org/security/2016/dsa-3720\n\n* https://access.redhat.com/errata/RHSA-2017:2247\n\n* https://access.redhat.com/errata/RHSA-2017:1552\n\n* https://access.redhat.com/errata/RHSA-2017:1550\n\n* https://access.redhat.com/errata/RHSA-2017:1549\n\n* https://access.redhat.com/errata/RHSA-2017:1548\n\n* https://access.redhat.com/errata/RHSA-2017:0456\n\n* https://access.redhat.com/errata/RHSA-2017:0455\n\n* http://rhn.redhat.com/errata/RHSA-2017-1551.html\n\n* http://rhn.redhat.com/errata/RHSA-2017-0457.html\n\n* https://security.netapp.com/advisory/ntap-20180605-0001/\n\n* https://usn.ubuntu.com/4557-1/\n\n* https://www.oracle.com/security-alerts/cpuoct2021.html\n\n'), finding.description)
             for section in ["**Technical Details**:", "**Classifications**:"]:
-                self.assertTrue(section in finding.description)
+                self.assertIn(section, finding.description)
 
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
@@ -135,9 +137,10 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
                 finding.description.startswith(
                     "This is simply a report of HTTP request methods supported by the web application.",
                 ),
+                finding.description,
             )
             for section in ["**Permitted HTTP Methods**:"]:
-                self.assertTrue(section in finding.description)
+                self.assertIn(section, finding.description)
 
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
@@ -172,9 +175,10 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
                 finding.description.startswith(
                     "This routine reports all SSL/TLS cipher suites accepted by a service   where attack vectors exists only on HTTPS services.\n\nThese rules are applied for the evaluation of the vulnerable cipher suites:\n\n- 64-bit block cipher 3DES vulnerable to the SWEET32 attack (CVE-2016-2183).",
                 ),
+                finding.description,
             )
             for section in ["**Technical Details**:", "**External Sources**"]:
-                self.assertTrue(section in finding.description)
+                self.assertIn(section, finding.description)
 
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
@@ -203,9 +207,10 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
                 finding.description.startswith(
                     "The server responded with a HTTP status code that may indicate that the remote server is experiencing technical\ndifficulties that are likely to affect the scan and may also be affecting other application users.",
                 ),
+                finding.description,
             )
             for section in ["**Technical Details**:"]:
-                self.assertTrue(section in finding.description)
+                self.assertIn(section, finding.description)
 
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
@@ -233,12 +238,12 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("2024-08-06", finding.date)
             self.assertEqual("HTTP/2 Supported", finding.title)
             self.assertEqual(1, len(finding.unsaved_endpoints))
-            self.assertTrue("**Messages**" not in finding.description)
-            self.assertTrue("\x00" not in finding.description)
+            self.assertNotIn("**Messages**", finding.description)
+            self.assertNotIn("\x00", finding.description)
             self.assertIsNotNone(finding.unsaved_request)
-            self.assertTrue(finding.unsaved_request.startswith(":method  =   GET"))
+            self.assertTrue(finding.unsaved_request.startswith(":method  =   GET"), finding.unsaved_request)
             self.assertIsNotNone(finding.unsaved_response)
-            self.assertTrue(finding.unsaved_response.startswith(":status: 200"))
+            self.assertTrue(finding.unsaved_response.startswith(":status: 200"), finding.unsaved_response)
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
             self.assertEqual("www.xzzvwy.com", endpoint.host)
@@ -251,13 +256,13 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("4e7c0b570ff6083376b99e1897102a87907effe2199dc8d4", finding.unique_id_from_tool)
             self.assertEqual("2024-08-06", finding.date)
             self.assertEqual("HTTP/2 Protocol: Transfer-Encoding Header Accepted", finding.title)
-            self.assertTrue("**Messages**" not in finding.description)
-            self.assertTrue("\x00" not in finding.description)
-            self.assertTrue("**HTTP2 Headers**" in finding.description)
+            self.assertNotIn("**Messages**", finding.description)
+            self.assertNotIn("\x00", finding.description)
+            self.assertIn("**HTTP2 Headers**", finding.description)
             self.assertIsNotNone(finding.unsaved_request)
-            self.assertTrue(finding.unsaved_request.startswith(":method  =   POST"))
+            self.assertTrue(finding.unsaved_request.startswith(":method  =   POST"), finding.unsaved_request)
             self.assertIsNotNone(finding.unsaved_response)
-            self.assertTrue(finding.unsaved_response.startswith(":status: 200"))
+            self.assertTrue(finding.unsaved_response.startswith(":status: 200"), finding.unsaved_response)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
@@ -271,13 +276,13 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertEqual("2f1fb384e6a866f9ee0c6f7550e3b607e8b1dd2b1ab0fd02", finding.unique_id_from_tool)
             self.assertEqual("2024-08-06", finding.date)
             self.assertEqual("HTTP/2 Protocol: Transfer-Encoding Header Accepted", finding.title)
-            self.assertTrue("**Messages**" not in finding.description)
-            self.assertTrue("**HTTP2 Headers**" in finding.description)
-            self.assertTrue("\x00" not in finding.description)
+            self.assertNotIn("**Messages**", finding.description)
+            self.assertIn("**HTTP2 Headers**", finding.description)
+            self.assertNotIn("\x00", finding.description)
             self.assertIsNotNone(finding.unsaved_request)
-            self.assertTrue(finding.unsaved_request.startswith(":method  =   POST"))
+            self.assertTrue(finding.unsaved_request.startswith(":method  =   POST"), finding.unsaved_request)
             self.assertIsNotNone(finding.unsaved_response)
-            self.assertTrue(finding.unsaved_response.startswith(":status: 200"))
+            self.assertTrue(finding.unsaved_response.startswith(":status: 200"), finding.unsaved_response)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
@@ -503,7 +508,7 @@ class TestAppCheckWebApplicationScannerParser(TestCase):
             self.assertIsNone(f.unsaved_response)
             # If the dict originally has a 'Messages' entry, it should remain there since no req/res was extracted
             if has_messages_entry:
-                self.assertTrue("Messages" in no_rr)
+                self.assertIn("Messages", no_rr)
 
         for template, test_data in {
             # HTTP/1

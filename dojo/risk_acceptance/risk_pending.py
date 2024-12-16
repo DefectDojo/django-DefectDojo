@@ -16,10 +16,11 @@ from dojo.models import (
     Product,
     Product_Type,
     System_Settings,
-    PermissionKey
+    PermissionKey,
+    Dojo_User
     )
 from dojo.api_v2.api_error import ApiError
-from dojo.risk_acceptance.helper import post_jira_comments
+from dojo.risk_acceptance.helper import post_jira_comments, handle_from_provider_risk
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
 from dojo.authorization.roles_permissions import Permissions
@@ -80,25 +81,6 @@ def update_expiration_risk_accepted(finding: Finding,
             risk_acceptance.expiration_date,
             risk_acceptance.created)
 
-
-def handle_from_provider_risk(finding, acceptance_days):
-    logger.info(f'Risk accepting for external provider Id:{finding.id}')
-    tag = ra_helper.get_matching_value(list_a=finding.tags.tags, list_b=[settings.PROVIDER1, settings.PROVIDER2, settings.PROVIDER3])
-    if tag is not None:
-        logger.info(f"Vulnerability {finding.vuln_id_from_tool} has provider tags")
-        if tag.name == settings.PROVIDER3:
-            finding_id = finding.unique_id_from_tool
-        else:
-            finding_id = finding.vuln_id_from_tool
-        ra_helper.risk_accept_provider(
-            finding_id=finding_id,
-            provider=tag.name,
-            acceptance_days=acceptance_days,
-            url=settings.PROVIDER_URL,
-            header=settings.PROVIDER_HEADER,
-            token=settings.PROVIDER_TOKEN)
-
-
 def risk_accepted_succesfully(
     finding: Finding,
     risk_acceptance: Risk_Acceptance,
@@ -112,7 +94,7 @@ def risk_accepted_succesfully(
     acceptance_days, __, __ = update_expiration_risk_accepted(finding,
                                                               risk_acceptance)
     finding.save()
-    handle_from_provider_risk(finding, acceptance_days)
+    ra_helper.handle_from_provider_risk(finding, acceptance_days)
 
     system_settings = System_Settings.objects.get()
     if system_settings.enable_transfer_finding:
@@ -134,7 +116,9 @@ def get_role_members(user, product: Product, product_type: Product_Type):
     user_members = None
     user_members_product_type: Product_Type_Member = get_authorized_product_type_members_for_user(user, Permissions.Risk_Acceptance)
     user_members = list(user_members_product_type)
-    user_members_product: Product_Member = get_authorized_members_for_product(product=product, permission=Permissions.Risk_Acceptance)
+    user_members_product: Product_Member = get_authorized_members_for_product(product=product,
+                                                                              permission=Permissions.Risk_Acceptance,
+                                                                              user=user)
     if user_members_product:
         user_members += list(user_members_product)
     if not user_members:
@@ -146,7 +130,7 @@ def get_role_members(user, product: Product, product_type: Product_Type):
         elif hasattr(user_member, "product_id"):
             if user_member.product_id == product.id:
                 return user_member.role.name
-    raise ValueError(f"The user is not related to the object {product_type}")    
+    raise ValueError(f"The user is not related to the object {product_type}")
 
 
 def role_has_exclusive_permissions(user):
@@ -157,27 +141,36 @@ def role_has_exclusive_permissions(user):
     return False
 
 
-def get_user_with_permission_key(permission_key=None):
+def get_user_with_permission_key(permission_key=None, raise_exception=True) -> Dojo_User:
     if permission_key is None:
         return crum.get_current_user()
     permission_key = PermissionKey.objects.get(token=permission_key)
-    if permission_key.status and permission_key.is_expired:
-        user = permission_key.user
-        logger.debug(f"User {user} with Permmission key ****")
-        return user
-    raise ApiError.network_authentication_required(detail="Token is expired")
+
+    if raise_exception and not permission_key.is_active():
+        raise ApiError.network_authentication_required(detail="Token is expired")
+
+    user = permission_key.user
+    logger.debug(f"User {user} with Permmission key ****")
+    return user
     
 
-def risk_acceptante_pending(eng: Engagement,
-                            finding: Finding,
-                            risk_acceptance: Risk_Acceptance,
-                            product: Product,
-                            product_type: Product_Type,
-                            permission_key=None):
+def rules_for_direct_acceptance(finding: Finding,
+                                           product_type: Product_Type,
+                                           user: Dojo_User,
+                                           product: Product,
+                                           risk_acceptance: Risk_Acceptance):
+    """Validate if user has permission on risk_acceptance
 
-    user = get_user_with_permission_key(permission_key)
-    status = "Failed"
-    message = "Cannot perform action"
+    Args:
+        finding (Finding): finding request permission
+        product_type (Product_Type): product_type request permission
+        user (Dojo_User): User request permission
+        product (Product): Product request permission
+        risk_acceptance (Risk_Acceptance):  risk_acceptance request permission
+    
+    Returns:
+        status_permission (dict): Dictionary of status permission of user on risk_acceptance
+    """
     number_of_acceptors_required = (
         settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding.severity)
         .get("type_contacts")
@@ -187,6 +180,13 @@ def risk_acceptante_pending(eng: Engagement,
             ]
         ).get("number_acceptors")
     )
+
+    status_permission = {
+        "status" : "Failed",
+        "message": "Cannot perform action",
+        "number_of_acceptors_required": number_of_acceptors_required
+    }
+
     if (
         user.is_superuser is True
         or role_has_exclusive_permissions(user)
@@ -196,17 +196,34 @@ def risk_acceptante_pending(eng: Engagement,
     ):
         finding.accepted_by = user.username
         risk_accepted_succesfully(finding, risk_acceptance)
-        message = "Finding Accept successfully from risk acceptance."
-        status = "OK"
+        status_permission.update(
+            {"status": "OK",
+             "message": "Finding Accept successfully from risk acceptance.",
+             "number_of_acceptors_required": number_of_acceptors_required})
+    return status_permission
+        
 
+def risk_acceptante_pending(eng: Engagement,
+                            finding: Finding,
+                            risk_acceptance: Risk_Acceptance,
+                            product: Product,
+                            product_type: Product_Type,
+                            permission_key):
+    user = get_user_with_permission_key(permission_key)
+    status_permission = rules_for_direct_acceptance(finding,
+                                                    product_type,
+                                                    user,
+                                                    product,
+                                                    risk_acceptance)
+    message = ""
     if finding.risk_status in ["Risk Pending", "Risk Rejected"]:
         confirmed_acceptances = get_confirmed_acceptors(finding)
         if is_permissions_risk_acceptance(eng, finding, user, product, product_type):
             if user.username in confirmed_acceptances:
                 message = "The user has already accepted the risk"
-                status = "Failed"
-                return Response(status=status, message=message)
-            if len(confirmed_acceptances) < number_of_acceptors_required:
+                status_permission["status"] = "Failed"
+                return Response(status=status_permission["status"], message=message)
+            if len(confirmed_acceptances) < status_permission.get("number_of_acceptors_required"):
                 if finding.accepted_by is None or finding.accepted_by == "":
                     finding.accepted_by = user.username
                 else:
@@ -214,20 +231,23 @@ def risk_acceptante_pending(eng: Engagement,
                 if finding.risk_status == "Risk Rejected":
                     finding.risk_status = "Risk Pending"
                 finding.save()
-                if number_of_acceptors_required == len(
+                if status_permission.get("number_of_acceptors_required") == len(
                     get_confirmed_acceptors(finding)
                 ):
                     risk_accepted_succesfully(finding, risk_acceptance)
                 message = "Finding Accept successfully from risk acceptance."
-                status = "OK"
+                status_permission["status"] = "OK"
             else:
                 raise ValueError(
-                    f"Error number of acceptors {len(confirmed_acceptances)} > number of acceptors required {number_of_acceptors_required}"
+                    f"""Error number of acceptors {len(confirmed_acceptances)} > number of acceptors required
+                     {status_permission.get("number_of_acceptors_required")}"""
                 )
+        else:
+            raise ApiError.unauthorized(detail="No permissions")
     else:
         message = "The risk is already accepted"
 
-    return Response(status=status, message=message)
+    return Response(status=status_permission["status"], message=message)
 
 
 def get_confirmed_acceptors(finding: Finding):
@@ -448,15 +468,27 @@ def risk_unaccept(finding):
         ra_helper.post_jira_comment(finding, ra_helper.unaccepted_message_creator)
 
 
-def accept_risk_pending_bullk(eng, risk_acceptance, product, product_type, permission_key=None):
+def accept_or_reject_risk_bulk(eng: Engagement,
+                               risk_acceptance: Risk_Acceptance,
+                               product: Product,
+                               product_type: Product_Type,
+                               action,
+                               permission_key):
     for accepted_finding in risk_acceptance.accepted_findings.all():
-        logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
-        risk_acceptante_pending(eng,
-                                accepted_finding,
-                                risk_acceptance,
-                                product,
-                                product_type,
-                                permission_key)
+        if action == "accept":
+            logger.debug(f"Accepted risk accepted id: {accepted_finding.id}")
+            risk_acceptante_pending(
+                eng,
+                accepted_finding,
+                risk_acceptance,
+                product,
+                product_type,
+                permission_key)
+        elif action == "reject":
+            logger.debug(f"Reject risk accepted id: {accepted_finding.id}")
+            risk_acceptance_decline(eng, accepted_finding, risk_acceptance)
+        else:
+            raise ApiError.forbidden(detail="The parameter *action* must be accept or reject")
 
 
 def validate_list_findings(conf_risk, type, finding, eng):

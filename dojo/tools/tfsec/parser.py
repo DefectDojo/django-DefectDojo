@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class TFSecParser:
-    """
-    A class that can be used to parse the tfsec JSON report file
-    """
+
+    """A class that can be used to parse the tfsec JSON report file"""
 
     # table to match tfsec severity to DefectDojo severity
     SEVERITY = {

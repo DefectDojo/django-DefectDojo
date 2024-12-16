@@ -114,16 +114,15 @@ def qualys_convert_severity(raw_val):
     val = str(raw_val).strip()
     if "1" == val:
         return "Info"
-    elif "2" == val:
+    if "2" == val:
         return "Low"
-    elif "3" == val:
+    if "3" == val:
         return "Medium"
-    elif "4" == val:
+    if "4" == val:
         return "High"
-    elif "5" == val:
+    if "5" == val:
         return "Critical"
-    else:
-        return "Info"
+    return "Info"
 
 
 class QualysInfrascanWebguiParser:

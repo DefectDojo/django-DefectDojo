@@ -13,6 +13,7 @@ from dojo.models import (
     App_Analysis,
     DojoMeta,
     Engagement_Presets,
+    Global_Role,
     Languages,
     Product,
     Product_API_Scan_Configuration,
@@ -59,20 +60,26 @@ def get_authorized_products(permission, user=None):
         member=Exists(authorized_product_roles),
         prod_type__authorized_group=Exists(authorized_product_type_groups),
         authorized_group=Exists(authorized_product_groups)).order_by("name")
-    products = products.filter(
+    return products.filter(
         Q(prod_type__member=True) | Q(member=True)
         | Q(prod_type__authorized_group=True) | Q(authorized_group=True))
 
-    return products
 
-
-def get_authorized_members_for_product(product, permission):
-    user = get_current_user()
+def get_authorized_members_for_product(product, permission, user=None):
+    if user is None:
+        user = get_current_user()
 
     if user.is_superuser or user_has_permission(user, product, permission):
         return Product_Member.objects.filter(product=product).order_by("user__first_name", "user__last_name").select_related("role", "user")
-    else:
-        return None
+    return Product_Member.objects.none()
+
+
+def get_authorized_global_members_for_product(product, permission):
+    user = get_current_user()
+
+    if user.is_superuser or user_has_permission(user, product, permission):
+        return Global_Role.objects.filter(group=None, role__isnull=False).order_by("user__first_name", "user__last_name").select_related("role", "user")
+    return Global_Role.objects.none()
 
 
 def get_authorized_groups_for_product(product, permission):
@@ -81,8 +88,15 @@ def get_authorized_groups_for_product(product, permission):
     if user.is_superuser or user_has_permission(user, product, permission):
         authorized_groups = get_authorized_groups(Permissions.Group_View)
         return Product_Group.objects.filter(product=product, group__in=authorized_groups).order_by("group__name").select_related("role")
-    else:
-        return None
+    return Product_Group.objects.none()
+
+
+def get_authorized_global_groups_for_product(product, permission):
+    user = get_current_user()
+
+    if user.is_superuser or user_has_permission(user, product, permission):
+        return Global_Role.objects.filter(user=None, role__isnull=False).order_by("group__name").select_related("role")
+    return Global_Role.objects.none()
 
 
 def get_authorized_product_members(permission):
@@ -164,11 +178,9 @@ def get_authorized_app_analysis(permission):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by("id")
-    app_analysis = app_analysis.filter(
+    return app_analysis.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return app_analysis
 
 
 def get_authorized_dojo_meta(permission):
@@ -246,7 +258,7 @@ def get_authorized_dojo_meta(permission):
         finding__test__engagement__product__prod_type__authorized_group=Exists(finding_authorized_product_type_groups),
         finding__test__engagement__product__authorized_group=Exists(finding_authorized_product_groups),
     ).order_by("id")
-    dojo_meta = dojo_meta.filter(
+    return dojo_meta.filter(
         Q(product__prod_type__member=True)
         | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True)
@@ -259,8 +271,6 @@ def get_authorized_dojo_meta(permission):
         | Q(finding__test__engagement__product__member=True)
         | Q(finding__test__engagement__product__prod_type__authorized_group=True)
         | Q(finding__test__engagement__product__authorized_group=True))
-
-    return dojo_meta
 
 
 def get_authorized_languages(permission):
@@ -297,11 +307,9 @@ def get_authorized_languages(permission):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by("id")
-    languages = languages.filter(
+    return languages.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return languages
 
 
 def get_authorized_engagement_presets(permission):
@@ -338,11 +346,9 @@ def get_authorized_engagement_presets(permission):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by("id")
-    engagement_presets = engagement_presets.filter(
+    return engagement_presets.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return engagement_presets
 
 
 def get_authorized_product_api_scan_configurations(permission):
@@ -379,8 +385,6 @@ def get_authorized_product_api_scan_configurations(permission):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by("id")
-    product_api_scan_configurations = product_api_scan_configurations.filter(
+    return product_api_scan_configurations.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return product_api_scan_configurations

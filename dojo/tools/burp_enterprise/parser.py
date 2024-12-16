@@ -23,8 +23,7 @@ class BurpEnterpriseParser:
         tree = etree.parse(filename, parser)
         if tree:
             return self.get_items(tree, test)
-        else:
-            return ()
+        return ()
 
     def get_content(self, container):
         s = ""
@@ -193,8 +192,7 @@ class BurpEnterpriseParser:
         cweSearch = re.search("CWE-([0-9]*)", vuln_references, re.IGNORECASE)
         if cweSearch:
             return cweSearch.group(1)
-        else:
-            return 0
+        return 0
 
     def create_findings(self, items, test):
         # Dictonary to hold the aggregated findings with:

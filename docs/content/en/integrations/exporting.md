@@ -2,7 +2,7 @@
 title: "Exporting"
 description: "DefectDojo has the ability to export findings."
 draft: false
-weight: 11
+weight: 12
 ---
 
 

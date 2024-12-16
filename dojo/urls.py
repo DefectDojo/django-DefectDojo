@@ -41,6 +41,7 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     NotificationsViewSet,
+    NotificationWebhooksViewSet,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -73,6 +74,7 @@ from dojo.api_v2.views import (
     UserContactInfoViewSet,
     UserProfileView,
     UsersViewSet,
+    ComponentViewSet,
 )
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.banner.urls import urlpatterns as banner_urls
@@ -83,8 +85,9 @@ from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
-from dojo.transfer_findings.urls import urlpatterns as transfer_finding_url
 from dojo.engine_tools.urls import urlpatterns as engine_tools_url
+from dojo.transfer_findings.urls import urlpatterns as transfer_finding_urls
+from dojo.risk_acceptance.urls import urlpatterns as risk_acceptance_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.group.urls import urlpatterns as group_urls
@@ -122,6 +125,7 @@ handler400 = "dojo.views.custom_bad_request_view"
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
 v2_api.register(r"announcements", AnnouncementViewSet, basename="announcement")
+v2_api.register(r"components", ComponentViewSet, basename="components")
 v2_api.register(r"configuration_permissions", ConfigurationPermissionViewSet, basename="permission")
 v2_api.register(r"credential_mappings", CredentialsMappingViewSet, basename="cred_mapping")
 v2_api.register(r"credentials", CredentialsViewSet, basename="cred_user")
@@ -150,6 +154,7 @@ v2_api.register(r"network_locations", NetworkLocationsViewset, basename="network
 v2_api.register(r"notes", NotesViewSet, basename="notes")
 v2_api.register(r"note_type", NoteTypeViewSet, basename="note_type")
 v2_api.register(r"notifications", NotificationsViewSet, basename="notifications")
+v2_api.register(r"notification_webhooks", NotificationWebhooksViewSet)
 v2_api.register(r"products", ProductViewSet, basename="product")
 v2_api.register(r"product_api_scan_configurations", ProductAPIScanConfigurationViewSet, basename="product_api_scan_configuration")
 v2_api.register(r"product_groups", ProductGroupViewSet, basename="product_group")
@@ -187,8 +192,9 @@ ur += dev_env_urls
 ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls
-ur += transfer_finding_url
 ur += engine_tools_url
+ur += transfer_finding_urls
+ur += risk_acceptance_urls
 ur += finding_group_urls
 ur += home_urls
 ur += metrics_urls

@@ -67,10 +67,10 @@ class TestYarnAuditParser(DojoTestCase):
             with open("unittests/scans/yarn_audit/empty_with_error.json", encoding="utf-8") as testfile:
                 parser = YarnAuditParser()
                 parser.get_findings(testfile, self.get_test())
-                self.assertTrue(
-                    "yarn audit report contains errors:" in str(context.exception),
+                self.assertIn(
+                    "yarn audit report contains errors:", str(context.exception),
                 )
-                self.assertTrue("ECONNREFUSED" in str(context.exception))
+                self.assertIn("ECONNREFUSED", str(context.exception))
 
     def test_yarn_audit_parser_issue_6495(self):
         with open("unittests/scans/yarn_audit/issue_6495.json", encoding="utf-8") as testfile:

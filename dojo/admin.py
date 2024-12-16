@@ -3,7 +3,7 @@ from django.contrib import admin
 from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 from django.db.migrations.recorder import MigrationRecorder
 from dojo.models import Question, TextQuestion, ChoiceQuestion, Choice, \
-    Answer, TextAnswer, ChoiceAnswer, Engagement_Survey, Answered_Survey
+    Answer, TextAnswer, ChoiceAnswer, Engagement_Survey, Answered_Survey, Component
 
 admin.site.unregister(LogEntry)
 
@@ -13,29 +13,25 @@ admin.site.unregister(LogEntry)
 
 
 class QuestionChildAdmin(PolymorphicChildModelAdmin):
-    """
-    Base admin class for all child models of Question
-    """
+
+    """Base admin class for all child models of Question"""
 
     base_model = Question
 
 
 class TextQuestionAdmin(QuestionChildAdmin):
-    """
-    ModelAdmin for a TextQuestion
-    """
+
+    """ModelAdmin for a TextQuestion"""
 
 
 class ChoiceQuestionAdmin(QuestionChildAdmin):
-    """
-    ModelAdmin for a ChoiceQuestion
-    """
+
+    """ModelAdmin for a ChoiceQuestion"""
 
 
 class QuestionParentAdmin(PolymorphicParentModelAdmin):
-    """
-    Question parent model admin
-    """
+
+    """Question parent model admin"""
 
     base_model = Question
     child_models = (
@@ -51,29 +47,25 @@ admin.site.register(Choice)
 
 
 class AnswerChildAdmin(PolymorphicChildModelAdmin):
-    """
-    Base admin class for all child Answer models
-    """
+
+    """Base admin class for all child Answer models"""
 
     base_model = Answer
 
 
 class TextAnswerAdmin(AnswerChildAdmin):
-    """
-    ModelAdmin for TextAnswer
-    """
+
+    """ModelAdmin for TextAnswer"""
 
 
 class ChoiceAnswerAdmin(AnswerChildAdmin):
-    """
-    ModelAdmin for ChoiceAnswer
-    """
+
+    """ModelAdmin for ChoiceAnswer"""
 
 
 class AnswerParentAdmin(PolymorphicParentModelAdmin):
-    """
-    The parent model admin for answer
-    """
+
+    """The parent model admin for answer"""
 
     list_display = (
         "answered_survey",

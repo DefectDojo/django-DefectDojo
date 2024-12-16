@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class WapitiParser:
-    """The web-application vulnerability scanner
+
+    """
+    The web-application vulnerability scanner
 
     see: https://wapiti.sourceforge.io/
     """
@@ -108,5 +110,4 @@ class WapitiParser:
         cweSearch = re.search("CWE-(\\d+)", val, re.IGNORECASE)
         if cweSearch:
             return int(cweSearch.group(1))
-        else:
-            return None
+        return None

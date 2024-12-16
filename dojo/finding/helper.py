@@ -567,7 +567,7 @@ def engagement_post_delete(sender, instance, **kwargs):
 
 
 def fix_loop_duplicates():
-    """ Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates. """
+    """Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates."""
     """ i.e. A -> B -> C. This can lead to problems when deleting findingns, performing deduplication, etc """
     candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).order_by("-id")
 

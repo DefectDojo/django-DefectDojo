@@ -1,0 +1,29 @@
+{% load display_tags %}
+{% load authorization_tags %}
+
+{% if include_view %}
+    <li role="presentation">
+        <a href="{% url 'view_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+            <i class="fa-solid fa-rectangle-list"></i> View Risk Acceptance
+        </a>
+    </li>
+{% endif %}
+{% if engagement.product.enable_full_risk_acceptance %}
+    {% if engagement|has_object_permission:"Risk_Acceptance_Bulk" and engagement|has_risk_acceptance_pending:accepted_findings%}
+        <li role="presentation">
+                <a class="accept-risk_acceptance" data-raid="{{risk_acceptance.id}}" href="#" title="Accept all Risk">
+                    <i class="fa-solid fa-check-double"></i> Accept All Risk
+                </a>
+        </li>
+        
+    {% endif %}
+    {% if engagement|has_object_permission:"Risk_Acceptance_Refresh_Permission_key" %}
+        <li role="separator" class="divider"></li>
+            <li role="presentation">
+                <a class="bg-info refresh-risk-acceptance-url" title="Send New Url of acceptation to Leader" href="{% url 'refresh_url' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+                    <i class="fa fa-rotate-right"></i> Refresh URL
+                    <i class="fa fa-tag" style="color: red;"></i><span style="color:red">new</span>
+                </a>
+            </li>
+    {% endif %}
+{% endif %}

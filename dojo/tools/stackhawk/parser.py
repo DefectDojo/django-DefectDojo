@@ -16,9 +16,8 @@ class StackHawkScanMetadata:
 
 
 class StackHawkParser:
-    """
-    DAST findings from StackHawk
-    """
+
+    """DAST findings from StackHawk"""
 
     def get_scan_types(self):
         return ["StackHawk HawkScan"]
@@ -33,9 +32,7 @@ class StackHawkParser:
         completed_scan = self.__parse_json(json_output)
 
         metadata = StackHawkScanMetadata(completed_scan)
-        findings = self.__extract_findings(completed_scan, metadata, test)
-
-        return findings
+        return self.__extract_findings(completed_scan, metadata, test)
 
     def __extract_findings(
         self, completed_scan, metadata: StackHawkScanMetadata, test,
@@ -142,12 +139,11 @@ class StackHawkParser:
     def __endpoint_status(status: str) -> str:
         if status == "NEW":
             return "** - New**"
-        elif status == "RISK_ACCEPTED":
+        if status == "RISK_ACCEPTED":
             return '** - Marked "Risk Accepted"**'
-        elif status == "FALSE_POSITIVE":
+        if status == "FALSE_POSITIVE":
             return '** - Marked "False Positive"**'
-        else:
-            return ""
+        return ""
 
     @staticmethod
     def __are_all_endpoints_in_status(paths, check_status: str) -> bool:

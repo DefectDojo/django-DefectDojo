@@ -45,7 +45,7 @@ def edit_regulations(request, ttid):
                              "Regulation Deleted.",
                              extra_tags="alert-success")
         return HttpResponseRedirect(reverse("regulations"))
-    elif request.method == "POST":
+    if request.method == "POST":
         tform = RegulationForm(request.POST, instance=regulation)
         if tform.is_valid():
             tform.save()

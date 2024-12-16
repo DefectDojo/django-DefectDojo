@@ -24,3 +24,7 @@ $('a.expire-risk_acceptance').on('click', function (e) {
 $('a.accept-risk_acceptance').on('click', function (e) {
     return confirm('Are you sure you want to accept all the risks?')
 });
+
+$('a.refresh-risk-acceptance-url').on('click', function (e) {
+    return confirm('It is ready to send a new acceptance url to the email address of the leader designated for the acceptance of these risks.')
+});

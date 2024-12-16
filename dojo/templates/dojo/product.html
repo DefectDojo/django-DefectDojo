@@ -27,11 +27,11 @@
                                     </li>
                                 {% endif %}
 
-                                <li role="presentation">
+                                <!-- <li role="presentation">
                                     <a rel="noopener noreferrer" href="{% url 'product_findings_report' %}">
                                         <i class="fa-solid fa-file-lines"></i> Findings Report
                                     </a>
-                                </li>
+                                </li> -->
                             </ul>
                         </div>
                     </h3>
@@ -106,7 +106,7 @@
                                           <li><a rel="noopener noreferrer" href="{% url 'endpoint_host' %}?product={{ prod.id }}"><i class="fa-solid fa-rectangle-list"></i> View Hosts</a></li>
                                           <li><a rel="noopener noreferrer" href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Endpoints</a></li>
                                           <li><a rel="noopener noreferrer" href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Hosts</a></li>
-                                          <li><a rel="noopener noreferrer" href="{% url 'product_endpoint_report' prod.id %}"><i class="fa-solid fa-file-lines"></i> Endpoint Report</a></li>
+                                          <!-- <li><a rel="noopener noreferrer" href="{% url 'product_endpoint_report' prod.id %}"><i class="fa-solid fa-file-lines"></i> Endpoint Report</a></li> -->
                                         {% if prod|has_object_permission:"Endpoint_Add" %}
                                           <li><a rel="noopener noreferrer" href="{% url 'add_endpoint' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Endpoint</a></li>
                                         {% endif %}
@@ -154,11 +154,11 @@
                                           {% endif %}
                                         {% endif %}
                                         <li role="separator" class="divider"></li>
-                                        <li role="presentation">
+                                        <!-- <li role="presentation">
                                           <a rel="noopener noreferrer" href="{% url 'product_report' prod.id %}">
                                             <i class="fa-solid fa-file-lines"></i> Product Report
                                           </a>
-                                        </li>
+                                        </li> -->
                                         {% if prod|has_object_permission:"Benchmark_Edit" %}
                                           {% if system_settings.enable_benchmark and benchmark_type %}
                                             <li role="separator" class="divider"></li>

@@ -29,12 +29,13 @@ class KubescapeParser:
     def severity_mapper(self, input):
         if input <= 4:
             return "Low"
-        elif input <= 7:
+        if input <= 7:
             return "Medium"
-        elif input <= 9:
+        if input <= 9:
             return "High"
-        elif input <= 10:
+        if input <= 10:
             return "Critical"
+        return None
 
     def parse_resource_id(self, resource_id):
         try:

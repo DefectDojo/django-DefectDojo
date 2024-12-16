@@ -5,6 +5,7 @@ from dojo.models import Finding
 
 
 class JFrogXrayUnifiedParser:
+
     """JFrog Xray JSON reports"""
 
     def get_scan_types(self):

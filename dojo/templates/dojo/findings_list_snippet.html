@@ -519,7 +519,7 @@
                                                             {% endif %}
                                                         {% endif %}
                                                         {% if finding|has_object_permission:"Transfer_Finding_Add" and system_settings.enable_transfer_finding%}
-                                                            {% if finding|enable_button:"Add Risk Acceptance"%}
+                                                            {% if finding|enable_button:"Add Transfer Finding"%}
                                                                 <li role="presentation">
                                                                     <a rel="noopener noreferrer" href="{% url 'add_transfer_finding' finding.test.engagement.id finding.id %}">
                                                                         <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Transfer Finding..." %}
@@ -563,7 +563,7 @@
                                         </td>
                                         <td>
                                             {% if finding.title %}
-                                                <a rel="noopener noreferrer" title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+                                                <a rel="noopener noreferrer" title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{finding.id}} - {{ finding.title|truncatechars_html:60 }}</a>
                                             {% else %}
                                                 <a rel="noopener noreferrer" title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
                                             {% endif %}

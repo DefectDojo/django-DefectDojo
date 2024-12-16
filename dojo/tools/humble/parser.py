@@ -4,6 +4,7 @@ from dojo.models import Endpoint, Finding
 
 
 class HumbleParser:
+
     """Humble (https://github.com/rfc-st/humble)"""
 
     def get_scan_types(self):

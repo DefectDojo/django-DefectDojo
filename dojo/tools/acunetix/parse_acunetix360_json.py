@@ -8,7 +8,9 @@ from dojo.models import Endpoint, Finding
 
 
 class AcunetixJSONParser:
+
     """This parser is written for Acunetix JSON Findings."""
+
     def get_findings(self, filename, test):
         dupes = {}
         data = json.load(filename)

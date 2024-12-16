@@ -19,6 +19,7 @@ if hasattr(settings, "LOGIN_EXEMPT_URLS"):
 
 
 class LoginRequiredMiddleware:
+
     """
     Middleware that requires a user to be authenticated to view any page other
     than LOGIN_URL. Exemptions to this requirement can optionally be specified
@@ -133,6 +134,7 @@ class System_Settings_Manager(models.Manager):
 
 
 class APITrailingSlashMiddleware:
+
     """
     Middleware that will send a more informative error response to POST requests
     made without the trailing slash. When this middleware is not active, POST requests
@@ -156,9 +158,8 @@ class APITrailingSlashMiddleware:
 
 
 class AdditionalHeaderMiddleware:
-    """
-    Middleware that will add an arbitray amount of HTTP Request headers toall requests.
-    """
+
+    """Middleware that will add an arbitray amount of HTTP Request headers toall requests."""
 
     def __init__(self, get_response):
 

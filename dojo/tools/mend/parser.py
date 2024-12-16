@@ -147,9 +147,7 @@ class MendParser:
                 findings.append(_build_common_output(node))
 
         def create_finding_key(f: Finding) -> str:
-            """
-            Hashes the finding's description and title to retrieve a key for deduplication.
-            """
+            """Hashes the finding's description and title to retrieve a key for deduplication."""
             return hashlib.md5(
                 f.description.encode("utf-8")
                 + f.title.encode("utf-8"),
@@ -161,4 +159,4 @@ class MendParser:
             if dupe_key not in dupes:
                 dupes[dupe_key] = finding
 
-        return dupes.values()
+        return list(dupes.values())

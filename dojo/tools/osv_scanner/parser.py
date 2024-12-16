@@ -30,26 +30,34 @@ class OSVScannerParser:
         except json.decoder.JSONDecodeError:
             return []
         findings = []
-        for result in data["results"]:
-            source_path = result["source"]["path"]
-            source_type = result["source"]["type"]
-            for package in result["packages"]:
-                package_name = package["package"]["name"]
-                package_version = package["package"]["version"]
-                package_ecosystem = package["package"]["ecosystem"]
-                for vulnerability in package["vulnerabilities"]:
+        for result in data.get("results", []):
+            # Extract source locations if present
+            source_path = result.get("source", {}).get("path", "")
+            source_type = result.get("source", {}).get("type", "")
+            for package in result.get("packages", []):
+                package_name = package.get("package", {}).get("name")
+                package_version = package.get("package", {}).get("version")
+                package_ecosystem = package.get("package", {}).get("ecosystem", "")
+                for vulnerability in package.get("vulnerabilities", []):
                     vulnerabilityid = vulnerability.get("id", "")
                     vulnerabilitysummary = vulnerability.get("summary", "")
-                    vulnerabilitydetails = vulnerability["details"]
-                    vulnerabilitypackagepurl = vulnerability["affected"][0].get("package", "")
-                    if vulnerabilitypackagepurl != "":
-                        vulnerabilitypackagepurl = vulnerabilitypackagepurl["purl"]
-                    cwe = vulnerability["affected"][0]["database_specific"].get("cwes", None)
-                    if cwe is not None:
-                        cwe = cwe[0]["cweId"]
+                    vulnerabilitydetails = vulnerability.get("details", "")
+                    vulnerabilitypackagepurl = ""
+                    cwe = None
+                    # Make sure we have an affected section to work with
+                    if (affected := vulnerability.get("affected")) is not None:
+                        if len(affected) > 0:
+                            # Pull the package purl if present
+                            if (vulnerabilitypackage := affected[0].get("package", "")) != "":
+                                vulnerabilitypackagepurl = vulnerabilitypackage.get("purl", "")
+                            # Extract the CWE
+                            if (cwe := affected[0].get("database_specific", {}).get("cwes", None)) is not None:
+                                cwe = cwe[0]["cweId"]
+                    # Create some references
                     reference = ""
                     for ref in vulnerability.get("references"):
                         reference += ref.get("url") + "\n"
+                    # Define the description
                     description = vulnerabilitysummary + "\n"
                     description += "**source_type**: " + source_type + "\n"
                     description += "**package_ecosystem**: " + package_ecosystem + "\n"

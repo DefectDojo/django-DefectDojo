@@ -37,8 +37,7 @@ def get_cwe(cwe):
     cweSearch = re.search("CWE-([0-9]*)", cwe, re.IGNORECASE)
     if cweSearch:
         return cweSearch.group(1)
-    else:
-        return 0
+    return 0
 
 
 def attach_unique_extras(
@@ -171,8 +170,7 @@ def decode_tag(tag):
     if tag is not None:
         if tag.get("base64") == "true":
             return base64.b64decode(tag.text).decode("utf8", "replace")
-        else:
-            return tag.text
+        return tag.text
     return ""
 
 
@@ -367,12 +365,14 @@ def get_unique_items(
         qid = int(finding.vuln_id_from_tool)
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(
+            final_finding = get_glossary_item(
                 glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
+        else:
+            final_finding = finding
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
-            findings[unique_id] = get_info_item(info_gathered[index], finding)
+            findings[unique_id] = get_info_item(info_gathered[index], final_finding)
     return findings
 
 
@@ -404,12 +404,14 @@ def get_items(
     ).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(
+            final_finding = get_glossary_item(
                 glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
+        else:
+            final_finding = finding
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
-            findings[qid] = get_info_item(info_gathered[index], finding)
+            findings[qid] = get_info_item(info_gathered[index], final_finding)
 
     return findings
 
@@ -462,7 +464,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
             ).values(),
         )
 
-    return items
+    return list(items)
 
 
 class QualysWebAppParser:

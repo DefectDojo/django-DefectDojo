@@ -299,3 +299,13 @@ class TestTenableParser(DojoTestCase):
                     endpoint.clean()
             self.assertEqual(2, len(findings))
             self.assertEqual("Critical", findings[0].severity)
+
+    def test_parse_issue_11102(self):
+        with open("unittests/scans/tenable/issue_11102.csv", encoding="utf-8") as testfile:
+            parser = TenableParser()
+            findings = parser.get_findings(testfile, self.create_test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(2, len(findings))
+            self.assertEqual("Reconfigure the affected application if possible to avoid use of medium strength ciphers.", findings[0].mitigation)

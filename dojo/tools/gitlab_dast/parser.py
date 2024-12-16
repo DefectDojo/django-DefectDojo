@@ -6,9 +6,8 @@ from dojo.models import Endpoint, Finding
 
 
 class GitlabDastParser:
-    """
-    Import GitLab DAST Report in JSON format
-    """
+
+    """Import GitLab DAST Report in JSON format"""
 
     def get_scan_types(self):
         return ["GitLab DAST Report"]

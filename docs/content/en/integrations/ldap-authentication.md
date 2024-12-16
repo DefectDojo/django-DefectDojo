@@ -116,7 +116,7 @@ Read the docs for Django Authentication with LDAP here: https://django-auth-ldap
 
 #### docker-compose.yml
 
-In order to pass the variables to the settings.dist.py file via docker, it's a good idea to add these to the docker-compose file.
+In order to pass the variables to the settings.dist.py file via docker, it's a good idea to add these to the docker compose file.
 
 You can do this by adding the following variables to the environment section for the uwsgi image:
 ```yaml

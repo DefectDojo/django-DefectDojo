@@ -16,7 +16,8 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Endpoint_Status,
     Vulnerability_Id,
-    Finding
+    Finding,
+    Component
 )
 import json
 import logging
@@ -274,3 +275,11 @@ def adjust_date_format(obj):
                 obj["fields"][field] = obj["fields"][field][:10]  # Extract date (YYYY-MM-DD)
     return obj
 
+def get_or_create_component(name, version, engagement):
+    component, created = Component.objects.get_or_create(
+        name=name,
+        version=version,
+        engagement=engagement
+    )
+
+    return component

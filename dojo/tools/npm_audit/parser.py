@@ -24,7 +24,7 @@ class NpmAuditParser:
 
     def parse_json(self, json_output):
         if json_output is None:
-            return
+            return None
         try:
             data = json_output.read()
             try:
@@ -46,9 +46,7 @@ class NpmAuditParser:
             msg = "npm audit report contains errors: %s, %s"
             raise ValueError(msg, code, summary)
 
-        subtree = tree.get("advisories")
-
-        return subtree
+        return tree.get("advisories")
 
     def get_items(self, tree, test):
         items = {}

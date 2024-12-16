@@ -363,7 +363,7 @@ class InheritedTagsTests(DojoAPITestCase):
         self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("test")))
         self.assertEqual(product_tags_post_removal, self._convert_instance_tags_to_list(objects.get("finding")))
         # Add a tag from the product
-        self.product.tags.add("more", "tags" "!")
+        self.product.tags.add("more", "tags!")
         # This triggers an async function with celery that will fail, so run it manually here
         propagate_tags_on_product_sync(self.product)
         # Save the tags post removal

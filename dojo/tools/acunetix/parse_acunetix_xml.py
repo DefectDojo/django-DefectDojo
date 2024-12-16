@@ -13,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class AcunetixXMLParser:
+
     """This parser is written for Acunetix XML reports"""
+
     def get_findings(self, filename, test):
         dupes = {}
         root = parse(filename).getroot()
@@ -145,8 +147,7 @@ class AcunetixXMLParser:
         """
         if cwe is None:
             return None
-        else:
-            return int(cwe.split("-")[1])
+        return int(cwe.split("-")[1])
 
     def get_severity(self, severity):
         """
@@ -156,14 +157,13 @@ class AcunetixXMLParser:
         """
         if severity == "high":
             return "High"
-        elif severity == "medium":
+        if severity == "medium":
             return "Medium"
-        elif severity == "low":
+        if severity == "low":
             return "Low"
-        elif severity == "informational":
+        if severity == "informational":
             return "Info"
-        else:
-            return "Critical"
+        return "Critical"
 
     def get_false_positive(self, false_p):
         """
@@ -173,5 +173,4 @@ class AcunetixXMLParser:
         """
         if false_p:
             return True
-        else:
-            return False
+        return False

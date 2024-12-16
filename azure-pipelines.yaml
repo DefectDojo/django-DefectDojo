@@ -20,7 +20,7 @@ steps:
       docker volume create defectdojo_data_unit_tests
 
       echo "docker run"
-      docker run -d -p 5432:5432/tcp -e POSTGRES_DB=test_defectdojo -e POSTGRES_USER=defectdojo -e POSTGRES_PASSWORD=defectdojo -v defectdojo_data_unit_tests:/var/lib/postgresql/data $(image)
+      docker run -d -p 5432:5432/tcp -e POSTGRES_DB=test_defectdojo -e POSTGRES_USER=$(user_pg) -e POSTGRES_PASSWORD=$(password_pg) -v defectdojo_data_unit_tests:/var/lib/postgresql/data $(image)
       docker ps
     displayName: "Start DB"
 
@@ -39,8 +39,8 @@ steps:
 
       echo -e "\033[94m--------python install-----------\033[0m"
       python -m pip install --upgrade pip
-      sudo apt-get install libmysqlclient-dev 
-      sudo apt-get install libmariadb-dev-compat 
+      sudo apt-get install libmysqlclient-dev
+      sudo apt-get install libmariadb-dev-compat
       sudo apt-get install libcurl4-gnutls-dev
       sudo apt-get install python3.12-dev
       sudo apt-get install libgnutls28-dev
@@ -55,6 +55,8 @@ steps:
       export DD_DATABASE_HOST=127.0.0.1
       export DD_DATABASE_PORT=5432
       export DD_DATABASE_NAME=test_defectdojo
+      export DD_DATABASE_USER=$(user_pg)
+      export DD_DATABASE_PASSWORD=$(password_pg)
       export DD_SECRET_KEY='.'
       export DD_PROVIDER_TOKEN='.'
       export DD_CUSTOM_TAG_PARSER="asff_regex=."
@@ -63,11 +65,11 @@ steps:
       python manage.py migrate
 
       coverage run --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
-        exit 1; 
+        exit 1;
       }
       coverage report
       coverage run -a --source='dojo' manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
-        exit 1; 
+        exit 1;
       }
       coverage report
       coverage xml

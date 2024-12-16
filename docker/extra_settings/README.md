@@ -6,7 +6,7 @@ If a file if placed here, it will be copied on startup to `dojo/settings/local_s
 For an example, see [template-local_settings](../../dojo/settings/template-local_settings)
 
 Please note this copy action could fail if you have mounted the full `dojo/` folder, but that is owned by a different user/group.
-That's why this copy action only happens in docker-compose release mode, and not in dev/debug/unit_tests/integration_tests modes.
+That's why this copy action only happens in docker compose release mode, and not in dev/debug/unit_tests/integration_tests modes.
 
 For advanced usage you can also place a `settings.dist.py` or `settings.py` file. These will also be copied on startup to dojo/settings.
 

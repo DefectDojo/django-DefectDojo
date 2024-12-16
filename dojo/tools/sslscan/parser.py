@@ -93,4 +93,4 @@ class SslscanParser:
                             else:
                                 endpoint = Endpoint(host=host, port=port)
                             finding.unsaved_endpoints.append(endpoint)
-        return dupes.values()
+        return list(dupes.values())

@@ -6,9 +6,8 @@ from dojo.models import Finding
 
 
 class NoseyParkerParser:
-    """
-    Scanning secrets from repos
-    """
+
+    """Scanning secrets from repos"""
 
     def get_scan_types(self):
         return ["Nosey Parker Scan"]
@@ -29,8 +28,8 @@ class NoseyParkerParser:
 
         # Turn JSONL file into DataFrame
         if file is None:
-            return
-        elif file.name.lower().endswith(".jsonl"):
+            return None
+        if file.name.lower().endswith(".jsonl"):
             # Process JSON lines into Dict
             data = [json.loads(line) for line in file]
 

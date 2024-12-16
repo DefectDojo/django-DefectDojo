@@ -39,7 +39,7 @@ class TestNoseyParkerParser(TestCase):
                 findings = parser.get_findings(testfile, Test())
                 testfile.close()
                 self.assertEqual(0, len(findings))
-                self.assertTrue(
-                    "Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0" in str(context.exception),
+                self.assertIn(
+                    "Invalid Nosey Parker data, make sure to use Nosey Parker v0.16.0", str(context.exception),
                 )
-                self.assertTrue("ECONNREFUSED" in str(context.exception))
+                self.assertIn("ECONNREFUSED", str(context.exception))

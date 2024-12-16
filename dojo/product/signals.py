@@ -16,7 +16,9 @@ def product_post_save(sender, instance, created, **kwargs):
         create_notification(event="product_added",
                             title=instance.name,
                             product=instance,
-                            url=reverse("view_product", args=(instance.id,)))
+                            url=reverse("view_product", args=(instance.id,)),
+                            url_api=reverse("product-detail", args=(instance.id,)),
+                        )
 
 
 @receiver(post_delete, sender=Product)

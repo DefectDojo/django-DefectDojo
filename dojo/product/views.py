@@ -9,10 +9,9 @@ from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from django.contrib.postgres.aggregates import StringAgg
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import DEFAULT_DB_ALIAS, connection
+from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, F, Max, OuterRef, Prefetch, Q, Subquery, Sum
 from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
@@ -29,7 +28,6 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.components.sql_group_concat import Sql_GroupConcat
 from dojo.filters import (
     EngagementFilter,
     EngagementFilterWithoutObjectLookups,
@@ -73,6 +71,7 @@ from dojo.models import (
     App_Analysis,
     Benchmark_Product_Summary,
     BurpRawRequestResponse,
+    Component,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -94,6 +93,8 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.product.queries import (
+    get_authorized_global_groups_for_product,
+    get_authorized_global_members_for_product,
     get_authorized_groups_for_product,
     get_authorized_members_for_product,
     get_authorized_products,
@@ -216,8 +217,10 @@ def view_product(request, pid):
                                       .prefetch_related("prod_type__members")
     prod = get_object_or_404(prod_query, id=pid)
     product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
+    global_product_members = get_authorized_global_members_for_product(prod, Permissions.Product_View)
     product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     product_groups = get_authorized_groups_for_product(prod, Permissions.Product_View)
+    global_product_groups = get_authorized_global_groups_for_product(prod, Permissions.Product_View)
     product_type_groups = get_authorized_groups_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
@@ -294,8 +297,10 @@ def view_product(request, pid):
         "benchmarks_percents": benchAndPercent,
         "benchmarks": benchmarks,
         "product_members": product_members,
+        "global_product_members": global_product_members,
         "product_type_members": product_type_members,
         "product_groups": product_groups,
+        "global_product_groups": global_product_groups,
         "product_type_groups": product_type_groups,
         "personal_notifications_form": personal_notifications_form,
         "enabled_notifications": get_enabled_notifications_list(),
@@ -306,41 +311,34 @@ def view_product(request, pid):
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(prod, title=_("Product"), tab="components")
-    separator = ", "
+    
+    component_query = Component.objects.filter(engagement__product=prod)
 
-    # Get components ordered by component_name and concat component versions to the same row
-    if connection.vendor == "postgresql":
-        component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name").order_by(
-            "component_name").annotate(
-            component_version=StringAgg("component_version", delimiter=separator, distinct=True, default=Value("")))
-    else:
-        component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name")
-        component_query = component_query.annotate(
-            component_version=Sql_GroupConcat("component_version", separator=separator, distinct=True))
+    component_query = component_query.annotate(
+        total_findings=Count('finding__id', distinct=True),
+        active_findings=Count('finding__id', filter=Q(finding__active=True), distinct=True),
+        duplicate_findings=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True),
+        engagement_name=F('engagement__name')
+    )
 
-    # Append finding counts
-    component_query = component_query.annotate(total=Count("id")).order_by("component_name", "component_version")
-    component_query = component_query.annotate(active=Count("id", filter=Q(active=True)))
-    component_query = component_query.annotate(duplicate=(Count("id", filter=Q(duplicate=True))))
+    component_query = component_query.order_by("-total_findings")
 
-    # Default sort by total descending
-    component_query = component_query.order_by("-total")
-
-    comp_filter = ProductComponentFilter(request.GET, queryset=component_query)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ProductComponentFilter
+    comp_filter = filter_class(request.GET, queryset=component_query, parent_product=prod)
     result = get_page_items(request, comp_filter.qs, 25)
 
-    # Filter out None values for auto-complete
-    component_words = component_query.exclude(component_name__isnull=True).values_list("component_name", flat=True)
+
+    component_words = component_query.exclude(name__isnull=True).values_list("name", flat=True)
 
     return render(request, "dojo/product_components.html", {
         "prod": prod,
-        "filter": comp_filter,
         "product_tab": product_tab,
+        "filter": comp_filter,
         "result": result,
-        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         "component_words": sorted(set(component_words)),
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
     })
-
 
 def identify_view(request):
     get_data = request.GET
@@ -352,11 +350,10 @@ def identify_view(request):
             return view
         msg = 'invalid view, view must be "Endpoint" or "Finding"'
         raise ValueError(msg)
-    else:
-        if get_data.get("finding__severity", None):
-            return "Endpoint"
-        elif get_data.get("false_positive", None):
-            return "Endpoint"
+    if get_data.get("finding__severity", None):
+        return "Endpoint"
+    if get_data.get("false_positive", None):
+        return "Endpoint"
     referer = request.META.get("HTTP_REFERER", None)
     if referer:
         if referer.find("type=Endpoint") > -1:
@@ -908,9 +905,8 @@ def new_product(request, ptid=None):
 
             if not error:
                 return HttpResponseRedirect(reverse("view_product", args=(product.id,)))
-            else:
-                # engagement was saved, but JIRA errors, so goto edit_product
-                return HttpResponseRedirect(reverse("edit_product", args=(product.id,)))
+            # engagement was saved, but JIRA errors, so goto edit_product
+            return HttpResponseRedirect(reverse("edit_product", args=(product.id,)))
     else:
         if get_system_setting("enable_jira"):
             jira_project_form = JIRAProjectForm()
@@ -1033,9 +1029,8 @@ def delete_product(request, pid):
                                      extra_tags="alert-success")
                 logger.debug("delete_product: POST RETURN")
                 return HttpResponseRedirect(reverse("product"))
-            else:
-                logger.debug("delete_product: POST INVALID FORM")
-                logger.error(form.errors)
+            logger.debug("delete_product: POST INVALID FORM")
+            logger.error(form.errors)
 
     logger.debug("delete_product: GET")
 
@@ -1108,16 +1103,13 @@ def new_eng_for_app(request, pid, cicd=False):
             if not error:
                 if "_Add Tests" in request.POST:
                     return HttpResponseRedirect(reverse("add_tests", args=(engagement.id,)))
-                elif "_Import Scan Results" in request.POST:
+                if "_Import Scan Results" in request.POST:
                     return HttpResponseRedirect(reverse("import_scan_results", args=(engagement.id,)))
-                else:
-                    return HttpResponseRedirect(reverse("view_engagement", args=(engagement.id,)))
-            else:
-                # engagement was saved, but JIRA errors, so goto edit_engagement
-                logger.debug("new_eng_for_app: jira errors")
-                return HttpResponseRedirect(reverse("edit_engagement", args=(engagement.id,)))
-        else:
-            logger.debug(form.errors)
+                return HttpResponseRedirect(reverse("view_engagement", args=(engagement.id,)))
+            # engagement was saved, but JIRA errors, so goto edit_engagement
+            logger.debug("new_eng_for_app: jira errors")
+            return HttpResponseRedirect(reverse("edit_engagement", args=(engagement.id,)))
+        logger.debug(form.errors)
     else:
         form = EngForm(initial={"lead": request.user, "target_start": timezone.now().date(),
                                 "target_end": timezone.now().date() + timedelta(days=7), "product": product}, cicd=cicd,
@@ -1227,8 +1219,7 @@ def add_meta_data(request, pid):
                                  extra_tags="alert-success")
             if "add_another" in request.POST:
                 return HttpResponseRedirect(reverse("add_meta_data", args=(pid,)))
-            else:
-                return HttpResponseRedirect(reverse("view_product", args=(pid,)))
+            return HttpResponseRedirect(reverse("view_product", args=(pid,)))
     else:
         form = DojoMetaDataForm()
 
@@ -1245,11 +1236,11 @@ def add_meta_data(request, pid):
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == "POST":
-        for key, value in request.POST.items():
+        for key, orig_value in request.POST.items():
             if key.startswith("cfv_"):
                 cfv_id = int(key.split("_")[1])
                 cfv = get_object_or_404(DojoMeta, id=cfv_id)
-                value = value.strip()
+                value = orig_value.strip()
                 if value:
                     cfv.value = value
                     cfv.save()
@@ -1292,12 +1283,11 @@ class AdHocFindingView(View):
     def get_test(self, engagement: Engagement, test_type: Test_Type):
         if test := Test.objects.filter(engagement=engagement).first():
             return test
-        else:
-            return Test.objects.create(
-                engagement=engagement,
-                test_type=test_type,
-                target_start=timezone.now(),
-                target_end=timezone.now())
+        return Test.objects.create(
+            engagement=engagement,
+            test_type=test_type,
+            target_start=timezone.now(),
+            target_end=timezone.now())
 
     def create_nested_objects(self, product: Product):
         engagement = self.get_engagement(product)
@@ -1410,9 +1400,8 @@ class AdHocFindingView(View):
             finding.save()
 
             return finding, request, True
-        else:
-            add_error_message_to_response("The form has errors, please correct them below.")
-            add_field_errors_to_response(context["form"])
+        add_error_message_to_response("The form has errors, please correct them below.")
+        add_field_errors_to_response(context["form"])
 
         return finding, request, False
 
@@ -1455,8 +1444,7 @@ class AdHocFindingView(View):
                 )
 
             return request, True, push_to_jira
-        else:
-            add_field_errors_to_response(context["jform"])
+        add_field_errors_to_response(context["jform"])
 
         return request, False, False
 
@@ -1468,8 +1456,7 @@ class AdHocFindingView(View):
             add_external_issue(finding, "github")
 
             return request, True
-        else:
-            add_field_errors_to_response(context["gform"])
+        add_field_errors_to_response(context["gform"])
 
         return request, False
 
@@ -1541,10 +1528,8 @@ class AdHocFindingView(View):
         if success:
             if "_Finished" in request.POST:
                 return HttpResponseRedirect(reverse("view_test", args=(test.id,)))
-            else:
-                return HttpResponseRedirect(reverse("add_findings", args=(test.id,)))
-        else:
-            context["form_error"] = True
+            return HttpResponseRedirect(reverse("add_findings", args=(test.id,)))
+        context["form_error"] = True
         # Render the form
         return render(request, self.get_template(), context)
 
@@ -1737,8 +1722,7 @@ def edit_product_member(request, memberid):
                                      extra_tags="alert-success")
                 if is_title_in_breadcrumbs("View User"):
                     return HttpResponseRedirect(reverse("view_user", args=(member.user.id,)))
-                else:
-                    return HttpResponseRedirect(reverse("view_product", args=(member.product.id,)))
+                return HttpResponseRedirect(reverse("view_product", args=(member.product.id,)))
     product_tab = Product_Tab(member.product, title=_("Edit Product Member"), tab="settings")
     return render(request, "dojo/edit_product_member.html", {
         "memberid": memberid,
@@ -1762,11 +1746,9 @@ def delete_product_member(request, memberid):
                              extra_tags="alert-success")
         if is_title_in_breadcrumbs("View User"):
             return HttpResponseRedirect(reverse("view_user", args=(member.user.id,)))
-        else:
-            if user == request.user:
-                return HttpResponseRedirect(reverse("product"))
-            else:
-                return HttpResponseRedirect(reverse("view_product", args=(member.product.id,)))
+        if user == request.user:
+            return HttpResponseRedirect(reverse("product"))
+        return HttpResponseRedirect(reverse("view_product", args=(member.product.id,)))
     product_tab = Product_Tab(member.product, title=_("Delete Product Member"), tab="settings")
     return render(request, "dojo/delete_product_member.html", {
         "memberid": memberid,
@@ -1798,8 +1780,7 @@ def add_api_scan_configuration(request, pid):
                                      extra_tags="alert-success")
                 if "add_another" in request.POST:
                     return HttpResponseRedirect(reverse("add_api_scan_configuration", args=(pid,)))
-                else:
-                    return HttpResponseRedirect(reverse("view_api_scan_configurations", args=(pid,)))
+                return HttpResponseRedirect(reverse("view_api_scan_configurations", args=(pid,)))
             except Exception as e:
                 logger.exception(e)
                 messages.add_message(request,
@@ -1896,8 +1877,7 @@ def delete_api_scan_configuration(request, pid, pascid):
                              _("API Scan Configuration deleted."),
                              extra_tags="alert-success")
         return HttpResponseRedirect(reverse("view_api_scan_configurations", args=(pid,)))
-    else:
-        form = DeleteProduct_API_Scan_ConfigurationForm(instance=product_api_scan_configuration)
+    form = DeleteProduct_API_Scan_ConfigurationForm(instance=product_api_scan_configuration)
 
     product_tab = Product_Tab(get_object_or_404(Product, id=pid), title=_("Delete Tool Configuration"), tab="settings")
     return render(request,
@@ -1931,8 +1911,7 @@ def edit_product_group(request, groupid):
                                      extra_tags="alert-success")
                 if is_title_in_breadcrumbs("View Group"):
                     return HttpResponseRedirect(reverse("view_group", args=(group.group.id,)))
-                else:
-                    return HttpResponseRedirect(reverse("view_product", args=(group.product.id,)))
+                return HttpResponseRedirect(reverse("view_product", args=(group.product.id,)))
 
     product_tab = Product_Tab(group.product, title=_("Edit Product Group"), tab="settings")
     return render(request, "dojo/edit_product_group.html", {
@@ -1957,10 +1936,9 @@ def delete_product_group(request, groupid):
                              extra_tags="alert-success")
         if is_title_in_breadcrumbs("View Group"):
             return HttpResponseRedirect(reverse("view_group", args=(group.group.id,)))
-        else:
-            # TODO: If user was in the group that was deleted and no longer has access, redirect back to product listing
-            #  page
-            return HttpResponseRedirect(reverse("view_product", args=(group.product.id,)))
+        # TODO: If user was in the group that was deleted and no longer has access, redirect back to product listing
+        #  page
+        return HttpResponseRedirect(reverse("view_product", args=(group.product.id,)))
 
     product_tab = Product_Tab(group.product, title=_("Delete Product Group"), tab="settings")
     return render(request, "dojo/delete_product_group.html", {

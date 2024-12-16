@@ -33,6 +33,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
+from dojo import engagement
 import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
@@ -119,6 +120,7 @@ from dojo.models import (
     Network_Locations,
     Note_Type,
     Notes,
+    Notification_Webhooks,
     Notifications,
     Product,
     Product_API_Scan_Configuration,
@@ -146,6 +148,7 @@ from dojo.models import (
     Tool_Type,
     User,
     UserContactInfo,
+    Component,
 )
 from dojo.product.queries import (
     get_authorized_app_analysis,
@@ -168,7 +171,8 @@ from dojo.reports.views import (
 )
 from dojo.risk_acceptance import api as ra_api
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
-from dojo.risk_acceptance.risk_pending import accept_risk_pending_bullk 
+from dojo.risk_acceptance.notification import Notification as NotificationRiskAcceptance
+from dojo.risk_acceptance.risk_pending import accept_or_reject_risk_bulk, get_user_with_permission_key
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
@@ -184,6 +188,33 @@ from dojo.utils import (
 from rest_framework.throttling import UserRateThrottle
 
 logger = logging.getLogger(__name__)
+
+
+def schema_with_prefetch() -> dict:
+    return {
+        "list": extend_schema(
+            parameters=[
+                OpenApiParameter(
+                    "prefetch",
+                    OpenApiTypes.STR,
+                    OpenApiParameter.QUERY,
+                    required=False,
+                    description="List of fields for which to prefetch model instances and add those to the response",
+                ),
+            ],
+        ),
+        "retrieve": extend_schema(
+            parameters=[
+                OpenApiParameter(
+                    "prefetch",
+                    OpenApiTypes.STR,
+                    OpenApiParameter.QUERY,
+                    required=False,
+                    description="List of fields for which to prefetch model instances and add those to the response",
+                ),
+            ],
+        ),
+    }
 
 
 class DojoOpenApiJsonRenderer(OpenApiJsonRenderer2):
@@ -225,30 +256,7 @@ class RoleViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class DojoGroupViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -266,30 +274,7 @@ class DojoGroupViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class DojoGroupMemberViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -315,6 +300,7 @@ class DojoGroupMemberViewSet(
 
 
 # Authorization: superuser
+@extend_schema_view(**schema_with_prefetch())
 class GlobalRoleViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -329,6 +315,8 @@ class GlobalRoleViewSet(
 
 
 # Authorization: object-based
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class EndPointViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -384,6 +372,8 @@ class EndPointViewSet(
 
 
 # Authorization: object-based
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class EndpointStatusViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -410,6 +400,10 @@ class EndpointStatusViewSet(
             Permissions.Endpoint_View,
         ).distinct()
 
+
+# Authorization: object-based
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class EngagementViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -663,6 +657,8 @@ class EngagementViewSet(
         return generate_file_response(file_object)
 
 
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class RiskAcceptanceViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -680,7 +676,7 @@ class RiskAcceptanceViewSet(
         instance = self.get_object()
         # Remove any findings on the risk acceptance
         for finding in instance.accepted_findings.all():
-            remove_finding_from_risk_acceptance(instance, finding)
+            remove_finding_from_risk_acceptance(request.user, instance, finding)
         # return the response of the object being deleted
         return super().destroy(request, pk=pk)
 
@@ -731,24 +727,43 @@ class RiskAcceptanceViewSet(
         request=RiskAcceptanceEmailSerializer,
     )
     @action(detail=True, methods=["post"])
-    def accept_bullk(self, request, pk=None):
+    def accept_bulk(self, request, pk=None):
         risk_acceptance = get_object_or_404(Risk_Acceptance.objects, id=pk)
+        eng = Risk_Acceptance.objects.get(id=pk).accepted_findings.all().first().test.engagement
+        product = eng.product
+        product_type = product.prod_type
+        permission_key = request.data.get("permission_key", None)
+        action = request.data.get("actions", None)
         try:
-            eng = Risk_Acceptance.objects.get(id=pk).accepted_findings.all().first().test.engagement
-            product = eng.product
-            product_type = product.prod_type
-            permission_key = request.data.get("permission_key", None)
+            accept_or_reject_risk_bulk(
+                eng=eng,
+                risk_acceptance=risk_acceptance,
+                product=product,
+                product_type=product_type,
+                action=action,
+                permission_key=permission_key)
+
+            logger.info("send message of confirmation for leader(s)")
+            NotificationRiskAcceptance.proccess_confirmation(
+                risk_pending=risk_acceptance,
+                error=action,
+                user_leader=get_user_with_permission_key(permission_key)
+            )
+            return http_response.ok(message="Acceptance process successfully completed")
         except Exception as e:
-            logger.error("Failed accept bullk {e}")
-            ApiError.internal_server_error(detail=str(e))
+            logger.error(f"Failed accept bulk: {e}")
+            NotificationRiskAcceptance.proccess_confirmation(
+                    risk_pending=risk_acceptance,
+                    user_leader=get_user_with_permission_key(permission_key, raise_exception=False),
+                    error=str(e),
+                    product=product.name,
+                    product_type=product_type.name
+                )
+            raise ApiError.internal_server_error(detail=str(e))
 
-        accept_risk_pending_bullk(eng, risk_acceptance,
-                                  product,
-                                  product_type,
-                                  permission_key)
-        return http_response.ok(message="Acceptance process completed")
 
 
+@extend_schema_view(**schema_with_prefetch())
 class AppAnalysisViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -767,6 +782,7 @@ class AppAnalysisViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class CredentialsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -780,6 +796,8 @@ class CredentialsViewSet(
 
 
 # Authorization: configuration
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class CredentialsMappingViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -911,8 +929,7 @@ class FindingViewSet(
     def get_serializer_class(self):
         if self.request and self.request.method == "POST":
             return serializers.FindingCreateSerializer
-        else:
-            return serializers.FindingSerializer
+        return serializers.FindingSerializer
 
     @extend_schema(
         methods=["POST"],
@@ -1266,10 +1283,9 @@ class FindingViewSet(
                 {"success": "Tag(s) Removed"},
                 status=status.HTTP_204_NO_CONTENT,
             )
-        else:
-            return Response(
-                delete_tags.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
+        return Response(
+            delete_tags.errors, status=status.HTTP_400_BAD_REQUEST,
+        )
 
     @extend_schema(
         responses={
@@ -1407,10 +1423,9 @@ class FindingViewSet(
                 )
 
             return Response(data=metadata_data.data, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                metadata_data.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
+        return Response(
+            metadata_data.errors, status=status.HTTP_400_BAD_REQUEST,
+        )
 
     def _remove_metadata(self, request, finding):
         name = request.query_params.get("name", None)
@@ -1497,18 +1512,41 @@ class FindingViewSet(
 
         if request.method == "GET":
             return self._get_metadata(request, finding)
-        elif request.method == "POST":
+        if request.method == "POST":
             return self._add_metadata(request, finding)
-        elif request.method == "PUT":
+        if request.method == "PUT":
             return self._edit_metadata(request, finding)
-        elif request.method == "PATCH":
+        if request.method == "PATCH":
             return self._edit_metadata(request, finding)
-        elif request.method == "DELETE":
+        if request.method == "DELETE":
             return self._remove_metadata(request, finding)
 
         return Response(
             {"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class ComponentViewSet(viewsets.ModelViewSet):
+    queryset = Component.objects.none()
+    serializer_class = serializers.ComponentSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["name", "version", "date", "engagement_id"]
+    permission_classes = (
+        IsAuthenticated, 
+        permissions.UserHasComponentPermission,)
+
+    def get_queryset(self):
+        queryset = Component.objects.all()
+        engagement_id = self.request.GET.get('engagement_id')
+        if engagement_id:
+            queryset = queryset.filter(engagement_id=engagement_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def perform_update(self, serializer):
+        serializer.save()
 
 
 # Authorization: configuration
@@ -1526,6 +1564,8 @@ class JiraInstanceViewSet(
 
 
 # Authorization: object-based
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class JiraIssuesViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1551,6 +1591,7 @@ class JiraIssuesViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class JiraProjectViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1562,6 +1603,7 @@ class JiraProjectViewSet(
         "jira_instance",
         "product",
         "engagement",
+        "enabled",
         "component",
         "project_key",
         "push_all_issues",
@@ -1613,6 +1655,7 @@ class SonarqubeIssueTransitionViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class ProductAPIScanConfigurationViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1639,30 +1682,8 @@ class ProductAPIScanConfigurationViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class DojoMetaViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1686,30 +1707,7 @@ class DojoMetaViewSet(
         return get_authorized_dojo_meta(Permissions.Product_View)
 
 
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
@@ -1800,30 +1798,7 @@ class ProductViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductMemberViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1851,30 +1826,7 @@ class ProductMemberViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductGroupViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -1902,30 +1854,7 @@ class ProductGroupViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductTypeViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2010,30 +1939,7 @@ class ProductTypeViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductTypeMemberViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2075,30 +1981,7 @@ class ProductTypeMemberViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class ProductTypeGroupViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2126,6 +2009,8 @@ class ProductTypeGroupViewSet(
 
 
 # Authorization: object-based
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class StubFindingsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2146,8 +2031,7 @@ class StubFindingsViewSet(
     def get_serializer_class(self):
         if self.request and self.request.method == "POST":
             return serializers.StubFindingCreateSerializer
-        else:
-            return serializers.StubFindingSerializer
+        return serializers.StubFindingSerializer
 
 
 # Authorization: authenticated, configuration
@@ -2164,6 +2048,8 @@ class DevelopmentEnvironmentViewSet(
 
 
 # Authorization: object-based
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class TestsViewSet(
     PrefetchDojoModelViewSet,
     ra_api.AcceptedRisksMixin,
@@ -2199,8 +2085,7 @@ class TestsViewSet(
             if self.action == "accept_risks":
                 return ra_api.AcceptedRiskSerializer
             return serializers.TestCreateSerializer
-        else:
-            return serializers.TestSerializer
+        return serializers.TestSerializer
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -2371,30 +2256,8 @@ class TestTypesViewSet(
         return Test_Type.objects.all().order_by("id")
 
 
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+# @extend_schema_view(**schema_with_prefetch())
+# Nested models with prefetch make the response schema too long for Swagger UI
 class TestImportViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2453,6 +2316,7 @@ class TestImportViewSet(
 
 
 # Authorization: configurations
+@extend_schema_view(**schema_with_prefetch())
 class ToolConfigurationsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2473,6 +2337,7 @@ class ToolConfigurationsViewSet(
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class ToolProductSettingsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2557,30 +2422,7 @@ class UsersViewSet(
 
 
 # Authorization: superuser
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class UserContactInfoViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2630,6 +2472,7 @@ class UserProfileView(GenericAPIView):
 
 # Authorization: authenticated users, DjangoModelPermissions
 class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
     """
     Imports a scan report into an engagement or product.
 
@@ -2693,6 +2536,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 class EndpointMetaImporterView(
     mixins.CreateModelMixin, viewsets.GenericViewSet,
 ):
+
     """
     Imports a CSV file into a product to propagate arbitrary meta and tags on endpoints.
 
@@ -2735,30 +2579,7 @@ class LanguageTypeViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class LanguageViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -2791,6 +2612,7 @@ class ImportLanguagesView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 # Authorization: object-based
 class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
     """
     Reimports a scan report into an existing test.
 
@@ -3191,6 +3013,7 @@ def report_generate(request, obj, options):
 class SystemSettingsViewSet(
     mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet,
 ):
+
     """Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations"""
 
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
@@ -3202,30 +3025,7 @@ class SystemSettingsViewSet(
 
 
 # Authorization: superuser
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-)
+@extend_schema_view(**schema_with_prefetch())
 class NotificationsViewSet(
     PrefetchDojoModelViewSet,
 ):
@@ -3239,6 +3039,7 @@ class NotificationsViewSet(
         return Notifications.objects.all().order_by("id")
 
 
+@extend_schema_view(**schema_with_prefetch())
 class EngagementPresetsViewset(
     PrefetchDojoModelViewSet,
 ):
@@ -3358,6 +3159,7 @@ class QuestionnaireEngagementSurveyViewSet(
         return Engagement_Survey.objects.all().order_by("id")
 
 
+@extend_schema_view(**schema_with_prefetch())
 class QuestionnaireAnsweredSurveyViewSet(
     prefetch.PrefetchListMixin,
     prefetch.PrefetchRetrieveMixin,
@@ -3485,3 +3287,13 @@ class ApiToken(ObtainAuthToken):
     def delete(self, request, *args, **kwargs):
         Token.objects.filter(user=request.user).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class NotificationWebhooksViewSet(
+    PrefetchDojoModelViewSet,
+):
+    serializer_class = serializers.NotificationWebhooksSerializer
+    queryset = Notification_Webhooks.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = "__all__"
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)  # TODO: add permission also for other users

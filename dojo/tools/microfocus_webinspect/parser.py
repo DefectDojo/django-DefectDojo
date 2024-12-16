@@ -8,6 +8,7 @@ from dojo.models import Endpoint, Finding
 
 
 class MicrofocusWebinspectParser:
+
     """Micro Focus Webinspect XML report parser"""
 
     def get_scan_types(self):
@@ -97,16 +98,15 @@ class MicrofocusWebinspectParser:
     def convert_severity(val):
         if val == "0":
             return "Info"
-        elif val == "1":
+        if val == "1":
             return "Low"
-        elif val == "2":
+        if val == "2":
             return "Medium"
-        elif val == "3":
+        if val == "3":
             return "High"
-        elif val == "4":
+        if val == "4":
             return "Critical"
-        else:
-            return "Info"
+        return "Info"
 
     @staticmethod
     def get_cwe(val):
@@ -114,5 +114,4 @@ class MicrofocusWebinspectParser:
         cweSearch = re.search("CWE-(\\d+)", val, re.IGNORECASE)
         if cweSearch:
             return int(cweSearch.group(1))
-        else:
-            return 0
+        return 0

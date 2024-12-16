@@ -22,6 +22,7 @@ from dojo.models import (
     Dojo_User,
     Endpoint,
     Engagement,
+    Component,
     Finding,
     Global_Role,
     Languages,
@@ -68,6 +69,9 @@ class TestAuthorization(DojoTestCase):
 
         cls.test = Test()
         cls.test.engagement = cls.engagement
+
+        cls.component = Component()
+        cls.component.engagement = cls.engagement
 
         cls.finding = Finding()
         cls.finding.test = cls.test
@@ -318,6 +322,28 @@ class TestAuthorization(DojoTestCase):
         mock_foo.filter.return_value = [self.product_member_owner]
 
         result = user_has_permission(self.user, self.test, Permissions.Test_Delete)
+
+        self.assertTrue(result)
+        mock_foo.filter.assert_called_with(user=self.user)
+
+    @patch("dojo.models.Product_Member.objects")
+    def test_user_has_permission_component_no_permissions(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.product_member_reader]
+
+        result = user_has_permission(self.user, self.component, Permissions.Component_Edit)
+
+        self.assertFalse(result)
+        mock_foo.filter.assert_called_with(user=self.user)
+
+    @patch("dojo.models.Product_Member.objects")
+    def test_user_has_permission_component_success(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.product_member_owner]
+
+        result = user_has_permission(self.user, self.component, Permissions.Component_Delete)
 
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(user=self.user)

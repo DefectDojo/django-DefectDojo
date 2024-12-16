@@ -65,8 +65,7 @@ class VCGXmlParser:
             and issue.find(field).text is not None
         ):
             return issue.find(field).text
-        else:
-            return None
+        return None
 
     def __init__(self):
         pass
@@ -97,8 +96,7 @@ class VCGXmlParser:
         data.code_line = self.get_field_from_xml(issue, "CodeLine")
         # data.line = self.get_field_from_xml(issue, 'CodeLine')
 
-        finding = data.to_finding(test)
-        return finding
+        return data.to_finding(test)
 
     def parse(self, content, test):
         dupes = {}
@@ -133,8 +131,7 @@ class VCGCsvParser:
     def get_field_from_row(row, column):
         if row[column] is not None:
             return row[column]
-        else:
-            return None
+        return None
 
     def parse_issue(self, row, test):
         if not row:
@@ -168,8 +165,7 @@ class VCGCsvParser:
         data.line = self.get_field_from_row(row, line_column)
         data.code_line = self.get_field_from_row(row, code_line_column)
 
-        finding = data.to_finding(test)
-        return finding
+        return data.to_finding(test)
 
     def parse(self, content, test):
         dupes = {}
@@ -200,6 +196,7 @@ class VCGCsvParser:
 
 
 class VCGParser:
+
     """VCG (VisualCodeGrepper) support CSV and XML"""
 
     def get_scan_types(self):
@@ -219,8 +216,7 @@ class VCGParser:
         #  'utf-8' This line was added to pass a unittest in test_parsers.TestParsers.test_file_existence.
         if filename.name.lower().endswith(".xml"):
             return list(VCGXmlParser().parse(content, test).values())
-        elif filename.name.lower().endswith(".csv"):
+        if filename.name.lower().endswith(".csv"):
             return list(VCGCsvParser().parse(content, test).values())
-        else:
-            msg = "Unknown File Format"
-            raise ValueError(msg)
+        msg = "Unknown File Format"
+        raise ValueError(msg)

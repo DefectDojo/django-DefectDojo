@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class CargoAuditParser:
-    """
-    A class that can be used to parse the cargo audit JSON report file
-    """
+
+    """A class that can be used to parse the cargo audit JSON report file"""
 
     def get_scan_types(self):
         return ["CargoAudit Scan"]

@@ -44,8 +44,6 @@ def get_authorized_cred_mappings(permission, queryset=None):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups))
-    cred_mappings = cred_mappings.filter(
+    return cred_mappings.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return cred_mappings

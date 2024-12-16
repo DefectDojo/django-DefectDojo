@@ -2,9 +2,8 @@ import vulners
 
 
 class VulnersAPI:
-    """
-    A simple client for the Vulners API
-    """
+
+    """A simple client for the Vulners API"""
 
     vulners_api_url = None
     api_key = None

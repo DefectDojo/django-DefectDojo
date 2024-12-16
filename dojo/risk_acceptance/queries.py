@@ -51,11 +51,9 @@ def get_authorized_risk_acceptances(permission):
         product__member=Exists(authorized_product_roles),
         product__prod_type__authorized_group=Exists(authorized_product_type_groups),
         product__authorized_group=Exists(authorized_product_groups)).order_by("id")
-    risk_acceptances = risk_acceptances.filter(
+    return risk_acceptances.filter(
         Q(product__prod_type__member=True) | Q(product__member=True)
         | Q(product__prod_type__authorized_group=True) | Q(product__authorized_group=True))
-
-    return risk_acceptances
 
 
 def abuse_control_min_vulnerability_closed(product_id: int, min_percentage: int, days=None):

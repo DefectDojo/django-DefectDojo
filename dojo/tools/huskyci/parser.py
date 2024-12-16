@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class HuskyCIParser:
-    """
-    Read JSON data from huskyCI compatible format and import it to DefectDojo
-    """
+
+    """Read JSON data from huskyCI compatible format and import it to DefectDojo"""
 
     def get_scan_types(self):
         return ["HuskyCI Report"]
@@ -20,11 +19,12 @@ class HuskyCIParser:
 
     def get_findings(self, json_output, test):
         if json_output is None:
-            return
+            return None
 
         tree = self.parse_json(json_output)
         if tree:
             return self.get_items(tree, test)
+        return None
 
     def parse_json(self, json_output):
         try:
@@ -71,7 +71,7 @@ def get_item(item_node, test):
     if "securitytool" in item_node:
         description += "\nSecurity Tool: " + item_node.get("securitytool")
 
-    finding = Finding(
+    return Finding(
         title=item_node.get("title"),
         test=test,
         severity=item_node.get("severity"),
@@ -88,5 +88,3 @@ def get_item(item_node, test):
         dynamic_finding=False,
         impact="No impact provided",
     )
-
-    return finding

@@ -15,7 +15,9 @@ CWE_REGEX = r"cwe-\d+"
 
 
 class SarifParser:
-    """OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
+
+    """
+    OASIS Static Analysis Results Interchange Format (SARIF) for version 2.1.0 only.
 
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
     """
@@ -132,7 +134,8 @@ def get_artifacts(run):
 
 
 def get_message_from_multiformatMessageString(data, rule):
-    """Get a message from multimessage struct
+    """
+    Get a message from multimessage struct
 
     See here for the specification: https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317468
     """
@@ -146,9 +149,9 @@ def get_message_from_multiformatMessageString(data, rule):
                 text = text.replace(substitution_str, arguments[i])
             else:
                 return text
-    else:
-        # TODO: manage markdown
-        return data.get("text")
+        return None
+    # TODO: manage markdown
+    return data.get("text")
 
 
 def cve_try(val):
@@ -156,8 +159,7 @@ def cve_try(val):
     cveSearch = re.search("(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
     if cveSearch:
         return cveSearch.group(1).upper()
-    else:
-        return None
+    return None
 
 
 def get_title(result, rule):
@@ -327,14 +329,13 @@ def cvss_to_severity(cvss):
 
     if cvss >= 9:
         return severity_mapping.get(5)
-    elif cvss >= 7:
+    if cvss >= 7:
         return severity_mapping.get(4)
-    elif cvss >= 4:
+    if cvss >= 4:
         return severity_mapping.get(3)
-    elif cvss > 0:
+    if cvss > 0:
         return severity_mapping.get(2)
-    else:
-        return severity_mapping.get(1)
+    return severity_mapping.get(1)
 
 
 def get_severity(result, rule):
@@ -346,12 +347,11 @@ def get_severity(result, rule):
 
     if "note" == severity:
         return "Info"
-    elif "warning" == severity:
+    if "warning" == severity:
         return "Medium"
-    elif "error" == severity:
+    if "error" == severity:
         return "High"
-    else:
-        return "Medium"
+    return "Medium"
 
 
 def get_item(result, rules, artifacts, run_date):

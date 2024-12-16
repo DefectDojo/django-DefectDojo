@@ -18,7 +18,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, Q
 from django.db.models.query import Prefetch, QuerySet
-from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
@@ -109,6 +109,7 @@ from dojo.utils import (
     add_success_message_to_response,
     async_delete,
     calculate_grade,
+    generate_file_response_from_file_path,
     get_cal_event,
     get_page_items,
     get_product,
@@ -176,15 +177,13 @@ def get_filtered_engagements(request, view):
 
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EngagementDirectFilterWithoutObjectLookups if filter_string_matching else EngagementDirectFilter
-    engagements = filter_class(request.GET, queryset=engagements)
-
-    return engagements
+    return filter_class(request.GET, queryset=engagements)
 
 
 def get_test_counts(engagements):
     # Get the test counts per engagement. As a separate query, this is much
     # faster than annotating the above `engagements` query.
-    engagement_test_counts = {
+    return {
         test["engagement"]: test["test_count"]
         for test in Test.objects.filter(
             engagement__in=engagements,
@@ -194,7 +193,6 @@ def get_test_counts(engagements):
             test_count=Count("engagement"),
         )
     }
-    return engagement_test_counts
 
 
 def engagements(request, view):
@@ -314,9 +312,8 @@ def edit_engagement(request, eid):
                 if "_Add Tests" in request.POST:
                     return HttpResponseRedirect(
                         reverse("add_tests", args=(engagement.id, )))
-                else:
-                    return HttpResponseRedirect(
-                        reverse("view_engagement", args=(engagement.id, )))
+                return HttpResponseRedirect(
+                    reverse("view_engagement", args=(engagement.id, )))
         else:
             logger.debug(form.errors)
 
@@ -414,12 +411,11 @@ def copy_engagement(request, eid):
                                 recipients=[engagement.lead],
                                 icon="exclamation-triangle")
             return redirect_to_return_url_or_else(request, reverse("view_engagements", args=(product.id, )))
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Unable to copy engagement, please try again.",
-                extra_tags="alert-danger")
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Unable to copy engagement, please try again.",
+            extra_tags="alert-danger")
 
     product_tab = Product_Tab(product, title="Copy Engagement", tab="engagements")
     return render(request, "dojo/copy_object.html", {
@@ -437,8 +433,7 @@ class ViewEngagement(View):
         return "dojo/view_eng.html"
 
     def get_risks_accepted(self, eng):
-        risks_accepted = eng.risk_acceptance.all().select_related("owner").annotate(accepted_findings_count=Count("accepted_findings__id"))
-        return risks_accepted
+        return eng.risk_acceptance.all().select_related("owner").annotate(accepted_findings_count=Count("accepted_findings__id"))
 
     def get_filtered_tests(
         self,
@@ -684,10 +679,10 @@ def add_tests(request, eid):
             if "_Add Another Test" in request.POST:
                 return HttpResponseRedirect(
                     reverse("add_tests", args=(eng.id, )))
-            elif "_Add Findings" in request.POST:
+            if "_Add Findings" in request.POST:
                 return HttpResponseRedirect(
                     reverse("add_findings", args=(new_test.id, )))
-            elif "_Finished" in request.POST:
+            if "_Finished" in request.POST:
                 return HttpResponseRedirect(
                     reverse("view_engagement", args=(eng.id, )))
     else:
@@ -710,9 +705,7 @@ def add_tests(request, eid):
 
 class ImportScanResultsView(View):
     def get_template(self) -> str:
-        """
-        Returns the template that will be presented to the user
-        """
+        """Returns the template that will be presented to the user"""
         return "dojo/import_scan_results.html"
 
     def get_development_environment(
@@ -732,9 +725,7 @@ class ImportScanResultsView(View):
         engagement_id: Optional[int] = None,
         product_id: Optional[int] = None,
     ) -> Tuple[Engagement, Product, Product | Engagement]:
-        """
-        Using the path parameters, either fetch the product or engagement
-        """
+        """Using the path parameters, either fetch the product or engagement"""
         engagement = product = engagement_or_product = None
         # Get the product if supplied
         # Get the engagement if supplied
@@ -757,13 +748,10 @@ class ImportScanResultsView(View):
         request: HttpRequest,
         **kwargs: dict,
     ) -> ImportScanForm:
-        """
-        Returns the default import form for importing findings
-        """
+        """Returns the default import form for importing findings"""
         if request.method == "POST":
             return ImportScanForm(request.POST, request.FILES, **kwargs)
-        else:
-            return ImportScanForm(**kwargs)
+        return ImportScanForm(**kwargs)
 
     def get_credential_form(
         self,
@@ -777,27 +765,24 @@ class ImportScanResultsView(View):
         """
         if request.method == "POST":
             return CredMappingForm(request.POST)
-        else:
-            # If the engagement is not present, return an empty form
-            if engagement is None:
-                return CredMappingForm()
-            # Otherwise get all creds in the associated engagement
-            return CredMappingForm(
-                initial={
-                    "cred_user_queryset": Cred_Mapping.objects.filter(
-                        engagement=engagement,
-                    ).order_by("cred_id"),
-                },
-            )
+        # If the engagement is not present, return an empty form
+        if engagement is None:
+            return CredMappingForm()
+        # Otherwise get all creds in the associated engagement
+        return CredMappingForm(
+            initial={
+                "cred_user_queryset": Cred_Mapping.objects.filter(
+                    engagement=engagement,
+                ).order_by("cred_id"),
+            },
+        )
 
     def get_jira_form(
         self,
         request: HttpRequest,
         engagement_or_product: Engagement | Product,
     ) -> Tuple[JIRAImportScanForm | None, bool]:
-        """
-        Returns a JiraImportScanForm if jira is enabled
-        """
+        """Returns a JiraImportScanForm if jira is enabled"""
         jira_form = None
         push_all_jira_issues = False
         # Determine if jira issues should be pushed automatically
@@ -938,18 +923,14 @@ class ImportScanResultsView(View):
         self,
         context: dict,
     ) -> BaseImporter:
-        """
-        Gets the importer to use
-        """
+        """Gets the importer to use"""
         return DefaultImporter(**context)
 
     def import_findings(
         self,
         context: dict,
     ) -> str | None:
-        """
-        Attempt to import with all the supplied information
-        """
+        """Attempt to import with all the supplied information"""
         try:
             importer_client = self.get_importer(context)
             context["test"], _, finding_count, closed_finding_count, _, _, _ = importer_client.process_scan(
@@ -971,9 +952,7 @@ class ImportScanResultsView(View):
         form: ImportScanForm,
         context: dict,
     ) -> str | None:
-        """
-        Process the form and manipulate the input in any way that is appropriate
-        """
+        """Process the form and manipulate the input in any way that is appropriate"""
         # Update the running context dict with cleaned form input
         context.update({
             "scan": request.FILES.get("file", None),
@@ -1043,9 +1022,7 @@ class ImportScanResultsView(View):
         form: CredMappingForm,
         context: dict,
     ) -> str | None:
-        """
-        Process the credentials form by creating
-        """
+        """Process the credentials form by creating"""
         if cred_user := form.cleaned_data["cred_user"]:
             # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
             cred_user = Cred_Mapping.objects.filter(
@@ -1065,18 +1042,14 @@ class ImportScanResultsView(View):
         self,
         context: dict,
     ) -> HttpResponseRedirect:
-        """
-        Redirect the user to a place that indicates a successful import
-        """
+        """Redirect the user to a place that indicates a successful import"""
         return HttpResponseRedirect(reverse("view_test", args=(context.get("test").id, )))
 
     def failure_redirect(
         self,
         context: dict,
     ) -> HttpResponseRedirect:
-        """
-        Redirect the user to a place that indicates a failed import
-        """
+        """Redirect the user to a place that indicates a failed import"""
         return HttpResponseRedirect(reverse(
             "import_scan_results",
             args=(context.get("engagement", context.get("product")).id, ),
@@ -1088,9 +1061,7 @@ class ImportScanResultsView(View):
         engagement_id: Optional[int] = None,
         product_id: Optional[int] = None,
     ) -> HttpResponse:
-        """
-        Process GET requests for the Import View
-        """
+        """Process GET requests for the Import View"""
         # process the request and path parameters
         request, context = self.handle_request(
             request,
@@ -1106,9 +1077,7 @@ class ImportScanResultsView(View):
         engagement_id: Optional[int] = None,
         product_id: Optional[int] = None,
     ) -> HttpResponse:
-        """
-        Process POST requests for the Import View
-        """
+        """Process POST requests for the Import View"""
         # process the request and path parameters
         request, context = self.handle_request(
             request,
@@ -1283,6 +1252,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
 
         findings = form.cleaned_data['accepted_findings']
         form.fields["accepted_findings"].queryset = form.fields["accepted_findings"].queryset.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
         white_list_final = None
         len_white_list = 0
         findings_not_on_white_list = []
@@ -1372,11 +1342,11 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 or rp_helper.role_has_exclusive_permissions(request.user)
                 or white_list_final
                 or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
-                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
-                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
         messages.add_message(
             request,
@@ -1410,11 +1380,20 @@ def add_risk_acceptance_pending(request, eid, fid):
             return post_risk_acceptance_pending(request, finding, eng, eid, product, product_type)
         else:
             form = get_risk_acceptance_pending(request, finding, eng, product, product_type)
-        finding_choices = Finding.objects.filter(duplicate=False,
-                                                 test__engagement=eng,
-                                                 active=True,
-                                                 risk_status__in=["Risk Active", "Risk Expired"],
-                                                 severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        finding_choices = (
+            Finding.objects.filter(
+                duplicate=False,
+                test__engagement=eng,
+                active=True,
+                risk_status__in=["Risk Active", "Risk Expired"],
+                severity=finding.severity,
+            )
+            .filter(
+                NOT_ACCEPTED_FINDINGS_QUERY
+                & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-"))
+            )
+            .order_by("title")
+        )
         if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
             finding_choices = finding_choices.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
         form.fields['accepted_findings'].queryset = finding_choices
@@ -1482,7 +1461,7 @@ def add_risk_acceptance(request, eid, fid=None):
 
             findings = form.cleaned_data["accepted_findings"]
 
-            risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+            risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
             messages.add_message(
                 request,
@@ -1672,7 +1651,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             if settings.RISK_PENDING:
                 rp_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
             else:
-                ra_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
+                ra_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
 
             messages.add_message(
                 request,
@@ -1683,7 +1662,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if "risk_accept_pending" in request.POST:
             finding = get_object_or_404(Finding,
                                         pk=request.POST["risk_accept_finding_id"])
-            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance, product, product_type)
+            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance, product, product_type, permission_key=None)
         if "risk_accept_decline" in request.POST:
             finding = get_object_or_404(Finding,
                                         pk=request.POST["risk_accept_finding_id"])
@@ -1761,7 +1740,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                                 return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
                     ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
                 else:
-                    ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                    ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
                 messages.add_message(
                     request,
@@ -1771,8 +1750,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if not errors:
             logger.debug("redirecting to return_url")
             return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
-        else:
-            logger.error("errors found")
+        logger.error("errors found")
 
     else:
         if edit_mode:
@@ -1790,7 +1768,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                                                      active=True,
                                                      risk_accepted=False,
                                                      severity=risk_acceptance.severity,
-                                                     duplicate=False)
+                                                     duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")))
         if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
             unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
     else:
@@ -1845,8 +1823,7 @@ def accept_risk_acceptance(request, eid, raid):
     eng = get_object_or_404(Engagement, pk=eid)
     product = eng.product
     product_type = product.get_product_type
-    rp_helper.accept_risk_pending_bullk(eng, risk_acceptance, product, product_type)
-    logger.debug("Risk Accepted all")
+    rp_helper.accept_or_reject_risk_bulk(eng, risk_acceptance, product, product_type, action="accept", permission_key=None)
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
@@ -1952,8 +1929,7 @@ def upload_threatmodel(request, eid):
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
-    response = FileResponse(open(eng.tmodel_path, "rb"))
-    return response
+    return generate_file_response_from_file_path(eng.tmodel_path)
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
@@ -1992,9 +1968,8 @@ def get_engagements(request):
     if not url:
         msg = "Please use the export button when exporting engagements"
         raise ValidationError(msg)
-    else:
-        if url.startswith("url="):
-            url = url[4:]
+    if url.startswith("url="):
+        url = url[4:]
 
     path_items = list(filter(None, re.split(r"/|\?", url)))
 

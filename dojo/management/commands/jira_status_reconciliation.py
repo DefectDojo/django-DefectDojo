@@ -86,7 +86,7 @@ def jira_status_reconciliation(*args, **kwargs):
             messages.append(message)
             logger.info(message)
             continue
-        elif find.risk_accepted:
+        if find.risk_accepted:
             message = "{}; {}/finding/{};{};{};{};{};{};{};{};{};{};{};{}skipping risk accepted findings;{}".format(
                 find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
                 find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, "skipped")
@@ -186,9 +186,11 @@ def jira_status_reconciliation(*args, **kwargs):
     logger.info("results (semicolon seperated)")
     for message in messages:
         logger.info(message)
+    return None
 
 
 class Command(BaseCommand):
+
     """
     Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results.
     Risk Accepted findings are skipped.'

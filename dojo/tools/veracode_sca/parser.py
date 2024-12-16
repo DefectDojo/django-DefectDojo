@@ -237,11 +237,10 @@ class VeracodeScaParser:
     def __cvss_to_severity(cls, cvss):
         if cvss >= 9:
             return cls.vc_severity_mapping.get(5)
-        elif cvss >= 7:
+        if cvss >= 7:
             return cls.vc_severity_mapping.get(4)
-        elif cvss >= 4:
+        if cvss >= 4:
             return cls.vc_severity_mapping.get(3)
-        elif cvss > 0:
+        if cvss > 0:
             return cls.vc_severity_mapping.get(2)
-        else:
-            return cls.vc_severity_mapping.get(1)
+        return cls.vc_severity_mapping.get(1)

@@ -1079,15 +1079,15 @@
                                                                     </li>
                                                                 {% endif %}
                                                                 {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                                    {% if finding.active == True and finding.risk_status != "Risk Pending"%}
+                                                                    {% if finding|enable_button:"Add Risk Acceptance"%}
                                                                         <li role="presentation">
-                                                                            <a rel="noopener noreferrer" href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                                            <a href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                                 <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Risk Acceptances..." %}<span>
                                                                             </a>
                                                                         </li>
                                                                     {% else %}
                                                                         <li role="presentation">
-                                                                            <a rel="noopener noreferrer">
+                                                                            <a href="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                                 <i class="fa-solid fa-circle-exclamation"></i><span style="color: grey"> {% trans "Add Risk Acceptance..." %}<span>
                                                                             </a>
                                                                         </li>  
@@ -1097,7 +1097,7 @@
                                                         {% endif %}
                                                     {% endif %}
                                                     {% if finding|has_object_permission:"Transfer_Finding_Add" and system_settings.enable_transfer_finding%}
-                                                        {% if finding|enable_button:"Add Risk Acceptance"%}
+                                                        {% if finding|enable_button:"Add Transfer Finding"%}
                                                             <li role="presentation">
                                                                 <a rel="noopener noreferrer" href="{% url 'add_transfer_finding' finding.test.engagement.id finding.id %}">
                                                                     <i class="fa-solid fa-circle-exclamation"></i> {% trans "Add Transfer Finding..." %}

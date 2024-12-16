@@ -15,11 +15,12 @@ class GitlabDepScanParser:
 
     def get_findings(self, json_output, test):
         if json_output is None:
-            return
+            return None
 
         tree = self.parse_json(json_output)
         if tree:
             return self.get_items(tree, test)
+        return None
 
     def parse_json(self, json_output):
         try:

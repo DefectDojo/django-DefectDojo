@@ -101,7 +101,7 @@ def get_item(node, test):
         for m in messages:
             full_description += f"{str(m).rstrip()}\n"
 
-    finding = Finding(
+    return Finding(
         title=title,
         test=test,
         description=full_description,
@@ -112,25 +112,22 @@ def get_item(node, test):
         dynamic_finding=False,
     )
 
-    return finding
-
 
 # see neuvector/share/clus_apis.go
 def convert_severity(severity):
     if severity.lower() == "high":
         return "High"
-    elif severity.lower() == "warn":
+    if severity.lower() == "warn":
         return "Medium"
-    elif severity.lower() == "info":
+    if severity.lower() == "info":
         return "Low"
-    elif severity.lower() == "pass":
+    if severity.lower() == "pass":
         return "Info"
-    elif severity.lower() == "note":
+    if severity.lower() == "note":
         return "Info"
-    elif severity.lower() == "error":
+    if severity.lower() == "error":
         return "Info"
-    else:
-        return severity.title()
+    return severity.title()
 
 
 class NeuVectorComplianceParser:
@@ -149,6 +146,5 @@ class NeuVectorComplianceParser:
 
         if filename.name.lower().endswith(".json"):
             return parse(filename, test)
-        else:
-            msg = "Unknown File Format"
-            raise ValueError(msg)
+        msg = "Unknown File Format"
+        raise ValueError(msg)

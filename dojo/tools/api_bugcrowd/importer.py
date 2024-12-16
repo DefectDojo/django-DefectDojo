@@ -10,9 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class BugcrowdApiImporter:
-    """
-    Import from Bugcrowd API
-    """
+
+    """Import from Bugcrowd API"""
 
     def get_findings(self, test):
         client, config = self.prepare_client(test)

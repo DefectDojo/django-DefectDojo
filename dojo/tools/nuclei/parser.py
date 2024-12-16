@@ -12,9 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class NucleiParser:
-    """
-    A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
-    """
+
+    """A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file"""
 
     DEFAULT_SEVERITY = "Low"
 
@@ -34,7 +33,7 @@ class NucleiParser:
         data = []
         if filecontent == "" or len(filecontent) == 0:
             return []
-        elif filecontent[0] == "[":
+        if filecontent[0] == "[":
             content = json.loads(filecontent)
             for template in content:
                 data.append(template)

@@ -167,19 +167,19 @@ optional arguments:
 This can be executed from the uwsgi docker container using:
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation'
+$ docker compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation'
 {{< /highlight >}}
 
 DEBUG output can be obtains via `-v 3`, but only after increasing the logging to DEBUG level in your settings.dist.py or local_settings.py file
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation -v 3'
+$ docker compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation -v 3'
 {{< /highlight >}}
 
 At the end of the command a semicolon seperated CSV summary will be printed. This can be captured by redirecting stdout to a file:
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation > jira_reconciliation.csv'
+$ docker compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation > jira_reconciliation.csv'
 {{< /highlight >}}
 
 
