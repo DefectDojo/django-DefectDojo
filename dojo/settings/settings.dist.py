@@ -456,7 +456,7 @@ env = environ.FileAwareEnv(
     DD_PRISMA_CYBER_EMAIL=(str, ""),
     
     # Finding exclusion - request expiration days
-    DD_FINDING_EXCLUSION_EXPIRATION_DAYS=(int, 30)
+    DD_FINDING_EXCLUSION_EXPIRATION_DAYS=(int, 30),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
