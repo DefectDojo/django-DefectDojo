@@ -10,6 +10,7 @@ from dojo.notifications.helper import create_notification, send_mail_notificatio
 from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm
+from dojo.engine_tools.helpers import check_priorization
 
 # Utils
 from datetime import datetime, timedelta
@@ -330,3 +331,30 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         return redirect('finding_exclusion', fxid=fxid)
     
     return redirect('finding_exclusion', fxid=fxid)
+
+
+def execute_priorization_check(request: HttpRequest) -> HttpResponse:
+    """Execute the priorization check task inmediately
+
+    Args:
+        request (HttpRequest): Http request object
+
+    Returns:
+        HttpResponse: Http response django object
+    """
+
+    user_has_global_permission_or_403(
+        request.user, Permissions.Finding_Exclusion_Review
+    )
+    
+    blst_result = check_priorization()
+    
+    messages.add_message(
+        request,
+        messages.SUCCESS,
+        f"Priorization of findings updated and {blst_result['message']}",
+        extra_tags="alert-success")
+    
+    return HttpResponseRedirect(reverse("finding_exclusions"))
+        
+        
