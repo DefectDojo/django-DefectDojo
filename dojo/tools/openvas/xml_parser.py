@@ -2,7 +2,8 @@ from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree as ET
 
-from dojo.models import Finding
+from dojo.models import Finding, Problem
+import dojo.problem.helper as problems_help
 
 
 class OpenVASXMLParser:
@@ -16,6 +17,7 @@ class OpenVASXMLParser:
         report = root.find("report")
         results = report.find("results")
         for result in results:
+            script_id = "NoID"
             for finding in result:
                 if finding.tag == "name":
                     title = finding.text
@@ -27,7 +29,8 @@ class OpenVASXMLParser:
                     title = title + "_" + finding.text
                     description.append(f"**Port**: {finding.text}")
                 if finding.tag == "nvt":
-                    description.append(f"**NVT**: {finding.text}")
+                    script_id = finding.get("oid")
+                    description.append(f"**NVT**: {script_id}")
                 if finding.tag == "severity":
                     severity = self.convert_cvss_score(finding.text)
                     description.append(f"**Severity**: {finding.text}")
@@ -42,7 +45,12 @@ class OpenVASXMLParser:
                 severity=severity,
                 dynamic_finding=True,
                 static_finding=False,
+                test=test,
+                vuln_id_from_tool=script_id,
             )
+            if finding.severity != "Info":
+                finding.problem = problems_help.find_or_create_problem(finding)
+                finding.save()
             findings.append(finding)
         return findings
 

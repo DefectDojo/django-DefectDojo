@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load display_tags %}
+{% load static %}
+{% block content %}
+    {% comment %} All/Open/Closed Problems {% endcomment %}
+    {% include "dojo/problems_list_snippet.html" %}
+{% endblock %}
