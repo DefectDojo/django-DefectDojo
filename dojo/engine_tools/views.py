@@ -22,6 +22,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
+from django.db.models import Q
 
 
 def finding_exclusions(request: HttpRequest):
@@ -257,9 +258,12 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                 finding_exclusion.status_updated_by = request.user
                 finding_exclusion.save()
                 
-                findings = Finding.objects.filter(cve=finding_exclusion.unique_id_from_tool,
-                                                  active=True,
-                                                  tags__name__in=["prisma", "tenable"])
+                findings = Finding.objects.filter(
+                    cve=finding_exclusion.unique_id_from_tool,
+                    active=True
+                ).filter(
+                    Q(tags__name__icontains="prisma") | Q(tags__name__icontains="tenable")
+                )
                 
                 for finding in findings:
                     if not 'white_list' in finding.tags:

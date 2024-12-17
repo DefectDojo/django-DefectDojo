@@ -1,5 +1,5 @@
 # Utils
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from django.utils import timezone
 from django.urls import reverse
 from enum import Enum
@@ -122,7 +122,8 @@ def check_priorization():
     
     all_vulnerabilities = Finding.objects.filter(
         active=True,
-        tags__name__in=["prisma", "tenable"]
+    ).filter(
+        Q(tags__name__icontains="prisma") | Q(tags__name__icontains="tenable")
     )
     
     # Identify critical vulnerabilities
