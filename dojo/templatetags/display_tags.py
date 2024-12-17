@@ -1,4 +1,5 @@
 import base64
+import contextlib
 import datetime
 import logging
 import mimetypes
@@ -175,10 +176,8 @@ def remove_string(string, value):
 def percentage(fraction, value):
     return_value = ""
     if int(value) > 0:
-        try:
+        with contextlib.suppress(ValueError):
             return_value = "%.1f%%" % ((float(fraction) / float(value)) * 100)
-        except ValueError:
-            pass
     return return_value
 
 
@@ -327,8 +326,11 @@ def action_log_entry(value, autoescape=None):
     import json
     history = json.loads(value)
     text = ""
-    for k in history.keys():
-        text += k.capitalize() + ' changed from "' + \
+    for k in history:
+        if isinstance(history[k], dict):
+            text += k.capitalize() + " operation: " + history[k].get("operation", "unknown") + ": " + str(history[k].get("objects", "unknown"))
+        else:
+            text += k.capitalize() + ' changed from "' + \
                 history[k][0] + '" to "' + history[k][1] + '"\n'
     return text
 
@@ -696,9 +698,7 @@ def get_severity_count(id, table):
 
     if table == "test":
         display_counts.append("Total: " + str(total) + " Findings")
-    elif table == "engagement":
-        display_counts.append("Total: " + str(total) + " Active Findings")
-    elif table == "product":
+    elif table == "engagement" or table == "product":
         display_counts.append("Total: " + str(total) + " Active Findings")
 
     return ", ".join([str(item) for item in display_counts])
@@ -767,10 +767,7 @@ def has_vulnerability_url(vulnerability_id):
     if not vulnerability_id:
         return False
 
-    for key in settings.VULNERABILITY_URLS:
-        if vulnerability_id.upper().startswith(key):
-            return True
-    return False
+    return any(vulnerability_id.upper().startswith(key) for key in settings.VULNERABILITY_URLS)
 
 
 @register.filter
@@ -780,8 +777,15 @@ def vulnerability_url(vulnerability_id):
 
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
+            if key in ["AVD", "KHV", "C-"]:
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if "&&" in settings.VULNERABILITY_URLS[key]:
-                return settings.VULNERABILITY_URLS[key].split("&&")[0] + str(vulnerability_id) + settings.VULNERABILITY_URLS[key].split("&&")[1]
+                # Process specific keys specially if need
+                if key in ["CAPEC", "CWE"]:
+                    vuln_id = str(vulnerability_id).replace(f"{key}-", "")
+                else:
+                    vuln_id = str(vulnerability_id)
+                return f'{settings.VULNERABILITY_URLS[key].split("&&")[0]}{vuln_id}{settings.VULNERABILITY_URLS[key].split("&&")[1]}'
             return settings.VULNERABILITY_URLS[key] + str(vulnerability_id)
     return ""
 
@@ -925,7 +929,7 @@ def jira_project_tag(product_or_engagement, autoescape=True):
     </i>
     """
     jira_project_no_inheritance = jira_helper.get_jira_project(product_or_engagement, use_inheritance=False)
-    inherited = True if not jira_project_no_inheritance else False
+    inherited = bool(not jira_project_no_inheritance)
 
     icon = "fa-bug"
     color = ""

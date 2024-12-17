@@ -11,7 +11,7 @@ TRIVY_SEVERITIES = {
 SECRET_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
 **Match:** {match}
-"""
+"""  # noqa: S105
 
 
 class TrivySecretsHandler:
@@ -42,6 +42,7 @@ class TrivySecretsHandler:
             secret_description += "\n**resource.kind:** " + resource_kind
             secret_description += "\n**resource.name:** " + resource_name
             secret_description += "\n**resource.namespace:** " + resource_namespace
+            secret_description += "\n**ruleID:** " + secret_rule_id
             finding = Finding(
                 test=test,
                 title=title,
@@ -52,9 +53,8 @@ class TrivySecretsHandler:
                 static_finding=True,
                 dynamic_finding=False,
                 service=service,
-                tags=[resource_namespace],
             )
-            if secret_rule_id:
-                finding.unsaved_vulnerability_ids = [secret_rule_id]
+            if resource_namespace != "":
+                finding.tags = resource_namespace
             findings.append(finding)
         return findings

@@ -59,65 +59,62 @@ class KubescapeParser:
             controls = results[0].get("controls", [])
 
             for control in controls:
-                # This condition is true if the result doesn't contain the status for each control (old format)
-                retrocompatibility_condition = "status" not in control or "status" not in control["status"]
-                if retrocompatibility_condition or control["status"]["status"] == "failed":
-                    control_name = control["name"]
-                    if resource_type and resource_name and control_name:
-                        title = f"{control_name} - {resource_type} {resource_name}"
-                    else:
-                        title = f"{control_name} - {resourceid}"
-                    controlID = control["controlID"]
-
-                    # Find control details
-                    controlSummary = self.find_control_summary_by_id(data, controlID)
-                    if controlSummary is None:
-                        severity = "Info"
-                        mitigation = ""
-                    else:
-                        severity = self.severity_mapper(controlSummary.get("scoreFactor", 0))
-                        # Define mitigation if available
-                        if "mitigation" in controlSummary:
-                            mitigation = controlSummary["mitigation"]
+                for rule in control["rules"]:
+                    if rule["status"] == "passed":
+                        continue
+                    # This condition is true if the result doesn't contain the status for each control (old format)
+                    retrocompatibility_condition = "status" not in control or "status" not in control["status"]
+                    if retrocompatibility_condition or control["status"]["status"] == "failed":
+                        control_name = control["name"]
+                        if resource_type and resource_name and control_name:
+                            title = f"{control_name} - {resource_type} {resource_name}"
                         else:
+                            title = f"{control_name} - {resourceid}"
+                        controlID = control["controlID"]
+
+                        # Find control details
+                        controlSummary = self.find_control_summary_by_id(data, controlID)
+                        if controlSummary is None:
+                            severity = "Info"
                             mitigation = ""
+                        else:
+                            severity = self.severity_mapper(controlSummary.get("scoreFactor", 0))
+                            # Define mitigation if available
+                            mitigation = controlSummary.get("mitigation", "")
 
-                    armoLink = f"https://hub.armosec.io/docs/{controlID.lower()}"
-                    description = "**Summary:** " + f"The ressource '{resourceid}' has failed the control '{control_name}'." + "\n"
-                    if controlSummary is not None and "description" in controlSummary:
-                        description += "**Description:** " + controlSummary["description"] + "\n"
+                        description = "**Summary:** " + f"The ressource '{resourceid}' has failed the control '{control_name}'." + "\n"
+                        if controlSummary is not None and "description" in controlSummary:
+                            description += "**Description:** " + controlSummary["description"] + "\n"
 
-                    # Define category if available
-                    if controlSummary is not None and "category" in controlSummary and "subCategory" in controlSummary["category"]:
-                        category_name = controlSummary["category"]["name"]
-                        category_subname = controlSummary["category"]["subCategory"]["name"]
-                        category = f"{category_name} > {category_subname}"
-                        description += "**Category:** " + category + "\n"
-                    elif controlSummary is not None and "category" in controlSummary and "name" in controlSummary["category"]:
-                        category = controlSummary["category"]["name"]
-                        description += "**Category:** " + category + "\n"
+                        # Define category if available
+                        if controlSummary is not None and "category" in controlSummary and "subCategory" in controlSummary["category"]:
+                            category_name = controlSummary["category"]["name"]
+                            category_subname = controlSummary["category"]["subCategory"]["name"]
+                            category = f"{category_name} > {category_subname}"
+                            description += "**Category:** " + category + "\n"
+                        elif controlSummary is not None and "category" in controlSummary and "name" in controlSummary["category"]:
+                            category = controlSummary["category"]["name"]
+                            description += "**Category:** " + category + "\n"
 
-                    description += "View control details here: " + self.__hyperlink(armoLink)
+                        steps_to_reproduce = "The following rules have failed :" + "\n"
+                        steps_to_reproduce += "\t**Rules:** " + str(json.dumps(control["rules"], indent=4)) + "\n"
+                        steps_to_reproduce += "Resource object may contain evidence:" + "\n"
+                        steps_to_reproduce += "\t**Resource object:** " + str(json.dumps(resource["object"], indent=4))
 
-                    steps_to_reproduce = "The following rules have failed :" + "\n"
-                    steps_to_reproduce += "\t**Rules:** " + str(json.dumps(control["rules"], indent=4)) + "\n"
-
-                    steps_to_reproduce += "Resource object may contain evidence:" + "\n"
-                    steps_to_reproduce += "\t**Resource object:** " + str(json.dumps(resource["object"], indent=4))
-
-                    references = armoLink
-
-                    find = Finding(
-                        title=textwrap.shorten(title, 150),
-                        test=test,
-                        description=description,
-                        mitigation=mitigation,
-                        steps_to_reproduce=steps_to_reproduce,
-                        references=references,
-                        severity=severity,
-                        component_name=resourceid,
-                        static_finding=True,
-                        dynamic_finding=False,
-                    )
-                    findings.append(find)
+                        find = Finding(
+                            title=textwrap.shorten(title, 150),
+                            test=test,
+                            description=description,
+                            mitigation=mitigation,
+                            steps_to_reproduce=steps_to_reproduce,
+                            references=f"https://hub.armosec.io/docs/{controlID.lower()}",
+                            severity=severity,
+                            component_name=resourceid,
+                            static_finding=True,
+                            dynamic_finding=False,
+                        )
+                        if controlID is not None:
+                            find.unsaved_vulnerability_ids = []
+                            find.unsaved_vulnerability_ids.append(controlID)
+                        findings.append(find)
         return findings

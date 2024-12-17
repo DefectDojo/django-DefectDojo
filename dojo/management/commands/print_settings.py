@@ -21,4 +21,4 @@ class Command(BaseCommand):
             value = getattr(settings, attr)
             a_dict[attr] = value
 
-        logging.info(pformat(a_dict))
+        logger.info(pformat(a_dict))

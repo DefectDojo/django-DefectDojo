@@ -1,7 +1,7 @@
 import logging
 import re
 
-from lxml import etree
+from lxml import etree, html
 
 from dojo.models import Endpoint, Finding
 
@@ -9,6 +9,16 @@ logger = logging.getLogger(__name__)
 
 
 class BurpEnterpriseParser:
+    vulnerability_list_xpath = (
+        "/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]"
+    )
+    table_contents_xpath = "/html/body/div/div[contains(@class, 'section') and .//table[contains(@class, 'issue-table')]]"
+    description_headers = ["issue detail", "issue description"]
+    request_response_headers = ["request", "response"]
+    impact_headers = ["issue background", "issue remediation"]
+    mitigation_headers = ["remediation detail", "remediation background"]
+    references_headers = ["vulnerability classifications", "references"]
+
     def get_scan_types(self):
         return ["Burp Enterprise Scan"]
 
@@ -19,230 +29,231 @@ class BurpEnterpriseParser:
         return "Import Burp Enterprise Edition findings in HTML format"
 
     def get_findings(self, filename, test):
-        parser = etree.HTMLParser()
-        tree = etree.parse(filename, parser)
+        tree = html.parse(filename)
         if tree:
             return self.get_items(tree, test)
         return ()
 
-    def get_content(self, container):
+    def _get_endpoints_title_severity_mapping(self, tree: etree.ElementTree) -> dict[str, str]:
+        """
+        Construct a dict that contains mappings of endpoints and severities by a a title key.
+
+        Example: {
+            "finding-title": {
+                "title": "finding-title",
+                "severity: "Medium",
+                "cwe": None,
+                "endpoints: [
+                    "http://127.0.0.1/path/A",
+                    "http://127.0.0.1/path/B",
+                ],
+            }
+        }
+        """
+        finding_mapping = {}
+        table_contents = tree.xpath(self.table_contents_xpath)
+        for table in table_contents:
+            # There is only one header in this div, so we will get a string back here
+            base_endpoint = table.xpath("h1")[0].text.replace("Issues found on ", "").removesuffix("/")
+            # Iterate over the table of endpoint paths and severities
+            title = None
+            for entry in table.xpath("table[contains(@class, 'issue-table')]/tbody/tr"):
+                # The etree.element with a class of "issue-type-row" is the title of the finding
+                if "issue-type-row" in entry.classes:
+                    # The structure of this section is consistent
+                    # <tr class="issue-type-row"><td colspan="4">... [number-of-instances]</td></tr>
+                    title = " ".join(entry.xpath("td")[0].text.strip().split(" ")[:-1])
+                    # Add the finding title as a new entry if needed
+                    if title not in finding_mapping:
+                        finding_mapping[title] = {
+                            "title": title,
+                            "severity": None,
+                            "cwe": None,
+                            "endpoints": [],
+                        }
+                else:
+                    # The structure of this section is consistent
+                    # <td class="issue-path issue-link">...</td>
+                    # <td>...</td>
+                    # Quick check to determine if we need to move to the
+                    path = entry.xpath("td")[0].text.strip()
+                    severity = entry.xpath("td")[1].text.strip()
+                    # Update the finding_mapping
+                    finding_mapping[title]["endpoints"].append(f"{base_endpoint}/{path.removeprefix('/')}")
+                    finding_mapping[title]["severity"] = severity
+
+        return finding_mapping
+
+    def _get_content(self, container: etree.Element):
+        # quick exit in case container is not found
         s = ""
+        if container is None or (isinstance(container, list) and len(list) == 0):
+            return s
+        # Do some extra processing as needed
         if (
             container.tag == "div"
             and container.text is not None
             and not container.text.isspace()
             and len(container.text) > 0
         ):
-            s += (
+            s += re.sub(r"[ \t]+", " ", (
                 "".join(container.itertext())
                 .strip()
                 .replace("Snip", "\n<-------------- Snip -------------->")
                 .replace("\t", "")
-            )
+            ))
         else:
             for elem in container.iterchildren():
                 if elem.text is not None and elem.text.strip() != "":
+                    stripped_text = elem.text.strip()
                     if elem.tag == "a":
-                        s += (
-                            "("
-                            + elem.text
-                            + ")["
-                            + elem.attrib["href"]
-                            + "]"
-                            + "\n"
-                        )
+                        value = "[" + stripped_text + "](" + elem.attrib["href"] + ")" + "\n"
                     elif elem.tag == "p":
-                        s += elem.text + "\n"
+                        value = elem.text_content().strip().replace("\n", "")
+                    elif elem.tag == "b":
+                        value = f"**{stripped_text}**"
                     elif elem.tag == "li":
-                        s += "* "
-                        if elem.text is not None:
-                            s += elem.text + "\n"
-                    elif elem.text.isspace():
-                        s += list(elem.itertext())[0]
+                        value = "- "
+                        if stripped_text is not None:
+                            value += stripped_text + "\n"
+                    elif stripped_text.isspace():
+                        value = list(elem.itertext())[0]
                     elif elem.tag == "div" or elem.tag == "span":
-                        s += elem.text.strip() + "\n"
+                        value = elem.text_content().strip().replace("\n", "") + "\n"
                     else:
                         continue
+                    s += re.sub(r"\s+", " ", value)
                 else:
-                    s += self.get_content(elem)
+                    s += self._get_content(elem)
         return s
 
-    # Get the endpoints and severities associated with each vulnerability
-    def pre_allocate_items(self, tree):
-        items = []
-        endpoint_text = tree.xpath(
-            "/html/body/div/div[contains(@class, 'section')]/h1",
-        )
-        severities = tree.xpath(
-            "/html/body/div/div[contains(@class, 'section')]/table[contains(@class, 'issue-table')]/tbody",
-        )
-        endpoint_text = [
-            endpoint
-            for endpoint in endpoint_text
-            if ("Issues found" in "".join(endpoint.itertext()).strip())
-        ]
+    def _format_bulleted_lists(self, finding_details: dict, div_element: etree.ElementTree) -> tuple[str, list[str]]:
+        """Create a mapping of bulleted lists with links into a formatted list, as well as the raw values."""
+        formatted_string = ""
+        content_list = []
+        for a_tag in div_element.xpath("ul/li/a"):
+            content = re.sub(r"\s+", " ", a_tag.text.strip())
+            link = a_tag.attrib["href"]
+            formatted_string += f"- [{content}]({link})\n"
+            content_list.append(content)
 
-        for index in range(len(severities)):
-            url = endpoint_text[index].text[16:]
-            sev_table = list(severities[index].iter("tr"))
+        return formatted_string, content_list
 
-            title = ""
-            endpoint = ""
-            for item in sev_table:
-                item_list = list(item.iter("td"))
-                if len(item_list) == 1:
-                    title_list = item_list[0].text.strip().split(" ")
-                    title = " ".join(title_list[:-1])
+    def _set_or_append_content(self, finding_details: dict, header: str, div_element: etree.ElementTree) -> None:
+        """Determine whether we should set or append content in a given place."""
+        header = header.replace(":", "")
+        field = None
+        # description
+        if header.lower() in self.description_headers:
+            field = "description"
+            content = self._get_content(div_element)
+        elif header.lower() in self.impact_headers:
+            field = "impact"
+            content = self._get_content(div_element)
+        elif header.lower() in self.mitigation_headers:
+            field = "mitigation"
+            content = self._get_content(div_element)
+        elif header.lower() in self.references_headers:
+            field = "references"
+            content, data_list = self._format_bulleted_lists(finding_details, div_element)
+            # process the vulnerability_ids if we have them
+            if header.lower() == "vulnerability classifications":
+                for item in data_list:
+                    cleaned_item = item.split(":")[0]
+                    if (
+                        finding_details["cwe"] is None
+                        and (cwe_search := re.search("CWE-([0-9]*)", cleaned_item, re.IGNORECASE))
+                    ):
+                        finding_details["cwe"] = int(cwe_search.group(1))
+                    if "vulnerability_ids" not in finding_details:
+                        finding_details["vulnerability_ids"] = [cleaned_item]
+                    else:
+                        finding_details["vulnerability_ids"].append(cleaned_item)
+        elif header.lower() in self.request_response_headers:
+            field = "request_response"
+            content = self._get_content(div_element)
+            if header.lower() == "request":
+                if "requests" not in finding_details:
+                    finding_details["requests"] = [content]
                 else:
-                    endpoint = item_list[0].text.strip()
-                    severity = item_list[1].text.strip()
-                    vuln = {}
-                    vuln["Severity"] = severity
-                    vuln["Title"] = title
-                    vuln["Description"] = ""
-                    vuln["Impact"] = ""
-                    vuln["Mitigation"] = ""
-                    vuln["References"] = ""
-                    vuln["CWE"] = ""
-                    vuln["Response"] = ""
-                    vuln["Request"] = ""
-                    vuln["Endpoint"] = [url + endpoint]
-                    vuln["URL"] = url
-                    items.append(vuln)
-        return items
+                    finding_details["requests"].append(content)
+            if header.lower() == "response":
+                if "responses" not in finding_details:
+                    finding_details["responses"] = [content]
+                else:
+                    finding_details["responses"].append(content)
+            return
 
-    def get_items(self, tree, test):
-        # Check that there is at least one vulnerability (the vulnerabilities
-        # table is absent when no vuln are found)
-        vulns = tree.xpath(
-            "/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]",
-        )
-        if len(vulns) == 0:
-            return []
+        else:
+            return
 
-        dict_index = 0
-        description = ["Issue detail:", "Issue description"]
-        reqrsp = ["Request", "Response"]
-        impact = ["Issue background", "Issue remediation"]
-        mitigation = ["Remediation detail:", "Remediation background"]
-        references = ["Vulnerability classifications", "References"]
-        vuln = None
-        merge = False
-        items = self.pre_allocate_items(tree)
-        for issue in vulns:
-            elems = list(issue.iterchildren())
-            curr_vuln = items[dict_index]
-            if vuln is None or (
-                curr_vuln["Title"] != vuln["Title"]
-                or curr_vuln["URL"] != vuln["URL"]
-            ):
-                vuln = curr_vuln
-                merge = False
-            else:
-                if curr_vuln["Endpoint"][0] not in vuln["Endpoint"]:
-                    vuln_list = vuln["Endpoint"]
-                    vuln_list.append(curr_vuln["Endpoint"][0])
-                    vuln["Endpoint"] = vuln_list
-                merge = True
+        formatted_content = f"**{header}**:\n{content}\n"
+        if (existing_field := finding_details.get(field)) is not None:
+            if header not in existing_field:
+                finding_details[field] += f"{formatted_content}\n---\n"
+        else:
+            finding_details[field] = f"{formatted_content}\n---\n"
 
-            for index in range(3, len(elems), 2):
-                primary, secondary = (
-                    elems[index].text.strip(),
-                    elems[index + 1],
-                )
-                field = self.get_content(secondary)
-                webinfo = primary.split(":")[0]
-                details = "**" + primary + "**\n" + field + "\n\n"
-                # Description
-                if primary in description:
-                    if merge:
-                        if field != vuln["Description"].split("\n")[1]:
-                            vuln["Description"] = (
-                                vuln["Description"] + field + "\n\n"
-                            )
-                    else:
-                        vuln["Description"] = vuln["Description"] + details
-                # Impact
-                if primary in impact and not merge:
-                    vuln["Impact"] = vuln["Impact"] + details
-                # Mitigation
-                if primary in mitigation and not merge:
-                    vuln["Mitigation"] = vuln["Mitigation"] + details
-                # References and CWE
-                if primary in references and not merge:
-                    if len(vuln["CWE"]) < 1 and field.find("CWE") != -1:
-                        vuln["CWE"] += str(self.get_cwe(field))
-                    vuln["References"] = vuln["References"] + details
-                # Request and Response pairs
-                if webinfo in reqrsp:
-                    if webinfo == "Request":
-                        vuln["Request"] = vuln["Request"] + field + "SPLITTER"
-                    else:
-                        vuln["Response"] = (
-                            vuln["Response"] + field + "SPLITTER"
-                        )
+    def _parse_elements_by_h3_element(self, issue: etree.Element, finding_details: dict) -> None:
+        for header_element in issue.xpath("h3"):
+            if (div_element := header_element.getnext()) is not None and div_element.tag == "div":
+                # Determine where to put the content
+                self._set_or_append_content(finding_details, header_element.text.strip(), div_element)
 
-            dict_index += 1
+    def get_items(self, tree: etree.ElementTree, test):
+        finding_details = self._get_endpoints_title_severity_mapping(tree)
+        for issue in tree.xpath(self.vulnerability_list_xpath):
+            # Get the title of the current finding
+            title = issue.xpath("h2")[0].text.strip()
+            # Fetch the bodies of the issues and process them
+            self._parse_elements_by_h3_element(issue, finding_details[title])
+            # Accommodate a newer format where request/response pairs in a separate div
+            for request_response_div in issue.xpath("div[contains(@class, 'evidence-container')]"):
+                # Fetch the bodies of the issues and process them
+                self._parse_elements_by_h3_element(request_response_div, finding_details[title])
+            # Merge the requests and response into a single dict
+            requests = finding_details[title].pop("requests", [])
+            responses = finding_details[title].pop("responses", [])
+            finding_details[title]["request_response_pairs"] = [
+                {
+                    "request": requests[i] if i < len(requests) else None,
+                    "response": responses[i] if i < len(responses) else None,
+                }
+                for i in range(max(len(requests), len(responses)))
+            ]
 
-        return list(self.create_findings(items, test))
+        return list(self.create_findings(finding_details, test))
 
-    def get_cwe(self, vuln_references):
-        # Match only the first CWE!
-        vuln_references = vuln_references.split(":")[0]
-        cweSearch = re.search("CWE-([0-9]*)", vuln_references, re.IGNORECASE)
-        if cweSearch:
-            return cweSearch.group(1)
-        return 0
-
-    def create_findings(self, items, test):
-        # Dictonary to hold the aggregated findings with:
-        #  - key: the concatenated aggregate keys
-        #  - value: the finding
-        dupes = {}
-        for details in items:
-            if details.get("Description") == "":
-                continue
-            aggregateKeys = "{}{}{}{}".format(
-                details.get("Title"),
-                details.get("Description"),
-                details.get("CWE"),
-                details.get("Endpoint"),
-            )
-            detail_cwe = None
-            if details.get("CWE"):
-                detail_cwe = int(details.get("CWE"))
-            find = Finding(
-                title=details.get("Title"),
-                description=details.get("Description"),
+    def create_findings(self, findings_dict: dict[str, dict], test):
+        # Pop off a few items to be processes after the finding is saved
+        findings = []
+        for finding_dict in findings_dict.values():
+            endpoints = finding_dict.pop("endpoints", [])
+            request_response_pairs = finding_dict.pop("request_response_pairs", [])
+            vulnerability_ids = finding_dict.pop("vulnerability_ids", [])
+            # Crete the finding from the rest of the dict
+            finding = Finding(
                 test=test,
-                severity=details.get("Severity"),
-                mitigation=details.get("Mitigation"),
-                references=details.get("References"),
-                impact=details.get("Impact"),
-                cwe=detail_cwe,
                 false_p=False,
                 duplicate=False,
                 out_of_scope=False,
                 mitigated=None,
                 static_finding=False,
                 dynamic_finding=True,
-                nb_occurences=1,
+                **finding_dict,
             )
+            # Add the unsaved versions of the other things
+            # Endpoints
+            finding.unsaved_endpoints = [Endpoint.from_uri(endpoint) for endpoint in endpoints]
+            # Request Response Pairs
 
-            if len(details.get("Request")) > 0:
-                requests = details.get("Request").split("SPLITTER")[:-1]
-                responses = details.get("Response").split("SPLITTER")[:-1]
-                unsaved_req_resp = []
-                for index in range(len(requests)):
-                    unsaved_req_resp.append(
-                        {"req": requests[index], "resp": responses[index]},
-                    )
-                find.unsaved_req_resp = unsaved_req_resp
+            finding.unsaved_req_resp = [
+                {"req": request_response.get("request"), "resp": request_response.get("response")}
+                for request_response in request_response_pairs
+            ]
+            # Vulnerability IDs
+            finding.unsaved_vulnerability_ids = vulnerability_ids
+            # Add the finding to the final list
+            findings.append(finding)
 
-            find.unsaved_endpoints = []
-            dupes[aggregateKeys] = find
-
-            for url in details.get("Endpoint"):
-                find.unsaved_endpoints.append(Endpoint.from_uri(url))
-
-        return list(dupes.values())
+        return findings

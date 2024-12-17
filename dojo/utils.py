@@ -11,6 +11,7 @@ from calendar import monthrange
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from math import pi, sqrt
+from pathlib import Path
 
 import bleach
 import crum
@@ -88,6 +89,7 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     Args:
         finding (:model:`dojo.Finding`): Finding to be replicated
+
     """
     to_mark_as_fp = set()
 
@@ -149,6 +151,7 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         product (:model:`dojo.Product`, optional): Product to filter findings by
         engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
         test (:model:`dojo.Test`, optional): Test to filter findings by
+
     """
     if product:
         custom_filter_type = "product"
@@ -781,11 +784,7 @@ def is_title_in_breadcrumbs(title):
     if breadcrumbs is None:
         return False
 
-    for breadcrumb in breadcrumbs:
-        if breadcrumb.get("title") == title:
-            return True
-
-    return False
+    return any(breadcrumb.get("title") == title for breadcrumb in breadcrumbs)
 
 
 def get_punchcard_data(objs, start_date, weeks, view="Finding"):
@@ -1327,15 +1326,9 @@ def build_query(query_string, search_fields):
         for field_name in search_fields:
             q = Q(**{f"{field_name}__icontains": term})
 
-            if or_query:
-                or_query = or_query | q
-            else:
-                or_query = q
+            or_query = or_query | q if or_query else q
 
-        if query:
-            query = query & or_query
-        else:
-            query = or_query
+        query = query & or_query if query else or_query
     return query
 
 
@@ -1378,11 +1371,12 @@ def get_page_items_and_count(request, items, page_size, prefix="", do_count=True
 
 
 def handle_uploaded_threat(f, eng):
-    _name, extension = os.path.splitext(f.name)
+    path = Path(f.name)
+    extension = path.suffix
     # Check if threat folder exist.
-    if not os.path.isdir(settings.MEDIA_ROOT + "/threat/"):
+    if not Path(settings.MEDIA_ROOT + "/threat/").is_dir():
         # Create the folder
-        os.mkdir(settings.MEDIA_ROOT + "/threat/")
+        Path(settings.MEDIA_ROOT + "/threat/").mkdir()
     with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
               "wb+") as destination:
         for chunk in f.chunks():
@@ -1392,7 +1386,8 @@ def handle_uploaded_threat(f, eng):
 
 
 def handle_uploaded_selenium(f, cred):
-    _name, extension = os.path.splitext(f.name)
+    path = Path(f.name)
+    extension = path.suffix
     with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
               "wb+") as destination:
         for chunk in f.chunks():
@@ -1848,7 +1843,7 @@ def get_return_url(request):
     return_url = request.POST.get("return_url", None)
     if return_url is None or not return_url.strip():
         # for some reason using request.GET.get('return_url') never works
-        return_url = request.GET["return_url"] if "return_url" in request.GET else None
+        return_url = request.GET["return_url"] if "return_url" in request.GET else None  # noqa: SIM401
 
     return return_url or None
 
@@ -2047,7 +2042,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 if sla_age is None:
                     sla_age = 0
 
-                if (sla_age < 0) and (settings.SLA_NOTIFY_POST_BREACH < abs(sla_age)):
+                if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
                     post_breach_no_notify_count += 1
                     # Skip finding notification if breached for too long
                     logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
@@ -2299,7 +2294,7 @@ def get_product(obj):
     if not obj:
         return None
 
-    if isinstance(obj, Finding) or isinstance(obj, Finding_Group):
+    if isinstance(obj, Finding | Finding_Group):
         return obj.test.engagement.product
 
     if isinstance(obj, Test):
@@ -2696,7 +2691,9 @@ def generate_file_response_from_file_path(
 ) -> FileResponse:
     """Serve an local file in a uniformed way."""
     # Determine the file path
-    file_path_without_extension, file_extension = os.path.splitext(file_path)
+    path = Path(file_path)
+    file_path_without_extension = path.parent / path.stem
+    file_extension = path.suffix
     # Determine the file name if not supplied
     if file_name is None:
         file_name = file_path_without_extension.rsplit("/")[-1]

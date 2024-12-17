@@ -248,7 +248,7 @@ class SlackNotificationManger(NotificationManagerHelpers):
                 "Slack Notification",
                 title=kwargs["title"],
                 description=str(exception),
-                url=kwargs.get("url", None),
+                url=kwargs.get("url"),
             )
 
     def _get_slack_user_id(self, user_email: str) -> str:
@@ -257,6 +257,7 @@ class SlackNotificationManger(NotificationManagerHelpers):
             method="POST",
             url="https://slack.com/api/users.lookupByEmail",
             data={"token": self.system_settings.slack_token, "email": user_email},
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         user = json.loads(res.text)
@@ -298,6 +299,7 @@ class SlackNotificationManger(NotificationManagerHelpers):
                 "username": self.system_settings.slack_username,
                 "text": self._create_notification_message(event, user, "slack", kwargs),
             },
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if "error" in res.text:
@@ -332,6 +334,7 @@ class MSTeamsNotificationManger(NotificationManagerHelpers):
                             "msteams",
                             kwargs,
                         ),
+                        timeout=settings.REQUESTS_TIMEOUT,
                     )
                     if res.status_code != 200:
                         logger.error("Error when sending message to Microsoft Teams")

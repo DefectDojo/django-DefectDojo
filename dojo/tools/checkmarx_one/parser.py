@@ -22,7 +22,7 @@ class CheckmarxOneParser:
         if isinstance(value, str):
             return parser.parse(value)
         if isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.utcfromtimestamp(value.get("seconds"))
+            return datetime.datetime.fromtimestamp(value.get("seconds"), datetime.UTC)
         return None
 
     def _parse_cwe(self, cwe):
@@ -262,6 +262,9 @@ class CheckmarxOneParser:
         description = vulnerability.get("description")
         file_path = vulnerability.get("data").get("nodes")[0].get("fileName")
         unique_id_from_tool = vulnerability.get("id", vulnerability.get("similarityId"))
+        if description is None:
+            description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
+
         return Finding(
             description=description,
             title=description,
@@ -280,6 +283,9 @@ class CheckmarxOneParser:
         description = vulnerability.get("description")
         file_path = vulnerability.get("data").get("filename", vulnerability.get("data").get("fileName"))
         unique_id_from_tool = vulnerability.get("id", vulnerability.get("similarityId"))
+        if description is None:
+            description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
+
         return Finding(
             title=description,
             description=description,
@@ -298,6 +304,9 @@ class CheckmarxOneParser:
     ) -> Finding:
         description = vulnerability.get("description")
         unique_id_from_tool = vulnerability.get("id", vulnerability.get("similarityId"))
+        if description is None:
+            description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
+
         finding = Finding(
             title=description,
             description=description,

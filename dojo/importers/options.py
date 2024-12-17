@@ -193,7 +193,7 @@ class ImporterOptions:
         and ensures it is the correct type before returning it
         """
         # Get the value from the kwargs
-        value = kwargs.get(field_name, None)
+        value = kwargs.get(field_name)
         # Make sure we have something if we need it
         if required is True:
             if value is None:
@@ -530,13 +530,15 @@ class ImporterOptions:
         *args: list,
         **kwargs: dict,
     ) -> list:
-        return self.validate(
+        tags = self.validate(
             "tags",
             expected_types=[list],
             required=False,
             default=[],
             **kwargs,
         )
+        # Force all tags to be lowercase
+        return [tag.lower() for tag in tags]
 
     def validate_test(
         self,

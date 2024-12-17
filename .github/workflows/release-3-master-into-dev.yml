@@ -50,15 +50,11 @@ jobs:
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
       
-      - name: Update settings SHA
-        run: sha256sum dojo/settings/settings.dist.py | cut -d ' ' -f1 > dojo/settings/.settings.dist.py.sha256sum
-
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
-          cat dojo/settings/.settings.dist.py.sha256sum
 
       - name: Create upgrade notes to documentation
         run: |
@@ -72,8 +68,8 @@ jobs:
           description: No special instructions.
           ---
           There are no special instructions for upgrading to $minorv.x. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/$patchv) for the contents of the release.
-          " > docs/content/en/getting_started/upgrading/$minorv.md
-          git add docs/content/en/getting_started/upgrading/$minorv.md
+          " > docs/content/en/open_source/upgrading/$minorv.md
+          git add docs/content/en/open_source/upgrading/$minorv.md
         if: endsWith(github.event.inputs.release_number_new, '.0') && endsWith(github.event.inputs.release_number_dev, '.0-dev')
 
       - name: Push version changes
@@ -136,15 +132,11 @@ jobs:
           CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml | head -1)
           sed -ri "0,/version/s/version: \S+/$(echo "version: $CURRENT_CHART_VERSION" | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{$NF=sprintf("%0*d", length($NF), ($NF+1)); print}')-dev/" helm/defectdojo/Chart.yaml
       
-      - name: Update settings SHA
-        run: sha256sum dojo/settings/settings.dist.py | cut -d ' ' -f1 > dojo/settings/.settings.dist.py.sha256sum
-
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
-          cat dojo/settings/.settings.dist.py.sha256sum
       
       - name: Push version changes
         uses: stefanzweifel/git-auto-commit-action@v5.0.1

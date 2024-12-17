@@ -13,10 +13,7 @@ def get_authorized_finding_groups(permission, queryset=None, user=None):
     if user is None:
         return Finding_Group.objects.none()
 
-    if queryset is None:
-        finding_groups = Finding_Group.objects.all()
-    else:
-        finding_groups = queryset
+    finding_groups = Finding_Group.objects.all() if queryset is None else queryset
 
     if user.is_superuser:
         return finding_groups

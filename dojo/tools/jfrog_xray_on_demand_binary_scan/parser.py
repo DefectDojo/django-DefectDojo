@@ -48,10 +48,7 @@ def get_component_name_version(name):
 
 def get_severity(vulnerability):
     if "severity" in vulnerability:
-        if vulnerability["severity"] == "Unknown":
-            severity = "Info"
-        else:
-            severity = vulnerability["severity"].title()
+        severity = "Info" if vulnerability["severity"] == "Unknown" else vulnerability["severity"].title()
     else:
         severity = "Info"
     return severity

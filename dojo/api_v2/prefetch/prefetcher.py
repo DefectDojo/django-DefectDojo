@@ -24,6 +24,7 @@ class _Prefetcher:
 
         Returns:
             dict[model, serializer]: map of model to their serializer
+
         """
 
         def _is_model_serializer(obj):
@@ -61,6 +62,7 @@ class _Prefetcher:
 
         Returns:
             rest_framework.serializers.ModelSerializer: The serializer if one has been found or None
+
         """
         # If the type is represented in the map then return the serializer
         if field_type in self._serializers:
@@ -80,6 +82,7 @@ class _Prefetcher:
         Args:
             entry (ModelInstance): Instance of a model as returned by a django queryset
             field_to_fetch (list[string]): fields to prefetch
+
         """
         for field_to_fetch in fields_to_fetch:
             # Get the field from the instance
