@@ -7,6 +7,11 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
 
+
+## Dec 16, 2024: v2.41.2
+
+- **(Connectors)** Remove the 'Beta' logo from Connectors
+
 ## Dec 9, 2024: v2.41.1
 
 - **(API)** When using the jira_finding_mappings API endpoint, trying to update a finding's Jira mapping with a Jira issue that is already assigned to another finding will now raise a validation error.
