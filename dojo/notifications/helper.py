@@ -638,7 +638,7 @@ class NotificationManager(NotificationManagerHelpers):
             logger.debug("creating personal notifications for event: %s", event)
             # There are notification like deleting a product type that shall not be sent to users.
             # These notifications will have the parameter no_users=True
-            if kwargs.get("no_users") is False:
+            if kwargs.get("no_users", False) is False:
                 # get users with either global notifications, or a product specific notification
                 # and all admin/superuser, they will always be notified
                 for user in self._get_user_to_send_notifications_to():
