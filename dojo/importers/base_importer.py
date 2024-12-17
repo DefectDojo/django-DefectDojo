@@ -742,13 +742,8 @@ class BaseImporter(ImporterOptions):
             f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
         )
 
-        if updated_count == 0:
-            event = "scan_added_empty"
-        else:
-            event = "scan_added"
-
         create_notification(
-            event=event,
+            event="scan_added_empty" if updated_count == 0 else "scan_added",
             title=title,
             findings_new=new_findings,
             findings_mitigated=findings_mitigated,
