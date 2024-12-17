@@ -1,7 +1,7 @@
 ---
 title: "Import Methods"
 description: "Learn how to import data manually, through the API, or via a connector"
-weight: 0
+weight: 1
 ---
 
 One of the things we understand at DefectDojo is that every company’s security needs are completely different. There is no ‘one\-size\-fits\-all’ approach. As your organization changes, having a flexible approach is key.
@@ -16,15 +16,16 @@ There are four main ways that DefectDojo can upload Finding reports:
 
 * Via direct **import** through the UI (“**Add Findings**”)
 * Via **API** endpoint (allowing for automated data ingest)
+* Via **Universal Importer**, a command-line tool which leverages the DefectDojo API
 * Via **Connectors** for certain tools, an ‘out of the box’ data integration
 * Via **Smart Upload** for certain tools, an importer designed to handle infrastructure scans
 
 ### Comparing Upload Methods
 
-|  | **UI Import** | **API Import** | **Connectors** | **Smart Upload** |
+|  | **UI Import** | **API** | **Connectors** <span style="background-color:rgba(242, 86, 29, 0.3)">Pro</span> | **Smart Upload** |
 | --- | --- | --- | --- | --- |
-| **Supported Scan Types** | All (see **Supported Tools**) | All (see **Supported Tools**) | Snyk, Semgrep, Burp Suite, AWS Security Hub, Probely, Checkmarx, Tenable | Nexpose, NMap, OpenVas, Qualys, Tenable |
-| **Can it be automated?** | Not directly, though method can be automated through API | Yes, calls to API can be made manually or via script | Yes, Connectors is a natively automated process which leverages your tool’s API to rapidly import data | Yes, can be automated via /smart\_upload\_import API endpoint |
+| **Supported Scan Types** | All: see [Supported Tools](en/connecting_your_tools/parsers) | All: see [Supported Tools](en/connecting_your_tools/parsers) | Snyk, Semgrep, Burp Suite, AWS Security Hub, Probely, Checkmarx, Tenable | Nexpose, NMap, OpenVas, Qualys, Tenable |
+| **Automation?** | Available via API: `/reimport` `/import` endpoints | Triggered from [CLI Importer](../external_tools) or external code | Connectors is inherently automated | Available via API: `/smart_upload_import` endpoint |
 
 ### Product Hierarchy
 
@@ -35,6 +36,6 @@ Each of these methods can create Product Hierarchy on the spot. Product Hierarch
 
 # Next Steps
 
-* If you have a brand new DefectDojo instance, learning how to use the **Import Scan Form** is a great starting point.
-* If you want to learn how to translate DefectDojo’s organizational system into a robust pipeline, you can start by consulting our article on [Product Hierarchy](https://docs.defectdojo.com/en/working_with_findings/organizing_engagements_tests/product-hierarchy-overview/).
-* If you want to set up Connectors to work with a supported tool, see our [About Connectors](https://docs.defectdojo.com/en/connecting_your_tools/connectors/about_connectors/) article.
+* If you have a brand new DefectDojo instance, learning how to use the [Import Scan Form](../import_scan_files/import_scan_ui) is a great starting point.
+* If you want to learn how to translate DefectDojo’s organizational system into a robust pipeline, you can start by consulting our article on [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/).
+* If you want to set up Connectors to work with a supported tool, see our [About Connectors](../connectors/about_connectors/) article.

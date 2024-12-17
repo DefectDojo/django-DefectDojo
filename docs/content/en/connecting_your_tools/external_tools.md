@@ -5,6 +5,8 @@ draft: false
 weight: 2
 ---
 
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The following external tools are DefectDojo Pro-only features. These binaries will not work unless they are connected to an instance with a DefectDojo Pro license.</span>
+
 ## About Universal Importer
 
 Universal Importer and Dojo-CLI are command-line tools designed to seamlessly upload scan results into DefectDojo. It streamlines both the import and re-import processes of findings and associated objects. These tools are flexible and supports importing and re-importing scan results, making it ideal for users who need robust interaction with the DefectDojo API.
@@ -261,5 +263,5 @@ If you encounter any issues, please check the following:
 - Ensure you're using the correct binary for your operating system and CPU architecture.
 - Verify that the API key is set correctly in your environment variables.
 - Check that the DefectDojo URL is correct and accessible.
-- When importing, confirm that the report file exists and is in the supported format for the specified scan type.  You can review the supported scanners for Defect Dojo in the documentation https://documentation.defectdojo.com/integrations/parsers/file/. 
+- When importing, confirm that the report file exists and is in the supported format for the specified scan type.  You can review the supported scanners for DefectDojo on our [supported tools list](../parsers). 
 

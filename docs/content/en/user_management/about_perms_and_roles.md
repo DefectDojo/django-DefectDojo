@@ -1,6 +1,7 @@
 ---
-title: "About Permissions & Roles"
+title: "User permissions & Roles"
 description: "Summary of all DefectDojo permission options, in detail"
+weight: 1
 ---
 
 If you have a team of users working in DefectDojo, it's important to set up Role\-Based Access Control (RBAC) appropriately so that users can only access specific data. Security data is highly sensitive, and DefectDojo's options for access control allow you to be specific about each team member’s access to information.
@@ -39,7 +40,7 @@ Users can be assigned a role of Reader, Writer, Maintainer, Owner or API Importe
 ​
 * **API Importer** **Users** have limited abilities. This Role allows limited API access without exposing the majority of the API endpoints, so is useful for automation or users who are meant to be ‘external’ to DefectDojo. They can view underlying data, Add / Edit Engagements, and Import Scan Data.
 
-For detailed information on Roles, please see our **[Role Permission Chart](https://docs.defectdojo.com/en/user_management/user-permission-charts/)**.
+For detailed information on Roles, please see our **[Role Permission Chart](../user-permission-charts/)**.
 
 ### Global Roles
 
@@ -85,4 +86,4 @@ If users are part of a Group, they also have Group Configuration Permissions whi
 
 If users create a new Group, they will be given the Owner role of the new Group by default.
 
-For more information on Configuration Permissions, see our **[Configuration Permissions Chart](https://docs.defectdojo.com/en/user_management/user-permission-charts/)**.
+For more information on Configuration Permissions, see our **[Configuration Permissions Chart](../user_permission_chart/#configuration-permission-chart)**.

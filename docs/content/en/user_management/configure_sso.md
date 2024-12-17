@@ -1,11 +1,10 @@
 ---
-title: "Configure Single-Sign On Login"
+title: "Configure SSO login"
 description: "Sign in to DefectDojo using OAuth or SAML login options"
 pro-feature: true
 ---
 
 Users can connect to DefectDojo with a Username and Password, but if you prefer, you can allow users to authenticate using a Single Sign\-On or SSO method. You can set up DefectDojo to work with your own SAML Identity Provider, but we also support many OAuth methods for authentication:
-
 
 * Auth0
 * Azure AD
@@ -17,25 +16,18 @@ Users can connect to DefectDojo with a Username and Password, but if you prefer,
 
 All of these methods can only be configured by a Superuser in DefectDojo.  
 ​
-
-
-
-# Set Up SAML Login
-
+## Set Up SAML Login
 
 If you would like to add DefectDojo to your SAML Identity Provider, here is the process to follow:
 
-
 1. Start from **Plugin Manager \> Enterprise Settings** in DefectDojo.  
 ​
-
-
 ![image](images/Configure_Single-Sign_On_Login.png)
+
 2. Open the SAML tab from this page to configure your sign\-on settings.  
 ​
-
-
 ![image](images/Configure_Single-Sign_On_Login_2.png)
+
 3. Complete the SAML form. Start by setting an **Entity ID** \- this is either a label or a URL which your SAML Identity Provider can point to, and use to identify DefectDojo. This is a required field.  
 ​
 4. If you wish, set **Login Button Text** in DefectDojo. This text will appear on the button or link users click to initiate the login process.  
@@ -64,56 +56,34 @@ This is a required field for this form.
 ​
 11. Finally, check the **Enable SAML** checkbox at the bottom of this form to confirm that you want to use SAML to log in. Once this is enabled, you will see the **Login With SAML** button on the DefectDojo Login Page.
 
-
 ![image](images/Configure_Single-Sign_On_Login_3.png)
 
-## Additional SAML Options:
+### Additional SAML Options
 
+* **Create Unknown User** allows you to decide whether or not to automatically create a new user in DefectDojo if they aren’t found in the SAML response.
 
-**Create Unknown User** allows you to decide whether or not to automatically create a new user in DefectDojo if they aren’t found in the SAML response.
+* **Allow Unknown Attributes** allows you to authorize users who have attributes which are not found in the **Attribute Mapping** field.
 
+* **Sign Assertions/Responses** will require any incoming SAML responses to be signed.
 
+* **Sign Logout Requests** forces DefectDojo to sign any logout requests.
 
-**Allow Unknown Attributes** allows you to authorize users who have attributes which are not found in the **Attribute Mapping** field.
+* **Force Authentication** determines whether you want to force your users to authenticate using your Identity Provider each time, regardless of existing sessions.
 
+* **Enable SAML Debugging** will log more detailed SAML output for debugging purposes.
 
-
-**Sign Assertions/Responses** will require any incoming SAML responses to be signed.
-
-
-
-**Sign Logout Requests** forces DefectDojo to sign any logout requests.
-
-
-
-**Force Authentication** determines whether you want to force your users to authenticate using your Identity Provider each time, regardless of existing sessions.
-
-
-
-**Enable SAML Debugging** will log more detailed SAML output for debugging purposes.
-
-
-
-
-
-# Set up OAuth Login (Google, Gitlab, Auth0…)
-
+## Set up OAuth Login (Google, Gitlab, Auth0…)
 
 1. Start by navigating to the **Plugin Manager \> Enterprise Settings** page in DefectDojo.  
 ​
-
-
 ![image](images/Configure_Single-Sign_On_Login_4.png)
+
 2. From here, navigate to the OAuth tab and select the service you want to configure from the list.  
 ​
-
-
 ![image](images/Configure_Single-Sign_On_Login_5.png)
+
 3. Complete the relevant OAuth form.  
 ​
 4. Finally, check the **Enable \_\_ OAuth** button from below, and click **Submit**.   
 ​
-
 Users should now be able to sign in using the OAuth service you selected. A button will be added to the DefectDojo Login page to enable them to sign on using this method.
-
-
