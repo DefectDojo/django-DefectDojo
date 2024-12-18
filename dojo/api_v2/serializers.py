@@ -394,7 +394,6 @@ class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
     burpRequestBase64 = serializers.CharField()
     burpResponseBase64 = serializers.CharField()
 
-
     def to_representation(self, data):
         return {
             "id": data.id,
