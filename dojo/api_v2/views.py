@@ -2699,21 +2699,6 @@ class BurpRawRequestResponseViewSet(
         )
         return results.order_by("id")
 
-    @extend_schema(
-        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseMultiSerializer(many=True)},
-        methods=["GET"],
-    )
-    @action(methods=["get"], detail=False, serializer_class=serializers.BurpRawRequestResponseMultiSerializer,
-            filter_backends=[], pagination_class=None, url_path=r"finding/(?P<finding_id>\d+)")
-    def finding(self, request, pk=None, finding_id=None):
-        finding = get_object_or_404(Finding.objects, pk=finding_id)
-
-        reqresp = finding.get_valid_request_response_pairs() if finding else BurpRawRequestResponse.objects.all()
-
-        # Send a favorable response
-        serialized_request_response = serializers.BurpRawRequestResponseMultiSerializer(reqresp, many=True)
-        return Response(serialized_request_response.data)
-
 
 # Authorization: superuser
 class NotesViewSet(
