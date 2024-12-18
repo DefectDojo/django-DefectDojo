@@ -2692,7 +2692,7 @@ class BurpRawRequestResponseViewSet(
 
     def get_queryset(self):
         results = BurpRawRequestResponse.objects.all()
-        empty_value = base64.b64encode(b"")
+        empty_value = b""
         results = results.exclude(
             burpRequestBase64__exact=empty_value,
             burpResponseBase64__exact=empty_value,

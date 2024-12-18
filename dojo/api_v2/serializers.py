@@ -414,8 +414,6 @@ class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
 
         base64.b64decode(b64request, validate=True)
         base64.b64decode(b64response, validate=True)
-        b64request = b64request
-        b64response = b64response
         data["burpRequestBase64"] = b64request.encode("utf-8")
         data["burpResponseBase64"] = b64response.encode("utf-8")
         if finding and b64request and b64response:
