@@ -342,7 +342,7 @@ def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True, post_com
             post_jira_comment(finding, unaccepted_message_creator)
 
         # Update the JIRA obect for this finding
-        update_risk_acceptance_jira(finding)
+        jira_helper.save_and_push_to_jira(finding)
 
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
@@ -369,24 +369,3 @@ def update_endpoint_statuses(finding: Finding, *, accept_risk: bool) -> None:
             status.risk_accepted = False
         status.last_modified = timezone.now()
         status.save()
-
-
-def update_risk_acceptance_jira(finding):
-    # Manage the jira status changes
-    push_to_jira = False
-    # Determine if the finding is in a group. if so, not push to jira yet
-    finding_in_group = finding.has_finding_group
-    # Check if there is a jira issue that needs to be updated
-    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
-    # Only push if the finding is not in a group
-    if jira_issue_exists:
-        # Determine if any automatic sync should occur
-        push_to_jira = jira_helper.is_push_all_issues(finding) \
-            or jira_helper.get_jira_instance(finding).finding_jira_sync
-    # Save the finding
-    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-
-    # we only push the group after saving the finding to make sure
-    # the updated data of the finding is pushed as part of the group
-    if push_to_jira and finding_in_group:
-        jira_helper.push_to_jira(finding.finding_group)
