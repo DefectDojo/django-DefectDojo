@@ -192,7 +192,7 @@ class MendParser:
                 dynamic_finding=True,
                 cvssv3=cvss3_vector,
                 cvssv3_score=float(cvss3_score) if cvss3_score is not None else None,
-                impact=impact is impact is not None else None,
+                impact=impact if impact is not None else None,
                 steps_to_reproduce="**Locations Found**: " + ", ".join(locations) if locations is not None else None,
             )
             if cve:
