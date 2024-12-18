@@ -394,23 +394,6 @@ class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
     burpRequestBase64 = serializers.CharField()
     burpResponseBase64 = serializers.CharField()
 
-    def get_stringrequest(self, obj) -> str:
-        result = ""
-        if isinstance(obj, dict):
-            result = obj.get("string_request", "")
-        elif obj.string_request:
-            result = obj.string_request
-
-        return result
-
-    def get_stringresponse(self, obj) -> str:
-        result = ""
-        if isinstance(obj, dict):
-            result = obj.get("string_response", "")
-        elif obj.string_response:
-            result = obj.string_response
-
-        return result
 
     def to_representation(self, data):
         return {
