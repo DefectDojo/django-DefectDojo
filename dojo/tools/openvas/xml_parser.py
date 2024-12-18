@@ -41,11 +41,11 @@ class OpenVASXMLParser:
 
             finding = Finding(
                 title=str(title),
+                test=test,
                 description="\n".join(description),
                 severity=severity,
                 dynamic_finding=True,
                 static_finding=False,
-                test=test,
                 vuln_id_from_tool=script_id,
             )
             if finding.severity != "Info":

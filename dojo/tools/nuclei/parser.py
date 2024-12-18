@@ -68,7 +68,6 @@ class NucleiParser:
                 severity=severity,
                 nb_occurences=1,
                 vuln_id_from_tool=template_id,
-                test=test,
             )
             if finding.severity != "Info":
                 finding.problem = problems_help.find_or_create_problem(finding)

@@ -129,7 +129,6 @@ class NmapParser:
                         mitigation="N/A",
                         impact="No impact provided",
                         vuln_id_from_tool=script_id,
-                        test=test,
                     )
                     find.unsaved_endpoints = []
                     dupes[dupe_key] = find
