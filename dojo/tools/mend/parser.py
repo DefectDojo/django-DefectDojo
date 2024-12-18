@@ -63,7 +63,7 @@ class MendParser:
                 component_version = node["component"].get("version")
                 impact = (
                     "**Direct or Transitive Vulnerability**: "
-                    + node["component"].get("dependencyType")
+                    + node["component"].get("dependencyType", "")
                     + "\n"
                 )
                 cvss3_score = node["vulnerability"].get("score", None)
@@ -192,7 +192,7 @@ class MendParser:
                 dynamic_finding=True,
                 cvssv3=cvss3_vector,
                 cvssv3_score=float(cvss3_score) if cvss3_score is not None else None,
-                impact=impact,
+                impact=impact is impact is not None else None,
                 steps_to_reproduce="**Locations Found**: " + ", ".join(locations) if locations is not None else None,
             )
             if cve:
