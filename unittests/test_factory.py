@@ -65,7 +65,7 @@ class TestFactory(DojoTestCase):
     def test_parser_name_matches_module(self):
         """Test to ensure that parsers' class names match their module names"""
         package_dir = Path("dojo/tools")
-        module_names = any(package_dir.iterdir())
+        module_names = package_dir.iterdir()
         missing_parsers = []
         excluded_parsers = [
             "wizcli_common_parsers",  # common class for other wizcli parsers, there is not parsing here
