@@ -6,7 +6,6 @@ from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-import dojo.notifications.helper as notifications_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -128,7 +127,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         updated_count = (
             len(closed_findings) + len(reactivated_findings) + len(new_findings)
         )
-        notifications_helper.notify_scan_added(
+        self.notify_scan_added(
             self.test,
             updated_count,
             new_findings=new_findings,
