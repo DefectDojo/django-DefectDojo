@@ -1290,6 +1290,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "HackerOne Cases": ["title", "severity"],
     "KrakenD Audit Scan": ["description", "mitigation", "severity"],
     "Red Hat Satellite": ["description", "severity"],
+    "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1535,6 +1536,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
+    "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
