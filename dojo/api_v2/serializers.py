@@ -1,3 +1,4 @@
+import base64
 import collections
 import json
 import logging
@@ -45,6 +46,7 @@ from dojo.models import (
     Answer,
     Answered_Survey,
     App_Analysis,
+    BurpRawRequestResponse,
     Check_List,
     ChoiceAnswer,
     ChoiceQuestion,
@@ -383,6 +385,46 @@ class RequestResponseSerializerField(serializers.ListSerializer):
 
 class BurpRawRequestResponseSerializer(serializers.Serializer):
     req_resp = RequestResponseSerializerField(required=True)
+
+
+class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
+    burpRequestBase64 = serializers.CharField()
+    burpResponseBase64 = serializers.CharField()
+
+    def to_representation(self, data):
+        return {
+            "id": data.id,
+            "finding": data.finding.id,
+            "burpRequestBase64": data.burpRequestBase64.decode("utf-8"),
+            "burpResponseBase64": data.burpResponseBase64.decode("utf-8"),
+        }
+
+    def validate(self, data):
+        b64request = data.get("burpRequestBase64", None)
+        b64response = data.get("burpResponseBase64", None)
+        finding = data.get("finding", None)
+        # Make sure all fields are present
+        if not b64request or not b64response or not finding:
+            msg = "burpRequestBase64, burpResponseBase64, and finding are required."
+            raise ValidationError(msg)
+        # Verify we have true base64 decoding
+        try:
+            base64.b64decode(b64request, validate=True)
+            base64.b64decode(b64response, validate=True)
+        except Exception as e:
+            msg = "Inputs need to be valid base64 encodings"
+            raise ValidationError(msg) from e
+        # Encode the data in utf-8 to remove any bad characters
+        data["burpRequestBase64"] = b64request.encode("utf-8")
+        data["burpResponseBase64"] = b64response.encode("utf-8")
+        # Run the model validation - an ValidationError will be raised if there is an issue
+        BurpRawRequestResponse(finding=finding, burpRequestBase64=b64request, burpResponseBase64=b64response).clean()
+
+        return data
+
+    class Meta:
+        model = BurpRawRequestResponse
+        fields = "__all__"
 
 
 class MetaSerializer(serializers.ModelSerializer):
