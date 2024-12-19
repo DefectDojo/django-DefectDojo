@@ -26,11 +26,13 @@ def expire_now(risk_acceptance):
                 logger.debug("%i:%s: unaccepting/reactivating finding.", finding.id, finding)
 
                 # Update any endpoint statuses on each of the findings
-                # update_endpoint_statuses(finding, accept_risk=False)
+                update_endpoint_statuses(finding, accept_risk=False)
+                risk_unaccept(None, finding, post_comments=False)  # comments will be posted at end
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
-                risk_unaccept(None, finding, post_comments=False)  # comments will be posted at end
+                    finding.save(dedupe_option=False)  # resave if changed after risk_unaccept
+
                 reactivated_findings.append(finding)
             else:
                 logger.debug("%i:%s already active, no changes made.", finding.id, finding)
