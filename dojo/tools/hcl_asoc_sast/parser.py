@@ -53,7 +53,7 @@ class HCLASoCSASTParser:
                             description = description + "**Issue-Type-Name:** " + title + "\n"
                         case "source-file":
                             location = self.xmltreehelper(item).strip()
-                            description = description + "***Location:" + location + "\n"
+                            description = description + "**Location:** " + location + "\n"
                         case "line":
                             line = int(self.xmltreehelper(item).strip())
                             description = description + "***Line:" + str(line) + "\n"
