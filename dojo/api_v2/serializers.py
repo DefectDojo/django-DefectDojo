@@ -406,22 +406,23 @@ class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
         b64request = data.get("burpRequestBase64", None)
         b64response = data.get("burpResponseBase64", None)
         finding = data.get("finding", None)
-
+        # Make sure all fields are present
         if not b64request or not b64response or not finding:
             msg = "burpRequestBase64, burpResponseBase64, and finding are required."
             raise ValidationError(msg)
-
-        base64.b64decode(b64request, validate=True)
-        base64.b64decode(b64response, validate=True)
+        # Verify we have true base64 decoding
+        try:
+            base64.b64decode(b64request, validate=True)
+            base64.b64decode(b64response, validate=True)
+        except Exception as e:
+            msg = "Inputs need to be valid base64 encodings"
+            raise ValidationError(msg) from e
+        # Encode the data in utf-8 to remove any bad characters
         data["burpRequestBase64"] = b64request.encode("utf-8")
         data["burpResponseBase64"] = b64response.encode("utf-8")
-        if finding and b64request and b64response:
-            BurpRawRequestResponse(finding=finding,
-                                   burpRequestBase64=b64request,
-                                   burpResponseBase64=b64response).clean()
-        else:
-            msg = "Failed to validate data. finding, burpRequestBase64, and burpResponseBase64 cannot be null"
-            raise ValidationError(msg)
+        # Run the model validation - an ValidationError will be raised if there is an issue
+        BurpRawRequestResponse(finding=finding, burpRequestBase64=b64request, burpResponseBase64=b64response).clean()
+
         return data
 
     class Meta:
