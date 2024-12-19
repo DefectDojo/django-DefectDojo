@@ -303,8 +303,10 @@ class TwistlockJsonParser:
         items = {}
         if "results" in tree:
             vulnerabilityTree = tree["results"][0].get("vulnerabilities", [])
+            packageTree = tree["results"][0].get("packages", [])
+            
             for node in vulnerabilityTree:
-                item = get_item(node, test)
+                item = get_item(node, test, packageTree)
                 unique_key = node["id"] + str(
                     node["packageName"]
                     + str(node["packageVersion"])
@@ -314,7 +316,7 @@ class TwistlockJsonParser:
         return list(items.values())
 
 
-def get_item(vulnerability, test):
+def get_item(vulnerability, test, packageTree):
     severity = (
         convert_severity(vulnerability["severity"])
         if "severity" in vulnerability
@@ -336,7 +338,10 @@ def get_item(vulnerability, test):
         if "riskFactors" in vulnerability
         else "No risk factors."
     )
-
+    for package in packageTree:
+        if package["name"] == vulnerability["packageName"]:
+            vulnerability["type"] = package["type"]
+            break
     description = (
         vulnerability.get("description", "")
         + "<p> Vulnerable Package: "
@@ -345,7 +350,10 @@ def get_item(vulnerability, test):
         + str(vulnerability["packageVersion"])
         + "</p><p> Layer Instruction: "
         + vulnerability.get("layerInstruction", "")
-        + "</p>"
+        + "</p><p> Package Path: "
+        + vulnerability.get("packagePath", "")
+        + "</p><p> Type: "
+        + vulnerability.get("type", "")
     )
 
     if vulnerability.get("baseImage"):
