@@ -47,7 +47,7 @@ class HCLASoCSASTParser:
                             cwe = int(self.xmltreehelper(item))
                         case "issue-type":
                             title = self.xmltreehelper(item).strip()
-                            description = description + "***Issue-Type:" + title + "\n"
+                            description = description + "**Issue-Type:** " + title + "\n"
                         case "issue-type-name":
                             title = self.xmltreehelper(item).strip()
                             description = description + "***Issue-Type-Name:" + title + "\n"
