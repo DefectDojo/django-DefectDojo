@@ -11,7 +11,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.notifications.helper as notifications_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
-from dojo.importers.utils import get_or_create_component
+from dojo.importers.utils import get_or_create_component, encode_datetime, decode_datetime
 from dojo.models import (
     Engagement,
     Finding,
@@ -243,7 +243,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         sync = kwargs.get("sync", True)
         if not sync:
-            return [serialize("json", [finding]) for finding in new_findings]
+            return [serialize("json", [encode_datetime(finding)]) for finding in new_findings]
         return new_findings
 
     def close_old_findings(
@@ -434,7 +434,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         for results in results_list:
             serial_new_findings = results
             new_findings += [
-                    next(deserialize("json", self.decode_datetime(finding))).object
+                    next(deserialize("json", decode_datetime(finding))).object
                     for finding in serial_new_findings
                 ]
         logger.info("IMPORT_SCAN: All Findings Collected")
