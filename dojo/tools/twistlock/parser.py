@@ -339,7 +339,7 @@ def get_item(vulnerability, test, packageTree):
         else "No risk factors."
     )
     for package in packageTree:
-        if package["name"] == vulnerability["packageName"]:
+        if package["name"] == vulnerability["packageName"] and package["version"] == vulnerability["packageVersion"]:
             vulnerability["type"] = package["type"]
             break
     description = (
