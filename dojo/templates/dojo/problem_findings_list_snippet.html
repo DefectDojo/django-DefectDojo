@@ -1,0 +1,219 @@
+{% load navigation_tags %}
+{% load display_tags %}
+{% load authorization_tags %}
+{% load get_endpoint_status %}
+{% load static %}
+{% load i18n %}
+{% block problem_findings %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        {% blocktrans %}Findings for Problem: {{ problem }}{% endblocktrans %}
+                        <div class="dropdown pull-right">
+                            &nbsp;
+                            <button id="show-filters"
+                                    data-toggle="collapse"
+                                    data-target="#the-filters"
+                                    class="btn btn-primary toggle-filters"
+                                    aria-label="show-filters">
+                                <i class="fa-solid fa-filter"></i> <i class="caret"></i>
+                            </button>
+                        </div>
+                    </h3>
+                </div>
+                <div id="the-filters" class="is-filters panel-body collapse">
+                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                </div>
+            </div>
+            {% if findings %}
+                <div class="clearfix">{% include "dojo/paging_snippet.html" with page=findings page_size=True %}</div>
+                <div class="panel panel-default table-responsive">
+                    <table id="open_problems" class="tablesorter-bootstrap table table-condensed table-striped table-hover" data-sort-order="asc">
+                        <thead>
+                            <tr>
+                                {% block header %}
+                                    <th>{% dojo_sort request "Name" "title" %}</th>
+                                    <th class="nowrap centered severity-sort">
+                                        {% trans "Severity" %}
+                                    </th>
+                                    <th>{% trans "Script ID" %}</th>
+                                    <th>{% trans "Reporter" %}</th>
+                                    <th>{% dojo_sort request "Found By" "found_by" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                {% endblock %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for finding in findings %}
+                            <tr>
+                                <td>
+                                    {% if finding.title %}
+                                        <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title }}</a>
+                                    {% else %}
+                                        <a title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
+                                    {% endif %}
+                                </td>
+                                <td class="centered severity-sort" data-severity="{{ finding.severity }}">
+                                    <span class="label severity severity-{{ finding.severity }}">
+                                        {{ finding.severity }}
+                                    </span>
+                                </td>
+                                <td>{{ finding.vuln_id_from_tool }}</td>
+                                <td>
+                                    {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
+                                        {{ finding.reporter.get_full_name }}
+                                    {% else %}
+                                        {{ finding.reporter }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if finding.found_by %}
+                                        {{ finding.found_by.all|join:", " }}
+                                    {% else %}
+                                        {{ finding.test.test_type }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=problem_findings %}
+                </div>
+            {% else %}
+                <div id="no_findings">
+                    <p class="text-center">
+                        {% trans "No findings found." %}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
+    <script type="application/javascript">
+        {% block datatables_columns %}
+            var percentSort = function(data, type, row, meta) {
+                if (type === 'sort') {
+                    return (data && data.endsWith("%")) ? parseFloat(data.slice(0, -1)) : -1.00;
+                }
+                return data;
+            };
+            var datatables_columns = [
+                { "data": "name", "render": function(data, type, row) {
+                    return type === 'export' ? getDojoExportValueFromTag(data, 'a') : data;
+                }},
+                { "data": "severity" },
+                { "data": "vuln_id_from_tool" },
+                { "data": "reporter" },
+                { "data": "found_by" },
+                { "data": "status" },
+            ];
+        {% endblock %}
+    </script>
+    <script type="application/javascript">
+        // DataTables Setup
+        $.fn.dataTable.ext.order['severity-asc'] = function (settings, col) {
+            return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
+                var severity = $(td).data('severity');
+                switch (severity) {
+                    case 'Info':
+                        return 1;
+                    case 'Low':
+                        return 2;
+                    case 'Medium':
+                        return 3;
+                    case 'High':
+                        return 4;
+                    case 'Critical':
+                        return 5;
+                    default:
+                        return 1;
+                }
+            });
+        };
+
+        $(document).ready(function() {
+            // Inicializa a DataTable para a tabela com o ID 'open_problems'
+            $('#open_problems').DataTable({
+                // Callback para mostrar e esconder popovers ao passar o mouse
+                drawCallback: function(){
+                    $('#open_findings .has-popover').hover(
+                        function() { $(this).popover('show'); }, // hover
+                        function() { $(this).popover('hide'); } // unhover
+                    );
+                },
+                // Reordenação das colunas
+                colReorder: true,
+                // Definição das colunas a partir da variável datatables_columns
+                columns: datatables_columns,
+                // Desativa a ordenação automática
+                order: [],
+                // Configurações de colunas
+                columnDefs: [
+                    {
+                        targets: 'severity-sort',
+                        orderDataType: 'severity-asc' // Aplica a ordenação personalizada na coluna de severidade
+                    },
+                ],
+                // Configurações de exibição da DataTable
+                dom: 'Bfrtip',
+                paging: false, // Desativa a paginação
+                info: false,   // Desativa as informações de página
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)' // Permite visibilidade das colunas, exceto as que têm a classe 'noVis'
+                    },
+                    {
+                        extend: 'copy',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5], // Define as colunas que serão exportadas
+                            stripHtml: true,
+                            stripNewlines: true,
+                            trim: true,
+                            orthogonal: 'export'
+                        },
+                        filename: 'Problems_List',
+                        title: 'Problems List'
+                    },
+                    {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5],
+                            stripHtml: true,
+                            stripNewlines: true,
+                            trim: true,
+                            orthogonal: 'export'
+                        },
+                        filename: 'Problems_List',
+                        title: 'Problems List'
+                    },
+                    {
+                        extend: 'print',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5],
+                            stripHtml: true,
+                            stripNewlines: true,
+                            trim: true,
+                            orthogonal: 'export'
+                        },
+                        filename: 'Problems_List',
+                        title: 'Problems List'
+                    }
+                ]
+            });
+        });
+    </script>
+    {% include "dojo/filter_js_snippet.html" %}
+    {% include "dojo/snippets/selectpicker_in_dropdown.html" %}
+{% endblock %}

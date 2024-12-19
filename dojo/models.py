@@ -2257,6 +2257,32 @@ class Test_Import_Finding_Action(TimeStampedModel):
     def __str__(self):
         return f"{self.finding.id}: {self.action}"
 
+class Problem(models.Model):
+    name = models.CharField(max_length=255,
+                            verbose_name=_("Name"),
+                            help_text=_("A short name or title for the problem."))
+    description = models.TextField(
+        verbose_name=_("Description"),
+        help_text=_("Detailed description of the problem."))
+    created_at = models.DateTimeField(auto_now_add=True,
+                                       verbose_name=_("Created At"),
+                                       help_text=_("Timestamp when this problem was created."))
+    updated_at = models.DateTimeField(auto_now=True,
+                                       verbose_name=_("Updated At"),
+                                       help_text=_("Timestamp when this problem was last updated."))
+    severity = models.CharField(max_length=50,
+                                 choices=[
+                                     ('Critical', _("Critical")),
+                                     ('High', _("High")),
+                                     ('Medium', _("Medium")),
+                                     ('Low', _("Low")),
+                                     ('Info', _("Info")),
+                                 ],
+                                 verbose_name=_("Severity"),
+                                 help_text=_("The severity level of this problem."))
+    def __str__(self):
+        return self.name
+
 
 class Finding(models.Model):
     title = models.CharField(max_length=511,
@@ -2283,6 +2309,13 @@ class Finding(models.Model):
                            blank=False,
                            verbose_name=_("Vulnerability Id"),
                            help_text=_("An id of a vulnerability in a security advisory associated with this finding. Can be a Common Vulnerabilities and Exposures (CVE) or from other sources."))
+    problem = models.ForeignKey(Problem,
+                                null=True,
+                                blank=True,
+                                on_delete=models.SET_NULL,
+                                related_name='findings',
+                                verbose_name=_("Problem"),
+                                help_text=_("The problem this finding is related to."))
     epss_score = models.FloatField(default=None, null=True, blank=True,
                               verbose_name=_("EPSS Score"),
                               help_text=_("EPSS score for the CVE. Describes how likely it is the vulnerability will be exploited in the next 30 days."),

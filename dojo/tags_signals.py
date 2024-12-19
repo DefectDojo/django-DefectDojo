@@ -10,6 +10,12 @@ from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
 
+@receiver(signals.post_delete, sender=Finding)
+def delete_problem_if_no_findings(sender, instance, **kwargs):
+    problem = instance._state.fields_cache.get('problem', None)
+    if problem is not None:
+        if not problem.findings.exists():  
+            problem.delete()
 
 @receiver(signals.m2m_changed, sender=Product.tags.through)
 def product_tags_post_add_remove(sender, instance, action, **kwargs):
