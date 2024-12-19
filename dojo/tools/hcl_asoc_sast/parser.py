@@ -112,11 +112,11 @@ class HCLASoCSASTParser:
                                     description = description + "***Cause:" + "\n"
                                     for causeitem in aitem:
                                         if causeitem.attrib["type"] == "string" and causeitem.text is not None:
-                                                description = description + causeitem.text + "\n"
+                                            description = description + causeitem.text + "\n"
                                 if aitem.tag == "recommendations":
                                     for recitem in aitem:
                                         if recitem.attrib["type"] == "string" and recitem.text is not None:
-                                                recommendations = recommendations + recitem.text + "\n"
+                                            recommendations = recommendations + recitem.text + "\n"
                                         elif recitem.attrib["type"] == "object":
                                             codeblock = recitem.iter()
                                             for codeitem in codeblock:
