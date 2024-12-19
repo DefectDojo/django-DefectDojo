@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "2.41.0"
+appVersion: "2.42.0-dev"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
-version: 1.6.162
+version: 1.6.165-dev
 icon: https://www.defectdojo.org/img/favicon.ico
 maintainers:
   - name: madchap
@@ -10,7 +10,7 @@ maintainers:
     url: https://github.com/DefectDojo/django-DefectDojo
 dependencies:
   - name: postgresql
-    version: ~16.2.0
+    version: ~16.3.0
     repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.enabled
   - name: postgresql-ha

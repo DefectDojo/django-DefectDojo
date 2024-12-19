@@ -1696,7 +1696,7 @@ def request_finding_review(request, fid):
                 jira_helper.push_to_jira(finding.finding_group)
 
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
-            reviewers_string = ", ".join([str(user) for user in reviewers])
+            reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
             logger.debug(f"Asking {reviewers_string} for review")
 
@@ -1708,7 +1708,7 @@ def request_finding_review(request, fid):
                 finding=finding,
                 reviewers=reviewers,
                 recipients=reviewers_usernames,
-                description=f'User {user.get_full_name()} has requested that user(s) {reviewers_string} review the finding "{finding.title}" for accuracy:\n\n{new_note}',
+                description=f'User {user.get_full_name()}({user.id}) has requested that user(s) {reviewers_string} review the finding "{finding.title}" for accuracy:\n\n{new_note}',
                 icon="check",
                 url=reverse("view_finding", args=(finding.id,)),
             )
@@ -3010,7 +3010,7 @@ def finding_bulk_update_all(request, pid=None):
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():
-                    add_error_message_to_response("{error_count} finding groups could not be pushed to JIRA: {error_message}")
+                    add_error_message_to_response(f"{error_count} finding groups could not be pushed to JIRA: {error_message}")
 
                 if success_count > 0:
                     add_success_message_to_response(f"{success_count} finding groups pushed to JIRA successfully")

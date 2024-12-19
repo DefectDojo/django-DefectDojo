@@ -28,7 +28,7 @@ jobs:
     steps:
       
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: master
           fetch-depth: 0
@@ -46,10 +46,8 @@ jobs:
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
       
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: v3.4.0
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
       
       - name: Configure HELM repos
         run: |-
@@ -58,7 +56,7 @@ jobs:
              helm dependency update ./helm/defectdojo
       
       - name: Add yq
-        uses: mikefarah/yq@master
+        uses: mikefarah/yq@4839dbbf80445070a31c7a9c1055da527db2d5ee # v4.44.6
 
       - name: Pin version docker version
         id: pin_image
@@ -75,7 +73,7 @@ jobs:
           echo "chart_version=$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')" >> $GITHUB_ENV
       
       - name: Create release ${{ github.event.inputs.release_number }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@7b4da11513bf3f43f9999e90eabced41ab8bb048 # v2.2.0
         with:
           name: '${{ github.event.inputs.release_number }} 🌈'
           tag_name: ${{ github.event.inputs.release_number }}
