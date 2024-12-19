@@ -1055,6 +1055,13 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
             if data.get("target_start") > data.get("target_end"):
                 msg = "Your target start date exceeds your target end date"
                 raise serializers.ValidationError(msg)
+        async_updating = getattr(self.instance.product, "async_updating", None)
+        if async_updating:  # TODO: test
+            new_sla_config = data.get("sla_configuration", None)
+            old_sla_config = getattr(self.instance, "sla_configuration", None)
+            if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
+                msg = "Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete."
+                raise serializers.ValidationError(msg)
         return data
 
     def build_relational_field(self, field_name, relation_info):
@@ -1403,6 +1410,16 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = Test
         exclude = ("inherited_tags",)
+
+    def validate(self, data):
+        async_updating = getattr(self.instance.engagement.product, "async_updating", None)
+        if async_updating:  # TODO: test
+            new_sla_config = data.get("sla_configuration", None)
+            old_sla_config = getattr(self.instance, "sla_configuration", None)
+            if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
+                msg = "Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete."
+                raise serializers.ValidationError(msg)
+        return data
 
     def build_relational_field(self, field_name, relation_info):
         if field_name == "notes":
