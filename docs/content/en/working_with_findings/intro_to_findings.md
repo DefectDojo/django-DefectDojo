@@ -73,7 +73,7 @@ If you’re in charge of security reporting for many different contexts, softwar
 * Each Product in DefectDojo can have a different SLA configuration, so that you can instantly flag Findings that are discovered in Production or other highly sensitive environments.
 * You can create a report directly from a **Product Type, Product, Engagement or Test** to ‘zoom in and out’ of your security context. **Tests** contain results from a single tool, **Engagements** can combine multiple Tests, **Products** can contain multiple Engagements, **Product Types** can contain multiple Products.
 
-For more information on creating a Report, see our guides to **[Custom Reporting](https://docs.defectdojo.com/en/pro_reports/using-the-report-builder/)**.
+For more information on creating a Report, see our guides to **[Custom Reporting](https://docs.defectdojo.com/en/pro_reports/using_the_report_builder/)**.
 
 ### Triage Vulnerabilities using Finding Status
 

@@ -1,6 +1,7 @@
 ---
-title: "Set a User's Permissions"
+title: "Set a User's permissions"
 description: "How to grant Roles & Permissions to a user, as well as superuser status"
+weight: 2
 ---
 
 ## Introduction to Permission Types
@@ -64,7 +65,7 @@ Users can have two kinds of membership simultaneously at the **Product** level:
 
 If a user has already been added as a Product Type member, and does not require an additional level of permissions on a specific Product, there is no need to add them as a Product Member.
 
-### Adding a new Member to a Product or Product Type
+### Adding a new Member
 
 1. Navigate to the Product or Product Type which you want to assign a user to. You can select the Product from the list under **Products \> All Products**.
 
@@ -78,7 +79,7 @@ If a user has already been added as a Product Type member, and does not require 
 
 Users cannot be assigned as Members on a Product or Product Type without also having a Role. If you're not sure which Role you want a new user to have, **Reader** is a good 'default' option. This will keep your Product state secure until you make your final decision about their Role.
 
-### Edit Or Delete a Member from a Product or Product Type
+### Edit Or Delete a Member
 
 Members can have their Role changed within a Product or Product Type.
 
@@ -93,7 +94,7 @@ Within the **Product** or **Product Type** page, navigate to the **Members** hea
 * If you can't Edit or Delete a user's Membership (the **⋮** is not visible) it's because they have this Membership conferred at a **Product Type** level.
 * A user can have two levels of membership within a Product \- one assigned at the **Product Type** level and another assigned at the **Product** level.
 
-### Adding an additional Product role to a user with a related Product Type role
+#### Add an additional Product role to a user with a related Product Type role
 
 If a User has a Product Type\-level Role, they will also be assigned Membership with this Role to every underlying Product within the category. However, if you want this User to have a special Role on a specific Product within that Product Type, you can give them an additional Role on the Product level.
 
@@ -117,7 +118,7 @@ Configuration Permissions are not related to a specific Product or Product Type 
 * **Finding Templates:** Access to the Findings \> Finding Templates page
 * **Groups**: Access the 👤Users \> Groups page
 * **Jira Instances:** Access the ⚙️Configuration \> JIRA page
-* **Language Types**:Access the [Language Types](https://documentation.defectdojo.com/integrations/languages/) API endpoint
+* **Language Types**:Access the [Language Types](en/open_source/languages/) API endpoint
 * **Login Banner**: Edit the ⚙️Configuration \> Login Banner page
 * **Announcements**: Access ⚙️Configuration \> Announcements
 * **Note Types:** Access the ⚙️Configuration \> Note Types page
@@ -135,11 +136,9 @@ Configuration Permissions are not related to a specific Product or Product Type 
 
 **Only Superusers can add Configuration Permissions to a User**.
 
-
 1. Navigate to the 👤 Users \> Users page on the sidebar. You will see a list of all registered accounts on DefectDojo, along with each account's Active status, Global Roles, and other relevant User data.  
 ​
 ![image](images/Set_a_User's_Permissions_7.png)
-  
 
 2. Click the name of the account that you wish to edit.  
 ​
@@ -147,5 +146,5 @@ Configuration Permissions are not related to a specific Product or Product Type 
 ​
 4. Select the User Configuration Permissions you wish to add.  
 ​
-For a detailed breakdown of User Configuration Permissions, please refer to our [Permission Chart](https://docs.defectdojo.com/en/user_management/user-permission-charts/).
+For a detailed breakdown of User Configuration Permissions, please refer to our [Permission Chart](../user-permission-charts/).
 
