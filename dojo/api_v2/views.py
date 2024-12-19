@@ -2693,6 +2693,24 @@ class NoteTypeViewSet(
         return Note_Type.objects.all().order_by("id")
 
 
+class BurpRawRequestResponseViewSet(
+    DojoModelViewSet,
+):
+    serializer_class = serializers.BurpRawRequestResponseMultiSerializer
+    queryset = BurpRawRequestResponse.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["finding"]
+
+    def get_queryset(self):
+        results = BurpRawRequestResponse.objects.all()
+        empty_value = b""
+        results = results.exclude(
+            burpRequestBase64__exact=empty_value,
+            burpResponseBase64__exact=empty_value,
+        )
+        return results.order_by("id")
+
+
 # Authorization: superuser
 class NotesViewSet(
     mixins.UpdateModelMixin,
