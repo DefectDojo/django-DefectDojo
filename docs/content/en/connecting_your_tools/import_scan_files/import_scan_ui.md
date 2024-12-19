@@ -1,6 +1,7 @@
 ---
 title: "Import Scan Form"
 description: ""
+weight: 1
 ---
 
 If you have a brand new DefectDojo instance, the Import Scan Form is a logical first step to learn the software and set up your environment. From this form, you upload a scan file from a supported tool, which will create Findings to represent those vulnerabilities. While filling out the form, you can decide whether to:
@@ -10,7 +11,7 @@ If you have a brand new DefectDojo instance, the Import Scan Form is a logical f
 
 It’s easy to reorganize your Product Hierarchy in DefectDojo, so it’s ok if you’re not sure how to set things up yet. 
 
-For now, it’s good to know that **Engagements** can store data from multiple tools, which can be useful if you’re running different scans concurrently.
+For now, it’s good to know that **Engagements** can store data from multiple tools, which can be useful if you’re running different tools concurrently as part of a single testing effort.
 
 ## Accessing the Import Scan Form
 
@@ -60,4 +61,4 @@ This option is especially relevant when using the API. If uploading data with Pr
 Once your upload has completed, you should be redirected to the Test Page which contains the Findings found in the scan file. You can start working with those results right away, but feel free to consult the following articles:
 
 * Learn how to organize your Product Hierarchy to manage different contexts for your Findings and Tests: [Product Hierarchy Overview](https://docs.defectdojo.com/en/working_with_findings/organizing_engagements_tests/product-hierarchy-overview/).
-* Learn how to add new Findings to this test: **Reimport Data To Extend a Test**
+* Learn how to extend a test with additional Findings and reports: **Reimport Data To Extend a Test**
