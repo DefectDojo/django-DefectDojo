@@ -306,6 +306,7 @@
                         <th>{% trans "User" %}</th>
                         <th>{% trans "Source" %}</th>
                         <th>{% trans "Role" %}</th>
+                        <th>{% trans "Exclusive Permission" %}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -335,6 +336,13 @@
                             <td name="member_user">{{ member.user.get_full_name }}</td>
                             <td>{% trans "Product member" %}</td>
                             <td name="member_role">{{ member.role }}</td>
+                            {% if member.exclusive_permission_product.all %} 
+                              <td>
+                                {{member.exclusive_permission_product.all | render_exclusive_permission_for_member}}
+                              </td>
+                            {% else %}
+                              <td></td>
+                            {%endif%}
                         </tr>
                     {% endfor %}
                     {% for member in product_type_members %}
