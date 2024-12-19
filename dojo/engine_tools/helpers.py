@@ -155,3 +155,20 @@ def check_expiring_findingexclusions():
         fex.notification_sent = True
         fex.save()
         
+        
+@app.task
+def add_findings_to_whitelist(unique_id_from_tool):
+    findings_to_update = Finding.objects.filter(
+        cve=unique_id_from_tool,
+        active=True
+    ).filter(
+        Q(tags__name__icontains="prisma") | Q(tags__name__icontains="tenable")
+    )
+    
+    for finding in findings_to_update:
+        if not 'white_list' in finding.tags:
+            finding.tags.add("white_list")
+        finding.active = False
+        finding.risk_status = "On Whitelist"
+        
+    Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
