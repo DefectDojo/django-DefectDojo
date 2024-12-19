@@ -39,6 +39,7 @@ class MendParser:
             description = "No Description Available"
             cvss3_score = None
             mitigation = "N/A"
+            locations = []
             if "component" in node:
                 description = (
                     "**Vulnerability Description**: "
@@ -56,18 +57,20 @@ class MendParser:
                     + "**Library Type**: "
                     + node["component"].get("libraryType", "")
                     + "\n"
-                    + "**Location Found**: "
-                    + node["component"].get("path", "")
-                    + "\n"
-                    + "**Direct or Transitive Dependency**: "
-                    + node["component"].get("dependencyType", "")
-                    + "\n"
                 )
                 lib_name = node["component"].get("name")
                 component_name = node["component"].get("artifactId")
                 component_version = node["component"].get("version")
-                impact = node["component"].get("dependencyType")
+                impact = (
+                    "**Direct or Transitive Vulnerability**: "
+                    + node["component"].get("dependencyType", "")
+                    + "\n"
+                )
                 cvss3_score = node["vulnerability"].get("score", None)
+                component_path = node["component"].get("path", None)
+                if component_path:
+                    locations.append(component_path)
+
                 if "topFix" in node:
                     try:
                         topfix_node = node.get("topFix")
@@ -159,7 +162,6 @@ class MendParser:
                         "Error handling local paths for vulnerability.",
                     )
 
-            locations = []
             if "locations" in node:
                 try:
                     locations_node = node.get("locations", [])
@@ -171,8 +173,10 @@ class MendParser:
                     logger.exception(
                         "Error handling local paths for vulnerability.",
                     )
+            if locations and len(", ".join(locations)) > 3999:
+                locations = [loc[:3999] for loc in locations]
 
-            filepaths = locations or filepaths
+            filepaths = filepaths
 
             new_finding = Finding(
                 title=title,
@@ -188,7 +192,8 @@ class MendParser:
                 dynamic_finding=True,
                 cvssv3=cvss3_vector,
                 cvssv3_score=float(cvss3_score) if cvss3_score is not None else None,
-                impact=impact,
+                impact=impact if impact is not None else None,
+                steps_to_reproduce="**Locations Found**: " + ", ".join(locations) if locations is not None else None,
             )
             if cve:
                 new_finding.unsaved_vulnerability_ids = [cve]
