@@ -22,23 +22,21 @@ def expire_now(risk_acceptance):
     reactivated_findings = []
     if risk_acceptance.reactivate_expired:
         for finding in risk_acceptance.accepted_findings.all():
-            if not finding.active:
-                logger.debug("%i:%s: unaccepting a.k.a reactivating finding.", finding.id, finding)
-                finding.active = True
-                finding.risk_accepted = False
+            if not finding.active:  # not sure why this is important
+                logger.debug("%i:%s: unaccepting/reactivating finding.", finding.id, finding)
+
                 # Update any endpoint statuses on each of the findings
                 update_endpoint_statuses(finding, accept_risk=False)
+                risk_unaccept(None, finding, post_comments=False)  # comments will be posted at end
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
+                    finding.save(dedupe_option=False)  # resave if changed after risk_unaccept
 
-                finding.save(dedupe_option=False)
                 reactivated_findings.append(finding)
-                # findings remain in this risk acceptance for reporting / metrics purposes
             else:
                 logger.debug("%i:%s already active, no changes made.", finding.id, finding)
 
-        # best effort JIRA integration, no status changes
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_message_creator)
 
     risk_acceptance.expiration_date = timezone.now()
@@ -189,7 +187,7 @@ def expiration_handler(*args, **kwargs):
                                 product=risk_acceptance.engagement.product,
                                 url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
 
-            post_jira_comments(risk_acceptance, expiration_warning_message_creator, heads_up_days)
+            post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_warning_message_creator, heads_up_days)
 
             risk_acceptance.expiration_date_warned = timezone.now()
             risk_acceptance.save()
@@ -243,20 +241,22 @@ def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
 
 
 def post_jira_comment(finding, message_factory, heads_up_days=0):
-    if not finding or not finding.has_jira_issue:
+    if not finding or (not finding.has_jira_issue and not finding.has_jira_group_issue):
         return
-
     jira_project = jira_helper.get_jira_project(finding)
 
     if jira_project and jira_project.risk_acceptance_expiration_notification:
         jira_instance = jira_helper.get_jira_instance(finding)
-
         if jira_instance:
 
             jira_comment = message_factory(None, heads_up_days)
 
-            logger.debug("Creating JIRA comment for something risk acceptance related")
-            jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
+            jira_issue = None
+            if finding.has_jira_issue:
+                jira_issue = finding.jira_issue
+            elif finding.has_jira_group_issue:
+                jira_issue = finding.finding_group.jira_issue
+            jira_helper.add_simple_jira_comment(jira_instance, jira_issue, jira_comment)
 
 
 def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days=0):
@@ -270,11 +270,15 @@ def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days
 
         if jira_instance:
             jira_comment = message_factory(risk_acceptance, heads_up_days)
-
             for finding in findings:
+                jira_issue = None
                 if finding.has_jira_issue:
-                    logger.debug("Creating JIRA comment for something risk acceptance related")
-                    jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
+                    jira_issue = finding.jira_issue
+                elif finding.has_jira_group_issue:
+                    jira_issue = finding.finding_group.jira_issue
+
+                if jira_issue:
+                    jira_helper.add_simple_jira_comment(jira_instance, jira_issue, jira_comment)
 
 
 def get_expired_risk_acceptances_to_handle():
@@ -319,7 +323,7 @@ def simple_risk_accept(user: Dojo_User, finding: Finding, perform_save=True) -> 
         ))
 
 
-def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True) -> None:
+def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True, post_comments=True) -> None:
     logger.debug("unaccepting finding %i:%s if it is currently risk accepted", finding.id, finding)
     if finding.risk_accepted:
         logger.debug("unaccepting finding %i:%s", finding.id, finding)
@@ -336,7 +340,12 @@ def risk_unaccept(user: Dojo_User, finding: Finding, perform_save=True) -> None:
 
         # post_jira_comment might reload from database so see unaccepted finding. but the comment
         # only contains some text so that's ok
-        post_jira_comment(finding, unaccepted_message_creator)
+        if post_comments:
+            post_jira_comment(finding, unaccepted_message_creator)
+
+        # Update the JIRA obect for this finding
+        jira_helper.save_and_push_to_jira(finding)
+
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
             finding.notes.add(Notes.objects.create(
