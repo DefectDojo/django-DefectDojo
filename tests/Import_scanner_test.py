@@ -28,9 +28,10 @@ class ScannerTest(BaseTestCase):
         git.Repo.clone_from("https://github.com/DefectDojo/sample-scan-files", self.repo_path)
         self.remove_items = ["__init__.py", "__init__.pyc", "factory.py", "factory.pyc",
                         "factory.py", "LICENSE", "README.md", ".gitignore", ".git", "__pycache__"]
-        tool_path = dir_path[:-5] + "dojo/tools"
-        tools = sorted(os.listdir(tool_path))
-        tests = sorted(os.listdir(self.repo_path))
+        tool_path = Path(dir_path[:-5] + "dojo/tools")
+        tools = sorted(any(tool_path.iterdir()))
+        p = Path(self.repo_path)
+        tests = sorted(any(p.iterdir()))
         self.tools = [i for i in tools if i not in self.remove_items]
         self.tests = [i for i in tests if i not in self.remove_items]
 
@@ -43,7 +44,8 @@ class ScannerTest(BaseTestCase):
         missing_tests += ["\nNO TEST FILES"]
 
         for test in self.tests:
-            cases = sorted(os.listdir(self.repo_path + "/" + test))
+            p = Path(self.repo_path + "/" + test)
+            cases = sorted(any(p.iterdir()))
             cases = [i for i in cases if i not in self.remove_items]
             if len(cases) == 0 and tool not in missing_tests:
                 missing_tests += [test]
@@ -145,8 +147,8 @@ class ScannerTest(BaseTestCase):
         options_text = [scan.strip() for scan in options_text]
 
         mod_options = options_text
-        mod_options = [re.sub(r" Scanner", "", scan) for scan in mod_options]
-        mod_options = [re.sub(r" Scan", "", scan) for scan in mod_options]
+        mod_options = [scan.replace(" Scanner", "") for scan in mod_options]
+        mod_options = [scan.replace(" Scan", "") for scan in mod_options]
         mod_options = [scan.lower().replace("-", " ").replace(".", "") for scan in mod_options]
 
         acronyms = []
@@ -177,7 +179,8 @@ class ScannerTest(BaseTestCase):
 
         failed_tests = []
         for test in self.tests:
-            cases = sorted(os.listdir(self.repo_path + "/" + test))
+            p = Path(self.repo_path + "/" + test)
+            cases = sorted(any(p.iterdir()))
             cases = [i for i in cases if i not in self.remove_items]
             if len(cases) == 0:
                 failed_tests += [test.upper() + ": No test cases"]
