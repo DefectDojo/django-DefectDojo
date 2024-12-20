@@ -60,6 +60,7 @@ from dojo.filters import (
     ApiTestFilter,
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
+    TestImportAPIFilter,
 )
 from dojo.finding.queries import (
     get_authorized_findings,
@@ -2259,17 +2260,9 @@ class TestImportViewSet(
     serializer_class = serializers.TestImportSerializer
     queryset = Test_Import.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "test",
-        "findings_affected",
-        "version",
-        "branch_tag",
-        "build_id",
-        "commit_hash",
-        "test_import_finding_action__action",
-        "test_import_finding_action__finding",
-        "test_import_finding_action__created",
-    ]
+
+    filterset_class = TestImportAPIFilter
+
     permission_classes = (
         IsAuthenticated,
         permissions.UserHasTestImportPermission,
