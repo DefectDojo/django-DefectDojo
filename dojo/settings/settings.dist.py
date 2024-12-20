@@ -304,6 +304,12 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # When set to True, searches for scm-type in DojoMeta
+    DD_SEARCH_SCM_TYPE=(bool, True),
+    # When scm-type is not found for a product or DD_SEARCH_SCM_TYPE is False returns the specified value
+    DD_DEFAULT_SCM_TYPE=(str, ""),
+    # When set, use this method for connect to jira
+    DD_JIRA_CONNECT_METHOD=(str, ""),
 )
 
 
@@ -1801,6 +1807,19 @@ NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
 # Timeouts
 # ------------------------------------------------------------------------------
 REQUESTS_TIMEOUT = env("DD_REQUESTS_TIMEOUT")
+
+SEARCH_SCM_TYPE = env("DD_SEARCH_SCM_TYPE")
+
+if env("DD_DEFAULT_SCM_TYPE") in ["github", "gitlab", "gitea", "codeberg", "bitbucket", "bitbucket-standalone"]:
+    DEFAULT_SCM_TYPE = env("DD_DEFAULT_SCM_TYPE")
+else:
+    DEFAULT_SCM_TYPE = ""
+
+# Example:
+# For file /app/dojo/jira_link/helper_jira.py with method connect_to_jira_by_token(jira_server, _, jira_token)
+# DD_JIRA_CONNECT_METHOD = dojo.jira_link.helper_jira.connect_to_jira_by_token
+if env("DD_JIRA_CONNECT_METHOD"):
+    JIRA_CONNECT_METHOD = env("DD_JIRA_CONNECT_METHOD")
 
 # ------------------------------------------------------------------------------
 # Ignored Warnings
