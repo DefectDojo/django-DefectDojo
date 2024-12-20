@@ -173,8 +173,29 @@ class MendParser:
                     logger.exception(
                         "Error handling local paths for vulnerability.",
                     )
-            if locations and len(", ".join(locations)) > 3999:
-                locations = [loc[:3999] for loc in locations]
+            if locations:
+                # Join the locations into a single string
+                joined_locations = ", ".join(locations)
+
+                # If the length exceeds 3999 characters, trim it
+                if len(joined_locations) > 3999:
+                    # Iterate over the locations and trim until the total length is <= 3999
+                    total_length = 0
+                    truncated_locations = []
+
+                    for loc in locations:
+                        loc_length = len(loc)
+                        # Check if adding this location will exceed the limit
+                        if total_length + loc_length + len(truncated_locations) <= 3996:  # 3999 - len("...") = 3996
+                            truncated_locations.append(loc)
+                            total_length += loc_length
+                        else:
+                            # Stop if adding the next location will exceed the limit
+                            break
+
+                    # Add ellipsis at the end to indicate truncation
+                    locations = truncated_locations
+                    locations.append("...")  # Add the ellipsis to the end of the locations list
 
             filepaths = filepaths
 
