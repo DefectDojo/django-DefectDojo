@@ -8,7 +8,6 @@ __author__ = "dr3dd589 + testaccount90009 aka SH"
 
 logger = logging.getLogger(__name__)
 
-
 class MendParser:
     def get_scan_types(self):
         return ["Mend Scan"]
@@ -41,51 +40,53 @@ class MendParser:
             mitigation = "N/A"
             locations = []
             if "component" in node:
-                description = (
-                    "**Vulnerability Description**: "
-                    + node["vulnerability"].get("description", "No Description Available")
-                    + "\n\n"
-                    + "**Component Name**: "
-                    + node["component"].get("name", "")
-                    + "\n"
-                    + "**Component Type**: "
-                    + node["component"].get("componentType", "")
-                    + "\n"
-                    + "**Root Library**: "
-                    + str(node["component"].get("rootLibrary", ""))
-                    + "\n"
-                    + "**Library Type**: "
-                    + node["component"].get("libraryType", "")
-                    + "\n"
-                )
-                lib_name = node["component"].get("name")
-                component_name = node["component"].get("artifactId")
-                component_version = node["component"].get("version")
-                impact = (
-                    "**Direct or Transitive Vulnerability**: "
-                    + node["component"].get("dependencyType", "")
-                    + "\n"
-                )
-                cvss3_score = node["vulnerability"].get("score", None)
-                component_path = node["component"].get("path", None)
-                if component_path:
-                    locations.append(component_path)
-
-                if "topFix" in node:
-                    try:
-                        topfix_node = node.get("topFix")
-                        mitigation = (
-                            "**Resolution**: "
-                            + topfix_node.get("date", "")
+                # Iterate over all findingInfo nodes and process each ACTIVE status
+                for finding_info in node.get("findingInfo", []):
+                    if finding_info.get("status") == "ACTIVE":
+                        description = (
+                            "**Vulnerability Description**: "
+                            + node["vulnerability"].get("description", "No Description Available")
+                            + "\n\n"
+                            + "**Component Name**: "
+                            + node["component"].get("name", "")
                             + "\n"
-                            + topfix_node.get("message", "")
+                            + "**Component Type**: "
+                            + node["component"].get("componentType", "")
                             + "\n"
-                            + topfix_node.get("fixResolution", "")
+                            + "**Root Library**: "
+                            + str(node["component"].get("rootLibrary", ""))
+                            + "\n"
+                            + "**Library Type**: "
+                            + node["component"].get("libraryType", "")
                             + "\n"
                         )
-                    except Exception:
-                        logger.exception("Error handling topFix node.")
+                        lib_name = node["component"].get("name")
+                        component_name = node["component"].get("artifactId")
+                        component_version = node["component"].get("version")
+                        impact = (
+                            "**Direct or Transitive Vulnerability**: "
+                            + node["component"].get("dependencyType", "")
+                            + "\n"
+                        )
+                        cvss3_score = node["vulnerability"].get("score", None)
+                        component_path = node["component"].get("path", None)
+                        if component_path:
+                            locations.append(component_path)
 
+                        if "topFix" in node:
+                            try:
+                                topfix_node = node.get("topFix")
+                                mitigation = (
+                                    "**Resolution**: "
+                                    + topfix_node.get("date", "")
+                                    + "\n"
+                                    + topfix_node.get("message", "")
+                                    + "\n"
+                                    + topfix_node.get("fixResolution", "")
+                                    + "\n"
+                                )
+                            except Exception:
+                                logger.exception("Error handling topFix node.")
             elif "library" in node:
                 node.get("project")
                 description = (
@@ -138,18 +139,6 @@ class MendParser:
                 cvss3_score if cvss3_score is not None else "N/A", cvss3_vector if cvss3_vector is not None else "N/A",
             )
             cwe = 1035  # default OWASP a9 until the report actually has them
-
-            # comment out the below for now - working on adding this into the above conditional statements since format can be slightly different
-            # mitigation = "N/A"
-            # if "topFix" in node:
-            #     try:
-            #         topfix_node = node.get("topFix")
-            #         mitigation = "**Resolution** ({}): {}\n".format(
-            #             topfix_node.get("date"),
-            #             topfix_node.get("fixResolution"),
-            #         )
-            #     except Exception:
-            #         logger.exception("Error handling topFix node.")
 
             filepaths = []
             if "sourceFiles" in node:
