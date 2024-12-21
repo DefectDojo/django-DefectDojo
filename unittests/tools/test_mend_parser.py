@@ -60,6 +60,7 @@ class TestMendParser(DojoTestCase):
             self.assertEqual("CVE-2024-51744", finding.unsaved_vulnerability_ids[0])
             self.assertEqual("CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N", finding.cvssv3)
             self.assertEqual(3.1, finding.cvssv3_score)
+            self.assertEqual("CVE-2024-51744 | github.com/golang-JWT/jwt-v3.2.2+incompatible" , finding.title)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding_platform(self):
         with open("unittests/scans/mend/mend-sca-platform-api3-multiple-findings.json", encoding="utf-8") as testfile:
