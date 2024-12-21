@@ -8,6 +8,7 @@ __author__ = "dr3dd589 + testaccount90009 aka SH"
 
 logger = logging.getLogger(__name__)
 
+
 class MendParser:
     def get_scan_types(self):
         return ["Mend Scan"]
