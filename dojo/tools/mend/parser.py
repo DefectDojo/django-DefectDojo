@@ -40,7 +40,7 @@ class MendParser:
             cvss3_score = None
             mitigation = "N/A"
             locations = []
-            if "component" in node and if finding_info.get("status") == "ACTIVE":
+            if "component" in node and finding_info.get("status") == "ACTIVE":
                 description = (
                     "**Vulnerability Description**: "
                     + node["vulnerability"].get("description", "No Description Available")
