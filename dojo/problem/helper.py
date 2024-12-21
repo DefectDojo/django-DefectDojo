@@ -1,6 +1,15 @@
 import json
 import os
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 from dojo.models import Problem, Finding
+
+import logging
+logger = logging.getLogger(__name__)
+
+CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'config.json')
+CACHED_JSON_FILE = os.path.join('/tmp', 'cached_disambiguator.json')
 
 SEVERITY_ORDER = {
     'Critical': 5,
@@ -10,11 +19,67 @@ SEVERITY_ORDER = {
     'Info': 1
 }
 
-JSON_FILE = os.path.join(os.path.dirname(__file__), 'disambiguator.json')
+# Disable SSL warnings
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+def load_config():
+    with open(CONFIG_FILE, 'r') as f:
+        return json.load(f)
+
+def validate_json(data):
+    if not isinstance(data, dict):
+        return False
+    for key, value in data.items():
+        if not isinstance(key, str) or not isinstance(value, list):
+            return False
+        if not all(isinstance(item, str) for item in value):
+            return False
+    return True
+
+def download_json(json_url):
+    response = requests.get(json_url, timeout=5, verify=False)
+    response.raise_for_status()
+    return response.json()
+
+def load_cached_json():
+    try:
+        if os.path.exists(CACHED_JSON_FILE):
+            with open(CACHED_JSON_FILE, 'r') as f:
+                data = json.load(f)
+                if validate_json(data):
+                    return data
+    except (ValueError, json.JSONDecodeError):
+        pass 
+    return None
+
+def save_json_to_cache(data):
+    logger.info('Saving disambiguator JSON to cache')
+    with open(CACHED_JSON_FILE, 'w') as f:
+        json.dump(data, f)
 
 def load_json():
-    with open(JSON_FILE, 'r') as f:
-        return json.load(f)
+    try:
+        cached_data = load_cached_json()
+        if cached_data is not None:
+            return cached_data
+
+        # Cache is missing or invalid, download and validate
+        config = load_config()
+        json_url = config.get('json_url')
+
+        if not json_url:
+            return {}
+
+        data = download_json(json_url)
+        if validate_json(data):
+            save_json_to_cache(data)
+            return data
+
+        return {}
+
+    except (requests.RequestException, ValueError, json.JSONDecodeError) as e:
+        logger.error('Error loading disambiguator JSON: %s', e)
+        return {}
 
 def extract_script_id(full_id):
     parts = full_id.split('____')
