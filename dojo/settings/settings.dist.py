@@ -1109,7 +1109,7 @@ CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
 
-CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
+CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", "dojo.problem.tasks")
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -1146,6 +1146,10 @@ CELERY_BEAT_SCHEDULE = {
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
+    },
+    "daily-cache-update": {
+        "task": "dojo.problem.tasks.daily_cache_update",
+        "schedule": crontab(minute=0, hour=0),  # every day at midnight
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',

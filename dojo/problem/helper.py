@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), 'config.json')
-CACHED_JSON_FILE = os.path.join('/tmp', 'cached_disambiguator.json')
+CACHED_JSON_FILE = os.path.join('/app/media', 'cached_disambiguator.json')
 
 SEVERITY_ORDER = {
     'Critical': 5,
@@ -18,9 +18,6 @@ SEVERITY_ORDER = {
     'Low': 2,
     'Info': 1
 }
-
-# Disable SSL warnings
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def load_config():
     with open(CONFIG_FILE, 'r') as f:
@@ -59,21 +56,22 @@ def save_json_to_cache(data):
 
 def load_json():
     try:
+        # Disable SSL warnings
+        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
         cached_data = load_cached_json()
-        if cached_data is not None:
+        if cached_data:
             return cached_data
 
         # Cache is missing or invalid, download and validate
         config = load_config()
         json_url = config.get('json_url')
 
-        if not json_url:
-            return {}
-
-        data = download_json(json_url)
-        if validate_json(data):
-            save_json_to_cache(data)
-            return data
+        if json_url:
+            data = download_json(json_url)
+            if validate_json(data):
+                save_json_to_cache(data)
+                return data
 
         return {}
 
