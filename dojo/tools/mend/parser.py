@@ -68,8 +68,6 @@ class MendParser:
                 )
                 cvss3_score = node["vulnerability"].get("score", None)
                 component_path = node["component"].get("path", None)
-                cve = node["vulnerability"].get("name")
-                title = "CVE-None | " + lib_name if cve is None else cve + " | " + lib_name
                 if component_path:
                     locations.append(component_path)
                 if "topFix" in node:
@@ -109,8 +107,6 @@ class MendParser:
                 component_name = node["library"].get("artifactId")
                 component_version = node["library"].get("version")
                 cvss3_score = node.get("cvss3_score", None)
-                cve = node.get("name")
-                title = "CVE-None | " + lib_name if cve is None else cve + " | " + lib_name
                 if "topFix" in node:
                     try:
                         topfix_node = node.get("topFix")
@@ -123,8 +119,8 @@ class MendParser:
             else:
                 description = node.get("description", "Unknown")
 
-            # cve = node.get("name")
-            # title = "CVE-None | " + lib_name if cve is None else cve + " | " + lib_name
+            cve = node.get("name")
+            title = "CVE-None | " + lib_name if cve is None else cve + " | " + lib_name
             # cvss2 by default in CLI, but cvss3 in UI. Adapting to have
             # homogeneous behavior.
             if "cvss3_severity" in node:
