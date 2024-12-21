@@ -41,52 +41,51 @@ class MendParser:
             mitigation = "N/A"
             locations = []
             if "component" in node:
-                if node.get("findingInfo", {}).get("status") == "ACTIVE":
-                    description = (
-                        "**Vulnerability Description**: "
-                        + node["vulnerability"].get("description", "No Description Available")
-                        + "\n\n"
-                        + "**Component Name**: "
-                        + node["component"].get("name", "")
-                        + "\n"
-                        + "**Component Type**: "
-                        + node["component"].get("componentType", "")
-                        + "\n"
-                        + "**Root Library**: "
-                        + str(node["component"].get("rootLibrary", ""))
-                        + "\n"
-                        + "**Library Type**: "
-                        + node["component"].get("libraryType", "")
-                        + "\n"
-                    )
-                    lib_name = node["component"].get("name")
-                    component_name = node["component"].get("artifactId")
-                    component_version = node["component"].get("version")
-                    impact = (
-                        "**Direct or Transitive Vulnerability**: "
-                        + node["component"].get("dependencyType", "")
-                        + "\n"
-                    )
-                    cvss3_score = node["vulnerability"].get("score", None)
-                    component_path = node["component"].get("path", None)
-                    cve = node["vulnerability"].get("name")
-                    title = "CVE-None | " + lib_name if cve is None else cve + " | " + lib_name
-                    if component_path:
-                        locations.append(component_path)
-                    if "topFix" in node:
-                        try:
-                            topfix_node = node.get("topFix")
-                            mitigation = (
-                                "**Resolution**: "
-                                + topfix_node.get("date", "")
-                                + "\n"
-                                + topfix_node.get("message", "")
-                                + "\n"
-                                + topfix_node.get("fixResolution", "")
-                                + "\n"
-                            )
-                        except Exception:
-                            logger.exception("Error handling topFix node.")
+                description = (
+                    "**Vulnerability Description**: "
+                    + node["vulnerability"].get("description", "No Description Available")
+                    + "\n\n"
+                    + "**Component Name**: "
+                    + node["component"].get("name", "")
+                    + "\n"
+                    + "**Component Type**: "
+                    + node["component"].get("componentType", "")
+                    + "\n"
+                    + "**Root Library**: "
+                    + str(node["component"].get("rootLibrary", ""))
+                    + "\n"
+                    + "**Library Type**: "
+                    + node["component"].get("libraryType", "")
+                    + "\n"
+                )
+                lib_name = node["component"].get("name")
+                component_name = node["component"].get("artifactId")
+                component_version = node["component"].get("version")
+                impact = (
+                    "**Direct or Transitive Vulnerability**: "
+                    + node["component"].get("dependencyType", "")
+                    + "\n"
+                )
+                cvss3_score = node["vulnerability"].get("score", None)
+                component_path = node["component"].get("path", None)
+                cve = node["vulnerability"].get("name")
+                title = "CVE-None | " + lib_name if cve is None else cve + " | " + lib_name
+                if component_path:
+                    locations.append(component_path)
+                if "topFix" in node:
+                    try:
+                        topfix_node = node.get("topFix")
+                        mitigation = (
+                            "**Resolution**: "
+                            + topfix_node.get("date", "")
+                            + "\n"
+                            + topfix_node.get("message", "")
+                            + "\n"
+                            + topfix_node.get("fixResolution", "")
+                            + "\n"
+                        )
+                    except Exception:
+                        logger.exception("Error handling topFix node.")
             elif "library" in node:
                 node.get("project")
                 description = (
@@ -255,7 +254,8 @@ class MendParser:
             tree_node = content["response"]
             if tree_node:
                 for node in tree_node:
-                    findings.append(_build_common_output(node))
+                    if node.get("findingInfo", {}).get("status") == "ACTIVE":
+                        findings.append(_build_common_output(node))
 
         def create_finding_key(f: Finding) -> str:
             # """Hashes the finding's description and title to retrieve a key for deduplication."""
