@@ -1,7 +1,6 @@
 import json
 import os
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from dojo.celery import app
 from dojo.decorators import dojo_async_task
