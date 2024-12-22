@@ -43,6 +43,7 @@ class NucleiParser:
                 if line != "":
                     data.append(json.loads(line))
         dupes = {}
+        script_to_problem_mapping = problems_help.load_json()
         for item in data:
             logger.debug("Item %s.", str(item))
             template_id = item.get("templateID", item.get("template-id", ""))
@@ -69,8 +70,8 @@ class NucleiParser:
                 nb_occurences=1,
                 vuln_id_from_tool=template_id,
             )
-            if finding.severity != "Info":
-                finding.problem = problems_help.find_or_create_problem(finding)
+            if finding.severity != "Info" and finding.vuln_id_from_tool:
+                finding.problem = problems_help.find_or_create_problem(finding, script_to_problem_mapping)
                 finding.save()
             if item.get("timestamp"):
                 finding.date = date_parser.parse(item.get("timestamp"))

@@ -32,6 +32,7 @@ class NmapParser:
                 int(root.attrib["start"]),
             )
 
+        script_to_problem_mapping = problems_help.load_json()
         for host in root.findall("host"):
             host_info = "### Host\n\n"
 
@@ -97,7 +98,6 @@ class NmapParser:
                             "**Extra Info:** {}\n".format(port_element.find("service").attrib["extrainfo"])
                         )
                     description += service_info
-                script_id = "NoID"
                 if script := port_element.find("script"):
                     if script_id := script.attrib.get("id"):
                         description += f"**Script ID:** {script_id}\n"
@@ -128,14 +128,13 @@ class NmapParser:
                         severity=severity,
                         mitigation="N/A",
                         impact="No impact provided",
-                        vuln_id_from_tool=script_id,
                     )
                     find.unsaved_endpoints = []
                     dupes[dupe_key] = find
                     if report_date:
                         find.date = report_date
-                    if find.severity != "Info":
-                        find.problem = problems_help.find_or_create_problem(find)
+                    if find.severity != "Info" and find.vuln_id_from_tool:
+                        find.problem = problems_help.find_or_create_problem(find, script_to_problem_mapping)
                         find.save()
 
                 find.unsaved_endpoints.append(endpoint)

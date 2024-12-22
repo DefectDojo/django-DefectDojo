@@ -16,8 +16,8 @@ class OpenVASXMLParser:
             raise NamespaceErr(msg)
         report = root.find("report")
         results = report.find("results")
+        script_to_problem_mapping = problems_help.load_json()
         for result in results:
-            script_id = "NoID"
             for finding in result:
                 if finding.tag == "name":
                     title = finding.text
@@ -29,8 +29,7 @@ class OpenVASXMLParser:
                     title = title + "_" + finding.text
                     description.append(f"**Port**: {finding.text}")
                 if finding.tag == "nvt":
-                    script_id = finding.get("oid")
-                    description.append(f"**NVT**: {script_id}")
+                    description.append(f"**NVT**: {finding.text}")
                 if finding.tag == "severity":
                     severity = self.convert_cvss_score(finding.text)
                     description.append(f"**Severity**: {finding.text}")
@@ -41,15 +40,13 @@ class OpenVASXMLParser:
 
             finding = Finding(
                 title=str(title),
-                test=test,
                 description="\n".join(description),
                 severity=severity,
                 dynamic_finding=True,
                 static_finding=False,
-                vuln_id_from_tool=script_id,
             )
-            if finding.severity != "Info":
-                finding.problem = problems_help.find_or_create_problem(finding)
+            if finding.severity != "Info" and finding.vuln_id_from_tool:
+                finding.problem = problems_help.find_or_create_problem(finding, script_to_problem_mapping)
                 finding.save()
             findings.append(finding)
         return findings

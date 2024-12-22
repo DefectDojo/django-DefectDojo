@@ -40,17 +40,13 @@ class ListProblems(View):
 
         return request, context
 
-    def get_ordered_queryset(self, queryset, order_field):
-        if order_field == "findings.count":
-            order_field = "findings_count"
-        elif order_field == "-findings.count":
-            order_field = "-findings_count"
-        return queryset.order_by(order_field) if order_field else queryset.order_by("id")
-
     def get_problems(self, request: HttpRequest):
-        queryset = Problem.objects.all().annotate(findings_count=Count('findings'))
+        queryset = Problem.objects.all().annotate(
+            findings_count=Count('findings'),
+            total_script_ids=Count('findings__vuln_id_from_tool', distinct=True)
+        ).distinct()
         order_field = request.GET.get('o')
-        return self.get_ordered_queryset(queryset, order_field)
+        return queryset.order_by(order_field) if order_field else queryset.order_by("id")
 
     def paginate_queryset(self, queryset, request: HttpRequest):
         page_size = request.GET.get('page_size', 25)  # Default is 25
@@ -77,10 +73,12 @@ class ListOpenProblems(ListProblems):
     def get_problems(self, request: HttpRequest):
         queryset = Problem.objects.filter(
             findings__active=True
-        ).annotate(findings_count=Count('findings')).distinct()
-
+        ).annotate(
+            findings_count=Count('findings'),
+            total_script_ids=Count('findings__vuln_id_from_tool', distinct=True)
+        ).distinct()
         order_field = request.GET.get('o')
-        return self.get_ordered_queryset(queryset, order_field)
+        return queryset.order_by(order_field) if order_field else queryset.order_by("id")
 
 
 class ListClosedProblems(ListProblems):
@@ -89,10 +87,12 @@ class ListClosedProblems(ListProblems):
     def get_problems(self, request: HttpRequest):
         queryset = Problem.objects.annotate(
             active_findings=Count('findings', filter=Q(findings__active=True))
-        ).filter(active_findings=0).annotate(findings_count=Count('findings')).distinct()
-
+        ).filter(active_findings=0).annotate(
+            findings_count=Count('findings'),
+            total_script_ids=Count('findings__vuln_id_from_tool', distinct=True)
+        ).distinct()
         order_field = request.GET.get('o')
-        return self.get_ordered_queryset(queryset, order_field)
+        return queryset.order_by(order_field) if order_field else queryset.order_by("id")
 
 
 
@@ -104,7 +104,7 @@ class ProblemFindings(ListProblems):
         problem = Problem.objects.get(pk=self.problem_id)
         queryset = problem.findings.all()
         order_field = request.GET.get('o')
-        return problem.name, self.get_ordered_queryset(queryset, order_field)
+        return problem.name, queryset.order_by(order_field) if order_field else queryset.order_by("id")
 
     def get(self, request: HttpRequest, problem_id: int):
         self.problem_id = problem_id

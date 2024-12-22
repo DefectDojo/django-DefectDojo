@@ -1109,7 +1109,7 @@ CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
 
-CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", "dojo.problem.tasks")
+CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", "dojo.problem.update_mappings")
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -1148,7 +1148,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": timedelta(minutes=1),
     },
     "daily-cache-update": {
-        "task": "dojo.problem.tasks.daily_cache_update",
+        "task": "dojo.problem.update_mappings.daily_cache_update",
         "schedule": crontab(minute=0, hour=0),  # every day at midnight
     },
     # 'jira_status_reconciliation': {
@@ -1747,6 +1747,15 @@ DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
 # see https://github.com/laymonage/django-jsonfield-backport
 SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
+
+# Problem utilizes mappings from a JSON file to disambiguate Findings.
+# The JSON file should have the following structure:
+# {
+#     "problem_id_1": ["script_id_1", "script_id_2", "script_id_3"],
+#     "problem_id_2": ["script_id_4", "script_id_5"],
+#     "problem_id_3": ["script_id_6"]
+# }
+PROBLEM_MAPPINGS_JSON_URL = "https://homepages.dcc.ufmg.br/~leonardooliveira/disambiguator.json"
 
 VULNERABILITY_URLS = {
     "CVE": "https://nvd.nist.gov/vuln/detail/",
