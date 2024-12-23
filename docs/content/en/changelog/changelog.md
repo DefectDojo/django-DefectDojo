@@ -7,6 +7,30 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
 
+## Dec 24, 2024: v2.41.3
+- **(API)** Added option to recalculate hash codes (deduplication / reimport) for a single finding via the API.  Sending `recalculate_hash_code = True` on a `PUT` or `PATCH` request to `/findings/{id}` will now recalculate the hash code for that Finding. <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
+- **(API)** Added `/request_response_pairs` endpoint.
+- **(Beta UI)** When sorting by Severity, Findings will now be ordered by **severity level** rather than alphabetically.
+- **(Beta UI)** On the Findings table, the Endpoint Hosts column has been replaced with a numerical count of affected Endpoints.
+- **(Beta UI)** On the Findings table, the Vulnerability ID field can now be filtered with "starts_with", "ends_with" filters.
+- **(Beta UI)** Added Edit Test Type form: you can now edit the properties of a custom Test Type to determine if it is Active or Inactive, or a Static Scan or Dynamic Scan Test.
+- **(Beta UI)** Same Tool Deduplication Settings / Test Type field is now searchable.
+- **(Tools)** Qualys HackerGuardian now uses hashcode against "title", "severity", "description" for deduplication.
+- **(Tools)** Horusec scan now uses hashcode against "title", "description", "file_path", and "line" for deduplication.
+
+##### Why recalculate Hash Codes for a Finding?
+By default, DefectDojo assumes that incoming scans will be consistent.  For example, if you're reimporting a specific kind of file, a given Finding from Scan #1 will be represented the same as a Finding from Scan #1.1, etc.  In this way, DefectDojo allows you to adjust the metadata for the Finding without affecting deduplication - you can add additional endpoints or information to a Finding, even if they are not captured by the scan initially.
+
+However, if a Finding's **incoming** metadata suddenly changes (for example, the scan reports a changed component name), you may want to recalculate the Hash Code of a given Finding to more accurately apply deduplication.
+
+For example: say you have a Finding with a component named 'ABC' - you've been working with this Finding for a while, etc.  But on your latest reimport, the component is now named '123'. By default, DefectDojo will not make the connection that this is the same Finding, because the component name has changed.  This incoming report will create a **new Finding**, which is likely not what you want.
+
+You can handle this by taking the following steps:
+
+1. Change the component name on the Finding to match the incoming scan: '123'
+2. Re-calculate the Hash Code on this Finding, by sending `recalculate_hash_code = True` on a `PUT` or `PATCH` request to `/findings/{id}`
+3. Re-import the scan.  The incoming Hash Code should now match the existing Finding, and a duplicate will be correctly identified.
+
 
 ## Dec 16, 2024: v2.41.2
 
