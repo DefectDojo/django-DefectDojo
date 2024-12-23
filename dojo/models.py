@@ -3191,13 +3191,13 @@ class Finding(models.Model):
     def get_scm_type(self):
         # extract scm type from product custom field 'scm-type'
 
-        if hasattr(self.test.engagement, "product"):
+        if settings.SEARCH_SCM_TYPE and hasattr(self.test.engagement, "product"):
             dojo_meta = DojoMeta.objects.filter(product=self.test.engagement.product, name="scm-type").first()
             if dojo_meta:
                 st = dojo_meta.value.strip()
                 if st:
                     return st.lower()
-        return ""
+        return settings.DEFAULT_SCM_TYPE
 
     def scm_public_prepare_base_link(self, uri):
         # scm public (https://scm-domain.org) url template for browse is:
