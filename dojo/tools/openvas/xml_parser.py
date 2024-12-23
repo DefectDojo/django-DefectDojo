@@ -28,8 +28,9 @@ class OpenVASXMLParser:
                     title = title + "_" + finding.text
                     description.append(f"**Port**: {finding.text}")
                 if finding.tag == "nvt":
-                    script_id = finding.get("oid")
-                    description.append(f"**NVT**: {script_id}")
+                    script_id = finding.get("oid") or finding.text
+                    text = f"{script_id}\n{finding.text}" if finding.get("oid") and finding.text else script_id
+                    description.append(f"**NVT**: {text}")
                 if finding.tag == "severity":
                     severity = self.convert_cvss_score(finding.text)
                     description.append(f"**Severity**: {finding.text}")
@@ -40,7 +41,6 @@ class OpenVASXMLParser:
 
             finding = Finding(
                 title=str(title),
-                test=test,
                 description="\n".join(description),
                 severity=severity,
                 dynamic_finding=True,
