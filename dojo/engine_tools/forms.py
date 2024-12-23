@@ -34,7 +34,8 @@ class CreateFindingExclusionForm(forms.ModelForm):
             "status_updated_at",
             "status_updated_by",
             "reviewed_at",
-            "final_status"
+            "final_status",
+            "notification_sent"
         ]
         
 
