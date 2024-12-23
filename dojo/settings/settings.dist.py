@@ -543,8 +543,8 @@ SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = True
 GOOGLE_OAUTH_ENABLED = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED")
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS")
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS")
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = tuple(env.list("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS", default=[""]))
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = tuple(env.list("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS", default=[""]))
 SOCIAL_AUTH_LOGIN_ERROR_URL = "/login"
 SOCIAL_AUTH_BACKEND_ERROR_URL = "/login"
 
@@ -1211,6 +1211,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Dependency Check Scan": ["title", "cwe", "file_path"],
     "Dockle Scan": ["title", "description", "vuln_id_from_tool"],
     "Dependency Track Finding Packaging Format (FPF) Export": ["component_name", "component_version", "vulnerability_ids"],
+    "Horusec Scan": ["title", "description", "file_path", "line"],
     "Mobsfscan Scan": ["title", "severity", "cwe", "file_path", "description"],
     "Tenable Scan": ["title", "severity", "vulnerability_ids", "cwe", "description"],
     "Nexpose Scan": ["title", "severity", "vulnerability_ids", "cwe"],
@@ -1289,6 +1290,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Invicti Scan": ["title", "description", "severity"],
     "HackerOne Cases": ["title", "severity"],
     "KrakenD Audit Scan": ["description", "mitigation", "severity"],
+    "Red Hat Satellite": ["description", "severity"],
+    "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1428,6 +1431,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Cobalt.io API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Crunch42 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Dependency Track Finding Packaging Format (FPF) Export": DEDUPE_ALGO_HASH_CODE,
+    "Horusec Scan": DEDUPE_ALGO_HASH_CODE,
     "Mobsfscan Scan": DEDUPE_ALGO_HASH_CODE,
     "SonarQube Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "SonarQube Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1533,6 +1537,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
     "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
+    "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

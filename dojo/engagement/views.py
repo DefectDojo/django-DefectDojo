@@ -28,7 +28,6 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 
 import dojo.jira_link.helper as jira_helper
-import dojo.notifications.helper as notifications_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
@@ -653,7 +652,15 @@ def add_tests(request, eid):
                 "Test added successfully.",
                 extra_tags="alert-success")
 
-            notifications_helper.notify_test_created(new_test)
+            create_notification(
+                event="test_added",
+                title=f"Test created for {new_test.engagement.product}: {new_test.engagement.name}: {new_test}",
+                test=new_test,
+                engagement=new_test.engagement,
+                product=new_test.engagement.product,
+                url=reverse("view_test", args=(new_test.id,)),
+                url_api=reverse("test-detail", args=(new_test.id,)),
+            )
 
             if "_Add Another Test" in request.POST:
                 return HttpResponseRedirect(

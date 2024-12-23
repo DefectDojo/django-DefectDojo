@@ -46,10 +46,8 @@ jobs:
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
       
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: v3.4.0
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
       
       - name: Configure HELM repos
         run: |-
