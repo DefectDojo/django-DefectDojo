@@ -17,6 +17,8 @@ seo:
 pro-feature: true
 ---
 
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
+
 DefectDojo allows users to build sophisticated API integrations, and gives users full control over how their vulnerability data is organized. 
 
 But everyone needs a starting point, and that's where Connectors come in. Connectors are designed to get your security tools connected and importing data to DefectDojo as quickly as possible.
@@ -39,9 +41,9 @@ These Connectors provide an API\-speed integration with DefectDojo, and can be u
 
 If you're using DefectDojo's **Auto\-Map** settings, you can have your first Connector up and running in no time.
 
-1. Set up a [Connector](https://docs.defectdojo.com/en/connecting_your_tools/connectors/add_edit_connectors/) from a supported tool.
-2. [Discover](https://docs.defectdojo.com/en/connecting_your_tools/connectors/operations_discover/) your tool's data hierarchy.
-3. [Sync](https://docs.defectdojo.com/en/connecting_your_tools/connectors/operations_sync/) the vulnerabilities found with your tool into DefectDojo.
+1. Set up a [Connector](../add_edit_connectors/) from a supported tool.
+2. [Discover](../manage_operations/#discover-operations) your tool's data hierarchy.
+3. [Sync](../operations_sync/#sync-operations) the vulnerabilities found with your tool into DefectDojo.
 
 That's all, really! And remember, even if you create your Connector the 'easy' way, you can easily change the way things are set up later, without losing any of your work.
 
@@ -59,10 +61,10 @@ When you're ready to add more tools to DefectDojo, you can easily rearrange your
 
 ## My Connector isn't supported
 
-Fortunately, DefectDojo can still handle manual import for a wide range of security tools. Please see our [Supported Tool List](https://docs.defectdojo.com/en/connecting_your_tools/parsers/), as well as our guide to Importing data.
+Fortunately, DefectDojo can still handle manual import for a wide range of security tools. Please see our [Supported Tool List](../../parsers/), as well as our guide to Importing data.
 
 # **Next Steps**
 
 * Check out the Connectors page by switching to DefectDojo's **Beta UI**.
-* Follow our guide to [create your first Connector](https://docs.defectdojo.com/en/connecting_your_tools/connectors/add_edit_connectors/).
-* Check out the process of [Discovering \& Mapping](https://docs.defectdojo.com/en/connecting_your_tools/connectors/operations_discover/) your security tools and see how they can be configured to import data.
+* Follow our guide to [create your first Connector](../add_edit_connectors/).
+* Check out the process of [Running Operations](../manage_operations/) with your Connected security tools and see how they can be configured to import data.
