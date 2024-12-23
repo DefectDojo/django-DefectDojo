@@ -1,19 +1,7 @@
 import json
 
-from dojo.models import Finding
-
-
+# Définition de la classe du parser OSV directement dans le script
 class OSVScannerParser:
-
-    def get_scan_types(self):
-        return ["OSV Scan"]
-
-    def get_label_for_scan_types(self, scan_type):
-        return "OSV Scan"
-
-    def get_description_for_scan_types(self, scan_type):
-        return "OSV scan output can be imported in JSON format (option --format json)."
-
     def classify_severity(self, input):
         return ("Medium" if input == "MODERATE" else input.lower().capitalize()) if input != "" else "Low"
 
@@ -24,7 +12,6 @@ class OSVScannerParser:
             return []
         findings = []
         for result in data.get("results", []):
-            # Extract source locations if present
             source_path = result.get("source", {}).get("path", "")
             source_type = result.get("source", {}).get("type", "")
             for package in result.get("packages", []):
@@ -37,41 +24,69 @@ class OSVScannerParser:
                     vulnerabilitydetails = vulnerability.get("details", "")
                     vulnerabilitypackagepurl = ""
                     cwe = None
-                    # Make sure we have an affected section to work with
+                    mitigation = None
                     if (affected := vulnerability.get("affected")) is not None:
                         if len(affected) > 0:
-                            # Pull the package purl if present
                             if (vulnerabilitypackage := affected[0].get("package", "")) != "":
                                 vulnerabilitypackagepurl = vulnerabilitypackage.get("purl", "")
-                            # Extract the CWE
                             if (cwe := affected[0].get("database_specific", {}).get("cwes", None)) is not None:
                                 cwe = cwe[0]["cweId"]
-                    # Create some references
+                            # Extraire la version corrigée (mitigation)
+                            ranges = affected[0].get("ranges", [])
+                            for range_item in ranges:
+                                for event in range_item.get("events", []):
+                                    if "fixed" in event:
+                                        mitigation = f"Upgrade to version: {event['fixed']}"
+
                     reference = ""
-                    for ref in vulnerability.get("references"):
+                    for ref in vulnerability.get("references", []):
                         reference += ref.get("url") + "\n"
-                    # Define the description
+
                     description = vulnerabilitysummary + "\n"
                     description += "**source_type**: " + source_type + "\n"
                     description += "**package_ecosystem**: " + package_ecosystem + "\n"
                     description += "**vulnerabilitydetails**: " + vulnerabilitydetails + "\n"
                     description += "**vulnerabilitypackagepurl**: " + vulnerabilitypackagepurl + "\n"
+
                     sev = vulnerability.get("database_specific", {}).get("severity", "")
-                    finding = Finding(
-                        title=vulnerabilityid + "_" + package_name,
-                        test=test,
-                        description=description,
-                        severity=self.classify_severity(sev),
-                        static_finding=True,
-                        dynamic_finding=False,
-                        component_name=package_name,
-                        component_version=package_version,
-                        cwe=cwe,
-                        file_path=source_path,
-                        references=reference,
-                    )
-                    if vulnerabilityid != "":
-                        finding.unsaved_vulnerability_ids = []
-                        finding.unsaved_vulnerability_ids.append(vulnerabilityid)
+                    finding = {
+                        "title": vulnerabilityid + "_" + package_name,
+                        "description": description,
+                        "severity": self.classify_severity(sev),
+                        "component_name": package_name,
+                        "component_version": package_version,
+                        "cwe": cwe,
+                        "file_path": source_path,
+                        "references": reference,
+                        "mitigation": mitigation,
+                    }
                     findings.append(finding)
         return findings
+
+# Fonction principale pour exécuter le test
+def test_osv_parser(json_file_path):
+    parser = OSVScannerParser()
+
+    with open(json_file_path, "r") as file:
+        findings = parser.get_findings(file, test="Test")
+
+    if findings:
+        print(f"Nombre de findings : {len(findings)}\n")
+        for finding in findings:
+            print(f"--- Finding ---")
+            print(f"Title: {finding['title']}")
+            print(f"Severity: {finding['severity']}")
+            print(f"Description: {finding['description']}")
+            print(f"Mitigation: {finding['mitigation'] if finding['mitigation'] else 'Non spécifié'}")
+            print(f"References: {finding['references']}")
+            print(f"Component Name: {finding['component_name']}")
+            print(f"Component Version: {finding['component_version']}")
+            print(f"--- Fin du Finding ---\n")
+    else:
+        print("Aucun finding détecté.")
+
+# Remplacez par le chemin vers votre fichier JSON de test
+json_file_path = "test.json"
+
+# Exécuter le test
+test_osv_parser(json_file_path)
