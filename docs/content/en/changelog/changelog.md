@@ -5,7 +5,12 @@ description: "DefectDojo Changelog"
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
-For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrate notes](../../open_source/upgrading/upgrading_guide).
+For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
+
+
+## Dec 16, 2024: v2.41.2
+
+- **(Connectors)** Remove the 'Beta' logo from Connectors
 
 ## Dec 9, 2024: v2.41.1
 
