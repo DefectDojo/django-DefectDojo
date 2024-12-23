@@ -22,7 +22,10 @@ class TwistlockCSVParser:
         data_vulnerability_id = row.get("CVE ID", "")
         data_package_version = row.get("Package Version", "")
         data_fix_status = row.get("Fix Status", "")
-        data_package_name = row.get("Source Package", row.get("Packages", ""))
+        if row.get("Source Package", "") == "":
+            data_package_name = row.get("Packages", "")
+        else:
+            data_package_name = row.get("Source Package", "")
         row.get("Id", "")
         data_severity = row.get("Severity", "")
         data_cvss = row.get("CVSS", "")
