@@ -208,8 +208,8 @@ def clean_hosts_run(apps, change):
                     to_be_deleted.update(ep_ids[1:])
                     if change:
                         message = "Merging Endpoints {} into '{}'".format(
-                            [f"{str(x)} (id={x.pk})" for x in ep[1:]],
-                            f"{str(ep[0])} (id={ep[0].pk})")
+                            [f"{x} (id={x.pk})" for x in ep[1:]],
+                            f"{ep[0]} (id={ep[0].pk})")
                         html_log.append(message)
                         logger.info(message)
                         Endpoint_Status_model.objects\

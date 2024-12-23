@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: release-drafter/release-drafter@v6.0.0
+        uses: release-drafter/release-drafter@3f0f87098bd6b5c5b9a36d49c41d998ea58f9348 # v6.0.0
         with:
           version: ${{ github.event.inputs.version }}  
         env:
@@ -47,13 +47,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Load OAS files from artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           pattern: oas-*
 
       - name: Upload Release Asset - OpenAPI Specification - YAML
         id: upload-release-asset-yaml
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -64,7 +64,7 @@ jobs:
 
       - name: Upload Release Asset - OpenAPI Specification - JSON
         id: upload-release-asset-json
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
