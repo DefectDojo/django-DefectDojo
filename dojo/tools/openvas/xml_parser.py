@@ -16,6 +16,7 @@ class OpenVASXMLParser:
         report = root.find("report")
         results = report.find("results")
         for result in results:
+            script_id = None
             for finding in result:
                 if finding.tag == "name":
                     title = finding.text
@@ -27,7 +28,9 @@ class OpenVASXMLParser:
                     title = title + "_" + finding.text
                     description.append(f"**Port**: {finding.text}")
                 if finding.tag == "nvt":
-                    description.append(f"**NVT**: {finding.text}")
+                    script_id = finding.get("oid") or finding.text
+                    text = f"{script_id}\n{finding.text}" if finding.get("oid") and finding.text else script_id
+                    description.append(f"**NVT**: {text}")
                 if finding.tag == "severity":
                     severity = self.convert_cvss_score(finding.text)
                     description.append(f"**Severity**: {finding.text}")
@@ -42,6 +45,7 @@ class OpenVASXMLParser:
                 severity=severity,
                 dynamic_finding=True,
                 static_finding=False,
+                vuln_id_from_tool=script_id,
             )
             findings.append(finding)
         return findings
