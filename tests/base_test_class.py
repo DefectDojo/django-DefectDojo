@@ -1,4 +1,3 @@
-import contextlib
 import logging
 import os
 import re
@@ -238,11 +237,7 @@ class BaseTestCase(unittest.TestCase):
         return driver
 
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
-        no_content = None
-        with contextlib.suppress(Exception):
-            no_content = self.driver.find_element(By.ID, no_content_id)
-
-        if no_content is None:
+        if not self.is_element_by_id_present(no_content_id):
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
             WebDriverWait(self.driver, 30).until(
                 EC.presence_of_element_located((By.ID, wrapper_id)),
@@ -338,7 +333,7 @@ class BaseTestCase(unittest.TestCase):
     def set_block_execution(self, block_execution=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
-        logger.info(f"setting block execution to: {str(block_execution)}")
+        logger.info(f"setting block execution to: {block_execution}")
         driver = self.driver
         driver.get(self.base_url + "profile")
         if (

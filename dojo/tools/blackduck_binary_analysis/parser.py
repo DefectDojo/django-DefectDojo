@@ -115,30 +115,30 @@ class BlackduckBinaryAnalysisParser:
         return title
 
     def format_description(self, i):
-        description = f"CSV Result: {str(i.report_name)}\n"
-        description += f"Vulnerable Component: {str(i.component)}\n"
-        description += f"Vulnerable Component Version in Use: {str(i.version)}\n"
-        description += f"Vulnerable Component Latest Version: {str(i.latest_version)}\n"
-        description += f"Matching Type: {str(i.matching_type)}\n"
-        description += f"Object Name: {str(i.object_name)}\n"
-        description += f"Object Extraction Path: {str(i.object_full_path)}\n"
-        description += f"Object Compilation Date: {str(i.object_compilation_date)}\n"
-        description += f"Object SHA1: {str(i.object_sha1)}\n"
-        description += f"CVE: {str(i.cve)}\n"
-        description += f"CVE Publication Date: {str(i.cve_publication_date)}\n"
-        description += f"Distribution Package: {str(i.distribution_package)}\n"
-        description += f"Missing Exploit Mitigations: {str(i.missing_exploit_mitigations)}\n"
-        description += f"BDSA: {str(i.bdsa)}\n"
-        description += f"Summary:\n{str(i.summary)}\n"
-        description += f"Note Type:\n{str(i.note_type)}\n"
-        description += f"Note Reason:\n{str(i.note_reason)}\n"
-        description += f"Triage Vectors:\n{str(i.triage_vectors)}\n"
-        description += f"Unresolving Triage Vectors:\n{str(i.triage_vectors)}\n"
+        description = f"CSV Result: {i.report_name}\n"
+        description += f"Vulnerable Component: {i.component}\n"
+        description += f"Vulnerable Component Version in Use: {i.version}\n"
+        description += f"Vulnerable Component Latest Version: {i.latest_version}\n"
+        description += f"Matching Type: {i.matching_type}\n"
+        description += f"Object Name: {i.object_name}\n"
+        description += f"Object Extraction Path: {i.object_full_path}\n"
+        description += f"Object Compilation Date: {i.object_compilation_date}\n"
+        description += f"Object SHA1: {i.object_sha1}\n"
+        description += f"CVE: {i.cve}\n"
+        description += f"CVE Publication Date: {i.cve_publication_date}\n"
+        description += f"Distribution Package: {i.distribution_package}\n"
+        description += f"Missing Exploit Mitigations: {i.missing_exploit_mitigations}\n"
+        description += f"BDSA: {i.bdsa}\n"
+        description += f"Summary:\n{i.summary}\n"
+        description += f"Note Type:\n{i.note_type}\n"
+        description += f"Note Reason:\n{i.note_reason}\n"
+        description += f"Triage Vectors:\n{i.triage_vectors}\n"
+        description += f"Unresolving Triage Vectors:\n{i.triage_vectors}\n"
 
         return description
 
     def format_mitigation(self, i):
-        return f"Upgrade {str(i.component)} to latest version: {str(i.latest_version)}.\n"
+        return f"Upgrade {i.component} to latest version: {i.latest_version}.\n"
 
     def format_impact(self, i):
         impact = "The use of vulnerable third-party open source software in applications can have numerous negative impacts:\n\n"
@@ -150,7 +150,7 @@ class BlackduckBinaryAnalysisParser:
         return impact
 
     def format_references(self, i):
-        references = f"BDSA: {str(i.bdsa)}\n"
-        references += f"NIST CVE Details: {str(i.vulnerability_url)}\n"
+        references = f"BDSA: {i.bdsa}\n"
+        references += f"NIST CVE Details: {i.vulnerability_url}\n"
 
         return references
