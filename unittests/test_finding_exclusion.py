@@ -87,7 +87,6 @@ class TestFindingExclusion(DojoTestCase):
 
 class FindingExclusionViewsTestCase(DojoTestCase):
     def setUp(self):
-        # Crear un usuario de prueba
         self.user = Dojo_User.objects.create_superuser(
             username='testuser', 
             password='12345'
