@@ -97,6 +97,7 @@ ignore = [
     "RUF012",
     "RUF015",
     "RUF027",
+    "RUF052",
     "D205",
     "D211",  # `one-blank-line-before-class` (D203) and `no-blank-line-before-class` (D211) are incompatible.
     "D212",  # `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line` (D213) are incompatible.
