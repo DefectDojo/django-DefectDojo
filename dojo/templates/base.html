@@ -3,6 +3,7 @@
 {% load authorization_tags %}
 {% load i18n %}
 {% load static %}
+{% load problem_tags %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -325,6 +326,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
+                                        {% if None|check_problem_habilit %}
                                         <li>
                                             <a href="{% url 'open_problems' %}" aria-expanded="false" aria-label="Problems">
                                                 <i class="fa-solid fa-triangle-exclamation fa-fw"></i>
@@ -350,6 +352,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
+                                        {% endif %}
                                         <li>
                                             <a href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
                                                 <i class="fa-solid fa-table-cells-large fa-fw"></i>
@@ -796,6 +799,7 @@
                                                 {% endif %}
                                             </ul>
                                         </li>
+                                        {% if None|check_problem_habilit %}
                                         <!-- Problems Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.title == 'Problems' %} active active-color{% endif %}">
                                             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
@@ -826,6 +830,7 @@
                                                 </li>
                                             </ul>
                                         </li>
+                                        {% endif %}
                                         <!-- Endpoints Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'endpoints' %} active active-color{% endif %}">
                                             <a class="dropdown-toggle" data-toggle="dropdown" href="">

@@ -14,4 +14,4 @@ logger = logging.getLogger(__name__)
 @app.task
 def daily_cache_update(**kwargs):
     logger.info("Starting daily cache update")
-    load_json(check_cash=False)
+    load_json(check_cache=False)

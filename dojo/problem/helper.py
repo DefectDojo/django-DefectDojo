@@ -36,14 +36,20 @@ def download_json(json_url):
     return response.json()
 
 def load_cached_json():
-    try:
-        if os.path.exists(CACHED_JSON_FILE):
+    if os.path.exists(CACHED_JSON_FILE):
+        try:
             with open(CACHED_JSON_FILE, 'r') as f:
                 data = json.load(f)
                 if validate_json(data):
                     return data
-    except (ValueError, json.JSONDecodeError):
-        pass 
+                else:
+                    logger.warning('Cached JSON failed validation.')
+        except json.JSONDecodeError:
+            logger.error('Error decoding JSON from cache.')
+        except Exception as e:
+            logger.error(f'Unexpected error loading JSON from cache: {e}')
+    else:
+        logger.info('Cached JSON file does not exist.')
     return None
 
 def save_json_to_cache(data):
@@ -59,22 +65,26 @@ def mapping_script_problem_id(mappings_json_findings):
     }
     return script_to_problem_mapping
 
-def load_json(check_cash=True):
+def load_json(check_cache=True):
     try:
-        if check_cash:
+        if check_cache:
             cached_data = load_cached_json()
             if cached_data and validate_json(cached_data):
                 return mapping_script_problem_id(cached_data)
 
-        data = download_json(settings.PROBLEM_MAPPINGS_JSON_URL)
-        if validate_json(data):
-            save_json_to_cache(data)
-            return mapping_script_problem_id(data)
-
-    except (requests.RequestException, ValueError, json.JSONDecodeError) as e:
-        logger.error('Error loading disambiguator JSON: %s', e)
-        pass
-
+        if settings.PROBLEM_MAPPINGS_JSON_URL:
+            data = download_json(settings.PROBLEM_MAPPINGS_JSON_URL)
+            if validate_json(data):
+                save_json_to_cache(data)
+                return mapping_script_problem_id(data)
+        else:
+            logger.error('No disambiguator JSON URL provided.')
+    except requests.RequestException as e:
+        logger.error('HTTP error while loading JSON: %s', e)
+    except json.JSONDecodeError as e:
+        logger.error('JSON decoding error: %s', e)
+    except Exception as e:
+        logger.error('Unexpected error: %s', e)
     return {}
 
 def find_or_create_problem(finding, script_to_problem_mapping):
@@ -108,7 +118,6 @@ def _get_or_create_problem_by_script_id(finding):
 
     return Problem.objects.create(
         name=finding.title,
-        problem_id=finding.description,
         severity=finding.severity
     )
 

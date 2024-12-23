@@ -2261,9 +2261,12 @@ class Problem(models.Model):
     name = models.CharField(max_length=255,
                             verbose_name=_("Name"),
                             help_text=_("A short name or title for the problem."))
-    problem_id = models.TextField(
-        verbose_name=_("Problem ID"),
-        help_text=_("Problem identifier. This field is used to uniquely identify the problem."))
+    problem_id = models.CharField(max_length=255,
+                                  unique=True,
+                                  null=True,
+                                  blank=True,
+                                  verbose_name=_("Problem ID"),
+                                  help_text=_("Problem identifier. This field is used to uniquely identify the problem."))
     created_at = models.DateTimeField(auto_now_add=True,
                                        verbose_name=_("Created At"),
                                        help_text=_("Timestamp when this problem was created."))

@@ -4,7 +4,7 @@
 {% load get_endpoint_status %}
 {% load static %}
 {% load i18n %}
-{% load get_different_total_script_id %}
+{% load problem_tags %}
 {% block problems_list %}
     <div class="row">
         <div class="col-md-12">
@@ -59,7 +59,7 @@
                                     </span>
                                 </td>
                                 <td>{{ problem.findings.count }}</td>
-                                <td>{{ problem.findings.all|count_unique_vulns }}</td>
+                                <td>{{ problem.findings.all|count_distinct_script_ids }}</td>
                                 <td data-order="{{ problem.created_at|date:"Y-m-d H:i:s" }}">
                                     {{ problem.created_at|date:"b. d, Y, H:i" }}
                                 </td>

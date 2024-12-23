@@ -1748,14 +1748,10 @@ DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 # see https://github.com/laymonage/django-jsonfield-backport
 SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
 
-# Problem utilizes mappings from a JSON file to disambiguate Findings.
-# The JSON file should have the following structure:
-# {
-#     "problem_id_1": ["script_id_1", "script_id_2", "script_id_3"],
-#     "problem_id_2": ["script_id_4", "script_id_5"],
-#     "problem_id_3": ["script_id_6"]
-# }
-PROBLEM_MAPPINGS_JSON_URL = "https://homepages.dcc.ufmg.br/~leonardooliveira/disambiguator.json"
+# By default, this mapping is not configured (set to None). If configured, it allows
+# the "Problems" button to appear in Dojo's left toolbar.
+# You can check more information in https://homepages.dcc.ufmg.br/~leonardooliveira/defectdojo/README.md
+PROBLEM_MAPPINGS_JSON_URL = None
 
 VULNERABILITY_URLS = {
     "CVE": "https://nvd.nist.gov/vuln/detail/",
