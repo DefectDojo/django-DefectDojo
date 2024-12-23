@@ -2,6 +2,8 @@
 from django.db.models import QuerySet, Q
 from django.utils import timezone
 from django.urls import reverse
+from django.conf import settings
+from celery.utils.log import get_task_logger
 from enum import Enum
 from datetime import timedelta
 import random
@@ -9,9 +11,12 @@ import random
 # Dojo
 from dojo.models import Finding
 from dojo.engine_tools.models import FindingExclusion
+from dojo.engine_tools.queries import tag_filter
 from dojo.celery import app
 from dojo.notifications.helper import create_notification
 
+
+logger = get_task_logger(__name__)
 
 class Constants(Enum):
     VULNERABILITY_ID_HELP_TEXT = "Vulnerability technical id from the source tool. " \
@@ -161,9 +166,7 @@ def add_findings_to_whitelist(unique_id_from_tool):
     findings_to_update = Finding.objects.filter(
         cve=unique_id_from_tool,
         active=True
-    ).filter(
-        Q(tags__name__icontains="prisma") | Q(tags__name__icontains="tenable")
-    )
+    ).filter(tag_filter)
     
     for finding in findings_to_update:
         if not 'white_list' in finding.tags:
@@ -172,3 +175,28 @@ def add_findings_to_whitelist(unique_id_from_tool):
         finding.risk_status = "On Whitelist"
         
     Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
+    logger.info(f"{findings_to_update.count()} findings added to whitelist.")
+    
+
+@app.task
+def check_new_findings_to_whitelist():
+    cves_on_whitelist = FindingExclusion.objects.filter(
+        type="white_list", 
+        status="Accepted"
+    ).values_list("unique_id_from_tool", flat=True)
+    
+    findings_to_whitelist = Finding.objects.filter(
+        cve__in=cves_on_whitelist,
+        active=True,
+    ).exclude(
+        risk_status="On Whitelist"
+    ).filter(tag_filter)
+    
+    for finding in findings_to_whitelist:
+        if not 'white_list' in finding.tags:
+            finding.tags.add("white_list")
+        finding.active = False
+        finding.risk_status = "On Whitelist"
+        
+    Finding.objects.bulk_update(findings_to_whitelist, ["active", "risk_status"], 1000)
+    logger.info(f"{findings_to_whitelist.count()} findings added to whitelist.")

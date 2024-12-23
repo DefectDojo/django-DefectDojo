@@ -55,16 +55,24 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     ).first()
     
     if duplicate_finding_exclusions:
-        messages.add_message(
-            request,
-            messages.ERROR,
-            f"There is already a request in status '{duplicate_finding_exclusions.status}' for this CVE, please consult the id '{duplicate_finding_exclusions.uuid}' in this section.",
-            extra_tags="alert-danger")
+        if duplicate_finding_exclusions.status == "Accepted":
+            messages.add_message(
+                request,
+                messages.INFO,
+                f"There is already a request in status '{duplicate_finding_exclusions.status}' for this CVE, This will be whitelisted.",
+                extra_tags="alert-success")
+            add_findings_to_whitelist.apply_async(args=(duplicate_finding_exclusions.unique_id_from_tool,))
+            
+        else:
+            messages.add_message(
+                request,
+                messages.INFO,
+                f"There is already a request in status '{duplicate_finding_exclusions.status}' for this CVE, please consult the id '{duplicate_finding_exclusions.uuid}' in this section.",
+                extra_tags="alert-info")
         
         return HttpResponseRedirect(reverse("finding_exclusions"))
     
-
-    form = CreateFindingExclusionForm(initial={'unique_id_from_tool': default_unique_id})
+    form = CreateFindingExclusionForm(initial={"unique_id_from_tool": default_unique_id})
 
     finding_exclusion = None
 

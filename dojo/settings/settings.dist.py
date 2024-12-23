@@ -457,6 +457,10 @@ env = environ.FileAwareEnv(
     
     # Finding exclusion - request expiration days
     DD_FINDING_EXCLUSION_EXPIRATION_DAYS=(int, 30),
+    
+    # tags for filter to finding exclusion
+    DD_FINDING_EXCLUSION_FILTER_TAGS=(str, "prisma,tenable,engine_dependencies,engine_container"),
+    
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
@@ -1476,6 +1480,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'dojo.engine_tools.helpers.check_expiring_findingexclusions',
         'schedule': timedelta(days=1),
     },
+    "check_new_findings_to_whitelist": {
+        'task': 'dojo.engine_tools.helpers.check_new_findings_to_whitelist',
+        'schedule': timedelta(days=1),
+    },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
@@ -2113,6 +2121,7 @@ COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 ENABLE_ENGINE_TOOLS = env("DD_ENABLE_ENGINE_TOOLS")
 EXCLUSION_CYBER_EMAIL = env("DD_EXCLUSION_CYBER_EMAIL")   
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
+FINDING_EXCLUSION_FILTER_TAGS = env("DD_FINDING_EXCLUSION_FILTER_TAGS")
 # Acceptace for email
 ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
 LIFETIME_HOURS_PERMISSION_KEY = env("DD_LIFETIME_HOURS_PERMISSION_KEY")
