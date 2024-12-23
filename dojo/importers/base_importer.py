@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.urls import reverse
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
@@ -28,6 +29,7 @@ from dojo.models import (
     Test_Type,
     Vulnerability_Id,
 )
+from dojo.notifications.helper import create_notification
 from dojo.tools.factory import get_parser
 from dojo.utils import max_safe
 
@@ -719,3 +721,38 @@ class BaseImporter(ImporterOptions):
             finding.save(dedupe_option=False)
         else:
             finding.save(dedupe_option=False, push_to_jira=self.push_to_jira)
+
+    def notify_scan_added(
+        self,
+        test,
+        updated_count,
+        new_findings=[],
+        findings_mitigated=[],
+        findings_reactivated=[],
+        findings_untouched=[],
+    ):
+        logger.debug("Scan added notifications")
+
+        new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
+        findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
+        findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
+        findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
+
+        title = (
+            f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
+        )
+
+        create_notification(
+            event="scan_added_empty" if updated_count == 0 else "scan_added",
+            title=title,
+            findings_new=new_findings,
+            findings_mitigated=findings_mitigated,
+            findings_reactivated=findings_reactivated,
+            finding_count=updated_count,
+            test=test,
+            engagement=test.engagement,
+            product=test.engagement.product,
+            findings_untouched=findings_untouched,
+            url=reverse("view_test", args=(test.id,)),
+            url_api=reverse("test-detail", args=(test.id,)),
+        )
