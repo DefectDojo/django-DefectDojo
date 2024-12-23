@@ -66,6 +66,12 @@ class GenericCSVParser:
             if "CweId" in row:
                 finding.cwe = int(row["CweId"])
 
+            if "epss_score" in row:
+                finding.epss_score = float(row["epss_score"])
+
+            if "epss_percentile" in row:
+                finding.epss_percentile = float(row["epss_percentile"])
+
             if "CVSSV3" in row:
                 cvss_objects = cvss_parser.parse_cvss_from_text(row["CVSSV3"])
                 if len(cvss_objects) > 0:
