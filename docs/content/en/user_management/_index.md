@@ -1,6 +1,6 @@
 ---
-title: "Set User Permissions"
-description: "Set User Permissions"
+title: "User Management"
+description: "Set Up User Permissions, SSO and Groups"
 summary: ""
 date: 2023-09-07T16:06:50+02:00
 lastmod: 2023-09-07T16:06:50+02:00

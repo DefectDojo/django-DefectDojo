@@ -51,7 +51,7 @@ exclude-labels:
 
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
-  Please consult the [Upgrade notes in the documentation ](https://documentation.defectdojo.com/getting_started/upgrading/) for specific instructions for this release, and general upgrade instructions. Below is an automatically generated list of all PRs merged since the previous release.
+  Please consult the [Upgrade notes in the documentation ](https://docs.defectdojo.com/en/open_source/upgrading/upgrading_guide/) for specific instructions for this release, and general upgrade instructions. Below is an automatically generated list of all PRs merged since the previous release.
 
   ## Changes since $PREVIOUS_TAG
   $CHANGES
