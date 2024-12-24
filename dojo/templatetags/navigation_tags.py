@@ -1,4 +1,5 @@
 from django import template
+from django.conf import settings
 from django.utils.html import escape
 from django.utils.safestring import mark_safe as safe
 from django.utils.translation import gettext as _
@@ -137,3 +138,7 @@ def paginate(page, adjacent=2):
 @register.filter
 def can_add_product(user):
     return get_authorized_product_types(Permissions.Product_Type_Add_Product).count() > 0
+
+@register.filter
+def check_problems_enabled(user):
+    return settings.PROBLEM_MAPPINGS_JSON_URL

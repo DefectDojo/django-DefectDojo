@@ -1751,6 +1751,8 @@ SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
 # By default, this mapping is not configured (set to None). If configured, it allows
 # the "Problems" button to appear in Dojo's left toolbar.
 # You can check more information in https://homepages.dcc.ufmg.br/~leonardooliveira/defectdojo/README.md
+# A finding-to-problem mapping covering Nmap, OpenVAS and Nuclei is available in
+# <link to JSON file>
 PROBLEM_MAPPINGS_JSON_URL = None
 
 VULNERABILITY_URLS = {
