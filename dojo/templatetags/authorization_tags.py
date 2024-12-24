@@ -3,7 +3,7 @@ from django import template
 
 from dojo.authorization.authorization import user_has_configuration_permission as configuration_permission
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission
-from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
+from dojo.authorization.exclusive_permissions import user_has_exclusive_permission_product
 from dojo.authorization.roles_permissions import Permissions
 from dojo.risk_acceptance.risk_pending import is_permissions_risk_acceptance 
 from dojo.utils import get_product
@@ -100,4 +100,4 @@ def enable_button(finding, button):
 
 @register.filter
 def has_object_exclusive_permission(obj, permission):
-    return user_has_exclusive_permission(crum.get_current_user(), obj, Permissions[permission])     
+    return user_has_exclusive_permission_product(crum.get_current_user(), obj, Permissions[permission])     

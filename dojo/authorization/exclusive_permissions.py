@@ -1,26 +1,43 @@
-from dojo.utils import get_product
-from dojo.api_v2.api_error import ApiError
-from dojo.models import Finding
-from dojo.authorization.roles_permissions import Permissions 
-from dojo.product.queries import get_authorized_members_for_product
-from dojo.authorization.authorization import user_has_global_permission
-from dojo.models import Dojo_User, Test, Product, ExclusivePermission, Product_Member
 import logging
+import crum
+from django.core.exceptions import PermissionDenied
+from dojo.api_v2.api_error import ApiError
+from dojo.utils import get_product
+from dojo.authorization.roles_permissions import Permissions 
+from dojo.authorization.authorization import (
+    user_has_global_permission,
+    get_product_type_member,
+    role_has_permission)
+from dojo.models import (
+    Dojo_User,
+    Test,
+    Product,
+    ExclusivePermission,
+    Product_Member,
+    Finding)
 logger = logging.getLogger(__name__)
 
 
 def get_exclusive_permission(user: Dojo_User,
                              product: Product) -> list[Permissions]:
-    products_members = Product_Member.objects.filter(product=product, user=user)
+    products_members = Product_Member.objects.filter(
+        product=product,
+        user=user)
     permissions = []
     if products_members.exists():
-        permissions = ExclusivePermission.objects.filter(members__in=products_members)
+        permissions = ExclusivePermission.objects.filter(
+            members__in=products_members)
         try:
-            permissions = [Permissions[permission.name] for permission in permissions]
+            permissions = [
+                Permissions[permission.name]
+                for permission in permissions
+                ]
         except KeyError as e:
-            logger.error(f"The permit {e} has not been defined in class Permissions")
+            logger.error(f"The permit {e} has not been defined\
+                in class Permissions")
 
     return permissions
+
 
 class RulePermission:
     def __init__(self, permission: Permissions, user: Dojo_User, obj: object):
@@ -34,13 +51,29 @@ class RulePermission:
         Returns:
             bool: True if user has permission, False otherwise
         """
-        tags = self.object.tags.all()
-        product = get_product(self.object)
-        if "red_team" in tags:
-            return self.permission in get_exclusive_permission(self.user,
-                                                               product)
+        product = None
+        validation_tags = ExclusivePermission.get_validation_field(
+            self.permission.name)
+        if isinstance(self.object, Test) or isinstance(self.object, Finding):
+            product = get_product(self.object)
+            tags_objects = list(
+                self.object.tags.all().values_list("name", flat=True)
+                )
+            if any(tag in validation_tags for tag in tags_objects):
+                return self.permission in get_exclusive_permission(
+                    self.user,
+                    product)
+            else:
+                # Tag not found in object
+                return True
+        elif isinstance(self.object, Product):
+            product = self.object
+            return self.permission in get_exclusive_permission(
+                self.user,
+                product)
         else:
-            return True
+            raise ApiError.internal_server_error(
+               detail=f"Object type {type(self.object)} not implemented")
 
     def apply_rule(self, *args, **kwargs) -> bool:
 
@@ -51,7 +84,7 @@ class RulePermission:
         rule_function = rule_dict.get(self.permission.name, None)
         if rule_function:
             return rule_function(*args, **kwargs)
-        return rule_function
+        return False
 
 
 def user_has_permission(user: Dojo_User,
@@ -67,24 +100,96 @@ def user_has_permission(user: Dojo_User,
     return rule_response
 
 
+def user_has_permission_or_404(
+    user: Dojo_User,
+    permission: Permissions,
+    obj: object) -> bool:
 
-def user_has_exclusive_permission(user: Dojo_User, 
-                                   obj: object,
-                                   permission: Permissions)-> bool:
-    if not user:
-        return False
+    engine_rule = RulePermission(
+        user=user,
+        permission=permission,
+        obj=obj)
+
+    rule_response = engine_rule.apply_rule()
+    if rule_response is False:
+        raise PermissionDenied
+    return rule_response
+
+
+def user_has_exclusive_permission_product(
+        user: Dojo_User,
+        obj: object,
+        permission: Permissions) -> bool:
+
+    member = get_product_type_member(user, obj)
+
+    if user is None:
+        user = crum.get_current_user()
 
     if user.is_anonymous:
         return False
-    
     if user.is_superuser:
         return True
-    
     if user_has_global_permission(user, permission):
         return True
-    
-    if ((isinstance(obj, Finding) or isinstance(obj, Test))
-        and user_has_permission(user, permission, obj)):
+    if member is not None and role_has_permission(
+        member.role.id,
+        permission
+    ):
+        return True
+    return user_has_permission(
+        user=user,
+        obj=obj,
+        permission=permission)
+
+
+def user_has_exclusive_permission_product_or_404(
+        user: Dojo_User,
+        obj: object,
+        permission: Permissions) -> bool:
+
+    if user is None:
+        user = crum.get_current_user()
+
+    member = get_product_type_member(user, obj)
+
+    if user.is_anonymous:
+        raise PermissionDenied
+    if user.is_superuser:
+        return True
+    if user_has_global_permission(user, permission):
+        return True
+    if member is not None and role_has_permission(
+            member.role.id, permission):
         return True
 
-    return False
+    return user_has_permission_or_404(
+        user=user,
+        obj=obj,
+        permission=permission)
+    
+
+def get_exclude_red_team_tag(
+        filtered_findings_qs,
+        product=None,
+        user=None):
+
+    if product is None and len(filtered_findings_qs)>0:
+        product = get_product(filtered_findings_qs[0])
+
+    if user is None:
+        user = crum.get_current_user()
+
+    if (
+        user_has_exclusive_permission_product(
+            user, product, Permissions["Product_Tag_Red_Team"]
+        )
+    ):
+        pass
+    else:
+        tags_name = ExclusivePermission\
+            .get_validation_field("Product_Tag_Red_Team")\
+            .split(",")
+        filtered_findings_qs = filtered_findings_qs.exclude(
+            tags__name__in=tags_name)
+    return filtered_findings_qs

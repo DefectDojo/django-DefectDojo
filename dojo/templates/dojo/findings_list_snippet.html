@@ -389,7 +389,6 @@
                         </thead>
                         <tbody>
                             {% for finding in findings %}
-                                {% if finding|has_object_exclusive_permission:"Product_Tag_Red_Team"%}
                                     <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                                         {% block body %}
                                             {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
@@ -724,7 +723,6 @@
                                             </td>
                                         {% endblock body %}
                                     </tr>
-                                {% endif %}
                             {% endfor %}
                         </tbody>
                     </table>

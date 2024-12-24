@@ -23,9 +23,11 @@ from django.views.decorators.vary import vary_on_cookie
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
+from dojo.authorization.exclusive_permissions import user_has_exclusive_permission_product_or_404
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.exclusive_permissions import get_exclude_red_team_tag
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
 from dojo.finding.views import find_available_notetypes
@@ -119,7 +121,12 @@ class ViewTest(View):
     def get_test(self, test_id: int):
         test_prefetched = get_authorized_tests(Permissions.Test_View)
         test_prefetched = test_prefetched.annotate(total_reimport_count=Count("test_import__id", distinct=True))
-        return get_object_or_404(test_prefetched, pk=test_id)
+        test = get_object_or_404(test_prefetched, pk=test_id)
+        user_has_exclusive_permission_product_or_404(
+            self.request.user,
+            test,
+            Permissions.Product_Tag_Red_Team)
+        return test
 
     def get_test_import_data(self, request: HttpRequest, test: Test):
         test_imports = Test_Import.objects.filter(test=test)
@@ -143,6 +150,7 @@ class ViewTest(View):
 
     def get_findings(self, request: HttpRequest, test: Test):
         findings = Finding.objects.filter(test=test).order_by("numerical_severity")
+        findings = get_exclude_red_team_tag(findings, product=None, user=request.user)
         filter_string_matching = get_system_setting("filter_string_matching", False)
         finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
         findings = finding_filter_class(request.GET, queryset=findings)

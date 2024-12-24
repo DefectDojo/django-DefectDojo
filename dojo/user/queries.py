@@ -12,7 +12,9 @@ from dojo.models import (
     Product_Type_Group,
     Product_Type_Member,
 )
-from dojo.product.queries import get_authorized_products
+from dojo.authorization.roles_permissions import Permissions
+from dojo.product_type.queries import get_authorized_product_type_members_for_user
+from dojo.product.queries import get_authorized_products, get_authorized_members_for_product
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.request_cache import cache_for_request
 
@@ -148,3 +150,23 @@ def get_users_authorized_role_permission(product, permission, role):
 
     return Dojo_User.objects.filter(Q(id__in=[ptm.user.id for ptm in product_type_members])).order_by("first_name", "last_name", "username")
 
+
+def get_role_members(user, product, product_type):
+    user_members = None
+    user_members_product_type: Product_Type_Member = get_authorized_product_type_members_for_user(user, Permissions.Risk_Acceptance)
+    user_members = list(user_members_product_type)
+    user_members_product: Product_Member = get_authorized_members_for_product(product=product,
+                                                                              permission=Permissions.Risk_Acceptance,
+                                                                              user=user)
+    if user_members_product:
+        user_members += list(user_members_product)
+    if not user_members:
+        raise ValueError("The user does not have any product_type or product associated with it")
+    for user_member in user_members:
+        if hasattr(user_member, "product_type_id"):
+            if user_member.product_type_id == product_type.id or len(user.groups.filter(dojo_group__name="Compliance")) > 0:
+                return user_member.role.name
+        elif hasattr(user_member, "product_id"):
+            if user_member.product_id == product.id:
+                return user_member.role.name
+    raise ValueError(f"The user is not related to the object {product_type}")

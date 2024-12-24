@@ -22,9 +22,12 @@ from dojo.models import (
     Test,
     Vulnerability_Id,
     Vulnerability_Id_Template,
+    ExclusivePermission,
 )
 from dojo.notes.helper import delete_related_notes
-from dojo.utils import get_current_user, mass_model_updater, to_str_typed
+from dojo.authorization.exclusive_permissions import user_has_exclusive_permission_product
+from dojo.authorization.roles_permissions import Permissions
+from dojo.utils import get_current_user, mass_model_updater, to_str_typed, get_product
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

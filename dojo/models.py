@@ -4864,10 +4864,21 @@ class ExclusivePermission(models.Model):
                            unique=True,
                            blank=True,
                            help_text=_("name permission")) 
+    short_name = models.CharField(max_length=50,
+                           blank=True,
+                           null=True,
+                           help_text=_("name permission")) 
     description = models.CharField(max_length=128,
                                   help_text=_("Short permit description"),
                                   null=True,
                                   blank=True) 
+    validation_field = models.CharField(max_length=250,
+                                  help_text=_("Validation Field"),
+                                  null=True,
+                                  blank=True) 
+    status = models.BooleanField(
+        default=True,
+        help_text=_("Status of the permission"))
     members = models.ManyToManyField(Product_Member,
                                     related_name="exclusive_permission_product",
                                     blank=True)
@@ -4878,7 +4889,18 @@ class ExclusivePermission(models.Model):
 
     def __str__(self):
         return self.description
-   
+    
+    @classmethod
+    def get_validation_field(cls, name: str) -> str:
+        try:
+            permission = cls.objects.get(name=name)
+        except ObjectDoesNotExist as e:
+            logger.error(f"Exclusive permission {name} not found")
+            raise e
+        return permission.validation_field
+    
+    def is_active(self):
+        return self.status
 
 
 if settings.ENABLE_AUDITLOG:

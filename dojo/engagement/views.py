@@ -38,6 +38,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.test.queries import get_exclude_red_team_tag
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
     EngagementDirectFilter,
@@ -98,9 +99,10 @@ from dojo.notifications.helper import create_notification
 from dojo.transfer_findings.notification import Notification as TransferFindingsNotification
 from dojo.transfer_findings.helper import get_sla_expiration_transfer_finding
 from dojo.product.queries import get_authorized_products
+from dojo.product_type.helper import get_contacts_product_typ_and_product
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
-from dojo.user.queries import get_authorized_users
+from dojo.user.queries import get_authorized_users, get_role_members
 from dojo.utils import (
     FileIterWrapper,
     Product_Tab,
@@ -450,6 +452,10 @@ class ViewEngagement(View):
         # Make sure the user is authorized
         user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by('-created')
+        tests = get_exclude_red_team_tag(
+            tests,
+            product=eng.product,
+            user=request.user)
         default_page_num = 10
         tests_filter = self.get_filtered_tests(request, tests, eng)
         paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
@@ -1200,11 +1206,16 @@ def get_risk_acceptance_pending(request,
                                                         finding,
                                                         product,
                                                         product_type):
-            form = RiskPendingForm(severity=finding.severity, product_id=product.id,product_type_id=product_type.id,
-                initial={'owner': request.user,
-                        'name': risk_acceptance_title_suggestion,
-                        'accepted_by': [request.user],
-                        "severity": finding.severity})
+            form = RiskPendingForm(
+                severity=finding.severity,
+                product_id=product.id,
+                product_type_id=product_type.id,
+                initial={
+                    'owner': request.user,
+                    'name': risk_acceptance_title_suggestion,
+                    'accepted_by': [request.user],
+                    'severity': finding.severity,
+                })
         elif finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
             form = RiskPendingForm(
                 severity=finding.severity,
@@ -1222,7 +1233,7 @@ def get_risk_acceptance_pending(request,
             form = RiskPendingForm(severity=finding.severity,product_id=product.id, product_type_id=product_type.id,
                 initial={'owner': request.user,
                         'name': risk_acceptance_title_suggestion,
-                        'accepted_by': rp_helper.get_contacts(eng, finding.severity, request.user),
+                        'accepted_by': get_contacts_product_typ_and_product(eng, finding.severity, request.user),
                         "severity": finding.severity})
     else:
         form = RiskAcceptanceForm(severity=finding.severity, initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
@@ -1341,7 +1352,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
             if (request.user.is_superuser is True
                 or rp_helper.role_has_exclusive_permissions(request.user)
                 or white_list_final
-                or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
+                or get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
                 risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
