@@ -82,7 +82,6 @@ from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
-from dojo.problem.urls import urlpatterns as problems_urls
 from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.group.urls import urlpatterns as group_urls
 from dojo.home.urls import urlpatterns as home_urls
@@ -92,6 +91,7 @@ from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
+from dojo.problem.urls import urlpatterns as problems_urls
 from dojo.product.urls import urlpatterns as prod_urls
 from dojo.product_type.urls import urlpatterns as pt_urls
 from dojo.regulations.urls import urlpatterns as regulations
@@ -184,9 +184,9 @@ ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls
 ur += finding_group_urls
-ur += problems_urls
 ur += home_urls
 ur += metrics_urls
+ur += problems_urls
 ur += prod_urls
 ur += pt_urls
 ur += reports_urls
