@@ -2,7 +2,8 @@ from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree as ET
 
-from dojo.models import Finding
+from dojo.models import Finding, Problem
+import dojo.problem.helper as problems_help
 
 
 class OpenVASXMLParser:
@@ -15,6 +16,7 @@ class OpenVASXMLParser:
             raise NamespaceErr(msg)
         report = root.find("report")
         results = report.find("results")
+        script_to_problem_mapping = problems_help.load_json()
         for result in results:
             for finding in result:
                 if finding.tag == "name":
@@ -43,6 +45,9 @@ class OpenVASXMLParser:
                 dynamic_finding=True,
                 static_finding=False,
             )
+            if finding.severity != "Info" and finding.vuln_id_from_tool:
+                finding.problem = problems_help.find_or_create_problem(finding, script_to_problem_mapping)
+                finding.save()
             findings.append(finding)
         return findings
 

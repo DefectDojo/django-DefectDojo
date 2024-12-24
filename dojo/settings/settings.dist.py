@@ -1109,7 +1109,7 @@ CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
 
-CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
+CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", "dojo.problem.update_mappings")
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -1146,6 +1146,10 @@ CELERY_BEAT_SCHEDULE = {
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
+    },
+    "daily-cache-update": {
+        "task": "dojo.problem.update_mappings.daily_cache_update",
+        "schedule": crontab(minute=0, hour=0),  # every day at midnight
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
@@ -1747,6 +1751,13 @@ DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
 # django-auditlog imports django-jsonfield-backport raises a warning that can be ignored,
 # see https://github.com/laymonage/django-jsonfield-backport
 SILENCED_SYSTEM_CHECKS = ["django_jsonfield_backport.W001"]
+
+# By default, this mapping is not configured (set to None). If configured, it allows
+# the "Problems" button to appear in Dojo's left toolbar.
+# You can check more information in https://homepages.dcc.ufmg.br/~leonardooliveira/defectdojo/README.md
+# A finding-to-problem mapping covering Nmap, OpenVAS and Nuclei is available in
+# <https://homepages.dcc.ufmg.br/~leonardooliveira/defectdojo/disambiguator.json>
+PROBLEM_MAPPINGS_JSON_URL = None
 
 VULNERABILITY_URLS = {
     "CVE": "https://nvd.nist.gov/vuln/detail/",

@@ -5,7 +5,8 @@ import logging
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Endpoint, Finding, Problem
+import dojo.problem.helper as problems_help
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ class NucleiParser:
                 if line != "":
                     data.append(json.loads(line))
         dupes = {}
+        script_to_problem_mapping = problems_help.load_json()
         for item in data:
             logger.debug("Item %s.", str(item))
             template_id = item.get("templateID", item.get("template-id", ""))
@@ -68,6 +70,9 @@ class NucleiParser:
                 nb_occurences=1,
                 vuln_id_from_tool=template_id,
             )
+            if finding.severity != "Info" and finding.vuln_id_from_tool:
+                finding.problem = problems_help.find_or_create_problem(finding, script_to_problem_mapping)
+                finding.save()
             if item.get("timestamp"):
                 finding.date = date_parser.parse(item.get("timestamp"))
             if info.get("description"):

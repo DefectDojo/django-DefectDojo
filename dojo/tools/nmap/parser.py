@@ -4,7 +4,8 @@ import datetime
 from cpe import CPE
 from defusedxml.ElementTree import parse
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Endpoint, Finding, Problem
+import dojo.problem.helper as problems_help
 
 
 class NmapParser:
@@ -31,6 +32,7 @@ class NmapParser:
                 int(root.attrib["start"]),
             )
 
+        script_to_problem_mapping = problems_help.load_json()
         for host in root.findall("host"):
             host_info = "### Host\n\n"
 
@@ -131,6 +133,9 @@ class NmapParser:
                     dupes[dupe_key] = find
                     if report_date:
                         find.date = report_date
+                    if find.severity != "Info" and find.vuln_id_from_tool:
+                        find.problem = problems_help.find_or_create_problem(find, script_to_problem_mapping)
+                        find.save()
 
                 find.unsaved_endpoints.append(endpoint)
         return list(dupes.values())

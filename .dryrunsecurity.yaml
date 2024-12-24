@@ -18,6 +18,7 @@ sensitiveCodepaths:
   - 'dojo/metrics/*.py'
   - 'dojo/note_type/*.py'
   - 'dojo/notes/*.py'
+  - 'dojo/problem/*.py'
   - 'dojo/product/*.py'
   - 'dojo/product_type/*.py'
   - 'dojo/reports/*.py'
