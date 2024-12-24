@@ -138,7 +138,7 @@ fi
 
 if [ -z "${ADMIN_EXISTS}" ]
 then
-  ./entrypoint-first-boot.sh
+  . /entrypoint-first-boot.sh
     
   create_announcement_banner
   initialize_data
