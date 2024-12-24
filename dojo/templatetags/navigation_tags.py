@@ -141,4 +141,4 @@ def can_add_product(user):
 
 @register.filter
 def check_problems_enabled(user):
-    return settings.PROBLEM_MAPPINGS_JSON_URL
+    return settings.PROBLEM_MAPPINGS_JSON_URL is not None
