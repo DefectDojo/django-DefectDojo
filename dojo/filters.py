@@ -21,6 +21,7 @@ from django_filters import (
     CharFilter,
     DateFilter,
     DateFromToRangeFilter,
+    DateTimeFilter,
     FilterSet,
     ModelChoiceFilter,
     ModelMultipleChoiceFilter,
@@ -1456,9 +1457,9 @@ class ApiFindingFilter(DojoFilter):
     jira_change = DateRangeFilter(field_name="jira_issue__jira_change")
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
-    mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact")
-    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt")
-    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt")
+    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact")
+    mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt")
+    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt")
     # NumberInFilter
     cwe = NumberInFilter(field_name="cwe", lookup_expr="in")
     defect_review_requested_by = NumberInFilter(field_name="defect_review_requested_by", lookup_expr="in")
@@ -1587,9 +1588,9 @@ class FindingFilterHelper(FilterSet):
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
-    mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On")
-    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
-    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After")
+    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On")
+    mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
+    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After")
     planned_remediation_date = DateRangeOmniFilter()
     planned_remediation_version = CharFilter(lookup_expr="icontains", label=_("Planned remediation version"))
     file_path = CharFilter(lookup_expr="icontains")
