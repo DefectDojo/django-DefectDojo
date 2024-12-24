@@ -326,7 +326,7 @@
                                             </ul>
                                             <!-- /.nav-second-level -->
                                         </li>
-                                        {% if None|check_problem_habilit %}
+                                        {% if None|check_problems_enabled %}
                                         <li>
                                             <a href="{% url 'open_problems' %}" aria-expanded="false" aria-label="Problems">
                                                 <i class="fa-solid fa-triangle-exclamation fa-fw"></i>
@@ -799,7 +799,7 @@
                                                 {% endif %}
                                             </ul>
                                         </li>
-                                        {% if None|check_problem_habilit %}
+                                        {% if None|check_problems_enabled %}
                                         <!-- Problems Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.title == 'Problems' %} active active-color{% endif %}">
                                             <a class="dropdown-toggle" data-toggle="dropdown" href="#">

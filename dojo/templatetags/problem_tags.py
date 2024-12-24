@@ -10,5 +10,5 @@ def count_distinct_script_ids(findings):
     return len(set(finding.vuln_id_from_tool for finding in findings))
 
 @register.filter
-def check_problem_habilit(value):
+def check_problems_enabled(value):
     return settings.PROBLEM_MAPPINGS_JSON_URL
