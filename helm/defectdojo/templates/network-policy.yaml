@@ -12,6 +12,12 @@ metadata:
     {{- with .Values.extraLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
+{{- if .Values.networkPolicy.annotations }}
+  annotations:
+{{- with .Values.networkPolicy.annotations }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
 spec:
   podSelector:
     matchLabels:

@@ -11,6 +11,12 @@ metadata:
     {{- with .Values.extraLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
+{{- if .Values.annotations }}
+  annotations:
+{{- with .Values.annotations }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
 data:
   DD_ADMIN_USER: {{ .Values.admin.user | default "admin" }}
   DD_ADMIN_MAIL: {{ .Values.admin.Mail | default "admin@defectdojo.local" }}

@@ -13,6 +13,12 @@ metadata:
     {{- with .Values.extraLabels }}
         {{- toYaml . | nindent 4 }}
     {{- end }}
+{{- if .Values.celery.annotations }}
+  annotations:
+{{- with .Values.celery.annotations }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
 spec:
   replicas: {{ .Values.celery.beat.replicas }}
   {{- if .Values.revisionHistoryLimit }}
