@@ -1411,6 +1411,15 @@ class ApiProductFilter(DojoFilter):
     )
 
 
+class PercentageRangeFilter(RangeFilter):
+    def filter(self, qs, value):
+        if value is not None:
+            start = value.start / decimal.Decimal("100.0") if value.start else None
+            stop = value.stop / decimal.Decimal("100.0") if value.stop else None
+            value = slice(start, stop)
+        return super().filter(qs, value)
+
+
 class ApiFindingFilter(DojoFilter):
     # BooleanFilter
     active = BooleanFilter(field_name="active")
@@ -1463,6 +1472,23 @@ class ApiFindingFilter(DojoFilter):
     cwe = NumberInFilter(field_name="cwe", lookup_expr="in")
     defect_review_requested_by = NumberInFilter(field_name="defect_review_requested_by", lookup_expr="in")
     endpoints = NumberInFilter(field_name="endpoints", lookup_expr="in")
+    epss_score = PercentageRangeFilter(
+        field_name="epss_score",
+        label="EPSS score range",
+        help_text=(
+            "The range of EPSS score percentages to filter on; the min input is a lower bound, "
+            "the max is an upper bound. Leaving one empty will skip that bound (e.g., leaving "
+            "the min bound input empty will filter only on the max bound -- filtering on "
+            '"less than or equal"). Leading 0 required.'
+        ))
+    epss_percentile = PercentageRangeFilter(
+        field_name="epss_percentile",
+        label="EPSS percentile range",
+        help_text=(
+            "The range of EPSS percentiles to filter on; the min input is a lower bound, the max "
+            "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the min bound "
+            'input empty will filter only on the max bound -- filtering on "less than or equal"). Leading 0 required.'
+        ))
     found_by = NumberInFilter(field_name="found_by", lookup_expr="in")
     id = NumberInFilter(field_name="id", lookup_expr="in")
     last_reviewed_by = NumberInFilter(field_name="last_reviewed_by", lookup_expr="in")
@@ -1562,15 +1588,6 @@ class PercentageFilter(NumberFilter):
             f"{name}__gte": value,
             f"{name}__lt": max_val}
         return queryset.filter(**lookup_kwargs)
-
-
-class PercentageRangeFilter(RangeFilter):
-    def filter(self, qs, value):
-        if value is not None:
-            start = value.start / decimal.Decimal("100.0") if value.start else None
-            stop = value.stop / decimal.Decimal("100.0") if value.stop else None
-            value = slice(start, stop)
-        return super().filter(qs, value)
 
 
 class FindingFilterHelper(FilterSet):
