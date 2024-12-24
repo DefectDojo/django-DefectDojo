@@ -68,6 +68,7 @@ COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
+  docker/entrypoint-first-boot.sh \
   docker/entrypoint-uwsgi.sh \
   docker/entrypoint-uwsgi-dev.sh \
   docker/entrypoint-unit-tests.sh \
