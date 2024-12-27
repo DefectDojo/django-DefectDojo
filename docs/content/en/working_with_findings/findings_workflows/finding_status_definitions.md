@@ -54,7 +54,7 @@ Findings cannot always be remediated or addressed for various reasons. You can a
 
 Risk Acceptances have expiry dates, at which time you can reevaluate the impact of the Finding and decide what to do next.
 
-For more information on Risk Acceptances, see our [Guide](../risk-acceptances)
+For more information on Risk Acceptances, see our [Guide](../risk_acceptances).
 
 ## **Out Of Scope**
 

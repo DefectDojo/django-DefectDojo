@@ -74,7 +74,7 @@ If you’re in charge of security reporting for many different contexts, softwar
 * Each Product in DefectDojo can have a different SLA configuration, so that you can instantly flag Findings that are discovered in Production or other highly sensitive environments.
 * You can create a report directly from a **Product Type, Product, Engagement or Test** to ‘zoom in and out’ of your security context. **Tests** contain results from a single tool, **Engagements** can combine multiple Tests, **Products** can contain multiple Engagements, **Product Types** can contain multiple Products.
 
-For more information on creating a Report, see our guides to **[Custom Reporting](https://docs.defectdojo.com/en/pro_reports/using_the_report_builder/)**.
+For more information on creating a Report, see our guides to **[Custom Reporting](/en/pro_reports/using_the_report_builder/)**.
 
 ### Triage Vulnerabilities using Finding Status
 
@@ -105,6 +105,5 @@ If a Finding’s EPSS score changes (i.e. the related Finding becomes more explo
 
 # Next Steps:
 
-* Learn how to add or adjust data on your Findings through the **[Edit Findings](https://docs.defectdojo.com/en/working_with_findings/findings_workflows/editing-findings/)** menu.
-* Learn how to update Findings in bulk using the **[Bulk Edit](https://docs.defectdojo.com/en/working_with_findings/findings_workflows/bulk-editing-findings/)** menu.
-* Learn how to apply **[Risk Acceptances](https://docs.defectdojo.com/en/working_with_findings/risk-acceptances/)** to Findings which create a record of sensitive decisions made surrounding risk\-accepted vulnerabilities.
+* Learn how to add or adjust data on your Findings: **[Editing Findings](../findings_workflows/editing_findings)**.
+* Learn how to apply **[Risk Acceptances](../findings_workflows/risk_acceptances/)** to Findings which create a record of sensitive decisions made surrounding risk\-accepted vulnerabilities.

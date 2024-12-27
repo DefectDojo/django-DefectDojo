@@ -36,7 +36,7 @@ DefectDojo has two methods for importing test data to create Findings: **Import*
 
 Each time you import new vulnerability reports into DefectDojo, those reports will be stored in a Test object. A Test object can be created by a user ahead of time to hold a future **Import**. If a user wants to import data without specifying a Test destination, a new Test will be created to store the incoming report.
 
-Tests are flexible objects, and although they can only hold one *kind* of report, they can handle multiple instances of that same report through the **Reimport** method. To learn more about Reimport, see our **[article](https://docs.defectdojo.com/en/connecting_your_tools/import_scan_files/using_reimport/)** on this topic.
+Tests are flexible objects, and although they can only hold one *kind* of report, they can handle multiple instances of that same report through the **Reimport** method. To learn more about Reimport, see our **[article](/en/connecting_your_tools/import_scan_files/using_reimport)** on this topic.
 
 ## When are Duplicate Findings acceptable?
 
