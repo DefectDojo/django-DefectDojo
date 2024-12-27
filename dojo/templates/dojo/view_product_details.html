@@ -337,9 +337,9 @@
                             <td>{% trans "Product member" %}</td>
                             <td name="member_role">{{ member.role }}</td>
                             {% if member.exclusive_permission_product.all %} 
-                              <td>
-                                {{member.exclusive_permission_product.all | render_exclusive_permission_for_member}}
-                              </td>
+                            <td>
+                              {{member.exclusive_permission_product.all | render_exclusive_permission_for_member}}
+                            </td>
                             {% else %}
                               <td></td>
                             {%endif%}
@@ -356,6 +356,7 @@
                                 </a>
                             </td>
                             <td>{{ member.role }}</td>
+                            <td></td>
                         </tr>
                     {% endfor %}
                     {% for member in global_product_members %}
@@ -365,6 +366,7 @@
                             <td>{{ member.user.get_full_name }}</td>
                             <td>Global role</td>
                             <td>{{ member.role }}</td>
+                            <td></td>
                         </tr>
                     {% endfor %}
                     </tbody>

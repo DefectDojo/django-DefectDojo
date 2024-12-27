@@ -99,7 +99,7 @@ from dojo.notifications.helper import create_notification
 from dojo.transfer_findings.notification import Notification as TransferFindingsNotification
 from dojo.transfer_findings.helper import get_sla_expiration_transfer_finding
 from dojo.product.queries import get_authorized_products
-from dojo.product_type.helper import get_contacts_product_typ_and_product
+from dojo.product_type.helper import get_contacts_product_type_and_product
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.tools.factory import get_scan_types_sorted
 from dojo.user.queries import get_authorized_users, get_role_members
@@ -1233,7 +1233,7 @@ def get_risk_acceptance_pending(request,
             form = RiskPendingForm(severity=finding.severity,product_id=product.id, product_type_id=product_type.id,
                 initial={'owner': request.user,
                         'name': risk_acceptance_title_suggestion,
-                        'accepted_by': get_contacts_product_typ_and_product(eng, finding.severity, request.user),
+                        'accepted_by': get_contacts_product_type_and_product(eng, finding.severity, request.user),
                         "severity": finding.severity})
     else:
         form = RiskAcceptanceForm(severity=finding.severity, initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})

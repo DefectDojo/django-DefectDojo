@@ -1102,13 +1102,13 @@ def import_history(finding):
 @register.filter()
 def render_exclusive_permission_for_member(exclusive_permissions: list[ExclusivePermission]):
     html_contect = ""
-    html_item = "<span class='pass_fail Pass'>{{permission}}</span><br/>"
+    html_item = "<span class='pass_fail Pass'>{{permission}}</span>"
     for i in range(len(exclusive_permissions)):
         html_contect += html_item.replace("permission", f"permission{str(i)}")
     
     context = {}
     for i, exclusive_permission in enumerate(exclusive_permissions):
-        context[f"permission{str(i)}"] = exclusive_permission.name
+        context[f"permission{str(i)}"] = exclusive_permission.short_name
 
     template_object = template.Template(html_contect)
     context_object = template.Context(context)

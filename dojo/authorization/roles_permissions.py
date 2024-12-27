@@ -660,6 +660,7 @@ def get_roles_with_permissions():
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
             Permissions.Product_Member_Edit,
+            Permissions.Product_Member_Add_Owner,
             Permissions.Product_Manage_Members,
             Permissions.Product_Member_Add_Role,
             Permissions.Product_Tag_Red_Team,

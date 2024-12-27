@@ -21,7 +21,7 @@ from dojo.models import (
     )
 from dojo.api_v2.api_error import ApiError
 from dojo.risk_acceptance.helper import post_jira_comments, handle_from_provider_risk
-from dojo.product_type.helper import get_contacts_product_typ_and_product
+from dojo.product_type.helper import get_contacts_product_type_and_product
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
 from dojo.authorization.roles_permissions import Permissions
@@ -257,7 +257,7 @@ def is_permissions_risk_acceptance(
     ):
         result = True
 
-    contacts = get_contacts_product_typ_and_product(engagement, finding.severity, user)
+    contacts = get_contacts_product_type_and_product(engagement, finding.severity, user)
     if contacts:
         contacts_ids = [contact.id for contact in contacts]
         if user.id in contacts_ids and finding.risk_accepted is False:

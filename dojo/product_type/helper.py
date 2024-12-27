@@ -5,7 +5,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-def get_contacts_product_typ_and_product(engagement: Engagement, finding_serverity: str, user):
+def get_contacts_product_type_and_product(engagement: Engagement, finding_serverity: str, user):
     rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding_serverity)
     product_type = engagement.product.get_product_type
     contacts = rule.get("type_contacts").get(json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type.name.split(" - ")[0]]).get("users")
