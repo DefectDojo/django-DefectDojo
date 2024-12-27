@@ -1,5 +1,5 @@
 ---
-title: "DefectDojo Cloud Manager"
+title: "☁️ DefectDojo Cloud"
 description: "Manage Your DefectDojo subscription"
 summary: ""
 date: 2023-09-07T16:06:50+02:00

@@ -1,5 +1,5 @@
 ---
-title: "Management & Customization"
+title: "👥 Management & Customization"
 description: "Dashboards, User Access"
 summary: ""
 date: 2023-09-07T16:06:50+02:00

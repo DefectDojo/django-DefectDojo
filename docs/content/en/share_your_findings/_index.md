@@ -1,5 +1,5 @@
 ---
-title: "Share Your Findings"
+title: "📤 Share Your Findings"
 description: "Create Reports or Push To Jira"
 summary: ""
 date: 2023-09-07T16:06:50+02:00
