@@ -1,6 +1,7 @@
 ---
 title: "Manage Duplicate Findings"
 description: "How to discover and correct redundancies in your workflow - using Deduplication, Reimiport and other Smart features"
+weight: 3
 ---
 
 One of DefectDojo’s strengths is that the data model can accommodate many different use\-cases and applications. You’ll likely change your approach as you master the software and discover ways to optimize your workflow.

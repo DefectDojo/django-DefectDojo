@@ -1,6 +1,7 @@
 ---
 title: "Introduction to Findings"
 description: "The main workflow and vulnerability tracking system of DefectDojo"
+weight: 1
 ---
 
 Findings are the main way that DefectDojo standardizes and guides the reporting and remediation process of your security tools. Regardless of whether a vulnerability was reported in SonarQube, Acunetix, or your team’s custom tool, Findings give you the ability to manage each vulnerability in the same way.
