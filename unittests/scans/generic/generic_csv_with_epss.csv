@@ -1,0 +1,2 @@
+Date,Title,CweId,epss_score,epss_percentile, Url,Severity,Description,Mitigation,Impact,References,Active,Verified,FalsePositive,Duplicate
+01/30/2018,"Server leaks inodes via ETags, header found with file /, fields: 0xW/109b 0xpqG8TolgxCnpM/7cGOOI0GRS+rc ",0,.00042,.23474,https://192.168.1.1/,Low,"Server leaks inodes via ETags, header found with file /, fields: 0xW/109b 0xpqG8TolgxCnpM/7cGOOI0GRS+rc ",,,,False,False,False,False
