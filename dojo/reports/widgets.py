@@ -368,16 +368,22 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
                           host=None):
     selected_widgets = OrderedDict()
     widgets = json.loads(json_data)
+
     for idx, widget in enumerate(widgets):
         if list(widget.keys())[0] == "page-break":
             selected_widgets[list(widget.keys())[0] + "-" + str(idx)] = PageBreak()
+
         if list(widget.keys())[0] == "endpoint-list":
             endpoints = Endpoint.objects.filter(finding__active=True,
-                                                finding__verified=True,
                                                 finding__false_p=False,
                                                 finding__duplicate=False,
                                                 finding__out_of_scope=False,
-                                                ).distinct()
+                                                )
+            if get_system_setting("enforce_verified_status", True):
+                endpoints = endpoints.filter(finding__verified=True)
+
+            endpoints = endpoints.distinct()
+
             d = QueryDict(mutable=True)
             for item in widget.get(list(widget.keys())[0]):
                 if item["name"] in d:

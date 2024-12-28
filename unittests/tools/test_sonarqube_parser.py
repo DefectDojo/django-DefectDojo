@@ -245,7 +245,7 @@ class TestSonarQubeParser(DojoTestCase):
         my_file_handle.close()
 
     def test_detailed_parse_file_with_rule_undefined(self):
-        """the vulnerability's rule is not in the list of rules"""
+        """The vulnerability's rule is not in the list of rules"""
         my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-rule-undefined.html",
         )

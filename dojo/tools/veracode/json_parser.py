@@ -130,7 +130,7 @@ class VeracodeJSONParser:
                     finding.cvssv3 = CVSS3(str(uncleaned_cvss)).clean_vector(output_prefix=True)
                 elif not uncleaned_cvss.startswith("CVSS"):
                     finding.cvssv3 = CVSS3(f"CVSS:3.1/{str(uncleaned_cvss)}").clean_vector(output_prefix=True)
-            elif isinstance(uncleaned_cvss, (float, int)):
+            elif isinstance(uncleaned_cvss, float | int):
                 finding.cvssv3_score = float(uncleaned_cvss)
         # Fill in extra info based on the scan type
         if scan_type == "STATIC":
@@ -146,10 +146,7 @@ class VeracodeJSONParser:
         finding.dynamic_finding = False
         finding.static_finding = True
         # Get the finding category to get the high level info about the vuln
-        if category := finding_details.get("finding_category"):
-            category_title = category.get("name")
-        else:
-            category_title = None
+        category_title = category.get("name") if (category := finding_details.get("finding_category")) else None
         # Set the title of the finding to the name of the finding category.
         # If not present, fall back on CWE title. If that is not present, do nothing
         if category_title:
@@ -185,10 +182,7 @@ class VeracodeJSONParser:
         finding.dynamic_finding = True
         finding.static_finding = False
         # Get the finding category to get the high level info about the vuln
-        if category := finding_details.get("finding_category"):
-            category_title = category.get("name")
-        else:
-            category_title = None
+        category_title = category.get("name") if (category := finding_details.get("finding_category")) else None
         # Set the title of the finding to the name of the finding category.
         # If not present, fall back on CWE title. If that is not present, do nothing
         if category_title:

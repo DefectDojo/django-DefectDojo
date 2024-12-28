@@ -1,5 +1,4 @@
 import logging
-from typing import List, Tuple
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import deserialize, serialize
@@ -7,7 +6,6 @@ from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-import dojo.notifications.helper as notifications_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -73,7 +71,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         scan: TemporaryUploadedFile,
         *args: list,
         **kwargs: dict,
-    ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
+    ) -> tuple[Test, int, int, int, int, int, Test_Import]:
         """
         The full step process of taking a scan report, and converting it to
         findings in the database. This entails the the following actions:
@@ -129,7 +127,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         updated_count = (
             len(closed_findings) + len(reactivated_findings) + len(new_findings)
         )
-        notifications_helper.notify_scan_added(
+        self.notify_scan_added(
             self.test,
             updated_count,
             new_findings=new_findings,
@@ -158,9 +156,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
     def process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> Tuple[List[Finding], List[Finding], List[Finding], List[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Saves findings in memory that were parsed from the scan report into the database.
         This process involves first saving associated objects such as endpoints, files,
@@ -256,9 +254,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
     def close_old_findings(
         self,
-        findings: List[Finding],
+        findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Updates the status of findings that were detected as "old" by the reimport
         process findings methods
@@ -289,7 +287,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Determine how to parse the findings based on the presence of the
         `get_tests` function on the parser object
@@ -307,7 +305,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Parses the findings from file and assigns them to the test
         that was supplied
@@ -320,7 +318,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Uses the parser to fetch any tests that may have been created
         by the API based parser, aggregates all findings from each test
@@ -331,9 +329,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
     def async_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> Tuple[List[Finding], List[Finding], List[Finding], List[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Processes findings in chunks within N number of processes. The
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
@@ -388,7 +386,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     def match_new_finding_to_existing_finding(
         self,
         unsaved_finding: Finding,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """Matches a single new finding to N existing findings and then returns those matches"""
         # This code should match the logic used for deduplication out of the re-import feature.
         # See utils.py deduplicate_* functions
@@ -429,7 +427,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
         existing_finding: Finding,
-    ) -> Tuple[Finding, bool]:
+    ) -> tuple[Finding, bool]:
         """
         Determine how to handle the an existing finding based on the status
         that is possesses at the time of reimport
@@ -453,7 +451,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
         existing_finding: Finding,
-    ) -> Tuple[Finding, bool]:
+    ) -> tuple[Finding, bool]:
         """
         Determine if there is parity between statuses of the new and existing finding.
         If so, do not touch either finding, and move on to the next unsaved finding
@@ -488,7 +486,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
         existing_finding: Finding,
-    ) -> Tuple[Finding, bool]:
+    ) -> tuple[Finding, bool]:
         """
         Determine how mitigated the existing and new findings really are. We need
         to cover circumstances where mitigation timestamps are different, and
@@ -583,7 +581,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         unsaved_finding: Finding,
         existing_finding: Finding,
-    ) -> Tuple[Finding, bool]:
+    ) -> tuple[Finding, bool]:
         """
         The existing finding must be active here, so we need to compare it
         closely with the new finding coming in and determine how to proceed
@@ -734,7 +732,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     def process_results(
         self,
         **kwargs: dict,
-    ) -> Tuple[List[Finding], List[Finding], List[Finding], List[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Determine how to to return the results based on whether the process was
         ran asynchronous or not

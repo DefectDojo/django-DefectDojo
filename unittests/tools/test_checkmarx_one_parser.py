@@ -68,6 +68,18 @@ class TestCheckmarxOneParser(DojoTestCase):
                 self.assertEqual("High", finding_test.severity)
                 self.assertEqual(89, finding_test.cwe)
 
+    def test_checkmarx_one_no_description(self):
+        with open("unittests/scans/checkmarx_one/checkmarx_one_format_two.json", encoding="utf-8") as testfile:
+            parser = CheckmarxOneParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            with self.subTest(i=0):
+                for finding in findings:
+                    self.assertIsNotNone(finding.title)
+                    self.assertIsNotNone(finding.description)
+                finding_test = findings[0]
+                self.assertEqual("Low", finding_test.severity)
+
     def test_checkmarx_vulnerabilities_from_scan_results(self):
         def test_iac_finding(finding):
             self.assertEqual("Dockerfile: Healthcheck Instruction Missing", finding.title)

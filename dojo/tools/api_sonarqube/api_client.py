@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 from requests.exceptions import JSONDecodeError as RequestsJSONDecodeError
 from rest_framework.exceptions import ValidationError
 from dojo.utils import prepare_for_view
@@ -75,6 +76,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/components/search",
             params=parameters,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
@@ -115,14 +117,13 @@ class SonarQubeAPI:
             parameters["organization"] = organization
         elif self.org_id:
             parameters["organization"] = self.org_id
-        try:
-            response = self.session.get(
-                url=f"{self.sonar_api_url}/components/show",
-                params=parameters,
-                headers=self.default_headers,
-            )
-        except Exception as e:
-            raise ValidationError(e)
+
+        response = self.session.get(
+            url=f"{self.sonar_api_url}/components/show",
+            params=parameters,
+            headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
+        )
 
         if not response.ok:
             msg = (
@@ -175,6 +176,7 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/issues/search",
                 params=request_filter,
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if not response.ok:
@@ -217,6 +219,7 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/hotspots/search",
                 params=request_filter,
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
 
             if not response.ok:
@@ -281,6 +284,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/issues/search",
             params=request_filter,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
@@ -321,6 +325,7 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/rules/show",
                 params=request_filter,
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
             if not response.ok:
                 msg = (
@@ -345,6 +350,7 @@ class SonarQubeAPI:
                 url=f"{self.sonar_api_url}/hotspots/show",
                 params={"hotspot": rule_id},
                 headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
             if not response.ok:
                 msg = (
@@ -388,6 +394,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/issues/do_transition",
             data={"issue": issue_key, "transition": transition},
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:
@@ -409,6 +416,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/issues/add_comment",
             data={"issue": issue_key, "text": text},
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
         if not response.ok:
             msg = (
@@ -428,6 +436,7 @@ class SonarQubeAPI:
             url=f"{self.sonar_api_url}/components/search",
             params=parameters,
             headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if not response.ok:

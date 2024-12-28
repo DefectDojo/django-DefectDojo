@@ -335,3 +335,12 @@ class TestAcunetixParser(DojoTestCase):
             parser = AcunetixParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+
+    def test_parse_file_issue_11206(self):
+        with open("unittests/scans/acunetix/issue_11206.json", encoding="utf-8") as testfile:
+            parser = AcunetixParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual(finding.date, date(2021, 6, 12, 12, 30))

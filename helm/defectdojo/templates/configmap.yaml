@@ -8,6 +8,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 data:
   DD_ADMIN_USER: {{ .Values.admin.user | default "admin" }}
   DD_ADMIN_MAIL: {{ .Values.admin.Mail | default "admin@defectdojo.local" }}
@@ -18,7 +21,7 @@ data:
   DD_CELERY_BROKER_SCHEME: {{ if eq .Values.celery.broker "redis" }}{{ template "redis.scheme" . }}{{ end }}
   DD_CELERY_BROKER_USER: ''
   DD_CELERY_BROKER_HOST: {{ if eq .Values.celery.broker "redis" }}{{ template "redis.hostname" . }}{{ end }}
-  DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "redis" }}{{ .Values.redis.master.service.ports.redis | default "6379" }}{{ end }}'
+  DD_CELERY_BROKER_PORT: '{{ if eq .Values.celery.broker "redis" }}{{- if ( hasKey .Values.redis "master" ) -}}{{ .Values.redis.master.service.ports.redis }}{{ else }}6379{{ end }}{{- end -}}'
   DD_CELERY_BROKER_PARAMS: '{{ if eq .Values.celery.broker "redis" }}{{- if .Values.redis.transportEncryption.enabled -}}{{ .Values.redis.transportEncryption.params | default "ssl_cert_reqs=optional" }}{{ end }}{{ end }}'
   DD_CELERY_BROKER_PATH: '{{ .Values.celery.path | default "//" }}'
   DD_CELERY_LOG_LEVEL: {{ .Values.celery.logLevel }}
@@ -45,5 +48,5 @@ data:
 {{- if  .Values.django.uwsgi.certificates.enabled }}
   REQUESTS_CA_BUNDLE: {{ .Values.django.uwsgi.certificates.certMountPath }}{{ .Values.django.uwsgi.certificates.certFileName }}
 {{- end }}
-{{- if  .Values.extraConfigs  }}
-{{ toYaml .Values.extraConfigs | indent 2 }}{{- end }}
+{{- with .Values.extraConfigs  }}
+  {{- toYaml . | nindent 2 }}{{- end }}

@@ -100,8 +100,7 @@ class RemoteUserScheme(OpenApiAuthenticationExtension):
             return {}
 
         header_name = settings.AUTH_REMOTEUSER_USERNAME_HEADER
-        if header_name.startswith("HTTP_"):
-            header_name = header_name[5:]
+        header_name = header_name.removeprefix("HTTP_")
         header_name = header_name.replace("_", "-").capitalize()
 
         return {

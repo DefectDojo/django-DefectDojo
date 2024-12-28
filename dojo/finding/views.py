@@ -7,7 +7,6 @@ import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
 from itertools import chain
-from typing import Optional
 
 from django.conf import settings
 from django.contrib import messages
@@ -139,6 +138,9 @@ def prefetch_for_findings(findings, prefetch_type="all", exclude_untouched=True)
     if isinstance(
         findings, QuerySet,
     ):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_findings = prefetched_findings.prefetch_related(
+            "reviewers",
+        )
         prefetched_findings = prefetched_findings.prefetch_related("reporter")
         prefetched_findings = prefetched_findings.prefetch_related(
             "jira_issue__jira_project__jira_instance",
@@ -268,9 +270,9 @@ class BaseListFindings:
     def __init__(
         self,
         filter_name: str = "All",
-        product_id: Optional[int] = None,
-        engagement_id: Optional[int] = None,
-        test_id: Optional[int] = None,
+        product_id: int | None = None,
+        engagement_id: int | None = None,
+        test_id: int | None = None,
         order_by: str = "-date",
         prefetch_type: str = "all",
     ):
@@ -423,7 +425,7 @@ class ListFindings(View, BaseListFindings):
 
         return request, context
 
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         # Store the product and engagement ids
         self.product_id = product_id
         self.engagement_id = engagement_id
@@ -449,37 +451,37 @@ class ListFindings(View, BaseListFindings):
 
 
 class ListOpenFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Open"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListVerifiedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Verified"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListOutOfScopeFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Out of Scope"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListFalsePositiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "False Positive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListInactiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Inactive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListAcceptedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Accepted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
@@ -491,7 +493,7 @@ class ListTransferFinding(ListFindings):
 
 
 class ListClosedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Closed"
         self.order_by = "-mitigated"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
@@ -1261,10 +1263,7 @@ def close_finding(request, fid):
     # in order to close a finding, we need to capture why it was closed
     # we can do this with a Note
     note_type_activation = Note_Type.objects.filter(is_active=True)
-    if len(note_type_activation):
-        missing_note_types = get_missing_mandatory_notetypes(finding)
-    else:
-        missing_note_types = note_type_activation
+    missing_note_types = get_missing_mandatory_notetypes(finding) if len(note_type_activation) else note_type_activation
     form = CloseFindingForm(missing_note_types=missing_note_types)
     if request.method == "POST":
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
@@ -1730,7 +1729,7 @@ def request_finding_review(request, fid):
             findings = form.cleaned_data['findings_review']
 
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
-            reviewers_string = ", ".join([str(user) for user in reviewers])
+            reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
             logger.debug(f"Asking {reviewers_string} for review")
 
@@ -1776,7 +1775,7 @@ def request_finding_review(request, fid):
                     finding=finding,
                     reviewers=reviewers,
                     recipients=reviewers_usernames,
-                    description=f"User {user.get_full_name()} has requested review the finding {finding.title}",
+                    description=f'User {user.get_full_name()}({user.id}) has requested that user(s) {reviewers_string} review the finding "{finding.title}" for accuracy:\n\n{new_note}',
                     icon="check",
                     url=reverse("view_finding", args=(finding.id,)),
                 )
@@ -2355,10 +2354,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                     cwe=title_template.cwe,
                     title__icontains=title_template.title,
                 ).values_list("id", flat=True)
-                if result_list is None:
-                    result_list = finding_ids
-                else:
-                    result_list = list(chain(result_list, finding_ids))
+                result_list = finding_ids if result_list is None else list(chain(result_list, finding_ids))
 
             # If result_list is None the filter exclude won't work
             if result_list:
@@ -2460,16 +2456,7 @@ def edit_template(request, tid):
             count = apply_cwe_mitigation(
                 form.cleaned_data["apply_to_findings"], template,
             )
-            if count > 0:
-                apply_message = (
-                    " and "
-                    + str(count)
-                    + " "
-                    + pluralize(count, "finding,findings")
-                    + " "
-                )
-            else:
-                apply_message = ""
+            apply_message = " and " + str(count) + " " + pluralize(count, "finding,findings") + " " if count > 0 else ""
 
             messages.add_message(
                 request,
