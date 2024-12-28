@@ -31,6 +31,7 @@ from tagulous.forms import TagField
 
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.authorization import user_has_global_permission
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings, get_authorized_findings_by_status
@@ -100,6 +101,8 @@ from dojo.models import (
     Tool_Type,
     User,
     UserContactInfo,
+    ExclusivePermission,
+    Role,
 )
 from dojo.group.queries import get_users_for_group
 from dojo.product.queries import get_authorized_products
@@ -465,11 +468,31 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
 class Edit_Product_MemberForm(forms.ModelForm):
 
+    exclusive_permission = forms.ModelMultipleChoiceField(
+        queryset=ExclusivePermission.objects.none(),
+        required=False,
+        label="Exclusive Permission")
+
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         self.fields["product"].disabled = True
+        self.fields["role"].disabled = not user_has_global_permission(
+            user, Permissions.Product_Member_Add_Role
+        )
         self.fields["user"].queryset = Dojo_User.objects.order_by("first_name", "last_name")
         self.fields["user"].disabled = True
+        self.fields["exclusive_permission"].queryset = ExclusivePermission.objects.all()
+
+        if self.instance.pk:
+            self.fields["exclusive_permission"].initial = self.instance.exclusive_permission_product.all()
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if commit:
+            self.save_m2m()
+            instance.exclusive_permission_product.set(self.cleaned_data['exclusive_permission'])
+        return instance
 
     class Meta:
         model = Product_Member
@@ -478,14 +501,33 @@ class Edit_Product_MemberForm(forms.ModelForm):
 
 class Add_Product_MemberForm(forms.ModelForm):
     users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label="Users")
+    exclusive_permission = forms.ModelMultipleChoiceField(
+        queryset=ExclusivePermission.objects.none(),
+        required=False,
+        label="Exclusive Permission")
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         self.fields["product"].disabled = True
+        self.fields["role"].disabled = not user_has_global_permission(user, Permissions.Product_Member_Add_Role)
         current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list("user", flat=True)
+        self.fields["exclusive_permission"].queryset = ExclusivePermission.objects.all()
         self.fields["users"].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True)
             | Q(id__in=current_members)).exclude(is_active=False).order_by("first_name", "last_name")
+    
+    
+        if self.instance.pk:
+            self.fields["exclusive_permission"].initial = self.instance.exclusive_permission_product.all()
+    
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if commit:
+            self.save_m2m()
+            for permission in self.cleaned_data['exclusive_permission']:
+                permission.members.add(instance)
+        return instance
 
     class Meta:
         model = Product_Member
@@ -1047,7 +1089,7 @@ class RiskPendingForm(forms.ModelForm):
             self.fields['accepted_by'].widget = forms.widgets.SelectMultiple(attrs={'size': 10})
             self.fields['accepted_by'].queryset = get_users_for_group('Compliance')
         else:
-            users_approvers = self.fields['accepted_by'].queryset if self.fields['owner'].queryset.filter(global_role__role__name="Maintainer").exists() else self.fields['accepted_by'].queryset.filter(~Q(global_role__role__name="Maintainer"))
+            users_approvers = self.fields['accepted_by'].queryset.filter(username=owner_username) if self.fields['owner'].queryset.filter(global_role__role__name="Maintainer").exists() else self.fields['accepted_by'].queryset.filter(~Q(global_role__role__name="Maintainer"))
             self.fields['approvers'].initial = list(users_approvers.values_list('username', flat=True))
         
 
@@ -2130,6 +2172,7 @@ class ReviewFindingForm(forms.Form):
         },
     )
     allow_all_reviewers = forms.BooleanField(
+        disabled=True,
         required=False,
         label="Allow All Eligible Reviewers",
         help_text=(

@@ -1249,6 +1249,7 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
 
         findings = form.cleaned_data['accepted_findings']
         form.fields["accepted_findings"].queryset = form.fields["accepted_findings"].queryset.filter(duplicate=False, test__engagement=eng, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        form.fields["approvers"].widget.attrs['value'] = form.fields["approvers"].initial
         white_list_final = None
         len_white_list = 0
         findings_not_on_white_list = []
@@ -1338,11 +1339,11 @@ def post_risk_acceptance_pending(request, finding: Finding, eng, eid, product: P
                 or rp_helper.role_has_exclusive_permissions(request.user)
                 or white_list_final
                 or rp_helper.get_role_members(request.user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
-                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
             elif rp_helper.rule_risk_acceptance_according_to_critical(finding.severity, request.user, product, product_type):
                 risk_acceptance = ra_helper.add_findings_to_risk_pending(risk_acceptance, findings)
             else:
-                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(risk_acceptance, findings)
+                risk_acceptance = ra_helper.add_findings_to_risk_acceptance(request.user, risk_acceptance, findings)
 
         messages.add_message(
             request,
@@ -1386,7 +1387,7 @@ def add_risk_acceptance_pending(request, eid, fid):
             )
             .filter(
                 NOT_ACCEPTED_FINDINGS_QUERY
-                & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-"))
+                & ~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-"))
             )
             .order_by("title")
         )
@@ -1645,7 +1646,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
             finding = get_object_or_404(
                 Finding, pk=request.POST["remove_finding_id"])
             if settings.RISK_PENDING:
-                rp_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
+                rp_helper.remove_finding_from_risk_acceptance(risk_acceptance, finding)
             else:
                 ra_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
 
@@ -1658,7 +1659,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         if "risk_accept_pending" in request.POST:
             finding = get_object_or_404(Finding,
                                         pk=request.POST["risk_accept_finding_id"])
-            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance, product, product_type)
+            response=rp_helper.risk_acceptante_pending(eng, finding, risk_acceptance, product, product_type, permission_key=None)
         if "risk_accept_decline" in request.POST:
             finding = get_object_or_404(Finding,
                                         pk=request.POST["risk_accept_finding_id"])
@@ -1764,7 +1765,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                                                      active=True,
                                                      risk_accepted=False,
                                                      severity=risk_acceptance.severity,
-                                                     duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-")))
+                                                     duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")))
         if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
             unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
     else:
@@ -1819,8 +1820,7 @@ def accept_risk_acceptance(request, eid, raid):
     eng = get_object_or_404(Engagement, pk=eid)
     product = eng.product
     product_type = product.get_product_type
-    rp_helper.accept_risk_pending_bullk(eng, risk_acceptance, product, product_type)
-    logger.debug("Risk Accepted all")
+    rp_helper.accept_or_reject_risk_bulk(eng, risk_acceptance, product, product_type, action="accept", permission_key=None)
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")

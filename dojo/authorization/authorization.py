@@ -9,6 +9,7 @@ from dojo.authorization.roles_permissions import (
 )
 from dojo.models import (
     App_Analysis,
+    Component,
     Cred_Mapping,
     Dojo_Group,
     Dojo_Group_Member,
@@ -109,6 +110,13 @@ def user_has_permission(user, obj, permission):
         and permission in Permissions.get_finding_group_permissions()):
         return user_has_permission(
             user, obj.test.engagement.product, permission,
+        )
+    if (
+        isinstance(obj, Component)
+        and permission in Permissions.get_component_permissions()
+    ):
+        return user_has_permission(
+            user, obj.engagement, permission,
         )
     if (isinstance(obj, TransferFinding) and permission in Permissions.get_transfer_finding_permissions()):
         return custom_permissions_transfer_findings(user, obj, permission)

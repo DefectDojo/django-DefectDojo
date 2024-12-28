@@ -33,6 +33,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
+from dojo import engagement
 import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
@@ -147,6 +148,7 @@ from dojo.models import (
     Tool_Type,
     User,
     UserContactInfo,
+    Component,
 )
 from dojo.product.queries import (
     get_authorized_app_analysis,
@@ -169,7 +171,8 @@ from dojo.reports.views import (
 )
 from dojo.risk_acceptance import api as ra_api
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
-from dojo.risk_acceptance.risk_pending import accept_risk_pending_bullk 
+from dojo.risk_acceptance.notification import Notification as NotificationRiskAcceptance
+from dojo.risk_acceptance.risk_pending import accept_or_reject_risk_bulk, get_user_with_permission_key
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
@@ -758,22 +761,40 @@ class RiskAcceptanceViewSet(
         request=RiskAcceptanceEmailSerializer,
     )
     @action(detail=True, methods=["post"])
-    def accept_bullk(self, request, pk=None):
+    def accept_bulk(self, request, pk=None):
         risk_acceptance = get_object_or_404(Risk_Acceptance.objects, id=pk)
+        eng = Risk_Acceptance.objects.get(id=pk).accepted_findings.all().first().test.engagement
+        product = eng.product
+        product_type = product.prod_type
+        permission_key = request.data.get("permission_key", None)
+        action = request.data.get("actions", None)
         try:
-            eng = Risk_Acceptance.objects.get(id=pk).accepted_findings.all().first().test.engagement
-            product = eng.product
-            product_type = product.prod_type
-            permission_key = request.data.get("permission_key", None)
-        except Exception as e:
-            logger.error("Failed accept bullk {e}")
-            ApiError.internal_server_error(detail=str(e))
+            accept_or_reject_risk_bulk(
+                eng=eng,
+                risk_acceptance=risk_acceptance,
+                product=product,
+                product_type=product_type,
+                action=action,
+                permission_key=permission_key)
 
-        accept_risk_pending_bullk(eng, risk_acceptance,
-                                  product,
-                                  product_type,
-                                  permission_key)
-        return http_response.ok(message="Acceptance process completed")
+            logger.info("send message of confirmation for leader(s)")
+            NotificationRiskAcceptance.proccess_confirmation(
+                risk_pending=risk_acceptance,
+                error=action,
+                user_leader=get_user_with_permission_key(permission_key)
+            )
+            return http_response.ok(message="Acceptance process successfully completed")
+        except Exception as e:
+            logger.error(f"Failed accept bulk: {e}")
+            NotificationRiskAcceptance.proccess_confirmation(
+                    risk_pending=risk_acceptance,
+                    user_leader=get_user_with_permission_key(permission_key, raise_exception=False),
+                    error=str(e),
+                    product=product.name,
+                    product_type=product_type.name
+                )
+            raise ApiError.internal_server_error(detail=str(e))
+
 
 
 @extend_schema_view(**schema_with_prefetch())
@@ -1540,6 +1561,29 @@ class FindingViewSet(
         return Response(
             {"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class ComponentViewSet(viewsets.ModelViewSet):
+    queryset = Component.objects.none()
+    serializer_class = serializers.ComponentSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["name", "version", "date", "engagement_id"]
+    permission_classes = (
+        IsAuthenticated, 
+        permissions.UserHasComponentPermission,)
+
+    def get_queryset(self):
+        queryset = Component.objects.all()
+        engagement_id = self.request.GET.get('engagement_id')
+        if engagement_id:
+            queryset = queryset.filter(engagement_id=engagement_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    def perform_update(self, serializer):
+        serializer.save()
 
 
 # Authorization: configuration
@@ -3345,3 +3389,4 @@ class NotificationWebhooksViewSet(
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = "__all__"
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)  # TODO: add permission also for other users
+

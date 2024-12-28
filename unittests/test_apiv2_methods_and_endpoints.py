@@ -29,6 +29,7 @@ from dojo.models import (
     TransferFindingFinding,
     TransferFinding,
     PermissionKey,
+    ExclusivePermission,
 )
 from dojo.urls import v2_api
 
@@ -54,7 +55,7 @@ class ApiEndpointMethods(DojoTestCase):
             "questionnaire_answers", "questionnaire_answered_questionnaires",
             "questionnaire_engagement_questionnaires", "questionnaire_general_questionnaires",
             "dojo_group_members", "product_members", "product_groups", "product_type_groups",
-            "product_type_members",
+            "product_type_members", "components"
         ]
         for reg, _, _ in sorted(self.registry):
             if reg in exempt_list:
@@ -117,6 +118,7 @@ class ApiEndpoints(DojoTestCase):
             Choice,
             TransferFindingFinding,
             PermissionKey,
+            ExclusivePermission,
         ]
 
     def test_is_defined(self):

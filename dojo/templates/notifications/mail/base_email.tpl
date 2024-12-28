@@ -175,10 +175,31 @@
 				outline: none;
 			}
 
-			.proton-table a.proton-button:hover {
-				color: #000000  !important;
-				background: #04f19a !important;
-			}
+			.proton-button-actions-reject{
+				font-size: 12px;
+				padding: 2px 0px;
+				margin: 20px 2px;
+				color: #040404 !important;
+				background: #ff7902  !important;
+				border-radius: 10px;
+				text-decoration: none;
+				outline: none;
+				width: 60px;
+				float: left;
+		}
+
+		.proton-button-actions-accept{
+				font-size: 12px;
+				padding: 2px 0px;
+				margin: 20px 2px;
+				color: #040404 !important;
+				background: #00ab46 !important;
+				border-radius: 10px;
+				text-decoration: none;
+				outline: none;
+				width: 60px;
+				float: left;
+		}
 
 			.proton-flex {
 				float: left;

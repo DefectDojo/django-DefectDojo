@@ -10,6 +10,7 @@ from dojo.transfer_findings import helper as hp_transfer_finding
 import dojo.jira_link.helper as jira_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
+from dojo.importers.utils import get_or_create_component, encode_datetime, decode_datetime
 from dojo.models import (
     Engagement,
     Finding,
@@ -174,6 +175,18 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             if Finding.SEVERITIES[unsaved_finding.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
+            
+            if hasattr(unsaved_finding, "component_name") and hasattr(unsaved_finding, "component_version"):
+                component_name = unsaved_finding.component_name
+                component_version = unsaved_finding.component_version
+                if component_name and component_version:
+                    component = get_or_create_component(
+                        component_name,
+                        component_version,
+                        self.engagement
+                    )
+
+                    unsaved_finding.component = component
 
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
@@ -238,7 +251,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         sync = kwargs.get("sync", True)
         if not sync:
-            return [serialize("json", [finding]) for finding in new_findings]
+            return [serialize("json", [encode_datetime(finding)]) for finding in new_findings]
         return new_findings
 
     def close_old_findings(
@@ -429,7 +442,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         for results in results_list:
             serial_new_findings = results
             new_findings += [
-                    next(deserialize("json", self.decode_datetime(finding))).object
+                    next(deserialize("json", decode_datetime(finding))).object
                     for finding in serial_new_findings
                 ]
         logger.info("IMPORT_SCAN: All Findings Collected")

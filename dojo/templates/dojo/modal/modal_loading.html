@@ -16,7 +16,7 @@
     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
 
    $(document).ready(function() {
-       $(document).on("click", "#id_bullk_risk_accepted", function() {
+       $(document).on("click", ".accept-risk_acceptance", function() {
            $('#id_loading_modal').modal('show') 
            eid = $(this).attr("data-eid")
            raid =$(this).attr("data-raid")

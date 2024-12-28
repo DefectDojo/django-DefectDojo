@@ -351,9 +351,13 @@ env = environ.FileAwareEnv(
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
     DD_COMPLIANCE_FILTER_RISK=(str, ""),
+    # Microsoft Entra id for risk acceptance for email
+    DD_TENAN_ID=(str, ""),
+    DD_CLIENT_ID=(str, ""),
+    DD_CALLBACK_URL=(str, ""),
     # The varible that allows settings acceptance for email
     DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL=(bool, False),
-    DD_LIFETIME_MINUTE_PERMISSION_KEY=(int, 2880),
+    DD_LIFETIME_HOURS_PERMISSION_KEY=(int, 48),
     DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL=(str, "http://localhost/8080"),
     # System user for automated resource creation
     DD_SYSTEM_USER=(str, "admin"),
@@ -443,6 +447,7 @@ env = environ.FileAwareEnv(
     }),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
+    AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30)
@@ -1804,7 +1809,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Azure Security Center Recommendations Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Hadolint Dockerfile check": DEDUPE_ALGO_HASH_CODE,
     "Semgrep JSON Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    "Generic Findings Import": DEDUPE_ALGO_HASH_CODE,
+    "Generic Findings Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Trufflehog Scan": DEDUPE_ALGO_HASH_CODE,
     "Trufflehog3 Scan": DEDUPE_ALGO_HASH_CODE,
     "Detect-secrets Scan": DEDUPE_ALGO_HASH_CODE,
@@ -2133,8 +2138,13 @@ RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING
 COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 # Acceptace for email
 ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
-LIFETIME_MINUTE_PERMISSION_KEY = env("DD_LIFETIME_MINUTE_PERMISSION_KEY")
+LIFETIME_HOURS_PERMISSION_KEY = env("DD_LIFETIME_HOURS_PERMISSION_KEY")
 HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
+
+TENAN_ID = env("DD_TENAN_ID")
+CLIENT_ID = env("DD_CLIENT_ID")
+CALLBACK_URL = env("DD_CALLBACK_URL")
+
 # System user for automated resource creation
 SYSTEM_USER = env("DD_SYSTEM_USER")
 # Engine Backend

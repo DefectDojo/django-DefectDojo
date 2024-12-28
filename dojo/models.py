@@ -19,7 +19,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError 
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
 from django.db import connection, models
@@ -2286,6 +2286,29 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return f"{self.finding.id}: {self.action}"
 
 
+class Component(models.Model):
+    name = models.CharField(null=False,
+                            blank=True,
+                            max_length=500,
+                            verbose_name=_("Component name"),
+                            help_text=_("Name of the component (library name, part of a system, ...)."))
+    version = models.CharField(null=False,
+                                blank=True,
+                                max_length=100,
+                                verbose_name=_("Component version"),
+                                help_text=_("Version of the component."))
+    date = models.DateField(default=get_current_date,
+                            verbose_name=_("Date"),
+                            help_text=_("The date the flaw was discovered."))
+    engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("name", "version", "engagement")
+        ordering = ("-date", "name")
+
+    def __str__(self):
+        return f"{self.id} - {self.name[:80] + '...' if len(self.name) > 80 else self.name}"
+
 class Finding(models.Model):
 
     STATUS_CHOICES = (('Risk Pending', 'Risk Pending'),
@@ -2544,6 +2567,11 @@ class Finding(models.Model):
                                          max_length=100,
                                          verbose_name=_("Component version"),
                                          help_text=_("Version of the affected component."))
+    component = models.ForeignKey(Component, 
+                                  on_delete=models.SET_NULL, 
+                                  blank=True, 
+                                  null=True,
+                                  help_text=_("Reference to the component"))
     found_by = models.ManyToManyField(Test_Type,
                                       editable=False,
                                       verbose_name=_("Found by"),
@@ -4249,6 +4277,9 @@ class Notifications(models.Model):
     risk_acceptance_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_("Risk Acceptance Request"),
         help_text=_("Send notification to the contacts of the product type"))
+    risk_acceptance_confirmed = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
+        verbose_name=_("Risk Acceptance Confirmed"),
+        help_text=_("Send notification to confirm acceptance process"))
     transfer_finding = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT_MAIL, blank=True,
         verbose_name=_("Transfer Finding"),
         help_text=_("Send notification to the contacts of the product"))
@@ -4297,6 +4328,7 @@ class Notifications(models.Model):
                 result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
                 result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
                 result.risk_acceptance_request = {*result.risk_acceptance_request, *notifications.risk_acceptance_request}
+                result.risk_acceptance_confirmed = {*result.risk_acceptance_confirmed, *notifications.risk_acceptance_confirmed}
         return result
 
 
@@ -4797,7 +4829,7 @@ class PermissionKey(models.Model):
     created = models.DateTimeField(auto_now=True)
     expiration = models.DateTimeField()
 
-    def is_expired(self):
+    def is_active(self):
         return self.status
     
     def expire(self):
@@ -4814,7 +4846,7 @@ class PermissionKey(models.Model):
         ):
 
         token = secrets.token_urlsafe(64)
-        expiration = timezone.now() + timedelta(minutes=lifetime)
+        expiration = timezone.now() + timedelta(hours=lifetime)
         try:
             permissionkey = cls.objects.create(
                 token=token,
@@ -4832,7 +4864,38 @@ class PermissionKey(models.Model):
                 expiration=expiration)
 
         return permissionkey
-            
+    
+    @classmethod 
+    def get_token(cls, risk_acceptance: Risk_Acceptance, user: Dojo_User):
+        try:
+            permission_key = cls.objects.get(risk_acceptance=risk_acceptance,
+                                            user=user)
+        except ObjectDoesNotExist as e:
+            logger.error(f"Permission key not found for user {user.id} associated with risk acceptance {risk_acceptance.id}")
+            raise e 
+        return permission_key
+
+
+class ExclusivePermission(models.Model):
+    name = models.CharField(max_length=50,
+                           unique=True,
+                           blank=True,
+                           help_text=_("name permission")) 
+    description = models.CharField(max_length=128,
+                                  help_text=_("Short permit description"),
+                                  null=True,
+                                  blank=True) 
+    members = models.ManyToManyField(Product_Member,
+                                    related_name="exclusive_permission_product",
+                                    blank=True)
+    
+    class Meta:
+        verbose_name = _("Exclusive Permission")
+        verbose_name_plural = _("Exclusive Permissions")
+
+    def __str__(self):
+        return self.description
+   
 
 
 if settings.ENABLE_AUDITLOG:
@@ -4895,6 +4958,7 @@ admin.site.register(Risk_Acceptance)
 admin.site.register(PermissionKey)
 admin.site.register(TransferFinding)
 admin.site.register(TransferFindingFinding)
+admin.site.register(ExclusivePermission)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
 admin.site.register(Endpoint_Params)
@@ -4958,3 +5022,4 @@ admin.site.register(General_Survey)
 admin.site.register(Test_Import)
 admin.site.register(Test_Import_Finding_Action)
 admin.site.register(Finding_Group)
+admin.site.register(Component)

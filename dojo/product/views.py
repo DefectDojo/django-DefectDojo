@@ -10,10 +10,9 @@ from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
-from django.contrib.postgres.aggregates import StringAgg
 from django.core.paginator import Paginator
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import DEFAULT_DB_ALIAS, connection
+from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Count, F, Max, OuterRef, Prefetch, Q, Subquery, Sum
 from django.db.models.expressions import Value
 from django.db.models.query import QuerySet
@@ -30,7 +29,6 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.components.sql_group_concat import Sql_GroupConcat
 from dojo.filters import (
     EngagementFilter,
     EngagementFilterWithoutObjectLookups,
@@ -74,6 +72,7 @@ from dojo.models import (
     App_Analysis,
     Benchmark_Product_Summary,
     BurpRawRequestResponse,
+    Component,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -93,6 +92,7 @@ from dojo.models import (
     System_Settings,
     Test,
     Test_Type,
+    ExclusivePermission,
 )
 from dojo.product.queries import (
     get_authorized_global_groups_for_product,
@@ -313,41 +313,34 @@ def view_product(request, pid):
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(prod, title=_("Product"), tab="components")
-    separator = ", "
+    
+    component_query = Component.objects.filter(engagement__product=prod)
 
-    # Get components ordered by component_name and concat component versions to the same row
-    if connection.vendor == "postgresql":
-        component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name").order_by(
-            "component_name").annotate(
-            component_version=StringAgg("component_version", delimiter=separator, distinct=True, default=Value("")))
-    else:
-        component_query = Finding.objects.filter(test__engagement__product__id=pid).values("component_name")
-        component_query = component_query.annotate(
-            component_version=Sql_GroupConcat("component_version", separator=separator, distinct=True))
+    component_query = component_query.annotate(
+        total_findings=Count('finding__id', distinct=True),
+        active_findings=Count('finding__id', filter=Q(finding__active=True), distinct=True),
+        duplicate_findings=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True),
+        engagement_name=F('engagement__name')
+    )
 
-    # Append finding counts
-    component_query = component_query.annotate(total=Count("id")).order_by("component_name", "component_version")
-    component_query = component_query.annotate(active=Count("id", filter=Q(active=True)))
-    component_query = component_query.annotate(duplicate=(Count("id", filter=Q(duplicate=True))))
+    component_query = component_query.order_by("-total_findings")
 
-    # Default sort by total descending
-    component_query = component_query.order_by("-total")
-
-    comp_filter = ProductComponentFilter(request.GET, queryset=component_query)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ProductComponentFilter
+    comp_filter = filter_class(request.GET, queryset=component_query, parent_product=prod)
     result = get_page_items(request, comp_filter.qs, 25)
 
-    # Filter out None values for auto-complete
-    component_words = component_query.exclude(component_name__isnull=True).values_list("component_name", flat=True)
+
+    component_words = component_query.exclude(name__isnull=True).values_list("name", flat=True)
 
     return render(request, "dojo/product_components.html", {
         "prod": prod,
-        "filter": comp_filter,
         "product_tab": product_tab,
+        "filter": comp_filter,
         "result": result,
-        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
         "component_words": sorted(set(component_words)),
+        "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
     })
-
 
 def identify_view(request):
     get_data = request.GET
@@ -1649,9 +1642,9 @@ def edit_notifications(request, pid):
 @user_is_authorized(Product, Permissions.Product_Manage_Members, "pid")
 def add_product_member(request, pid):
     product = get_object_or_404(Product, pk=pid)
-    memberform = Add_Product_MemberForm(initial={"product": product.id})
+    memberform = Add_Product_MemberForm(initial={"product": product.id}, user=request.user)
     if request.method == "POST":
-        memberform = Add_Product_MemberForm(request.POST, initial={"product": product.id})
+        memberform = Add_Product_MemberForm(request.POST, initial={"product": product.id}, user=request.user)
         if memberform.is_valid():
             if memberform.cleaned_data["role"].is_owner and not user_has_permission(request.user, product,
                                                                                     Permissions.Product_Member_Add_Owner):
@@ -1675,6 +1668,10 @@ def add_product_member(request, pid):
                                 return validate_res
                             else:
                                 product_member.save()
+                                if memberform.cleaned_data["exclusive_permission"]:
+                                    logger.info("Adding exclusive permissions to product member")
+                                    product_member.exclusive_permission_product.add(*memberform.cleaned_data["exclusive_permission"])
+                                    product_member.save()
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -1692,9 +1689,9 @@ def add_product_member(request, pid):
 @user_is_authorized(Product_Member, Permissions.Product_Manage_Members, "memberid")
 def edit_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
-    memberform = Edit_Product_MemberForm(instance=member)
+    memberform = Edit_Product_MemberForm(instance=member, user=request.user)
     if request.method == "POST":
-        memberform = Edit_Product_MemberForm(request.POST, instance=member)
+        memberform = Edit_Product_MemberForm(request.POST, instance=member, user=request.user)
         if memberform.is_valid():
             if member.role.is_owner and not user_has_permission(request.user, member.product,
                                                                 Permissions.Product_Member_Add_Owner):

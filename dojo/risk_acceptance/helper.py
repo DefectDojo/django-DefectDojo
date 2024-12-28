@@ -2,6 +2,7 @@ import logging
 import crum
 import requests
 import json
+from datetime import timedelta
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 from django.conf import settings
@@ -151,34 +152,26 @@ def add_findings_to_risk_pending(risk_pending: Risk_Acceptance, findings):
             risk_pending.accepted_findings.add(finding)
     risk_pending.save()
     if settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL is True:
-        for user_name in eval(risk_pending.accepted_by):
-            user = Dojo_User.objects.get(username=user_name)
-            token = generate_permision_key(
-                user=user,
-                risk_acceptance=risk_pending)
-
-            url = "/".join([
-                settings.HOST_ACCEPTANCE_RISK_FOR_EMAIL,
-                str(risk_pending.id),
-                token
-                ])
-            
-            permission_keys.append(
-                {"username": user.username, "url": url})
-
-    Notification.risk_acceptance_request(
-        risk_pending=risk_pending,
-        permission_keys=permission_keys,
-        enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
-    post_jira_comments(risk_pending, findings, accepted_message_creator)
+        permission_keys = update_or_create_url_risk_acceptance(risk_pending)
+    else:
+        Notification.risk_acceptance_request(
+            risk_pending=risk_pending,
+            permission_keys=permission_keys,
+            enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
+        post_jira_comments(risk_pending, findings, accepted_message_creator)
 
 
-def generate_permision_key(risk_acceptance, user, transfer_finding=None):
-    permission_key = PermissionKey.create_token(
-        lifetime=settings.LIFETIME_MINUTE_PERMISSION_KEY,
-        user=user,
-        risk_acceptance=risk_acceptance,
-        transfer_finding=transfer_finding)
+def generate_permision_key(permission_keys, user, risk_acceptance, transfer_finding=None):
+    if len(permission_keys) == 0:
+        permission_key = PermissionKey.create_token(
+            lifetime=settings.LIFETIME_HOURS_PERMISSION_KEY,
+            user=user,
+            risk_acceptance=risk_acceptance,
+            transfer_finding=transfer_finding)
+    else:
+        permission_key = PermissionKey.get_token(
+            risk_acceptance=risk_acceptance,
+            user=user)
     return permission_key.token
 
 
@@ -449,7 +442,7 @@ def handle_from_provider_risk(finding, acceptance_days):
             header=settings.PROVIDER_HEADER,
             token=settings.PROVIDER_TOKEN)
 
-@retry(tries=100, delay=10)
+@retry(tries=5, delay=2)
 def risk_accept_provider(
         finding_id: str,
         provider_endpoint: str,
@@ -463,14 +456,15 @@ def risk_accept_provider(
     formatted_url = url + f'{provider_endpoint}'
     headers = {}
     headers['Content-Type'] = 'application/json'
-    body = {}
     headers[header] = token
-    body["event"] = "DD_RISK_ACCEPTANCE"
-    body["id_vulnerability"] = finding_id
-    body["acceptanceDays"] = acceptance_days
-    body["provider_to_accept"] = provider_tag
+    body = {
+        "event": "DD_RISK_ACCEPTANCE",
+        "id_vulnerability": finding_id,
+        "acceptanceDays": acceptance_days,
+        "provider_to_accept": provider_tag
+    }
     try:
-        response = requests.post(url=formatted_url, headers=headers, data=body, verify=False)
+        response = requests.post(url=formatted_url, headers=headers, json=body, verify=False)
     except Exception as ex:
         logger.error(ex)
         raise(ex)
@@ -491,9 +485,57 @@ def get_config_risk():
     connection = Connection(base_url=settings.AZURE_DEVOPS_ORGANIZATION_URL, creds=credentials)
     return get_remote_json_config(connection, settings.AZURE_DEVOPS_REMOTE_CONFIG_FILE_PATH.split(",")[1])
 
+
 def enable_flow_accept_risk(**kwargs):
     # add rule custom if necessary
     if (kwargs["finding"].risk_status in ["Risk Active", "Risk Expired"]
-    and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra").split("-")).exists()):
+    and kwargs["finding"].active is True and not kwargs["finding"].tags.filter(name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")).exists()):
         return True
     return False
+
+
+def update_expiration_date_permission_key(risk_pending: Risk_Acceptance):
+    permission_keys = risk_pending.permissionkey_set.all()
+    for permission_key in permission_keys:
+        permission_key.expiration = timezone.now() + timedelta(hours=settings.LIFETIME_HOURS_PERMISSION_KEY)
+        permission_key.status = True
+        permission_key.save()
+
+def generate_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list:
+    permission_keys = []
+    permission_keys_query = risk_pending.permissionkey_set.all()
+    for user_name in eval(risk_pending.accepted_by):
+        user = Dojo_User.objects.get(username=user_name)
+        token = generate_permision_key(
+            permission_keys=permission_keys_query,
+            user=user,
+            risk_acceptance=risk_pending)
+        url = (
+            settings.HOST_ACCEPTANCE_RISK_FOR_EMAIL
+            .replace("{TENAN_ID}", settings.TENAN_ID)
+            .replace("{CLIENT_ID}", settings.CLIENT_ID)
+            .replace("{CALLBACK_URL}", settings.CALLBACK_URL)
+            .replace("{risk_acceptance_id}", str(risk_pending.id))
+            .replace("{permission_key_id}", token)
+        )
+        permission_keys.append({
+                "username": user.username,
+                "url_accept": url.replace("{action}", "accept"),
+                "url_reject": url.replace("{action}", "reject")
+            })
+        print(permission_keys)
+    return permission_keys
+
+
+def update_or_create_url_risk_acceptance(risk_pending: Risk_Acceptance) -> list: 
+    permission_keys = risk_pending.permissionkey_set.all()
+    if len(permission_keys) > 0:
+        update_expiration_date_permission_key(risk_pending)
+    permission_keys = generate_url_risk_acceptance(risk_pending)
+
+    Notification.risk_acceptance_request(
+    risk_pending=risk_pending,
+    permission_keys=permission_keys,
+    enable_acceptance_risk_for_email=settings.ENABLE_ACCEPTANCE_RISK_FOR_EMAIL)
+
+    return permission_keys

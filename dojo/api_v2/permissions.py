@@ -242,6 +242,20 @@ class UserHasToolProductSettingsPermission(permissions.BasePermission):
             Permissions.Product_Edit,
         )
 
+class UserHasComponentPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+            request, Engagement, "engagement_id", Permissions.Component_Add,
+        )
+    
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj,
+            Permissions.Component_View,
+            Permissions.Component_Edit,
+            Permissions.Component_Delete,
+        )
 
 class UserHasEndpointPermission(permissions.BasePermission):
     def has_permission(self, request, view):
