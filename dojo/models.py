@@ -4281,6 +4281,15 @@ class Notifications(models.Model):
     sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
         verbose_name=_("SLA breach (combined)"),
         help_text=_("Get notified of (upcoming) SLA breaches (a message per project)"))
+    finding_exclusion_request = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
+        verbose_name=_("Finding exclusion request"),
+        help_text=_("Get notified of finding exclusion requests"))
+    finding_exclusion_rejected = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
+        verbose_name=_("Finding exclusion rejected"),
+        help_text=_("Get notified of finding exclusion requests rejected"))
+    finding_exclusion_approved = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
+        verbose_name=_("Finding exclusion approved"),
+        help_text=_("Get notified of finding exclusion requests approved"))
 
     class Meta:
         constraints = [
@@ -4324,6 +4333,9 @@ class Notifications(models.Model):
                 result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
                 result.risk_acceptance_request = {*result.risk_acceptance_request, *notifications.risk_acceptance_request}
                 result.risk_acceptance_confirmed = {*result.risk_acceptance_confirmed, *notifications.risk_acceptance_confirmed}
+                result.finding_exclusion_request = {*result.finding_exclusion_request, *notifications.finding_exclusion_request}
+                result.finding_exclusion_rejected = {*result.finding_exclusion_rejected, *notifications.finding_exclusion_rejected}
+                result.finding_exclusion_approved = {*result.finding_exclusion_approved, *notifications.finding_exclusion_approved}
         return result
 
 

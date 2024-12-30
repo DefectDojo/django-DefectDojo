@@ -17,7 +17,7 @@ class FindingExclusion(models.Model):
     unique_id_from_tool = models.CharField(
         blank=True,
         max_length=500,
-        verbose_name=_("Unique ID from tool"),
+        verbose_name=_("Vulnerability Id"),
         help_text=_("Vulnerability technical id from the source tool. Allows to track unique vulnerabilities."))
 
     create_date = models.DateTimeField(auto_now_add=True)
@@ -30,22 +30,13 @@ class FindingExclusion(models.Model):
                                           related_name="dojo_user_status_updated",
                                           on_delete=models.CASCADE)
     reviewed_at = models.DateTimeField(null=True, blank=True)
-    user_history = models.IntegerField(null=True)
     product = models.ForeignKey("Product",
-                                null=True,
-                                blank=True,
-                                on_delete=models.CASCADE)
-    finding = models.ForeignKey("Finding",
                                 null=True,
                                 blank=True,
                                 on_delete=models.CASCADE)
     reason = models.CharField(max_length=200, blank=True)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, blank=True, default="Pending")
-    final_status = models.CharField(choices=[("Accepted", "Accepted"), ("Rejected", "Rejected")], null=True)
-    accepted_by = models.ForeignKey("Dojo_User",
-                                    null=True,
-                                    blank=True,
-                                    on_delete=models.CASCADE)
+    final_status = models.CharField(choices=[("Accepted", "Accepted"), ("Rejected", "Rejected")], blank=True, null=True)
     created_by = models.ForeignKey("Dojo_User",
                                    null=True,
                                    blank=True,

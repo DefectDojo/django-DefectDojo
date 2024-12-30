@@ -6,4 +6,4 @@ class FindingExclusionFilter(filter.FilterSet):
 
     class Meta:
         model = FindingExclusion
-        fields = ["uuid", "type", "status"]
+        fields = ["uuid", "unique_id_from_tool", "type", "status"]

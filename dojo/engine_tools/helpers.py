@@ -21,6 +21,7 @@ logger = get_task_logger(__name__)
 class Constants(Enum):
     VULNERABILITY_ID_HELP_TEXT = "Vulnerability technical id from the source tool. " \
                                  "Allows to track unique vulnerabilities."
+    ON_WHITELIST = "On Whitelist"
 
 
 @app.task
@@ -53,10 +54,10 @@ def add_findings_to_whitelist(unique_id_from_tool):
     ).filter(tag_filter)
     
     for finding in findings_to_update:
-        if not 'white_list' in finding.tags:
+        if 'white_list' not in finding.tags:
             finding.tags.add("white_list")
         finding.active = False
-        finding.risk_status = "On Whitelist"
+        finding.risk_status = Constants.ON_WHITELIST.value
         
     Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
     logger.info(f"{findings_to_update.count()} findings added to whitelist.")
@@ -73,14 +74,14 @@ def check_new_findings_to_whitelist():
         cve__in=cves_on_whitelist,
         active=True,
     ).exclude(
-        risk_status="On Whitelist"
+        risk_status=Constants.ON_WHITELIST.value
     ).filter(tag_filter)
     
     for finding in findings_to_whitelist:
-        if not 'white_list' in finding.tags:
+        if 'white_list' not in finding.tags:
             finding.tags.add("white_list")
         finding.active = False
-        finding.risk_status = "On Whitelist"
+        finding.risk_status = Constants.ON_WHITELIST.value
         
     Finding.objects.bulk_update(findings_to_whitelist, ["active", "risk_status"], 1000)
     logger.info(f"{findings_to_whitelist.count()} findings added to whitelist.")

@@ -3,12 +3,6 @@ from dojo.engine_tools.models import FindingExclusion, FindingExclusionDiscussio
 from dojo.engine_tools.helpers import Constants
 
 
-class FindingExclusionForm(forms.ModelForm):
-    class Meta:
-        model = FindingExclusion
-        fields = "__all__"
-
-
 class CreateFindingExclusionForm(forms.ModelForm):
     type = forms.ChoiceField(required=True,
                              choices=FindingExclusion.TYPE_CHOICES)
@@ -22,21 +16,7 @@ class CreateFindingExclusionForm(forms.ModelForm):
     
     class Meta:
         model = FindingExclusion
-        exclude = [
-            "uuid", 
-            "product", 
-            "user_history", 
-            "created_by", 
-            "accepted_by", 
-            "status", 
-            "finding", 
-            "expiration_date",
-            "status_updated_at",
-            "status_updated_by",
-            "reviewed_at",
-            "final_status",
-            "notification_sent"
-        ]
+        fields = ["type", "unique_id_from_tool", "reason"]
         
 
 class FindingExclusionDiscussionForm(forms.ModelForm):
