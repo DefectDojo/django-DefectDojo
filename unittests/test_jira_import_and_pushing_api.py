@@ -724,4 +724,3 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     def assert_epic_issue_count(self, engagement, count):
         jira_issues = self.get_epic_issues(engagement)
         self.assertEqual(count, len(jira_issues))
-
