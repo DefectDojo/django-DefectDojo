@@ -2129,10 +2129,10 @@ class CommonImportScanSerializer(serializers.Serializer):
         help_text="Minimum severity level to be imported",
     )
     active = serializers.BooleanField(
-        help_text="Override the active setting from the tool.",
+        help_text="Force findings to be active/inactive or default to the original tool (None)", required=False,
     )
     verified = serializers.BooleanField(
-        help_text="Override the verified setting from the tool.",
+        help_text="Force findings to be verified/not verified or default to the original tool (None)", required=False,
     )
 
     # TODO: why do we allow only existing endpoints?
