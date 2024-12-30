@@ -649,3 +649,12 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             with self.assertRaisesMessage(ValueError,
                     "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
                 parser.get_findings(file, Test())
+
+    def test_parse_csv_with_epss(self):
+        with open("unittests/scans/generic/generic_csv_with_epss.csv", encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(.00042, finding.epss_score)
+            self.assertEqual(.23474, finding.epss_percentile)
