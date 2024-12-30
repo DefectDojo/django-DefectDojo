@@ -75,7 +75,7 @@ steps:
       coverage xml
     displayName: "Unit test"
 
-  - task: SonarQubePrepare@6
+  - task: SonarQubePrepare@7
     displayName: "Prepare analysis on SonarQube"
     inputs:
       SonarQube: SonarQube
@@ -93,7 +93,7 @@ steps:
         sonar.language=py
         sonar.python.version=3.10
 
-  - task: SonarQubeAnalyze@6
+  - task: SonarQubeAnalyze@7
     displayName: "Run Code Analysis"
 
   - task: sonar-buildbreaker@8
