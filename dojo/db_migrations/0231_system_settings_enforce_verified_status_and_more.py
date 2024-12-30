@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0217_jira_project_enabled'),
+        ('dojo', '0230_exclusivepermission'),
     ]
 
     operations = [
