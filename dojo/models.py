@@ -1619,7 +1619,7 @@ class Endpoint_Status(models.Model):
         ]
 
     def __str__(self):
-        return f"'{str(self.finding)}' on '{str(self.endpoint)}'"
+        return f"'{self.finding}' on '{self.endpoint}'"
 
     def copy(self, finding=None):
         copy = self

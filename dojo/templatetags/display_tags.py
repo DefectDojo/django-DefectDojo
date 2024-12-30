@@ -431,13 +431,12 @@ def pic_token(context, image, size):
 
 @register.filter
 def inline_image(image_file):
-    try:
-        if img_type := mimetypes.guess_type(image_file.file.name)[0]:
-            if img_type.startswith("image/"):
-                img_data = base64.b64encode(image_file.file.read())
-                return f"data:{img_type};base64, {img_data.decode('utf-8')}"
-    except:
-        pass
+    # TODO: This code might need better exception handling or data processing
+    if img_types := mimetypes.guess_type(image_file.file.name):
+        img_type = img_types[0]
+        if img_type.startswith("image/"):
+            img_data = base64.b64encode(image_file.file.read())
+            return f"data:{img_type};base64, {img_data.decode('utf-8')}"
     return ""
 
 
@@ -777,6 +776,8 @@ def vulnerability_url(vulnerability_id):
 
     for key in settings.VULNERABILITY_URLS:
         if vulnerability_id.upper().startswith(key):
+            if key == "GLSA":
+                return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("GLSA-", "glsa/"))
             if key in ["AVD", "KHV", "C-"]:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if "&&" in settings.VULNERABILITY_URLS[key]:
