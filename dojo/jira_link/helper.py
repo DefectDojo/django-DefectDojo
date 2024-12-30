@@ -785,7 +785,7 @@ def add_jira_issue(obj, *args, **kwargs):
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
     except Exception as e:
-        message = f"The following jira instance could not be connected: {jira_instance} - {e.text}"
+        message = f"The following jira instance could not be connected: {jira_instance} - {e}"
         return failure_to_add_message(message, e, obj)
     # Set the list of labels to set on the jira issue
     labels = get_labels(obj) + get_tags(obj)
@@ -793,6 +793,7 @@ def add_jira_issue(obj, *args, **kwargs):
         labels = list(dict.fromkeys(labels))  # de-dup
     # Determine what due date to set on the jira issue
     duedate = None
+
     if System_Settings.objects.get().enable_finding_sla:
         duedate = obj.sla_deadline()
     # Set the fields that will compose the jira issue
@@ -1104,6 +1105,7 @@ def get_issuetype_fields(
 
     issuetype_fields = None
     use_cloud_api = jira.deploymentType.lower() == "cloud" or jira._version < (9, 0, 0)
+
     try:
         if use_cloud_api:
             try:
