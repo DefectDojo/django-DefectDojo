@@ -9,7 +9,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Dec 31, 2024: v2.41.4
 
-- **(API)** Changed functionality of 'Force To Active / Verified' flag: True now forces to Active, while False will keep the tool's status (rather than forcing to Inactive).
+- **(API)** 'Force To Active / Verified' flag is no longer required when calling `/import-scan`, `/reimport-scan` endponts: a value of True now forces to Active, False now forces to Inactive, while setting a value of none (or not using the flag) will use the tool's status.
 - **(Beta UI)** Added ability to regenerate / copy your API token
 - **(Beta UI)** Fixed bug preventing date / planned remediation dates from being added via Bulk Edit
 - **(Import)** Added fields for EPSS score and percentile to Generic Findings Import parser
