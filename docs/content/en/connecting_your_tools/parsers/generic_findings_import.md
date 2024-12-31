@@ -12,6 +12,8 @@ These attributes are supported for CSV:
 - Date: Date of the finding in mm/dd/yyyy format.
 - Title: Title of the finding
 - CweId: Cwe identifier, must be an integer value.
+- epss_score: The probability of exploitation in the next 30 days, must be a float value between 0 and 1.0.
+- epss_percentile: The proportion of all scored vulnerabilities with the same or a lower EPSS score, must be a float value between 0 and 1.0.
 - Url: Url associated with the finding.
 - Severity: Severity of the finding. Must be one of Info, Low, Medium, High, or Critical.
 - Description: Description of the finding. Can be multiple lines if enclosed in double quotes.
