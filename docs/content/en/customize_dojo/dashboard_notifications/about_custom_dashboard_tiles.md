@@ -283,7 +283,7 @@ Clicking on the footer will bring you to a list of these Findings for you to add
 
 This Tile is used to track specific Products to ensure that new scan data is being added on a regular basis. 
 
-ere are particular Products which you’re scanning on a regular interval, you can use this tile to ensure your tools and imports are running as expected. 
+If there are particular Products which you’re scanning on a regular interval, you can use this tile to ensure your tools and imports are running as expected. 
 
 This Tile will return a count and related list of Products which have **not** had new scan data added in the interval you’ve defined.
 
