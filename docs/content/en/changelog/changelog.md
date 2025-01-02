@@ -7,6 +7,13 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
 
+## Dec 31, 2024: v2.41.4
+
+- **(API)** 'Force To Active / Verified' flag is no longer required when calling `/import-scan`, `/reimport-scan` endponts: a value of True now forces to Active, False now forces to Inactive, while setting a value of none (or not using the flag) will use the tool's status.
+- **(Beta UI)** Added ability to regenerate / copy your API token
+- **(Beta UI)** Fixed bug preventing date / planned remediation dates from being added via Bulk Edit
+- **(Import)** Added fields for EPSS score and percentile to Generic Findings Import parser
+
 ## Dec 24, 2024: v2.41.3
 
 - **(API)** Added `/request_response_pairs` endpoint.
