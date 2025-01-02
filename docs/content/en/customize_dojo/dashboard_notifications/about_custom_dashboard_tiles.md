@@ -4,7 +4,7 @@ description: "How to make Dashboard Tiles work for you, with examples"
 weight: 2
 ---
 
-Dashboard Tiles are customizable sets of filters for your DefectDojo instance, which can be added to your 🏠 **Home** dashboard. Tiles are designed to provide relevant information and speed up navigation within DefectDojo. 
+Dashboard Tiles are customizable sets of filters for your DefectDojo instance, which can be added to your 🏠 **Home** dashboard. Tiles are designed to provide relevant information and speed up navigation within DefectDojo.
 
 ![image](images/About_Custom_Dashboard_Tiles.png)
 
@@ -13,6 +13,10 @@ Tiles can:
 * Act as shortcuts for particular sets of Findings, Products, or other objects
 * Visualize relevant metrics related a Product, Engagement or other components of the [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/)
 * Provide alerts on particular activity, track SLA Violations, failing imports or new Critical Findings
+
+Tile Filters set a narrower focus for any tile you want to create. Each Tile has a different set of relevant filters which can be selected.
+
+Note that only Superusers can add or edit Dashboard Tiles.
 
 ## Tile Components
 
@@ -36,17 +40,20 @@ Select the kind of Tile you want to add, which will then bring you to the Add Da
 
 If you wish to **edit** a Dashboard Tile, you can click the Header of the Tile, which will also open the Dashboard Tile form.
 
-### Form Options
+### Display Options
 
 From here you can set your Dashboard Tile’s options:
 
 ![image](images/How-To_Add,_Edit_or_Delete_Dashboard_Tiles_2.png)
 
-* Set the **Header** textfor your tile **(3\)**
-* Set the **Footer** textfor your tile
-* Set the **Color** of your icon
+* Set the **Header** text for your tile **(3)**
+* Set the **Footer** text for your tile **(4)**
+* Set the **Color** of your icon **(1)**
 
 ![image](images/How-To_Add,_Edit_or_Delete_Dashboard_Tiles_3.png)
+
+### Tile Filters
+Click the **Tile Filters \+** button at the bottom of the form to expand the Tile Filters menu.  From here you can apply any relevant filtering to the tile.  See the [Tile Index](./#dashboard-tile-index) for more info on what filters can be applied to which tile.
 
 ### Dynamic Color Tile
 
@@ -82,9 +89,7 @@ You can set your **Dynamic Color Maximum** of 2, and a **Dynamic Color Minimum**
 
 ## Dashboard Tile Index
 
-To set a specific context for your tile, you can set various Tile Filters. Click the **Tile Filters \+** button at the bottom of the form to expand the Tile Filters menu.
-
-Filters are optional. Each Tile has a different set of relevant filters which can be selected.
+Here is a list summarizing each Dashboard Tile you can add, along with filters that can be applied to the Tile and an example configuration.
 
 ### Product, Engagement or Test Tiles
 
@@ -312,7 +317,7 @@ This tile uses a comparison operator (\<, \=, \<\=, \>\=) to track Products whic
 ![image](images/About_Custom_Dashboard_Tiles_11.png)
 For more information on how Product Grades are calculated, see our article on [Product Health Grading](https://docs.defectdojo.com/en/working_with_findings/organizing_engagements_tests/product-health-grade/).
 
-### Example: Track Failing Products
+#### Example: Track Failing Products
 
 If you want to quickly access Products in your instance which do not meet your Grading standard, you can set up a Tile which handles that calculation. The Grading standard used in this example is ‘Less Than C’: we want our tile to flag any Products with a Grade of D or lower.
 
