@@ -14,7 +14,7 @@ DefectDojo handles notifications in two different ways::
 * **System\-Wide Notifications** are sent to all users.
 * **Personal Notifications are set by individual users, and will be received in addition to any System\-Wide Notifications.**
 
-In both cases, [Role\-Based Access Control](https://docs.defectdojo.com/en/user_management/about-permissions--roles/) rules apply, so users will not receive activity notifications for Products or Product Types (or their related objects) which they don’t have access to.
+In both cases, [Role\-Based Access Control](../../user_management/about_perms_and_roles/) rules apply, so users will not receive activity notifications for Products or Product Types (or their related objects) which they don’t have access to.
 
 ## Notification Delivery Methods
 
@@ -27,10 +27,7 @@ There are four delivery methods for DefectDojo notifications:
 
 Notifications can be sent to multiple destinations simultaneously.
 
-Receiving Slack and Teams notifications will require you to have a working integration. For more info, see our articles:
-
-* [Slack Integration](../configure_slack/)
-* [Teams Integration](../configure_msteams/)
+Receiving Slack and Teams notifications will require you to have a working integration. For more info on setting this integration up, see our [Guide](../email_slack_teams).
 
 ## In-App Alerts
 
