@@ -32,12 +32,6 @@ Receiving Slack and Teams notifications will require you to have a working integ
 * [Slack Integration](../configure_slack/)
 * [Teams Integration](../configure_msteams/)
 
-**Next Steps:**
-
-* **[Learn more about DefectDojo's internal 🔔 Alerts](https://docs.defectdojo.com/en/notifications/configure-a-slack-integration/)**
-* [Set up a Slack integration for DefectDojo](https://docs.defectdojo.com/en/notifications/configure-a-microsoft-teams-integration/)
-* [Set up a Teams integration for DefectDojo](https://docs.defectdojo.com/en/notifications/configure-a-microsoft-teams-integration/)
-
 ## In-App Alerts
 
 DefectDojo’s Alerts system keeps you up to date with all Product or system activity.

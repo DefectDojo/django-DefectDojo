@@ -288,7 +288,7 @@ Clicking on the footer will bring you to a list of these Findings for you to add
 
 This Tile is used to track specific Products to ensure that new scan data is being added on a regular basis. 
 
-ere are particular Products which you’re scanning on a regular interval, you can use this tile to ensure your tools and imports are running as expected. 
+If there are particular Products which you’re scanning on a regular interval, you can use this tile to ensure your tools and imports are running as expected. 
 
 This Tile will return a count and related list of Products which have **not** had new scan data added in the interval you’ve defined.
 
@@ -315,7 +315,7 @@ This Tile compares the Product Grade of all Products on your instance, so that y
 This tile uses a comparison operator (\<, \=, \<\=, \>\=) to track Products which equal, exceed or fail to meet the Product Grade which you want to monitor.
 
 ![image](images/About_Custom_Dashboard_Tiles_11.png)
-For more information on how Product Grades are calculated, see our article on [Product Health Grading](https://docs.defectdojo.com/en/working_with_findings/organizing_engagements_tests/product-health-grade/).
+For more information on how Product Grades are calculated, see our article on [Product Health Grading](/en/working_with_findings/organizing_engagements_tests/product-health-grade/).
 
 #### Example: Track Failing Products
 
