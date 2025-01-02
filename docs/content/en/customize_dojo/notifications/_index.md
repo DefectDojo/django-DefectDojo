@@ -1,11 +1,10 @@
 ---
-title: "Set Up Notifications"
-description: "Configure your DefectDojo in-app, email and other notifications"
+title: "Notifications"
 summary: ""
 date: 2023-09-07T16:06:50+02:00
 lastmod: 2023-09-07T16:06:50+02:00
 draft: false
-weight: 8
+weight: 7
 chapter: true
 sidebar:
   collapsed: true
@@ -14,4 +13,5 @@ seo:
   description: "" # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
+pro-feature: true
 ---

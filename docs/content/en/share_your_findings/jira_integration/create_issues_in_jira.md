@@ -1,12 +1,13 @@
 ---
-title: "Creating Issues in Jira"
+title: "Send Finding data to Jira"
 description: "Pushing DefectDojo Findings to a linked Jira Project"
+weight: 3
 ---
 
 Before you can create an Issue in Jira, you'll need to have:
 
-* **[a Jira integration configured](https://docs.defectdojo.com/en/jira_integration/connect-defectdojo-to-jira/)**
-* **[that same Jira integration linked to a Product](https://docs.defectdojo.com/en/jira_integration/add-a-connected-jira-project-to-a-product/)**
+* **[a Jira integration configured](../connect_to_jira/)**
+* **[that same Jira integration linked to a Product](../add_jira_to_product/)**
 
 Please see the guides above for help with this process.
 
