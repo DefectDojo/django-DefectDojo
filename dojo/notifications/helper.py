@@ -385,7 +385,7 @@ class EmailNotificationManger(NotificationManagerHelpers):
         try:
             if settings.AWS_SES_EMAIL:
                 ses_email.aws_ses(email=address,
-                                email_from_address=f"{self.system_setting('team_name')} <{self.system_settings.email_from}>",
+                                email_from_address=f"{self.system_settings.team_name} <{self.system_settings.email_from}>",
                                 html_contect=self._create_notification_message(event, user, "mail", **kwargs),
                                 template_name=event,
                                 subject=kwargs.get("subject", event),
