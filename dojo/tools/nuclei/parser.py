@@ -82,7 +82,7 @@ class NucleiParser:
                     item.get("extracted-results"),
                 )
             if info.get("tags"):
-                finding.unsaved_tags = custom_tags + info.get("tags")
+                finding.unsaved_tags = custom_tags.append(info.get("tags"))
             if info.get("reference"):
                 reference = info.get("reference")
                 if isinstance(reference, list):

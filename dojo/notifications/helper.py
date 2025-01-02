@@ -607,6 +607,7 @@ class AlertNotificationManger(NotificationManagerHelpers):
                 )[:2000],
                 url=kwargs.get("url", reverse("alerts")),
                 icon=icon[:25],
+                color_icon=kwargs.get("color_icon", "#262626"),
                 source=source,
             )
             # relative urls will fail validation
