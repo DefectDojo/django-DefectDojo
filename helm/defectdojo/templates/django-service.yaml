@@ -37,7 +37,6 @@ spec:
     {{- end }}
 {{- if .Values.django.service.type }}
   type: {{ .Values.django.service.type }}
-{{- end }}
-{{- if .Values.gke.useGKEIngress }}
+{{- else if .Values.gke.useGKEIngress }}
   type: NodePort
 {{- end }}
