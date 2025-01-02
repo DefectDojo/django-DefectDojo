@@ -35,6 +35,10 @@ class SemgrepParser:
 
                 # fingerprint detection
                 unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                # treat "requires login" as if the fingerprint is absent
+                if unique_id_from_tool == "requires login":
+                    unique_id_from_tool = None
+                    
                 if unique_id_from_tool:
                     finding.unique_id_from_tool = unique_id_from_tool
 
@@ -99,6 +103,10 @@ class SemgrepParser:
 
                 # fingerprint detection
                 unique_id_from_tool = item.get("extra", {}).get("fingerprint")
+                # treat "requires login" as if the fingerprint is absent
+                if unique_id_from_tool == "requires login":
+                    unique_id_from_tool = None
+                    
                 if unique_id_from_tool:
                     finding.unique_id_from_tool = unique_id_from_tool
 
