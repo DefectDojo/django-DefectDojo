@@ -561,6 +561,7 @@ def set_duplicate(new_finding, existing_finding):
     existing_finding.description = new_finding.description
     existing_finding.impact = new_finding.impact
     existing_finding.references = new_finding.references
+    existing_finding.files = new_finding.files
     logger.debug("saving new finding: %d", new_finding.id)
     super(Finding, new_finding).save()
     logger.debug("saving existing finding: %d", existing_finding.id)

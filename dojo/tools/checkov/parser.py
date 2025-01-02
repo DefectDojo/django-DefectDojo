@@ -95,7 +95,7 @@ def get_item(vuln, test, check_type):
     mitigation = ""
 
     references = vuln.get("guideline", "")
-    return Finding(
+    finding = Finding(
         title=title,
         test=test,
         description=description,
