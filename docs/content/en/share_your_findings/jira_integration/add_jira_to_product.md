@@ -1,27 +1,37 @@
 ---
-title: "Add a Connected Jira Project to a Product"
+title: "Connect a Jira Project to a Product"
 description: "Set up a DefectDojo Product to push Findings to a JIRA board"
+weight: 2
 ---
 
 If you haven't already set up DefectDojo's Jira Configuration, you'll need to start by linking one or more Jira instances to DefectDojo.  
 ​  
-See this guide for more information: [Connect DefectDojo To Jira](https://docs.defectdojo.com/en/jira_integration/connect-defectdojo-to-jira/)
+See this guide for more information: [Connect DefectDojo To Jira](../connect_to_jira/).
 
 Once a Jira configuration is connected to a Product, Jira and the Product will communicate to do the following:
 
 * Use DefectDojo Findings to create Jira Issues, which automatically contain all relevant Finding information and links
 * Bidirectional Sync, allowing for status updates and comments to be created on both the Jira and DefectDojo side.
 
-## Adding a Jira Configuration to a Product
-
 Each Product in DefectDojo has its own settings which govern how Findings are converted to JIRA Issues. From here, you can decide the associated JIRA Project and set the default behaviour for creating Issues, Epics, Labels and other JIRA metadata.
 
-* In the UI, you can find this page by clicking the " **📝 Edit**" button under **Settings** on the Product page (defectdojo.com/product/{id}) \- see below.  
+## Link a Jira Project to a Product (Beta UI)
+
+You can find this page by clicking the Gear menu - ⚙️ and opening the Jira Project Settings page.
+
+![image](images/jira-project-settings.png)
+
+
+## Link a Jira Project to a Product (Classic UI)
+
+You can find this page by clicking the "**📝 Edit**" button under **Settings** on the Product page: `(defectdojo.com/product/{id})`.
+
 ​
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product.png)
-* You can link to a Product Settings page directly via **yourcompany.**defectdojo.com/product/{id}/settings.​
 
-## List of Jira Settings
+* You can link to a Product Settings page directly via `**yourcompany.**defectdojo.com/product/{id}/settings`.​
+
+## List of Jira settings
 
 Jira settings are located near the bottom of the Product Settings page.
 
@@ -35,7 +45,7 @@ If this menu doesn't list any Jira instances, confirm that those Projects are co
 
 #### **Project key**
 
-This is the Jira Key that you want to use for DefectDojo\-related Issues. You can set this Key to whatever you prefer for identifying DefectDojo Issues (e.g. if you set this key to “DEF” then Jira issues will be keyed as DEF\-1, DEF\-2\.. etc).
+This is the key of the Project that you want to use with DefectDojo.  The Project Key for a given project can be found in the URL.
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_3.png)
 
@@ -69,7 +79,7 @@ However, if your Jira Project Settings **require you** to use Custom Fields on n
 
 Note that DefectDojo cannot send any Issue\-specific metadata as Custom Fields, only a default value. This section should only be set up if your JIRA Project **requires that these Custom Fields exist** in every Issue in your project.
 
-Follow **[this guide](https://docs.defectdojo.com/en/jira_integration/using-custom-fields/)** to get started working with Custom Fields.
+Follow **[this guide](../using_custom_fields/)** to get started working with Custom Fields.
 
 **Jira labels**
 
@@ -118,9 +128,9 @@ Service Level Agreements can be configured under **Configuration \> SLA Configur
 
 If enabled, any Issue where the associated DefectDojo Risk Acceptance expires will have a comment added to the Jira issue indicating this. These comments will be posted daily until the Issue is resolved.
 
-# Testing \& Troubleshooting the Jira integration
+## Testing the Jira integration
 
-## Test 1: Do Findings successfully push to Jira?
+### Test 1: Do Findings successfully push to Jira?
 
 In order to test that the Jira integration is working properly, you can add a new blank Finding to the Product associated with Jira in DefectDojo. **Product \> Findings \> Add New Finding.**
 
@@ -130,7 +140,7 @@ If Jira Issues are not being created correctly, check your Notifications for err
 
 * Confirm that the Jira User associated with DefectDojo's Jira Configuration has permission to create and update issues on that particular Jira Project.
 
-## Test 2: Jira Webhooks send and receive updates from DefectDojo
+### Test 2: Jira Webhooks send to DefectDojo
 
 In order to test the Jira webhooks, add a Note to a Finding which also exists in JIRA as an Issue (for example, the test issue in the section above).
 
@@ -142,4 +152,4 @@ If this doesn’t work correctly, it could be due to a Firewall issue on your Ji
 
 # Next Steps
 
-Learn how to create Jira Issues from your Product with **[this guide](https://docs.defectdojo.com/en/jira_integration/creating-issues-in-jira/).**
+Learn how to create Jira Issues from your Product with **[this guide](../create_issues_in_jira).**

@@ -1,7 +1,7 @@
 ---
 title: "API Pull"
 description: "Report pulled to DefectDojo via API exposed by scanning service"
-weight: 2
+weight: 3
 chapter: true
 sidebar:
   collapsed: true

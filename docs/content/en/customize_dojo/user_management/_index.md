@@ -1,11 +1,11 @@
 ---
-title: "Create A Report"
-description: "Create Custom Reports and Export Data"
+title: "User Management"
+description: "Set Up User Permissions, SSO and Groups"
 summary: ""
 date: 2023-09-07T16:06:50+02:00
 lastmod: 2023-09-07T16:06:50+02:00
 draft: false
-weight: 9
+weight: 5
 chapter: true
 sidebar:
   collapsed: true
@@ -14,5 +14,5 @@ seo:
   description: "" # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
-pro-feature: true
+
 ---
