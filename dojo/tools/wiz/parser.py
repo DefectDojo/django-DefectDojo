@@ -156,7 +156,7 @@ class WizParserByDetailedName:
 
     def _parse_tags(self, tags: str) -> list[str]:
         """
-        parse the Tag string dict, and convert to a list of strings.
+        Parse the Tag string dict, and convert to a list of strings.
 
         The format of the tags is is "{""key"":""value""}" format
         """
