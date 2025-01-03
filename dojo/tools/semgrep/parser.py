@@ -157,6 +157,9 @@ class SemgrepParser:
         description += f"**Result message:** {message}\n"
 
         snippet = item["extra"].get("lines")
+        if snippet == "requires login":
+            snippet = None  # Treat "requires login" as no snippet
+            
         if snippet is not None:
             if "<![" in snippet:
                 snippet = snippet.replace("<![", "<! [")
