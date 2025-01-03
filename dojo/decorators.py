@@ -148,16 +148,16 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, block=False):
     def decorator(fn):
         @wraps(fn)
         def _wrapped(request, *args, **kw):
-            _block = getattr(settings, "RATE_LIMITER_BLOCK", block)
-            _rate = getattr(settings, "RATE_LIMITER_RATE", rate)
-            _lockout = getattr(settings, "RATE_LIMITER_ACCOUNT_LOCKOUT", False)
+            limiter_block = getattr(settings, "RATE_LIMITER_BLOCK", block)
+            limiter_rate = getattr(settings, "RATE_LIMITER_RATE", rate)
+            llimiter_ockout = getattr(settings, "RATE_LIMITER_ACCOUNT_LOCKOUT", False)
             old_limited = getattr(request, "limited", False)
             ratelimited = is_ratelimited(request=request, fn=fn,
-                                         key=key, rate=_rate, method=method,
+                                         key=key, rate=limiter_rate, method=method,
                                          increment=True)
             request.limited = ratelimited or old_limited
-            if ratelimited and _block:
-                if _lockout:
+            if ratelimited and limiter_block:
+                if llimiter_ockout:
                     username = request.POST.get("username", None)
                     if username:
                         dojo_user = Dojo_User.objects.filter(username=username).first()

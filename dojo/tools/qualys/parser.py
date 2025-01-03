@@ -136,146 +136,146 @@ def parse_finding(host, tree):
 
     # Scan details
     for vuln_details in host.iterfind("VULN_INFO_LIST/VULN_INFO"):
-        _temp = issue_row.copy()
+        temp = issue_row.copy()
         # Port
-        _gid = vuln_details.find("QID").attrib["id"]
-        _port = vuln_details.findtext("PORT")
-        _temp["port_status"] = _port
+        gid = vuln_details.find("QID").attrib["id"]
+        port = vuln_details.findtext("PORT")
+        temp["port_status"] = port
 
-        _category = str(vuln_details.findtext("CATEGORY"))
-        _result = str(vuln_details.findtext("RESULT"))
-        _first_found = str(vuln_details.findtext("FIRST_FOUND"))
-        _last_found = str(vuln_details.findtext("LAST_FOUND"))
-        _times_found = str(vuln_details.findtext("TIMES_FOUND"))
+        category = str(vuln_details.findtext("CATEGORY"))
+        result = str(vuln_details.findtext("RESULT"))
+        first_found = str(vuln_details.findtext("FIRST_FOUND"))
+        last_found = str(vuln_details.findtext("LAST_FOUND"))
+        times_found = str(vuln_details.findtext("TIMES_FOUND"))
 
         # Get the date based on the first_seen setting
         try:
             if settings.USE_FIRST_SEEN:
                 if date := vuln_details.findtext("FIRST_FOUND"):
-                    _temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+                    temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
             else:
                 if date := vuln_details.findtext("LAST_FOUND"):
-                    _temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
+                    temp["date"] = datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ").date()
         except Exception:
-            _temp["date"] = None
+            temp["date"] = None
 
         # Vuln_status
         status = vuln_details.findtext("VULN_STATUS")
         if status == "Active" or status == "Re-Opened" or status == "New":
-            _temp["active"] = True
-            _temp["mitigated"] = False
-            _temp["mitigation_date"] = None
+            temp["active"] = True
+            temp["mitigated"] = False
+            temp["mitigation_date"] = None
         else:
-            _temp["active"] = False
-            _temp["mitigated"] = True
+            temp["active"] = False
+            temp["mitigated"] = True
             last_fixed = vuln_details.findtext("LAST_FIXED")
             if last_fixed is not None:
-                _temp["mitigation_date"] = datetime.datetime.strptime(
+                temp["mitigation_date"] = datetime.datetime.strptime(
                     last_fixed, "%Y-%m-%dT%H:%M:%SZ",
                 )
             else:
-                _temp["mitigation_date"] = None
+                temp["mitigation_date"] = None
         # read cvss value if present
         cvss3 = vuln_details.findtext("CVSS3_FINAL")
         if cvss3 is not None and cvss3 != "-":
-            split_cvss(cvss3, _temp)
+            split_cvss(cvss3, temp)
         else:
             cvss2 = vuln_details.findtext("CVSS_FINAL")
             if cvss2 is not None and cvss2 != "-":
-                split_cvss(cvss2, _temp)
+                split_cvss(cvss2, temp)
                 # DefectDojo does not support cvssv2
-                _temp["CVSS_vector"] = None
+                temp["CVSS_vector"] = None
 
-        search = f".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{_gid}']"
+        search = f".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{gid}']"
         vuln_item = tree.find(search)
         if vuln_item is not None:
             finding = Finding()
             # Vuln name
-            _temp["vuln_name"] = vuln_item.findtext("TITLE")
+            temp["vuln_name"] = vuln_item.findtext("TITLE")
 
             # Vuln Description
-            _description = str(vuln_item.findtext("THREAT"))
+            description = str(vuln_item.findtext("THREAT"))
             # Solution Strips Heading Workaround(s)
             # _temp['solution'] = re.sub('Workaround(s)?:.+\n', '', htmltext(vuln_item.findtext('SOLUTION')))
-            _temp["solution"] = htmltext(vuln_item.findtext("SOLUTION"))
+            temp["solution"] = htmltext(vuln_item.findtext("SOLUTION"))
 
             # type
-            _type = TYPE_MAP.get(vuln_details.findtext("TYPE"), "Unknown")
+            vul_type = TYPE_MAP.get(vuln_details.findtext("TYPE"), "Unknown")
 
             # Vuln_description
-            _temp["vuln_description"] = "\n".join(
+            temp["vuln_description"] = "\n".join(
                 [
-                    htmltext(_description),
-                    htmltext("Type: " + _type),
-                    htmltext("Category: " + _category),
-                    htmltext("QID: " + str(_gid)),
-                    htmltext("Port: " + str(_port)),
-                    htmltext("Result Evidence: " + _result),
-                    htmltext("First Found: " + _first_found),
-                    htmltext("Last Found: " + _last_found),
-                    htmltext("Times Found: " + _times_found),
+                    htmltext(description),
+                    htmltext("Type: " + vul_type),
+                    htmltext("Category: " + category),
+                    htmltext("QID: " + str(gid)),
+                    htmltext("Port: " + str(port)),
+                    htmltext("Result Evidence: " + result),
+                    htmltext("First Found: " + first_found),
+                    htmltext("Last Found: " + last_found),
+                    htmltext("Times Found: " + times_found),
                 ],
             )
             # Impact description
-            _temp["IMPACT"] = htmltext(vuln_item.findtext("IMPACT"))
+            temp["IMPACT"] = htmltext(vuln_item.findtext("IMPACT"))
 
             # read cvss value if present and not already read from vuln
-            if _temp.get("CVSS_value") is None:
+            if temp.get("CVSS_value") is None:
                 cvss3 = vuln_item.findtext("CVSS3_SCORE/CVSS3_BASE")
                 cvss2 = vuln_item.findtext("CVSS_SCORE/CVSS_BASE")
                 if cvss3 is not None and cvss3 != "-":
-                    split_cvss(cvss3, _temp)
+                    split_cvss(cvss3, temp)
                 else:
                     cvss2 = vuln_item.findtext("CVSS_FINAL")
                     if cvss2 is not None and cvss2 != "-":
-                        split_cvss(cvss2, _temp)
+                        split_cvss(cvss2, temp)
                         # DefectDojo does not support cvssv2
-                        _temp["CVSS_vector"] = None
+                        temp["CVSS_vector"] = None
 
             # CVE and LINKS
-            _temp_cve_details = vuln_item.iterfind("CVE_ID_LIST/CVE_ID")
-            if _temp_cve_details:
-                _cl = {
+            temp_cve_details = vuln_item.iterfind("CVE_ID_LIST/CVE_ID")
+            if temp_cve_details:
+                cl = {
                     cve_detail.findtext("ID"): cve_detail.findtext("URL")
-                    for cve_detail in _temp_cve_details
+                    for cve_detail in temp_cve_details
                 }
-                _temp["cve"] = "\n".join(list(_cl.keys()))
-                _temp["links"] = "\n".join(list(_cl.values()))
+                temp["cve"] = "\n".join(list(cl.keys()))
+                temp["links"] = "\n".join(list(cl.values()))
 
         # Generate severity from number in XML's 'SEVERITY' field, if not present default to 'Informational'
         sev = get_severity(vuln_item.findtext("SEVERITY"))
         finding = None
-        if _temp_cve_details:
-            refs = "\n".join(list(_cl.values()))
+        if temp_cve_details:
+            refs = "\n".join(list(cl.values()))
             finding = Finding(
-                title="QID-" + _gid[4:] + " | " + _temp["vuln_name"],
-                mitigation=_temp["solution"],
-                description=_temp["vuln_description"],
+                title="QID-" + gid[4:] + " | " + temp["vuln_name"],
+                mitigation=temp["solution"],
+                description=temp["vuln_description"],
                 severity=sev,
                 references=refs,
-                impact=_temp["IMPACT"],
-                date=_temp["date"],
-                vuln_id_from_tool=_gid,
+                impact=temp["IMPACT"],
+                date=temp["date"],
+                vuln_id_from_tool=gid,
             )
 
         else:
             finding = Finding(
-                title="QID-" + _gid[4:] + " | " + _temp["vuln_name"],
-                mitigation=_temp["solution"],
-                description=_temp["vuln_description"],
+                title="QID-" + gid[4:] + " | " + temp["vuln_name"],
+                mitigation=temp["solution"],
+                description=temp["vuln_description"],
                 severity=sev,
-                references=_gid,
-                impact=_temp["IMPACT"],
-                date=_temp["date"],
-                vuln_id_from_tool=_gid,
+                references=gid,
+                impact=temp["IMPACT"],
+                date=temp["date"],
+                vuln_id_from_tool=gid,
             )
-        finding.mitigated = _temp["mitigation_date"]
-        finding.is_mitigated = _temp["mitigated"]
-        finding.active = _temp["active"]
-        if _temp.get("CVSS_vector") is not None:
-            finding.cvssv3 = _temp.get("CVSS_vector")
-        if _temp.get("CVSS_value") is not None:
-            finding.cvssv3_score = _temp.get("CVSS_value")
+        finding.mitigated = temp["mitigation_date"]
+        finding.is_mitigated = temp["mitigated"]
+        finding.active = temp["active"]
+        if temp.get("CVSS_vector") is not None:
+            finding.cvssv3 = temp.get("CVSS_vector")
+        if temp.get("CVSS_value") is not None:
+            finding.cvssv3_score = temp.get("CVSS_value")
         finding.verified = True
         finding.unsaved_endpoints = []
         finding.unsaved_endpoints.append(ep)
