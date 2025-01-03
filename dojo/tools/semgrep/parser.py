@@ -38,7 +38,7 @@ class SemgrepParser:
                 # treat "requires login" as if the fingerprint is absent
                 if unique_id_from_tool == "requires login":
                     unique_id_from_tool = None
-                    
+
                 if unique_id_from_tool:
                     finding.unique_id_from_tool = unique_id_from_tool
 
@@ -106,7 +106,7 @@ class SemgrepParser:
                 # treat "requires login" as if the fingerprint is absent
                 if unique_id_from_tool == "requires login":
                     unique_id_from_tool = None
-                    
+
                 if unique_id_from_tool:
                     finding.unique_id_from_tool = unique_id_from_tool
 
@@ -159,7 +159,7 @@ class SemgrepParser:
         snippet = item["extra"].get("lines")
         if snippet == "requires login":
             snippet = None  # Treat "requires login" as no snippet
-            
+
         if snippet is not None:
             if "<![" in snippet:
                 snippet = snippet.replace("<![", "<! [")
