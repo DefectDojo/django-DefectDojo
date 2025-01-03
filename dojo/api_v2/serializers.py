@@ -22,6 +22,7 @@ from rest_framework.exceptions import ValidationError as RestFrameworkValidation
 from rest_framework.fields import DictField, MultipleChoiceField
 
 import dojo.jira_link.helper as jira_helper
+import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
@@ -111,7 +112,6 @@ from dojo.models import (
     Vulnerability_Id_Template,
     get_current_date,
 )
-from dojo.risk_acceptance.helper import add_findings_to_risk_acceptance, remove_finding_from_risk_acceptance
 from dojo.tools.factory import (
     get_choices_sorted,
     requires_file,
@@ -1532,7 +1532,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance = super().create(validated_data)
         user = getattr(self.context.get("request", None), "user", None)
-        add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
+        ra_helper.add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
         return instance
 
     def update(self, instance, validated_data):
@@ -1548,10 +1548,10 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         user = getattr(self.context.get("request", None), "user", None)
         # Add the new findings
-        add_findings_to_risk_acceptance(user, instance, findings_to_add)
+        ra_helper.add_findings_to_risk_acceptance(user, instance, findings_to_add)
         # Remove the ones that were not present in the payload
         for finding in findings_to_remove:
-            remove_finding_from_risk_acceptance(user, instance, finding)
+            ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
         return instance
 
     @extend_schema_field(serializers.CharField())
@@ -1767,6 +1767,13 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     def get_display_status(self, obj) -> str:
         return obj.status()
 
+    def process_risk_acceptance(self, data):
+        is_risk_accepted = data.get("risk_accepted", False)
+        if is_risk_accepted and not self.instance.risk_accepted and self.instance.test.engagement.product.enable_simple_risk_acceptance and not data.get("active", False):
+            ra_helper.simple_risk_accept(self.context["request"].user, self.instance)
+        elif not is_risk_accepted and self.instance.risk_accepted:  # turning off risk_accepted
+            ra_helper.risk_unaccept(self.context["request"].user, self.instance)
+
     # Overriding this to push add Push to JIRA functionality
     def update(self, instance, validated_data):
         # remove tags from validated data and store them seperately
@@ -1841,6 +1848,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         if is_active and is_risk_accepted:
             msg = "Active findings cannot be risk accepted."
             raise serializers.ValidationError(msg)
+
+        # assuming we made it past the validations,call risk acceptance properly to make sure notes, etc get created
+        # doing it here instead of in update because update doesn't know if the value changed
+        self.process_risk_acceptance(data)
 
         return data
 
