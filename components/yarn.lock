@@ -24,10 +24,10 @@
     base64-js "1.3.1"
     unicode-trie "^2.0.0"
 
-"@foliojs-fork/pdfkit@^0.15.2":
-  version "0.15.2"
-  resolved "https://registry.yarnpkg.com/@foliojs-fork/pdfkit/-/pdfkit-0.15.2.tgz#6dbe57ed45f1dc022d0219f3810071b9007e347e"
-  integrity sha512-Wpj6BH4DGn+zAWmCk9agdbAw3Zxt+MpemjssLfYdnretWpZ014uR6Zo51E4ftVP75UA8a7mtt4TiCu09lIKsBw==
+"@foliojs-fork/pdfkit@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.yarnpkg.com/@foliojs-fork/pdfkit/-/pdfkit-0.15.3.tgz#590b31e770a98e2af62ce44f268a0d06b41ff32f"
+  integrity sha512-Obc0Wmy3bm7BINFVvPhcl2rnSSK61DQrlHU8aXnAqDk9LCjWdUOPwhgD8Ywz5VtuFjRxmVOM/kQ/XLIBjDvltw==
   dependencies:
     "@foliojs-fork/fontkit" "^1.9.2"
     "@foliojs-fork/linebreak" "^1.1.1"
@@ -503,13 +503,13 @@ pako@~1.0.2:
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
-pdfmake@^0.2.17:
-  version "0.2.17"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.17.tgz#64beeb0b09c7e0ade39b6d4b379371818cea3da5"
-  integrity sha512-ODOp1T232yr/HGjdYCq888paBE7RDCflCOSRDUtR9CyfXneOmnMPZJl8dxP9zEXbKiv9vfk9Z/3eK2V2B/Wx/Q==
+pdfmake@^0.2.18:
+  version "0.2.18"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.18.tgz#0be32a9274466494a69285193b64f61f3198ea4e"
+  integrity sha512-Fe+GnMS8EVZu5rci/CDaQ+xmUoHvx8P+rvIlrwSYM6A5c7Aik8G6lpJbddhjBE2jXGjv6WcUCFCB06uZbjxkMw==
   dependencies:
     "@foliojs-fork/linebreak" "^1.1.2"
-    "@foliojs-fork/pdfkit" "^0.15.2"
+    "@foliojs-fork/pdfkit" "^0.15.3"
     iconv-lite "^0.6.3"
     xmldoc "^1.3.0"
 
