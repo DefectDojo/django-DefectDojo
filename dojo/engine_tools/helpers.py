@@ -9,7 +9,8 @@ from datetime import timedelta
 import random
 
 # Dojo
-from dojo.models import Finding
+from dojo.models import Finding, Dojo_Group
+from dojo.group.queries import get_group_members_for_group
 from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.queries import tag_filter
 from dojo.celery import app
@@ -22,6 +23,22 @@ class Constants(Enum):
     VULNERABILITY_ID_HELP_TEXT = "Vulnerability technical id from the source tool. " \
                                  "Allows to track unique vulnerabilities."
     ON_WHITELIST = "On Whitelist"
+    REVIEWERS_MAINTAINER_GROUP = "Reviewers_Maintainer"
+    APPROVERS_CYBERSECURITY_GROUP = "Approvers_Cibersecurity"
+    
+    
+def get_reviewers_menbers():
+    reviewer_group = Dojo_Group.objects.filter(name=Constants.REVIEWERS_MAINTAINER_GROUP.value).first()
+    reviewer_members = get_group_members_for_group(reviewer_group)
+    
+    return [member.user for member in reviewer_members if member]
+    
+
+def get_approvers_members():
+    approvers_group = Dojo_Group.objects.filter(name=Constants.APPROVERS_CYBERSECURITY_GROUP.value).first()
+    approvers_members = get_group_members_for_group(approvers_group)
+    
+    return [member.user for member in approvers_members if member]
 
 
 @app.task

@@ -4,13 +4,13 @@ from dojo.authorization.authorization_decorators import (
 )
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
-from dojo.models import Dojo_User, Finding, Product
+from dojo.models import Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification, send_mail_notification
 from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm
-from dojo.engine_tools.helpers import add_findings_to_whitelist
+from dojo.engine_tools.helpers import add_findings_to_whitelist, get_approvers_members, get_reviewers_menbers
 
 # Utils
 from datetime import datetime, timedelta
@@ -43,12 +43,6 @@ def finding_exclusions(request: HttpRequest):
 
 def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     default_unique_id = request.GET.get('unique_id', '')
-    product_id = request.GET.get('product_id', '')
-    
-    if product_id:
-        product = get_object_or_404(Product, pk=product_id)
-    else:
-        product = None
     
     duplicate_finding_exclusions = FindingExclusion.objects.filter(
             unique_id_from_tool__in=[default_unique_id],
@@ -87,17 +81,19 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             exclusion = form.save(commit=False)
             exclusion.created_by = request.user
-            exclusion.product = product
             exclusion.expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
             exclusion.save()
             
             cve = request.POST.get(key="unique_id_from_tool")
             
+            reviewers = get_reviewers_menbers()
+            
             create_notification(
-                event="other",
+                event="finding_exclusion_request",
                 title=f"A new request has been created to add {cve} to the {list_type}.",
                 description=f"A new request has been created to add {cve} to the {list_type}.",
                 url=reverse("finding_exclusion", args=[str(exclusion.pk)]),
+                recipients=reviewers
             )
             
             messages.add_message(
@@ -137,15 +133,6 @@ def show_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
     """
     
     finding_exclusion = get_object_or_404(FindingExclusion, pk=fxid)
-    
-    if finding_exclusion.product is not None: 
-        user_has_permission_or_403(
-            request.user, finding_exclusion, Permissions.Finding_Exclusion_View
-        )
-    else:
-        user_has_global_permission_or_403(
-            request.user, Permissions.Finding_Exclusion_View,
-        )
     
     discussion_form = FindingExclusionDiscussionForm()
     
@@ -200,38 +187,25 @@ def review_finding_exclusion_request(
     if request.method == 'POST':      
         finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
         
-        if finding_exclusion.product is not None: 
-            user_has_permission_or_403(
-                request.user, finding_exclusion, Permissions.Finding_Exclusion_Review
-            )
-        else:
-            user_has_global_permission_or_403(
-                request.user, Permissions.Finding_Exclusion_Review,
-            )
-        
         finding_exclusion.status = "Reviewed"
         finding_exclusion.reviewed_at = datetime.now()
         finding_exclusion.status_updated_at = datetime.now()
         finding_exclusion.status_updated_by = request.user
         finding_exclusion.save()
         
-        create_notification(event="other",
+        create_notification(event="finding_exclusion_request",
                             title=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}",
                             description=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
                             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                            product=finding_exclusion.product,
                             recipients=[finding_exclusion.created_by])
         
-        kwargs["description"] = finding_exclusion.reason
-        kwargs["title"] = f"Evaluación Elegibilidad Vulnerabilidad Lista Blanca {finding_exclusion.unique_id_from_tool}"
-        kwargs["subject"] = f"Evaluación Elegibilidad Vulnerabilidad Lista Blanca {finding_exclusion.unique_id_from_tool}"
-        kwargs["url"] = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
+        approvers = get_approvers_members()
         
-        cyber_emails = settings.EXCLUSION_CYBER_EMAIL
-        
-        for email in str(cyber_emails).split(","):
-            cyber_user =  Dojo_User(email=email)
-            send_mail_notification("other", cyber_user, **kwargs)
+        create_notification(event="finding_exclusion_request",
+                            title=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}",
+                            description=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+                            url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+                            recipients=approvers)
         
         messages.add_message(
                 request,
@@ -249,15 +223,6 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         try:
             with transaction.atomic():
                 finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
-                
-                if finding_exclusion.product is not None: 
-                    user_has_permission_or_403(
-                        request.user, finding_exclusion, Permissions.Finding_Exclusion_Accept
-                    )
-                else:
-                    user_has_global_permission_or_403(
-                        request.user, Permissions.Finding_Exclusion_Accept,
-                    )
                     
                 finding_exclusion.status = "Accepted"
                 finding_exclusion.final_status = "Accepted"
@@ -276,12 +241,12 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                     extra_tags="alert-success")
             return redirect('finding_exclusion', fxid=fxid)
         
-        create_notification(event="other",
+        approvers = get_approvers_members()
+        create_notification(event="finding_exclusion_approved",
                             title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
-                            description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+                            description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
                             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                            product=finding_exclusion.product,
-                            recipients=[finding_exclusion.created_by])
+                            recipients=[finding_exclusion.created_by] + approvers)
         
         messages.add_message(
                 request,
@@ -298,15 +263,6 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
     if request.method == 'POST':
         finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
         
-        if finding_exclusion.product is not None: 
-            user_has_permission_or_403(
-                request.user, finding_exclusion, Permissions.Finding_Exclusion_Reject
-            )
-        else:
-            user_has_global_permission_or_403(
-                request.user, Permissions.Finding_Exclusion_Reject,
-            )
-        
         finding_exclusion.status = "Rejected"
         finding_exclusion.final_status = "Rejected"
         finding_exclusion.status_updated_at = datetime.now()
@@ -314,11 +270,10 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         finding_exclusion.save()
         
         create_notification(
-            event="other",
+            event="finding_exclusion_rejected",
             title=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}",
             description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-            product=finding_exclusion.product,
             recipients=[finding_exclusion.created_by]
         )
         

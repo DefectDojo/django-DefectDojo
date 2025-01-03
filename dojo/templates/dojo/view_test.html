@@ -1062,6 +1062,13 @@
                                                             </li>
                                                         {% endif %}
                                                     {% endif %}
+                                                    {% if finding.cve and not 'white_list' in finding.tags.all %}
+                                                        <li role="presentation">
+                                                            <a rel="noopener noreferrer" href="{% url 'create_finding_exclusion' %}?unique_id={{ finding.cve }}&product_id={{ finding.test.engagement.product.id }}">
+                                                                <i class="fas fa-list"></i> Add to White List
+                                                            </a>
+                                                        </li>
+                                                    {% endif %}
                                                     {% if finding|has_object_permission:"Risk_Acceptance" %}
                                                         {% if finding.risk_accepted and "Risk_Unaccept"|has_global_permission %}
                                                             <li role="presentation">

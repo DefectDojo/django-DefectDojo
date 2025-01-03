@@ -100,4 +100,14 @@ def enable_button(finding, button):
 
 @register.filter
 def has_object_exclusive_permission(obj, permission):
-    return user_has_exclusive_permission(crum.get_current_user(), obj, Permissions[permission])     
+    return user_has_exclusive_permission(crum.get_current_user(), obj, Permissions[permission])
+
+
+@register.filter
+def is_in_group(user, group_name):
+    if user.is_superuser:
+        return True
+    
+    if user.is_authenticated:
+        return user.groups.filter(dojo_group__name=group_name).exists()
+    return False

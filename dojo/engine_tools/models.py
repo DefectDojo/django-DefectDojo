@@ -30,10 +30,6 @@ class FindingExclusion(models.Model):
                                           related_name="dojo_user_status_updated",
                                           on_delete=models.CASCADE)
     reviewed_at = models.DateTimeField(null=True, blank=True)
-    product = models.ForeignKey("Product",
-                                null=True,
-                                blank=True,
-                                on_delete=models.CASCADE)
     reason = models.CharField(max_length=200, blank=True)
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, blank=True, default="Pending")
     final_status = models.CharField(choices=[("Accepted", "Accepted"), ("Rejected", "Rejected")], blank=True, null=True)
