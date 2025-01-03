@@ -1,4 +1,4 @@
-name: Ruff Linter
+name: SHA Pin Check
 
 on:
   workflow_dispatch:
