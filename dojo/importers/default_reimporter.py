@@ -204,11 +204,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             deduplicationLogger.debug(f"found {len(matched_findings)} findings matching with current new finding")
             # Determine how to proceed based on whether matches were found or not
             if matched_findings:
-                existing_finding = matched_findings[0]
-                finding, force_continue = self.process_matched_finding(
-                    unsaved_finding,
-                    existing_finding,
-                )
+                for existing_finding in matched_findings:
+                    finding, force_continue = self.process_matched_finding(
+                        unsaved_finding,
+                        existing_finding,
+                    )
                 # Determine if we should skip the rest of the loop
                 if force_continue:
                     continue
