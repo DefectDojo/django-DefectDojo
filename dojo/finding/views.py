@@ -685,7 +685,7 @@ class ViewFinding(View):
     def get_form(self, request: HttpRequest, context: dict):
         return (
             self.get_typed_note_form(request, context)
-            if context.get("note_type_activation", 0)
+            if context.get("note_type_activation")
             else self.get_note_form(request)
         )
 
