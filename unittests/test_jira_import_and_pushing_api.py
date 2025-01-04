@@ -11,7 +11,12 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.jira_link import helper as jira_helper
 from dojo.models import Finding, Finding_Group, JIRA_Instance, Risk_Acceptance, User
 
-from .dojo_test_case import DojoVCRAPITestCase, get_unit_tests_path, toggle_system_setting_boolean
+from .dojo_test_case import (
+    DojoVCRAPITestCase,
+    get_unit_tests_path,
+    get_unit_tests_scans_path,
+    toggle_system_setting_boolean,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +57,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         my_vcr.record_mode = "once"
         my_vcr.path_transformer = VCR.ensure_suffix(".yaml")
         my_vcr.filter_headers = ["Authorization", "X-Atlassian-Token"]
-        my_vcr.cassette_library_dir = get_unit_tests_path() + "/vcr/jira/"
+        my_vcr.cassette_library_dir = str(get_unit_tests_path() / "vcr" / "jira")
         # filters headers doesn't seem to work for cookies, so use callbacks to filter cookies from being recorded
         my_vcr.before_record_request = self.before_record_request
         my_vcr.before_record_response = self.before_record_response
@@ -67,9 +72,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         token = Token.objects.get(user=self.testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
-        self.scans_path = "/scans/"
-        self.zap_sample5_filename = self.scans_path + "zap/5_zap_sample_one.xml"
-        self.npm_groups_sample_filename = self.scans_path + "npm_audit/many_vuln_with_groups.json"
+        self.zap_sample5_filename = get_unit_tests_scans_path("zap") / "5_zap_sample_one.xml"
+        self.npm_groups_sample_filename = get_unit_tests_scans_path("npm_audit") / "many_vuln_with_groups.json"
         self.client.force_login(self.get_test_admin())
 
     def test_import_no_push_to_jira(self):
