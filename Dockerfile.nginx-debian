@@ -76,8 +76,11 @@ RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 FROM nginx:1.27.3-alpine@sha256:41523187cf7d7a2f2677a80609d9caa14388bf5c1fbca9c410ba3de602aaaab4
 ARG uid=1001
 ARG appuser=defectdojo
+ARG NGINX_CRT_PATH=""
+ARG NGINX_KEY_PATH=""
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
+COPY ${NGINX_CRT_PATH} ${NGINX_KEY_PATH} /etc/nginx/ssl/
 COPY docker/entrypoint-nginx.sh /
 RUN \
   apk add --no-cache openssl && \

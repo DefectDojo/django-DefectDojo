@@ -1,6 +1,11 @@
 ---
 services:
   nginx:
+    build:
+      context: .
+      args:
+        NGINX_CRT_PATH: ''
+        NGINX_KEY_PATH: ''
     environment:
       USE_TLS: 'true'
       GENERATE_TLS_CERTIFICATE: 'true'
@@ -10,6 +15,6 @@ services:
         protocol: tcp
         mode: host
   uwsgi:
-    environment:
-      DD_SESSION_COOKIE_SECURE: 'True'
-      DD_CSRF_COOKIE_SECURE: 'True'
+      environment:
+        DD_SESSION_COOKIE_SECURE: 'True'
+        DD_CSRF_COOKIE_SECURE: 'True'
