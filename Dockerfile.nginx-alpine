@@ -147,7 +147,7 @@ ARG NGINX_CRT_PATH=""
 ARG NGINX_KEY_PATH=""
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
-COPY ${NGINX_CRT_PATH:} ${NGINX_KEY_PATH:} /etc/nginx/ssl/
+COPY ${NGINX_CRT_PATH} ${NGINX_KEY_PATH} /etc/nginx/ssl/
 COPY docker/entrypoint-nginx.sh /
 RUN \
   apk add --no-cache openssl && \
