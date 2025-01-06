@@ -1,5 +1,5 @@
 ---
-title: "Import Methods"
+title: "Import Method Comparison"
 description: "Learn how to import data manually, through the API, or via a connector"
 weight: 1
 ---
