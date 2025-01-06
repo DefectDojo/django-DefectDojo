@@ -785,7 +785,7 @@ def add_jira_issue(obj, *args, **kwargs):
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
     except Exception as e:
-        message = f"The following jira instance could not be connected: {jira_instance} - {e.text}"
+        message = f"The following jira instance could not be connected: {jira_instance} - {e}"
         return failure_to_add_message(message, e, obj)
     # Set the list of labels to set on the jira issue
     labels = get_labels(obj) + get_tags(obj)
@@ -793,6 +793,7 @@ def add_jira_issue(obj, *args, **kwargs):
         labels = list(dict.fromkeys(labels))  # de-dup
     # Determine what due date to set on the jira issue
     duedate = None
+
     if System_Settings.objects.get().enable_finding_sla:
         duedate = obj.sla_deadline()
     # Set the fields that will compose the jira issue
@@ -1104,6 +1105,7 @@ def get_issuetype_fields(
 
     issuetype_fields = None
     use_cloud_api = jira.deploymentType.lower() == "cloud" or jira._version < (9, 0, 0)
+
     try:
         if use_cloud_api:
             try:
@@ -1706,3 +1708,24 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     if status_changed:
         finding.save()
     return status_changed
+
+
+def save_and_push_to_jira(finding):
+    # Manage the jira status changes
+    push_to_jira = False
+    # Determine if the finding is in a group. if so, not push to jira yet
+    finding_in_group = finding.has_finding_group
+    # Check if there is a jira issue that needs to be updated
+    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
+    # Only push if the finding is not in a group
+    if jira_issue_exists:
+        # Determine if any automatic sync should occur
+        push_to_jira = is_push_all_issues(finding) \
+            or get_jira_instance(finding).finding_jira_sync
+    # Save the finding
+    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+
+    # we only push the group after saving the finding to make sure
+    # the updated data of the finding is pushed as part of the group
+    if push_to_jira and finding_in_group:
+        push_to_jira(finding.finding_group)
