@@ -2992,7 +2992,7 @@ def finding_bulk_update_all(request, pid=None):
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():
-                    add_error_message_to_response("{error_count} finding groups could not be pushed to JIRA: {error_message}")
+                    add_error_message_to_response(f"{error_count} finding groups could not be pushed to JIRA: {error_message}")
 
                 if success_count > 0:
                     add_success_message_to_response(f"{success_count} finding groups pushed to JIRA successfully")
