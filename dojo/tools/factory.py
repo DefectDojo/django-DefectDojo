@@ -115,7 +115,7 @@ def requires_tool_type(scan_type):
 
 # iterate through the modules in the current package
 package_dir = str(Path(__file__).resolve().parent)
-for module_name in os.listdir(package_dir):
+for module_name in os.listdir(package_dir):  # noqa: PTH208
     # check if it's dir
     if Path(os.path.join(package_dir, module_name)).is_dir():
         try:
