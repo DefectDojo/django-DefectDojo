@@ -77,6 +77,12 @@ weight = 1
     pre = "<i class='fab fa-github'></i>"
     url = "https://github.com/DefectDojo/django-DefectDojo"
 
+[[menu.main]]
+    name = "Knowledge Base"
+    weight = 50
+    pre = "<i class='fas fa-atlas'></i>"
+    url = "https://support.defectdojo.com"
+
 [markup]
   [markup.goldmark]
     [markup.goldmark.renderer]

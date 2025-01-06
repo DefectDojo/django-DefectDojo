@@ -9,6 +9,7 @@ from dojo.models import Finding
 
 
 class AuditJSParser:
+
     """Parser for AuditJS Scan tool"""
 
     def get_scan_types(self):

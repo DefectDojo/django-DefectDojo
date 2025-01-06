@@ -19,9 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class ApiBugcrowdParser:
-    """
-    Import from Bugcrowd API /submissions
-    """
+
+    """Import from Bugcrowd API /submissions"""
 
     def get_scan_types(self):
         return [SCAN_BUGCROWD_API]
@@ -156,7 +155,7 @@ class ApiBugcrowdParser:
                         finding.unsaved_endpoints = [bug_endpoint]
                     except Exception as e:
                         logger.error(
-                            f"{str(bug_endpoint)} bug url from bugcrowd failed to parse to endpoint, error= {e}",
+                            f"{bug_endpoint} bug url from bugcrowd failed to parse to endpoint, error= {e}",
                         )
                 except ValidationError:
                     logger.error(

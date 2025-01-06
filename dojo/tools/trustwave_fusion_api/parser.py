@@ -8,9 +8,8 @@ from dojo.models import Endpoint, Finding
 
 
 class TrustwaveFusionAPIParser:
-    """
-    Import Trustwave Fusion Report from its API in JSON format
-    """
+
+    """Import Trustwave Fusion Report from its API in JSON format"""
 
     def get_scan_types(self):
         return ["Trustwave Fusion API Scan"]

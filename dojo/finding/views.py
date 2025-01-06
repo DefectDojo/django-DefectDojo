@@ -7,7 +7,6 @@ import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
 from itertools import chain
-from typing import Optional
 
 from django.conf import settings
 from django.contrib import messages
@@ -136,6 +135,9 @@ def prefetch_for_findings(findings, prefetch_type="all", exclude_untouched=True)
     if isinstance(
         findings, QuerySet,
     ):  # old code can arrive here with prods being a list because the query was already executed
+        prefetched_findings = prefetched_findings.prefetch_related(
+            "reviewers",
+        )
         prefetched_findings = prefetched_findings.prefetch_related("reporter")
         prefetched_findings = prefetched_findings.prefetch_related(
             "jira_issue__jira_project__jira_instance",
@@ -265,9 +267,9 @@ class BaseListFindings:
     def __init__(
         self,
         filter_name: str = "All",
-        product_id: Optional[int] = None,
-        engagement_id: Optional[int] = None,
-        test_id: Optional[int] = None,
+        product_id: int | None = None,
+        engagement_id: int | None = None,
+        test_id: int | None = None,
         order_by: str = "numerical_severity",
         prefetch_type: str = "all",
     ):
@@ -420,7 +422,7 @@ class ListFindings(View, BaseListFindings):
 
         return request, context
 
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         # Store the product and engagement ids
         self.product_id = product_id
         self.engagement_id = engagement_id
@@ -446,43 +448,43 @@ class ListFindings(View, BaseListFindings):
 
 
 class ListOpenFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Open"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListVerifiedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Verified"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListOutOfScopeFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Out of Scope"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListFalsePositiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "False Positive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListInactiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Inactive"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListAcceptedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Accepted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 
 class ListClosedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: Optional[int] = None, engagement_id: Optional[int] = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Closed"
         self.order_by = "-mitigated"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
@@ -987,10 +989,10 @@ class EditFinding(View):
             # Handle risk exception related things
             if "risk_accepted" in context["form"].cleaned_data and context["form"]["risk_accepted"].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
-                    ra_helper.simple_risk_accept(new_finding, perform_save=False)
+                    ra_helper.simple_risk_accept(request.user, new_finding, perform_save=False)
             else:
                 if new_finding.risk_accepted:
-                    ra_helper.risk_unaccept(new_finding, perform_save=False)
+                    ra_helper.risk_unaccept(request.user, new_finding, perform_save=False)
             # Save and add new endpoints
             finding_helper.add_endpoints(new_finding, context["form"])
             # Remove unrelated endpoints
@@ -1217,10 +1219,7 @@ def close_finding(request, fid):
     # in order to close a finding, we need to capture why it was closed
     # we can do this with a Note
     note_type_activation = Note_Type.objects.filter(is_active=True)
-    if len(note_type_activation):
-        missing_note_types = get_missing_mandatory_notetypes(finding)
-    else:
-        missing_note_types = note_type_activation
+    missing_note_types = get_missing_mandatory_notetypes(finding) if len(note_type_activation) else note_type_activation
     form = CloseFindingForm(missing_note_types=missing_note_types)
     if request.method == "POST":
         form = CloseFindingForm(request.POST, missing_note_types=missing_note_types)
@@ -1263,7 +1262,7 @@ def close_finding(request, fid):
                     status.last_modified = timezone.now()
                     status.save()
                 # Clear the risk acceptance, if present
-                ra_helper.risk_unaccept(finding)
+                ra_helper.risk_unaccept(request.user, finding)
 
                 # Manage the jira status changes
                 push_to_jira = False
@@ -1438,26 +1437,8 @@ def reopen_finding(request, fid):
         status.last_modified = timezone.now()
         status.save()
     # Clear the risk acceptance, if present
-    ra_helper.risk_unaccept(finding)
-
-    # Manage the jira status changes
-    push_to_jira = False
-    # Determine if the finding is in a group. if so, not push to jira
-    finding_in_group = finding.has_finding_group
-    # Check if there is a jira issue that needs to be updated
-    jira_issue_exists = finding.has_jira_issue or (finding.finding_group and finding.finding_group.has_jira_issue)
-    # Only push if the finding is not in a group
-    if jira_issue_exists:
-        # Determine if any automatic sync should occur
-        push_to_jira = jira_helper.is_push_all_issues(finding) \
-            or jira_helper.get_jira_instance(finding).finding_jira_sync
-    # Save the finding
-    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-
-    # we only push the group after saving the finding to make sure
-    # the updated data of the finding is pushed as part of the group
-    if push_to_jira and finding_in_group:
-        jira_helper.push_to_jira(finding.finding_group)
+    ra_helper.risk_unaccept(request.user, finding)
+    jira_helper.save_and_push_to_jira(finding)
 
     reopen_external_issue(finding, "re-opened by defectdojo", "github")
 
@@ -1616,7 +1597,7 @@ def simple_risk_accept(request, fid):
     if not finding.test.engagement.product.enable_simple_risk_acceptance:
         raise PermissionDenied
 
-    ra_helper.simple_risk_accept(finding)
+    ra_helper.simple_risk_accept(request.user, finding)
 
     messages.add_message(
         request, messages.WARNING, "Finding risk accepted.", extra_tags="alert-success",
@@ -1630,7 +1611,7 @@ def simple_risk_accept(request, fid):
 @user_is_authorized(Finding, Permissions.Risk_Acceptance, "fid")
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    ra_helper.risk_unaccept(finding)
+    ra_helper.risk_unaccept(request.user, finding)
 
     messages.add_message(
         request,
@@ -1697,7 +1678,7 @@ def request_finding_review(request, fid):
                 jira_helper.push_to_jira(finding.finding_group)
 
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
-            reviewers_string = ", ".join([str(user) for user in reviewers])
+            reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
             reviewers_usernames = [user.username for user in reviewers]
             logger.debug(f"Asking {reviewers_string} for review")
 
@@ -1709,7 +1690,7 @@ def request_finding_review(request, fid):
                 finding=finding,
                 reviewers=reviewers,
                 recipients=reviewers_usernames,
-                description=f'User {user.get_full_name()} has requested that user(s) {reviewers_string} review the finding "{finding.title}" for accuracy:\n\n{new_note}',
+                description=f'User {user.get_full_name()}({user.id}) has requested that user(s) {reviewers_string} review the finding "{finding.title}" for accuracy:\n\n{new_note}',
                 icon="check",
                 url=reverse("view_finding", args=(finding.id,)),
             )
@@ -2274,10 +2255,7 @@ def apply_cwe_mitigation(apply_to_findings, template, update=True):
                     cwe=title_template.cwe,
                     title__icontains=title_template.title,
                 ).values_list("id", flat=True)
-                if result_list is None:
-                    result_list = finding_ids
-                else:
-                    result_list = list(chain(result_list, finding_ids))
+                result_list = finding_ids if result_list is None else list(chain(result_list, finding_ids))
 
             # If result_list is None the filter exclude won't work
             if result_list:
@@ -2379,16 +2357,7 @@ def edit_template(request, tid):
             count = apply_cwe_mitigation(
                 form.cleaned_data["apply_to_findings"], template,
             )
-            if count > 0:
-                apply_message = (
-                    " and "
-                    + str(count)
-                    + " "
-                    + pluralize(count, "finding,findings")
-                    + " "
-                )
-            else:
-                apply_message = ""
+            apply_message = " and " + str(count) + " " + pluralize(count, "finding,findings") + " " if count > 0 else ""
 
             messages.add_message(
                 request,
@@ -2834,9 +2803,9 @@ def finding_bulk_update_all(request, pid=None):
                                 ):
                                     skipped_risk_accept_count += 1
                                 else:
-                                    ra_helper.simple_risk_accept(finding)
+                                    ra_helper.simple_risk_accept(request.user, finding)
                             elif form.cleaned_data["risk_unaccept"]:
-                                ra_helper.risk_unaccept(finding)
+                                ra_helper.risk_unaccept(request.user, finding)
 
                     for prod in prods:
                         calculate_grade(prod)
@@ -3023,7 +2992,7 @@ def finding_bulk_update_all(request, pid=None):
                             success_count += 1
 
                 for error_message, error_count in error_counts.items():
-                    add_error_message_to_response("{error_count} finding groups could not be pushed to JIRA: {error_message}")
+                    add_error_message_to_response(f"{error_count} finding groups could not be pushed to JIRA: {error_message}")
 
                 if success_count > 0:
                     add_success_message_to_response(f"{success_count} finding groups pushed to JIRA successfully")

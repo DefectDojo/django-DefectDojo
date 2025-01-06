@@ -104,7 +104,7 @@ class CycloneDXXMLParser:
                 [
                     f"**Ref:** {ref}",
                     f"**Id:** {vuln_id}",
-                    f"**Severity:** {str(severity)}",
+                    f"**Severity:** {severity}",
                 ],
             )
         if component_name is None:
@@ -141,7 +141,7 @@ class CycloneDXXMLParser:
         for rating in vulnerability.findall(
             "v:ratings/v:rating", namespaces=ns,
         ):
-            if "CVSSv3" == rating.findtext("v:method", namespaces=ns):
+            if rating.findtext("v:method", namespaces=ns) == "CVSSv3":
                 raw_vector = rating.findtext("v:vector", namespaces=ns)
                 severity = rating.findtext("v:severity", namespaces=ns)
                 cvssv3 = Cyclonedxhelper()._get_cvssv3(raw_vector)
@@ -253,7 +253,7 @@ class CycloneDXXMLParser:
                 "b:ratings/b:rating", namespaces=ns,
             ):
                 method = rating.findtext("b:method", namespaces=ns)
-                if "CVSSv3" == method or "CVSSv31" == method:
+                if method == "CVSSv3" or method == "CVSSv31":
                     raw_vector = rating.findtext("b:vector", namespaces=ns)
                     severity = rating.findtext("b:severity", namespaces=ns)
                     cvssv3 = Cyclonedxhelper()._get_cvssv3(raw_vector)
@@ -280,13 +280,13 @@ class CycloneDXXMLParser:
                 state = analysis[0].findtext("b:state", namespaces=ns)
                 if state:
                     if (
-                        "resolved" == state
-                        or "resolved_with_pedigree" == state
-                        or "not_affected" == state
+                        state == "resolved"
+                        or state == "resolved_with_pedigree"
+                        or state == "not_affected"
                     ):
                         finding.is_mitigated = True
                         finding.active = False
-                    elif "false_positive" == state:
+                    elif state == "false_positive":
                         finding.false_p = True
                         finding.active = False
                     if not finding.active:

@@ -3,6 +3,7 @@ from .parser_xml import SSLyzeXMLParser
 
 
 class SslyzeParser:
+
     """SSLyze support JSON and XML"""
 
     def get_scan_types(self):

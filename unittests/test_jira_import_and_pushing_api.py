@@ -2,14 +2,16 @@
 import logging
 
 from crum import impersonate
+from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from vcr import VCR
 
+import dojo.risk_acceptance.helper as ra_helper
 from dojo.jira_link import helper as jira_helper
-from dojo.models import Finding, Finding_Group, JIRA_Instance, User
+from dojo.models import Finding, Finding_Group, JIRA_Instance, Risk_Acceptance, User
 
-from .dojo_test_case import DojoVCRAPITestCase, get_unit_tests_path
+from .dojo_test_case import DojoVCRAPITestCase, get_unit_tests_path, toggle_system_setting_boolean
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +70,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.scans_path = "/scans/"
         self.zap_sample5_filename = self.scans_path + "zap/5_zap_sample_one.xml"
         self.npm_groups_sample_filename = self.scans_path + "npm_audit/many_vuln_with_groups.json"
+        self.client.force_login(self.get_test_admin())
 
     def test_import_no_push_to_jira(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, verified=True)
@@ -280,6 +283,65 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # duplicates shouldn't be sent to JIRA
         self.assert_jira_issue_count_in_test(test_id1, 0)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+    def add_risk_acceptance(self, eid, data_risk_accceptance, fid=None):
+        args = (eid, fid) if fid else (eid,)
+        response = self.client.post(reverse("add_risk_acceptance", args=args), data_risk_accceptance)
+        self.assertEqual(302, response.status_code, response.content[:1000])
+        return response
+
+    def test_import_grouped_reopen_expired_sla(self):
+        # steps
+        # import scan, make sure they are in grouped JIRA
+        # risk acceptance all the grouped findings, make sure they are closed in JIRA
+        # expire risk acceptance on all grouped findings, make sure they are open in JIRA
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
+        test_id = import0["test"]
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+        findings = self.get_test_findings_api(test_id)
+        finding_id = findings["results"][0]["id"]
+
+        ra_data = {
+            "name": "Accept: Unit test",
+            "accepted_findings": [],
+            "recommendation": "A",
+            "recommendation_details": "recommendation 1",
+            "decision": "A",
+            "decision_details": "it has been decided!",
+            "accepted_by": "pointy haired boss",
+            "owner": 1,
+            "expiration_date": "2024-12-31",
+            "reactivate_expired": True,
+            }
+
+        for finding in findings["results"]:
+            ra_data["accepted_findings"].append(finding["id"])
+
+        pre_jira_status = self.get_jira_issue_status(finding_id)
+
+        response = self.add_risk_acceptance(1, data_risk_accceptance=ra_data)
+        self.assertEqual("/engagement/1", response.url)
+
+        # We do this to update the JIRA
+        for finding in ra_data["accepted_findings"]:
+            self.patch_finding_api(finding, {"push_to_jira": True})
+
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertNotEqual(pre_jira_status, post_jira_status)
+
+        pre_jira_status = post_jira_status
+        ra = Risk_Acceptance.objects.last()
+        ra_helper.expire_now(ra)
+        # We do this to update the JIRA
+        for finding in ra_data["accepted_findings"]:
+            self.patch_finding_api(finding, {"push_to_jira": True})
+
+        post_jira_status = self.get_jira_issue_status(finding_id)
+        self.assertNotEqual(pre_jira_status, post_jira_status)
+
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
 
     def test_import_with_groups_twice_push_to_jira(self):
         import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type="NPM Audit Scan", group_by="component_name+component_version", push_to_jira=True, verified=True)
@@ -553,6 +615,24 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         # Assert that the tags match
         self.assertEqual(issue.fields.labels, tags_new)
 
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
+    def test_import_with_push_to_jira_not_verified_with_enforced_verified(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # This scan file has two active findings, so we should not push either of them
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    def test_import_with_push_to_jira_not_verified_without_enforced_verified(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # This scan file has two active findings, so we should not push both of them
+        self.assert_jira_issue_count_in_test(test_id, 2)
         # by asserting full cassette is played we know all calls to JIRA have been made as expected
         self.assert_cassette_played()
 

@@ -1,11 +1,12 @@
+import datetime
 import hashlib
 import json
-from datetime import datetime
 
 from dojo.models import Endpoint, Finding
 
 
 class WpscanParser:
+
     """WPScan - WordPress Security Scanner"""
 
     def get_scan_types(self):
@@ -88,7 +89,7 @@ class WpscanParser:
 
         report_date = None
         if "start_time" in tree:
-            report_date = datetime.utcfromtimestamp(tree.get("start_time"))
+            report_date = datetime.datetime.fromtimestamp(tree.get("start_time"), datetime.UTC)
 
         dupes = {}
         # manage plugin findings
@@ -185,7 +186,8 @@ class WpscanParser:
         return references
 
     def _get_scanner_confidence(self, val):
-        """Confidence value are from 0 (wrong) to 100 (certain)
+        """
+        Confidence value are from 0 (wrong) to 100 (certain)
         So we divide by 10 and invert axis
         """
         if val is None:

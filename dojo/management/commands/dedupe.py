@@ -27,10 +27,12 @@ def generate_hash_code(f):
 
 
 class Command(BaseCommand):
+
     """
     Updates hash codes and/or runs deduplication for findings. Hashcode calculation always runs in the foreground, dedupe by default runs in the background.
     Usage: manage.py dedupe [--parser "Parser1 Scan" --parser "Parser2 Scan"...] [--hash_code_only] [--dedupe_only] [--dedupe_sync]'
     """
+
     help = 'Usage: manage.py dedupe [--parser "Parser1 Scan" --parser "Parser2 Scan"...] [--hash_code_only] [--dedupe_only] [--dedupe_sync]'
 
     def add_arguments(self, parser):

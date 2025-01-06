@@ -10,9 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class VulnersImporter:
-    """
-    Import from Vulners API
-    """
+
+    """Import from Vulners API"""
 
     def get_findings(self, test):
         client, _config = self.prepare_client(test)

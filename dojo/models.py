@@ -6,7 +6,7 @@ import os
 import re
 import warnings
 from datetime import datetime
-from typing import Dict, Optional, Set
+from pathlib import Path
 from uuid import uuid4
 
 import hyperlink
@@ -125,6 +125,7 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
 
 @deconstructible
 class UniqueUploadNameProvider:
+
     """
     A callable to be passed as upload_to parameter to FileField.
 
@@ -140,7 +141,9 @@ class UniqueUploadNameProvider:
         self.keep_ext = keep_ext
 
     def __call__(self, model_instance, filename):
-        base, ext = os.path.splitext(filename)
+        path = Path(filename)
+        base = path.parent / path.stem
+        ext = path.suffix
         filename = f"{base}_{uuid4()}" if self.keep_basename else str(uuid4())
         if self.keep_ext:
             filename += ext
@@ -215,9 +218,7 @@ class Dojo_User(User):
 
     @staticmethod
     def generate_full_name(user):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
+        """Returns the first_name plus the last_name, with a space in between."""
         full_name = f"{user.first_name} {user.last_name} ({user.username})"
         return full_name.strip()
 
@@ -359,6 +360,15 @@ class System_Settings(models.Model):
                             blank=False)
     webhooks_notifications_timeout = models.IntegerField(default=10,
                                           help_text=_("How many seconds will DefectDojo waits for response from webhook endpoint"))
+
+    enforce_verified_status = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status"),
+        help_text=_("When enabled, features such as product grading, jira "
+                    "integration, metrics, and reports will only interact "
+                    "with verified findings.",
+        ),
+    )
 
     false_positive_history = models.BooleanField(
         default=False, help_text=_(
@@ -734,16 +744,38 @@ class FileUpload(models.Model):
 
         return f"access_file/{self.id}/{obj_id}/{obj_type}"
 
+    def clean(self):
+        if not self.title:
+            self.title = "<No Title>"
+
+        valid_extensions = settings.FILE_UPLOAD_TYPES
+
+        # why does this not work with self.file....
+        file_name = self.file.url if self.file else self.title
+        if Path(file_name).suffix.lower() not in valid_extensions:
+            if accepted_extensions := f"{', '.join(valid_extensions)}":
+                msg = (
+                    _("Unsupported extension. Supported extensions are as follows: %s") % accepted_extensions
+                )
+            else:
+                msg = (
+                    _("File uploads are prohibited due to the list of acceptable file extensions being empty")
+                )
+            raise ValidationError(msg)
+
 
 class Product_Type(models.Model):
-    """Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
-`
+
+    """
+    Product types represent the top level model, these can be business unit divisions, different offices or locations, development teams, or any other logical way of distinguishing “types” of products.
+    `
        Examples:
          * IAM Team
          * Internal / 3rd Party
          * Main company / Acquisition
          * San Francisco / New York offices
     """
+
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
@@ -1194,42 +1226,24 @@ class Product(models.Model):
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
             return {}
-        critical = Finding.objects.filter(test__engagement__product=self,
-                                          mitigated__isnull=True,
-                                          verified=True,
-                                          false_p=False,
-                                          duplicate=False,
-                                          out_of_scope=False,
-                                          severity="Critical",
-                                          date__range=[start_date,
-                                                       end_date]).count()
-        high = Finding.objects.filter(test__engagement__product=self,
-                                      mitigated__isnull=True,
-                                      verified=True,
-                                      false_p=False,
-                                      duplicate=False,
-                                      out_of_scope=False,
-                                      severity="High",
-                                      date__range=[start_date,
-                                                   end_date]).count()
-        medium = Finding.objects.filter(test__engagement__product=self,
+
+        from dojo.utils import get_system_setting
+        findings = Finding.objects.filter(test__engagement__product=self,
                                         mitigated__isnull=True,
-                                        verified=True,
                                         false_p=False,
                                         duplicate=False,
                                         out_of_scope=False,
-                                        severity="Medium",
                                         date__range=[start_date,
-                                                     end_date]).count()
-        low = Finding.objects.filter(test__engagement__product=self,
-                                     mitigated__isnull=True,
-                                     verified=True,
-                                     false_p=False,
-                                     duplicate=False,
-                                     out_of_scope=False,
-                                     severity="Low",
-                                     date__range=[start_date,
-                                                  end_date]).count()
+                                                    end_date])
+
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True)
+
+        critical = findings.filter(severity="Critical").count()
+        high = findings.filter(severity="High").count()
+        medium = findings.filter(severity="Medium").count()
+        low = findings.filter(severity="Low").count()
+
         return {"Critical": critical,
                 "High": high,
                 "Medium": medium,
@@ -1521,17 +1535,11 @@ class Engagement(models.Model):
         return copy
 
     def is_overdue(self):
-        if self.engagement_type == "CI/CD":
-            overdue_grace_days = 10
-        else:
-            overdue_grace_days = 0
+        overdue_grace_days = 10 if self.engagement_type == "CI/CD" else 0
 
         max_end_date = timezone.now() - relativedelta(days=overdue_grace_days)
 
-        if self.target_end < max_end_date.date():
-            return True
-
-        return False
+        return self.target_end < max_end_date.date()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
@@ -1542,7 +1550,13 @@ class Engagement(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test__engagement=self)
+        from dojo.utils import get_system_setting
+
+        findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True)
+
+        return findings
 
     def accept_risks(self, accepted_risks):
         self.risk_acceptance.add(*accepted_risks)
@@ -1605,7 +1619,7 @@ class Endpoint_Status(models.Model):
         ]
 
     def __str__(self):
-        return f"'{str(self.finding)}' on '{str(self.endpoint)}'"
+        return f"'{self.finding}' on '{self.endpoint}'"
 
     def copy(self, finding=None):
         copy = self
@@ -1622,10 +1636,7 @@ class Endpoint_Status(models.Model):
     @property
     def age(self):
 
-        if self.mitigated:
-            diff = self.mitigated_time.date() - self.date
-        else:
-            diff = get_current_date() - self.date
+        diff = self.mitigated_time.date() - self.date if self.mitigated else get_current_date() - self.date
         days = diff.days
         return max(0, days)
 
@@ -1763,7 +1774,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.path = self.path.replace(remove_str, "%00")
-                    logging.error(f'Path "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error(f'Path "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
             if self.path == "":
                 self.path = None
 
@@ -1776,7 +1787,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.query = self.query.replace(remove_str, "%00")
-                    logging.error(f'Query "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error(f'Query "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
             if self.query == "":
                 self.query = None
 
@@ -1789,7 +1800,7 @@ class Endpoint(models.Model):
                     action_string = "Postgres does not accept NULL character. Attempting to replace with %00..."
                     for remove_str in null_char_list:
                         self.fragment = self.fragment.replace(remove_str, "%00")
-                    logging.error(f'Fragment "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
+                    logger.error(f'Fragment "{old_value}" has invalid format - It contains the NULL character. The following action was taken: {action_string}')
             if self.fragment == "":
                 self.fragment = None
 
@@ -1820,9 +1831,7 @@ class Endpoint(models.Model):
         except:
             return True
         else:
-            if self.product:
-                return False
-            return True
+            return not self.product
 
     @property
     def mitigated(self):
@@ -2112,7 +2121,12 @@ class Test(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test=self)
+        from dojo.utils import get_system_setting
+        findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True)
+
+        return findings
 
     def accept_risks(self, accepted_risks):
         self.engagement.risk_acceptance.add(*accepted_risks)
@@ -2175,7 +2189,7 @@ class Test(models.Model):
 
     @property
     def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        """Queries the database, no prefetching, so could be slow for lists of model instances"""
         return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
 
     def inherit_tags(self, potentially_existing_tags):
@@ -2221,7 +2235,7 @@ class Test_Import(TimeStampedModel):
 
     @property
     def statistics(self):
-        """ Queries the database, no prefetching, so could be slow for lists of model instances """
+        """Queries the database, no prefetching, so could be slow for lists of model instances"""
         stats = {}
         for action in IMPORT_ACTIONS:
             stats[action[1].lower()] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=action[0]), _get_annotations_for_statistics)
@@ -2736,7 +2750,12 @@ class Finding(models.Model):
     # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
-        return cls.objects.filter(active=True, verified=True, duplicate=False, risk_accepted=False)
+        from dojo.utils import get_system_setting
+        results = cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
+        if get_system_setting("enforce_verified_status", True):
+            results = results.filter(verified=True)
+
+        return results
 
     @property
     def risk_acceptance(self):
@@ -2910,7 +2929,7 @@ class Finding(models.Model):
     @staticmethod
     def get_severity(num_severity):
         severities = {0: "Info", 1: "Low", 2: "Medium", 3: "High", 4: "Critical"}
-        if num_severity in severities.keys():
+        if num_severity in severities:
             return severities[num_severity]
 
         return None
@@ -3407,7 +3426,7 @@ class Finding_Group(TimeStampedModel):
 
     @cached_property
     def components(self):
-        components: Dict[str, Set[Optional[str]]] = {}
+        components: dict[str, set[str | None]] = {}
         for finding in self.findings.all():
             if finding.component_name is not None:
                 components.setdefault(finding.component_name, set()).add(finding.component_version)
@@ -3567,9 +3586,9 @@ class Check_List(models.Model):
 
     @staticmethod
     def get_status(pass_fail):
-        if pass_fail == "Pass":
+        if pass_fail == "Pass":  # noqa: S105
             return "success"
-        if pass_fail == "Fail":
+        if pass_fail == "Fail":  # noqa: S105
             return "danger"
         return "warning"
 
@@ -3654,7 +3673,7 @@ class Risk_Acceptance(models.Model):
         # logger.debug('path: "%s"', self.path)
         if not self.path:
             return None
-        return os.path.basename(self.path.name)
+        return Path(self.path.name).name
 
     @property
     def name_and_expiration_info(self):
@@ -3701,9 +3720,13 @@ class Risk_Acceptance(models.Model):
 
 
 class FileAccessToken(models.Model):
-    """This will allow reports to request the images without exposing the
+
+    """
+    This will allow reports to request the images without exposing the
     media root to the world without
-    authentication"""
+    authentication
+    """
+
     user = models.ForeignKey(Dojo_User, null=False, blank=False, on_delete=models.CASCADE)
     file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
@@ -3906,16 +3929,24 @@ class JIRA_Project(models.Model):
                                                              verbose_name=_("Add vulnerability Id as a JIRA label"),
                                                              blank=False)
     push_all_issues = models.BooleanField(default=False, blank=True,
-         help_text=_("Automatically maintain parity with JIRA. Always create and update JIRA tickets for findings in this Product."))
+         help_text=_("Automatically create JIRA tickets for verified findings, assuming enforce_verified_status is True, or for all findings otherwise. Once linked, the JIRA ticket will continue to sync, regardless of status in DefectDojo."))
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))
     push_notes = models.BooleanField(default=False, blank=True)
     product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
+    enabled = models.BooleanField(
+        verbose_name=_("Enable Connection With Jira Project"),
+        help_text=_("When disabled, Findings will no longer be pushed to Jira, even if they have already been pushed previously."),
+        default=True,
+        blank=True)
 
     def __str__(self):
-        return ("%s: " + self.project_key + "(%s)") % (str(self.id), str(self.jira_instance.url) if self.jira_instance else "None")
+        value = f"{self.id}: {self.project_key} ({self.jira_instance.url if self.jira_instance else 'None'})"
+        if not self.enabled:
+            value += " - Not Connected"
+        return value
 
     def clean(self):
         if not self.jira_instance:
@@ -4402,9 +4433,8 @@ class Benchmark_Product_Summary(models.Model):
 # ==============================
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Question(PolymorphicModel, TimeStampedModel):
-        """
-            Represents a question.
-        """
+
+        """Represents a question."""
 
         class Meta:
             ordering = ["order"]
@@ -4425,23 +4455,20 @@ with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning
 
 
 class TextQuestion(Question):
-    """
-    Question with a text answer
-    """
+
+    """Question with a text answer"""
+
     objects = PolymorphicManager()
 
     def get_form(self):
-        """
-        Returns the form for this model
-        """
+        """Returns the form for this model"""
         from .forms import TextQuestionForm
         return TextQuestionForm
 
 
 class Choice(TimeStampedModel):
-    """
-    Model to store the choices for multi choice questions
-    """
+
+    """Model to store the choices for multi choice questions"""
 
     order = models.PositiveIntegerField(default=1)
 
@@ -4455,6 +4482,7 @@ class Choice(TimeStampedModel):
 
 
 class ChoiceQuestion(Question):
+
     """
     Question with answers that are chosen from a list of choices defined
     by the user.
@@ -4466,10 +4494,7 @@ class ChoiceQuestion(Question):
     objects = PolymorphicManager()
 
     def get_form(self):
-        """
-        Returns the form for this model
-        """
-
+        """Returns the form for this model"""
         from .forms import ChoiceQuestionForm
         return ChoiceQuestionForm
 
@@ -4534,8 +4559,9 @@ class General_Survey(models.Model):
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class Answer(PolymorphicModel, TimeStampedModel):
-        """ Base Answer model
-        """
+
+        """Base Answer model"""
+
         question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
         answered_survey = models.ForeignKey(Answered_Survey,
@@ -4575,7 +4601,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Dojo_User, exclude_fields=["password"])
     auditlog.register(Endpoint)
     auditlog.register(Engagement)
-    auditlog.register(Finding)
+    auditlog.register(Finding, m2m_fields={"reviewers"})
     auditlog.register(Finding_Group)
     auditlog.register(Product_Type)
     auditlog.register(Product)
@@ -4584,6 +4610,7 @@ if settings.ENABLE_AUDITLOG:
     auditlog.register(Finding_Template)
     auditlog.register(Cred_User, exclude_fields=["password"])
     auditlog.register(Notification_Webhooks, exclude_fields=["header_name", "header_value"])
+
 
 from dojo.utils import calculate_grade, to_str_typed  # noqa: E402  # there is issue due to a circular import
 

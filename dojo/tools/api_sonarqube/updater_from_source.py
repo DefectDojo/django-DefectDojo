@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiUpdaterFromSource:
+
     """
     The responsibility of this class is to update the Finding status if current SonarQube issue status doesn't match.
 
@@ -63,10 +64,7 @@ class SonarQubeApiUpdaterFromSource:
         elif finding.risk_accepted:
             target_status = "WONTFIX"
         elif finding.active:
-            if finding.verified:
-                target_status = "CONFIRMED"
-            else:
-                target_status = "REOPENED"
+            target_status = "CONFIRMED" if finding.verified else "REOPENED"
         return target_status
 
     @staticmethod

@@ -4,7 +4,9 @@ from dojo.models import Finding
 
 
 class MozillaObservatoryParser:
-    """Mozilla Observatory
+
+    """
+    Mozilla Observatory
 
     See: https://observatory.mozilla.org
 
@@ -25,10 +27,7 @@ class MozillaObservatoryParser:
     def get_findings(self, file, test):
         data = json.load(file)
         # format from the CLI
-        if "tests" in data:
-            nodes = data["tests"]
-        else:
-            nodes = data
+        nodes = data.get("tests", data)
 
         findings = []
         for key in nodes:

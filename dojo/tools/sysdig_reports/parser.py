@@ -8,9 +8,8 @@ from dojo.tools.sysdig_reports.sysdig_csv_parser import CSVParser
 
 
 class SysdigReportsParser:
-    """
-    Sysdig Report Importer - Runtime CSV
-    """
+
+    """Sysdig Report Importer - Runtime CSV"""
 
     def get_scan_types(self):
         return ["Sysdig Vulnerability Report"]

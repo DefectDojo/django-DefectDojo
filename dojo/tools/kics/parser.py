@@ -5,9 +5,8 @@ from dojo.models import Finding
 
 
 class KICSParser:
-    """
-    A class that can be used to parse the KICS JSON report file
-    """
+
+    """A class that can be used to parse the KICS JSON report file"""
 
     # table to match KICS severity to DefectDojo severity
     SEVERITY = {
@@ -32,10 +31,7 @@ class KICSParser:
         for query in data["queries"]:
             name = query.get("query_name")
             query_url = query.get("query_url")
-            if query.get("severity") in self.SEVERITY:
-                severity = self.SEVERITY[query.get("severity")]
-            else:
-                severity = "Medium"
+            severity = self.SEVERITY.get(query.get("severity"), "Medium")
             platform = query.get("platform")
             category = query.get("category")
             for item in query.get("files"):
@@ -54,8 +50,7 @@ class KICSParser:
                     description += f"**Issue type:** {issue_type}\n"
                 if actual_value:
                     description += f"**Actual value:** {actual_value}\n"
-                if description.endswith("\n"):
-                    description = description[:-1]
+                description = description.removesuffix("\n")
 
                 dupe_key = hashlib.sha256(
                     (

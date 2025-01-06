@@ -4,6 +4,7 @@ from time import strftime
 from django.conf import settings
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
+from django.db.utils import IntegrityError
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
 from fieldsignals import pre_save_changed
@@ -164,21 +165,22 @@ def create_finding_group(finds, finding_group_name):
 
     finding_group = Finding_Group(test=finds[0].test)
     finding_group.creator = get_current_user()
-    finding_group.name = finding_group_name + finding_group_name_dummy
-    finding_group.save()
+
+    if finding_group_name:
+        finding_group.name = finding_group_name
+    elif finding_group.components:
+        finding_group.name = finding_group.components
+    try:
+        finding_group.save()
+    except IntegrityError as ie:
+        if "already exists" in str(ie):
+            finding_group.name = finding_group_name + finding_group_name_dummy
+            finding_group.save()
+        else:
+            raise
+
     available_findings = [find for find in finds if not find.finding_group_set.all()]
     finding_group.findings.set(available_findings)
-
-    # if user provided a name, we use that, else:
-    # if we have components, we may set a nice name but catch 'name already exist' exceptions
-    try:
-        if finding_group_name:
-            finding_group.name = finding_group_name
-        elif finding_group.components:
-            finding_group.name = finding_group.components
-        finding_group.save()
-    except:
-        pass
 
     added = len(available_findings)
     skipped = len(finds) - added
@@ -306,7 +308,7 @@ def add_findings_to_auto_group(name, findings, group_by, create_finding_groups_f
     if name is not None and findings is not None and len(findings) > 0:
         creator = get_current_user()
         if not creator:
-            creator = kwargs.get("async_user", None)
+            creator = kwargs.get("async_user")
         test = findings[0].test
 
         if create_finding_groups_for_all_findings or len(findings) > 1:
@@ -566,7 +568,7 @@ def engagement_post_delete(sender, instance, **kwargs):
 
 
 def fix_loop_duplicates():
-    """ Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates. """
+    """Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates."""
     """ i.e. A -> B -> C. This can lead to problems when deleting findingns, performing deduplication, etc """
     candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).order_by("-id")
 

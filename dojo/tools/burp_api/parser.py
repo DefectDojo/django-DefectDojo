@@ -16,6 +16,7 @@ DESCRIPTION_TEMPLATE = """**{title}**
 
 
 class BurpApiParser:
+
     """Parser that can load data from Burp API"""
 
     def get_scan_types(self):
@@ -35,7 +36,7 @@ class BurpApiParser:
         # for each issue found
         for issue_event in tree.get("issue_events", []):
             if (
-                "issue_found" == issue_event.get("type")
+                issue_event.get("type") == "issue_found"
                 and "issue" in issue_event
             ):
                 issue = issue_event.get("issue")
@@ -51,7 +52,7 @@ class BurpApiParser:
                 )
                 false_p = False
                 # manage special case of false positives
-                if "false_positive" == issue.get("severity", "undefined"):
+                if issue.get("severity", "undefined") == "false_positive":
                     false_p = True
 
                 finding = Finding(
@@ -123,7 +124,8 @@ class BurpApiParser:
 
 
 def convert_severity(issue):
-    """According to OpenAPI definition of the API
+    """
+    According to OpenAPI definition of the API
 
     "Severity":{
              "type":"string",
@@ -144,7 +146,8 @@ def convert_severity(issue):
 
 
 def convert_confidence(issue):
-    """According to OpenAPI definition:
+    """
+    According to OpenAPI definition:
 
     "Confidence":{
              "type":"string",
@@ -157,10 +160,10 @@ def convert_confidence(issue):
           },
     """
     value = issue.get("confidence", "undefined").lower()
-    if "certain" == value:
+    if value == "certain":
         return 2
-    if "firm" == value:
+    if value == "firm":
         return 3
-    if "tentative" == value:
+    if value == "tentative":
         return 6
     return None

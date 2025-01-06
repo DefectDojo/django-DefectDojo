@@ -5,6 +5,7 @@ from dojo.models import Finding
 
 
 class CoverityApiParser:
+
     """Parser that can load data from Synopsys Coverity API"""
 
     def get_scan_types(self):
@@ -26,7 +27,7 @@ class CoverityApiParser:
         items = []
         for issue in tree["viewContentsV1"]["rows"]:
             # get only security findings
-            if "Security" != issue.get("displayIssueKind"):
+            if issue.get("displayIssueKind") != "Security":
                 continue
 
             description_formated = "\n".join(
@@ -65,17 +66,17 @@ class CoverityApiParser:
             else:
                 finding.nb_occurences = 1
 
-            if "New" == issue.get("status"):
+            if issue.get("status") == "New":
                 finding.active = True
                 finding.verified = False
-            elif "Triaged" == issue.get("status"):
+            elif issue.get("status") == "Triaged":
                 finding.active = True
                 finding.verified = True
-            elif "Fixed" == issue.get("status"):
+            elif issue.get("status") == "Fixed":
                 finding.active = False
                 finding.verified = True
             else:
-                if "False Positive" == issue.get("classification"):
+                if issue.get("classification") == "False Positive":
                     finding.false_p = True
                 if "lastTriaged" in issue:
                     ds = issue["lastTriaged"][0:10]
@@ -91,13 +92,13 @@ class CoverityApiParser:
     def convert_displayImpact(self, val):
         if val is None:
             return "Info"
-        if "Audit" == val:
+        if val == "Audit":
             return "Info"
-        if "Low" == val:
+        if val == "Low":
             return "Low"
-        if "Medium" == val:
+        if val == "Medium":
             return "Medium"
-        if "High" == val:
+        if val == "High":
             return "High"
         msg = f"Unknown value for Coverity displayImpact {val}"
         raise ValueError(msg)
@@ -105,17 +106,17 @@ class CoverityApiParser:
     def convert_severity(self, val):
         if val is None:
             return "Info"
-        if "Unspecified" == val:
+        if val == "Unspecified":
             return "Info"
-        if "Severe" == val:
+        if val == "Severe":
             return "Critical"
-        if "Major" == val:
+        if val == "Major":
             return "High"
-        if "Minor" == val:
+        if val == "Minor":
             return "Medium"
-        if "New Value" == val:
+        if val == "New Value":
             return "Info"
-        if "Various" == val:
+        if val == "Various":
             return "Info"
         msg = f"Unknown value for Coverity severity {val}"
         raise ValueError(msg)

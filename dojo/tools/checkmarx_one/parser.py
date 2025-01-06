@@ -1,7 +1,6 @@
 import datetime
 import json
 import re
-from typing import List
 
 from dateutil import parser
 from django.conf import settings
@@ -23,7 +22,7 @@ class CheckmarxOneParser:
         if isinstance(value, str):
             return parser.parse(value)
         if isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.utcfromtimestamp(value.get("seconds"))
+            return datetime.datetime.fromtimestamp(value.get("seconds"), datetime.UTC)
         return None
 
     def _parse_cwe(self, cwe):
@@ -40,7 +39,7 @@ class CheckmarxOneParser:
         self,
         test: Test,
         data: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         cwe_store = data.get("vulnerabilityDetails", [])
         # SAST
@@ -59,7 +58,7 @@ class CheckmarxOneParser:
         test: Test,
         results: list,
         cwe_store: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         for technology in results:
             # Set the name aside for use in the title
@@ -109,7 +108,7 @@ class CheckmarxOneParser:
         test: Test,
         results: list,
         cwe_store: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         # Not implemented yet
         return []
 
@@ -118,7 +117,7 @@ class CheckmarxOneParser:
         test: Test,
         results: list,
         cwe_store: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         def get_cwe_store_entry(cwe_store: list, cwe: int) -> dict:
             # Quick base case
             if cwe is None:
@@ -197,7 +196,7 @@ class CheckmarxOneParser:
         self,
         test: Test,
         results: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         for result in results:
             id = result.get("identifiers")[0].get("value")
@@ -233,7 +232,7 @@ class CheckmarxOneParser:
         self,
         test: Test,
         results: list,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         findings = []
         for vulnerability in results:
             result_type = vulnerability.get("type")
@@ -263,6 +262,9 @@ class CheckmarxOneParser:
         description = vulnerability.get("description")
         file_path = vulnerability.get("data").get("nodes")[0].get("fileName")
         unique_id_from_tool = vulnerability.get("id", vulnerability.get("similarityId"))
+        if description is None:
+            description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
+
         return Finding(
             description=description,
             title=description,
@@ -281,6 +283,9 @@ class CheckmarxOneParser:
         description = vulnerability.get("description")
         file_path = vulnerability.get("data").get("filename", vulnerability.get("data").get("fileName"))
         unique_id_from_tool = vulnerability.get("id", vulnerability.get("similarityId"))
+        if description is None:
+            description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
+
         return Finding(
             title=description,
             description=description,
@@ -299,6 +304,9 @@ class CheckmarxOneParser:
     ) -> Finding:
         description = vulnerability.get("description")
         unique_id_from_tool = vulnerability.get("id", vulnerability.get("similarityId"))
+        if description is None:
+            description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
+
         finding = Finding(
             title=description,
             description=description,

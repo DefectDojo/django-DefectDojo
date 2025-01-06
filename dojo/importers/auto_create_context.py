@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Optional
+from typing import Any
 
 from crum import get_current_user
 from django.db import transaction
@@ -23,6 +23,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class AutoCreateContextManager:
+
     """
     Management of safely fetching and creating resources used in the import
     and reimport processes. Resources managed by this class are:
@@ -31,6 +32,7 @@ class AutoCreateContextManager:
     - Engagements
     - Tests
     """
+
     """
     ===================================
     ----------- Validators ------------
@@ -49,7 +51,7 @@ class AutoCreateContextManager:
         test such that passing the whole object, or just the ID
         will suffice
         """
-        if object_id := data.get(key, None):
+        if object_id := data.get(key):
             # Convert to just the ID if the whole object as passed
             if isinstance(object_id, object_type):
                 object_id = object_id.id
@@ -111,7 +113,7 @@ class AutoCreateContextManager:
     """
     def get_target_product_type_if_exists(
         self,
-        product_type_name: Optional[str] = None,
+        product_type_name: str | None = None,
         **kwargs: dict,
     ) -> Product_Type | None:
         """
@@ -126,8 +128,8 @@ class AutoCreateContextManager:
 
     def get_target_product_if_exists(
         self,
-        product_name: Optional[str] = None,
-        product_type_name: Optional[str] = None,
+        product_name: str | None = None,
+        product_type_name: str | None = None,
         **kwargs: dict,
     ) -> Product | None:
         """
@@ -166,7 +168,7 @@ class AutoCreateContextManager:
     def get_target_engagement_if_exists(
         self,
         engagement_id: int = 0,
-        engagement_name: Optional[str] = None,
+        engagement_name: str | None = None,
         product: Product = None,
         **kwargs: dict,
     ) -> Engagement | None:
@@ -189,8 +191,8 @@ class AutoCreateContextManager:
     def get_target_test_if_exists(
         self,
         test_id: int = 0,
-        test_title: Optional[str] = None,
-        scan_type: Optional[str] = None,
+        test_title: str | None = None,
+        scan_type: str | None = None,
         engagement: Engagement = None,
         **kwargs: dict,
     ) -> Test | None:
@@ -218,7 +220,7 @@ class AutoCreateContextManager:
     """
     def get_or_create_product_type(
         self,
-        product_type_name: Optional[str] = None,
+        product_type_name: str | None = None,
         **kwargs: dict,
     ) -> Product_Type:
         """
@@ -241,8 +243,8 @@ class AutoCreateContextManager:
 
     def get_or_create_product(
         self,
-        product_name: Optional[str] = None,
-        product_type_name: Optional[str] = None,
+        product_name: str | None = None,
+        product_type_name: str | None = None,
         *,
         auto_create_context: bool = False,
         **kwargs: dict,
@@ -276,19 +278,17 @@ class AutoCreateContextManager:
     def get_or_create_engagement(
         self,
         engagement_id: int = 0,
-        engagement_name: Optional[str] = None,
-        product_name: Optional[str] = None,
-        product_type_name: Optional[str] = None,
+        engagement_name: str | None = None,
+        product_name: str | None = None,
+        product_type_name: str | None = None,
         *,
         auto_create_context: bool = False,
         deduplication_on_engagement: bool = False,
-        source_code_management_uri: Optional[str] = None,
-        target_end: Optional[datetime] = None,
+        source_code_management_uri: str | None = None,
+        target_end: datetime | None = None,
         **kwargs: dict,
     ) -> Engagement:
-        """
-        Fetches an engagement by name or ID if one already exists.
-        """
+        """Fetches an engagement by name or ID if one already exists."""
         # try to find the engagement (and product)
         product = self.get_target_product_if_exists(
             product_name=product_name,

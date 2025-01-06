@@ -6,9 +6,8 @@ from dojo.models import Finding
 
 
 class MobsfscanParser:
-    """
-    A class that can be used to parse the mobsfscan (https://github.com/MobSF/mobsfscan) JSON report file.
-    """
+
+    """A class that can be used to parse the mobsfscan (https://github.com/MobSF/mobsfscan) JSON report file."""
 
     SEVERITY = {
         "ERROR": "High",
@@ -47,34 +46,45 @@ class MobsfscanParser:
                 ],
             )
             references = metadata.get("reference")
-            if metadata.get("severity") in self.SEVERITY:
-                severity = self.SEVERITY[metadata.get("severity")]
-            else:
-                severity = "Info"
+            severity = self.SEVERITY.get(metadata.get("severity"), "Info")
 
-            finding = Finding(
-                title=f"{key}",
-                test=test,
-                severity=severity,
-                nb_occurences=1,
-                cwe=cwe,
-                description=description,
-                references=references,
-            )
+            files = []
+
             if item.get("files"):
                 for file in item.get("files"):
-                    file_path = file.get("file_path")
-                    line = file.get("match_lines")[0]
+                    file_path = file.get("file_path", "")
+                    line = file.get("match_lines", [0])[0]
+                    snippet = file.get("match_string", "")
+
+                    files.append((file_path, line, snippet))
+            else:
+                files.append(("", 0, ""))
+
+            for file_path, line, snippet in files:
+
+                finding = Finding(
+                    title=f"{key}",
+                    test=test,
+                    severity=severity,
+                    nb_occurences=1,
+                    cwe=cwe,
+                    description=description,
+                    references=references,
+                )
+
+                if file_path:
                     finding.file_path = file_path
                     finding.line = line
+                    finding.description = f"{description}\n**Snippet:** `{snippet}`"
 
-            dupe_key = hashlib.sha256(
-                (key + str(cwe) + masvs + owasp_mobile).encode("utf-8"),
-            ).hexdigest()
+                dupe_key = hashlib.sha256(
+                    (key + str(cwe) + masvs + owasp_mobile + file_path).encode("utf-8"),
+                ).hexdigest()
 
-            if dupe_key in dupes:
-                finding = dupes[dupe_key]
-                finding.nb_occurences += 1
-            else:
-                dupes[dupe_key] = finding
+                if dupe_key in dupes:
+                    finding = dupes[dupe_key]
+                    finding.nb_occurences += 1
+                else:
+                    dupes[dupe_key] = finding
+
         return list(dupes.values())

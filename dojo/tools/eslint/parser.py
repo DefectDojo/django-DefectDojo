@@ -35,10 +35,7 @@ class ESLintParser:
                 continue
 
             for message in item["messages"]:
-                if message["message"] is None:
-                    title = "Finding Not defined"
-                else:
-                    title = str(message["message"])
+                title = "Finding Not defined" if message["message"] is None else str(message["message"])
 
                 if message["ruleId"] is not None:
                     title = title + " Test ID: " + str(message["ruleId"])

@@ -7,10 +7,12 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
+
     """
     Textquestions for surveys need to be modified after loading the fixture
     as they contain an instance dependant polymorphic content id
     """
+
     help = "Usage: manage.py migration_textquestions"
 
     def handle(self, *args, **options):

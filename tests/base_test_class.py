@@ -237,13 +237,7 @@ class BaseTestCase(unittest.TestCase):
         return driver
 
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
-        no_content = None
-        try:
-            no_content = self.driver.find_element(By.ID, no_content_id)
-        except:
-            pass
-
-        if no_content is None:
+        if not self.is_element_by_id_present(no_content_id):
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
             WebDriverWait(self.driver, 30).until(
                 EC.presence_of_element_located((By.ID, wrapper_id)),
@@ -339,7 +333,7 @@ class BaseTestCase(unittest.TestCase):
     def set_block_execution(self, block_execution=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
-        logger.info(f"setting block execution to: {str(block_execution)}")
+        logger.info(f"setting block execution to: {block_execution}")
         driver = self.driver
         driver.get(self.base_url + "profile")
         if (
@@ -407,7 +401,6 @@ class BaseTestCase(unittest.TestCase):
         {'level': 'WARNING', 'message': 'http://localhost:8080/product/type/4/edit 562:16 "warning"', 'source': 'console-api', 'timestamp': 1583952828410}
         {'level': 'SEVERE', 'message': 'http://localhost:8080/product/type/4/edit 563:16 "error"', 'source': 'console-api', 'timestamp': 1583952828410}
         """
-
         for entry in WebdriverOnlyNewLogFacade(self.driver).get_log("browser"):
             """
             Images are now working after https://github.com/DefectDojo/django-DefectDojo/pull/3954,

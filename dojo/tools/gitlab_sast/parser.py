@@ -70,7 +70,7 @@ class GitlabSastParser:
             "Low": 6,          # Tentative
             "Experimental": 7,  # Tentative
         }
-        return switcher.get(argument, None)
+        return switcher.get(argument)
 
     def get_item(self, vuln, scanner):
         unique_id_from_tool = vuln["id"] if "id" in vuln else vuln["cve"]
@@ -92,9 +92,9 @@ class GitlabSastParser:
             description += f"{vuln['description']}\n"
 
         location = vuln["location"]
-        file_path = location["file"] if "file" in location else None
+        file_path = location.get("file", None)
 
-        line = location["start_line"] if "start_line" in location else None
+        line = location.get("start_line", None)
 
         sast_object = None
         sast_source_file_path = None
@@ -121,7 +121,7 @@ class GitlabSastParser:
             severity = "Info"
         scanner_confidence = self.get_confidence_numeric(vuln.get("confidence", "Unkown"))
 
-        mitigation = vuln["solution"] if "solution" in vuln else ""
+        mitigation = vuln.get("solution", "")
         cwe = None
         vulnerability_id = None
         references = ""

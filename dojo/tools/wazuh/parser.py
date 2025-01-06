@@ -5,6 +5,7 @@ from dojo.models import Endpoint, Finding
 
 
 class WazuhParser:
+
     """
     The vulnerabilities with condition "Package unfixed" are skipped because there is no fix out yet.
     https://github.com/wazuh/wazuh/issues/14560
@@ -48,10 +49,7 @@ class WazuhParser:
                 agent_ip = item.get("agent_ip")
                 detection_time = item.get("detection_time").split("T")[0]
 
-                if links:
-                    references = "\n".join(links)
-                else:
-                    references = None
+                references = "\n".join(links) if links else None
 
                 title = (
                     item.get("title") + " (version: " + package_version + ")"

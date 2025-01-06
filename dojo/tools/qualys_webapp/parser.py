@@ -34,7 +34,7 @@ def truncate_str(value: str, maxlen: int):
 
 # Parse 'CWE-XXXX' format to strip just the numbers
 def get_cwe(cwe):
-    cweSearch = re.search("CWE-([0-9]*)", cwe, re.IGNORECASE)
+    cweSearch = re.search(r"CWE-([0-9]*)", cwe, re.IGNORECASE)
     if cweSearch:
         return cweSearch.group(1)
     return 0
@@ -200,10 +200,7 @@ def get_unique_vulnerabilities(
         if access_path is not None:
             urls += [url.text for url in access_path.iter("URL")]
         payloads = vuln.find("PAYLOADS")
-        if payloads is not None:
-            req_resps = get_request_response(payloads)
-        else:
-            req_resps = [[], []]
+        req_resps = get_request_response(payloads) if payloads is not None else [[], []]
 
         if is_info:
             raw_finding_date = vuln.findtext("LAST_TIME_DETECTED")
@@ -267,10 +264,7 @@ def get_vulnerabilities(
         if access_path is not None:
             urls += [url.text for url in access_path.iter("URL")]
         payloads = vuln.find("PAYLOADS")
-        if payloads is not None:
-            req_resps = get_request_response(payloads)
-        else:
-            req_resps = [[], []]
+        req_resps = get_request_response(payloads) if payloads is not None else [[], []]
 
         if is_info:
             raw_finding_date = vuln.findtext("LAST_TIME_DETECTED")
@@ -292,7 +286,7 @@ def get_vulnerabilities(
         else:
             finding_date = None
 
-        finding = findings.get(qid, None)
+        finding = findings.get(qid)
         findings[qid] = attach_extras(
             urls, req_resps[0], req_resps[1], finding, finding_date, qid, test,
         )
@@ -365,12 +359,14 @@ def get_unique_items(
         qid = int(finding.vuln_id_from_tool)
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(
+            final_finding = get_glossary_item(
                 glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
+        else:
+            final_finding = finding
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
-            findings[unique_id] = get_info_item(info_gathered[index], finding)
+            findings[unique_id] = get_info_item(info_gathered[index], final_finding)
     return findings
 
 
@@ -402,12 +398,14 @@ def get_items(
     ).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(
+            final_finding = get_glossary_item(
                 glossary[index], finding, is_info=True, enable_weakness=enable_weakness,
             )
+        else:
+            final_finding = finding
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
-            findings[qid] = get_info_item(info_gathered[index], finding)
+            findings[qid] = get_info_item(info_gathered[index], final_finding)
 
     return findings
 
@@ -460,7 +458,7 @@ def qualys_webapp_parser(qualys_xml_file, test, unique, enable_weakness=False):
             ).values(),
         )
 
-    return items
+    return list(items)
 
 
 class QualysWebAppParser:

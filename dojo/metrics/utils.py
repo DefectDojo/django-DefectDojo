@@ -1,10 +1,10 @@
 
 import operator
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from enum import Enum
 from functools import partial
-from math import ceil
-from typing import Any, Callable, NamedTuple, TypeVar, Union
+from typing import Any, NamedTuple, TypeVar
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -35,12 +35,18 @@ from dojo.utils import (
 )
 
 
+def get_metrics_finding_filter_class() -> type[MetricsFindingFilter | MetricsFindingFilterWithoutObjectLookups]:
+    if get_system_setting("filter_string_matching", False):
+        return MetricsFindingFilterWithoutObjectLookups
+    return MetricsFindingFilter
+
+
 def finding_queries(
     prod_type: QuerySet[Product_Type],
     request: HttpRequest,
 ) -> dict[str, Any]:
     # Get the initial list of findings the user is authorized to see
-    findings_query = get_authorized_findings(
+    all_authorized_findings: QuerySet[Finding] = get_authorized_findings(
         Permissions.Finding_View,
         user=request.user,
     ).select_related(
@@ -54,46 +60,47 @@ def finding_queries(
         "test__test_type",
     )
 
-    filter_string_matching = get_system_setting("filter_string_matching", False)
-    finding_filter_class = MetricsFindingFilterWithoutObjectLookups if filter_string_matching else MetricsFindingFilter
-    findings = finding_filter_class(request.GET, queryset=findings_query)
-    form = findings.form
-    findings_qs = queryset_check(findings)
-    # Quick check to determine if the filters were too tight and filtered everything away
-    if not findings_qs.exists() and not findings_query.exists():
-        findings = findings_query
-        findings_qs = findings if isinstance(findings, QuerySet) else findings.qs
+    finding_filter_class = get_metrics_finding_filter_class()
+    findings_filter = finding_filter_class(request.GET, queryset=all_authorized_findings)
+    form = findings_filter.form
+    filtered_findings: QuerySet[Finding] = queryset_check(findings_filter)
+    # Quick check to determine if the filters were too tight and filtered everything away. If so, fall back to using all
+    # authorized Findings instead.
+    if not filtered_findings.exists() and all_authorized_findings.exists():
+        filtered_findings = all_authorized_findings
         messages.add_message(
             request,
             messages.ERROR,
             _("All objects have been filtered away. Displaying all objects"),
             extra_tags="alert-danger")
 
-    start_date, end_date = get_date_range(findings_qs)
+    start_date, end_date = get_date_range(filtered_findings)
 
     # Filter by the date ranges supplied
-    findings_query = findings_query.filter(date__range=[start_date, end_date])
+    all_findings_within_date_range = all_authorized_findings.filter(date__range=[start_date, end_date])
     # Get the list of closed and risk accepted findings
-    findings_closed = findings_query.filter(CLOSED_FINDINGS_QUERY)
-    accepted_findings = findings_query.filter(ACCEPTED_FINDINGS_QUERY)
-    active_findings = findings_query.filter(OPEN_FINDINGS_QUERY)
+    closed_filtered_findings = all_findings_within_date_range.filter(CLOSED_FINDINGS_QUERY)
+    accepted_filtered_findings = all_findings_within_date_range.filter(ACCEPTED_FINDINGS_QUERY)
+    active_filtered_findings = all_findings_within_date_range.filter(OPEN_FINDINGS_QUERY)
 
     # filter by product type if applicable
     if len(prod_type) > 0:
-        findings_query = findings_query.filter(test__engagement__product__prod_type__in=prod_type)
-        findings_closed = findings_closed.filter(test__engagement__product__prod_type__in=prod_type)
-        accepted_findings = accepted_findings.filter(test__engagement__product__prod_type__in=prod_type)
-        active_findings = active_findings.filter(test__engagement__product__prod_type__in=prod_type)
+        all_findings_within_date_range = all_findings_within_date_range.filter(
+            test__engagement__product__prod_type__in=prod_type)
+        closed_filtered_findings = closed_filtered_findings.filter(test__engagement__product__prod_type__in=prod_type)
+        accepted_filtered_findings = accepted_filtered_findings.filter(
+            test__engagement__product__prod_type__in=prod_type)
+        active_filtered_findings = active_filtered_findings.filter(test__engagement__product__prod_type__in=prod_type)
 
     # Get the severity counts of risk accepted findings
-    accepted_findings_counts = severity_count(accepted_findings, "aggregate", "severity")
+    accepted_findings_counts = severity_count(accepted_filtered_findings, "aggregate", "severity")
 
     weeks_between, months_between = period_deltas(start_date, end_date)
 
     query_counts_for_period = query_counts(
-        findings_query,
-        active_findings,
-        accepted_findings,
+        all_findings_within_date_range,
+        active_filtered_findings,
+        accepted_filtered_findings,
         start_date,
         MetricsType.FINDING,
     )
@@ -102,8 +109,10 @@ def finding_queries(
     weekly_counts = query_counts_for_period(MetricsPeriod.WEEK, weeks_between)
 
     top_ten = get_authorized_products(Permissions.Product_View)
-    top_ten = top_ten.filter(engagement__test__finding__verified=True,
-                             engagement__test__finding__false_p=False,
+    if get_system_setting("enforce_verified_status", True):
+        top_ten = top_ten.filter(engagement__test__finding__verified=True)
+
+    top_ten = top_ten.filter(engagement__test__finding__false_p=False,
                              engagement__test__finding__duplicate=False,
                              engagement__test__finding__out_of_scope=False,
                              engagement__test__finding__mitigated__isnull=True,
@@ -117,9 +126,9 @@ def finding_queries(
     )[:10]
 
     return {
-        "all": findings_query,
-        "closed": findings_closed,
-        "accepted": accepted_findings,
+        "all": filtered_findings,
+        "closed": closed_filtered_findings,
+        "accepted": accepted_filtered_findings,
         "accepted_count": accepted_findings_counts,
         "top_ten": top_ten,
         "monthly_counts": monthly_counts,
@@ -244,35 +253,39 @@ MetricsQuerySet = TypeVar("MetricsQuerySet", QuerySet[Finding], QuerySet[Endpoin
 
 
 class _MetricsPeriodEntry(NamedTuple):
+
     """
     Class for holding information for a metrics period. Allows us to store a kwarg for date manipulation alongside a DB
     method used to aggregate around the same timeframe.
     """
+
     datetime_name: str
-    db_method: Union[TruncWeek, TruncMonth]
+    db_method: TruncWeek | TruncMonth
 
 
 class MetricsPeriod(_MetricsPeriodEntry, Enum):
-    """
-    Enum for the two metrics periods supported: by week and month
-    """
+
+    """Enum for the two metrics periods supported: by week and month"""
+
     WEEK = ("weeks", TruncWeek)
     MONTH = ("months", TruncMonth)
 
 
 class _MetricsTypeEntry(NamedTuple):
+
     """
     Class for holding information for a metrics type. Allows us to store relative queryset lookups for severities
     alongside relative lookups for closed statuses.
     """
+
     severity_lookup: str
     closed_lookup: str
 
 
 class MetricsType(_MetricsTypeEntry, Enum):
-    """
-    Enum for the two metrics types supported: by Findings and by Endpoints (Endpoint_Status)
-    """
+
+    """Enum for the two metrics types supported: by Findings and by Endpoints (Endpoint_Status)"""
+
     FINDING = ("severity", "is_mitigated")
     ENDPOINT = ("finding__severity", "mitigated")
 
@@ -336,7 +349,7 @@ def severity_count(
     queryset: MetricsQuerySet,
     method: str,
     expression: str,
-) -> Union[MetricsQuerySet, dict[str, int]]:
+) -> MetricsQuerySet | dict[str, int]:
     """
     Aggregates counts by severity for the given queryset.
 
@@ -383,7 +396,7 @@ def identify_view(
 
 
 def js_epoch(
-    d: Union[date, datetime],
+    d: date | datetime,
 ) -> int:
     """
     Converts a date/datetime object to a JavaScript epoch time (for use in FE charts)
@@ -454,13 +467,8 @@ def period_deltas(start_date, end_date):
     :return: A tuple of integers representing (number of weeks between the dates, number of months between the dates)
     """
     r = relativedelta(end_date, start_date)
-    months_between = (r.years * 12) + r.months
-    # include current month
-    months_between += 1
-
-    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
-    if weeks_between <= 0:
-        weeks_between += 2
+    months_between = max((r.years * 12) + r.months, 2)
+    weeks_between = max((end_date - start_date).days // 7, 2)
     return weeks_between, months_between
 
 
@@ -481,7 +489,6 @@ def aggregate_counts_by_period(
     :param include_closed: A boolean dictating whether 'closed' finding/status aggregates should be included
     :return: A queryset with aggregate severity counts grouped by period
     """
-
     desired_values = ("grouped_date", "critical", "high", "medium", "low", "info", "total")
 
     severities_by_period = severity_count(

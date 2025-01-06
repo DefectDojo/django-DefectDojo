@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class BlackduckCRImporter:
+
     """
     Importer for blackduck. V3 is different in that it creates a Finding in defect dojo
     for each vulnerable component version used in a project, for each license that is

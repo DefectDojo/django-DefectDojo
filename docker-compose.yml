@@ -16,6 +16,8 @@ services:
       - uwsgi
     environment:
       NGINX_METRICS_ENABLED: "${NGINX_METRICS_ENABLED:-false}"
+      DD_UWSGI_HOST: "${DD_UWSGI_HOST:-uwsgi}"
+      DD_UWSGI_PORT: "${DD_UWSGI_PORT:-3031}"
     volumes:
       - defectdojo_media:/usr/share/nginx/html/media
     ports:
@@ -103,7 +105,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   postgres:
-    image: postgres:16.4-alpine@sha256:d898b0b78a2627cb4ee63464a14efc9d296884f1b28c841b0ab7d7c42f1fffdf
+    image: postgres:17.2-alpine@sha256:d37d2c160d34430877c802e5adc22824a2ad453499db9bab1a2ceb2be6c1a46f
     environment:
       POSTGRES_DB: ${DD_DATABASE_NAME:-defectdojo}
       POSTGRES_USER: ${DD_DATABASE_USER:-defectdojo}

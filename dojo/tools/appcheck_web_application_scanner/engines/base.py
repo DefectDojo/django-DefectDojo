@@ -1,6 +1,6 @@
 import re
 from itertools import starmap
-from typing import Any, Optional, Tuple, Union
+from typing import Any
 
 import cvss.parser
 import dateutil.parser
@@ -19,9 +19,7 @@ MARKUP_STRIPPING_PATTERN = re.compile(r"\[\[markup\]\]|\[\[|\]\]")
 
 
 def strip_markup(value: str) -> str:
-    """
-    Strips out "markup" from value
-    """
+    """Strips out "markup" from value"""
     if value:
         return MARKUP_STRIPPING_PATTERN.sub("", value).strip()
     return value
@@ -75,6 +73,7 @@ def cvss_score_to_severity(score: float, version: int) -> str:
 # Field parsing helper classes
 #######
 class FieldType:
+
     """
     Base class for attribute handlers for parsers. Callable, and calls the .handle() method, which should be implemented
     by subclasses.
@@ -83,6 +82,7 @@ class FieldType:
     subclasses should check whether the configuration for this object makes sense (or as much sense as can be determined
     when the method is called) and raise an ImproperlyConfigured exception if it does not.
     """
+
     def __init__(self, target_name):
         self.target_name = target_name
 
@@ -97,10 +97,12 @@ class FieldType:
 
 
 class Attribute(FieldType):
+
     """
     Class for a field that maps directly from one in the input data to a Finding attribute. Initialized with a Finding
     attribute name, when called sets the value of that attribute to the passed-in value.
     """
+
     def handle(self, engine_class, finding, value):
         setattr(finding, self.target_name, value)
 
@@ -111,19 +113,21 @@ class Attribute(FieldType):
 
 
 class DeMarkupedAttribute(Attribute):
-    """
-    Class for an Attribute (as above) but whose value is stripped of markup and non-printable chars prior to being set.
-    """
+
+    """Class for an Attribute (as above) but whose value is stripped of markup and non-printable chars prior to being set."""
+
     def handle(self, engine_class, finding, value):
         super().handle(engine_class, finding, escape_non_printable(strip_markup(value)))
 
 
 class Method(FieldType):
+
     """
     Class for a field that requires a method to process it. Initialized with a method name, when called it invokes the
     method on the passed-in engine parser, passing in a Finding and value. It's expected that the method will update
     the Finding as it sees fit (i.e., this class does not modify the Finding)
     """
+
     def handle(self, engine_parser, finding, value):
         getattr(engine_parser, self.target_name)(finding, value)
 
@@ -134,6 +138,7 @@ class Method(FieldType):
 
 
 class BaseEngineParser:
+
     """
     Parser for data shared by all engines used by AppCheck, as well as data from an unknown/unspecified engine.
 
@@ -158,6 +163,7 @@ class BaseEngineParser:
     Child classes can override the _ENGINE_FIELDS_MAP dictionary to support extended/different functionality as so
     desired, without having to change/copy the common field parsing described above.
     """
+
     SCANNING_ENGINE = "Unknown"
 
     # Field handling common to all findings returned by AppCheck
@@ -187,7 +193,7 @@ class BaseEngineParser:
     #####
     # For parsing the initial finding datetime to a date format pleasing to Finding
     #####
-    def get_date(self, value: str) -> Optional[str]:
+    def get_date(self, value: str) -> str | None:
         try:
             return str(dateutil.parser.parse(value).date())
         except dateutil.parser.ParserError:
@@ -199,7 +205,7 @@ class BaseEngineParser:
     #####
     # For parsing CVEs
     #####
-    CVE_PATTERN = re.compile("CVE-[0-9]+-[0-9]+", re.IGNORECASE)
+    CVE_PATTERN = re.compile(r"CVE-[0-9]+-[0-9]+", re.IGNORECASE)
 
     def is_cve(self, c: str) -> bool:
         return bool(c and isinstance(c, str) and self.CVE_PATTERN.fullmatch(c))
@@ -223,7 +229,7 @@ class BaseEngineParser:
     #####
     # For parsing component data
     #####
-    def parse_cpe(self, cpe_str: str) -> (Optional[str], Optional[str]):
+    def parse_cpe(self, cpe_str: str) -> (str | None, str | None):
         if not cpe_str:
             return None, None
         cpe_obj = CPE(cpe_str)
@@ -251,12 +257,12 @@ class BaseEngineParser:
     def parse_notes(self, finding: Finding, value: str) -> None:
         self.append_description(finding, {"Notes": value})
 
-    def extract_details(self, value: Union[str, dict[str, Union[str, dict[str, list[str]]]]]) -> dict[str, str]:
+    def extract_details(self, value: str | dict[str, str | dict[str, list[str]]]) -> dict[str, str]:
         if isinstance(value, dict):
             return {k: v for k, v in value.items() if k != "_meta"}
         return {"Details": str(value)}
 
-    def parse_details(self, finding: Finding, value: dict[str, Union[str, dict[str, list[str]]]]) -> None:
+    def parse_details(self, finding: Finding, value: dict[str, str | dict[str, list[str]]]) -> None:
         self.append_description(finding, self.extract_details(value))
 
     #####
@@ -265,7 +271,7 @@ class BaseEngineParser:
     def get_host(self, item: dict[str, Any]) -> str:
         return item.get("url") or item.get("host") or item.get("ipv4_address") or None
 
-    def parse_port(self, item: Any) -> Optional[int]:
+    def parse_port(self, item: Any) -> int | None:
         try:
             int_val = int(item)
             if 0 < int_val <= 65535:
@@ -274,10 +280,10 @@ class BaseEngineParser:
             pass
         return None
 
-    def get_port(self, item: dict[str, Any]) -> Optional[int]:
+    def get_port(self, item: dict[str, Any]) -> int | None:
         return self.parse_port(item.get("port"))
 
-    def construct_endpoint(self, host: str, port: Optional[int]) -> Endpoint:
+    def construct_endpoint(self, host: str, port: int | None) -> Endpoint:
         endpoint = Endpoint.from_uri(host)
         if endpoint.host:
             if port:
@@ -300,7 +306,7 @@ class BaseEngineParser:
     #####
     # For severity (extracted from various cvss vectors)
     #####
-    def parse_cvss_vector(self, value: str) -> Optional[str]:
+    def parse_cvss_vector(self, value: str) -> str | None:
         # CVSS4 vectors don't parse with the handy-danty parse method :(
         try:
             if (severity := cvss.CVSS4(value).severity) in Finding.SEVERITIES:
@@ -341,7 +347,7 @@ class BaseEngineParser:
             **BaseEngineParser._COMMON_FIELDS_MAP,
             **self._ENGINE_FIELDS_MAP}
 
-    def get_finding_key(self, finding: Finding) -> Tuple:
+    def get_finding_key(self, finding: Finding) -> tuple:
         return (
             finding.severity,
             finding.title,
@@ -349,7 +355,7 @@ class BaseEngineParser:
             self.SCANNING_ENGINE,
         )
 
-    def parse_finding(self, item: dict[str, Any]) -> Tuple[Finding, Tuple]:
+    def parse_finding(self, item: dict[str, Any]) -> tuple[Finding, tuple]:
         finding = Finding()
         for field, field_handler in self.get_engine_fields().items():
             # Check first whether the field even exists on this item entry; if not, skip it

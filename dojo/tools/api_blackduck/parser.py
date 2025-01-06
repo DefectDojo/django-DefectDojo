@@ -8,9 +8,8 @@ SCAN_TYPE_ID = "BlackDuck API"
 
 
 class ApiBlackduckParser:
-    """
-    Import from Synopsys BlackDuck API /findings
-    """
+
+    """Import from Synopsys BlackDuck API /findings"""
 
     def get_scan_types(self):
         return [SCAN_TYPE_ID]
@@ -37,10 +36,7 @@ class ApiBlackduckParser:
         )
 
     def get_findings(self, file, test):
-        if file is None:
-            data = BlackduckApiImporter().get_findings(test)
-        else:
-            data = json.load(file)
+        data = BlackduckApiImporter().get_findings(test) if file is None else json.load(file)
         findings = []
         for entry in data:
             vulnerability_id = entry["vulnerabilityWithRemediation"][

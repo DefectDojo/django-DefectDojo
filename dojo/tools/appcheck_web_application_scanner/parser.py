@@ -18,6 +18,7 @@ SCANNING_ENGINE_PARSERS: dict[str, BaseEngineParser] = {
 
 
 class AppCheckWebApplicationScannerParser:
+
     """
     AppCheck Web Application Security Scanner.
 

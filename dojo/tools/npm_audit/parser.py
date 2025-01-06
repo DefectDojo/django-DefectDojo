@@ -66,7 +66,7 @@ def censor_path_hashes(path):
     if not path:
         return None
 
-    return re.sub("[a-f0-9]{64}", "censored_by_npm_audit", path)
+    return re.sub(r"[a-f0-9]{64}", "censored_by_npm_audit", path)
 
 
 def get_item(item_node, test):
@@ -86,9 +86,7 @@ def get_item(item_node, test):
     for npm_finding in item_node["findings"]:
         # use first version as component_version
         component_version = (
-            npm_finding["version"]
-            if not component_version
-            else component_version
+            component_version or npm_finding["version"]
         )
         paths += (
             "\n  - "

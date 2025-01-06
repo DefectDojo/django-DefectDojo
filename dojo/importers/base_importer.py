@@ -1,11 +1,11 @@
 import base64
 import logging
-from typing import List, Tuple
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.urls import reverse
 from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
@@ -29,6 +29,7 @@ from dojo.models import (
     Test_Type,
     Vulnerability_Id,
 )
+from dojo.notifications.helper import create_notification
 from dojo.tools.factory import get_parser
 from dojo.utils import max_safe
 
@@ -36,12 +37,13 @@ logger = logging.getLogger(__name__)
 
 
 class Parser:
+
     """
     This class is used as an alias to a given parser
     and is purely for the sake of type hinting
     """
 
-    def get_findings(scan_type: str, test: Test) -> List[Finding]:
+    def get_findings(scan_type: str, test: Test) -> list[Finding]:
         """
         Stub function to make the hinting happier. The actual class
         is loosely obligated to have this function defined.
@@ -52,11 +54,13 @@ class Parser:
 
 
 class BaseImporter(ImporterOptions):
+
     """
     A collection of utilities used by various importers within DefectDojo.
     Some of these commonalities may be fully used by children importers,
     or even extended
     """
+
     def __init__(
         self,
         *args: list,
@@ -86,7 +90,7 @@ class BaseImporter(ImporterOptions):
         scan: TemporaryUploadedFile,
         *args: list,
         **kwargs: dict,
-    ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
+    ) -> tuple[Test, int, int, int, int, int, Test_Import]:
         """
         A helper method that executes the entire import process in a single method.
         This includes parsing the file, processing the findings, and returning the
@@ -96,9 +100,9 @@ class BaseImporter(ImporterOptions):
 
     def process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Make the conversion from unsaved Findings in memory to Findings that are saved in the
         database with and ID associated with them. This processor will also save any associated
@@ -108,9 +112,9 @@ class BaseImporter(ImporterOptions):
 
     def close_old_findings(
         self,
-        findings: List[Finding],
+        findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Identify any findings that have been imported before,
         but are no longer present in later reports so that
@@ -144,7 +148,7 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Parse the scan report submitted with the parser class and generate some findings
         that are not saved to the database yet. This step is crucial in determining if
@@ -165,10 +169,8 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Test]:
-        """
-        Use the API configuration object to get the tests to be used by the parser
-        """
+    ) -> list[Test]:
+        """Use the API configuration object to get the tests to be used by the parser"""
         try:
             return parser.get_tests(self.scan_type, scan)
         except ValueError as e:
@@ -177,8 +179,8 @@ class BaseImporter(ImporterOptions):
 
     def parse_dynamic_test_type_findings_from_tests(
         self,
-        tests: List[Test],
-    ) -> List[Finding]:
+        tests: list[Test],
+    ) -> list[Finding]:
         """
         currently we only support import one Test
         so for parser that support multiple tests (like SARIF)
@@ -193,7 +195,7 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Use the API configuration object to get the tests to be used by the parser
         to dump findings into
@@ -207,7 +209,7 @@ class BaseImporter(ImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Determine how to parse the findings based on the presence of the
         `get_tests` function on the parser object
@@ -220,9 +222,9 @@ class BaseImporter(ImporterOptions):
 
     def sync_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> Tuple[List[Finding], List[Finding], List[Finding], List[Finding]]:
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         """
         Processes findings in a synchronous manner such that all findings
         will be processed in a worker/process/thread
@@ -231,9 +233,9 @@ class BaseImporter(ImporterOptions):
 
     def async_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Processes findings in chunks within N number of processes. The
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many
@@ -243,9 +245,9 @@ class BaseImporter(ImporterOptions):
 
     def determine_process_method(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Determines whether to process the scan iteratively, or in chunks,
         based upon the ASYNC_FINDING_IMPORT setting
@@ -317,14 +319,12 @@ class BaseImporter(ImporterOptions):
 
     def update_import_history(
         self,
-        new_findings: List[Finding] = [],
-        closed_findings: List[Finding] = [],
-        reactivated_findings: List[Finding] = [],
-        untouched_findings: List[Finding] = [],
+        new_findings: list[Finding] = [],
+        closed_findings: list[Finding] = [],
+        reactivated_findings: list[Finding] = [],
+        untouched_findings: list[Finding] = [],
     ) -> Test_Import:
-        """
-        Creates a record of the import or reimport operation that has occurred.
-        """
+        """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
         if settings.TRACK_IMPORT_HISTORY is False:
             return None
@@ -448,9 +448,9 @@ class BaseImporter(ImporterOptions):
 
     def chunk_findings(
         self,
-        finding_list: List[Finding],
+        finding_list: list[Finding],
         chunk_size: int = settings.ASYNC_FINDING_IMPORT_CHUNK_SIZE,
-    ) -> List[List[Finding]]:
+    ) -> list[list[Finding]]:
         """
         Split a single large list into a list of lists of size `chunk_size`.
         For Example
@@ -628,7 +628,7 @@ class BaseImporter(ImporterOptions):
     def process_endpoints(
         self,
         finding: Finding,
-        endpoints_to_add: List[Endpoint],
+        endpoints_to_add: list[Endpoint],
     ) -> None:
         """
         Process any endpoints to add to the finding. Endpoints could come from two places
@@ -721,3 +721,38 @@ class BaseImporter(ImporterOptions):
             finding.save(dedupe_option=False)
         else:
             finding.save(dedupe_option=False, push_to_jira=self.push_to_jira)
+
+    def notify_scan_added(
+        self,
+        test,
+        updated_count,
+        new_findings=[],
+        findings_mitigated=[],
+        findings_reactivated=[],
+        findings_untouched=[],
+    ):
+        logger.debug("Scan added notifications")
+
+        new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
+        findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
+        findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
+        findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
+
+        title = (
+            f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
+        )
+
+        create_notification(
+            event="scan_added_empty" if updated_count == 0 else "scan_added",
+            title=title,
+            findings_new=new_findings,
+            findings_mitigated=findings_mitigated,
+            findings_reactivated=findings_reactivated,
+            finding_count=updated_count,
+            test=test,
+            engagement=test.engagement,
+            product=test.engagement.product,
+            findings_untouched=findings_untouched,
+            url=reverse("view_test", args=(test.id,)),
+            url_api=reverse("test-detail", args=(test.id,)),
+        )

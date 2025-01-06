@@ -22,7 +22,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_configuration_permission
 
 # Local application/library imports
-from dojo.forms import DeleteJIRAInstanceForm, ExpressJIRAForm, JIRAForm
+from dojo.forms import AdvancedJIRAForm, DeleteJIRAInstanceForm, JIRAForm
 from dojo.models import JIRA_Instance, JIRA_Issue, Notes, System_Settings, User
 from dojo.notifications.helper import create_notification
 from dojo.utils import add_breadcrumb, add_error_message_to_response, get_setting
@@ -100,10 +100,10 @@ def webhook(request, secret=None):
             findings = None
             # Determine what type of object we will be working with
             if jissue.finding:
-                logging.debug(f"Received issue update for {jissue.jira_key} for finding {jissue.finding.id}")
+                logger.debug(f"Received issue update for {jissue.jira_key} for finding {jissue.finding.id}")
                 findings = [jissue.finding]
             elif jissue.finding_group:
-                logging.debug(f"Received issue update for {jissue.jira_key} for finding group {jissue.finding_group}")
+                logger.debug(f"Received issue update for {jissue.jira_key} for finding group {jissue.finding_group}")
                 findings = jissue.finding_group.findings.all()
             elif jissue.engagement:
                 return webhook_responser_handler("debug", "Update for engagement ignored")
@@ -168,46 +168,46 @@ def webhook(request, secret=None):
 
 def check_for_and_create_comment(parsed_json):
     """
-        example incoming requests from JIRA Server 8.14.0
-        {
-        "timestamp":1610269967824,
-        "webhookEvent":"comment_created",
-        "comment":{
-            "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
-            "id":"466578",
-            "author":{
-                "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                "name":"defect.dojo",
-                "key":"defect.dojo", # seems to be only present on JIRA Server, not on Cloud
-                "avatarUrls":{
-                    "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                    "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                    "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                    "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                },
-                "displayName":"Defect Dojo",
-                "active":true,
-                "timeZone":"Europe/Amsterdam"
+    example incoming requests from JIRA Server 8.14.0
+    {
+    "timestamp":1610269967824,
+    "webhookEvent":"comment_created",
+    "comment":{
+        "self":"https://jira.host.com/rest/api/2/issue/115254/comment/466578",
+        "id":"466578",
+        "author":{
+            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+            "name":"defect.dojo",
+            "key":"defect.dojo", # seems to be only present on JIRA Server, not on Cloud
+            "avatarUrls":{
+                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                "24x24":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                "16x16":"https://www.gravatar.com/avatar9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
             },
-            "body":"(Valentijn Scholten):test4",
-            "updateAuthor":{
-                "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
-                "name":"defect.dojo",
-                "key":"defect.dojo",
-                "avatarUrls":{
-                    "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
-                    "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
-                    "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
-                    "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
-                },
-                "displayName":"Defect Dojo",
-                "active":true,
-                "timeZone":"Europe/Amsterdam"
+            "displayName":"Defect Dojo",
+            "active":true,
+            "timeZone":"Europe/Amsterdam"
+        },
+        "body":"(Valentijn Scholten):test4",
+        "updateAuthor":{
+            "self":"https://jira.host.com/rest/api/2/user?username=defect.dojo",
+            "name":"defect.dojo",
+            "key":"defect.dojo",
+            "avatarUrls":{
+                "48x48":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=48",
+                "24x24""https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=24",
+                "16x16":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=16",
+                "32x32":"https://www.gravatar.com/avatar/9637bfb970eff6176357df615f548f1c?d=mm&s=32"
             },
-            "created":"2021-01-10T10:12:47.824+0100",
-            "updated":"2021-01-10T10:12:47.824+0100"
-        }
-        }
+            "displayName":"Defect Dojo",
+            "active":true,
+            "timeZone":"Europe/Amsterdam"
+        },
+        "created":"2021-01-10T10:12:47.824+0100",
+        "updated":"2021-01-10T10:12:47.824+0100"
+    }
+    }
     """
     comment = parsed_json.get("comment", None)
     if comment is None:
@@ -228,7 +228,7 @@ def check_for_and_create_comment(parsed_json):
         jissue = JIRA_Issue.objects.get(jira_id=jid)
     except JIRA_Instance.DoesNotExist:
         return webhook_responser_handler("info", f"JIRA issue {jid} is not linked to a DefectDojo Finding")
-    logging.debug(f"Received issue comment for {jissue.jira_key}")
+    logger.debug(f"Received issue comment for {jissue.jira_key}")
     logger.debug("jissue: %s", vars(jissue))
 
     jira_usernames = JIRA_Instance.objects.values_list("username", flat=True)
@@ -285,24 +285,24 @@ def get_custom_field(jira, label):
     return field
 
 
-class ExpressJiraView(View):
+class NewJiraView(View):
     def get_template(self):
-        return "dojo/express_new_jira.html"
-
-    def get_fallback_template(self):
         return "dojo/new_jira.html"
 
+    def get_fallback_template(self):
+        return "dojo/new_jira_advanced.html"
+
     def get_form_class(self):
-        return ExpressJIRAForm
+        return JIRAForm
 
     def get_fallback_form_class(self):
-        return JIRAForm
+        return AdvancedJIRAForm
 
     def get(self, request):
         if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
-        add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
+        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
         return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
@@ -391,18 +391,18 @@ class ExpressJiraView(View):
         return render(request, self.get_template(), {"jform": jform})
 
 
-class NewJiraView(View):
+class AdvancedJiraView(View):
     def get_template(self):
-        return "dojo/new_jira.html"
+        return "dojo/new_jira_advanced.html"
 
     def get_form_class(self):
-        return JIRAForm
+        return AdvancedJIRAForm
 
     def get(self, request):
         if not user_has_configuration_permission(request.user, "dojo.add_jira_instance"):
             raise PermissionDenied
         jform = self.get_form_class()()
-        add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
+        add_breadcrumb(title="New Jira Configuration (Advanced)", top_level=False, request=request)
         return render(request, self.get_template(), {"jform": jform})
 
     def post(self, request):
@@ -442,7 +442,7 @@ class EditJiraView(View):
         return "dojo/edit_jira.html"
 
     def get_form_class(self):
-        return JIRAForm
+        return AdvancedJIRAForm
 
     def get(self, request, jid=None):
         if not user_has_configuration_permission(request.user, "dojo.change_jira_instance"):
@@ -552,7 +552,7 @@ class DeleteJiraView(View):
                         url=request.build_absolute_uri(reverse("jira")))
                     return HttpResponseRedirect(reverse("jira"))
                 except Exception as e:
-                    add_error_message_to_response(f"Unable to delete JIRA Instance, probably because it is used by JIRA Issues: {str(e)}")
+                    add_error_message_to_response(f"Unable to delete JIRA Instance, probably because it is used by JIRA Issues: {e}")
 
         rels = ["Previewing the relationships has been disabled.", ""]
         display_preview = get_setting("DELETE_PREVIEW")

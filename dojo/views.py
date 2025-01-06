@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from auditlog.models import LogEntry
 from django.conf import settings
@@ -150,7 +151,7 @@ def manage_files(request, oid, obj_type):
 
             for o in files_formset.deleted_objects:
                 logger.debug("removing file: %s", o.file.name)
-                os.remove(os.path.join(settings.MEDIA_ROOT, o.file.name))
+                Path(os.path.join(settings.MEDIA_ROOT, o.file.name)).unlink()
 
             for o in files_formset.new_objects:
                 logger.debug("adding file: %s", o.file.name)
@@ -161,7 +162,7 @@ def manage_files(request, oid, obj_type):
                                                      finding__isnull=True)
             for o in orphan_files:
                 logger.debug("purging orphan file: %s", o.file.name)
-                os.remove(os.path.join(settings.MEDIA_ROOT, o.file.name))
+                Path(os.path.join(settings.MEDIA_ROOT, o.file.name)).unlink()
                 o.delete()
 
             messages.add_message(

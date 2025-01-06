@@ -129,10 +129,7 @@ def parse_finding(host, tree):
     issue_row["fqdn"] = host.findtext("DNS")
 
     # Create Endpoint
-    if issue_row["fqdn"]:
-        ep = Endpoint(host=issue_row["fqdn"])
-    else:
-        ep = Endpoint(host=issue_row["ip_address"])
+    ep = Endpoint(host=issue_row["fqdn"]) if issue_row["fqdn"] else Endpoint(host=issue_row["ip_address"])
 
     # OS NAME
     issue_row["os"] = host.findtext("OPERATING_SYSTEM")

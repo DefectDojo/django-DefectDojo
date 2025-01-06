@@ -1,6 +1,4 @@
-"""
-Parser for Aquasecurity trivy (https://github.com/aquasecurity/trivy) Docker images scaner
-"""
+"""Parser for Aquasecurity trivy (https://github.com/aquasecurity/trivy) Docker images scaner"""
 
 import json
 import logging
@@ -36,7 +34,7 @@ MISC_DESCRIPTION_TEMPLATE = """**Target:** {target}
 SECRET_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
 **Match:** {match}
-"""
+"""  # noqa: S105
 
 LICENSE_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
@@ -88,7 +86,7 @@ class TrivyParser:
         if schema_version == 2:
             results = data.get("Results", [])
             return self.get_result_items(test, results, artifact_name=artifact_name)
-        if cluster_name:
+        if cluster_name is not None:
             findings = []
             vulnerabilities = data.get("Vulnerabilities", [])
             for service in vulnerabilities:
@@ -196,10 +194,7 @@ class TrivyParser:
                 package_version = vuln.get("InstalledVersion", "")
                 references = "\n".join(vuln.get("References", []))
                 mitigation = vuln.get("FixedVersion", "")
-                if len(vuln.get("CweIDs", [])) > 0:
-                    cwe = int(vuln["CweIDs"][0].split("-")[1])
-                else:
-                    cwe = 0
+                cwe = int(vuln["CweIDs"][0].split("-")[1]) if len(vuln.get("CweIDs", [])) > 0 else 0
                 type = target_data.get("Type", "")
                 title = f"{vuln_id} {package_name} {package_version}"
                 description = DESCRIPTION_TEMPLATE.format(

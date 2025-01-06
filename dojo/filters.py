@@ -235,6 +235,35 @@ class FindingSLAFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.field_name)
 
 
+class FindingHasJIRAFilter(ChoiceFilter):
+    def no_jira(self, qs, name):
+        return qs.filter(Q(jira_issue=None) & Q(finding_group__jira_issue=None))
+
+    def any_jira(self, qs, name):
+        return qs.filter(~Q(jira_issue=None) | ~Q(finding_group__jira_issue=None))
+
+    def all_items(self, qs, name):
+        return qs
+
+    options = {
+        0: (_("Yes"), any_jira),
+        1: (_("No"), no_jira),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs["choices"] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            return self.all_items(qs, self.field_name)
+
+        return self.options[value][1](self, qs, self.field_name)
+
+
 class ProductSLAFilter(ChoiceFilter):
     def any(self, qs, name):
         return qs
@@ -1576,6 +1605,7 @@ class FindingFilterHelper(FilterSet):
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
     endpoints = NumberFilter(widget=HiddenInput())
     status = FindingStatusFilter(label="Status")
+
     has_component = BooleanFilter(
         field_name="component_name",
         lookup_expr="isnull",
@@ -1610,6 +1640,7 @@ class FindingFilterHelper(FilterSet):
                 lookup_expr="isnull",
                 exclude=True,
                 label="Has Group JIRA")
+        has_any_jira = FindingHasJIRAFilter(label="Has Any JIRA")
 
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
@@ -2393,6 +2424,7 @@ class EndpointFilterHelper(FilterSet):
         fields=(
             ("product", "product"),
             ("host", "host"),
+            ("id", "id"),
         ),
     )
 
@@ -2630,6 +2662,7 @@ class ApiEndpointFilter(DojoFilter):
         fields=(
             ("host", "host"),
             ("product", "product"),
+            ("id", "id"),
         ),
     )
 
@@ -3179,6 +3212,7 @@ class GroupFilter(DojoFilter):
         exclude = ["users"]
 
 
+# This class is used exclusively by Findings
 class TestImportFilter(DojoFilter):
     version = CharFilter(field_name="version", lookup_expr="icontains")
     version_exact = CharFilter(field_name="version", lookup_expr="iexact", label="Version Exact")
@@ -3205,6 +3239,7 @@ class TestImportFilter(DojoFilter):
         fields = []
 
 
+# This class is used exclusively by Findings
 class TestImportFindingActionFilter(DojoFilter):
     action = MultipleChoiceFilter(choices=IMPORT_ACTIONS)
     o = OrderingFilter(
@@ -3217,6 +3252,35 @@ class TestImportFindingActionFilter(DojoFilter):
     class Meta:
         model = Test_Import_Finding_Action
         fields = []
+
+
+# Used within the TestImport API
+class TestImportAPIFilter(DojoFilter):
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ("id", "id"),
+            ("created", "created"),
+            ("modified", "modified"),
+            ("version", "version"),
+            ("branch_tag", "branch_tag"),
+            ("build_id", "build_id"),
+            ("commit_hash", "commit_hash"),
+
+        ),
+    )
+
+    class Meta:
+        model = Test_Import
+        fields = ["test",
+        "findings_affected",
+        "version",
+        "branch_tag",
+        "build_id",
+        "commit_hash",
+        "test_import_finding_action__action",
+        "test_import_finding_action__finding",
+        "test_import_finding_action__created"]
 
 
 class LogEntryFilter(DojoFilter):

@@ -6,7 +6,7 @@ from unittests.dojo_test_case import DojoTestCase
 
 
 class TestStackHawkParser(DojoTestCase):
-    __test_datetime = datetime.datetime(2022, 2, 16, 23, 7, 19, 575000, datetime.timezone.utc)
+    __test_datetime = datetime.datetime(2022, 2, 16, 23, 7, 19, 575000, datetime.UTC)
 
     def test_invalid_json_format(self):
         with open("unittests/scans/stackhawk/invalid.json", encoding="utf-8") as testfile:

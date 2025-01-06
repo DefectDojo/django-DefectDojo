@@ -161,4 +161,4 @@ class SSLyzeXMLParser:
                                     host=host, port=port, protocol=protocol,
                                 ),
                             )
-        return dupes.values()
+        return list(dupes.values())

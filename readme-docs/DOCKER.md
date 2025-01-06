@@ -8,7 +8,7 @@ Although Docker Compose is one of the supported installation methods to deploy a
 # Prerequisites
 
 *  Docker version
-    *  Installing with docker-compose requires at least Docker 19.03.0 and Docker Compose 1.28.0. See "Checking Docker versions" below for version errors during running docker-compose.
+    *  Installing with docker compose requires at least Docker 19.03.0 and Docker Compose 1.28.0. See "Checking Docker versions" below for version errors during running docker compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ .
 
@@ -100,7 +100,7 @@ This will run the application based on merged configurations from docker-compose
 * Hot-reloading for the **celeryworker** container is not yet implemented. When working on deduplication for example, restart the celeryworker container with:
 
 ```
-docker-compose restart celeryworker
+docker compose restart celeryworker
 ```
 
 *  The postgres port is forwarded to the host so that you can access your database from outside the container.
@@ -126,7 +126,7 @@ To find out the admin password, check the very beginning of the console
 output of the initializer container by running:
 
 ```zsh
-docker-compose logs initializer | grep "Admin password:"
+docker compose logs initializer | grep "Admin password:"
 ```
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
@@ -141,7 +141,7 @@ docker exec -it django-defectdojo-uwsgi-1 ./manage.py changepassword admin
 ```
 
 # Logging
-For docker-compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
+For docker compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
 
 
 ```
@@ -251,7 +251,7 @@ To change the port:
 - update `docker-compose.override.https.yml` or set DD_TLS_PORT in the environment)
 - restart the application
 
-NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker-compose declarations to discover which ports to map when publishing the application.
+NB: some third party software may require to change the exposed port in Dockerfile.nginx as they use docker compose declarations to discover which ports to map when publishing the application.
 
 
 # Run the tests with Docker Compose
@@ -324,7 +324,7 @@ docker logs -f django-defectdojo_integration-tests_1
 
 # Checking Docker versions
 
-Run the following to determine the versions for docker and docker-compose:
+Run the following to determine the versions for docker and docker compose:
 
 ```zsh
 $ docker version
@@ -345,58 +345,14 @@ Server:
  OS/Arch:      linux/amd64
  Experimental: false
 
-$ docker-compose version
-docker-compose version 1.18.0, build 8dd22a9
+$ docker compose version
+Docker Compose version 1.18.0, build 8dd22a9
 docker-py version: 2.6.1
 CPython version: 2.7.13
 OpenSSL version: OpenSSL 1.0.1t  3 May 2016
 ```
 
-In this case, both docker (version 17.09.0-ce) and docker-compose (1.18.0) need to be updated.
+In this case, both docker (version 17.09.0-ce) and docker compose (1.18.0) need to be updated.
 
 Follow [Docker's documentation](https://docs.docker.com/install/) for your OS to get the latest version of Docker. For the docker command, most OSes have a built-in update mechanism like "apt upgrade".
 
-Docker Compose isn't packaged like Docker and you'll need to manually update an existing install if using Linux. For Linux, either follow the instructions in the [Docker Compose documentation](https://docs.docker.com/compose/install/) or use the shell script below. The script below will update docker-compose to the latest version automatically. You will need to make the script executable and have sudo privileges to upgrade docker-compose:
-
-```zsh
-#!/bin/bash
-
-# Set location of docker-compose binary - shouldn't need to modify this
-DESTINATION=/usr/local/bin/docker-compose
-
-# Get latest docker-compose version
-VERSION=$(curl --silent https://api.github.com/repos/docker/compose/releases/latest | jq .name -r)
-
-# Output some info on what this is going to do
-echo "Note: docker-compose version $VERSION will be downloaded from:"
-echo "https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m)"
-echo "Enter sudo password to install docker-compose"
-
-# Download and install latest docker compose
-sudo curl -L https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m) -o $DESTINATION
-sudo chmod +x $DESTINATION
-
-# Output new docker-compose version info
-echo ""
-docker-compose version
-```
-
-Running the script above will look like:
-
-```zsh
-$ vi update-docker-compose
-$ chmod u+x update-docker-compose
-$ ./update-docker-compose
-Note: docker-compose version 1.24.0 will be downloaded from:
-https://github.com/docker/compose/releases/download/1.24.0/docker-compose-Linux-x86_64
-Enter sudo password to install docker-compose
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100   617    0   617    0     0   1778      0 --:--:-- --:--:-- --:--:--  1778
-100 15.4M  100 15.4M    0     0  2478k      0  0:00:06  0:00:06 --:--:-- 2910k
-
-docker-compose version 1.24.0, build 0aa59064
-docker-py version: 3.7.2
-CPython version: 3.6.8
-OpenSSL version: OpenSSL 1.1.0j  20 Nov 2018
-```

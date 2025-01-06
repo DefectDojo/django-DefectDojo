@@ -6,9 +6,9 @@ from unittests.dojo_test_case import DojoAPITestCase
 
 
 class NotificationsTest(DojoAPITestCase):
-    """
-    Test the metadata APIv2 endpoint.
-    """
+
+    """Test the metadata APIv2 endpoint."""
+
     fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
@@ -33,6 +33,7 @@ class NotificationsTest(DojoAPITestCase):
         password = "testTEST1234!@#$"
         r = self.client.post(reverse("user-list"), {
             "username": "api-user-notification",
+            "email": "admin@dojo.com",
             "password": password,
         }, format="json")
         return r.json()["id"]
@@ -56,9 +57,7 @@ class NotificationsTest(DojoAPITestCase):
         self.assertEqual("Notification template already exists", r.json()["non_field_errors"][0])
 
     def test_user_notifications(self):
-        """
-        creates user and checks if template is assigned
-        """
+        """Creates user and checks if template is assigned"""
         user = {"user": self.create_test_user()}
         r = self.client.get(reverse("notifications-list"), user, format="json")
         self.assertEqual(r.status_code, 200)

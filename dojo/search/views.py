@@ -31,7 +31,6 @@ max_results = settings.SEARCH_MAX_RESULTS
 
 
 def simple_search(request):
-
     """
     query:     some keywords
     operators: {}
@@ -69,7 +68,6 @@ def simple_search(request):
     operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
     keywords:  ['jquery']
     """
-
     tests = None
     findings = None
     finding_templates = None
@@ -189,10 +187,10 @@ def simple_search(request):
                 # some over the top tag displaying happening...
                 findings.object_list = findings.object_list.prefetch_related("test__engagement__product__tags")
 
-            tag = operators["tag"] if "tag" in operators else keywords
-            tags = operators["tags"] if "tags" in operators else keywords
-            not_tag = operators["not-tag"] if "not-tag" in operators else keywords
-            not_tags = operators["not-tags"] if "not-tags" in operators else keywords
+            tag = operators.get("tag", keywords)
+            tags = operators.get("tags", keywords)
+            not_tag = operators.get("not-tag", keywords)
+            not_tags = operators.get("not-tags", keywords)
             if (search_tags and tag) or tags or not_tag or not_tags:
                 logger.debug("searching tags")
 
@@ -500,15 +498,15 @@ def apply_tag_filters(qs, operators, skip_relations=False):
 
     # negative search based on not- prefix (not-tags, not-test-tags, not-engagement-tags, not-product-tags, etc)
 
-    for tag_filter in tag_filters:
-        tag_filter = "not-" + tag_filter
+    for base_tag_filter in tag_filters:
+        tag_filter = "not-" + base_tag_filter
         if tag_filter in operators:
             value = operators[tag_filter]
             value = ",".join(value)  # contains needs a single value
             qs = qs.exclude(**{"{}tags__name__contains".format(tag_filters[tag_filter.replace("not-", "")]): value})
 
-    for tag_filter in tag_filters:
-        tag_filter = "not-" + tag_filter
+    for base_tag_filter in tag_filters:
+        tag_filter = "not-" + base_tag_filter
         if tag_filter + "s" in operators:
             value = operators[tag_filter + "s"]
             qs = qs.exclude(**{"{}tags__name__in".format(tag_filters[tag_filter.replace("not-", "")]): value})
@@ -544,7 +542,7 @@ def apply_vulnerability_id_filter(qs, operators):
 def perform_keyword_search_for_operator(qs, operators, operator, keywords_query):
     watson_results = None
     operator_query = ""
-    keywords_query = "" if not keywords_query else keywords_query
+    keywords_query = keywords_query or ""
 
     if operator in operators:
         operator_query = " ".join(operators[operator])

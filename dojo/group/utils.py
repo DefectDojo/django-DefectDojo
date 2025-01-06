@@ -11,10 +11,7 @@ def get_auth_group_name(group, attempt=0):
     if attempt > 999:
         msg = f"Cannot find name for authorization group for Dojo_Group {group.name}, aborted after 999 attempts."
         raise Exception(msg)
-    if attempt == 0:
-        auth_group_name = group.name
-    else:
-        auth_group_name = group.name + "_" + str(attempt)
+    auth_group_name = group.name if attempt == 0 else group.name + "_" + str(attempt)
 
     try:
         # Attempt to fetch an existing group before moving forward with the real operation

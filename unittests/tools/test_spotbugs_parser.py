@@ -96,7 +96,8 @@ class TestSpotbugsParser(DojoTestCase):
         )
 
     def test_version_4_4(self):
-        """There was a big difference between version < 4.4.x and after
+        """
+        There was a big difference between version < 4.4.x and after
         The dictionnary is not in the report anymore
         """
         testfile = open("unittests/scans/spotbugs/version_4.4.0.xml", encoding="utf-8")

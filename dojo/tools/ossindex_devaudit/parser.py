@@ -5,7 +5,9 @@ from dojo.models import Finding
 
 
 class OssIndexDevauditParser:
-    """OssIndex Devaudit Results Parser
+
+    """
+    OssIndex Devaudit Results Parser
     Parses files created by the Sonatype OssIndex Devaudit tool
     https://github.com/sonatype-nexus-community/DevAudit
     """

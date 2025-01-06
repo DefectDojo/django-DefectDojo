@@ -6,6 +6,7 @@ from .importer import BlackduckImporter
 
 
 class BlackduckParser:
+
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv and files.csv
@@ -77,7 +78,7 @@ class BlackduckParser:
 
                 dupes[dupe_key] = finding
 
-        return dupes.values()
+        return list(dupes.values())
 
     def format_title(self, i):
         if i.channel_version_origin_id is not None:
@@ -88,10 +89,10 @@ class BlackduckParser:
         return f"{i.vuln_id} - {component_title}"
 
     def format_description(self, i):
-        description = f"Published on: {str(i.published_date)}\n\n"
-        description += f"Updated on: {str(i.updated_date)}\n\n"
-        description += f"Base score: {str(i.base_score)}\n\n"
-        description += f"Exploitability: {str(i.exploitability)}\n\n"
+        description = f"Published on: {i.published_date}\n\n"
+        description += f"Updated on: {i.updated_date}\n\n"
+        description += f"Base score: {i.base_score}\n\n"
+        description += f"Exploitability: {i.exploitability}\n\n"
         description += f"Description: {i.description}\n"
 
         return description

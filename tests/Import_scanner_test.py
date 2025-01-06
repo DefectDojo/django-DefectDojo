@@ -5,6 +5,7 @@ import re
 import shutil
 import sys
 import unittest
+from pathlib import Path
 
 import git
 from base_test_class import BaseTestCase
@@ -12,7 +13,7 @@ from product_test import ProductTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = Path(os.path.realpath(__file__)).parent
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +22,16 @@ class ScannerTest(BaseTestCase):
     def setUp(self):
         super().setUp(self)
         self.repo_path = dir_path + "/scans"
-        if os.path.isdir(self.repo_path):
+        if Path(self.repo_path).is_dir():
             shutil.rmtree(self.repo_path)
-        os.mkdir(self.repo_path)
+        Path(self.repo_path).mkdir()
         git.Repo.clone_from("https://github.com/DefectDojo/sample-scan-files", self.repo_path)
         self.remove_items = ["__init__.py", "__init__.pyc", "factory.py", "factory.pyc",
                         "factory.py", "LICENSE", "README.md", ".gitignore", ".git", "__pycache__"]
-        tool_path = dir_path[:-5] + "dojo/tools"
-        tools = sorted(os.listdir(tool_path))
-        tests = sorted(os.listdir(self.repo_path))
+        tool_path = Path(dir_path[:-5] + "dojo/tools")
+        tools = sorted(any(tool_path.iterdir()))
+        p = Path(self.repo_path)
+        tests = sorted(any(p.iterdir()))
         self.tools = [i for i in tools if i not in self.remove_items]
         self.tests = [i for i in tests if i not in self.remove_items]
 
@@ -42,7 +44,8 @@ class ScannerTest(BaseTestCase):
         missing_tests += ["\nNO TEST FILES"]
 
         for test in self.tests:
-            cases = sorted(os.listdir(self.repo_path + "/" + test))
+            p = Path(self.repo_path + "/" + test)
+            cases = sorted(any(p.iterdir()))
             cases = [i for i in cases if i not in self.remove_items]
             if len(cases) == 0 and tool not in missing_tests:
                 missing_tests += [test]
@@ -54,7 +57,7 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in missing_tests:
                 logger.info(test)
-        assert len(missing_tests) == 0
+        self.assertEqual(len(missing_tests), 0)
 
     def test_check_for_forms(self):
         forms_path = dir_path[:-5] + "dojo/forms.py"
@@ -91,7 +94,7 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/forms.py\n")
             for tool in missing_forms:
                 logger.info(tool)
-        assert len(missing_forms) == 0
+        self.assertEqual(len(missing_forms), 0)
 
     @unittest.skip("Deprecated since Dynamic Parser infrastructure")
     def test_check_for_options(self):
@@ -131,7 +134,7 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/templates/dojo/import_scan_results.html\n")
             for tool in missing_templates:
                 logger.info(tool)
-        assert len(missing_templates) == 0
+        self.assertEqual(len(missing_templates), 0)
 
     def test_engagement_import_scan_result(self):
         driver = self.driver
@@ -144,8 +147,8 @@ class ScannerTest(BaseTestCase):
         options_text = [scan.strip() for scan in options_text]
 
         mod_options = options_text
-        mod_options = [re.sub(" Scanner", "", scan) for scan in mod_options]
-        mod_options = [re.sub(" Scan", "", scan) for scan in mod_options]
+        mod_options = [scan.replace(" Scanner", "") for scan in mod_options]
+        mod_options = [scan.replace(" Scan", "") for scan in mod_options]
         mod_options = [scan.lower().replace("-", " ").replace(".", "") for scan in mod_options]
 
         acronyms = []
@@ -171,15 +174,13 @@ class ScannerTest(BaseTestCase):
                 index = list(found_matches.keys())[0]
                 scan_map[test] = options_text[index]
             elif len(found_matches) > 1:
-                try:
-                    index = list(found_matches.values()).index(temp_test)
-                    scan_map[test] = options_text[list(found_matches.keys())[index]]
-                except:
-                    pass
+                index = list(found_matches.values()).index(temp_test)
+                scan_map[test] = options_text[list(found_matches.keys())[index]]
 
         failed_tests = []
         for test in self.tests:
-            cases = sorted(os.listdir(self.repo_path + "/" + test))
+            p = Path(self.repo_path + "/" + test)
+            cases = sorted(any(p.iterdir()))
             cases = [i for i in cases if i not in self.remove_items]
             if len(cases) == 0:
                 failed_tests += [test.upper() + ": No test cases"]
@@ -198,7 +199,7 @@ class ScannerTest(BaseTestCase):
                     driver.find_element(By.ID, "id_file").send_keys(test_location)
                     driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
                     EngagementTXT = "".join(driver.find_element(By.TAG_NAME, "BODY").text).split("\n")
-                    reg = re.compile("processed, a total of")
+                    reg = re.compile(r"processed, a total of")
                     matches = list(filter(reg.search, EngagementTXT))
                     if len(matches) != 1:
                         failed_tests += [test.upper() + " - " + case + ": Not imported"]
@@ -216,7 +217,7 @@ class ScannerTest(BaseTestCase):
             logger.info("https://github.com/DefectDojo/sample-scan-files\n")
             for test in failed_tests:
                 logger.info(test)
-        assert len(failed_tests) == 0
+        self.assertEqual(len(failed_tests), 0)
 
     def tearDown(self):
         super().tearDown(self)

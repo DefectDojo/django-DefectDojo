@@ -1,13 +1,14 @@
 import os
 import sys
 import unittest
+from pathlib import Path
 
 from base_test_class import BaseTestCase
 from product_test import ProductTest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = Path(os.path.realpath(__file__)).parent
 
 
 class IBMAppScanTest(BaseTestCase):

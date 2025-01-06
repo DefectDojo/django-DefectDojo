@@ -3,12 +3,12 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import List, Union
 
 from dojo.models import Endpoint, Finding
 
 
 class WhiteHatSentinelParser:
+
     """
     A class to parse WhiteHat Sentinel vulns from the WhiteHat Sentinel API vuln?query_site=[
     SITE_ID]&format=json&display_attack_vectors=all&display_custom_risk=1&display_risk=1&display_description=custom
@@ -34,7 +34,7 @@ class WhiteHatSentinelParser:
         # Make sure the findings key exists in the dictionary and that it is
         # not null or an empty list
         if (
-            "collection" not in findings_collection.keys()
+            "collection" not in findings_collection
             or not findings_collection["collection"]
         ):
             msg = "collection key not present or there were not findings present."
@@ -54,12 +54,14 @@ class WhiteHatSentinelParser:
 
     def _convert_whitehat_severity_id_to_dojo_severity(
         self, whitehat_severity_id: int,
-    ) -> Union[str, None]:
+    ) -> str | None:
         """
         Converts a WhiteHat Sentinel numerical severity to a DefectDojo severity.
+
         Args:
             whitehat_severity_id: The WhiteHat Severity ID (called risk_id in the API)
         Returns: A DefectDojo severity if a mapping can be found; otherwise a null value is returned
+
         """
         severities = [
             "Informational",
@@ -79,9 +81,11 @@ class WhiteHatSentinelParser:
     def _parse_cwe_from_tags(self, whitehat_sentinel_tags) -> str:
         """
         Some Vulns include the CWE ID as a tag. This is used to pull it out of that list and return only the ID.
+
         Args:
             whitehat_sentinel_tags: The Tags list from the WhiteHat vuln
         Returns: The first CWE ID in the list, if it exists
+
         """
         for tag in whitehat_sentinel_tags:
             if tag.startswith("CWE-"):
@@ -91,11 +95,12 @@ class WhiteHatSentinelParser:
     def _parse_description(self, whitehat_sentinel_description: dict):
         """
         Manually converts the HTML description to a DefectDojo-friendly format.
+
         Args:
             whitehat_sentinel_description: The description section of the WhiteHat Sentinel vulnerability dict
         Returns: A dict with description and reference link
-        """
 
+        """
         description_ref = {"description": "", "reference_link": ""}
 
         # The references section is always between <h2> or <strong> tags
@@ -145,11 +150,12 @@ class WhiteHatSentinelParser:
     def __get_href_url(self, text_to_search):
         """
         Searches for the anchor targets within a string that includes an anchor tag.
+
         Args:
             text_to_search: The text string to search for an anchor tag
         Returns:
-        """
 
+        """
         links = ""
 
         for match in re.findall(r'(<a href=")(https://\S+)">', text_to_search):
@@ -159,16 +165,17 @@ class WhiteHatSentinelParser:
     def __remove_paragraph_tags(self, html_string):
         """
         Manually remove <p> tags from HTML strings to avoid importing yet-another-library.
+
         Args:
             html_string: The HMTL string to remove <p> </p> tags from
         Returns: The original string stipped of paragraph tags
-        """
 
+        """
         return re.sub(r"<p>|</p>", "", html_string)
 
     def _convert_attack_vectors_to_endpoints(
-        self, attack_vectors: List[dict],
-    ) -> List["Endpoint"]:
+        self, attack_vectors: list[dict],
+    ) -> list["Endpoint"]:
         """
         Takes a list of Attack Vectors dictionaries from the WhiteHat vuln API and converts them to Defect Dojo
         Endpoints
@@ -176,7 +183,6 @@ class WhiteHatSentinelParser:
             attack_vectors: The list of Attack Vector dictionaries
         Returns: A list of Defect Dojo Endpoints
         """
-
         endpoints_list = []
 
         # This should be in the Endpoint class should it not?
@@ -197,12 +203,13 @@ class WhiteHatSentinelParser:
             whitehat_sentinel_vulns: The vuln dictionary from WhiteHat Sentinel vuln API
             test: The test ID that the DefectDojo finding should be associated with
         Returns: A DefectDojo Finding object
+
         """
         dupes = {}
 
         for whitehat_vuln in whitehat_sentinel_vulns:
             date_created = whitehat_vuln["found"].split("T")[0]
-            mitigated_ts = whitehat_vuln.get("closed".split("T")[0], None)
+            mitigated_ts = whitehat_vuln.get("closed", None)
             if mitigated_ts is not None:
                 mitigated_ts = datetime.strptime(mitigated_ts, "%Y-%m-%dT%H:%M:%SZ")
             cwe = self._parse_cwe_from_tags(
@@ -268,4 +275,4 @@ class WhiteHatSentinelParser:
                 finding.unsaved_endpoints = endpoints
                 dupes[dupe_key] = finding
 
-        return dupes.values()
+        return list(dupes.values())

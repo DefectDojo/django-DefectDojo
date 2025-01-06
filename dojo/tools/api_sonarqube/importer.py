@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SonarQubeApiImporter:
+
     """
     This class imports from SonarQube (SQ) all open/confirmed SQ issues related to the project related to the test as
      findings.
@@ -127,7 +128,7 @@ class SonarQubeApiImporter:
                 organization=organization,
                 branch=test.branch_tag,
             )
-            logging.info(
+            logger.info(
                 f'Found {len(issues)} issues for component {component["key"]}',
             )
 
@@ -141,10 +142,7 @@ class SonarQubeApiImporter:
                     continue
 
                 issue_type = issue["type"]
-                if len(issue["message"]) > 511:
-                    title = issue["message"][0:507] + "..."
-                else:
-                    title = issue["message"]
+                title = issue["message"][0:507] + "..." if len(issue["message"]) > 511 else issue["message"]
                 component_key = issue["component"]
                 line = issue.get("line")
                 rule_id = issue["rule"]
@@ -246,7 +244,7 @@ class SonarQubeApiImporter:
                 organization=organization,
                 branch=test.branch_tag,
             )
-            logging.info(
+            logger.info(
                 f'Found {len(hotspots)} hotspots for project {component["key"]}',
             )
             sonarUrl = client.sonar_api_url[:-3]  # [:-3] removes the /api part of the sonarqube/cloud URL

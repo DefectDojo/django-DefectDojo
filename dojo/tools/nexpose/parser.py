@@ -10,6 +10,7 @@ from dojo.models import Endpoint, Finding
 
 
 class NexposeParser:
+
     """
     The objective of this class is to parse Nexpose's XML 2.0 Report.
 
@@ -141,9 +142,7 @@ class NexposeParser:
         return vulns
 
     def get_vuln_definitions(self, tree):
-        """
-        @returns vulns A dict of Vulnerability Definitions
-        """
+        """@returns vulns A dict of Vulnerability Definitions"""
         vulns = {}
         url_index = 0
         for vulnsDef in tree.findall("VulnerabilityDefinitions"):
@@ -266,7 +265,7 @@ class NexposeParser:
                                         "severity": "Info",
                                         "tags": [
                                             re.sub(
-                                                "[^A-Za-z0-9]+",
+                                                r"[^A-Za-z0-9]+",
                                                 "-",
                                                 service.get("name").lower(),
                                             ).rstrip("-"),

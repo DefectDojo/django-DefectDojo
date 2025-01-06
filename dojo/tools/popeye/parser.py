@@ -6,9 +6,8 @@ from dojo.models import Finding
 
 
 class PopeyeParser:
-    """
-    Popeye is a kubernetes cluster resource analyzer.
-    """
+
+    """Popeye is a kubernetes cluster resource analyzer."""
 
     def get_scan_types(self):
         return ["Popeye Scan"]

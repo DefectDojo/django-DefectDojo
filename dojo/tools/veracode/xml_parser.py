@@ -11,7 +11,9 @@ XML_NAMESPACE = {"x": "https://www.veracode.com/schema/reports/export/1.0"}
 
 
 class VeracodeXMLParser:
-    """This parser is written for Veracode Detailed XML reports, version 1.5.
+
+    """
+    This parser is written for Veracode Detailed XML reports, version 1.5.
 
     Version is annotated in the report, `detailedreport/@report_format_version`.
     see https://help.veracode.com/r/t_download_XML_report
@@ -269,7 +271,7 @@ class VeracodeXMLParser:
     @staticmethod
     def _get_cwe(val):
         # Match only the first CWE!
-        cweSearch = re.search("CWE-(\\d+)", val, re.IGNORECASE)
+        cweSearch = re.search(r"CWE-(\d+)", val, re.IGNORECASE)
         if cweSearch:
             return int(cweSearch.group(1))
         return None

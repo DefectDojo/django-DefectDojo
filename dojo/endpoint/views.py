@@ -61,10 +61,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
-    if vulnerable:
-        view_name = "Vulnerable"
-    else:
-        view_name = "All"
+    view_name = "Vulnerable" if vulnerable else "All"
 
     if host_view:
         view_name += " Hosts"
@@ -325,12 +322,12 @@ def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
     if request.method == "POST":
-        for key, value in request.POST.items():
+        for key, orig_value in request.POST.items():
             if key.startswith("cfv_"):
                 cfv_id = int(key.split("_")[1])
                 cfv = get_object_or_404(DojoMeta, id=cfv_id)
 
-                value = value.strip()
+                value = orig_value.strip()
                 if value:
                     cfv.value = value
                     cfv.save()
@@ -506,7 +503,7 @@ def import_endpoint_meta(request, pid):
                 endpoint_meta_import(file, product, create_endpoints, create_tags, create_dojo_meta, origin="UI", request=request)
             except Exception as e:
                 logger.exception(e)
-                add_error_message_to_response(f"An exception error occurred during the report import:{str(e)}")
+                add_error_message_to_response(f"An exception error occurred during the report import:{e}")
             return HttpResponseRedirect(reverse("endpoint") + "?product=" + pid)
 
     add_breadcrumb(title="Endpoint Meta Importer", top_level=False, request=request)

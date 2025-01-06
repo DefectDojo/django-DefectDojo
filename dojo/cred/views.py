@@ -584,11 +584,7 @@ def new_cred_finding(request, fid):
 
 @user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
 def delete_cred_controller(request, destination_url, id, ttid):
-    cred = None
-    try:
-        cred = Cred_Mapping.objects.get(pk=ttid)
-    except:
-        pass
+    cred = Cred_Mapping.objects.filter(pk=ttid).first()
     if request.method == "POST":
         tform = CredMappingForm(request.POST, instance=cred)
         message = ""

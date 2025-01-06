@@ -1,10 +1,10 @@
 import requests
+from django.conf import settings
 
 
 class CobaltAPI:
-    """
-    A simple client for the Cobalt.io API
-    """
+
+    """A simple client for the Cobalt.io API"""
 
     cobalt_api_url = "https://api.cobalt.io"
 
@@ -37,6 +37,7 @@ class CobaltAPI:
         response = self.session.get(
             url=f"{self.cobalt_api_url}/assets?limit=1000",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
@@ -57,6 +58,7 @@ class CobaltAPI:
         response = self.session.get(
             url=f"{self.cobalt_api_url}/findings?limit=1000&asset={asset_id}",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response.ok:
@@ -73,12 +75,14 @@ class CobaltAPI:
         response_orgs = self.session.get(
             url=f"{self.cobalt_api_url}/orgs",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         # Request assets to validate the org token
         response_assets = self.session.get(
             url=f"{self.cobalt_api_url}/assets",
             headers=self.get_headers(),
+            timeout=settings.REQUESTS_TIMEOUT,
         )
 
         if response_orgs.ok and response_assets.ok:

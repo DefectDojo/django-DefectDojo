@@ -39,7 +39,7 @@ class TestSemgrepParser(DojoTestCase):
             self.assertEqual('javax crypto Cipher.getInstance("AES/GCM/NoPadding");', finding.mitigation)
             self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
             finding = findings[2]
-            self.assertEqual("Info", finding.severity)
+            self.assertEqual("Low", finding.severity)
             self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01150.java", finding.file_path)
             self.assertEqual(66, finding.line)
             self.assertEqual(696, finding.cwe)
@@ -96,7 +96,7 @@ class TestSemgrepParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
             finding = findings[0]
-            self.assertEqual("Info", finding.severity)
+            self.assertEqual("Low", finding.severity)
             self.assertEqual("index.js", finding.file_path)
             self.assertEqual(12, finding.line)
             self.assertEqual(352, finding.cwe)
@@ -120,6 +120,12 @@ class TestSemgrepParser(DojoTestCase):
             parser = SemgrepParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+
+    def test_parse_low_medium_high_severity(self):
+        with open("unittests/scans/semgrep/high-medium-low-severities.json", encoding="utf-8") as testfile:
+            parser = SemgrepParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(3, len(findings))
 
     def test_parse_sca_deployments_vulns(self):
         with open("unittests/scans/semgrep/sca-deployments-vulns.json", encoding="utf-8") as testfile:

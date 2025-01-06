@@ -49,7 +49,7 @@ class JIRAConfigProductTest(DojoTestCase):
 
     @patch("dojo.jira_link.views.jira_helper.get_jira_connection_raw")
     def add_jira_instance(self, data, jira_mock):
-        response = self.client.post(reverse("add_jira"), urlencode(data), content_type="application/x-www-form-urlencoded")
+        response = self.client.post(reverse("add_jira_advanced"), urlencode(data), content_type="application/x-www-form-urlencoded")
         # check that storing a new config triggers a login call to JIRA
         call_1 = call(data["url"], data["username"], data["password"])
         call_2 = call(data["url"], data["username"], data["password"])

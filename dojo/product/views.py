@@ -92,6 +92,8 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.product.queries import (
+    get_authorized_global_groups_for_product,
+    get_authorized_global_members_for_product,
     get_authorized_groups_for_product,
     get_authorized_members_for_product,
     get_authorized_products,
@@ -213,8 +215,10 @@ def view_product(request, pid):
                                       .prefetch_related("prod_type__members")
     prod = get_object_or_404(prod_query, id=pid)
     product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
+    global_product_members = get_authorized_global_members_for_product(prod, Permissions.Product_View)
     product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     product_groups = get_authorized_groups_for_product(prod, Permissions.Product_View)
+    global_product_groups = get_authorized_global_groups_for_product(prod, Permissions.Product_View)
     product_type_groups = get_authorized_groups_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
@@ -291,8 +295,10 @@ def view_product(request, pid):
         "benchmarks_percents": benchAndPercent,
         "benchmarks": benchmarks,
         "product_members": product_members,
+        "global_product_members": global_product_members,
         "product_type_members": product_type_members,
         "product_groups": product_groups,
+        "global_product_groups": global_product_groups,
         "product_type_groups": product_type_groups,
         "personal_notifications_form": personal_notifications_form,
         "enabled_notifications": get_enabled_notifications_list(),
@@ -349,9 +355,7 @@ def identify_view(request):
             return view
         msg = 'invalid view, view must be "Endpoint" or "Finding"'
         raise ValueError(msg)
-    if get_data.get("finding__severity", None):
-        return "Endpoint"
-    if get_data.get("false_positive", None):
+    if get_data.get("finding__severity", None) or get_data.get("false_positive", None):
         return "Endpoint"
     referer = request.META.get("HTTP_REFERER", None)
     if referer:
@@ -608,13 +612,11 @@ def view_product_metrics(request, pid):
                 open_close_weekly[unix_timestamp] = {"closed": 0, "open": 1, "accepted": 0}
                 open_close_weekly[unix_timestamp]["week"] = html_date
 
-            if view == "Finding":
-                severity = finding.get("severity")
-            elif view == "Endpoint":
+            if view == "Finding" or view == "Endpoint":
                 severity = finding.get("severity")
 
             finding_age = calculate_finding_age(finding)
-            if open_objs_by_age.get(finding_age, None):
+            if open_objs_by_age.get(finding_age):
                 open_objs_by_age[finding_age] += 1
             else:
                 open_objs_by_age[finding_age] = 1
@@ -909,10 +911,7 @@ def new_product(request, ptid=None):
         if get_system_setting("enable_jira"):
             jira_project_form = JIRAProjectForm()
 
-        if get_system_setting("enable_github"):
-            gform = GITHUB_Product_Form()
-        else:
-            gform = None
+        gform = GITHUB_Product_Form() if get_system_setting("enable_github") else None
 
     add_breadcrumb(title=_("New Product"), top_level=False, request=request)
     return render(request, "dojo/new_product.html",
@@ -958,11 +957,8 @@ def edit_product(request, pid):
 
             if get_system_setting("enable_github") and github_inst:
                 gform = GITHUB_Product_Form(request.POST, instance=github_inst)
-                # need to handle delete
-                try:
+                if gform.is_valid():
                     gform.save()
-                except:
-                    pass
             elif get_system_setting("enable_github"):
                 gform = GITHUB_Product_Form(request.POST)
                 if gform.is_valid():
@@ -986,10 +982,7 @@ def edit_product(request, pid):
             jform = None
 
         if github_enabled:
-            if github_inst is not None:
-                gform = GITHUB_Product_Form(instance=github_inst)
-            else:
-                gform = GITHUB_Product_Form()
+            gform = GITHUB_Product_Form(instance=github_inst) if github_inst is not None else GITHUB_Product_Form()
         else:
             gform = None
 
@@ -1119,10 +1112,7 @@ def new_eng_for_app(request, pid, cicd=False):
             logger.debug("showing jira-epic-form")
             jira_epic_form = JIRAEngagementForm()
 
-    if cicd:
-        title = _("New CI/CD Engagement")
-    else:
-        title = _("New Interactive Engagement")
+    title = _("New CI/CD Engagement") if cicd else _("New Interactive Engagement")
 
     product_tab = Product_Tab(product, title=title, tab="engagements")
     return render(request, "dojo/new_eng.html", {
@@ -1234,11 +1224,11 @@ def add_meta_data(request, pid):
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == "POST":
-        for key, value in request.POST.items():
+        for key, orig_value in request.POST.items():
             if key.startswith("cfv_"):
                 cfv_id = int(key.split("_")[1])
                 cfv = get_object_or_404(DojoMeta, id=cfv_id)
-                value = value.strip()
+                value = orig_value.strip()
                 if value:
                     cfv.value = value
                     cfv.save()

@@ -1188,27 +1188,12 @@ class ImportReimportMixin:
 
         count = 0
         for finding in active_findings_after["results"]:
-            if "v0.0.0-20190219172222-a4c6cb3142f2" == finding["component_version"]:
+            if finding["component_version"] == "v0.0.0-20190219172222-a4c6cb3142f2" or finding["component_version"] == "v0.0.0-20190308221718-c2843e01d9a2" or finding["component_version"] == "v0.0.0-20200302210943-78000ba7a073":
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
                 self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
                 self.assertEqual("golang.org/x/crypto", finding["component_name"])
                 count = count + 1
-            elif "v0.0.0-20190308221718-c2843e01d9a2" == finding["component_version"]:
-                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
-                self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
-                self.assertEqual("golang.org/x/crypto", finding["component_name"])
-                count = count + 1
-            elif "v0.0.0-20200302210943-78000ba7a073" == finding["component_version"]:
-                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
-                self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
-                self.assertEqual("golang.org/x/crypto", finding["component_name"])
-                count = count + 1
-            elif "v0.3.0" == finding["component_version"]:
-                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding["title"])
-                self.assertEqual("CVE-2020-14040", finding["vulnerability_ids"][0]["vulnerability_id"])
-                self.assertEqual("golang.org/x/text", finding["component_name"])
-                count = count + 1
-            elif "v0.3.2" == finding["component_version"]:
+            elif finding["component_version"] == "v0.3.0" or finding["component_version"] == "v0.3.2":
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding["title"])
                 self.assertEqual("CVE-2020-14040", finding["vulnerability_ids"][0]["vulnerability_id"])
                 self.assertEqual("golang.org/x/text", finding["component_name"])
@@ -1347,11 +1332,11 @@ class ImportReimportMixin:
         self.assertEqual(engagement_findings_count, 4)
 
     def test_import_reimport_generic(self):
-        """This test do a basic import and re-import of a generic JSON report
+        """
+        This test do a basic import and re-import of a generic JSON report
 
         This test is useful because some features are only activated in generic JSON format
         """
-
         import0 = self.import_scan_with_params(self.generic_filename_with_file, scan_type="Generic Findings Import")
 
         test_id = import0["test"]
@@ -1376,12 +1361,12 @@ class ImportReimportMixin:
         self.assert_finding_count_json(1, findings)
 
     def test_import_nuclei_emptyc(self):
-        """This test do a basic import of Nuclei report with no vulnerability
+        """
+        This test do a basic import of Nuclei report with no vulnerability
 
         This test is useful because Nuclei use jsonl for his format so it can generate empty files.
         It tests the condition limit of loading an empty file.
         """
-
         import0 = self.import_scan_with_params(self.nuclei_empty, scan_type="Nuclei Scan")
 
         test_id = import0["test"]
@@ -1456,8 +1441,8 @@ class ImportReimportMixin:
             engagement=test.engagement,
             test_type=test_type,
             scan_type=self.anchore_grype_scan_type,
-            target_start=datetime.datetime.now(datetime.timezone.utc),
-            target_end=datetime.datetime.now(datetime.timezone.utc),
+            target_start=datetime.datetime.now(datetime.UTC),
+            target_end=datetime.datetime.now(datetime.UTC),
         )
         reimport_test.save()
 

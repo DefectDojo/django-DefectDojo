@@ -22,9 +22,8 @@ class HydraScanMetadata:
 
 
 class HydraParser:
-    """
-    Weak password findings from THC-Hydra (https://github.com/vanhauser-thc/thc-hydra)
-    """
+
+    """Weak password findings from THC-Hydra (https://github.com/vanhauser-thc/thc-hydra)"""
 
     def get_scan_types(self):
         return ["Hydra Scan"]

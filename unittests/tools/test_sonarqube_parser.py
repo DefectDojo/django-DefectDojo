@@ -245,7 +245,7 @@ class TestSonarQubeParser(DojoTestCase):
         my_file_handle.close()
 
     def test_detailed_parse_file_with_rule_undefined(self):
-        """the vulnerability's rule is not in the list of rules"""
+        """The vulnerability's rule is not in the list of rules"""
         my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_path() + "/scans/sonarqube/sonar-rule-undefined.html",
         )
@@ -366,7 +366,8 @@ class TestSonarQubeParser(DojoTestCase):
         my_file_handle.close()
 
     def test_detailed_parse_file_with_vuln_issue_3725(self):
-        """SonarQube Scan detailed - report that crash
+        """
+        SonarQube Scan detailed - report that crash
         see: https://github.com/DefectDojo/django-DefectDojo/issues/3725
         """
         my_file_handle, _product, _engagement, test = self.init(get_unit_tests_path() + "/scans/sonarqube/sonar.html")
@@ -641,6 +642,7 @@ class TestSonarQubeParser(DojoTestCase):
         item = findings[0]
         self.assertEqual(str, type(item.description))
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwoefijo", item.title)
+        self.assertEqual("testapplication", item.file_path)
         self.assertEqual("Medium", item.severity)
         item = findings[3]
         self.assertEqual("OWASP:UsingComponentWithKnownVulnerability_fjioefjwo1123efijo", item.title)

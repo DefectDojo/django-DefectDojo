@@ -31,6 +31,7 @@ from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
 from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
+    BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
     CredentialsMappingViewSet,
     CredentialsViewSet,
@@ -279,7 +280,7 @@ class SchemaChecker:
             _check_helper(isinstance(obj, list))
             return None
         if schema_type == TYPE_OBJECT:
-            _check_helper(isinstance(obj, OrderedDict) or isinstance(obj, dict))
+            _check_helper(isinstance(obj, OrderedDict | dict))
             return None
         if schema_type == TYPE_STRING:
             _check_helper(isinstance(obj, str))
@@ -320,10 +321,10 @@ class SchemaChecker:
                         # self._with_prefix(name, _check, prop, obj_child)
                         _check(prop, obj_child)
 
-                for child_name in obj.keys():
+                for child_name in obj:
                     # TODO: prefetch mixins not picked up by spectcular?
                     if child_name != "prefetch":
-                        if not properties or child_name not in properties.keys():
+                        if not properties or child_name not in properties:
                             self._has_failed = True
                             self._register_error(f'unexpected property "{child_name}" found')
 
@@ -342,7 +343,8 @@ class SchemaChecker:
         self._errors = []
         self._prefix = []
         _check(schema, obj)
-        assert not self._has_failed, "\n" + "\n".join(self._errors) + "\nFailed with " + str(len(self._errors)) + " errors"
+        if self._has_failed:
+            raise AssertionError("\n" + "\n".join(self._errors) + "\nFailed with " + str(len(self._errors)) + " errors")
 
 
 class TestType(Enum):
@@ -439,7 +441,7 @@ class BaseClass:
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_object_not_authorized(self):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
 
             self.setUp_not_authorized()
@@ -451,7 +453,7 @@ class BaseClass:
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
@@ -525,15 +527,14 @@ class BaseClass:
                     values = field_value if isinstance(field_value, list) else [field_value]
 
                     for value in values:
-                        if not isinstance(value, int):
-                            value = value["id"]
-                        self.assertIn(value, objs["prefetch"][field])
+                        clean_value = value["id"] if not isinstance(value, int) else value
+                        self.assertIn(clean_value, objs["prefetch"][field])
 
             # TODO: add schema check
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list_object_not_authorized(self):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
 
             self.setUp_not_authorized()
@@ -544,7 +545,7 @@ class BaseClass:
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
@@ -574,7 +575,7 @@ class BaseClass:
         @skipIfNotSubclass(CreateModelMixin)
         @patch("dojo.api_v2.permissions.user_has_permission")
         def test_create_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
 
             mock.return_value = False
@@ -587,7 +588,7 @@ class BaseClass:
 
         @skipIfNotSubclass(CreateModelMixin)
         def test_create_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
@@ -609,13 +610,12 @@ class BaseClass:
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
                 if key not in ["push_to_jira", "ssh", "password", "api_key"]:
                     # Convert data to sets to avoid problems with lists
-                    if isinstance(value, list):
-                        value = set(value)
+                    clean_value = set(value) if isinstance(value, list) else value
                     if isinstance(response.data[key], list):
                         response_data = set(response.data[key])
                     else:
                         response_data = response.data[key]
-                    self.assertEqual(value, response_data)
+                    self.assertEqual(clean_value, response_data)
 
             self.assertNotIn("push_to_jira", response.data)
             self.assertNotIn("ssh", response.data)
@@ -637,7 +637,7 @@ class BaseClass:
         @skipIfNotSubclass(UpdateModelMixin)
         @patch("dojo.api_v2.permissions.user_has_permission")
         def test_update_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
 
             mock.return_value = False
@@ -666,7 +666,7 @@ class BaseClass:
 
         @skipIfNotSubclass(UpdateModelMixin)
         def test_update_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
@@ -726,7 +726,7 @@ class BaseClass:
         @skipIfNotSubclass(DestroyModelMixin)
         @patch("dojo.api_v2.permissions.user_has_permission")
         def test_delete_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
 
             mock.return_value = False
@@ -748,7 +748,7 @@ class BaseClass:
 
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
@@ -785,7 +785,7 @@ class BaseClass:
         @skipIfNotSubclass(UpdateModelMixin)
         @patch("dojo.api_v2.permissions.user_has_permission")
         def test_update_object_not_authorized(self, mock):
-            if not self.test_type == TestType.OBJECT_PERMISSIONS:
+            if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
 
             mock.return_value = False
@@ -802,7 +802,7 @@ class BaseClass:
     class AuthenticatedViewTest(BaseClassTest):
         @skipIfNotSubclass(ListModelMixin)
         def test_list_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
@@ -812,7 +812,7 @@ class BaseClass:
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail_configuration_not_authorized(self):
-            if not self.test_type == TestType.CONFIGURATION_PERMISSIONS:
+            if self.test_type != TestType.CONFIGURATION_PERMISSIONS:
                 self.skipTest("Authorization is not configuration based")
 
             self.setUp_not_authorized()
@@ -1118,9 +1118,9 @@ class FilesTest(DojoAPITestCase):
 
     def test_request_response_post_and_download(self):
         # Test the creation
-        for level in self.url_levels.keys():
+        for level in self.url_levels:
             length = FileUpload.objects.count()
-            with open(f"{str(self.path)}/scans/acunetix/one_finding.xml", encoding="utf-8") as testfile:
+            with open(f"{self.path}/scans/acunetix/one_finding.xml", encoding="utf-8") as testfile:
                 payload = {
                     "title": level,
                     "file": testfile,
@@ -1132,7 +1132,7 @@ class FilesTest(DojoAPITestCase):
                 self.url_levels[level] = response.data.get("id")
 
         #  Test the download
-        file_data = Path(f"{str(self.path)}/scans/acunetix/one_finding.xml").read_text(encoding="utf-8")
+        file_data = Path(f"{self.path}/scans/acunetix/one_finding.xml").read_text(encoding="utf-8")
         for level, file_id in self.url_levels.items():
             response = self.client.get(f"/api/v2/{level}/files/download/{file_id}/")
             self.assertEqual(200, response.status_code)
@@ -1140,7 +1140,7 @@ class FilesTest(DojoAPITestCase):
             self.assertEqual(file_data, downloaded_file)
 
     def test_request_response_get(self):
-        for level in self.url_levels.keys():
+        for level in self.url_levels:
             response = self.client.get(f"/api/v2/{level}/files/")
             self.assertEqual(200, response.status_code)
 
@@ -1203,15 +1203,15 @@ class FindingsTest(BaseClass.BaseClassTest):
         result = self.client.get(self.url + "2/")
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not check new duplicate")
         result_json = result.json()
-        assert result_json["duplicate"]
-        assert result_json["duplicate_finding"] == 3
+        self.assertTrue(result_json["duplicate"])
+        self.assertEqual(result_json["duplicate_finding"], 3)
 
         # Check duplicate status
         result = self.client.get(self.url + "3/duplicate/")
-        assert result.status_code == status.HTTP_200_OK, "Could not check duplicate status"
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not check duplicate status")
         result_json = result.json()
         # Should return all duplicates for id=3
-        assert set(x["id"] for x in result_json) == {2, 4, 5, 6}  # noqa: C401
+        self.assertEqual({x["id"] for x in result_json}, {2, 4, 5, 6})
 
         # Reset duplicate
         result = self.client.post(self.url + "2/duplicate/reset/")
@@ -1219,44 +1219,44 @@ class FindingsTest(BaseClass.BaseClassTest):
         new_result = self.client.get(self.url + "2/")
         self.assertEqual(result.status_code, status.HTTP_204_NO_CONTENT, "Could not check reset duplicate status")
         result_json = new_result.json()
-        assert not result_json["duplicate"]
-        assert result_json["duplicate_finding"] is None
+        self.assertFalse(result_json["duplicate"])
+        self.assertIsNone(result_json["duplicate_finding"])
 
     def test_filter_steps_to_reproduce(self):
         # Confirm initial data
         result = self.client.get(self.url + "?steps_to_reproduce=lorem")
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not filter on steps_to_reproduce")
         result_json = result.json()
-        assert result_json["count"] == 0
+        self.assertEqual(result_json["count"], 0)
 
         # Set steps to reproduce
         result = self.client.patch(self.url + "2/", data={"steps_to_reproduce": "Lorem ipsum dolor sit amet"})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
-        assert result.json()["steps_to_reproduce"] == "Lorem ipsum dolor sit amet"
+        self.assertEqual(result.json()["steps_to_reproduce"], "Lorem ipsum dolor sit amet")
         result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": "Ut enim ad minim veniam"})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
-        assert result.json()["steps_to_reproduce"] == "Ut enim ad minim veniam"
+        self.assertEqual(result.json()["steps_to_reproduce"], "Ut enim ad minim veniam")
 
         # Test
         result = self.client.get(self.url + "?steps_to_reproduce=lorem")
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not filter on steps_to_reproduce")
         result_json = result.json()
-        assert result_json["count"] == 1
-        assert result_json["results"][0]["id"] == 2
-        assert result_json["results"][0]["steps_to_reproduce"] == "Lorem ipsum dolor sit amet"
+        self.assertEqual(result_json["count"], 1)
+        self.assertEqual(result_json["results"][0]["id"], 2)
+        self.assertEqual(result_json["results"][0]["steps_to_reproduce"], "Lorem ipsum dolor sit amet")
 
         # Set steps to reproduce
         result = self.client.patch(self.url + "2/", data={"steps_to_reproduce": ""})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
-        assert result.json()["steps_to_reproduce"] == ""
+        self.assertEqual(result.json()["steps_to_reproduce"], "")
         result = self.client.patch(self.url + "3/", data={"steps_to_reproduce": ""})
         self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not patch finding with steps to reproduce")
-        assert result.json()["steps_to_reproduce"] == ""
+        self.assertEqual(result.json()["steps_to_reproduce"], "")
 
     def test_severity_validation(self):
         result = self.client.patch(self.url + "2/", data={"severity": "Not a valid choice"})
         self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
-        assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
+        self.assertEqual(result.json()["severity"], ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"])
 
 
 class FindingMetadataTest(BaseClass.BaseClassTest):
@@ -1291,33 +1291,38 @@ class FindingMetadataTest(BaseClass.BaseClassTest):
         self.assertEqual(200, response.status_code, response.data)
 
         results = self.client.get(self.base_url).data
+        correct = False
         for result in results:
             if result["name"] == "test_meta2" and result["value"] == "40":
+                correct = True
                 return
 
-        assert False, "Metadata was not created correctly"
+        self.assertTrue(correct, "Metadata was not created correctly")
 
     def test_create_duplicate(self):
         result = self.client.post(self.base_url, data={"name": "test_meta", "value": "40"})
-        assert result.status_code == status.HTTP_400_BAD_REQUEST, "Metadata creation did not failed on duplicate"
+        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Metadata creation did not failed on duplicate")
 
     def test_get(self):
         results = self.client.get(self.base_url, format="json").data
+        correct = False
         for result in results:
             if result["name"] == "test_meta" and result["value"] == "20":
+                correct = True
                 return
 
-        assert False, "Metadata was not created correctly"
+        self.assertTrue(correct, "Metadata was not created correctly")
 
     def test_update(self):
         self.client.put(self.base_url + "?name=test_meta", data={"name": "test_meta", "value": "40"})
         result = self.client.get(self.base_url).data[0]
-        assert result["name"] == "test_meta" and result["value"] == "40", "Metadata not edited correctly"
+        self.assertEqual(result["name"], "test_meta", "Metadata not edited correctly")
+        self.assertEqual(result["value"], "40", "Metadata not edited correctly")
 
     def test_delete(self):
         self.client.delete(self.base_url + "?name=test_meta")
         result = self.client.get(self.base_url).data
-        assert len(result) == 0, "Metadata not deleted correctly"
+        self.assertEqual(len(result), 0, "Metadata not deleted correctly")
 
 
 class FindingTemplatesTest(BaseClass.BaseClassTest):
@@ -1539,7 +1544,7 @@ class StubFindingsTest(BaseClass.BaseClassTest):
     def test_severity_validation(self):
         result = self.client.patch(self.url + "2/", data={"severity": "Not a valid choice"})
         self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
-        assert result.json()["severity"] == ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"]
+        self.assertEqual(result.json()["severity"], ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"])
 
 
 class TestsTest(BaseClass.BaseClassTest):
@@ -1708,8 +1713,19 @@ class UsersTest(BaseClass.BaseClassTest):
         self.deleted_objects = 25
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_create(self):
+        payload = self.payload.copy() | {
+            "password": "testTEST1234!@#$",
+        }
+        length = self.endpoint_model.objects.count()
+        response = self.client.post(self.url, payload)
+        self.assertEqual(201, response.status_code, response.content[:1000])
+        self.assertEqual(self.endpoint_model.objects.count(), length + 1)
+
     def test_create_user_with_non_configuration_permissions(self):
-        payload = self.payload.copy()
+        payload = self.payload.copy() | {
+            "password": "testTEST1234!@#$",
+        }
         payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, 400)
@@ -1930,9 +1946,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
     @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
-        """
-        Test creating a new engagement should also check for import scan permission in the product
-        """
+        """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
@@ -2128,9 +2142,7 @@ class ReimportScanTest(DojoAPITestCase):
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
     @patch("dojo.api_v2.permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
-        """
-        Test creating a new engagement should also check for import scan permission in the product
-        """
+        """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
@@ -2972,6 +2984,11 @@ class EngagementSurveyTest(BaseClass.BaseClassTest):
         self.deleted_objects = 5
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_link_engagement_questionnaire(self):
+        end_url = self.url + "4/link_engagement/2/"
+        result = self.client.post(end_url)
+        self.assertEqual(result.status_code, status.HTTP_200_OK, f"Failed to link enagement survey to engagement: {result.content} on {end_url}")
+
 
 class AnsweredSurveyTest(BaseClass.BaseClassTest):
     fixtures = ["questionnaire_testdata.json"]
@@ -3023,6 +3040,30 @@ class NotificationWebhooksTest(BaseClass.BaseClassTest):
         self.update_fields = {
             "header_name": "Auth",
             "header_value": "token x",
+        }
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class BurpRawRequestResponseTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = BurpRawRequestResponse
+        self.endpoint_path = "request_response_pairs"
+        self.viewname = "request_response_pairs"
+        self.viewset = BurpRawRequestResponseViewSet
+        self.payload = {
+            "finding": 2,
+            "burpRequestBase64": "cmVxdWVzdAo=",
+            "burpResponseBase64": "cmVzcG9uc2UK",
+        }
+
+        self.update_fields = {
+            "finding": 2,
+            "burpRequestBase64": "cmVxdWVzdCAtIGVkaXRlZAo=",
+            "burpResponseBase64": "cmVzcG9uc2UgLSBlZGl0ZWQK",
         }
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1

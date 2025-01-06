@@ -13,7 +13,7 @@ from django.utils.translation import gettext as _
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.authorization_decorators import user_has_global_permission, user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.filters import ProductTypeFilter
+from dojo.filters import ProductFilter, ProductFilterWithoutObjectLookups, ProductTypeFilter
 from dojo.forms import (
     Add_Product_Type_GroupForm,
     Add_Product_Type_MemberForm,
@@ -27,6 +27,8 @@ from dojo.forms import (
 from dojo.models import Product_Type, Product_Type_Group, Product_Type_Member, Role
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
+    get_authorized_global_groups_for_product_type,
+    get_authorized_global_members_for_product_type,
     get_authorized_groups_for_product_type,
     get_authorized_members_for_product_type,
     get_authorized_product_types,
@@ -36,6 +38,7 @@ from dojo.utils import (
     async_delete,
     get_page_items,
     get_setting,
+    get_system_setting,
     is_title_in_breadcrumbs,
 )
 
@@ -49,7 +52,6 @@ Product Type views
 
 
 def product_type(request):
-
     prod_types = get_authorized_product_types(Permissions.Product_Type_View)
     name_words = prod_types.values_list("name", flat=True)
 
@@ -117,16 +119,26 @@ def view_product_type(request, ptid):
     page_name = _("View Product Type")
     pt = get_object_or_404(Product_Type, pk=ptid)
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_View)
+    global_members = get_authorized_global_members_for_product_type(pt, Permissions.Product_Type_View)
     groups = get_authorized_groups_for_product_type(pt, Permissions.Product_Type_View)
+    global_groups = get_authorized_global_groups_for_product_type(pt, Permissions.Product_Type_View)
     products = get_authorized_products(Permissions.Product_View).filter(prod_type=pt)
-    products = get_page_items(request, products, 25)
+    filter_string_matching = get_system_setting("filter_string_matching", False)
+    filter_class = ProductFilterWithoutObjectLookups if filter_string_matching else ProductFilter
+    prod_filter = filter_class(request.GET, queryset=products, user=request.user)
+    products = get_page_items(request, prod_filter.qs, 25)
+
     add_breadcrumb(title=page_name, top_level=False, request=request)
     return render(request, "dojo/view_product_type.html", {
         "name": page_name,
         "pt": pt,
         "products": products,
+        "prod_filter": prod_filter,
         "groups": groups,
-        "members": members})
+        "members": members,
+        "global_groups": global_groups,
+        "global_members": global_members,
+    })
 
 
 @user_is_authorized(Product_Type, Permissions.Product_Type_Delete, "ptid")

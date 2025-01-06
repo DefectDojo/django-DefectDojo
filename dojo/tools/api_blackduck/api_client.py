@@ -2,9 +2,8 @@ from blackduck import Client
 
 
 class BlackduckAPI:
-    """
-    A simple client for the BlackDuck API
-    """
+
+    """A simple client for the BlackDuck API"""
 
     def __init__(self, tool_config):
         if tool_config.authentication_type == "API":

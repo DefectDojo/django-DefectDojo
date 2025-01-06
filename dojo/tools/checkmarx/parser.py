@@ -129,7 +129,8 @@ class CheckmarxParser:
         result,
         find_date,
     ):
-        """Process one result = one pathId for default "Checkmarx Scan"
+        """
+        Process one result = one pathId for default "Checkmarx Scan"
         Create the finding and add it into the dupes list
         If a vuln with the same file_path was found before, updates the description
         """
@@ -139,10 +140,7 @@ class CheckmarxParser:
             query, result,
         )
         sinkFilename = lastPathnode.find("FileName").text
-        if sinkFilename:
-            title = "{} ({})".format(titleStart, sinkFilename.split("/")[-1])
-        else:
-            title = titleStart
+        title = "{} ({})".format(titleStart, sinkFilename.split("/")[-1]) if sinkFilename else titleStart
         false_p = result.get("FalsePositive")
         sev = result.get("Severity")
         aggregateKeys = f"{cwe}{sev}{sinkFilename}"
@@ -226,7 +224,8 @@ class CheckmarxParser:
     def _process_result_detailed(
         self, test, dupes, findingdetail, query, result, find_date,
     ):
-        """Process one result = one pathId for scanner "Checkmarx Scan detailed"
+        """
+        Process one result = one pathId for scanner "Checkmarx Scan detailed"
         Create the finding and add it into the dupes list
         """
         name, cwe, categories, queryId = self.getQueryElements(query)
@@ -366,7 +365,7 @@ class CheckmarxParser:
         if isinstance(value, str):
             return parser.parse(value).date()
         if isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.utcfromtimestamp(value.get("seconds")).date()
+            return datetime.datetime.fromtimestamp(value.get("seconds"), datetime.UTC).date()
         return None
 
     def _get_findings_json(self, file, test):

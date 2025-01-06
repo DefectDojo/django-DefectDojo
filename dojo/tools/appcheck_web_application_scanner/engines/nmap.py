@@ -1,22 +1,24 @@
-from typing import Any, Union
+from typing import Any
 
 from dojo.models import Endpoint
 from dojo.tools.appcheck_web_application_scanner.engines.base import BaseEngineParser
 
 
 class NmapScanningEngineParser(BaseEngineParser):
+
     """
     Parser for data from the Nmap scanning engine.
 
     Nmap engine results include a list of ports in a 'port_table' data entry that we use to generate several endpoints
     under the same Finding.
     """
+
     SCANNING_ENGINE = "NMapScanner"
 
     def is_port_table_entry(self, entry) -> bool:
         return len(entry) > 0 and self.parse_port(entry[0])
 
-    def get_ports(self, item) -> Union[list[int], list[None]]:
+    def get_ports(self, item) -> list[int] | list[None]:
         meta = item.get("meta")
         if not isinstance(meta, dict):
             meta = {}

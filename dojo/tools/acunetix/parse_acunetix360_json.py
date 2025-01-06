@@ -8,12 +8,14 @@ from dojo.models import Endpoint, Finding
 
 
 class AcunetixJSONParser:
+
     """This parser is written for Acunetix JSON Findings."""
+
     def get_findings(self, filename, test):
         dupes = {}
         data = json.load(filename)
         dupes = {}
-        scan_date = parser.parse(data["Generated"])
+        scan_date = parser.parse(data["Generated"], dayfirst=True)
         text_maker = html2text.HTML2Text()
         text_maker.body_width = 0
         for item in data["Vulnerabilities"]:
@@ -49,10 +51,7 @@ class AcunetixJSONParser:
                         + references
                     )
             url = item["Url"]
-            if item["Impact"] is not None:
-                impact = text_maker.handle(item.get("Impact", ""))
-            else:
-                impact = None
+            impact = text_maker.handle(item.get("Impact", "")) if item["Impact"] is not None else None
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             if request is None or len(request) <= 0:
@@ -94,7 +93,7 @@ class AcunetixJSONParser:
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]
             if item.get("FirstSeenDate"):
-                parseddate = parser.parse(item["FirstSeenDate"])
+                parseddate = parser.parse(item["FirstSeenDate"], dayfirst=True)
                 finding.date = parseddate
             if dupe_key in dupes:
                 find = dupes[dupe_key]

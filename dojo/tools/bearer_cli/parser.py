@@ -4,9 +4,8 @@ from dojo.models import Finding
 
 
 class BearerCLIParser:
-    """
-    Bearer CLI tool is a SAST scanner for multiple languages
-    """
+
+    """Bearer CLI tool is a SAST scanner for multiple languages"""
 
     def get_scan_types(self):
         return ["Bearer CLI"]
@@ -34,7 +33,7 @@ class BearerCLIParser:
                 finding = Finding(
                     title=bearerfinding["title"] + " in " + bearerfinding["filename"] + ":" + str(bearerfinding["line_number"]),
                     test=test,
-                    description=bearerfinding["description"] + "\n Detected code snippet: \n" + bearerfinding["snippet"],
+                    description=bearerfinding["description"] + "\n Detected code snippet: \n" + bearerfinding.get("snippet", bearerfinding.get("code_extract")),
                     severity=severity,
                     cwe=bearerfinding["cwe_ids"][0],
                     static_finding=True,

@@ -144,22 +144,6 @@ def get_parameter_froms_args_kwargs(args, kwargs, parameter):
     return model_or_id
 
 
-def on_exception_log_kwarg(func):
-    def wrapper(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-
-        except Exception:
-            logger.info(f"exception occured at url: {self.driver.current_url}")
-            logger.info(f"page source: {self.driver.page_source}")
-            f = open("/tmp/selenium_page_source.html", "w", encoding="utf-8")
-            f.writelines(self.driver.page_source)
-            # time.sleep(30)
-            raise
-
-    return wrapper
-
-
 def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, block=False):
     def decorator(fn):
         @wraps(fn)

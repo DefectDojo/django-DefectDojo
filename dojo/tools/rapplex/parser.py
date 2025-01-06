@@ -7,9 +7,9 @@ from dojo.models import Endpoint, Finding
 
 
 class RapplexParser:
-    """
-    Rapplex - Web Application Security Scanner
-    """
+
+    """Rapplex - Web Application Security Scanner"""
+
     def get_scan_types(self):
         return ["Rapplex Scan"]
 

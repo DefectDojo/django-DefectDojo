@@ -62,7 +62,7 @@ class KiuwanParser:
                 + row["Software characteristic"]
                 + "\n\n"
                 + "**Vulnerability type** : "
-                + (row["Vulnerability type"] if "Vulnerability type" in row else "")
+                + (row.get("Vulnerability type", ""))
                 + "\n\n"
                 + "**CWE Scope** : "
                 + row["CWE Scope"]
@@ -104,10 +104,9 @@ class KiuwanParser:
             finding.mitigation = "Not provided!"
             finding.severity = findingdict["severity"]
             finding.static_finding = True
-            try:
-                finding.cwe = int(row["CWE"])
-            except Exception:
-                pass
+            if cwe := row.get("CWE"):
+                if cwe.isdigit():
+                    finding.cwe = int(cwe)
 
             if finding is not None:
                 if finding.title is None:

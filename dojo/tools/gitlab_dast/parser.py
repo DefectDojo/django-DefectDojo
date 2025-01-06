@@ -6,9 +6,8 @@ from dojo.models import Endpoint, Finding
 
 
 class GitlabDastParser:
-    """
-    Import GitLab DAST Report in JSON format
-    """
+
+    """Import GitLab DAST Report in JSON format"""
 
     def get_scan_types(self):
         return ["GitLab DAST Report"]
@@ -58,7 +57,7 @@ class GitlabDastParser:
             "Unknown": 8,  # Tentative
             "Ignore": 10,  # Tentative
         }
-        return switcher.get(confidence, None)
+        return switcher.get(confidence)
 
     # iterating through properties of each vulnerability
     def get_item(self, vuln, test, scanner):
@@ -97,7 +96,7 @@ class GitlabDastParser:
 
         # title
         finding.title = (
-            vuln["name"] if "name" in vuln else finding.unique_id_from_tool
+            vuln.get("name", finding.unique_id_from_tool)
         )
         # cwe
         for identifier in vuln["identifiers"]:

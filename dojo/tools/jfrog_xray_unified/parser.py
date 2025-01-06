@@ -5,6 +5,7 @@ from dojo.models import Finding
 
 
 class JFrogXrayUnifiedParser:
+
     """JFrog Xray JSON reports"""
 
     def get_scan_types(self):
@@ -53,10 +54,7 @@ def get_item(vulnerability, test):
 
     # Following the CVSS Scoring per https://nvd.nist.gov/vuln-metrics/cvss
     if "severity" in vulnerability:
-        if vulnerability["severity"] == "Unknown":
-            severity = "Info"
-        else:
-            severity = vulnerability["severity"].title()
+        severity = "Info" if vulnerability["severity"] == "Unknown" else vulnerability["severity"].title()
     # TODO: Needs UNKNOWN new status in the model.
     else:
         severity = "Info"

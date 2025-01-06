@@ -7,6 +7,7 @@ from dojo.models import Finding
 
 
 class JFrogXrayOnDemandBinaryScanParser:
+
     """jfrog_xray_scan JSON reports"""
 
     def get_scan_types(self):
@@ -47,10 +48,7 @@ def get_component_name_version(name):
 
 def get_severity(vulnerability):
     if "severity" in vulnerability:
-        if vulnerability["severity"] == "Unknown":
-            severity = "Info"
-        else:
-            severity = vulnerability["severity"].title()
+        severity = "Info" if vulnerability["severity"] == "Unknown" else vulnerability["severity"].title()
     else:
         severity = "Info"
     return severity
@@ -135,8 +133,7 @@ def get_vuln_id_from_tool(vulnerability):
 
 
 def clean_title(title):
-    if title.startswith("Issue summary: "):
-        title = title[len("Issue summary: "):]
+    title = title.removeprefix("Issue summary: ")
     if "\n" in title:
         title = title[:title.index("\n")]
     return title
@@ -161,8 +158,8 @@ def get_item_set(vulnerability):
             cvss_v3 = cves[0]["cvss_v3_vector"]
             cvssv3 = CVSS3(cvss_v3).clean_vector()
 
-    for component_name, component in vulnerability.get("components", {}).items():
-        component_name, component_version = get_component_name_version(component_name)
+    for component_name_with_version, component in vulnerability.get("components", {}).items():
+        component_name, component_version = get_component_name_version(component_name_with_version)
         mitigation, impact = process_component(component)
 
         title = clean_title(vulnerability["summary"])

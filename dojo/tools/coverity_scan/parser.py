@@ -4,6 +4,7 @@ from dojo.models import Finding
 
 
 class CoverityScanParser:
+
     """Parser for Coverity Scan JSON files."""
 
     SEVERITY_MAPPING = {

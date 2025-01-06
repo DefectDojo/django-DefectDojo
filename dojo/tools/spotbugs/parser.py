@@ -7,6 +7,7 @@ from dojo.models import Finding
 
 
 class SpotbugsParser:
+
     """Parser for XML ouput file from Spotbugs (https://github.com/spotbugs/spotbugs)"""
 
     def get_scan_types(self):
@@ -85,10 +86,7 @@ class SpotbugsParser:
                 desc += message + "\n"
 
             shortmessage_extract = bug.find("ShortMessage")
-            if shortmessage_extract is not None:
-                title = shortmessage_extract.text
-            else:
-                title = bug.get("type")
+            title = shortmessage_extract.text if shortmessage_extract is not None else bug.get("type")
             severity = SEVERITY[bug.get("priority")]
             description = desc
 

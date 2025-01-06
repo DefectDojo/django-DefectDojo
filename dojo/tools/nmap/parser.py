@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 
 from cpe import CPE
@@ -25,12 +26,10 @@ class NmapParser:
             raise ValueError(msg)
 
         report_date = None
-        try:
+        with contextlib.suppress(ValueError):
             report_date = datetime.datetime.fromtimestamp(
                 int(root.attrib["start"]),
             )
-        except ValueError:
-            pass
 
         for host in root.findall("host"):
             host_info = "### Host\n\n"
@@ -74,7 +73,7 @@ class NmapParser:
                     endpoint.port = int(port_element.attrib["portid"])
 
                 # filter on open ports
-                if "open" != port_element.find("state").attrib.get("state"):
+                if port_element.find("state").attrib.get("state") != "open":
                     continue
                 title = f"Open port: {endpoint.port}/{endpoint.protocol}"
                 description = host_info
@@ -137,12 +136,14 @@ class NmapParser:
         return list(dupes.values())
 
     def convert_cvss_score(self, raw_value):
-        """According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
+        """
+        According to CVSS official numbers https://nvd.nist.gov/vuln-metrics/cvss
                         None 	0.0
         Low 	0.0-3.9 	Low 	0.1-3.9
         Medium 	4.0-6.9 	Medium 	4.0-6.9
         High 	7.0-10.0 	High 	7.0-8.9
-        Critical 	9.0-10.0"""
+        Critical 	9.0-10.0
+        """
         val = float(raw_value)
         if val == 0.0:
             return "Info"
@@ -198,7 +199,7 @@ class NmapParser:
                 # manage if CVE is in metadata
                 if (
                     "type" in vuln_attributes
-                    and "cve" == vuln_attributes["type"]
+                    and vuln_attributes["type"] == "cve"
                 ):
                     finding.unsaved_vulnerability_ids = [vuln_attributes["id"]]
 

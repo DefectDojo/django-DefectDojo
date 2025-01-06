@@ -8,6 +8,7 @@ from dojo.tools.parser_test import ParserTest
 
 
 class HorusecParser:
+
     """Horusec (https://github.com/ZupIT/horusec)"""
 
     ID = "Horusec"

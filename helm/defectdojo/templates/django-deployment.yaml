@@ -9,6 +9,9 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- with .Values.extraLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   replicas: {{ .Values.django.replicas }}
   {{- if .Values.revisionHistoryLimit }}
@@ -25,9 +28,12 @@ spec:
         defectdojo.org/component: django
         app.kubernetes.io/name: {{ include "defectdojo.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        {{- if .Values.podLabels }}
-        {{- toYaml .Values.podLabels | nindent 8 }}
-        {{- end }}        
+        {{- with .Values.extraLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.podLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       annotations:
       {{- with .Values.django.annotations }}
         {{- toYaml . | nindent 8 }}
@@ -82,17 +88,14 @@ spec:
         emptyDir: {}
         {{- end }}
       {{- end }}
-      {{- if .Values.dbMigrationChecker.enabled }}
+      {{- if or .Values.dbMigrationChecker.enabled .Values.cloudsql.enabled }}
       initContainers:
-      {{$data := dict "fullName" $fullName }}
-      {{- $newContext := merge . (dict "fullName" $fullName) }}
-      {{- include "dbMigrationChecker" $newContext | nindent 6 }}
       {{- end }}
-      containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
         image: {{ .Values.cloudsql.image.repository }}:{{ .Values.cloudsql.image.tag }}
         imagePullPolicy: {{ .Values.cloudsql.image.pullPolicy }}
+        restartPolicy: Always
         securityContext:
           runAsNonRoot: true
         command: ["/cloud_sql_proxy"]
@@ -108,6 +111,12 @@ spec:
         - "-ip_address_types=PRIVATE"
         {{- end }}
       {{- end }}
+      {{- if .Values.dbMigrationChecker.enabled }}
+      {{$data := dict "fullName" $fullName }}
+      {{- $newContext := merge . (dict "fullName" $fullName) }}
+      {{- include "dbMigrationChecker" $newContext | nindent 6 }}
+      {{- end }}
+      containers:
       {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
       - name: metrics
         image: {{ .Values.monitoring.prometheus.image }}
@@ -155,11 +164,6 @@ spec:
         - name: http-uwsgi
           protocol: TCP
           containerPort: 8081
-        {{- if .Values.django.uwsgi.enableDebug }}
-        - name: debug
-          protocol: TCP
-          containerPort: 3000
-        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -202,8 +206,8 @@ spec:
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
         - name: DD_CSRF_COOKIE_SECURE
           value: {{- if or .Values.django.ingress.activateTLS .Values.django.nginx.tls.enabled }} "True" {{- else }} "False" {{- end }}
-        {{- if .Values.extraEnv }}
-        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{- with .Values.extraEnv }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- if .Values.django.uwsgi.livenessProbe.enabled }}
         livenessProbe:
@@ -260,23 +264,10 @@ spec:
           value: '{{ .Values.django.nginx.tls.enabled }}'
         - name: GENERATE_TLS_CERTIFICATE
           value: '{{ .Values.django.nginx.tls.generateCertificate }}'
+        {{- if .Values.django.uwsgi.livenessProbe.enabled }}
         livenessProbe:
           httpGet:
             path: /nginx_health
-            port: http
-            {{- if .Values.django.nginx.tls.enabled }}
-            scheme: HTTPS
-            {{- end }}
-            httpHeaders:
-            - name: Host
-              value: {{ .Values.host }}
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          failureThreshold: 6
-        {{- if .Values.django.uwsgi.livenessProbe.enabled }}
-        readinessProbe:
-          httpGet:
-            path: /uwsgi_health
             port: http
             {{- if .Values.django.nginx.tls.enabled }}
             scheme: HTTPS
@@ -289,6 +280,40 @@ spec:
           periodSeconds: {{ .Values.django.uwsgi.livenessProbe.periodSeconds }}
           successThreshold: {{ .Values.django.uwsgi.livenessProbe.successThreshold }}
           timeoutSeconds: {{ .Values.django.uwsgi.livenessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.django.uwsgi.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /uwsgi_health
+            port: http
+            {{- if .Values.django.nginx.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+            httpHeaders:
+            - name: Host
+              value: {{ .Values.host }}
+          failureThreshold: {{ .Values.django.uwsgi.readinessProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.readinessProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.readinessProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.readinessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.django.uwsgi.startupProbe.enabled }}
+        startupProbe:
+          httpGet:
+            path: /uwsgi_health
+            port: http
+            {{- if .Values.django.nginx.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+            httpHeaders:
+            - name: Host
+              value: {{ .Values.host }}
+          failureThreshold: {{ .Values.django.uwsgi.startupProbe.failureThreshold }}
+          initialDelaySeconds: {{ .Values.django.uwsgi.startupProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.django.uwsgi.startupProbe.periodSeconds }}
+          successThreshold: {{ .Values.django.uwsgi.startupProbe.successThreshold }}
+          timeoutSeconds: {{ .Values.django.uwsgi.startupProbe.timeoutSeconds }}
         {{- end }}
         resources:
           {{- toYaml .Values.django.nginx.resources | nindent 10 }}

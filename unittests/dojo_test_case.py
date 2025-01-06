@@ -2,7 +2,9 @@ import copy
 import json
 import logging
 import os
+from functools import wraps
 from itertools import chain
+from pathlib import Path
 from pprint import pformat
 
 from django.test import TestCase
@@ -38,7 +40,26 @@ logger = logging.getLogger(__name__)
 
 
 def get_unit_tests_path():
-    return os.path.dirname(os.path.realpath(__file__))
+    return str(Path(os.path.realpath(__file__)).parent)
+
+
+def toggle_system_setting_boolean(flag_name, value):
+    """Decorator to temporarily set a boolean flag in System Settings."""
+
+    def decorator(test_func):
+        @wraps(test_func)
+        def wrapper(*args, **kwargs):
+            # Set the flag to the specified value
+            System_Settings.objects.update(**{flag_name: value})
+            try:
+                return test_func(*args, **kwargs)
+            finally:
+                # Reset the flag to its original state after the test
+                System_Settings.objects.update(**{flag_name: not value})
+
+        return wrapper
+
+    return decorator
 
 
 class DojoTestUtilsMixin:
@@ -173,6 +194,7 @@ class DojoTestUtilsMixin:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-enable_engagement_epic_mapping": "on",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-push_notes": "on",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
@@ -188,6 +210,7 @@ class DojoTestUtilsMixin:
             "sla_configuration": 1,
             # A value is set by default by the model, so we need to add it here as well
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
@@ -204,6 +227,7 @@ class DojoTestUtilsMixin:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-enable_engagement_epic_mapping": "on",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-push_notes": "on",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
@@ -220,6 +244,7 @@ class DojoTestUtilsMixin:
             "jira-project-form-jira_instance": 2,
             "jira-project-form-enable_engagement_epic_mapping": "on",
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-push_notes": "on",
             "jira-project-form-product_jira_sla_notification": "on",
             "jira-project-form-custom_fields": "null",
@@ -235,6 +260,7 @@ class DojoTestUtilsMixin:
             "sla_configuration": 1,
             # A value is set by default by the model, so we need to add it here as well
             "jira-project-form-epic_issue_type_name": "Epic",
+            "jira-project-form-enabled": "True",
             "jira-project-form-custom_fields": "null",
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,

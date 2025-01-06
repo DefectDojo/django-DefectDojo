@@ -7,6 +7,7 @@ from dojo.models import Finding
 
 
 class CredScanParser:
+
     """
     Credential Scanner (aka CredScan) is a tool developed and maintained by
     Microsoft to identify credential leaks such as those in source code and

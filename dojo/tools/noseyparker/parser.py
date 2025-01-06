@@ -6,9 +6,8 @@ from dojo.models import Finding
 
 
 class NoseyParkerParser:
-    """
-    Scanning secrets from repos
-    """
+
+    """Scanning secrets from repos"""
 
     def get_scan_types(self):
         return ["Nosey Parker Scan"]

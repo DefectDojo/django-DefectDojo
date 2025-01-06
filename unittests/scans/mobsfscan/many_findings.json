@@ -25,6 +25,18 @@
             271
           ],
           "match_string": "key = \"hmi_busroutes_health\""
+        },
+        {
+          "file_path": "app/src/main/java/com/routes/domain/analytics/event/Signatures2.kt",
+          "match_lines": [
+            20,
+            20
+          ],
+          "match_position": [
+            243,
+            271
+          ],
+          "match_string": "key2 = \"hmi_busroutes_health2\""
         }
       ],
       "metadata": {

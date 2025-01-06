@@ -36,11 +36,7 @@ def add_benchmark(queryset, product):
         benchmark_product.product = product
         benchmark_product.control = requirement
         requirements.append(benchmark_product)
-
-    try:
-        Benchmark_Product.objects.bulk_create(requirements)
-    except Exception:
-        pass
+    Benchmark_Product.objects.bulk_create(requirements)
 
 
 @user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
