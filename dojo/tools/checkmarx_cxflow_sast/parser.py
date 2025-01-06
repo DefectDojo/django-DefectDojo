@@ -95,7 +95,7 @@ class CheckmarxCXFlowSastParser:
 
                 map_paths[str(path.source.line)] = path
 
-            for detail_key in issue.get("details").keys():
+            for detail_key in issue.get("details"):
                 if detail_key not in map_paths:
                     logger.warning(f"{detail_key} not found in path, ignore")
                 else:
