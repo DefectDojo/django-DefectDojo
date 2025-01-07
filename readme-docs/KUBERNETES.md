@@ -20,8 +20,7 @@ Starting with version 1.14.0, a helm chart will be pushed onto the `helm-charts`
 To use it, you can add our repo.
 
 ```
-$ helm repo add helm-charts 'https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts'
-"helm-charts" has been added to your repositories
+$ helm repo add defectdojo 'https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts'
 
 $ helm repo update
 ```
@@ -31,7 +30,7 @@ You should now be able to see the chart.
 ```
 $ helm search repo defectdojo
 NAME                      	CHART VERSION	APP VERSION	DESCRIPTION
-helm-charts/defectdojo	    1.5.1        	1.14.0-dev 	A Helm chart for Kubernetes to install DefectDojo
+defectdojo/defectdojo   1.6.153         2.39.0          A Helm chart for Kubernetes to install DefectDojo
 ```
 
 ## Kubernetes Local Quickstart
@@ -268,6 +267,15 @@ For more detail how how to create proper PVC see [example](https://github.com/De
 
 ### Installation
 
+**Important:** If you choose to create the secret on your own, you will need to create a secret named `defectdojo` and containing the following fields:
+
+- DD_ADMIN_PASSWORD
+- DD_SECRET_KEY
+- DD_CREDENTIAL_AES_256_KEY
+- METRICS_HTTP_AUTH_PASSWORD
+
+Theses fields are required to get the stack running.
+
 ```zsh
 # Install Helm chart. Choose a host name that matches the certificate above
 helm install \
@@ -322,7 +330,7 @@ helm install \
 # Run test.
 helm test defectdojo
 
-# Navigate to <https://defectdojo.default.minikube.local>.
+# Navigate to <YOUR_INGRESS_ENDPOINT>.
 ```
 
 ### Prometheus metrics
@@ -349,7 +357,7 @@ In your helm install simply pass them as a defined array, for example:
 
 This will also work with shell inserted variables:
 
-` --set "alternativeHosts={defectdojo.${TLS_CERT_DOMAIN},localhost}"`
+`--set "alternativeHosts={defectdojo.${TLS_CERT_DOMAIN},localhost}"`
 
 You will still need to set a host value as well.
 
@@ -375,18 +383,19 @@ extraEnv:
     value: '26379'
 ```
 
-
 ### How to use an external PostgreSQL DB with Defectdojo
 
 #### Step 1: Create a Namespace for DefectDojo
 
 To begin, create a dedicated namespace for DefectDojo to isolate its resources:
 `kubectl create ns defectdojo`
+
 #### Step 2: Create a Secret for PostgreSQL Credentials
 
 Set up a Kubernetes Secret to securely store the PostgreSQL user password and database connection URL, which are essential for establishing a secure connection between DefectDojo and your PostgreSQL instance. Apply the secret using the following command: `kubectl apply -f secret.yaml -n defectdojo`. This secret will be referenced within the `extraEnv` section of the DefectDojo Helm values file.
 
 Sample secret template (replace the placeholders with your PostgreSQL credentials):
+
 ```YAML
 apiversion: v1
 kind: Secret
@@ -394,8 +403,7 @@ metadata:
   name: defectdojo-postgresql-specific  
 type: Opaque
 stringData:  # I chose stringData for better visualization of the credentials for debugging
-  postgresql-password: <user-password>
-  db-url: psql://<username>:<password>@<hostname>:<port>/<database-name> 
+  password: <user-password>
 ```
 
 #### Step 2.5: Install PostgreSQL (Optional)
@@ -408,10 +416,9 @@ helm repo update
 helm install defectdojo-postgresql bitnami/postgresql -n defectdojo -f postgresql/values.yaml
 ```
 
-
 Sample `values.yaml` file for PostgreSQL configuration:
 
-```YAML 
+```YAML
 auth:
   username: defectdojo
   password: <user-password>
@@ -427,18 +434,27 @@ auth:
 Before installing the DefectDojo Helm chart, it's important to customize the `values.yaml` file. Key areas to modify include specifying the PostgreSQL connection details & the extraEnv block:
 
 ```yaml
-database: postgresql
-postgresql:
-  postgresServer: "defectdojo-postgresql" # point to the hostname of your postgresql server
-  enabled: false
+database: postgresql # refer to the following configuration
 
-# Specify the postgresql DB connection url for the external postgresql server
+postgresql:
+  enabled: false # Disable the creation of the database in the cluster
+  postgresServer: "127.0.0.1" # Required to skip certains tests not useful on external instances
+  auth:
+    username: defectdojo # your database user
+    database: defectdojo # your database name
+    secretKeys: 
+      adminPasswordKey: password # the name of the field containing the password value
+      userPasswordKey: password # the name of the field containing the password value
+      replicationPasswordKey: password # the name of the field containing the password value
+    existingSecret: defectdojo-postgresql-specific # the secret containing your database password
+
 extraEnv:
-  - name: DD_DATABASE_URL
-    valueFrom:
-      secretKeyRef:
-        name: defectdojo-postgresql-specific
-        key: db-url
+# Overwrite the database endpoint
+- name: DD_DATABASE_HOST
+  value: <YOUR_POSTGRES_HOST>
+# Overwrite the database port
+- name: DD_DATABASE_PORT
+  value: <YOUR_POSTGRES_PORT>
 ```
 
 #### Step 4: Deploy DefectDojo

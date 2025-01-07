@@ -2,7 +2,7 @@ from datetime import datetime
 
 from dateutil.tz import tzoffset
 
-from dojo.models import Test
+from dojo.models import Test, Test_Type
 from dojo.tools.nuclei.parser import NucleiParser
 from unittests.dojo_test_case import DojoTestCase
 
@@ -236,3 +236,48 @@ class TestNucleiParser(DojoTestCase):
             with self.subTest(i=0):
                 finding = findings[0]
                 self.assertEqual("Info", finding.severity)
+
+    def test_parse_invalid_cwe(self):
+        with open("unittests/scans/nuclei/invalid_cwe.json", encoding="utf-8") as testfile:
+            parser = NucleiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
+            self.assertEqual(0, finding.cwe)
+
+    def test_parse_same_template_multiple_matches(self):
+        with open("unittests/scans/nuclei/multiple_matches.json", encoding="utf-8") as testfile:
+            parser = NucleiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual("turquoise-estrellita-69.tiiny.site", finding.unsaved_endpoints[0].host)
+
+            # required to compute hash code, same as in test_endpoint_model - move to some test utils module?
+            from django.contrib.auth import get_user_model
+            user, _ = get_user_model().objects.get_or_create(username="importer")
+            product_type = self.create_product_type("prod_type")
+            product = self.create_product("test_deduplicate_finding", prod_type=product_type)
+            engagement = self.create_engagement("eng", product)
+            Test_Type.objects.create(name="Nuclei Scan")
+            test = self.create_test(engagement=engagement, scan_type="Nuclei Scan", title="test")
+            for finding in findings:
+                finding.test = test
+                finding.reporter = user
+                finding.save(dedupe_option=False)
+
+            self.assertEqual(
+                (
+                    findings[0].compute_hash_code(),
+                    findings[1].compute_hash_code(),
+                ),
+                (
+                    "e7ffb8136ce875351828c8f27f930a05b6cab0a52d31e3961df7a0031fffe37f",
+                    "65e95106ab3c53cd42f384804a4a9087f43616f863e90c34818086862df253ec",
+                ),
+            )

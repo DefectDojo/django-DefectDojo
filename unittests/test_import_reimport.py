@@ -1188,27 +1188,12 @@ class ImportReimportMixin:
 
         count = 0
         for finding in active_findings_after["results"]:
-            if "v0.0.0-20190219172222-a4c6cb3142f2" == finding["component_version"]:
+            if finding["component_version"] == "v0.0.0-20190219172222-a4c6cb3142f2" or finding["component_version"] == "v0.0.0-20190308221718-c2843e01d9a2" or finding["component_version"] == "v0.0.0-20200302210943-78000ba7a073":
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
                 self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
                 self.assertEqual("golang.org/x/crypto", finding["component_name"])
                 count = count + 1
-            elif "v0.0.0-20190308221718-c2843e01d9a2" == finding["component_version"]:
-                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
-                self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
-                self.assertEqual("golang.org/x/crypto", finding["component_name"])
-                count = count + 1
-            elif "v0.0.0-20200302210943-78000ba7a073" == finding["component_version"]:
-                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
-                self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
-                self.assertEqual("golang.org/x/crypto", finding["component_name"])
-                count = count + 1
-            elif "v0.3.0" == finding["component_version"]:
-                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding["title"])
-                self.assertEqual("CVE-2020-14040", finding["vulnerability_ids"][0]["vulnerability_id"])
-                self.assertEqual("golang.org/x/text", finding["component_name"])
-                count = count + 1
-            elif "v0.3.2" == finding["component_version"]:
+            elif finding["component_version"] == "v0.3.0" or finding["component_version"] == "v0.3.2":
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding["title"])
                 self.assertEqual("CVE-2020-14040", finding["vulnerability_ids"][0]["vulnerability_id"])
                 self.assertEqual("golang.org/x/text", finding["component_name"])
@@ -1456,8 +1441,8 @@ class ImportReimportMixin:
             engagement=test.engagement,
             test_type=test_type,
             scan_type=self.anchore_grype_scan_type,
-            target_start=datetime.datetime.now(datetime.timezone.utc),
-            target_end=datetime.datetime.now(datetime.timezone.utc),
+            target_start=datetime.datetime.now(datetime.UTC),
+            target_end=datetime.datetime.now(datetime.UTC),
         )
         reimport_test.save()
 

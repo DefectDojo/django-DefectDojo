@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from dojo.models import Finding
 
@@ -29,13 +29,13 @@ class Compliance:
         if finding.get("Compliance", {}).get("Status", "PASSED") == "PASSED":
             is_Mitigated = True
             active = False
-            if finding.get("LastObservedAt", None):
+            if finding.get("LastObservedAt"):
                 try:
-                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
                 except Exception:
-                    mitigated = datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
+                    mitigated = datetime.datetime.strptime(finding.get("LastObservedAt"), "%Y-%m-%dT%H:%M:%fZ")
             else:
-                mitigated = datetime.utcnow()
+                mitigated = datetime.datetime.now(datetime.UTC)
         else:
             mitigated = None
             is_Mitigated = False

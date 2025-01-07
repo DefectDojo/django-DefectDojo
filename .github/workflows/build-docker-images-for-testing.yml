@@ -49,8 +49,8 @@ jobs:
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
         timeout-minutes: 10
-        uses:  actions/upload-artifact@v3
+        uses:  actions/upload-artifact@v4
         with:
-          name: ${{ matrix.docker-image }}
+          name: built-docker-image-${{ matrix.docker-image }}-${{ matrix.os }}
           path: ${{ matrix.docker-image }}-${{ matrix.os }}_img
           retention-days: 1

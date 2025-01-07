@@ -307,7 +307,7 @@ def add_findings_to_auto_group(name, findings, group_by, create_finding_groups_f
     if name is not None and findings is not None and len(findings) > 0:
         creator = get_current_user()
         if not creator:
-            creator = kwargs.get("async_user", None)
+            creator = kwargs.get("async_user")
         test = findings[0].test
 
         if create_finding_groups_for_all_findings or len(findings) > 1:

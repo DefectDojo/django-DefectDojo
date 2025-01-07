@@ -109,8 +109,9 @@ def search_azure_groups(kwargs, token, soc):
                         + str(group_from_response)
                         + "?$select=displayName"
                     ),
-                    headers=request_headers,
-                )
+                        headers=request_headers,
+                        timeout=settings.REQUESTS_TIMEOUT,
+                    )
                 group_name_request.raise_for_status()
                 group_name_request_json = group_name_request.json()
                 group_name = group_name_request_json["displayName"]
@@ -136,9 +137,7 @@ def search_azure_groups(kwargs, token, soc):
 
 
 def is_group_id(group):
-    if re.search(r"^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$", group):
-        return True
-    return False
+    return bool(re.search("^[a-zA-Z0-9]{8,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{4,}-[a-zA-Z0-9]{12,}$", group))
 
 
 def assign_user_to_groups(user, group_names, social_provider):

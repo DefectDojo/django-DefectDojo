@@ -3,6 +3,7 @@ import os
 from importlib import import_module
 from importlib.util import find_spec
 from inspect import isclass
+from pathlib import Path
 
 from dojo.models import Test, Test_Type
 from dojo.tools.factory import get_parser
@@ -72,7 +73,7 @@ class TestFactory(DojoTestCase):
         for module_name in module_names:
             if module_name in excluded_parsers:
                 continue
-            if os.path.isdir(os.path.join(package_dir, module_name)):
+            if Path(os.path.join(package_dir, module_name)).is_dir():
                 found = False
                 if find_spec(f"dojo.tools.{module_name}.parser"):
                     module = import_module(f"dojo.tools.{module_name}.parser")

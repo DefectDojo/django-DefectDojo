@@ -1,9 +1,10 @@
 
 import operator
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from enum import Enum
 from functools import partial
-from typing import Any, Callable, NamedTuple, Type, TypeVar, Union
+from typing import Any, NamedTuple, TypeVar
 
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
@@ -34,7 +35,7 @@ from dojo.utils import (
 )
 
 
-def get_metrics_finding_filter_class() -> Type[Union[MetricsFindingFilter, MetricsFindingFilterWithoutObjectLookups]]:
+def get_metrics_finding_filter_class() -> type[MetricsFindingFilter | MetricsFindingFilterWithoutObjectLookups]:
     if get_system_setting("filter_string_matching", False):
         return MetricsFindingFilterWithoutObjectLookups
     return MetricsFindingFilter
@@ -108,8 +109,10 @@ def finding_queries(
     weekly_counts = query_counts_for_period(MetricsPeriod.WEEK, weeks_between)
 
     top_ten = get_authorized_products(Permissions.Product_View)
-    top_ten = top_ten.filter(engagement__test__finding__verified=True,
-                             engagement__test__finding__false_p=False,
+    if get_system_setting("enforce_verified_status", True):
+        top_ten = top_ten.filter(engagement__test__finding__verified=True)
+
+    top_ten = top_ten.filter(engagement__test__finding__false_p=False,
                              engagement__test__finding__duplicate=False,
                              engagement__test__finding__out_of_scope=False,
                              engagement__test__finding__mitigated__isnull=True,
@@ -257,7 +260,7 @@ class _MetricsPeriodEntry(NamedTuple):
     """
 
     datetime_name: str
-    db_method: Union[TruncWeek, TruncMonth]
+    db_method: TruncWeek | TruncMonth
 
 
 class MetricsPeriod(_MetricsPeriodEntry, Enum):
@@ -346,7 +349,7 @@ def severity_count(
     queryset: MetricsQuerySet,
     method: str,
     expression: str,
-) -> Union[MetricsQuerySet, dict[str, int]]:
+) -> MetricsQuerySet | dict[str, int]:
     """
     Aggregates counts by severity for the given queryset.
 
@@ -393,7 +396,7 @@ def identify_view(
 
 
 def js_epoch(
-    d: Union[date, datetime],
+    d: date | datetime,
 ) -> int:
     """
     Converts a date/datetime object to a JavaScript epoch time (for use in FE charts)

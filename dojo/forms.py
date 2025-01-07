@@ -4,6 +4,7 @@ import pickle
 import re
 import warnings
 from datetime import date, datetime
+from pathlib import Path
 
 import tagulous
 from crispy_forms.bootstrap import InlineCheckboxes, InlineRadios
@@ -189,10 +190,7 @@ class MonthYearWidget(Widget):
 
         output = []
 
-        if "id" in self.attrs:
-            id_ = self.attrs["id"]
-        else:
-            id_ = f"id_{name}"
+        id_ = self.attrs.get("id", f"id_{name}")
 
         month_choices = list(MONTHS.items())
         if not (self.required and value):
@@ -892,7 +890,8 @@ class UploadThreatForm(forms.Form):
 
     def clean(self):
         if (file := self.cleaned_data.get("file", None)) is not None:
-            ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+            path = Path(file.name)
+            ext = path.suffix
             valid_extensions = [".jpg", ".png", ".pdf"]
             if ext.lower() not in valid_extensions:
                 if accepted_extensions := f"{', '.join(valid_extensions)}":
@@ -1185,7 +1184,8 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
         for form in self.forms:
             file = form.cleaned_data.get("file", None)
             if file:
-                ext = os.path.splitext(file.name)[1]  # [0] returns path+filename
+                path = Path(file.name)
+                ext = path.suffix
                 valid_extensions = settings.FILE_UPLOAD_TYPES
                 if ext.lower() not in valid_extensions:
                     if accepted_extensions := f"{', '.join(valid_extensions)}":
@@ -1752,7 +1752,7 @@ class FindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue", "endpoint_status")
+                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue", "endpoint_status", "component")
 
 
 class StubFindingForm(forms.ModelForm):
@@ -2734,10 +2734,7 @@ def get_jira_issue_template_dir_choices():
         #     template_list.append((os.path.join(base_dir, filename), filename))
 
         for dirname in dirnames:
-            if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
-                clean_base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
-            else:
-                clean_base_dir = base_dir
+            clean_base_dir = base_dir.removeprefix(settings.TEMPLATE_DIR_PREFIX)
             template_dir_list.append((os.path.join(clean_base_dir, dirname), dirname))
 
     logger.debug("templates: %s", template_dir_list)
@@ -2871,7 +2868,7 @@ class ToolTypeForm(forms.ModelForm):
         exclude = ["product"]
 
     def __init__(self, *args, **kwargs):
-        instance = kwargs.get("instance", None)
+        instance = kwargs.get("instance")
         self.newly_created = True
         if instance is not None:
             self.newly_created = instance.pk is None
@@ -3423,7 +3420,7 @@ class JIRAFindingForm(forms.Form):
         elif self.cleaned_data.get("push_to_jira", None):
             active = self.finding_form["active"].value()
             verified = self.finding_form["verified"].value()
-            if not active or not verified:
+            if not active or (not verified and get_system_setting("enforce_verified_status", True)):
                 logger.debug("Findings must be active and verified to be pushed to JIRA")
                 error_message = "Findings must be active and verified to be pushed to JIRA"
                 self.add_error("push_to_jira", ValidationError(error_message, code="not_active_or_verified"))
@@ -3613,10 +3610,7 @@ class TextQuestionForm(QuestionForm):
             question=self.question,
         )
 
-        if initial_answer.exists():
-            initial_answer = initial_answer[0].answer
-        else:
-            initial_answer = ""
+        initial_answer = initial_answer[0].answer if initial_answer.exists() else ""
 
         self.fields["answer"] = forms.CharField(
             label=self.question.text,

@@ -57,7 +57,8 @@ function homepage_pie_chart(critical, high, medium, low, info) {
 function homepage_severity_plot(critical, high, medium, low) {
     var options = {
         xaxes: [{
-            mode: 'time'
+            mode: 'time',
+            minTickSize: [1, "month"]
         }],
         yaxes: [{
             min: 0

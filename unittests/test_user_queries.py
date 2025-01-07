@@ -91,4 +91,4 @@ class TestUserQueries(DojoTestCase):
         user_model = get_user_model()
         user = user_model._default_manager.create_user(username="test", password="pwd")
         query_function = get_all_user_by_role(user=user, role="Leader")
-        self.assertQuerysetEqual(users_leader, query_function)
+        self.assertQuerySetEqual(users_leader, query_function)

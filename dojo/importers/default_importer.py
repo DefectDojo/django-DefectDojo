@@ -1,14 +1,13 @@
 import logging
-from typing import List, Tuple
 
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.core.serializers import deserialize, serialize
 from django.db.models.query_utils import Q
+from django.urls import reverse
 
 import dojo.finding.helper as finding_helper
 from dojo.transfer_findings import helper as hp_transfer_finding
 import dojo.jira_link.helper as jira_helper
-import dojo.notifications.helper as notifications_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.importers.utils import get_or_create_component, encode_datetime, decode_datetime
@@ -19,6 +18,7 @@ from dojo.models import (
     Test_Import,
     System_Settings
 )
+from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -89,7 +89,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         scan: TemporaryUploadedFile,
         *args: list,
         **kwargs: dict,
-    ) -> Tuple[Test, int, int, int, int, int, Test_Import]:
+    ) -> tuple[Test, int, int, int, int, int, Test_Import]:
         """
         The full step process of taking a scan report, and converting it to
         findings in the database. This entails the the following actions:
@@ -130,9 +130,17 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         )
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
-        notifications_helper.notify_test_created(self.test)
+        create_notification(
+            event="test_added",
+            title=f"Test created for {self.test.engagement.product}: {self.test.engagement.name}: {self.test}",
+            test=self.test,
+            engagement=self.test.engagement,
+            product=self.test.engagement.product,
+            url=reverse("view_test", args=(self.test.id,)),
+            url_api=reverse("test-detail", args=(self.test.id,)),
+        )
         updated_count = len(new_findings) + len(closed_findings)
-        notifications_helper.notify_scan_added(
+        self.notify_scan_added(
             self.test,
             updated_count,
             new_findings=new_findings,
@@ -146,9 +154,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
     def process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Saves findings in memory that were parsed from the scan report into the database.
         This process involves first saving associated objects such as endpoints, files,
@@ -248,9 +256,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
     def close_old_findings(
         self,
-        findings: List[Finding],
+        findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Closes old findings based on a hash code match at either the product
         or the engagement scope. Closing an old finding entails setting the
@@ -331,7 +339,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Determine how to parse the findings based on the presence of the
         `get_tests` function on the parser object
@@ -349,7 +357,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Creates a test object as part of the import process as there is not one present
         at the time of import. Once the test is created, proceed with the traditional
@@ -365,7 +373,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         self,
         scan: TemporaryUploadedFile,
         parser: Parser,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Uses the parser to fetch any tests that may have been created
         by the API based parser, aggregates all findings from each test
@@ -408,9 +416,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
     def async_process_findings(
         self,
-        parsed_findings: List[Finding],
+        parsed_findings: list[Finding],
         **kwargs: dict,
-    ) -> List[Finding]:
+    ) -> list[Finding]:
         """
         Processes findings in chunks within N number of processes. The
         ASYNC_FINDING_IMPORT_CHUNK_SIZE setting will determine how many

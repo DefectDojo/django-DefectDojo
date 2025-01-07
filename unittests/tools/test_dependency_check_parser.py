@@ -1,6 +1,7 @@
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from os import path
+from pathlib import Path
 
 from dateutil.tz import tzlocal, tzoffset
 
@@ -255,7 +256,7 @@ class TestDependencyCheckParser(DojoTestCase):
 
     def test_parse_java_6_5_3(self):
         """Test with version 6.5.3"""
-        with open(path.join(path.dirname(__file__), "../scans/dependency_check/version-6.5.3.xml"), encoding="utf-8") as test_file:
+        with open(path.join(Path(__file__).parent, "../scans/dependency_check/version-6.5.3.xml"), encoding="utf-8") as test_file:
             parser = DependencyCheckParser()
             findings = parser.get_findings(test_file, Test())
             items = findings
@@ -271,7 +272,7 @@ class TestDependencyCheckParser(DojoTestCase):
                 )
                 self.assertEqual(items[i].severity, "Low")
                 self.assertEqual(items[i].file_path, "log4j-api-2.12.4.jar")
-                self.assertEqual(items[i].date, datetime(2022, 1, 15, 14, 31, 13, 42600, tzinfo=timezone.utc))
+                self.assertEqual(items[i].date, datetime(2022, 1, 15, 14, 31, 13, 42600, tzinfo=UTC))
 
     def test_parse_file_pr6439(self):
         with open("unittests/scans/dependency_check/PR6439.xml", encoding="utf-8") as testfile:
