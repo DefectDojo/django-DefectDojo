@@ -109,7 +109,7 @@
                                 {% endif %}
                                   {% include "dojo/snippets/tags.html" with tags=e.tags.all %}
                                 </td>
-                                {% if not product_tab %}
+                                {% if not product_tab and e.product %}
                                   <td>
                                     <a rel="noopener noreferrer" href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
                                     {% include "dojo/snippets/tags.html" with tags=e.product.tags.all %}

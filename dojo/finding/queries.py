@@ -44,10 +44,7 @@ def get_authorized_findings(permission, queryset=None, user=None):
         user = get_current_user()
     if user is None:
         return Finding.objects.none()
-    if queryset is None:
-        findings = Finding.objects.all().order_by("id")
-    else:
-        findings = queryset
+    findings = Finding.objects.all().order_by("id") if queryset is None else queryset
 
     if user.is_superuser:
         return findings
@@ -119,10 +116,7 @@ def get_authorized_vulnerability_ids(permission, queryset=None, user=None):
     if user is None:
         return Vulnerability_Id.objects.none()
 
-    if queryset is None:
-        vulnerability_ids = Vulnerability_Id.objects.all()
-    else:
-        vulnerability_ids = queryset
+    vulnerability_ids = Vulnerability_Id.objects.all() if queryset is None else queryset
 
     if user.is_superuser:
         return vulnerability_ids

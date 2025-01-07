@@ -63,10 +63,8 @@ class AsffParser:
             else:
                 mitigation = None
                 references = None
-            if item.get("RecordState") and item.get("RecordState") == "ACTIVE":
-                active = True
-            else:
-                active = False
+            active = bool(item.get("RecordState") and item.get("RecordState") == "ACTIVE")
+
             # Adding the Resources:0/Id value to the description.
             #
             # This is needed because every Finding in AWS from Security Hub has an

@@ -11,7 +11,7 @@ from django.views import View
 
 from dojo.forms import DeleteNotificationsWebhookForm, NotificationsForm, NotificationsWebhookForm
 from dojo.models import Notification_Webhooks, Notifications
-from dojo.notifications.helper import test_webhooks_notification
+from dojo.notifications.helper import NotificationManagerHelpers
 from dojo.utils import add_breadcrumb, get_enabled_notifications_list, get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -136,6 +136,9 @@ class TemplateNotificationsView(SystemNotificationsView):
 
 class NotificationWebhooksView(View):
 
+    def get_webhook_manager_instance(self) -> type[NotificationManagerHelpers]:
+        return Notification_Webhooks()
+
     def check_webhooks_enabled(self):
         if not get_system_setting("enable_webhooks_notifications"):
             raise Http404
@@ -216,7 +219,7 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
         form = context["form"]
         if form.is_valid():
             try:
-                test_webhooks_notification(form.instance)
+                self.get_webhook_manager_instance().test_webhooks_notification(form.instance)
             except requests.exceptions.RequestException as e:
                 messages.add_message(
                     request,
@@ -305,7 +308,7 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
 
         if form.is_valid():
             try:
-                test_webhooks_notification(form.instance)
+                self.get_webhook_manager_instance().test_webhooks_notification(form.instance)
             except requests.exceptions.RequestException as e:
                 messages.add_message(
                     request,

@@ -1,4 +1,5 @@
 from os import path
+from pathlib import Path
 
 from dojo.models import Test
 from dojo.tools.sslyze.parser import SslyzeParser
@@ -7,19 +8,19 @@ from unittests.dojo_test_case import DojoTestCase
 
 class TestSslyzeJSONParser(DojoTestCase):
     def test_parse_json_file_with_one_target_has_zero_vuln_old(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_zero_vuln_old.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/one_target_zero_vuln_old.json"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_json_file_issue_9848(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/issue_9848.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/issue_9848.json"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
 
     def test_parse_json_file_with_one_target_has_one_vuln_old(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_one_vuln_old.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/one_target_one_vuln_old.json"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -41,7 +42,7 @@ class TestSslyzeJSONParser(DojoTestCase):
             self.assertEqual(443, endpoint.port)
 
     def test_parse_json_file_with_one_target_has_four_vuln_old(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_many_vuln_old.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/one_target_many_vuln_old.json"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -54,20 +55,20 @@ class TestSslyzeJSONParser(DojoTestCase):
             self.assertEqual("CVE-2014-0224", findings[1].unsaved_vulnerability_ids[0])
 
     def test_parse_json_file_with_two_target_has_many_vuln_old(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/two_targets_two_vuln_old.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/two_targets_two_vuln_old.json"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
 
             self.assertEqual(2, len(findings))
 
     def test_parse_json_file_with_one_target_has_zero_vuln_new(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_zero_vuln_new.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/one_target_zero_vuln_new.json"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_parse_json_file_with_one_target_has_one_vuln_new(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_one_vuln_new.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/one_target_one_vuln_new.json"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
 
@@ -104,13 +105,13 @@ class TestSslyzeJSONParser(DojoTestCase):
             self.assertEqual(443, endpoint.port)
 
     def test_parse_json_file_with_one_target_has_three_vuln_new(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/one_target_many_vuln_new.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/one_target_many_vuln_new.json"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
 
     def test_parse_json_file_with_two_target_has_many_vuln_new(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/two_targets_many_vuln_new.json"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/two_targets_many_vuln_new.json"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(5, len(findings))
@@ -159,7 +160,7 @@ class TestSslyzeJSONParser(DojoTestCase):
 
 class TestSSLyzeXMLParser(DojoTestCase):
     def test_parse_file_with_one_target_has_three_vuln(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/report_one_target_three_vuln.xml"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/report_one_target_three_vuln.xml"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -168,7 +169,7 @@ class TestSSLyzeXMLParser(DojoTestCase):
             self.assertEqual(3, len(findings))
 
     def test_parse_xml_file_with_one_target_has_one_vuln(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/report_one_target_one_vuln.xml"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/report_one_target_one_vuln.xml"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -177,7 +178,7 @@ class TestSSLyzeXMLParser(DojoTestCase):
             self.assertEqual(1, len(findings))
 
     def test_parse_xml_file_with_one_target_has_three_vuln(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/report_one_target_three_vuln.xml"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/report_one_target_three_vuln.xml"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:
@@ -186,7 +187,7 @@ class TestSSLyzeXMLParser(DojoTestCase):
             self.assertEqual(3, len(findings))
 
     def test_parse_xml_file_with_two_target_has_many_vuln(self):
-        with open(path.join(path.dirname(__file__), "../scans/sslyze/report_two_target_many_vuln.xml"), encoding="utf-8") as testfile:
+        with open(path.join(Path(__file__).parent, "../scans/sslyze/report_two_target_many_vuln.xml"), encoding="utf-8") as testfile:
             parser = SslyzeParser()
             findings = parser.get_findings(testfile, Test())
             for finding in findings:

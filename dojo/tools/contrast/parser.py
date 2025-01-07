@@ -41,9 +41,7 @@ class ContrastParser:
             severity = row.get("Severity")
             if severity == "Note":
                 severity = "Info"
-            date_raw = datetime.datetime.utcfromtimestamp(
-                int(row.get("First Seen")) / 1000,
-            )
+            date_raw = datetime.datetime.fromtimestamp(int(row.get("First Seen")) / 1000, datetime.UTC)
             finding = Finding(
                 title=title.split(" from")[0],
                 date=date_raw,
@@ -60,7 +58,7 @@ class ContrastParser:
             finding.unsaved_endpoints = []
             if row.get("Request URI"):
                 endpoint = Endpoint(
-                    host="0.0.0.0",
+                    host="0.0.0.0",  # noqa: S104
                     path=row.get("Request URI"),
                     protocol=row.get("Request Protocol"),
                 )

@@ -327,20 +327,16 @@ def get_item(vulnerability, test, packageTree):
         else "Info"
     )
     vector = (
-        vulnerability["vector"]
-        if "vector" in vulnerability
-        else "CVSS vector not provided. "
+        vulnerability.get("vector", "CVSS vector not provided. ")
     )
     status = (
-        vulnerability["status"]
-        if "status" in vulnerability
-        else "There seems to be no fix yet. Please check description field."
+        vulnerability.get("status", "There seems to be no fix yet. Please check description field.")
     )
-    cvss = vulnerability["cvss"] if "cvss" in vulnerability else "No CVSS score yet."
+    cvss = (
+        vulnerability.get("cvss", "No CVSS score yet.")
+    )
     riskFactors = (
-        vulnerability["riskFactors"]
-        if "riskFactors" in vulnerability
-        else "No risk factors."
+        vulnerability.get("riskFactors", "No risk factors.")
     )
     for package in packageTree:
         if package["name"] == vulnerability["packageName"] and package["version"] == vulnerability["packageVersion"]:
@@ -408,19 +404,9 @@ def convert_severity(severity):
         return "High"
     if severity.lower() == "moderate":
         return "Medium"
-    if severity.lower() == "unimportant":
+    if severity.lower() in ["unimportant", "unassigned", "negligible", "not yet assigned"]:
         return "Low"
-    if severity.lower() == "unassigned":
-        return "Low"
-    if severity.lower() == "negligible":
-        return "Low"
-    if severity.lower() == "not yet assigned":
-        return "Low"
-    if severity.lower() == "information":
-        return "Info"
-    if severity.lower() == "informational":
-        return "Info"
-    if severity == "":
+    if severity.lower() in ["information", "informational", ""]:
         return "Info"
     return severity.title()
 

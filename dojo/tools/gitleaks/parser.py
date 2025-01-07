@@ -106,10 +106,7 @@ class GitleaksParser:
     def get_finding_current(self, issue, test, dupes):
         reason = issue.get("Description")
         line = issue.get("StartLine")
-        if line:
-            line = int(line)
-        else:
-            line = 0
+        line = int(line) if line else 0
         #dont need match for security
         #match = issue.get("Match")
         secret = issue.get("Secret")

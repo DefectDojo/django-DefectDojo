@@ -15,7 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 class TenableCSVParser:
     def _validated_severity(self, severity):
-        if severity not in Finding.SEVERITIES.keys():
+        if severity not in Finding.SEVERITIES:
             severity = "Info"
         return severity
 
@@ -188,6 +188,9 @@ class TenableCSVParser:
             mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
             impact = row.get("Description", row.get("definition.description", "N/A"))
             references = row.get("See Also", row.get("definition.see_also", "N/A"))
+            references += "\nTenable Plugin ID: " + row.get("Plugin", "N/A")
+            references += "\nPlugin Publication Date: " + row.get("Plugin Publication Date", "N/A")
+            references += "\nPlugin Modification Date: " + row.get("Plugin Modification Date", "N/A")
             # Determine if the current row has already been processed
             dupe_key = (
                 severity
@@ -275,10 +278,7 @@ class TenableCSVParser:
             if isinstance(port, str) and port in ["", "0"]:
                 port = None
             # Update the endpoints
-            if "://" in host:
-                endpoint = Endpoint.from_uri(host)
-            else:
-                endpoint = Endpoint(protocol=protocol, host=host, port=port)
+            endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(protocol=protocol, host=host, port=port)
             # Add the list to be processed later
             find.unsaved_endpoints.append(endpoint)
 

@@ -55,10 +55,7 @@ def get_component_name_version(name):
 
 def get_severity(vulnerability):
     if "severity" in vulnerability:
-        if vulnerability["severity"] == "Unknown":
-            severity = "Info"
-        else:
-            severity = vulnerability["severity"].title()
+        severity = "Info" if vulnerability["severity"] == "Unknown" else vulnerability["severity"].title()
     else:
         severity = "Info"
     return severity
@@ -149,8 +146,7 @@ def get_vuln_id_from_tool(vulnerability):
 
 
 def clean_title(title):
-    if title.startswith("Issue summary: "):
-        title = title[len("Issue summary: "):]
+    title = title.removeprefix("Issue summary: ")
     if "\n" in title:
         title = title[:title.index("\n")]
     return title
