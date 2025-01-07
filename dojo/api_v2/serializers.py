@@ -3161,4 +3161,4 @@ class NotificationWebhooksSerializer(serializers.ModelSerializer):
 class FindingExclusionSerializer(serializers.ModelSerializer):
     class Meta:
         model = FindingExclusion
-        fields = ["uuid", "unique_id_from_tool", "type", "create_date"]
+        fields = ["uuid", "unique_id_from_tool", "type", "create_date", "expiration_date"]
