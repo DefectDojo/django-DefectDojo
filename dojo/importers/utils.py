@@ -21,6 +21,9 @@ from dojo.models import (
 )
 import json
 import logging
+import json
+import dateutil
+import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -283,3 +286,13 @@ def get_or_create_component(name, version, engagement):
     )
 
     return component
+
+def encode_datetime(finding):
+    finding.date = parse_date_field(finding.date)
+    finding.publish_date = parse_date_field(finding.publish_date)
+    return finding
+
+def parse_date_field(date_field):
+    if date_field and not isinstance(date_field, datetime.date):
+        return dateutil.parser.parse(date_field)
+    return date_field

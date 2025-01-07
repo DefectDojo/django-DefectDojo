@@ -1,6 +1,7 @@
 # #  product
 import base64
 import calendar as tcalendar
+import contextlib
 import logging
 from collections import OrderedDict
 from datetime import date, datetime, timedelta
@@ -355,9 +356,7 @@ def identify_view(request):
             return view
         msg = 'invalid view, view must be "Endpoint" or "Finding"'
         raise ValueError(msg)
-    if get_data.get("finding__severity", None):
-        return "Endpoint"
-    if get_data.get("false_positive", None):
+    if get_data.get("finding__severity", None) or get_data.get("false_positive", None):
         return "Endpoint"
     referer = request.META.get("HTTP_REFERER", None)
     if referer:
@@ -614,13 +613,11 @@ def view_product_metrics(request, pid):
                 open_close_weekly[unix_timestamp] = {"closed": 0, "open": 1, "accepted": 0}
                 open_close_weekly[unix_timestamp]["week"] = html_date
 
-            if view == "Finding":
-                severity = finding.get("severity")
-            elif view == "Endpoint":
+            if view == "Finding" or view == "Endpoint":
                 severity = finding.get("severity")
 
             finding_age = calculate_finding_age(finding)
-            if open_objs_by_age.get(finding_age, None):
+            if open_objs_by_age.get(finding_age):
                 open_objs_by_age[finding_age] += 1
             else:
                 open_objs_by_age[finding_age] = 1
@@ -916,10 +913,7 @@ def new_product(request, ptid=None):
         if get_system_setting("enable_jira"):
             jira_project_form = JIRAProjectForm()
 
-        if get_system_setting("enable_github"):
-            gform = GITHUB_Product_Form()
-        else:
-            gform = None
+        gform = GITHUB_Product_Form() if get_system_setting("enable_github") else None
 
     add_breadcrumb(title=_("New Product"), top_level=False, request=request)
     return render(request, "dojo/new_product.html",
@@ -966,10 +960,8 @@ def edit_product(request, pid):
             if get_system_setting("enable_github") and github_inst:
                 gform = GITHUB_Product_Form(request.POST, instance=github_inst)
                 # need to handle delete
-                try:
+                with contextlib.suppress(Exception):
                     gform.save()
-                except:
-                    pass
             elif get_system_setting("enable_github"):
                 gform = GITHUB_Product_Form(request.POST)
                 if gform.is_valid():
@@ -993,10 +985,7 @@ def edit_product(request, pid):
             jform = None
 
         if github_enabled:
-            if github_inst is not None:
-                gform = GITHUB_Product_Form(instance=github_inst)
-            else:
-                gform = GITHUB_Product_Form()
+            gform = GITHUB_Product_Form(instance=github_inst) if github_inst is not None else GITHUB_Product_Form()
         else:
             gform = None
 
@@ -1126,10 +1115,7 @@ def new_eng_for_app(request, pid, cicd=False):
             logger.debug("showing jira-epic-form")
             jira_epic_form = JIRAEngagementForm()
 
-    if cicd:
-        title = _("New CI/CD Engagement")
-    else:
-        title = _("New Interactive Engagement")
+    title = _("New CI/CD Engagement") if cicd else _("New Interactive Engagement")
 
     product_tab = Product_Tab(product, title=title, tab="engagements")
     return render(request, "dojo/new_eng.html", {

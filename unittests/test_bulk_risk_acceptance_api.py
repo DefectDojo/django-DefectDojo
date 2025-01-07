@@ -29,25 +29,25 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         cls.product = Product.objects.create(prod_type=cls.product_type, name="Flopper", description="Test product")
         Product_Type_Member.objects.create(product_type=cls.product_type, user=cls.user, role=Role.objects.get(id=Roles.Owner))
         cls.product_2 = Product.objects.create(prod_type=cls.product_type, name="Flopper2", description="Test product2")
-        cls.engagement = Engagement.objects.create(product=cls.product, target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc),
-                                                   target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.timezone.utc))
-        cls.engagement_2a = Engagement.objects.create(product=cls.product_2, target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc),
-                                                   target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.timezone.utc))
-        cls.engagement_2b = Engagement.objects.create(product=cls.product_2, target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc),
-                                                   target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.timezone.utc))
+        cls.engagement = Engagement.objects.create(product=cls.product, target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
+                                                   target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC))
+        cls.engagement_2a = Engagement.objects.create(product=cls.product_2, target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
+                                                   target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC))
+        cls.engagement_2b = Engagement.objects.create(product=cls.product_2, target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC),
+                                                   target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC))
 
         cls.test_type = Test_Type.objects.create(name="Risk Acceptance Mock Scan", static_tool=True)
         cls.test_a = Test.objects.create(engagement=cls.engagement, test_type=cls.test_type,
-                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.timezone.utc))
+                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC))
         cls.test_b = Test.objects.create(engagement=cls.engagement, test_type=cls.test_type,
-                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.timezone.utc))
+                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC))
         cls.test_c = Test.objects.create(engagement=cls.engagement, test_type=cls.test_type,
-                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.timezone.utc))
+                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC))
 
         cls.test_d = Test.objects.create(engagement=cls.engagement_2a, test_type=cls.test_type,
-                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.timezone.utc))
+                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC))
         cls.test_e = Test.objects.create(engagement=cls.engagement_2b, test_type=cls.test_type,
-                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.timezone.utc))
+                                         target_start=datetime.datetime(2000, 1, 1, tzinfo=datetime.UTC), target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC))
 
         def create_finding(test: Test, reporter: User, cve: str) -> Finding:
             return Finding(test=test, title=f"Finding {cve}", cve=cve, severity="High", verified=True,

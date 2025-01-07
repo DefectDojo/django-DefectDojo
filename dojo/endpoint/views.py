@@ -61,10 +61,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
-    if vulnerable:
-        view_name = "Vulnerable"
-    else:
-        view_name = "All"
+    view_name = "Vulnerable" if vulnerable else "All"
 
     if host_view:
         view_name += " Hosts"

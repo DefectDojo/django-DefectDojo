@@ -140,10 +140,7 @@ class CheckmarxParser:
             query, result,
         )
         sinkFilename = lastPathnode.find("FileName").text
-        if sinkFilename:
-            title = "{} ({})".format(titleStart, sinkFilename.split("/")[-1])
-        else:
-            title = titleStart
+        title = "{} ({})".format(titleStart, sinkFilename.split("/")[-1]) if sinkFilename else titleStart
         false_p = result.get("FalsePositive")
         sev = result.get("Severity")
         aggregateKeys = f"{cwe}{sev}{sinkFilename}"
@@ -368,7 +365,7 @@ class CheckmarxParser:
         if isinstance(value, str):
             return parser.parse(value).date()
         if isinstance(value, dict) and isinstance(value.get("seconds"), int):
-            return datetime.datetime.utcfromtimestamp(value.get("seconds")).date()
+            return datetime.datetime.fromtimestamp(value.get("seconds"), datetime.UTC).date()
         return None
 
     def _get_findings_json(self, file, test):

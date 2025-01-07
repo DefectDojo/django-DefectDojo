@@ -384,6 +384,11 @@
                                     <th>
                                         {% trans "Planned Remediation" %}
                                     </th>
+                                    {% if filter_name != 'Closed' %}
+                                        <th>
+                                            {% trans "Reviewers" %}
+                                        </th>
+                                    {% endif %}
                                 {% endblock header %}
                             </tr>
                         </thead>
@@ -721,6 +726,16 @@
                                             <td class="nowrap">
                                                 {% if finding.planned_remediation_date %}{{ finding.planned_remediation_date }}{% endif %}
                                             </td>
+                                            {% if filter_name != 'Closed' %}
+                                            <td class="nowrap">
+                                                {% if finding.reviewers %}
+                                                    {% for reviewer in finding.reviewers.all %}
+                                                        {{reviewer.get_full_name}}
+                                                        {% if not forloop.last %}<br>{% endif %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
                                         {% endblock body %}
                                     </tr>
                             {% endfor %}
@@ -801,6 +816,9 @@
                 {% endif %}
                 { "data": "service" },
                 { "data": "planned_remediation_date" },
+                {% if filter_name != 'Closed' %}
+                    { "data": "reviewers" },
+                {% endif %}
             ];
         {% endblock datatables_columns %}
     </script>

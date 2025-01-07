@@ -119,7 +119,7 @@ def metrics(request, mtype):
     punchcard = []
     ticks = []
 
-    if "view" in request.GET and "dashboard" == request.GET["view"]:
+    if "view" in request.GET and request.GET["view"] == "dashboard":
         punchcard, ticks = get_punchcard_data(all_findings, filters["start_date"], filters["weeks_between"], view)
         page_name = _("%(team_name)s Metrics") % {"team_name": get_system_setting("team_name")}
         template = "dojo/dashboard-metrics.html"
@@ -191,13 +191,17 @@ def simple_metrics(request):
         findings_broken_out = {}
 
         total = Finding.objects.filter(test__engagement__product__prod_type=pt,
-                                       verified=True,
                                        false_p=False,
                                        duplicate=False,
                                        out_of_scope=False,
                                        date__month=now.month,
                                        date__year=now.year,
-                                       ).distinct()
+                                       )
+
+        if get_system_setting("enforce_verified_status", True):
+            total = total.filter(verified=True)
+
+        total = total.distinct()
 
         for f in total:
             if f.severity == "Critical":
@@ -355,53 +359,99 @@ def product_type_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))["total"]
 
-            overall_in_pt = Finding.objects.filter(date__lt=end_date,
-                                                   verified=True,
-                                                   false_p=False,
-                                                   duplicate=False,
-                                                   out_of_scope=False,
-                                                   mitigated__isnull=True,
-                                                   test__engagement__product__prod_type=pt,
-                                                   severity__in=("Critical", "High", "Medium", "Low")).values(
-                "numerical_severity").annotate(Count("numerical_severity")).order_by("numerical_severity")
+            if get_system_setting("enforce_verified_status", True):
+                overall_in_pt = Finding.objects.filter(date__lt=end_date,
+                                                    verified=True,
+                                                    false_p=False,
+                                                    duplicate=False,
+                                                    out_of_scope=False,
+                                                    mitigated__isnull=True,
+                                                    test__engagement__product__prod_type=pt,
+                                                    severity__in=("Critical", "High", "Medium", "Low")).values(
+                    "numerical_severity").annotate(Count("numerical_severity")).order_by("numerical_severity")
 
-            total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                         verified=True,
-                                                         false_p=False,
-                                                         duplicate=False,
-                                                         out_of_scope=False,
-                                                         mitigated__isnull=True,
-                                                         test__engagement__product__prod_type=pt,
-                                                         severity__in=("Critical", "High", "Medium", "Low")).aggregate(
-                total=Sum(
-                    Case(When(severity__in=("Critical", "High", "Medium", "Low"),
-                              then=Value(1)),
-                         output_field=IntegerField())))["total"]
+                total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                            verified=True,
+                                                            false_p=False,
+                                                            duplicate=False,
+                                                            out_of_scope=False,
+                                                            mitigated__isnull=True,
+                                                            test__engagement__product__prod_type=pt,
+                                                            severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(When(severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"]
 
-            all_current_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                       verified=True,
-                                                       false_p=False,
-                                                       duplicate=False,
-                                                       out_of_scope=False,
-                                                       mitigated__isnull=True,
-                                                       test__engagement__product__prod_type=pt,
-                                                       severity__in=(
-                                                           "Critical", "High", "Medium", "Low")).prefetch_related(
-                "test__engagement__product",
-                "test__engagement__product__prod_type",
-                "test__engagement__risk_acceptance",
-                "reporter").order_by(
-                "numerical_severity")
+                all_current_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                        verified=True,
+                                                        false_p=False,
+                                                        duplicate=False,
+                                                        out_of_scope=False,
+                                                        mitigated__isnull=True,
+                                                        test__engagement__product__prod_type=pt,
+                                                        severity__in=(
+                                                            "Critical", "High", "Medium", "Low")).prefetch_related(
+                    "test__engagement__product",
+                    "test__engagement__product__prod_type",
+                    "test__engagement__risk_acceptance",
+                    "reporter").order_by(
+                    "numerical_severity")
 
-            top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                             engagement__test__finding__verified=True,
-                                             engagement__test__finding__false_p=False,
-                                             engagement__test__finding__duplicate=False,
-                                             engagement__test__finding__out_of_scope=False,
-                                             engagement__test__finding__mitigated__isnull=True,
-                                             engagement__test__finding__severity__in=(
-                                                 "Critical", "High", "Medium", "Low"),
-                                             prod_type=pt)
+                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
+                                                engagement__test__finding__verified=True,
+                                                engagement__test__finding__false_p=False,
+                                                engagement__test__finding__duplicate=False,
+                                                engagement__test__finding__out_of_scope=False,
+                                                engagement__test__finding__mitigated__isnull=True,
+                                                engagement__test__finding__severity__in=(
+                                                    "Critical", "High", "Medium", "Low"),
+                                                prod_type=pt)
+            else:
+                overall_in_pt = Finding.objects.filter(date__lt=end_date,
+                                                    false_p=False,
+                                                    duplicate=False,
+                                                    out_of_scope=False,
+                                                    mitigated__isnull=True,
+                                                    test__engagement__product__prod_type=pt,
+                                                    severity__in=("Critical", "High", "Medium", "Low")).values(
+                    "numerical_severity").annotate(Count("numerical_severity")).order_by("numerical_severity")
+
+                total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                            false_p=False,
+                                                            duplicate=False,
+                                                            out_of_scope=False,
+                                                            mitigated__isnull=True,
+                                                            test__engagement__product__prod_type=pt,
+                                                            severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(When(severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"]
+
+                all_current_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                        false_p=False,
+                                                        duplicate=False,
+                                                        out_of_scope=False,
+                                                        mitigated__isnull=True,
+                                                        test__engagement__product__prod_type=pt,
+                                                        severity__in=(
+                                                            "Critical", "High", "Medium", "Low")).prefetch_related(
+                    "test__engagement__product",
+                    "test__engagement__product__prod_type",
+                    "test__engagement__risk_acceptance",
+                    "reporter").order_by(
+                    "numerical_severity")
+
+                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
+                                                engagement__test__finding__false_p=False,
+                                                engagement__test__finding__duplicate=False,
+                                                engagement__test__finding__out_of_scope=False,
+                                                engagement__test__finding__mitigated__isnull=True,
+                                                engagement__test__finding__severity__in=(
+                                                    "Critical", "High", "Medium", "Low"),
+                                                prod_type=pt)
+
             top_ten = severity_count(top_ten, "annotate", "engagement__test__finding__severity").order_by("-critical", "-high", "-medium", "-low")[:10]
 
             cip = {"S0": 0,
@@ -510,56 +560,105 @@ def product_tag_counts(request):
                               then=Value(1)),
                          output_field=IntegerField())))["total"]
 
-            overall_in_pt = Finding.objects.filter(date__lt=end_date,
-                                                   verified=True,
-                                                   false_p=False,
-                                                   duplicate=False,
-                                                   out_of_scope=False,
-                                                   mitigated__isnull=True,
-                                                   test__engagement__product__tags__name=pt,
-                                                   test__engagement__product__in=prods,
-                                                   severity__in=("Critical", "High", "Medium", "Low")).values(
-                "numerical_severity").annotate(Count("numerical_severity")).order_by("numerical_severity")
+            if get_system_setting("enforce_verified_status", True):
+                overall_in_pt = Finding.objects.filter(date__lt=end_date,
+                                                    verified=True,
+                                                    false_p=False,
+                                                    duplicate=False,
+                                                    out_of_scope=False,
+                                                    mitigated__isnull=True,
+                                                    test__engagement__product__tags__name=pt,
+                                                    test__engagement__product__in=prods,
+                                                    severity__in=("Critical", "High", "Medium", "Low")).values(
+                    "numerical_severity").annotate(Count("numerical_severity")).order_by("numerical_severity")
 
-            total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                         verified=True,
-                                                         false_p=False,
-                                                         duplicate=False,
-                                                         out_of_scope=False,
-                                                         mitigated__isnull=True,
-                                                         test__engagement__product__tags__name=pt,
-                                                         test__engagement__product__in=prods,
-                                                         severity__in=("Critical", "High", "Medium", "Low")).aggregate(
-                total=Sum(
-                    Case(When(severity__in=("Critical", "High", "Medium", "Low"),
-                              then=Value(1)),
-                         output_field=IntegerField())))["total"]
+                total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                            verified=True,
+                                                            false_p=False,
+                                                            duplicate=False,
+                                                            out_of_scope=False,
+                                                            mitigated__isnull=True,
+                                                            test__engagement__product__tags__name=pt,
+                                                            test__engagement__product__in=prods,
+                                                            severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(When(severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"]
 
-            all_current_in_pt = Finding.objects.filter(date__lte=end_date,
-                                                       verified=True,
-                                                       false_p=False,
-                                                       duplicate=False,
-                                                       out_of_scope=False,
-                                                       mitigated__isnull=True,
-                                                       test__engagement__product__tags__name=pt,
-                                                       test__engagement__product__in=prods,
-                                                       severity__in=(
-                                                           "Critical", "High", "Medium", "Low")).prefetch_related(
-                "test__engagement__product",
-                "test__engagement__product__prod_type",
-                "test__engagement__risk_acceptance",
-                "reporter").order_by(
-                "numerical_severity")
+                all_current_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                        verified=True,
+                                                        false_p=False,
+                                                        duplicate=False,
+                                                        out_of_scope=False,
+                                                        mitigated__isnull=True,
+                                                        test__engagement__product__tags__name=pt,
+                                                        test__engagement__product__in=prods,
+                                                        severity__in=(
+                                                            "Critical", "High", "Medium", "Low")).prefetch_related(
+                    "test__engagement__product",
+                    "test__engagement__product__prod_type",
+                    "test__engagement__risk_acceptance",
+                    "reporter").order_by(
+                    "numerical_severity")
 
-            top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
-                                             engagement__test__finding__verified=True,
-                                             engagement__test__finding__false_p=False,
-                                             engagement__test__finding__duplicate=False,
-                                             engagement__test__finding__out_of_scope=False,
-                                             engagement__test__finding__mitigated__isnull=True,
-                                             engagement__test__finding__severity__in=(
-                                                 "Critical", "High", "Medium", "Low"),
-                                             tags__name=pt, engagement__product__in=prods)
+                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
+                                                engagement__test__finding__verified=True,
+                                                engagement__test__finding__false_p=False,
+                                                engagement__test__finding__duplicate=False,
+                                                engagement__test__finding__out_of_scope=False,
+                                                engagement__test__finding__mitigated__isnull=True,
+                                                engagement__test__finding__severity__in=(
+                                                    "Critical", "High", "Medium", "Low"),
+                                                tags__name=pt, engagement__product__in=prods)
+            else:
+                overall_in_pt = Finding.objects.filter(date__lt=end_date,
+                                                    false_p=False,
+                                                    duplicate=False,
+                                                    out_of_scope=False,
+                                                    mitigated__isnull=True,
+                                                    test__engagement__product__tags__name=pt,
+                                                    test__engagement__product__in=prods,
+                                                    severity__in=("Critical", "High", "Medium", "Low")).values(
+                    "numerical_severity").annotate(Count("numerical_severity")).order_by("numerical_severity")
+
+                total_overall_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                            false_p=False,
+                                                            duplicate=False,
+                                                            out_of_scope=False,
+                                                            mitigated__isnull=True,
+                                                            test__engagement__product__tags__name=pt,
+                                                            test__engagement__product__in=prods,
+                                                            severity__in=("Critical", "High", "Medium", "Low")).aggregate(
+                    total=Sum(
+                        Case(When(severity__in=("Critical", "High", "Medium", "Low"),
+                                then=Value(1)),
+                            output_field=IntegerField())))["total"]
+
+                all_current_in_pt = Finding.objects.filter(date__lte=end_date,
+                                                        false_p=False,
+                                                        duplicate=False,
+                                                        out_of_scope=False,
+                                                        mitigated__isnull=True,
+                                                        test__engagement__product__tags__name=pt,
+                                                        test__engagement__product__in=prods,
+                                                        severity__in=(
+                                                            "Critical", "High", "Medium", "Low")).prefetch_related(
+                    "test__engagement__product",
+                    "test__engagement__product__prod_type",
+                    "test__engagement__risk_acceptance",
+                    "reporter").order_by(
+                    "numerical_severity")
+
+                top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
+                                                engagement__test__finding__false_p=False,
+                                                engagement__test__finding__duplicate=False,
+                                                engagement__test__finding__out_of_scope=False,
+                                                engagement__test__finding__mitigated__isnull=True,
+                                                engagement__test__finding__severity__in=(
+                                                    "Critical", "High", "Medium", "Low"),
+                                                tags__name=pt, engagement__product__in=prods)
+
             top_ten = severity_count(top_ten, "annotate", "engagement__test__finding__severity").order_by("-critical", "-high", "-medium", "-low")[:10]
 
             cip = {"S0": 0,
@@ -637,7 +736,11 @@ def view_engineer(request, eid):
         raise PermissionDenied
     now = timezone.now()
 
-    findings = Finding.objects.filter(reporter=user, verified=True)
+    if get_system_setting("enforce_verified_status", True):
+        findings = Finding.objects.filter(reporter=user, verified=True)
+    else:
+        findings = Finding.objects.filter(reporter=user)
+
     closed_findings = Finding.objects.filter(mitigated_by=user)
     open_findings = findings.exclude(mitigated__isnull=False)
     open_month = findings.filter(date__year=now.year, date__month=now.month)

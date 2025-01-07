@@ -4,8 +4,8 @@ import re
 import zipfile
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .model import BlackduckFinding
 
@@ -76,10 +76,7 @@ class BlackduckImporter(Importer):
                     file_entry_dict = dict(file_entry)
                     path = file_entry_dict.get("Path")
                     archive_context = file_entry_dict.get("Archive context")
-                    if archive_context:
-                        full_path = f"{archive_context}{path[1:]}"
-                    else:
-                        full_path = path
+                    full_path = f"{archive_context}{path[1:]}" if archive_context else path
 
                     # 4000 character limit on this field
                     total_len = len(full_path)
@@ -125,10 +122,7 @@ class BlackduckImporter(Importer):
         findings = defaultdict(set)
         # Backwards compatibility. Newer versions of Blackduck use Component
         # id.
-        if "Project id" in records.fieldnames:
-            key = "Project id"
-        else:
-            key = "Component id"
+        key = "Project id" if "Project id" in records.fieldnames else "Component id"
         for record in records:
             findings[record.get(key)].add(frozenset(record.items()))
         return findings

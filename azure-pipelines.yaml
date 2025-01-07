@@ -75,7 +75,7 @@ steps:
       coverage xml
     displayName: "Unit test"
 
-  - task: SonarQubePrepare@6
+  - task: SonarQubePrepare@7
     displayName: "Prepare analysis on SonarQube"
     inputs:
       SonarQube: SonarQube
@@ -89,11 +89,11 @@ steps:
         sonar.sources=dojo
         sonar.tests=unittests
         sonar.python.coverage.reportPaths=*coverage.xml
-        sonar.exclusions=**/dojo/db_migrations/**,**/dojo/management/**,**/dojo/static/dojo/js/**,/dojo/settings/unittest.py,**/dojo/templates/notifications/**
+        sonar.exclusions=**/dojo/db_migrations/**,**/dojo/management/**,**/dojo/static/dojo/js/**,/dojo/settings/unittest.py,**/dojo/templates/notifications/**,**/unittests/**
         sonar.language=py
         sonar.python.version=3.10
 
-  - task: SonarQubeAnalyze@6
+  - task: SonarQubeAnalyze@7
     displayName: "Run Code Analysis"
 
   - task: sonar-buildbreaker@8

@@ -44,18 +44,18 @@ class JFrogXrayOnDemandBinaryScanParser:
 
 
 def get_component_name_version(name):
-    match = re.match(r"[a-z]+://([a-z\d\.\-\/:]+):([a-z\d\.\-].+)", name, re.IGNORECASE)
+    match = re.match(r"[a-z]+://([a-z\d\.\-\/:@]+):([a-z\d\.\-].+)", name, re.IGNORECASE)
     if match is None:
+        match2 = re.match(r"^(.*):([a-z\d\.\-].+)", name, re.IGNORECASE)
+        if match2 is not None:
+            return match[1].replace(":", "_"), match[2]
         return name.replace(":", "_"), ""
     return match[1].replace(":", "_"), match[2]
 
 
 def get_severity(vulnerability):
     if "severity" in vulnerability:
-        if vulnerability["severity"] == "Unknown":
-            severity = "Info"
-        else:
-            severity = vulnerability["severity"].title()
+        severity = "Info" if vulnerability["severity"] == "Unknown" else vulnerability["severity"].title()
     else:
         severity = "Info"
     return severity
@@ -146,8 +146,7 @@ def get_vuln_id_from_tool(vulnerability):
 
 
 def clean_title(title):
-    if title.startswith("Issue summary: "):
-        title = title[len("Issue summary: "):]
+    title = title.removeprefix("Issue summary: ")
     if "\n" in title:
         title = title[:title.index("\n")]
     return title

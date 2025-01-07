@@ -37,9 +37,9 @@ class MSDefenderParser:
             vulnerabilityfiles = []
             machinefiles = []
             for content in list(zipdata):
-                if "vulnerabilities/" in content and "vulnerabilities/" != content:
+                if "vulnerabilities/" in content and content != "vulnerabilities/":
                     vulnerabilityfiles.append(content)
-                if "machines/" in content and "machines/" != content:
+                if "machines/" in content and content != "machines/":
                     machinefiles.append(content)
             vulnerabilities = []
             machines = {}
@@ -131,7 +131,7 @@ class MSDefenderParser:
         self.findings.append(finding)
         finding.unsaved_endpoints = []
         if machine["computerDnsName"] is not None:
-            finding.unsaved_endpoints.append(Endpoint(host=str(machine["computerDnsName"])))
+            finding.unsaved_endpoints.append(Endpoint(host=str(machine["computerDnsName"]).replace(" ", "").replace("(", "_").replace(")", "_")))
         if machine["lastIpAddress"] is not None:
             finding.unsaved_endpoints.append(Endpoint(host=str(machine["lastIpAddress"])))
         if machine["lastExternalIpAddress"] is not None:

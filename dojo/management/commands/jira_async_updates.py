@@ -1,11 +1,11 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from jira.exceptions import JIRAError
 
 import dojo.jira_link.helper as jira_helper
 from dojo.models import Dojo_User, Finding, Notes, User
+from dojo.utils import get_system_setting, timezone
 
 """
 Author: Aaron Weaver
@@ -21,7 +21,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         findings = Finding.objects.exclude(jira_issue__isnull=True)
-        findings = findings.filter(verified=True, active=True)
+        if get_system_setting("enforce_verified_status", True):
+            findings = findings.filter(verified=True, active=True)
+        else:
+            findings = findings.filter(active=True)
+
         findings = findings.prefetch_related("jira_issue")
         # finding = Finding.objects.get(id=1)
         for finding in findings:

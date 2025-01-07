@@ -1,7 +1,7 @@
+import datetime
 import hashlib
 import logging
 import re
-from datetime import datetime
 
 import dateutil
 from cpe import CPE
@@ -9,6 +9,7 @@ from defusedxml import ElementTree
 from packageurl import PackageURL
 
 from dojo.models import Finding
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class DependencyCheckParser:
                 purl = PackageURL.from_string(id)
                 purl_parts = purl.to_dict()
                 component_name = (
-                    purl_parts["namespace"] + ":"
+                    purl_parts["namespace"] + "_"
                     if purl_parts["namespace"]
                     and len(purl_parts["namespace"]) > 0
                     else ""
@@ -99,7 +100,7 @@ class DependencyCheckParser:
                 id = cpe_node.findtext(f"{namespace}name")
                 cpe = CPE(id)
                 component_name = (
-                    cpe.get_vendor()[0] + ":"
+                    cpe.get_vendor()[0] + "_"
                     if len(cpe.get_vendor()) > 0
                     else ""
                 )
@@ -123,7 +124,7 @@ class DependencyCheckParser:
                 )
                 # logger.debug('maven_parts:' + str(maven_parts))
                 if len(maven_parts) == 3:
-                    component_name = maven_parts[0] + ":" + maven_parts[1]
+                    component_name = maven_parts[0] + "_" + maven_parts[1]
                     component_version = maven_parts[2]
                     return component_name, component_version
 
@@ -302,7 +303,7 @@ class DependencyCheckParser:
                 mitigation
                 + f"Update {component_name}:{component_version} to at least the version recommended in the description"
             )
-            mitigated = datetime.utcnow()
+            mitigated = datetime.datetime.now(datetime.UTC)
             is_Mitigated = True
             active = False
             tags.append("suppressed")
@@ -330,6 +331,7 @@ class DependencyCheckParser:
             component_name=component_name,
             component_version=component_version,
         )
+        finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("dependency_check")]
 
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = [vulnerability_id]
@@ -388,28 +390,28 @@ class DependencyCheckParser:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
 
-                            relatedDependencies = dependency.find(
-                                namespace + "relatedDependencies",
-                            )
-                            if relatedDependencies:
-                                for (
-                                    relatedDependency
-                                ) in relatedDependencies.findall(
-                                    namespace + "relatedDependency",
-                                ):
-                                    finding = (
-                                        self.get_finding_from_vulnerability(
-                                            dependency,
-                                            relatedDependency,
-                                            vulnerability,
-                                            test,
-                                            namespace,
-                                        )
-                                    )
-                                    if finding:  # could be None
-                                        if scan_date:
-                                            finding.date = scan_date
-                                        self.add_finding(finding, dupes)
+                            # relatedDependencies = dependency.find(
+                            #     namespace + "relatedDependencies",
+                            # )
+                            # if relatedDependencies:
+                            #     for (
+                            #         relatedDependency
+                            #     ) in relatedDependencies.findall(
+                            #         namespace + "relatedDependency",
+                            #     ):
+                            #         finding = (
+                            #             self.get_finding_from_vulnerability(
+                            #                 dependency,
+                            #                 relatedDependency,
+                            #                 vulnerability,
+                            #                 test,
+                            #                 namespace,
+                            #             )
+                            #         )
+                            #         if finding:  # could be None
+                            #             if scan_date:
+                            #                 finding.date = scan_date
+                            #             self.add_finding(finding, dupes)
 
                     for suppressedVulnerability in vulnerabilities.findall(
                         namespace + "suppressedVulnerability",

@@ -22,7 +22,10 @@ class TwistlockCSVParser:
         data_vulnerability_id = row.get("CVE ID", "")
         data_package_version = row.get("Package Version", "")
         data_fix_status = row.get("Fix Status", "")
-        data_package_name = row.get("Source Package", "")
+        if row.get("Source Package", "") == "":
+            data_package_name = row.get("Packages", "")
+        else:
+            data_package_name = row.get("Source Package", "")
         row.get("Id", "")
         data_severity = row.get("Severity", "")
         data_cvss = row.get("CVSS", "")
@@ -31,7 +34,6 @@ class TwistlockCSVParser:
         data_type = row.get("Type")
         data_package_version = row.get("Package Version", "")
         data_package_license = row.get("Package License", "")
-        data_package_name = row.get("Package Name", "")
         data_cluster = row.get("Clusters", "")
         data_namespaces = row.get("Namespaces", "")
         data_package_path = row.get("Package Path", "")
@@ -53,6 +55,7 @@ class TwistlockCSVParser:
         data_vulnerability_link = row.get("Vulnerability Link", "")
         data_account_id = row.get("Account ID", "")
         data_discovered = row.get("Discovered", "")
+        data_unique_id = row.get("Custom Id")
 
         if data_vulnerability_id and data_package_name:
             title = (
@@ -120,6 +123,7 @@ class TwistlockCSVParser:
             severity_justification=f"(CVSS v3 base score: {data_cvss})",
             impact=data_severity,
             vuln_id_from_tool=data_vulnerability_id,
+            unique_id_from_tool=data_unique_id,
             publish_date=(
                 dateutil.parser.parse(row.get("Published"))
                 if row.get("Published", None)
@@ -303,8 +307,10 @@ class TwistlockJsonParser:
         items = {}
         if "results" in tree:
             vulnerabilityTree = tree["results"][0].get("vulnerabilities", [])
+            packageTree = tree["results"][0].get("packages", [])
+            
             for node in vulnerabilityTree:
-                item = get_item(node, test)
+                item = get_item(node, test, packageTree)
                 unique_key = node["id"] + str(
                     node["packageName"]
                     + str(node["packageVersion"])
@@ -314,29 +320,28 @@ class TwistlockJsonParser:
         return list(items.values())
 
 
-def get_item(vulnerability, test):
+def get_item(vulnerability, test, packageTree):
     severity = (
         convert_severity(vulnerability["severity"])
         if "severity" in vulnerability
         else "Info"
     )
     vector = (
-        vulnerability["vector"]
-        if "vector" in vulnerability
-        else "CVSS vector not provided. "
+        vulnerability.get("vector", "CVSS vector not provided. ")
     )
     status = (
-        vulnerability["status"]
-        if "status" in vulnerability
-        else "There seems to be no fix yet. Please check description field."
+        vulnerability.get("status", "There seems to be no fix yet. Please check description field.")
     )
-    cvss = vulnerability["cvss"] if "cvss" in vulnerability else "No CVSS score yet."
+    cvss = (
+        vulnerability.get("cvss", "No CVSS score yet.")
+    )
     riskFactors = (
-        vulnerability["riskFactors"]
-        if "riskFactors" in vulnerability
-        else "No risk factors."
+        vulnerability.get("riskFactors", "No risk factors.")
     )
-
+    for package in packageTree:
+        if package["name"] == vulnerability["packageName"] and package["version"] == vulnerability["packageVersion"]:
+            vulnerability["type"] = package["type"]
+            break
     description = (
         vulnerability.get("description", "")
         + "<p> Vulnerable Package: "
@@ -345,7 +350,10 @@ def get_item(vulnerability, test):
         + str(vulnerability["packageVersion"])
         + "</p><p> Layer Instruction: "
         + vulnerability.get("layerInstruction", "")
-        + "</p>"
+        + "</p><p> Package Path: "
+        + vulnerability.get("packagePath", "")
+        + "</p><p> Type: "
+        + vulnerability.get("type", "")
     )
 
     if vulnerability.get("baseImage"):
@@ -396,19 +404,9 @@ def convert_severity(severity):
         return "High"
     if severity.lower() == "moderate":
         return "Medium"
-    if severity.lower() == "unimportant":
+    if severity.lower() in ["unimportant", "unassigned", "negligible", "not yet assigned"]:
         return "Low"
-    if severity.lower() == "unassigned":
-        return "Low"
-    if severity.lower() == "negligible":
-        return "Low"
-    if severity.lower() == "not yet assigned":
-        return "Low"
-    if severity.lower() == "information":
-        return "Info"
-    if severity.lower() == "informational":
-        return "Info"
-    if severity == "":
+    if severity.lower() in ["information", "informational", ""]:
         return "Info"
     return severity.title()
 

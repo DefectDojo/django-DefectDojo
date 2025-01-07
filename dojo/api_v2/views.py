@@ -520,6 +520,10 @@ class EngagementViewSet(
                     new_note.errors, status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            notes = engagement.notes.filter(note_type=note_type).first()
+            if notes and note_type and note_type.is_single:
+                return Response("Only one instance of this note_type allowed on an engagement.", status=status.HTTP_400_BAD_REQUEST)
+
             author = request.user
             note = Notes(
                 entry=entry,
@@ -655,6 +659,36 @@ class EngagementViewSet(
             )
         # send file
         return generate_file_response(file_object)
+
+    @extend_schema(
+        request=serializers.EngagementUpdateJiraEpicSerializer,
+        responses={status.HTTP_200_OK: serializers.EngagementUpdateJiraEpicSerializer},
+    )
+    @action(
+        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+    )
+    def update_jira_epic(self, request, pk=None):
+        engagement = self.get_object()
+        try:
+
+            if engagement.has_jira_issue:
+                jira_helper.update_epic(engagement, **request.data)
+                response = Response(
+                    {"info": "Jira Epic update query sent"},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                jira_helper.add_epic(engagement, **request.data)
+                response = Response(
+                    {"info": "Jira Epic create query sent"},
+                    status=status.HTTP_200_OK,
+                )
+            return response
+        except ValidationError:
+            return Response(
+                {"error": "Bad Request!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 # @extend_schema_view(**schema_with_prefetch())
@@ -1111,6 +1145,11 @@ class FindingViewSet(
                     new_note.errors, status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            if finding.notes:
+                notes = finding.notes.filter(note_type=note_type).first()
+                if notes and note_type and note_type.is_single:
+                    return Response("Only one instance of this note_type allowed on a finding.", status=status.HTTP_400_BAD_REQUEST)
+
             author = request.user
             note = Notes(
                 entry=entry,
@@ -1514,9 +1553,7 @@ class FindingViewSet(
             return self._get_metadata(request, finding)
         if request.method == "POST":
             return self._add_metadata(request, finding)
-        if request.method == "PUT":
-            return self._edit_metadata(request, finding)
-        if request.method == "PATCH":
+        if request.method in ["PUT", "PATCH"]:
             return self._edit_metadata(request, finding)
         if request.method == "DELETE":
             return self._remove_metadata(request, finding)
@@ -1705,6 +1742,61 @@ class DojoMetaViewSet(
 
     def get_queryset(self):
         return get_authorized_dojo_meta(Permissions.Product_View)
+
+    @extend_schema(
+        methods=["post", "patch"],
+        request=serializers.MetaMainSerializer,
+        responses={status.HTTP_200_OK: serializers.MetaMainSerializer},
+        filters=False,
+    )
+    @action(
+        detail=False, methods=["post", "patch"], pagination_class=None,
+    )
+    def batch(self, request, pk=None):
+        serialized_data = serializers.MetaMainSerializer(data=request.data)
+        if serialized_data.is_valid(raise_exception=True):
+            if request.method == "POST":
+                self.process_post(request.data)
+            if request.method == "PATCH":
+                self.process_patch(request.data)
+
+        return Response(status=status.HTTP_201_CREATED, data=serialized_data.data)
+
+    def process_post(self: object, data: dict):
+        product = Product.objects.filter(id=data.get("product")).first()
+        finding = Finding.objects.filter(id=data.get("finding")).first()
+        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+        metalist = data.get("metadata")
+        for metadata in metalist:
+            try:
+                DojoMeta.objects.create(
+                    product=product,
+                    finding=finding,
+                    endpoint=endpoint,
+                    name=metadata.get("name"),
+                    value=metadata.get("value"),
+                    )
+            except (IntegrityError) as ex:  # this should not happen as the data was validated in the batch call
+                raise ValidationError(str(ex))
+
+    def process_patch(self: object, data: dict):
+        product = Product.objects.filter(id=data.get("product")).first()
+        finding = Finding.objects.filter(id=data.get("finding")).first()
+        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+        metalist = data.get("metadata")
+        for metadata in metalist:
+            dojometa = DojoMeta.objects.filter(product=product, finding=finding, endpoint=endpoint, name=metadata.get("name"))
+            if dojometa:
+                try:
+                    dojometa.update(
+                        name=metadata.get("name"),
+                        value=metadata.get("value"),
+                        )
+                except (IntegrityError) as ex:
+                    raise ValidationError(str(ex))
+            else:
+                msg = f"Metadata {metadata.get('name')} not found for object."
+                raise ValidationError(msg)
 
 
 @extend_schema_view(**schema_with_prefetch())
@@ -2148,6 +2240,10 @@ class TestsViewSet(
                 return Response(
                     new_note.errors, status=status.HTTP_400_BAD_REQUEST,
                 )
+
+            notes = test.notes.filter(note_type=note_type).first()
+            if notes and note_type and note_type.is_single:
+                return Response("Only one instance of this note_type allowed on a test.", status=status.HTTP_400_BAD_REQUEST)
 
             author = request.user
             note = Notes(
@@ -2908,24 +3004,15 @@ def report_generate(request, obj, options):
                         if eng.name:
                             engagement_name = eng.name
                         engagement_target_start = eng.target_start
-                        if eng.target_end:
-                            engagement_target_end = eng.target_end
-                        else:
-                            engagement_target_end = "ongoing"
+                        engagement_target_end = eng.target_end or "ongoing"
                         if eng.test_set.all():
                             for t in eng.test_set.all():
                                 test_type_name = t.test_type.name
                                 if t.environment:
                                     test_environment_name = t.environment.name
                                 test_target_start = t.target_start
-                                if t.target_end:
-                                    test_target_end = t.target_end
-                                else:
-                                    test_target_end = "ongoing"
-                            if eng.test_strategy:
-                                test_strategy_ref = eng.test_strategy
-                            else:
-                                test_strategy_ref = ""
+                                test_target_end = t.target_end or "ongoing"
+                            test_strategy_ref = eng.test_strategy or ""
                 total_findings = len(findings.qs.all())
 
         elif type(obj).__name__ == "Product":
@@ -2935,20 +3022,14 @@ def report_generate(request, obj, options):
                     if eng.name:
                         engagement_name = eng.name
                     engagement_target_start = eng.target_start
-                    if eng.target_end:
-                        engagement_target_end = eng.target_end
-                    else:
-                        engagement_target_end = "ongoing"
+                    engagement_target_end = eng.target_end or "ongoing"
 
                     if eng.test_set.all():
                         for t in eng.test_set.all():
                             test_type_name = t.test_type.name
                             if t.environment:
                                 test_environment_name = t.environment.name
-                    if eng.test_strategy:
-                        test_strategy_ref = eng.test_strategy
-                    else:
-                        test_strategy_ref = ""
+                    test_strategy_ref = eng.test_strategy or ""
                 total_findings = len(findings.qs.all())
 
         elif type(obj).__name__ == "Engagement":
@@ -2956,38 +3037,26 @@ def report_generate(request, obj, options):
             if eng.name:
                 engagement_name = eng.name
             engagement_target_start = eng.target_start
-            if eng.target_end:
-                engagement_target_end = eng.target_end
-            else:
-                engagement_target_end = "ongoing"
+            engagement_target_end = eng.target_end or "ongoing"
 
             if eng.test_set.all():
                 for t in eng.test_set.all():
                     test_type_name = t.test_type.name
                     if t.environment:
                         test_environment_name = t.environment.name
-            if eng.test_strategy:
-                test_strategy_ref = eng.test_strategy
-            else:
-                test_strategy_ref = ""
+            test_strategy_ref = eng.test_strategy or ""
             total_findings = len(findings.qs.all())
 
         elif type(obj).__name__ == "Test":
             t = obj
             test_type_name = t.test_type.name
             test_target_start = t.target_start
-            if t.target_end:
-                test_target_end = t.target_end
-            else:
-                test_target_end = "ongoing"
+            test_target_end = t.target_end or "ongoing"
             total_findings = len(findings.qs.all())
             if t.engagement.name:
                 engagement_name = t.engagement.name
             engagement_target_start = t.engagement.target_start
-            if t.engagement.target_end:
-                engagement_target_end = t.engagement.target_end
-            else:
-                engagement_target_end = "ongoing"
+            engagement_target_end = t.engagement.target_end or "ongoing"
         else:
             pass  # do nothing
 
@@ -3157,6 +3226,29 @@ class QuestionnaireEngagementSurveyViewSet(
 
     def get_queryset(self):
         return Engagement_Survey.objects.all().order_by("id")
+
+    @extend_schema(
+    request=OpenApiTypes.NONE,
+    parameters=[
+        OpenApiParameter(
+            "engagement_id", OpenApiTypes.INT, OpenApiParameter.PATH,
+        ),
+    ],
+    responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer},
+    )
+    @action(
+        detail=True, methods=["post"], url_path=r"link_engagement/(?P<engagement_id>\d+)",
+    )
+    def link_engagement(self, request, pk, engagement_id):
+        # Get the answered survey
+        engagement_survey = self.get_object()
+        # Safely get the engagement
+        engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
+        # Link the engagement
+        answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
+        # Send a favorable response
+        serialized_answered_survey = serializers.QuestionnaireAnsweredSurveySerializer(answered_survey)
+        return Response(serialized_answered_survey.data)
 
 
 @extend_schema_view(**schema_with_prefetch())
