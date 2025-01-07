@@ -1,6 +1,7 @@
 ---
 title: "Using the Report Builder"
 description: "Build and publish custom reports for external audiences, or your own records"
+weight: 1
 ---
 
 DefectDojo allows you to create Custom Reports for external audiences, which summarize the Findings or Endpoints that you wish to report on. Custom Reports can include branding and boilerplate text, and can also be used as **[Templates](https://docs.defectdojo.com/en/pro_reports/working-with-generated-reports/)** for future reports.
@@ -44,6 +45,32 @@ Widgets are content elements of a report which can be added by dragging and drop
 * To remove a widget from a report, click and drag it back to the right column.
 * Widgets can also be collapsed by clicking on the grey header, for ease in navigation through a report builder.
 * The Findings Widget, WYSIWYG Widget and the Endpoints widget can be used more than once.
+
+For more information about Report Widgets, see our [Report Widget index](./#report-widget-index).
+
+## Step 3: Publish and view your Report
+
+Once you have finished building your report, you can generate it by clicking the green ‘**Run’** button at the bottom of the **Report Format** section.
+
+This will automatically take you to the Generated Reports page, and your report will begin to generate in the background. You can check on the Status of your report by reading the Status column next to it, and refreshing the page periodically.
+
+Once your report has generated, you can view it by either clicking on the **Status** (which will be set to ‘Complete: View Report’), or by opening the **⋮** menu next to your report and selecting **View Report**.
+
+![image](images/Using_the_Report_Builder_14.png)
+
+## Step 4: Exporting a Report
+
+Only DefectDojo users will have access to Reports stored in the software, but Reports are set up in a way where they can be exported or printed easily.
+
+The easiest method to use is to Print To PDF \- with an HTML Report open, open a **Print** dialog in your browser and set **Save To PDF** as the **Print Destination**.
+
+![image](images/Using_the_Report_Builder_15.png)
+
+## Report formatting suggestions
+
+* WYSIWYG sections can be used to contextualize or summarize Finding lists. We recommend using this widget throughout your report in between Findings or Vulnerable Endpoints widgets.
+
+## Report Widget Index
 
 ### Cover Page Widget
 
@@ -125,25 +152,3 @@ Select the parameters for the Endpoints you wish to include here and click the *
 This Widget will render a light grey horizontal line to divide between sections.
 
 ![image](images/Using_the_Report_Builder_13.png)
-
-## Step 3: Publishing and viewing your Report
-
-Once you have finished building your report, you can generate it by clicking the green ‘**Run’** button at the bottom of the **Report Format** section.
-
-This will automatically take you to the Generated Reports page, and your report will begin to generate in the background. You can check on the Status of your report by reading the Status column next to it, and refreshing the page periodically.
-
-Once your report has generated, you can view it by either clicking on the **Status** (which will be set to ‘Complete: View Report’), or by opening the **⋮** menu next to your report and selecting **View Report**.
-
-![image](images/Using_the_Report_Builder_14.png)
-
-## Step 4: Exporting a Report
-
-Only DefectDojo users will have access to Reports stored in the software, but Reports are set up in a way where they can be exported or printed easily.
-
-The easiest method to use is to Print To PDF \- with an HTML Report open, open a **Print** dialog in your browser and set **Save To PDF** as the **Print Destination**.
-
-![image](images/Using_the_Report_Builder_15.png)
-
-## Report formatting suggestions
-
-* WYSIWYG sections can be used to contextualize or summarize Finding lists. We recommend using this widget throughout your report in between Findings or Vulnerable Endpoints widgets.
