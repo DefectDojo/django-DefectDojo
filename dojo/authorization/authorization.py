@@ -110,12 +110,6 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(
             user, obj.test.engagement.product, permission,
         )
-    if (
-        isinstance(obj, FindingExclusion)
-    ) and permission in Permissions.get_finding_exclusion_permissions():
-        return user_has_permission(
-            user, obj.product, permission
-        )
         
     if (
         isinstance(obj, Component)

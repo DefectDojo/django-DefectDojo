@@ -9,12 +9,14 @@ from datetime import timedelta
 import random
 
 # Dojo
-from dojo.models import Finding, Dojo_Group
+from dojo.models import Finding, Dojo_Group, Notes
 from dojo.group.queries import get_group_members_for_group
 from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.queries import tag_filter
 from dojo.celery import app
+from dojo.user.queries import get_user
 from dojo.notifications.helper import create_notification
+from dojo.utils import get_full_url
 
 
 logger = get_task_logger(__name__)
@@ -31,14 +33,14 @@ def get_reviewers_menbers():
     reviewer_group = Dojo_Group.objects.filter(name=Constants.REVIEWERS_MAINTAINER_GROUP.value).first()
     reviewer_members = get_group_members_for_group(reviewer_group)
     
-    return [member.user for member in reviewer_members if member]
+    return [member.user.username for member in reviewer_members if member]
     
 
 def get_approvers_members():
     approvers_group = Dojo_Group.objects.filter(name=Constants.APPROVERS_CYBERSECURITY_GROUP.value).first()
     approvers_members = get_group_members_for_group(approvers_group)
     
-    return [member.user for member in approvers_members if member]
+    return [member.user.username for member in approvers_members if member]
 
 
 @app.task
@@ -62,18 +64,31 @@ def check_expiring_findingexclusions():
         fex.notification_sent = True
         fex.save()
         
-        
+
+def get_note(author, message):
+    note, _ = Notes.objects.get_or_create(
+        author=author,
+        entry=message
+    )
+    return note
+
+
 @app.task
-def add_findings_to_whitelist(unique_id_from_tool):
+def add_findings_to_whitelist(unique_id_from_tool, relative_url):
     findings_to_update = Finding.objects.filter(
         cve=unique_id_from_tool,
         active=True
     ).filter(tag_filter)
     
     for finding in findings_to_update:
+        finding_exclusion_url = get_full_url(relative_url)
+        system_user = get_user(settings.SYSTEM_USER)
+        message = f"Finding added to white list, for more details check the finding exclusion request: {finding_exclusion_url}"
+        note = get_note(system_user, message)
         if 'white_list' not in finding.tags:
             finding.tags.add("white_list")
         finding.active = False
+        finding.notes.add(note)
         finding.risk_status = Constants.ON_WHITELIST.value
         
     Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)

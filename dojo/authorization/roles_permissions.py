@@ -161,14 +161,6 @@ class Permissions(IntEnum):
     Api_v2_Key = 2901
     Swagger_Documentation = 2902
     Defect_Dojo_Documentation = 2903
-    
-    Finding_Exclusion_View = 2911
-    Finding_Exclusion_Edit = 2912
-    Finding_Exclusion_Delete = 2913
-    Finding_Exclusion_Add = 2914
-    Finding_Exclusion_Review = 2915
-    Finding_Exclusion_Accept = 2916
-    Finding_Exclusion_Reject = 2917
 
     @classmethod
     def has_value(cls, value):
@@ -266,15 +258,6 @@ class Permissions(IntEnum):
             Permissions.Transfer_Finding_Finding_Delete,
             Permissions.Transfer_Finding_Finding_Add,
         }
-        
-    @classmethod
-    def get_finding_exclusion_permissions(cls):
-        return {
-            Permissions.Finding_Exclusion_Add,
-            Permissions.Finding_Exclusion_Edit,
-            Permissions.Finding_Exclusion_Delete,
-            Permissions.Finding_Exclusion_View,
-        }
 
     @classmethod
     def get_finding_group_permissions(cls):
@@ -369,7 +352,6 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
-            Permissions.Finding_Exclusion_View
         },
         Roles.API_Importer: {
             Permissions.Product_Type_Add,
@@ -444,7 +426,6 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Finding_Code_Review,
-            Permissions.Finding_Exclusion_View 
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -546,12 +527,6 @@ def get_roles_with_permissions():
             Permissions.Api_v2_Key,
             Permissions.Defect_Dojo_Documentation,
             Permissions.Finding_Code_Review,
-            Permissions.Finding_Exclusion_View,
-            Permissions.Finding_Exclusion_Add,
-            Permissions.Finding_Exclusion_Edit,
-            Permissions.Finding_Exclusion_Delete,
-            Permissions.Finding_Exclusion_Review,
-            Permissions.Finding_Exclusion_Reject
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -640,9 +615,6 @@ def get_roles_with_permissions():
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
             Permissions.Finding_Code_Review,
-            Permissions.Finding_Exclusion_View,
-            Permissions.Finding_Exclusion_Add,
-            Permissions.Finding_Exclusion_Edit
         },
         Roles.Developer: {
             Permissions.Product_Type_View,
@@ -668,9 +640,6 @@ def get_roles_with_permissions():
             Permissions.Transfer_Finding_View,
             Permissions.Transfer_Finding_Finding_View,
             Permissions.Transfer_Finding_Finding_Add,
-            Permissions.Finding_Exclusion_View,
-            Permissions.Finding_Exclusion_Add,
-            Permissions.Finding_Exclusion_Edit,
             Permissions.Risk_Acceptance_Refresh_Permission_key,
 
         },
@@ -734,11 +703,6 @@ def get_roles_with_permissions():
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
             Permissions.Finding_Code_Review,
-            Permissions.Finding_Exclusion_Accept,
-            Permissions.Finding_Exclusion_Reject,
-            Permissions.Finding_Exclusion_Review,
-            Permissions.Finding_Exclusion_View,
-            Permissions.Finding_Exclusion_Add,
             Permissions.Risk_Acceptance_Bulk,
             Permissions.Risk_Acceptance_Refresh_Permission_key,
             Permissions.Finding_Code_Review,

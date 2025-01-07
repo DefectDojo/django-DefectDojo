@@ -1,16 +1,13 @@
 # Dojo
-from dojo.authorization.authorization_decorators import (
-    user_is_configuration_authorized, user_is_authorized, user_has_global_permission_or_403
-)
-from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
-from dojo.models import Dojo_User
+from dojo.templatetags.authorization_tags import is_in_group
 from dojo.utils import get_page_items, add_breadcrumb
-from dojo.notifications.helper import create_notification, send_mail_notification
+from dojo.notifications.helper import create_notification
 from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm
-from dojo.engine_tools.helpers import add_findings_to_whitelist, get_approvers_members, get_reviewers_menbers
+from dojo.engine_tools.helpers import (
+    add_findings_to_whitelist, get_approvers_members, get_reviewers_menbers, Constants
+)
 
 # Utils
 from datetime import datetime, timedelta
@@ -18,11 +15,11 @@ from django.contrib import messages
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseRedirect
+from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
-from django.db.models import Q
 
 
 def finding_exclusions(request: HttpRequest):
@@ -55,7 +52,8 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
                 messages.INFO,
                 f"There is already a request in status '{duplicate_finding_exclusions.status}' for this CVE, This will be whitelisted.",
                 extra_tags="alert-success")
-            add_findings_to_whitelist.apply_async(args=(duplicate_finding_exclusions.unique_id_from_tool,))
+            relative_url = reverse("finding_exclusion", args=[str(duplicate_finding_exclusions.pk)])
+            add_findings_to_whitelist.apply_async(args=(duplicate_finding_exclusions.unique_id_from_tool, relative_url,))
             
         else:
             messages.add_message(
@@ -74,9 +72,8 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
         form = CreateFindingExclusionForm(request.POST)
         list_type = request.POST.get(key="type")
         if list_type == "black_list":
-            user_has_global_permission_or_403(
-                request.user, Permissions.Finding_Exclusion_Review,
-        )
+            if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+                raise PermissionDenied
         
         if form.is_valid():
             exclusion = form.save(commit=False)
@@ -173,7 +170,7 @@ def add_finding_exclusion_discussion(request: HttpRequest, fxid: str) -> HttpRes
 
 
 def review_finding_exclusion_request(
-    request: HttpRequest, fxid: str, **kwargs: dict[str, any]
+    request: HttpRequest, fxid: str
     ) -> HttpResponse:
     """Change the status of the finding exclusion to reviewed.
 
@@ -184,7 +181,10 @@ def review_finding_exclusion_request(
     Returns:
         HttpResponse: Http response object via Django template
     """
-    if request.method == 'POST':      
+    if request.method == 'POST':
+        if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+            raise PermissionDenied
+        
         finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
         
         finding_exclusion.status = "Reviewed"
@@ -197,7 +197,7 @@ def review_finding_exclusion_request(
                             title=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}",
                             description=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
                             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                            recipients=[finding_exclusion.created_by])
+                            recipients=[finding_exclusion.created_by.username])
         
         approvers = get_approvers_members()
         
@@ -220,6 +220,8 @@ def review_finding_exclusion_request(
 
 def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
     if request.method == 'POST':
+        if not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
+            raise PermissionDenied
         try:
             with transaction.atomic():
                 finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
@@ -231,7 +233,8 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                 finding_exclusion.status_updated_by = request.user
                 finding_exclusion.save()
                 
-                add_findings_to_whitelist.apply_async(args=(finding_exclusion.unique_id_from_tool,))
+                relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
+                add_findings_to_whitelist(finding_exclusion.unique_id_from_tool, str(relative_url))
                       
         except Exception as e:
             messages.add_message(
@@ -241,12 +244,11 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                     extra_tags="alert-success")
             return redirect('finding_exclusion', fxid=fxid)
         
-        approvers = get_approvers_members()
         create_notification(event="finding_exclusion_approved",
                             title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
                             description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
                             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                            recipients=[finding_exclusion.created_by] + approvers)
+                            recipients=[finding_exclusion.created_by.username])
         
         messages.add_message(
                 request,
@@ -261,6 +263,9 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
 
 def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
     if request.method == 'POST':
+        if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value) or \
+           not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
+            raise PermissionDenied
         finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
         
         finding_exclusion.status = "Rejected"
@@ -274,7 +279,7 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
             title=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}",
             description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
             url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-            recipients=[finding_exclusion.created_by]
+            recipients=[finding_exclusion.created_by.username]
         )
         
         messages.add_message(

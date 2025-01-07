@@ -486,7 +486,12 @@
                                     <td>{{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
                                 {% endif %}
                         {% endif %}
-                        <td>91</td>
+                        <td>{% if finding.priority %}
+                                {{ finding.priority }}
+                            {% else %}
+                                N.A.
+                            {% endif %}
+                        </td>
                         <td>
                             {% if found_by %}
                                 {% for scanner in found_by %}

@@ -43,7 +43,7 @@
     <div class="col-md-10">
         <div class="panel panel-default">
             <div class="panel-heading">
-                {% if "Finding_Exclusion_Add"|has_global_permission %}
+                {% if request.user|is_in_group:"Reviewers_Maintainer" %}
                     <a title="Add Exclusion" class="pull-right btn btn-sm btn-primary" href="{% url 'create_finding_exclusion' %}"><span class="fa-solid fa-plus"></span></a>
                 {% endif %}
                 {{ name }}

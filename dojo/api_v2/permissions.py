@@ -14,6 +14,7 @@ from dojo.authorization.authorization import (
     user_has_permission,
 )
 from dojo.authorization.roles_permissions import Permissions
+from dojo.templatetags.authorization_tags import is_in_group
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.models import (
     Cred_Mapping,
@@ -1077,3 +1078,8 @@ class UserHasViewApiV2Key(permissions.BasePermission):
         return user_has_global_permission(
             request.user, Permissions.Api_v2_Key
         )
+
+
+class IsAPIImporter(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return is_in_group(request.user, "API_Importer")

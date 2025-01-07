@@ -75,6 +75,7 @@ from dojo.api_v2.views import (
     UserProfileView,
     UsersViewSet,
     ComponentViewSet,
+    FindingExclusionViewSet,
 )
 from dojo.exclusive_permission.view import ExclusivePermissionViewSet
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
@@ -189,6 +190,7 @@ v2_api.register(r"questionnaire_general_questionnaires", QuestionnaireGeneralSur
 v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basename="question")
 v2_api.register(r"transfer_finding", TransferFindingViewSet, basename="transfer_finding")
 v2_api.register(r"transfer_finding_findings", TransferFindingFindingsViewSet, basename="transfer_finding_findings")
+v2_api.register(r"finding_exclusions", FindingExclusionViewSet, basename="finding_exclusions")
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls

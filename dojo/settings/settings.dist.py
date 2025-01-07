@@ -356,8 +356,6 @@ env = environ.FileAwareEnv(
     # The variable that allows enabling pending risk acceptance.
     DD_RISK_PENDING=(bool, False),
     DD_COMPLIANCE_FILTER_RISK=(str, ""),
-    # Engin Tools
-    DD_ENABLE_ENGINE_TOOLS=(bool, False),
     # Microsoft Entra id for risk acceptance for email
     DD_TENAN_ID=(str, ""),
     DD_CLIENT_ID=(str, ""),
@@ -452,14 +450,14 @@ env = environ.FileAwareEnv(
             }
         }
     }),
-    # Finding exclusion - cybersecurity emails
-    DD_EXCLUSION_CYBER_EMAIL=(str, ""),
     
     # Finding exclusion - request expiration days
     DD_FINDING_EXCLUSION_EXPIRATION_DAYS=(int, 30),
+    DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS=(int, 1),
+    DD_CHECK_NEW_FINDINGS_TO_WHITELIST_DAYS=(int, 1),
     
     # tags for filter to finding exclusion
-    DD_FINDING_EXCLUSION_FILTER_TAGS=(str, "prisma,tenable,engine_dependencies,engine_container"),
+    DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
     
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
@@ -1425,6 +1423,8 @@ CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
 CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY = env("DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY")
+CELERY_EXPIRING_FINDINGEXCLUSION_DAYS = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS")
+CELERY_NEW_FINDINGS_TO_WHITELIST_DAYS = env("DD_CHECK_NEW_FINDINGS_TO_WHITELIST_DAYS")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
@@ -1478,11 +1478,11 @@ CELERY_BEAT_SCHEDULE = {
         },
     "check_expiring_findingexclusions": {
         'task': 'dojo.engine_tools.helpers.check_expiring_findingexclusions',
-        'schedule': timedelta(days=1),
+        'schedule': timedelta(days=CELERY_EXPIRING_FINDINGEXCLUSION_DAYS),
     },
     "check_new_findings_to_whitelist": {
         'task': 'dojo.engine_tools.helpers.check_new_findings_to_whitelist',
-        'schedule': timedelta(days=1),
+        'schedule': timedelta(days=CELERY_NEW_FINDINGS_TO_WHITELIST_DAYS),
     },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
@@ -2117,9 +2117,7 @@ RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
 COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
-# Engine Tools
-ENABLE_ENGINE_TOOLS = env("DD_ENABLE_ENGINE_TOOLS")
-EXCLUSION_CYBER_EMAIL = env("DD_EXCLUSION_CYBER_EMAIL")   
+# Engine Tools 
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
 FINDING_EXCLUSION_FILTER_TAGS = env("DD_FINDING_EXCLUSION_FILTER_TAGS")
 # Acceptace for email
