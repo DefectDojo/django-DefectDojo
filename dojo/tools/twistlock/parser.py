@@ -130,18 +130,21 @@ class TwistlockCSVParser:
                 else None
             ),
         )
-        finding.unsaved_tags = [
-            (
-                row.get("Custom Tag")
-                if row.get("Custom Tag", None)
-                else settings.DD_CUSTOM_TAG_PARSER.get("twistlock")
-            )
-        ]
+        finding.unsaved_tags = self.get_tags(row)
         finding.description = finding.description.strip()
         if data_vulnerability_id:
             finding.unsaved_vulnerability_ids = [data_vulnerability_id]
 
         return finding
+
+    def get_tags(self, row):
+        tags = row.get("Custom Tag", None)
+        if (tags is not None) and ',' in str(tags):
+            return str(tags).split(',')
+        elif (tags is not None):
+            return [tags]
+        else:
+            return [settings.DD_CUSTOM_TAG_PARSER.get("twistlock")]
 
     def get_description(
         self,
