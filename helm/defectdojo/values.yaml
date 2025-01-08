@@ -50,6 +50,7 @@ networkPolicy:
   #   ports:
   #   - protocol: TCP
   #     port: 443
+  annotations: {}
 
 # Configuration value to select database type
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
@@ -136,6 +137,7 @@ celery:
   # To use an external celery broker, set the hostname here
   brokerHost: ""
   logLevel: INFO
+  annotations: {}
   beat:
     annotations: {}
     affinity: {}
