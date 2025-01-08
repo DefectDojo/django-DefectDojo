@@ -100,7 +100,9 @@ class TestGitleaksParser(DojoTestCase):
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("Hard coded RSA private key found in conf/rsa.pk", finding.title)
-                description = "**Rule Id:** RSA-PK"
+                description = """**Secret:** -----BEGIN RSA PRIVATE KEY-----
+**Match:** -----BEGIN RSA PRIVATE KEY-----
+**Rule Id:** RSA-PK"""
                 self.assertEqual(description, finding.description)
                 self.assertIn("tag1", finding.unsaved_tags)
                 self.assertIn("tag2", finding.unsaved_tags)
