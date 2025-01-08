@@ -9,6 +9,8 @@ class GitleaksParser:
 
     """A class that can be used to parse the Gitleaks JSON report files"""
 
+    custom_tag = settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")
+
     def get_scan_types(self):
         return ["Gitleaks Scan"]
 
@@ -39,7 +41,6 @@ class GitleaksParser:
         return list(dupes.values())
 
     def get_finding_legacy(self, issue, test, dupes):
-        custom_tag = settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")
         line = None
         file_path = issue["file"]
         reason = issue["rule"]
@@ -94,8 +95,8 @@ class GitleaksParser:
             static_finding=True,
         )
         # manage tags
-        if self.custom_tag():
-            finding.unsaved_tags = [self.custom_tag()]
+        if self.custom_tag:
+            finding.unsaved_tags = [self.custom_tag]
         else:
             finding.unsaved_tags = issue.get("tags", "").split(", ")
 
@@ -107,7 +108,6 @@ class GitleaksParser:
             dupes[dupe_key] = finding
 
     def get_finding_current(self, issue, test, dupes):
-        custom_tag = settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")
         reason = issue.get("Description")
         line = issue.get("StartLine")
         line = int(line) if line else 0
@@ -126,7 +126,7 @@ class GitleaksParser:
         title = f"Hard coded {reason} found in {file_path}"
 
         description = ""
-        if not self.custom_tag():
+        if not self.custom_tag:
             if secret:
                 description += f"**Secret:** {secret}\n"
             if match:
@@ -150,7 +150,7 @@ class GitleaksParser:
         if description[-1] == "\n":
             description = description[:-1]
 
-        if self.custom_tag():
+        if self.custom_tag:
             severity = "Critical"
         else:
             severity = "High"
@@ -179,7 +179,7 @@ class GitleaksParser:
                 static_finding=True,
                 nb_occurences=1,
             )
-            if self.custom_tag():
+            if self.custom_tag:
                 finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")]
             else:
                 if tags:
