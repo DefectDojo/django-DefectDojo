@@ -9,8 +9,6 @@ class GitleaksParser:
 
     """A class that can be used to parse the Gitleaks JSON report files"""
 
-    custom_tag = settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")
-
     def get_scan_types(self):
         return ["Gitleaks Scan"]
 
@@ -41,6 +39,7 @@ class GitleaksParser:
         return list(dupes.values())
 
     def get_finding_legacy(self, issue, test, dupes):
+        custom_tag = settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")
         line = None
         file_path = issue["file"]
         reason = issue["rule"]
@@ -108,6 +107,7 @@ class GitleaksParser:
             dupes[dupe_key] = finding
 
     def get_finding_current(self, issue, test, dupes):
+        custom_tag = settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")
         reason = issue.get("Description")
         line = issue.get("StartLine")
         line = int(line) if line else 0
