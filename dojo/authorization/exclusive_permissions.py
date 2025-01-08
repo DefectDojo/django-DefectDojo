@@ -115,13 +115,22 @@ def user_has_permission_or_404(
         raise PermissionDenied
     return rule_response
 
+def get_members(user, obj):
+    product = get_product(obj)
+    product_type = product.prod_type
+    members = get_product_type_member(user, product_type)
+    return members
 
-def user_has_exclusive_permission_product(
+
+def user_has_exclusive_permission(
         user: Dojo_User,
         obj: object,
         permission: Permissions) -> bool:
+        
+    if user is None:
+        user = crum.get_current_user()
 
-    member = get_product_type_member(user, obj)
+    member = get_members(user, obj)
 
     if user is None:
         user = crum.get_current_user()
@@ -169,27 +178,38 @@ def user_has_exclusive_permission_product_or_404(
         permission=permission)
     
 
-def get_exclude_red_team_tag(
-        filtered_findings_qs,
+def exclude_test_or_finding_with_tag(
+        tests_or_findings,
         product=None,
         user=None):
 
-    if product is None and len(filtered_findings_qs)>0:
-        product = get_product(filtered_findings_qs[0])
+    exclusive_permission = None
+
+    if product is None and len(tests_or_findings) > 0:
+        product = get_product(tests_or_findings[0])
 
     if user is None:
         user = crum.get_current_user()
 
+    try:
+        exclusive_permission = ExclusivePermission.objects.get(
+            name="Product_Tag_Red_Team")
+    except ExclusivePermission.DoesNotExist:
+        logger.Error("Product_Tag_Red_Team does not exist")
+        raise ApiError.not_found("Product_Tag_Red_Team does not exist")
+
+    if exclusive_permission.is_active() is False:
+        return tests_or_findings
+
     if (
-        user_has_exclusive_permission_product(
-            user, product, Permissions["Product_Tag_Red_Team"]
-        )
+        user_has_exclusive_permission(
+            user, product, Permissions["Product_Tag_Red_Team"])
     ):
         pass
     else:
-        tags_name = ExclusivePermission\
+        tags_name = exclusive_permission\
             .get_validation_field("Product_Tag_Red_Team")\
             .split(",")
-        filtered_findings_qs = filtered_findings_qs.exclude(
+        tests_or_findings = tests_or_findings.exclude(
             tags__name__in=tags_name)
-    return filtered_findings_qs
+    return tests_or_findings

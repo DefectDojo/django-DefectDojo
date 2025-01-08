@@ -26,7 +26,7 @@ from dojo.authorization.exclusive_permissions import user_has_exclusive_permissi
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.exclusive_permissions import get_exclude_red_team_tag
+from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
 from dojo.finding.views import find_available_notetypes
@@ -149,7 +149,7 @@ class ViewTest(View):
 
     def get_findings(self, request: HttpRequest, test: Test):
         findings = Finding.objects.filter(test=test).order_by("numerical_severity")
-        findings = get_exclude_red_team_tag(findings, product=None, user=request.user)
+        findings = exclude_test_or_finding_with_tag(findings, product=None, user=request.user)
         filter_string_matching = get_system_setting("filter_string_matching", False)
         finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
         findings = finding_filter_class(request.GET, queryset=findings)

@@ -3,7 +3,7 @@ from crum import get_current_user
 from dojo.api_v2.api_error import ApiError
 from django.db.models import Exists, OuterRef, Q
 from dojo.authorization.roles_permissions import Permissions 
-from dojo.authorization.exclusive_permissions import user_has_exclusive_permission_product
+from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
 from dojo.models import (
     Product_Group,
@@ -104,38 +104,3 @@ def get_authorized_test_imports(permission):
         | Q(test__engagement__product__member=True)
         | Q(test__engagement__product__prod_type__authorized_group=True)
         | Q(test__engagement__product__authorized_group=True))
-
-
-def get_exclude_red_team_tag(filtered_tests_qs,
-                             product=None,
-                             user=None):
-    exclusive_permission = None
-
-    if product is None and len(filtered_tests_qs) > 0:
-        product = filtered_tests_qs[0].engagement.product
-
-    if user is None:
-        user = get_current_user()
-
-    try:
-        exclusive_permission = ExclusivePermission.objects.get(
-            name="Product_Tag_Red_Team")
-    except ExclusivePermission.DoesNotExist:
-        logger.Error("Product_Tag_Red_Team does not exist")
-        raise ApiError.not_found("Product_Tag_Red_Team does not exist")
-
-    if exclusive_permission.is_active() is False:
-        return filtered_tests_qs
-
-    if (
-        user_has_exclusive_permission_product(
-            user, product, Permissions["Product_Tag_Red_Team"])
-    ):
-        pass
-    else:
-        tags_name = exclusive_permission\
-            .get_validation_field("Product_Tag_Red_Team")\
-            .split(",")
-        filtered_tests_qs = filtered_tests_qs.exclude(
-            tags__name__in=tags_name)
-    return filtered_tests_qs

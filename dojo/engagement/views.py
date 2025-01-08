@@ -34,9 +34,9 @@ import dojo.risk_acceptance.risk_pending as rp_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.test.queries import get_exclude_red_team_tag
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
     EngagementDirectFilter,
@@ -447,7 +447,7 @@ class ViewEngagement(View):
         # Make sure the user is authorized
         user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by('-created')
-        tests = get_exclude_red_team_tag(
+        tests = exclude_test_or_finding_with_tag(
             tests,
             product=eng.product,
             user=request.user)
@@ -1402,6 +1402,12 @@ def add_risk_acceptance_pending(request, eid, fid):
             )
             .order_by("title")
         )
+
+        finding_choices = exclude_test_or_finding_with_tag(
+            finding_choices,
+            product=product,
+            user=request.user)
+
         if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
             finding_choices = finding_choices.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
         form.fields['accepted_findings'].queryset = finding_choices
@@ -1483,6 +1489,10 @@ def add_risk_acceptance(request, eid, fid=None):
         form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion})
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by("title")
+    finding_choices = exclude_test_or_finding_with_tag(
+            finding_choices,
+            product=eng.product,
+            user=request.user)
 
     form.fields["accepted_findings"].queryset = finding_choices
     if fid:
@@ -1563,7 +1573,18 @@ def add_transfer_finding(request, eid, fid=None):
                                             "owner": request.user},
                                    product=product)
 
-        form.fields["findings"].queryset = form.fields["findings"].queryset.filter(duplicate=False, test__engagement=origin_engagement, active=True, severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        form.fields["findings"].queryset = exclude_test_or_finding_with_tag(
+            form.fields["findings"].queryset,
+            product=product,
+            user=request.user)
+
+        form.fields["findings"].queryset = form.fields["findings"].queryset.filter(
+            duplicate=False,
+            test__engagement=origin_engagement,
+            active=True,
+            severity=finding.severity).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+        
+
 
     return render(request, 'dojo/add_transfer_finding.html', {
                   'eng': origin_engagement,
@@ -1769,7 +1790,12 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
 
     accepted_findings = risk_acceptance.accepted_findings.order_by("-risk_status")
+    accepted_findings = exclude_test_or_finding_with_tag(
+        accepted_findings,
+        product=product,
+        user=request.user)
     fpage = get_page_items(request, accepted_findings, 15)
+
     if settings.RISK_PENDING:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(),
                                                      risk_status__in=["Risk Active", "Risk Expired"],
@@ -1779,12 +1805,15 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                                                      duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")))
         if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
             unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
+        unaccepted_findings = exclude_test_or_finding_with_tag(
+            unaccepted_findings,
+            product=product,
+            user=request.user)
     else:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
             .exclude(id__in=accepted_findings).order_by("title")
     add_fpage = get_page_items(request, unaccepted_findings, 25, "apage")
     # on this page we need to add unaccepted findings as possible findings to add as accepted
-
     add_findings_form.fields[
         "accepted_findings"].queryset = add_fpage.object_list
 

@@ -3296,6 +3296,10 @@ class TransferFindingViewSet(prefetch.PrefetchListMixin,
                         "origin_product",
                         "origin_engagement",
                         "owner"]
+
+    def get(self, request, *args, **kwargs):
+        response =  super().get(request, *args, **kwargs)
+        return response
     
     def destroy(self, request, pk=None):
         transfer_finding = get_object_or_404(TransferFinding, id=pk)

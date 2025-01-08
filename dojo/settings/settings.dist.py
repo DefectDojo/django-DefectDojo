@@ -360,7 +360,7 @@ env = environ.FileAwareEnv(
     DD_LIFETIME_HOURS_PERMISSION_KEY=(int, 48),
     DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL=(str, "http://localhost/8080"),
     # Exclusive Permissi
-    ENABLE_EXCLUSIVE_PERMISSION=(bool, False),
+    DD_ENABLE_EXCLUSIVE_PERMISSION=(bool, False),
     # System user for automated resource creation
     DD_SYSTEM_USER=(str, "admin"),
     # These variables are the params of providers name
@@ -2144,7 +2144,7 @@ LIFETIME_HOURS_PERMISSION_KEY = env("DD_LIFETIME_HOURS_PERMISSION_KEY")
 HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
 
 # Exclusive Permission
-ENABLE_EXCLUSIVE_PERMISSION_RED_TEAM = env("ENABLE_EXCLUSIVE_PERMISSION")
+ENABLE_EXCLUSIVE_PERMISSION = env("DD_ENABLE_EXCLUSIVE_PERMISSION")
 
 TENAN_ID = env("DD_TENAN_ID")
 CLIENT_ID = env("DD_CLIENT_ID")

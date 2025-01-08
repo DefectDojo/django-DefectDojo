@@ -25,7 +25,7 @@ from dojo.models import (
     ExclusivePermission,
 )
 from dojo.notes.helper import delete_related_notes
-from dojo.authorization.exclusive_permissions import user_has_exclusive_permission_product
+from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.utils import get_current_user, mass_model_updater, to_str_typed, get_product
 
