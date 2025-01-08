@@ -21,7 +21,7 @@ class TestGitleaksParser(DojoTestCase):
                 self.assertEqual("Hard Coded Asymmetric Private Key", finding.title)
                 self.assertEqual("cert-key.pem", finding.file_path)
                 self.assertIsNone(finding.line)  # some old version don't have this data
-                #self.assertIn("AsymmetricPrivateKey", finding.unsaved_tags)
+                self.assertIn("AsymmetricPrivateKey", finding.unsaved_tags)
 
     def test_parse_file_legacy_with_multiple_finding(self):
         with open(get_unit_tests_path() + "/scans/gitleaks/data_many.json", encoding="utf-8") as testfile:
@@ -33,7 +33,7 @@ class TestGitleaksParser(DojoTestCase):
                 self.assertEqual("Hard Coded Github", finding.title)
                 self.assertEqual(".bashrc", finding.file_path)
                 self.assertIsNone(finding.line)  # some old version don't have this data
-                #self.assertIn("Github", finding.unsaved_tags)
+                self.assertIn("Github", finding.unsaved_tags)
 
     def test_parse_file_legacy_with_multiple_redacted_finding(self):
         with open(get_unit_tests_path() + "/scans/gitleaks/redacted_data_many.json", encoding="utf-8") as testfile:
@@ -62,26 +62,26 @@ class TestGitleaksParser(DojoTestCase):
                 self.assertEqual("Hard Coded AWS Access Key", finding.title)
                 self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json", finding.file_path)
                 self.assertEqual(13, finding.line)
-                #self.assertIn("key", finding.unsaved_tags)
-                #self.assertIn("AWS", finding.unsaved_tags)
+                self.assertIn("key", finding.unsaved_tags)
+                self.assertIn("AWS", finding.unsaved_tags)
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("Hard Coded Asymmetric Private Key", finding.title)
                 self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
                 self.assertEqual(13, finding.line)
-                #self.assertIn("AsymmetricPrivateKey", finding.unsaved_tags)
+                self.assertIn("AsymmetricPrivateKey", finding.unsaved_tags)
             with self.subTest(i=2):
                 finding = findings[2]
                 self.assertEqual("Hard Coded AWS Access Key", finding.title)
                 self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
                 self.assertEqual(44, finding.line)
-                #self.assertIn("AWS", finding.unsaved_tags)
+                self.assertIn("AWS", finding.unsaved_tags)
             with self.subTest(i=3):
                 finding = findings[3]
                 self.assertEqual("Hard Coded AWS Access Key", finding.title)
                 self.assertEqual("dojo/unittests/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
                 self.assertEqual(37, finding.line)
-                #self.assertIn("AWS", finding.unsaved_tags)
+                self.assertIn("AWS", finding.unsaved_tags)
 
     def test_parse_file_from_version_8(self):
         with open(get_unit_tests_path() + "/scans/gitleaks/gitleaks8_many.json", encoding="utf-8") as testfile:
@@ -102,12 +102,14 @@ class TestGitleaksParser(DojoTestCase):
                 self.assertEqual("Hard coded RSA private key found in conf/rsa.pk", finding.title)
                 description = "**Rule Id:** RSA-PK"
                 self.assertEqual(description, finding.description)
-                #self.assertIn("tag1", finding.unsaved_tags)
-                #self.assertIn("tag2", finding.unsaved_tags)
+                self.assertIn("tag1", finding.unsaved_tags)
+                self.assertIn("tag2", finding.unsaved_tags)
             with self.subTest(i=2):
                 finding = findings[2]
                 self.assertEqual("Hard coded Generic API Key found in tests/api.py", finding.title)
-                description = """**Commit message:**
+                description = """**Secret:** dfjksdjfs3294dfjlsdaf213
+**Match:** apikey = "dfjksdjfs3294dfjlsdaf213"
+**Commit message:**
 ```
 Lorem ipsum dolor sit amet,
 consetetur sadipscing elitr,

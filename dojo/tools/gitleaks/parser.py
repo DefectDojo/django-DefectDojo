@@ -9,6 +9,8 @@ class GitleaksParser:
 
     """A class that can be used to parse the Gitleaks JSON report files"""
 
+    custom_tag = settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")
+
     def get_scan_types(self):
         return ["Gitleaks Scan"]
 
@@ -17,7 +19,7 @@ class GitleaksParser:
 
     def get_description_for_scan_types(self, scan_type):
         return "Import Gitleaks Scan findings in JSON format."
-
+    
     def get_findings(self, filename, test):
         """Converts a Gitleaks report to DefectDojo findings"""
         issues = json.load(filename)
@@ -77,9 +79,9 @@ class GitleaksParser:
             + "\n```"
         )
 
-        severity = "Critical"
-        #if "Github" in reason or "AWS" in reason or "Heroku" in reason:
-        #    severity = "Critical"
+        severity = "High"
+        if "Github" in reason or "AWS" in reason or "Heroku" in reason or self.custom_tag:
+            severity = "Critical"
 
         finding = Finding(
             title=titleText,
@@ -93,8 +95,10 @@ class GitleaksParser:
             static_finding=True,
         )
         # manage tags
-        #finding.unsaved_tags = issue.get("tags", "").split(", ")
-        finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")]
+        if self.custom_tag():
+            finding.unsaved_tags = [self.custom_tag()]
+        else:
+            finding.unsaved_tags = issue.get("tags", "").split(", ")
 
         dupe_key = hashlib.sha256(
             (issue["offender"] + file_path + str(line)).encode("utf-8"),
@@ -107,8 +111,7 @@ class GitleaksParser:
         reason = issue.get("Description")
         line = issue.get("StartLine")
         line = int(line) if line else 0
-        #dont need match for security
-        #match = issue.get("Match")
+        match = issue.get("Match")
         secret = issue.get("Secret")
         file_path = issue.get("File")
         commit = issue.get("Commit")
@@ -123,11 +126,11 @@ class GitleaksParser:
         title = f"Hard coded {reason} found in {file_path}"
 
         description = ""
-        #dont add the secret and match to description for security
-        #if secret:
-        #    description += f"**Secret:** {secret}\n"
-        #if match:
-        #    description += f"**Match:** {match}\n"
+        if not self.custom_tag():
+            if secret:
+                description += f"**Secret:** {secret}\n"
+            if match:
+                description += f"**Match:** {match}\n"
         if message:
             if len(message.split("\n")) > 1:
                 description += (
@@ -147,7 +150,10 @@ class GitleaksParser:
         if description[-1] == "\n":
             description = description[:-1]
 
-        severity = "Critical"
+        if self.custom_tag():
+            severity = "Critical"
+        else:
+            severity = "High"
 
         dupe_key = hashlib.md5(
             (title + secret + str(line)).encode("utf-8"),
@@ -173,7 +179,9 @@ class GitleaksParser:
                 static_finding=True,
                 nb_occurences=1,
             )
-            finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")]
-            #if tags:
-            #    finding.unsaved_tags = tags
+            if self.custom_tag():
+                finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")]
+            else:
+                if tags:
+                    finding.unsaved_tags = tags
             dupes[dupe_key] = finding
