@@ -48,6 +48,7 @@ from dojo.transfer_findings.serializers import TransferFindingFindingSerializer,
 from dojo.risk_acceptance.serializers import RiskAcceptanceEmailSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import role_has_global_permission, user_has_permission 
+from dojo.authorization.exclusive_permissions import exclude_test_or_finding_with_tag
 from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
@@ -958,7 +959,7 @@ class FindingViewSet(
             "test__engagement__product",
             "test__engagement__product__prod_type",
         )
-
+        findings = exclude_test_or_finding_with_tag(findings)
         return findings.distinct()
 
     def get_serializer_class(self):
