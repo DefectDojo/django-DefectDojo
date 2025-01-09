@@ -369,19 +369,7 @@ class BaseListFindings:
     def get_fully_filtered_findings(self, request: HttpRequest):
         findings = self.get_filtered_findings()
         return self.filter_findings_by_form(request, findings)
-    
-    # def exclude_test_or_finding_with_tag(self, filtered_findings_qs, user, product):
-    #     if (
-    #         user_has_exclusive_permission(
-    #             user, product, Permissions["Product_Tag_Red_Team"]
-    #         )
-    #     ):
-    #         pass
-    #     else:
-    #         filtered_findings_qs = filtered_findings_qs.exclude(tags__name="red_team")
-    #     return filtered_findings_qs
-
-
+ 
 class ListFindings(View, BaseListFindings):
     def get_initial_context(self, request: HttpRequest):
         context = {
