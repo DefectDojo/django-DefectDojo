@@ -149,6 +149,14 @@ If this doesn’t work correctly, it could be due to a Firewall issue on your Ji
 
 * DefectDojo's Firewall Rules include a checkbox for **Jira Cloud,** which needs to be enabled before DefectDojo can receive Webhook messages from Jira.
 
+## Disconnecting from Jira
+
+Jira integrations can be removed from your instance only if no related Issues have been created.  If Issues have been created, there is no way to completely remove a Jira Instance from DefectDojo.
+
+However, you can disable your Jira integration by disabling it at the Product level.  From the **Edit Product** form (Classic UI) or from the **Jira Product Settings** (Beta UI) you can uncheck the "Enable Connection With Jira Project" option.  This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
+
+See our guide on [Adding Jira To a Product](../jira_integration/add_jira_to_product) for more information on Product-level settings.
+
 ## Next steps
 
 * Now that you've set up your Jira Configuration, **[link it to one or more of your Products](../add_jira_to_product)** to have your Findings populate into Jira.
