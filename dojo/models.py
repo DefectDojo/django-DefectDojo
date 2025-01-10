@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import warnings
+from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -1575,7 +1576,10 @@ class Engagement(models.Model):
         import dojo.finding.helper as helper
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
-        calculate_grade(self.product)
+        with suppress(Product.DoesNotExist):
+            # Suppressing a potential issue created from async delete removing
+            # related objects in a separate task
+            calculate_grade(self.product)
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -2185,7 +2189,10 @@ class Test(models.Model):
     def delete(self, *args, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        calculate_grade(self.engagement.product)
+        with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
+            # Suppressing a potential issue created from async delete removing
+            # related objects in a separate task
+            calculate_grade(self.engagement.product)
 
     @property
     def statistics(self):
@@ -2745,7 +2752,10 @@ class Finding(models.Model):
         import dojo.finding.helper as helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        calculate_grade(self.test.engagement.product)
+        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+            # Suppressing a potential issue created from async delete removing
+            # related objects in a separate task
+            calculate_grade(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
