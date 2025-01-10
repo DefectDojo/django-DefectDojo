@@ -30,4 +30,13 @@ urlpatterns = [
     re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/mark-as-rejected/$', 
             views.reject_finding_exclusion_request, 
             name='reject_finding_exclusion_request'),
+    re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/mark-as-expired/$', 
+            views.expire_finding_exclusion_request, 
+            name='expire_finding_exclusion_request'),
+    re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/edit-exclusion/$', 
+            views.edit_finding_exclusion_request, 
+            name='edit_finding_exclusion_request'),
+    re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/edit/$', 
+            views.edit_finding_exclusion, 
+            name='edit_finding_exclusion'),
 ]

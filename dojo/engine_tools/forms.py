@@ -17,7 +17,14 @@ class CreateFindingExclusionForm(forms.ModelForm):
     class Meta:
         model = FindingExclusion
         fields = ["type", "unique_id_from_tool", "reason"]
-        
+
+
+class EditFindingExclusionForm(forms.ModelForm):
+
+    class Meta:
+        model = FindingExclusion
+        fields = ["type", "unique_id_from_tool", "reason", "expiration_date", "status"]
+
 
 class FindingExclusionDiscussionForm(forms.ModelForm):
     class Meta:

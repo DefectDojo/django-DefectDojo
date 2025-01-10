@@ -1,5 +1,6 @@
 import crum
 from django import template
+from django.conf import settings
 
 from dojo.authorization.authorization import user_has_configuration_permission as configuration_permission
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission
@@ -111,3 +112,13 @@ def is_in_group(user, group_name):
     if user.is_authenticated:
         return user.groups.filter(dojo_group__name=group_name).exists()
     return False
+
+
+@register.filter
+def is_in_reviewer_group(user):
+    return is_in_group(user, settings.REVIEWER_GROUP_NAME)
+
+
+@register.filter
+def is_in_approver_group(user):
+    return is_in_group(user, settings.APPROVER_GROUP_NAME)

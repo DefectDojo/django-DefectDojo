@@ -4,9 +4,9 @@ from dojo.utils import get_page_items, add_breadcrumb
 from dojo.notifications.helper import create_notification
 from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.filters import FindingExclusionFilter
-from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm
+from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm, EditFindingExclusionForm
 from dojo.engine_tools.helpers import (
-    add_findings_to_whitelist, get_approvers_members, get_reviewers_menbers, Constants
+    add_findings_to_whitelist, get_approvers_members, get_reviewers_menbers, Constants, expire_finding_exclusion_immediately
 )
 
 # Utils
@@ -43,7 +43,7 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     
     duplicate_finding_exclusions = FindingExclusion.objects.filter(
             unique_id_from_tool__in=[default_unique_id],
-    ).first()
+    ).exclude(status="Expired").first()
     
     if duplicate_finding_exclusions:
         if duplicate_finding_exclusions.status == "Accepted":
@@ -78,7 +78,6 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             exclusion = form.save(commit=False)
             exclusion.created_by = request.user
-            exclusion.expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
             exclusion.save()
             
             cve = request.POST.get(key="unique_id_from_tool")
@@ -181,114 +180,153 @@ def review_finding_exclusion_request(
     Returns:
         HttpResponse: Http response object via Django template
     """
-    if request.method == 'POST':
-        if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
-            raise PermissionDenied
-        
-        finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
-        
-        finding_exclusion.status = "Reviewed"
-        finding_exclusion.reviewed_at = datetime.now()
-        finding_exclusion.status_updated_at = datetime.now()
-        finding_exclusion.status_updated_by = request.user
-        finding_exclusion.save()
-        
-        create_notification(event="finding_exclusion_request",
-                            title=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}",
-                            description=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
-                            url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                            recipients=[finding_exclusion.created_by.username])
-        
-        approvers = get_approvers_members()
-        
-        create_notification(event="finding_exclusion_request",
-                            title=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}",
-                            description=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
-                            url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                            recipients=approvers)
-        
-        messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Finding Exclusion reviewed.",
-                extra_tags="alert-success")
-            
-        return redirect('finding_exclusion', fxid=fxid)
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+        raise PermissionDenied
     
+    finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+    
+    finding_exclusion.status = "Reviewed"
+    finding_exclusion.reviewed_at = datetime.now()
+    finding_exclusion.status_updated_at = datetime.now()
+    finding_exclusion.status_updated_by = request.user
+    finding_exclusion.save()
+    
+    create_notification(event="finding_exclusion_request",
+                        title=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}",
+                        description=f"Review applied to the whitelisting request - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+                        url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+                        recipients=[finding_exclusion.created_by.username])
+    
+    approvers = get_approvers_members()
+    
+    create_notification(event="finding_exclusion_request",
+                        title=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}",
+                        description=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+                        url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+                        recipients=approvers)
+    
+    messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding Exclusion reviewed.",
+            extra_tags="alert-success")
+        
     return redirect('finding_exclusion', fxid=fxid)
+    
+
 
 
 def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
-    if request.method == 'POST':
-        if not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
-            raise PermissionDenied
-        try:
-            with transaction.atomic():
-                finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
-                    
-                finding_exclusion.status = "Accepted"
-                finding_exclusion.final_status = "Accepted"
-                finding_exclusion.accepted_at = datetime.now()
-                finding_exclusion.status_updated_at = datetime.now()
-                finding_exclusion.status_updated_by = request.user
-                finding_exclusion.save()
+    if not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
+        raise PermissionDenied
+    try:
+        with transaction.atomic():
+            finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
                 
-                relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
-                add_findings_to_whitelist(finding_exclusion.unique_id_from_tool, str(relative_url))
-                      
-        except Exception as e:
-            messages.add_message(
-                    request,
-                    messages.ERROR,
-                    f"An error occurred while accepting this finding exclusion, please try again later. Details: {e.with_traceback()}",
-                    extra_tags="alert-success")
-            return redirect('finding_exclusion', fxid=fxid)
-        
-        create_notification(event="finding_exclusion_approved",
-                            title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
-                            description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
-                            url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                            recipients=[finding_exclusion.created_by.username])
-        
+            finding_exclusion.status = "Accepted"
+            finding_exclusion.final_status = "Accepted"
+            finding_exclusion.accepted_at = datetime.now()
+            finding_exclusion.status_updated_at = datetime.now()
+            finding_exclusion.status_updated_by = request.user
+            finding_exclusion.expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
+            finding_exclusion.save()
+            
+            relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
+            add_findings_to_whitelist.apply_async(args=(finding_exclusion.unique_id_from_tool, str(relative_url),))
+                    
+    except Exception as e:
         messages.add_message(
                 request,
-                messages.SUCCESS,
-                "Finding Exclusion accepted.",
+                messages.ERROR,
+                f"An error occurred while accepting this finding exclusion, please try again later. Details: {e.with_traceback()}",
                 extra_tags="alert-success")
-            
         return redirect('finding_exclusion', fxid=fxid)
     
+    create_notification(event="finding_exclusion_approved",
+                        title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
+                        description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
+                        url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+                        recipients=[finding_exclusion.created_by.username])
+    
+    messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding Exclusion accepted.",
+            extra_tags="alert-success")
+        
     return redirect('finding_exclusion', fxid=fxid)
+    
+
 
 
 def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
-    if request.method == 'POST':
-        if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value) or \
-           not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
-            raise PermissionDenied
-        finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value) and \
+        not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
+        raise PermissionDenied
+    finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+    
+    finding_exclusion.status = "Rejected"
+    finding_exclusion.final_status = "Rejected"
+    finding_exclusion.status_updated_at = datetime.now()
+    finding_exclusion.status_updated_by = request.user
+    finding_exclusion.save()
+    
+    create_notification(
+        event="finding_exclusion_rejected",
+        title=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}",
+        description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+        url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+        recipients=[finding_exclusion.created_by.username]
+    )
+    
+    messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding Exclusion rejected.",
+            extra_tags="alert-success")
         
-        finding_exclusion.status = "Rejected"
-        finding_exclusion.final_status = "Rejected"
-        finding_exclusion.status_updated_at = datetime.now()
-        finding_exclusion.status_updated_by = request.user
-        finding_exclusion.save()
-        
-        create_notification(
-            event="finding_exclusion_rejected",
-            title=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}",
-            description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
-            url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-            recipients=[finding_exclusion.created_by.username]
-        )
-        
-        messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Finding Exclusion rejected.",
-                extra_tags="alert-success")
+    return redirect('finding_exclusion', fxid=fxid)
+    
             
-        return redirect('finding_exclusion', fxid=fxid)
+def expire_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value) and \
+        not is_in_group(request.user, Constants.APPROVERS_CYBERSECURITY_GROUP.value):
+        raise PermissionDenied
+    finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+    
+    expire_finding_exclusion_immediately.apply_async(args=(finding_exclusion,))
+    
+    messages.add_message(
+            request,
+            messages.SUCCESS,
+            f"Finding Exclusion {finding_exclusion.uuid} expired.",
+            extra_tags="alert-success")
     
     return redirect('finding_exclusion', fxid=fxid)
+    
+
+def edit_finding_exclusion(request: HttpRequest, fxid: str) -> HttpResponse:
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+        raise PermissionDenied
+
+    finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
+
+    if request.method == 'POST':
+        form = EditFindingExclusionForm(request.POST, instance=finding_exclusion)
+        if form.is_valid():
+            form.save()
+            
+            return redirect('finding_exclusion', fxid=fxid)
+    else:
+        form = EditFindingExclusionForm(instance=finding_exclusion)
+
+    return render(request, 'dojo/edit_finding_exclusion.html', {'form': form})
+
+
+def edit_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+        raise PermissionDenied
+    
+    return redirect('edit_finding_exclusion', fxid=fxid)
+        
         

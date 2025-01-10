@@ -1,5 +1,6 @@
 # Utils
 from django.db.models import QuerySet, Q
+from django.db import transaction
 from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
@@ -25,8 +26,9 @@ class Constants(Enum):
     VULNERABILITY_ID_HELP_TEXT = "Vulnerability technical id from the source tool. " \
                                  "Allows to track unique vulnerabilities."
     ON_WHITELIST = "On Whitelist"
-    REVIEWERS_MAINTAINER_GROUP = "Reviewers_Maintainer"
-    APPROVERS_CYBERSECURITY_GROUP = "Approvers_Cibersecurity"
+    REVIEWERS_MAINTAINER_GROUP = settings.REVIEWER_GROUP_NAME
+    APPROVERS_CYBERSECURITY_GROUP = settings.APPROVER_GROUP_NAME
+    API_IMPORTER_GROUP = settings.API_IMPORTER_GROUP_NAME
     
     
 def get_reviewers_menbers():
@@ -43,28 +45,6 @@ def get_approvers_members():
     return [member.user.username for member in approvers_members if member]
 
 
-@app.task
-def check_expiring_findingexclusions():
-    days_before_expiration = 5
-    expiration_threshold = timezone.now() + timedelta(days=days_before_expiration)
-    
-    expiring_objects = FindingExclusion.objects.filter(
-        expiration_date__lte=expiration_threshold,
-        notification_sent=False
-    ).exclude(status__in=['Accepted', 'Rejected'])
-    
-    for fex in expiring_objects:
-        create_notification(
-            event="other",
-            title=f"{fex.unique_id_from_tool} | Whitelist request about to expire.",
-            description=f"The request to whitelist {fex.unique_id_from_tool} expires on {fex.expiration_date.date()}, it is recommended to review the request as soon as possible.",
-            url=reverse("finding_exclusion", args=[str(fex.pk)]),
-        )
-        
-        fex.notification_sent = True
-        fex.save()
-        
-
 def get_note(author, message):
     note, _ = Notes.objects.get_or_create(
         author=author,
@@ -73,6 +53,72 @@ def get_note(author, message):
     return note
 
 
+def remove_finding_from_whitelist(finding: Finding, note: Notes) -> Finding:
+    finding.active = True
+    finding.risk_status = None
+    finding.notes.add(note)
+    finding.tags.remove("white_list")
+    
+    return finding
+
+
+def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
+    try:
+        with transaction.atomic():
+            expired_fex.status = "Expired"
+            expired_fex.save()
+            system_user = get_user(settings.SYSTEM_USER)
+            logger.info(f"Expired finding exclusion: {expired_fex}")
+            note = get_note(system_user, "Finding has been removed from the whitelist as it has expired.")
+            
+            findings = Finding.objects.filter(
+                cve=expired_fex.unique_id_from_tool,
+                active=False,
+                tags__name__icontains="white_list"
+            ).prefetch_related("tags", "notes")
+            
+            findings_to_update = []
+            
+            for finding in findings:
+                finding = remove_finding_from_whitelist(finding, note)
+                findings_to_update.append(finding)
+                logger.info(f"Removed finding {finding.id} from whitelist.")
+            
+            Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
+            
+            maintainers = get_reviewers_menbers()
+            approvers = get_approvers_members()
+            
+            create_notification(
+                event="finding_exclusion_expired",
+                title=f"The finding exclusion for {expired_fex.unique_id_from_tool} has expired.",
+                description="All findings whitelisted via this finding exclusion will be removed from the whitelist.",
+                url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
+                recipients=maintainers + approvers
+            )
+    except Exception as e:
+        logger.error(
+            f"Error processing expired exclusion {expired_fex.uuid}: {str(e)}"
+        )
+
+@app.task
+def expire_finding_exclusion_immediately(finding_exclusion_id: str) -> None:
+    finding_exclusion = FindingExclusion.objects.get(uuid=finding_exclusion_id)
+    expire_finding_exclusion(finding_exclusion)
+
+
+@app.task
+def check_expiring_findingexclusions():
+    expired_finding_exclusions = FindingExclusion.objects.filter(
+        type="white_list",
+        status="Accepted",
+        expiration_date__lt=timezone.now()
+    )
+    
+    for expired_fex in expired_finding_exclusions:
+        expire_finding_exclusion.apply_async(args=(str(expired_fex.uuid),))
+        
+
 @app.task
 def add_findings_to_whitelist(unique_id_from_tool, relative_url):
     findings_to_update = Finding.objects.filter(
@@ -80,11 +126,12 @@ def add_findings_to_whitelist(unique_id_from_tool, relative_url):
         active=True
     ).filter(tag_filter)
     
+    finding_exclusion_url = get_full_url(relative_url)
+    system_user = get_user(settings.SYSTEM_USER)
+    message = f"Finding added to white list, for more details check the finding exclusion request: {finding_exclusion_url}"
+    note = get_note(system_user, message)
+    
     for finding in findings_to_update:
-        finding_exclusion_url = get_full_url(relative_url)
-        system_user = get_user(settings.SYSTEM_USER)
-        message = f"Finding added to white list, for more details check the finding exclusion request: {finding_exclusion_url}"
-        note = get_note(system_user, message)
         if 'white_list' not in finding.tags:
             finding.tags.add("white_list")
         finding.active = False

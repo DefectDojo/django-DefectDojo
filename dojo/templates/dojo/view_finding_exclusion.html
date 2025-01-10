@@ -43,7 +43,7 @@
     <div class="col-md-10">
         <div class="panel panel-default">
             <div class="panel-heading">
-                {% if request.user|is_in_group:"Reviewers_Maintainer" %}
+                {% if request.user|is_in_reviewer_group %}
                     <a title="Add Exclusion" class="pull-right btn btn-sm btn-primary" href="{% url 'create_finding_exclusion' %}"><span class="fa-solid fa-plus"></span></a>
                 {% endif %}
                 {{ name }}
@@ -73,11 +73,12 @@
                                 <td>{{exclusion.expiration_date}}</td>
                                 <td>{{exclusion.reason}}</td>
                                 <td>
-                                    {% if exclusion.status in "Pending,Accepted,Rejected,Reviewed" %}
+                                    {% if exclusion.status in "Pending,Accepted,Rejected,Reviewed,Expired" %}
                                         <span style="background-color: 
                                             {% if exclusion.status == 'Pending' %}#1B30DE
                                             {% elif exclusion.status == 'Accepted' %}#096C11
                                             {% elif exclusion.status == 'Rejected' %}#d11d38
+                                            {% elif exclusion.status == 'Expired' %}#d11d38
                                             {% else %}#b97a0c
                                             {% endif %}" 
                                             class="pass_fail Pass">

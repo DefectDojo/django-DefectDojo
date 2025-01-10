@@ -459,6 +459,11 @@ env = environ.FileAwareEnv(
     # tags for filter to finding exclusion
     DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
     
+    # Reviewer and approver groups
+    DD_REVIEWER_GROUP_NAMES=(str, ""),
+    DD_APPROVER_GROUP_NAMES=(str, ""),
+    DD_API_IMPORTER_GROUP_NAMES=(str, ""),
+    
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
@@ -1031,6 +1036,11 @@ FOOTER_VERSION = env("DD_FOOTER_VERSION")
 # Django-tagging settings
 FORCE_LOWERCASE_TAGS = env("DD_FORCE_LOWERCASE_TAGS")
 MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
+
+# Approver and reviewer group names
+APPROVER_GROUP_NAME = env("DD_APPROVER_GROUP_NAMES")
+REVIEWER_GROUP_NAME = env("DD_REVIEWER_GROUP_NAMES")
+API_IMPORTER_GROUP_NAME = env("DD_API_IMPORTER_GROUP_NAMES")
 
 
 # ------------------------------------------------------------------------------

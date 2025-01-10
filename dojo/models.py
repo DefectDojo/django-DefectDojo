@@ -4290,6 +4290,9 @@ class Notifications(models.Model):
     finding_exclusion_approved = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
         verbose_name=_("Finding exclusion approved"),
         help_text=_("Get notified of finding exclusion requests approved"))
+    finding_exclusion_expired = MultiSelectField(choices=NOTIFICATION_CHOICES, default=NOTIFICATION_CHOICE_ALERT, blank=True,
+        verbose_name=_("Finding exclusion expired"),
+        help_text=_("Get notified of finding exclusion requests expired"))
 
     class Meta:
         constraints = [
@@ -4336,6 +4339,7 @@ class Notifications(models.Model):
                 result.finding_exclusion_request = {*result.finding_exclusion_request, *notifications.finding_exclusion_request}
                 result.finding_exclusion_rejected = {*result.finding_exclusion_rejected, *notifications.finding_exclusion_rejected}
                 result.finding_exclusion_approved = {*result.finding_exclusion_approved, *notifications.finding_exclusion_approved}
+                result.finding_exclusion_expired = {*result.finding_exclusion_expired, *notifications.finding_exclusion_expired}
         return result
 
 
