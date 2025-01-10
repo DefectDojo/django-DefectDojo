@@ -185,6 +185,9 @@ def exclude_test_or_finding_with_tag(
 
     exclusive_permission = None
 
+    if not tests_or_findings:
+        return tests_or_findings
+
     if product is None and len(tests_or_findings) > 0:
         product = get_product(tests_or_findings[0])
 
