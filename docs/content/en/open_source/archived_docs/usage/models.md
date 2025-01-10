@@ -3,9 +3,10 @@ title: "Core data classes"
 description: "DefectDojo is made to be flexible to conform to your program, rather than making your team conform to the tool."
 draft: false
 weight: 1
+exclude_search: true
 ---
 
-{{ readFile "/docs/assets/svgs/DD-Hierarchy.svg" | safeHTML }}
+![image](images/dd-hierarchy.png)
 
 ## Product Type
 
