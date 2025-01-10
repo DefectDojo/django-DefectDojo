@@ -98,8 +98,6 @@ class KubescapeParser:
 
                         steps_to_reproduce = "The following rules have failed :" + "\n"
                         steps_to_reproduce += "\t**Rules:** " + str(json.dumps(control["rules"], indent=4)) + "\n"
-                        steps_to_reproduce += "Resource object may contain evidence:" + "\n"
-                        steps_to_reproduce += "\t**Resource object:** " + str(json.dumps(resource["object"], indent=4))
 
                         find = Finding(
                             title=textwrap.shorten(title, 150),
