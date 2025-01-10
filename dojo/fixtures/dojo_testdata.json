@@ -3143,5 +3143,19 @@
       "note": null,
       "owner": 2
     }
+  },
+  {
+    "model": "dojo.exclusivepermission",
+    "pk": 1,
+    "fields": {
+      "name": "Product_Tag_Red_Team",
+      "short_name": "Red Team",
+      "description": "Permisos para ver los finding del regulatorio",
+      "validation_field": "red_team",
+      "status": true,
+      "members": [
+        1
+      ]
+    }
   }
 ]

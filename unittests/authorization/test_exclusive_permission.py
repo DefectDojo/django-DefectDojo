@@ -29,17 +29,12 @@ class TestExclusivePermissions(DojoTestCase):
 
         cls.user_developer = Dojo_User.objects.get(id=2)
 
+        cls.permission = ExclusivePermission.objects.get(id=1)
+
         cls.product_member_developer = Product_Member.objects.create(
             product=cls.product,
             user=cls.user_developer,
             role=Role.objects.get(name='Developer'))
-
-        cls.permission = ExclusivePermission.objects.create(
-            name='Product_Tag_Red_Team',
-            description="view findings with tags",
-            validation_field="red_team",
-            short_name="red team")
-
 
         cls.product_member = Product_Member.objects.create(
             product=cls.product,
