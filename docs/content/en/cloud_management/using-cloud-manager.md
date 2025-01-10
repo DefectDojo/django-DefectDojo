@@ -1,6 +1,7 @@
 ---
 title: "Using the Cloud Manager"
 description: "Manage your subscription and account settings"
+weight: 1
 ---
 
 Logging into DefectDojo's Cloud Manager allows you to configure your account settings and manage your subscription with DefectDojo Cloud.
@@ -16,11 +17,11 @@ This page allows you to request a [new, or additional Cloud instance](../set-up-
 The Subscription Management page shows all of your currently active Cloud instances, and allows you to configure the Firewall settings for each instance.
 
 ### Changing your Firewall Settings
-![image](images/Using_the_Cloud_Manager.png)
+![image](images/using_the_cloud_manager.png)
 
 Once on the **Edit Subscription** page, enter the IP Address, Mask, and Label for the rule you wish to add. If more than one firewall rule is needed, click **Add New Range** to create a new empty rule.
 
-![image](images/Using_the_Cloud_Manager_2.png)
+![image](images/using_the_cloud_manager_2.png)
 
 Here, you can also open your firewall to external services (GitHub & Jira Cloud).  You can also disable your firewall entirely, if you wish, by selecting **Proceed Without Firewall** from the menu.
 
@@ -37,14 +38,14 @@ Enter the email associated with the user's Cloud Portal account, and click Submi
 
 The Resources page contains a Contact Us form, which you can use to get in touch with our Support team.
 
-![image](images/Using_the_Cloud_Manager_3.png)
+![image](images/using_the_cloud_manager_3.png)
 
 ## Tools
 <https://cloud.defectdojo.com/external_tools/defectdojo-cli>
 
 The Tools page is one of the places where you can download external Pro tools, such as Universal Importer or DefectDojo CLI.  These tools are external add-ons which can be used to quickly build a command-line import pipeline in your network. For more information about these tools, see the [External Tools](../../connecting_your_tools/external_tools/) documentation.
 
-![image](images/Using_the_Cloud_Manager_6.png)
+![image](images/using_the_cloud_manager_6.png)
 
 
 ## Account Settings
@@ -62,7 +63,7 @@ The account settings page has four sections:
 
 Note that this will only add MFA to your DefectDojo Cloud login, not to the login for your DefectDojo app.
 
-![image](images/Using_the_Cloud_Manager_4.png)
+![image](images/using_the_cloud_manager_4.png)
 
 1. Begin by installing an Authenticator app which supports QR code authentication on your smartphone or computer.
 2. Once you've done this, click **Generate QR Code**.

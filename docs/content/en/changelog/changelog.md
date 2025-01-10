@@ -5,11 +5,41 @@ description: "DefectDojo Changelog"
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
-For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrate notes](../../open_source/upgrading/upgrading_guide).
+For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
+
+## Dec 31, 2024: v2.41.4
+
+- **(API)** 'Force To Active / Verified' flag is no longer required when calling `/import-scan`, `/reimport-scan` endponts: a value of True now forces to Active, False now forces to Inactive, while setting a value of none (or not using the flag) will use the tool's status.
+- **(Beta UI)** Added ability to regenerate / copy your API token
+- **(Beta UI)** Fixed bug preventing date / planned remediation dates from being added via Bulk Edit
+- **(Import)** Added fields for EPSS score and percentile to Generic Findings Import parser
+
+## Dec 24, 2024: v2.41.3
+
+- **(API)** Added `/request_response_pairs` endpoint.
+- **(Beta UI)** When sorting by Severity, Findings will now be ordered by **severity level** rather than alphabetically.
+- **(Beta UI)** On the Findings table, the Endpoint Hosts column has been replaced with a numerical count of affected Endpoints.
+- **(Beta UI)** On the Findings table, the Vulnerability ID field can now be filtered with "starts_with", "ends_with" filters.
+- **(Beta UI)** Added Edit Test Type form: you can now edit the properties of a custom Test Type to determine if it is Active or Inactive, or a Static Scan or Dynamic Scan Test.
+- **(Beta UI)** Same Tool Deduplication Settings / Test Type field is now searchable.
+- **(Tools)** Qualys HackerGuardian now uses hashcode against "title", "severity", "description" for deduplication.
+- **(Tools)** Horusec scan now uses hashcode against "title", "description", "file_path", and "line" for deduplication.
+
+## Dec 16, 2024: v2.41.2
+
+- **(Connectors)** Remove the 'Beta' logo from Connectors
+
+## Dec 9, 2024: v2.41.1
+
+- **(API)** When using the jira_finding_mappings API endpoint, trying to update a finding's Jira mapping with a Jira issue that is already assigned to another finding will now raise a validation error.
+- **(Beta UI)** A Test's Import History is now paginated by default.
+- **(Findings)** New Filter: 'Has Any JIRA' which accounts for Findings with single Issues or Findings that were pushed to Jira as part of a Group.
+- **(Classic UI)** Filters have been added to the Product Type view.  This is useful for when a single Product Type contains many Products which need to be filtered down.
+- **(Classic UI)** Reported Finding Severity by Month graph now tracks the X axis by month correctly.
 
 ## Dec 2, 2024: v2.41.0
 
-- **(Api)** `engagements/{id}/update_jira_epic` endpoint path added so that users can now push an updated Engagement to Jira, without creating a new Jira Epic.
+- **(API)** `engagements/{id}/update_jira_epic` endpoint path added so that users can now push an updated Engagement to Jira, without creating a new Jira Epic.
 - **(Beta UI)** Columns can now be reordered in tables, by clicking and dragging the column header.
 
 ![image](images/reorder-columns.png)
@@ -139,7 +169,7 @@ configuration fields.
 
 
 
-## Sept 9, 2024: v2.39.1
+## Sept 9, 2024: v2.38.1
 
 - **(Beta UI)**  Clearing a date filter and re-applying it no longer throws a 400 error.
 - **(Dashboard)**  Dashboard Tag Filters now work correctly in both legacy and beta UIs.  

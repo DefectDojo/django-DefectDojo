@@ -31,6 +31,7 @@ from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
 from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
+    BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
     CredentialsMappingViewSet,
     CredentialsViewSet,
@@ -3039,6 +3040,30 @@ class NotificationWebhooksTest(BaseClass.BaseClassTest):
         self.update_fields = {
             "header_name": "Auth",
             "header_value": "token x",
+        }
+        self.test_type = TestType.STANDARD
+        self.deleted_objects = 1
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class BurpRawRequestResponseTest(BaseClass.BaseClassTest):
+    fixtures = ["dojo_testdata.json"]
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = BurpRawRequestResponse
+        self.endpoint_path = "request_response_pairs"
+        self.viewname = "request_response_pairs"
+        self.viewset = BurpRawRequestResponseViewSet
+        self.payload = {
+            "finding": 2,
+            "burpRequestBase64": "cmVxdWVzdAo=",
+            "burpResponseBase64": "cmVzcG9uc2UK",
+        }
+
+        self.update_fields = {
+            "finding": 2,
+            "burpRequestBase64": "cmVxdWVzdCAtIGVkaXRlZAo=",
+            "burpResponseBase64": "cmVzcG9uc2UgLSBlZGl0ZWQK",
         }
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1
