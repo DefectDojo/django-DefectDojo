@@ -6,7 +6,7 @@ from .prefetcher import _Prefetcher
 
 class PrefetchListMixin(ListModelMixin):
     def list(self, request, *args, **kwargs):
-        prefetch_params = request.GET.get("prefetch", "").split(",")
+        prefetch_params = request.GET.getlist("prefetch")
         prefetcher = _Prefetcher()
 
         # Apply the same operations as the standard list method defined in the
@@ -30,7 +30,7 @@ class PrefetchListMixin(ListModelMixin):
 
 class PrefetchRetrieveMixin(RetrieveModelMixin):
     def retrieve(self, request, *args, **kwargs):
-        prefetch_params = request.GET.get("prefetch", "").split(",")
+        prefetch_params = request.GET.getlist("prefetch")
         prefetcher = _Prefetcher()
 
         entry = self.get_object()
