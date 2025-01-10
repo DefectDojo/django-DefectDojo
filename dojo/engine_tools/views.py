@@ -294,7 +294,7 @@ def expire_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         raise PermissionDenied
     finding_exclusion = get_object_or_404(FindingExclusion, uuid=fxid)
     
-    expire_finding_exclusion_immediately.apply_async(args=(finding_exclusion,))
+    expire_finding_exclusion_immediately.apply_async(args=(str(finding_exclusion.uuid),))
     
     messages.add_message(
             request,
