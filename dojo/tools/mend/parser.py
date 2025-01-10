@@ -250,7 +250,7 @@ class MendParser:
             tree_node = content["response"]
             if tree_node:
                 for node in tree_node:
-                    if node.get("findingInfo", {}).get("status") == "ACTIVE" or "OPEN":
+                    if node.get("findingInfo", {}).get("status") == "ACTIVE":
                         findings.append(_build_common_output(node))
 
         def create_finding_key(f: Finding) -> str:
