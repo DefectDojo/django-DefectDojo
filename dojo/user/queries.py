@@ -25,7 +25,7 @@ def get_authorized_users_for_product_type(users, product_type, permission):
         .filter(product_type=product_type, role__in=roles)
     global_roles = Global_Role.objects.filter(role__in=roles)
     group_members = Dojo_Group_Member.objects \
-        .filter(Q(group__in=[ptg.group for ptg in product_type_groups]) \
+        .filter(Q(group__in=[ptg.group for ptg in product_type_groups])
                 | Q(group__in=[gr.group for gr in global_roles])) \
         .select_related("user")
 
@@ -55,7 +55,7 @@ def get_authorized_users_for_product_and_product_type(users, product, permission
     group_members = Dojo_Group_Member.objects \
         .filter(
             Q(group__in=[pg.group for pg in product_groups])
-            | Q(group__in=[ptg.group for ptg in product_type_groups]) \
+            | Q(group__in=[ptg.group for ptg in product_type_groups])
             | Q(group__in=[gr.group for gr in global_roles])) \
         .select_related("user")
 
@@ -64,7 +64,6 @@ def get_authorized_users_for_product_and_product_type(users, product, permission
         | Q(id__in=[gm.user.id for gm in group_members])
         | Q(global_role__role__in=roles)
         | Q(is_superuser=True))
-
 
 
 # Cached because it is a complex SQL query and it is called 3 times for the engagement lists in products
