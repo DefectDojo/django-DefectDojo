@@ -3076,14 +3076,6 @@ class JIRAFindingForm(forms.Form):
         elif self.cleaned_data.get("push_to_jira", None):
             active = self.finding_form["active"].value()
             verified = self.finding_form["verified"].value()
-            print("\n\nJIRAFindingForm(clean)")
-            print(f"active: {active} - {type(active)}")
-            print(f"verified: {verified} - {type(verified)}")
-            print(f'get_system_setting("enforce_verified_status", True): {get_system_setting("enforce_verified_status", True)} - {type(get_system_setting("enforce_verified_status", True))}')
-            print(f'get_system_setting("enforce_verified_status_jira", True): {get_system_setting("enforce_verified_status_jira", True)} - {type(get_system_setting("enforce_verified_status_jira", True))}')
-            print(f'(get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)): {(get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True))} - {type((get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)))}')
-            print(f'not active or (not verified and (get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True))): {not active or (not verified and (get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)))} - {type(not active or (not verified and (get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True))))}')
-            print("\n\n")
             if not active or (not verified and (get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True))):
                 logger.debug("Findings must be active and verified to be pushed to JIRA")
                 error_message = "Findings must be active and verified to be pushed to JIRA"

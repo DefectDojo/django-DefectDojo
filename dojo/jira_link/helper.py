@@ -1116,9 +1116,6 @@ def get_issuetype_fields(
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta' failed with status: {e.status_code} and message: {e.text}"
                 raise
-            print("\n\n")
-            print(meta)
-            print("\n\n")
             project = None
             try:
                 project = meta["projects"][0]
