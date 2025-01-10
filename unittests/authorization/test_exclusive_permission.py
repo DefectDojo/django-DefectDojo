@@ -64,7 +64,7 @@ class TestExclusivePermissions(DojoTestCase):
                                        mock_get_exclusive_permission,
                                        mock_get_product):
 
-        Finding.objects.first().tags.add("red_team")
+        Finding.objects.first().tags.add("tag_name_test")
         obj = Finding.objects.first()
         mock_get_product.return_value = self.product
         mock_get_exclusive_permission.return_value = [
@@ -84,7 +84,7 @@ class TestExclusivePermissions(DojoTestCase):
             mock_get_exclusive_permission):
 
         obj = Finding.objects.first()
-        obj.tags.add("red_team")
+        obj.tags.add("tag_name_test")
         mock_get_exclusive_permission.return_value = [
             Permissions.Product_Tag_Red_Team]
 
@@ -129,7 +129,7 @@ class TestExclusivePermissions(DojoTestCase):
         result = exclude_test_or_finding_with_tag(tests_or_findings, self.user)
 
         self.assertEqual(result, tests_or_findings)
-        tests_or_findings.exclude.assert_called_once_with(tags__name__in=['red_team'])
+        tests_or_findings.exclude.assert_called_once_with(tags__name__in=['tag_name_test'])
 
     @patch('dojo.authorization.exclusive_permissions.user_has_exclusive_permission')
     def test_exclude_test_or_finding_with_tag_user_has_permission(

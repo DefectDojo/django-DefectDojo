@@ -378,9 +378,9 @@
     "pk": 1,
     "fields": {
       "name": "Product_Tag_Red_Team",
-      "short_name": "Red Team",
+      "short_name": "Short Name Test",
       "description": "Permisos para ver los finding del regulatorio",
-      "validation_field": "red_team",
+      "validation_field": "tag_name_test",
       "status": true,
       "members": [
         1
@@ -416,8 +416,8 @@
     "model": "dojo.product",
     "pk": 1,
     "fields": {
-      "name": "NU00001 - ProductTest",
-      "description": "NU00001 - ProductTest",
+      "name": "ProductTest",
+      "description": "ProductTest",
       "product_manager": null,
       "technical_contact": null,
       "team_manager": null,
