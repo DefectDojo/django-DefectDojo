@@ -146,7 +146,7 @@ def can_be_pushed_to_jira(obj, form=None):
 
         logger.debug("can_be_pushed_to_jira: %s, %s, %s", active, verified, severity)
 
-        isenforced = get_system_setting("enforce_verified_status", True)
+        isenforced = get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True)
 
         if not active or (not verified and isenforced):
             logger.debug("Findings must be active and verified, if enforced by system settings, to be pushed to JIRA")
@@ -1116,7 +1116,9 @@ def get_issuetype_fields(
             except JIRAError as e:
                 e.text = f"Jira API call 'createmeta' failed with status: {e.status_code} and message: {e.text}"
                 raise
-
+            print("\n\n")
+            print(meta)
+            print("\n\n")
             project = None
             try:
                 project = meta["projects"][0]

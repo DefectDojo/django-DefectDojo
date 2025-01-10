@@ -44,7 +44,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         DojoVCRAPITestCase.__init__(self, *args, **kwargs)
 
     def assert_cassette_played(self):
-        if True:  # set to True when committing. set to False when recording new test cassettes
+        if False:  # set to True when committing. set to False when recording new test cassettes
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
@@ -619,7 +619,18 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
 
     @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
-    def test_import_with_push_to_jira_not_verified_with_enforced_verified(self):
+    @toggle_system_setting_boolean("enforce_verified_status_jira", True)  # noqa: FBT003
+    def test_import_with_push_to_jira_not_verified_enforced_verified_globally_true_enforced_verified_jira_true(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # This scan file has two active findings, so we should not push either of them
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", True)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", False)  # noqa: FBT003
+    def test_import_with_push_to_jira_not_verified_enforced_verified_globally_true_enforced_verified_jira_false(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push either of them
@@ -628,7 +639,18 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
 
     @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
-    def test_import_with_push_to_jira_not_verified_without_enforced_verified(self):
+    @toggle_system_setting_boolean("enforce_verified_status_jira", True)  # noqa: FBT003
+    def test_import_with_push_to_jira_not_verified_enforced_verified_globally_false_enforced_verified_jira_true(self):
+        import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
+        test_id = import0["test"]
+        # This scan file has two active findings, so we should not push either of them
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know all calls to JIRA have been made as expected
+        self.assert_cassette_played()
+
+    @toggle_system_setting_boolean("enforce_verified_status", False)  # noqa: FBT003
+    @toggle_system_setting_boolean("enforce_verified_status_jira", False)  # noqa: FBT003
+    def test_import_with_push_to_jira_not_verified_enforced_verified_globally_false_enforced_verified_jira_false(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True, verified=False)
         test_id = import0["test"]
         # This scan file has two active findings, so we should not push both of them

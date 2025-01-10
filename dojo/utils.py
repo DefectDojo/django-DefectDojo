@@ -1136,7 +1136,7 @@ def opened_in_period(start_date, end_date, **kwargs):
         end_date.month,
         end_date.day,
         tzinfo=timezone.get_current_timezone())
-    if get_system_setting("enforce_verified_status", True):
+    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
         opened_in_period = Finding.objects.filter(
             date__range=[start_date, end_date],
             **kwargs,
@@ -1584,7 +1584,7 @@ def calculate_grade(product, *args, **kwargs):
                 false_p=False,
                 test__engagement__product=product)
 
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_product_grading", True):
             findings = findings.filter(verified=True)
 
         severity_values = findings.values("severity").annotate(
