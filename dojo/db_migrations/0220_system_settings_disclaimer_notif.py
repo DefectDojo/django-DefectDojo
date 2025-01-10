@@ -17,5 +17,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(copy_notif_field),
+        migrations.RunPython(copy_notif_field, reverse_code=migrations.RunPython.noop),
     ]
