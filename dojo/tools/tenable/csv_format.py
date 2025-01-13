@@ -75,7 +75,7 @@ class TenableCSVParser:
     def get_description(self, row):
         if not row:
             return None
-
+        data_desc = row.get("definition.description", "N/A")
         data_plugin = row.get("Plugin", "")
         data_plugin_name = row.get("Plugin Name", "")
         data_severity = row.get("Severity", "")
@@ -117,6 +117,7 @@ class TenableCSVParser:
         data_custom_id = row.get("Custom Id", "")
         return (
         "<p><strong>Plugin:</strong> " + str(data_plugin) + "</p>"
+        "<p><strong>Description:</strong> " + str(data_desc) + "</p>"
         + "<p><strong>Plugin Name:</strong> " + str(data_plugin_name) + "</p>"
         + "<p><strong>Severity:</strong> " + str(data_severity) + "</p>"
         + "<p><strong>IP Address:</strong> " + str(data_ip_address) + "</p>"
@@ -157,6 +158,25 @@ class TenableCSVParser:
         + "<p><strong>Custom Id:</strong> " + str(data_custom_id) + "</p>"
     )
 
+    def get_severity_by_vpr(self, vpr_score: int):
+        severity_mapping = {
+            1: "Info",
+            2: "Low",
+            3: "Medium",
+            4: "High",
+            5: "Critical",
+        }
+
+        if vpr_score >= 9:
+            return severity_mapping.get(5)
+        if vpr_score >= 7:
+            return severity_mapping.get(4)
+        if vpr_score >= 4:
+            return severity_mapping.get(3)
+        if vpr_score > 0:
+            return severity_mapping.get(2)
+        return severity_mapping.get(1)
+
     def get_findings(self, filename: str, test: Test):
         # Read the CSV
         content = filename.read()
@@ -173,9 +193,7 @@ class TenableCSVParser:
             if title is None or title == "":
                 continue
             # severity: Could come from "Severity" or "Risk"
-            raw_severity = row.get("Risk", row.get("severity", ""))
-            if raw_severity == "":
-                raw_severity = row.get("Severity", "Info")
+            raw_severity = self.get_severity_by_vpr(row.get("Vulnerability Priority Rating", 0))
             # this could actually be a int, so try to convert
             # and swallow the exception if it's a string a move on
             with contextlib.suppress(ValueError):
@@ -186,7 +204,7 @@ class TenableCSVParser:
             # Other text fields
             description = self.get_description(row)
             mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
-            impact = row.get("Description", row.get("definition.description", "N/A"))
+            impact = row.get("Description", row.get("Object Class", "No Class Defined"))
             references = row.get("See Also", row.get("definition.see_also", "N/A"))
             references += "\nTenable Plugin ID: " + row.get("Plugin", "N/A")
             references += "\nPlugin Publication Date: " + row.get("Plugin Publication Date", "N/A")
