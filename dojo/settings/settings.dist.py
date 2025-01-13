@@ -445,6 +445,19 @@ env = environ.FileAwareEnv(
             }
         }
     }),
+    
+    # Finding exclusion - request expiration days
+    DD_FINDING_EXCLUSION_EXPIRATION_DAYS=(int, 30),
+    DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS=(int, 1),
+    DD_CHECK_NEW_FINDINGS_TO_WHITELIST_DAYS=(int, 1),
+    
+    # tags for filter to finding exclusion
+    DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
+    
+    # Reviewer and approver groups
+    DD_REVIEWER_GROUP_NAMES=(str, ""),
+    DD_APPROVER_GROUP_NAMES=(str, ""),
+    
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
@@ -1021,6 +1034,10 @@ FOOTER_VERSION = env("DD_FOOTER_VERSION")
 FORCE_LOWERCASE_TAGS = env("DD_FORCE_LOWERCASE_TAGS")
 MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
 
+# Approver and reviewer group names
+APPROVER_GROUP_NAME = env("DD_APPROVER_GROUP_NAMES")
+REVIEWER_GROUP_NAME = env("DD_REVIEWER_GROUP_NAMES")
+
 
 # ------------------------------------------------------------------------------
 # ADMIN
@@ -1412,6 +1429,8 @@ CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_PASS_MODEL_BY_ID = env("DD_CELERY_PASS_MODEL_BY_ID")
 CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
 CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY = env("DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY")
+CELERY_EXPIRING_FINDINGEXCLUSION_DAYS = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS")
+CELERY_NEW_FINDINGS_TO_WHITELIST_DAYS = env("DD_CHECK_NEW_FINDINGS_TO_WHITELIST_DAYS")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
@@ -1463,9 +1482,18 @@ CELERY_BEAT_SCHEDULE = {
             month_of_year=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[3],
             day_of_week=CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY.split()[4]),
         },
+    "check_expiring_findingexclusions": {
+        'task': 'dojo.engine_tools.helpers.check_expiring_findingexclusions',
+        'schedule': timedelta(days=CELERY_EXPIRING_FINDINGEXCLUSION_DAYS),
+    },
+    "check_new_findings_to_whitelist": {
+        'task': 'dojo.engine_tools.helpers.check_new_findings_to_whitelist',
+        'schedule': timedelta(days=CELERY_NEW_FINDINGS_TO_WHITELIST_DAYS),
+    },
     "notification_webhook_status_cleanup": {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
+
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
@@ -2136,6 +2164,9 @@ RISK_PENDING = env("DD_RISK_PENDING")
 ROLE_ALLOWED_TO_ACCEPT_RISKS = env("DD_ROLE_ALLOWED_TO_ACCEPT_RISKS")
 RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY = env("DD_RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY")
 COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
+# Engine Tools 
+FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
+FINDING_EXCLUSION_FILTER_TAGS = env("DD_FINDING_EXCLUSION_FILTER_TAGS")
 # Acceptace for email
 ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
 LIFETIME_HOURS_PERMISSION_KEY = env("DD_LIFETIME_HOURS_PERMISSION_KEY")

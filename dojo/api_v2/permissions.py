@@ -14,7 +14,9 @@ from dojo.authorization.authorization import (
     user_has_permission,
 )
 from dojo.authorization.roles_permissions import Permissions
+from dojo.templatetags.authorization_tags import is_in_group
 from dojo.importers.auto_create_context import AutoCreateContextManager
+from dojo.engine_tools.helpers import Constants
 from dojo.models import (
     Cred_Mapping,
     Dojo_Group,
@@ -1077,3 +1079,19 @@ class UserHasViewApiV2Key(permissions.BasePermission):
         return user_has_global_permission(
             request.user, Permissions.Api_v2_Key
         )
+
+
+class IsAPIImporter(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_superuser:
+            return True
+        if request.user.global_role:
+            if request.user.global_role.role.name == 'API_Importer':
+                return True
+            if request.user.global_role.role.name == 'Maintainer':
+                return True
+        else:
+            return False
+        
+        # If you have a global role but it is not API_Importer or Maintainer.
+        return False

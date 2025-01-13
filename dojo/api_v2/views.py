@@ -88,6 +88,7 @@ from dojo.jira_link.queries import (
     get_authorized_jira_issues,
     get_authorized_jira_projects,
 )
+from dojo.engine_tools.models import FindingExclusion
 from dojo.models import (
     Announcement,
     Answer,
@@ -3390,3 +3391,19 @@ class NotificationWebhooksViewSet(
     filterset_fields = "__all__"
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)  # TODO: add permission also for other users
 
+
+@extend_schema_view(**schema_with_prefetch())
+class FindingExclusionViewSet(
+    PrefetchDojoModelViewSet,
+):
+    serializer_class = serializers.FindingExclusionSerializer
+    queryset = FindingExclusion.objects.filter(status="Accepted")
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["type", "unique_id_from_tool"]
+    permission_classes = (
+        IsAuthenticated,
+        permissions.IsAPIImporter,
+    )
+
+    def get_queryset(self):
+        return self.queryset

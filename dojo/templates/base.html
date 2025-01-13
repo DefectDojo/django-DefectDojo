@@ -514,6 +514,24 @@
                                                 </li>
                                             {% endif %}
                                         {% endif %}
+                                        <li>
+                                            <a rel="noopener noreferrer" href="#">
+                                                <i class="fa-solid fa fa-wrench fa-fw"></i>
+                                                <span>{% trans "Engine Tools" %}</span>
+                                                <span class="glyphicon arrow"></span>
+                                            </a>
+                                            <ul class="nav nav-second-level">
+                                                
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'finding_exclusions' %}">
+                                                        {% trans "Exclusion" %}
+                                                    </a>
+                                                </li>
+
+                                            </ul>
+                                            <!-- /.nav-second-level -->
+                                        </li>
+                                        
                                         <li id="menu_configuration">
                                             <a rel="noopener noreferrer" href="#" aria-expanded="false" aria-label="Configuration">
                                                 <i class="fa-solid fa-gear fa-fw"></i>
