@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.contrib import admin
 from dojo.engine_tools import views
-from django.urls import re_path, path
+from django.urls import re_path
 
 if not apps.ready:
     apps.get_models()

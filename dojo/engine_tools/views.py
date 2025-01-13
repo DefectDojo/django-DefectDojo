@@ -6,7 +6,7 @@ from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm, EditFindingExclusionForm
 from dojo.engine_tools.helpers import (
-    add_findings_to_whitelist, get_approvers_members, get_reviewers_menbers, Constants, expire_finding_exclusion_immediately
+    add_findings_to_whitelist, get_approvers_members, get_reviewers_members, Constants, expire_finding_exclusion_immediately
 )
 
 # Utils
@@ -82,7 +82,7 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
             
             cve = request.POST.get(key="unique_id_from_tool")
             
-            reviewers = get_reviewers_menbers()
+            reviewers = get_reviewers_members()
             
             create_notification(
                 event="finding_exclusion_request",
@@ -201,7 +201,7 @@ def review_finding_exclusion_request(
     
     create_notification(event="finding_exclusion_request",
                         title=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}",
-                        description=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+                        description=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}.",
                         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
                         recipients=approvers)
     
@@ -242,11 +242,13 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
                 extra_tags="alert-success")
         return redirect('finding_exclusion', fxid=fxid)
     
+    maintainers = get_reviewers_members()
+    
     create_notification(event="finding_exclusion_approved",
                         title=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
                         description=f"Whitelisting request accepted - {finding_exclusion.unique_id_from_tool}",
                         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-                        recipients=[finding_exclusion.created_by.username])
+                        recipients=[finding_exclusion.created_by.username] + maintainers)
     
     messages.add_message(
             request,
@@ -274,7 +276,7 @@ def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
     create_notification(
         event="finding_exclusion_rejected",
         title=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}",
-        description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}, You will be notified of the final result.",
+        description=f"Whitelisting request rejected - {finding_exclusion.unique_id_from_tool}.",
         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
         recipients=[finding_exclusion.created_by.username]
     )

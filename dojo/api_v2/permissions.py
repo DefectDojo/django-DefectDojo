@@ -1083,5 +1083,15 @@ class UserHasViewApiV2Key(permissions.BasePermission):
 
 class IsAPIImporter(permissions.BasePermission):
     def has_permission(self, request, view):
-        return is_in_group(request.user, Constants.API_IMPORTER_GROUP.value) or \
-               is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value)
+        if request.user.is_superuser:
+            return True
+        if request.user.global_role:
+            if request.user.global_role.role.name == 'API_Importer':
+                return True
+            if request.user.global_role.role.name == 'Maintainer':
+                return True
+        else:
+            return False
+        
+        # If you have a global role but it is not API_Importer or Maintainer.
+        return False

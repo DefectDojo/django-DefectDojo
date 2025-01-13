@@ -702,7 +702,6 @@ def get_roles_with_permissions():
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
             Permissions.Risk_Acceptance,
-            Permissions.Finding_Code_Review,
             Permissions.Risk_Acceptance_Bulk,
             Permissions.Risk_Acceptance_Refresh_Permission_key,
             Permissions.Finding_Code_Review,

@@ -1,13 +1,10 @@
 # Utils
-from django.db.models import QuerySet, Q
 from django.db import transaction
 from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
 from celery.utils.log import get_task_logger
 from enum import Enum
-from datetime import timedelta
-import random
 
 # Dojo
 from dojo.models import Finding, Dojo_Group, Notes
@@ -31,7 +28,7 @@ class Constants(Enum):
     API_IMPORTER_GROUP = settings.API_IMPORTER_GROUP_NAME
     
     
-def get_reviewers_menbers():
+def get_reviewers_members():
     reviewer_group = Dojo_Group.objects.filter(name=Constants.REVIEWERS_MAINTAINER_GROUP.value).first()
     reviewer_members = get_group_members_for_group(reviewer_group)
     
@@ -86,7 +83,7 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
             
             Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
             
-            maintainers = get_reviewers_menbers()
+            maintainers = get_reviewers_members()
             approvers = get_approvers_members()
             
             create_notification(
@@ -94,7 +91,7 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
                 title=f"The finding exclusion for {expired_fex.unique_id_from_tool} has expired.",
                 description="All findings whitelisted via this finding exclusion will be removed from the whitelist.",
                 url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
-                recipients=maintainers + approvers
+                recipients=maintainers + approvers + [expired_fex.created_by.username]
             )
     except Exception as e:
         logger.error(
