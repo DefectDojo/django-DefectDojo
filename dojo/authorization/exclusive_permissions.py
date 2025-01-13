@@ -185,10 +185,10 @@ def exclude_test_or_finding_with_tag(
 
     exclusive_permission = None
 
-    if not tests_or_findings:
+    if not tests_or_findings.exists():
         return tests_or_findings
 
-    if product is None and len(tests_or_findings) > 0:
+    if product is None and tests_or_findings:
         product = get_product(tests_or_findings[0])
 
     if user is None:

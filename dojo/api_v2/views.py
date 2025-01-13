@@ -1,4 +1,5 @@
 import copy
+import time
 import base64
 import logging
 import mimetypes
@@ -959,7 +960,11 @@ class FindingViewSet(
             "test__engagement__product",
             "test__engagement__product__prod_type",
         )
+        start_time = time.time()
         findings = exclude_test_or_finding_with_tag(findings)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Tiempo de ejecución de exclude_test_or_finding_with_tag: {execution_time} segundos")
         return findings.distinct()
 
     def get_serializer_class(self):
