@@ -25,7 +25,6 @@ class Constants(Enum):
     ON_WHITELIST = "On Whitelist"
     REVIEWERS_MAINTAINER_GROUP = settings.REVIEWER_GROUP_NAME
     APPROVERS_CYBERSECURITY_GROUP = settings.APPROVER_GROUP_NAME
-    API_IMPORTER_GROUP = settings.API_IMPORTER_GROUP_NAME
     
     
 def get_reviewers_members():

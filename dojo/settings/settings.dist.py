@@ -462,7 +462,6 @@ env = environ.FileAwareEnv(
     # Reviewer and approver groups
     DD_REVIEWER_GROUP_NAMES=(str, ""),
     DD_APPROVER_GROUP_NAMES=(str, ""),
-    DD_API_IMPORTER_GROUP_NAMES=(str, ""),
     
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
@@ -1040,7 +1039,6 @@ MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
 # Approver and reviewer group names
 APPROVER_GROUP_NAME = env("DD_APPROVER_GROUP_NAMES")
 REVIEWER_GROUP_NAME = env("DD_REVIEWER_GROUP_NAMES")
-API_IMPORTER_GROUP_NAME = env("DD_API_IMPORTER_GROUP_NAMES")
 
 
 # ------------------------------------------------------------------------------
