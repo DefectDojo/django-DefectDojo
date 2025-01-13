@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0231_finding_priority_alter_finding_risk_status_and_more'),
+        ('dojo', '0232_finding_priority_alter_finding_risk_status_and_more'),
     ]
 
     operations = [

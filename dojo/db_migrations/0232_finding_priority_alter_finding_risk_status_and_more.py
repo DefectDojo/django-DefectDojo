@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0230_exclusivepermission'),
+        ('dojo', '0231_system_settings_enforce_verified_status_and_more'),
     ]
 
     operations = [
