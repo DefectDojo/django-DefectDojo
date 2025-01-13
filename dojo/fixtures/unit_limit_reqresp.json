@@ -379,7 +379,7 @@
     "fields": {
       "name": "Product_Tag_Red_Team",
       "short_name": "Short Name Test",
-      "description": "Permisos para ver los finding del regulatorio",
+      "description": "Description Test",
       "validation_field": "tag_name_test",
       "status": true,
       "members": [
