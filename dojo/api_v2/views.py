@@ -959,7 +959,8 @@ class FindingViewSet(
             "test__engagement__product",
             "test__engagement__product__prod_type",
         )
-        findings = exclude_test_or_finding_with_tag(findings)
+        # TODO: Performace Problem
+        # findings = exclude_test_or_finding_with_tag(findings)
         return findings.distinct()
 
     def get_serializer_class(self):
