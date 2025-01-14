@@ -1,5 +1,5 @@
 ---
-title: "Connect To Jira"
+title: "Send Findings To Jira"
 description: "Send DefectDojo Findings to one or more Jira Projects"
 summary: ""
 date: 2023-09-07T16:06:50+02:00
