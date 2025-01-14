@@ -204,7 +204,7 @@ class TenableCSVParser:
             # Other text fields
             description = self.get_description(row)
             mitigation = str(row.get("Solution", row.get("definition.solution", row.get("Steps to Remediate", "N/A"))))
-            impact = row.get("Description", row.get("Object Class", "No Class Defined"))
+            impact = row.get("Object Class", "No Class Defined")
             references = row.get("See Also", row.get("definition.see_also", "N/A"))
             references += "\nTenable Plugin ID: " + row.get("Plugin", "N/A")
             references += "\nPlugin Publication Date: " + row.get("Plugin Publication Date", "N/A")
