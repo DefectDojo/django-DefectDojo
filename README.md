@@ -81,20 +81,18 @@ Navigate to `http://localhost:8080` to see your new instance!
 
 ## Documentation
 
-* [Official Docs](https://documentation.defectdojo.com/)
-    * [Docs for our `dev` branch](https://documentation.defectdojo.com/dev/)
-* [REST APIs](https://documentation.defectdojo.com/integrations/api-v2-docs/)
-* [Client APIs and Wrappers](https://documentation.defectdojo.com/integrations/api-v2-docs/#clients--api-wrappers)
+* [Official Docs](https://docs.defectdojo.com/)
+* [REST APIs](https://docs.defectdojo.com/en/open_source/api-v2-docs/)
+* [Client APIs and Wrappers](https://docs.defectdojo.com/en/open_source/api-v2-docs/#clients--api-wrappers)
 * Authentication options:
-    * [OAuth2/SAML2](https://documentation.defectdojo.com/integrations/social-authentication/)
-    * [LDAP](https://documentation.defectdojo.com/integrations/ldap-authentication/)
-* [Supported tools](https://documentation.defectdojo.com/integrations/parsers/)
+    * [OAuth2/SAML2](https://docs.defectdojo.com/en/open_source/archived_docs/integrations/social-authentication/)
+    * [LDAP](https://docs.defectdojo.com/en/open_source/ldap-authentication/)
+* [Supported tools](https://docs.defectdojo.com/en/connecting_your_tools/parsers/)
 
 ## Supported Installation Options
 
 * [Docker / Docker Compose](readme-docs/DOCKER.md)
-* [SaaS](https://www.defectdojo.com/pricing) - Includes Support & Supports the Project
-* [AWS AMI](https://aws.amazon.com/marketplace/pp/prodview-m2a25gr67xbzk) - Supports the Project
+* [SaaS](https://www.defectdojo.com/) - Includes Support & Supports the Project
 
 ## Community, Getting Involved, and Updates
 
