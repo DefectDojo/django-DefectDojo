@@ -8,7 +8,7 @@ Once you have created one or more **Reports** in DefectDojo you can take further
 
 * Using a report as a template for subsequent reports
 * Re-running a report with updated data
-* Deleting an old or unused reports
+* Deleting an old or unused report
 
 ![image](images/Working_with_Generated_Reports.png)
 
