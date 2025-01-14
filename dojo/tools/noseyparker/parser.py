@@ -50,7 +50,6 @@ class NoseyParkerParser:
 
         return list(self.dupes.values())
 
-
     def version_0_16_0(self, line, test):
         rule_name = line["rule_name"]
         secret = line["match_content"]
