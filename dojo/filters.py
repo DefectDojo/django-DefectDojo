@@ -1459,7 +1459,7 @@ class ApiFindingFilter(DojoFilter):
     mitigated = DateRangeFilter()
     mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact")
     mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt")
-    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt")
+    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After", method="filter_mitigated_after")
     # NumberInFilter
     cwe = NumberInFilter(field_name="cwe", lookup_expr="in")
     defect_review_requested_by = NumberInFilter(field_name="defect_review_requested_by", lookup_expr="in")
@@ -1545,6 +1545,12 @@ class ApiFindingFilter(DojoFilter):
         exclude = ["url", "thread_id", "notes", "files",
                    "line", "cve"]
 
+    def filter_mitigated_after(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            value = value.replace(hour=23, minute=59, second=59)
+
+        return queryset.filter(mitigated__gt=value)
+
 
 class PercentageFilter(NumberFilter):
     def __init__(self, *args, **kwargs):
@@ -1590,7 +1596,7 @@ class FindingFilterHelper(FilterSet):
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
     mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On")
     mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
-    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After")
+    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After", method="filter_mitigated_after")
     planned_remediation_date = DateRangeOmniFilter()
     planned_remediation_version = CharFilter(lookup_expr="icontains", label=_("Planned remediation version"))
     file_path = CharFilter(lookup_expr="icontains")
@@ -1705,6 +1711,12 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["mitigated_before"].widget = date_input_widget
         self.form.fields["mitigated_after"].widget = date_input_widget
         self.form.fields["cwe"].choices = cwe_options(self.queryset)
+
+    def filter_mitigated_after(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            value = value.replace(hour=23, minute=59, second=59)
+
+        return queryset.filter(mitigated__gt=value)
 
 
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
