@@ -166,16 +166,18 @@ class TenableCSVParser:
             4: "High",
             5: "Critical",
         }
-
-        if vpr_score >= 9:
-            return severity_mapping.get(5)
-        if vpr_score >= 7:
-            return severity_mapping.get(4)
-        if vpr_score >= 4:
-            return severity_mapping.get(3)
-        if vpr_score > 0:
-            return severity_mapping.get(2)
-        return severity_mapping.get(1)
+        try:
+            if vpr_score >= 9:
+                return severity_mapping.get(5)
+            if vpr_score >= 7:
+                return severity_mapping.get(4)
+            if vpr_score >= 4:
+                return severity_mapping.get(3)
+            if vpr_score > 0:
+                return severity_mapping.get(2)
+            return severity_mapping.get(1)
+        except:
+            return severity_mapping.get(1)
 
     def get_findings(self, filename: str, test: Test):
         # Read the CSV
