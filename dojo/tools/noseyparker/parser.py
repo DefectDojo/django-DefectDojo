@@ -17,7 +17,7 @@ class NoseyParkerParser:
 
     def get_description_for_scan_types(self, scan_type):
         return "Nosey Parker report file can be imported in JSON Lines format (option --jsonl). " \
-               "Supports v0.16.0 of https://github.com/praetorian-inc/noseyparker"
+               "Supports v0.16.0 and v0.22.0 of https://github.com/praetorian-inc/noseyparker"
 
     def get_findings(self, file, test):
         """
