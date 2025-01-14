@@ -13,7 +13,7 @@ def get_contacts_product_type_and_product(engagement: Engagement, finding_server
     get_contacts_dict = {
         "team_manager": engagement.product.team_manager,
         "product_manager": engagement.product.product_manager,
-        "product_manager": engagement.product.technical_contact,
+        "technical_contact": engagement.product.technical_contact,
         "product_type_manager": product_type.product_type_manager,
         "product_type_technical_contact": product_type.product_type_technical_contact,
         "environment_manager": product_type.environment_manager,

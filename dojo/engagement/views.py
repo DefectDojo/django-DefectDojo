@@ -1789,11 +1789,12 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
     add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
 
-    accepted_findings = risk_acceptance.accepted_findings.order_by("-risk_status")
     accepted_findings = exclude_test_or_finding_with_tag(
-        accepted_findings,
+        risk_acceptance.accepted_findings,
         product=product,
         user=request.user)
+
+    accepted_findings = accepted_findings.order_by("-risk_status")
     fpage = get_page_items(request, accepted_findings, 15)
 
     if settings.RISK_PENDING:
