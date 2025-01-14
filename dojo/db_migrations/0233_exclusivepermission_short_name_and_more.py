@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0231_system_settings_enforce_verified_status_and_more'),
+        ('dojo', '0232_merge_finding_exclusion_feature_migrations'),
     ]
 
     operations = [

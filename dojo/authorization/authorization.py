@@ -31,6 +31,7 @@ from dojo.models import (
     TransferFindingFinding,
     Risk_Acceptance
 )
+from dojo.engine_tools.models import FindingExclusion
 from dojo.request_cache import cache_for_request
 logger = logging.getLogger(__name__)
 
@@ -111,6 +112,7 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(
             user, obj.test.engagement.product, permission,
         )
+        
     if (
         isinstance(obj, Component)
         and permission in Permissions.get_component_permissions()

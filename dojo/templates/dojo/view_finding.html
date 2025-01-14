@@ -129,6 +129,15 @@
                                     </a>
                                 </li>
                             {% endif %}
+                            
+                            {% if finding.cve and not 'white_list' in finding.tags.all %}
+                                <li role="presentation">
+                                    <a rel="noopener noreferrer" href="{% url 'create_finding_exclusion' %}?unique_id={{ finding.cve }}&product_id={{ finding.test.engagement.product.id }}">
+                                        <i class="fas fa-list"></i> Add to White List
+                                    </a>
+                                </li>
+                            {% endif %}
+                        
                             {% if finding|has_object_permission:"Finding_Edit" %}
                                 <li role="separator" class="divider"></li>
                                     <li role="presentation">
@@ -305,6 +314,7 @@
                                 <th>EPSS Percentile</th>
                             {% endif %}
                         {% endif %}
+                        <th>Priorization</th>
                         <th>Found by</th>
                         {% if finding.vuln_id_from_tool %}
                             <th>Vuln ID from tool</th>
@@ -476,6 +486,12 @@
                                     <td>{{ finding.epss_percentile|multiply:100|floatformat:"2" }}%</td>
                                 {% endif %}
                         {% endif %}
+                        <td>{% if finding.priority %}
+                                {{ finding.priority }}
+                            {% else %}
+                                N.A.
+                            {% endif %}
+                        </td>
                         <td>
                             {% if found_by %}
                                 {% for scanner in found_by %}

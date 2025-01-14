@@ -1806,14 +1806,17 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
                                                      duplicate=False).filter(~Q(tags__name__in=settings.DD_CUSTOM_TAG_PARSER.get("disable_ra", "").split("-")))
         if len(accepted_findings) > 0 and accepted_findings[0].impact and accepted_findings[0].impact in settings.COMPLIANCE_FILTER_RISK:
             unaccepted_findings = unaccepted_findings.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
-        unaccepted_findings = exclude_test_or_finding_with_tag(
-            unaccepted_findings,
-            product=product,
-            user=request.user)
+
     else:
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
             .exclude(id__in=accepted_findings).order_by("title")
+
+    # unaccepted_findings = exclude_test_or_finding_with_tag(
+    #     unaccepted_findings,
+    #     product=product,
+    #     user=request.user)
     add_fpage = get_page_items(request, unaccepted_findings, 25, "apage")
+    
     # on this page we need to add unaccepted findings as possible findings to add as accepted
     add_findings_form.fields[
         "accepted_findings"].queryset = add_fpage.object_list

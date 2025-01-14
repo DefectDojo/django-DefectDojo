@@ -328,6 +328,9 @@
                                     <th>
                                         {% trans "EPSS Percentile" %}
                                     </th>
+                                    <th>
+                                        {% trans "Priority" %}
+                                    </th>
                                     <th class="nowrap">
                                         {% if filter_name == 'Closed' %}
                                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
@@ -460,6 +463,13 @@
                                                                 <li role="presentation">
                                                                     <a rel="noopener noreferrer" href="{% url 'find_template_to_apply' finding.id %}">
                                                                         <i class="fa-solid fa-copy"></i> {% trans "Apply Template to Finding" %}
+                                                                    </a>
+                                                                </li>
+                                                            {% endif %}
+                                                            {% if finding.cve and not 'white_list' in finding.tags.all %}
+                                                                <li role="presentation">
+                                                                    <a rel="noopener noreferrer" href="{% url 'create_finding_exclusion' %}?unique_id={{ finding.cve }}&product_id={{ finding.test.engagement.product.id }}">
+                                                                        <i class="fas fa-list"></i> Add to White List
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
@@ -632,6 +642,13 @@
                                             <td class="nowrap">
                                                 {{ finding.epss_percentile|format_epss }}
                                             </td>
+                                            <td>
+                                                {% if finding.priority %}
+                                                    {{ finding.priority }}
+                                                {% else %}
+                                                    N.A.
+                                                {% endif %}
+                                            </td>
                                             {% if filter_name == 'Closed' %}
                                             <td class="nowrap" data-order="{{ finding.mitigated|date:"U" }}">
                                                 {{ finding.mitigated|date }}
@@ -779,6 +796,7 @@
                     { "data": "cve" },
                     { "data": "epss_score", "type": "num", "render": percentSort },
                     { "data": "epss_percentile", "type": "num", "render": percentSort },
+                    { "data": "priority", "type": "num"},
                     { "data": "found_date", render: function (data, type, row, meta) {
                         if(type === 'sort') {
                             var api = new $.fn.dataTable.Api(meta.settings);

@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% load authorization_tags %}
+{% load display_tags %}
+{% load multiply %}
+{% load humanize %}
+{% load i18n %}
+{% block add_styles %}
+    {{ block.super }}
+    .tooltip-inner {
+        max-width: 650px;
+    }
+    .process-timeline-horizontal {
+        margin-top: 20px;
+        margin-left: 10px;
+    }
+    .timeline-row {
+        position: relative;
+        display: flex;
+    }
+    .timeline-step {
+        position: relative;
+        text-align: center;
+        padding: 20px;
+        background-color: #f4f4f4;
+        opacity: 0.5;
+        border-right: 1px solid #ddd;
+        width: 33.3%;
+    }
+    .timeline-step:last-child {
+        border-right: none;
+    }
+    .timeline-step.active {
+        opacity: 1;
+        background-color: #e9ecef;
+    }
+    .timeline-step.danger {
+        opacity: 1;
+        background-color: #e9ecef;
+    }
+    .timeline-step::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 20px;
+        background-color: #6c757d;
+        border-radius: 50%;
+    }
+    .timeline-step.active::before {
+        background-color: #28a745;
+    }
+    .timeline-step.danger::before {
+        background-color: #d11d38;
+    }
+    .timeline-content {
+        position: relative;
+        z-index: 1;
+    }
+    .discussion-item {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .discussion-right {
+        align-self: flex-end;
+        text-align: end;
+        background-color: #e6f2ff;
+        border-radius: 10px;
+        padding: 10px;
+        width: 300px;
+        margin-left: auto; /* This will push it to the right */
+    }
+    
+    .discussion-left {
+        align-self: flex-start;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        padding: 10px;
+        width: 300px;
+        margin-right: auto; /* This will keep it on the left */
+    }
+    .sticky-form {
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        padding: 15px;
+        border-top: 1px solid #ddd;
+        z-index: 1000;
+    }
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+<div id="main-finding-exclusion">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h3 class="pull-left finding-title">
+                    {{ finding_exclusion.unique_id_from_tool }}
+                    {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
+                    <small>Last Status Update: {{ finding_exclusion.last_status_update | naturalday }}, </small>
+                    <small>Created:
+                      {{ finding_exclusion.create_date | naturalday }}
+                    </small>
+                </h3>
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                data-toggle="dropdown" aria-expanded="true">
+                            <span class="fa-solid fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1"> 
+                            {% if request.user|is_in_reviewer_group %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'edit_finding_exclusion_request' finding_exclusion.uuid %}">
+                                        <i class="fa-solid fa-circle-check"></i> Edit Finding Exclusion
+                                    </a>
+                                </li>
+                            {% endif %}
+                        
+                            {% if request.user|is_in_reviewer_group %}
+                                {% if finding_exclusion.status == 'Pending' %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'review_finding_exclusion_request' finding_exclusion.uuid %}">
+                                        <i class="fa-solid fa-circle-check"></i> Mark as Reviewed
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                        
+                            {% if request.user|is_in_approver_group %}
+                                {% if finding_exclusion.status != 'Accepted' and finding_exclusion.status != 'Rejected' and finding_exclusion.status == 'Reviewed' %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'accept_finding_exclusion_request' finding_exclusion.uuid %}">
+                                        <i class="fa-solid fa-circle-exclamation"></i> Accept Finding Exclusion
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                        
+                            {% if request.user|is_in_reviewer_group or request.user|is_in_approver_group %}
+                                {% if finding_exclusion.status != 'Accepted' and finding_exclusion.status != 'Rejected' and finding_exclusion.status != 'Expired' %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'reject_finding_exclusion_request' finding_exclusion.uuid %}">
+                                        <i class="fa-solid fa-circle-xmark"></i> Reject Finding Exclusion
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                        
+                            {% if request.user|is_in_reviewer_group or request.user|is_in_approver_group %}
+                                {% if finding_exclusion.status == 'Accepted' %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'expire_finding_exclusion_request' finding_exclusion.uuid %}">
+                                        <i class="fa-solid fa-circle-xmark"></i> Expire Finding Exclusion
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                        </ul>  
+                    </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="notes" class="table-striped table table-condensed table-hover centered">
+                <tr>
+                    {% block header_head %}
+                        <th>ID</th>
+                        <th>Vulnerability unique ID</th>
+                        <th>Status</th>
+                        <th>Created by</th>
+                        <th>Created at</th>
+                        <th>Expires at</th>
+                    {% endblock header_head %}
+                </tr>
+                <tr>
+                    {% block header_body %}
+                        <td>{{ finding_exclusion.uuid }}</td>
+                        <td>{{ finding_exclusion.unique_id_from_tool }}</td>
+                        <td>
+                            {% if finding_exclusion.status in "Pending,Accepted,Rejected,Reviewed,Expired" %}
+                                <span style="background-color: 
+                                    {% if finding_exclusion.status == 'Pending' %}#1B30DE
+                                    {% elif finding_exclusion.status == 'Accepted' %}#096C11
+                                    {% elif finding_exclusion.status == 'Rejected' %}#d11d38
+                                    {% elif finding_exclusion.status == 'Expired' %}#d11d38
+                                    {% else %}#b97a0c
+                                    {% endif %}" 
+                                    class="pass_fail Pass">
+                                    {{ finding_exclusion.status }}
+                                </span>
+                            {% else %}
+                                {{ finding_exclusion.status }}
+                            {% endif %}
+                        </td>
+                        <td>{{ finding_exclusion.created_by }}</td>
+                        <td>{{ finding_exclusion.create_date|date:"d M Y H:i" }}</td>
+                        <td>{{ finding_exclusion.expiration_date|date:"d M Y H:i" }}</td>          
+                    {% endblock header_body %}
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="view-finding">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Reason <span class="pull-right"><a rel="noopener noreferrer" data-toggle="collapse" href="#vuln_desc"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_desc" class="panel-body finding-description collapse in">
+              <pre>{{ finding_exclusion.reason }}</pre>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Process <span class="pull-right"><a rel="noopener noreferrer" data-toggle="collapse" href="#vuln_procs"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_procs" class="panel-body finding-description collapse in">
+                {% if finding_exclusion %}
+                <div class="container-fluid process-timeline-horizontal">
+                    <div class="row timeline-row">
+                        <div class="col-4 timeline-step {% if finding_exclusion.create_date %}active{% endif %}">
+                            <div class="timeline-content">
+                                <pre><strong>Created</strong></pre>
+                                <p>
+                                    <pre>{{ finding_exclusion.create_date|date:"d M Y H:i" }}</pre>
+                                    <br>
+                                    <pre><strong>By:</strong> {{ finding_exclusion.created_by.username }}</pre>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 timeline-step {% if finding_exclusion.reviewed_at %}active{% endif %}">
+                            <div class="timeline-content">
+                                <pre><strong>Reviewed</strong></pre>
+                                <p>
+                                    {% if finding_exclusion.reviewed_at %}
+                                        <pre>{{ finding_exclusion.reviewed_at|date:"d M Y H:i" }}</pre>
+                                        <br>
+                                        <pre><strong>By:</strong> DevSecOps Team</pre>
+                                    {% else %}
+                                        <pre>Pending review by DevSecOps team</pre>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-4 timeline-step {% if finding_exclusion.final_status == 'Accepted' %}active{% elif finding_exclusion.final_status == 'Rejected' %}danger{% endif %}">
+                            <div class="timeline-content">
+                                <pre><strong>Final Status</strong></pre>
+                                <p>
+                                    {% if finding_exclusion.final_status %}
+                                        {% if finding_exclusion.final_status == 'Accepted' %}
+                                            <pre class="text-success"><strong>Approved</strong></pre>
+                                        {% else %}
+                                            <pre class="text-danger"><strong>Rejected</strong></pre>
+                                        {% endif %}
+                                        <br>
+                                        <pre>{{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}</pre>
+                                    {% else %}
+                                        <pre>Awaiting Decision by Cibersecurity team</pre>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Discussion <span class="pull-right"><a rel="noopener noreferrer" data-toggle="collapse" href="#vuln_disc"><i
+                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+            </div>
+            <div id="vuln_disc" class="panel-body finding-description collapse in">
+                {% for discussion in finding_exclusion.discussions.all %}
+                    <div class="discussion-item {% if discussion.author == request.user %}discussion-right{% else %}discussion-left{% endif %}">
+                        <div class="discussion-header">
+                            <strong>{{ discussion.author.username }}</strong>
+                            <small class="text-muted">{{ discussion.created_at|date:"F d, Y H:i" }}</small>
+                        </div>
+                        <div class="discussion-content">
+                            {{ discussion.content|linebreaks }}
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>There are no discussions yet.</p>
+                {% endfor %}
+                
+                <div class="sticky-form">
+                    <form method="post" action="{% url 'add_finding_exclusion_discussion' finding_exclusion.uuid|stringformat:'s' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ discussion_form.content }}
+                        </div>
+                        <button type="submit" class="btn" label="Submit" name="Submit" value="Submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
