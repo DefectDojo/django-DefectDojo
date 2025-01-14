@@ -5,9 +5,6 @@ draft: false
 weight: 2
 ---
 
-
-
-
 DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at
