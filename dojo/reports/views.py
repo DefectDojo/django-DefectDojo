@@ -88,7 +88,7 @@ class ReportBuilder(View):
                                             finding__duplicate=False,
                                             finding__out_of_scope=False,
                                             )
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             endpoints = endpoints.filter(finding__active=True)
 
         endpoints = endpoints.distinct()
@@ -194,7 +194,7 @@ def report_endpoints(request):
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
                                         )
-    if get_system_setting("enforce_verified_status", True):
+    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
         endpoints = endpoints.filter(finding__active=True)
 
     endpoints = endpoints.distinct()
@@ -271,7 +271,7 @@ def product_endpoint_report(request, pid):
                                          finding__duplicate=False,
                                          finding__out_of_scope=False)
 
-    if get_system_setting("enforce_verified_status", True):
+    if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
         endpoint_ids = endpoints.filter(finding__active=True).values_list("id", flat=True)
 
     endpoint_ids = endpoints.values_list("id", flat=True)

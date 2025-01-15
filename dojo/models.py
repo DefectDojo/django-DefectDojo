@@ -364,10 +364,32 @@ class System_Settings(models.Model):
 
     enforce_verified_status = models.BooleanField(
         default=True,
-        verbose_name=_("Enforce Verified Status"),
-        help_text=_("When enabled, features such as product grading, jira "
-                    "integration, metrics, and reports will only interact "
-                    "with verified findings.",
+        verbose_name=_("Enforce Verified Status - Globally"),
+        help_text=_(
+            "When enabled, features such as product grading, jira "
+            "integration, metrics, and reports will only interact "
+            "with verified findings. This setting will override "
+            "individually scoped verified toggles.",
+        ),
+    )
+    enforce_verified_status_jira = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status - Jira"),
+        help_text=_("When enabled, findings must have a verified status to be pushed to jira."),
+    )
+    enforce_verified_status_product_grading = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status - Product Grading"),
+        help_text=_(
+            "When enabled, findings must have a verified status to be considered as part of a product's grading.",
+        ),
+    )
+    enforce_verified_status_metrics = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status - Metrics"),
+        help_text=_(
+            "When enabled, findings must have a verified status to be counted in metric calculations, "
+            "be included in reports, and filters.",
         ),
     )
 
@@ -1237,7 +1259,7 @@ class Product(models.Model):
                                         date__range=[start_date,
                                                     end_date])
 
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
 
         critical = findings.filter(severity="Critical").count()
@@ -1554,7 +1576,7 @@ class Engagement(models.Model):
         from dojo.utils import get_system_setting
 
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
 
         return findings
@@ -2127,7 +2149,7 @@ class Test(models.Model):
     def unaccepted_open_findings(self):
         from dojo.utils import get_system_setting
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
 
         return findings
@@ -2762,7 +2784,7 @@ class Finding(models.Model):
     def unaccepted_open_findings(cls):
         from dojo.utils import get_system_setting
         results = cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             results = results.filter(verified=True)
 
         return results
