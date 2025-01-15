@@ -44,7 +44,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         DojoVCRAPITestCase.__init__(self, *args, **kwargs)
 
     def assert_cassette_played(self):
-        if False:  # set to True when committing. set to False when recording new test cassettes
+        if True:  # set to True when committing. set to False when recording new test cassettes
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
