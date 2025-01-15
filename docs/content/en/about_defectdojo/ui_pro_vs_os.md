@@ -14,7 +14,7 @@ The Beta UI brings the following enhancements to DefectDojo:
 
 - Modern and sleek design, built using Vue.js
 - Optimized data delivery and load times, especially for large datasets
-- Access to new Pro features, including [API Connectors](en/connecting_your_tools/connectors/about_connectors/), [Universal Importer](en/connecting_your_tools/external_tools/), and Pro Metrics views
+- Access to new Pro features, including [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), [Universal Importer](/en/connecting_your_tools/external_tools/), and Pro Metrics views
 - Improved UI workflows: better filtering, dashboards, and navigation
 
 ## Switching To The Beta UI
