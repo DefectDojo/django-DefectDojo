@@ -34,14 +34,14 @@ class ScantistParser:
 
     def get_items(self, tree, test):
         """
-        tree list: input tree list of all the vulnerability findings
+        Tree list: input tree list of all the vulnerability findings
         test:
         : purpose: parses input rawto extract dojo
         """
 
         def get_findings(vuln, test):
             """
-            vuln : input vulnerable node
+            Vuln : input vulnerable node
             test :
             """
             vulnerability_id = vuln.get("Public ID")
