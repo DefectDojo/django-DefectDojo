@@ -37,7 +37,7 @@ To access the Beta UI, open your User Options menu from the top-right hand corne
 
 The Enterprise settings section contains the System Settings, Jira Instances, Deduplication Settings, SAML, OAuth, Login and MFA forms.
 
-5. The beta UI also has a **new table format** to help with navigation.  This table is used with all [Product Hierarchy](en/working_with_findings/organizing_engagements_tests/product_hierarchy/). Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
+5. The beta UI also has a **new table format** to help with navigation.  This table is used with all [Product Hierarchy](/en/working_with_findings/organizing_engagements_tests/product_hierarchy/). Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
 
 6. The table also has a **"Toggle Columns"** menu which can add or remove columns from the table.
 
