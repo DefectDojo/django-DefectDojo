@@ -3212,6 +3212,7 @@ class GroupFilter(DojoFilter):
         exclude = ["users"]
 
 
+# This class is used exclusively by Findings
 class TestImportFilter(DojoFilter):
     version = CharFilter(field_name="version", lookup_expr="icontains")
     version_exact = CharFilter(field_name="version", lookup_expr="iexact", label="Version Exact")
@@ -3238,6 +3239,7 @@ class TestImportFilter(DojoFilter):
         fields = []
 
 
+# This class is used exclusively by Findings
 class TestImportFindingActionFilter(DojoFilter):
     action = MultipleChoiceFilter(choices=IMPORT_ACTIONS)
     o = OrderingFilter(
@@ -3250,6 +3252,35 @@ class TestImportFindingActionFilter(DojoFilter):
     class Meta:
         model = Test_Import_Finding_Action
         fields = []
+
+
+# Used within the TestImport API
+class TestImportAPIFilter(DojoFilter):
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ("id", "id"),
+            ("created", "created"),
+            ("modified", "modified"),
+            ("version", "version"),
+            ("branch_tag", "branch_tag"),
+            ("build_id", "build_id"),
+            ("commit_hash", "commit_hash"),
+
+        ),
+    )
+
+    class Meta:
+        model = Test_Import
+        fields = ["test",
+        "findings_affected",
+        "version",
+        "branch_tag",
+        "build_id",
+        "commit_hash",
+        "test_import_finding_action__action",
+        "test_import_finding_action__finding",
+        "test_import_finding_action__created"]
 
 
 class LogEntryFilter(DojoFilter):

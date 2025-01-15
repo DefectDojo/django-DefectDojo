@@ -1211,6 +1211,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Dependency Check Scan": ["title", "cwe", "file_path"],
     "Dockle Scan": ["title", "description", "vuln_id_from_tool"],
     "Dependency Track Finding Packaging Format (FPF) Export": ["component_name", "component_version", "vulnerability_ids"],
+    "Horusec Scan": ["title", "description", "file_path", "line"],
     "Mobsfscan Scan": ["title", "severity", "cwe", "file_path", "description"],
     "Tenable Scan": ["title", "severity", "vulnerability_ids", "cwe", "description"],
     "Nexpose Scan": ["title", "severity", "vulnerability_ids", "cwe"],
@@ -1290,6 +1291,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "HackerOne Cases": ["title", "severity"],
     "KrakenD Audit Scan": ["description", "mitigation", "severity"],
     "Red Hat Satellite": ["description", "severity"],
+    "Qualys Hacker Guardian Scan": ["title", "severity", "description"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1429,6 +1431,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Cobalt.io API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Crunch42 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Dependency Track Finding Packaging Format (FPF) Export": DEDUPE_ALGO_HASH_CODE,
+    "Horusec Scan": DEDUPE_ALGO_HASH_CODE,
     "Mobsfscan Scan": DEDUPE_ALGO_HASH_CODE,
     "SonarQube Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "SonarQube Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1535,6 +1538,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,
+    "Qualys Hacker Guardian Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1770,8 +1774,10 @@ VULNERABILITY_URLS = {
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html
     "CWE": "https://cwe.mitre.org/data/definitions/&&.html",  # e.g. https://cwe.mitre.org/data/definitions/79.html
+    "GLSA": "https://security.gentoo.org/",  # e.g. https://security.gentoo.org/glsa/202409-32
     "RLSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RLSA-2024:7001
     "RLBA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RLBA-2024:6968
+    "CGA": "https://images.chainguard.dev/security/",  # e.g. https://images.chainguard.dev/security/CGA-24pq-h5fw-43v3
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
 FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")

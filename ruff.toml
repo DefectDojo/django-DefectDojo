@@ -41,7 +41,7 @@ select = [
    "UP",
    "YTT",
    "ASYNC",
-   "S2", "S5", "S7", "S101", "S104", "S105", "S106", "S108", "S311", "S112", "S113",
+   "S1", "S2", "S5", "S7", "S311",
    "FBT001", "FBT003",
    "A003", "A004", "A005", "A006",
    "COM",
@@ -93,10 +93,8 @@ ignore = [
     "SIM115",
     "SIM116",
     "SIM117",
-    "RUF010",
     "RUF012",
     "RUF015",
-    "RUF027",
     "D205",
     "D211",  # `one-blank-line-before-class` (D203) and `no-blank-line-before-class` (D211) are incompatible.
     "D212",  # `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line` (D213) are incompatible.

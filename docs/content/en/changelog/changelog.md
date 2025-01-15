@@ -7,6 +7,37 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
 
+## Jan 13, 2025: v2.42.1
+
+- **(API)** Pro users can now specify the fields they want to return in a given API payload.  For example, this request will only return the title, severity and description fields for each Finding.  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
+```
+curl -X 'GET' \
+  'https://localhost/api/v2/findings/?response_fields=title,severity,description' \
+  -H 'accept: application/json'
+```
+
+## Jan 6, 2025: v2.42.0
+
+- **(API)** `/test_reimport` results can now be ordered via id, created, modified, version, branch_tag, build_id, and commit_hash.
+- **(Jira)** When a Risk Acceptance expires, linked Jira Group issues will now be updated to reflect the status change.
+
+## Dec 31, 2024: v2.41.4
+
+- **(API)** 'Force To Active / Verified' flag is no longer required when calling `/import-scan`, `/reimport-scan` endponts: a value of True now forces to Active, False now forces to Inactive, while setting a value of none (or not using the flag) will use the tool's status.
+- **(Beta UI)** Added ability to regenerate / copy your API token.
+- **(Beta UI)** Fixed bug preventing date / planned remediation dates from being added via Bulk Edit.
+- **(Import)** Added fields for EPSS score and percentile to Generic Findings Import parser.
+
+## Dec 24, 2024: v2.41.3
+
+- **(API)** Added `/request_response_pairs` endpoint.
+- **(Beta UI)** When sorting by Severity, Findings will now be ordered by **severity level** rather than alphabetically.
+- **(Beta UI)** On the Findings table, the Endpoint Hosts column has been replaced with a numerical count of affected Endpoints.
+- **(Beta UI)** On the Findings table, the Vulnerability ID field can now be filtered with "starts_with", "ends_with" filters.
+- **(Beta UI)** Added Edit Test Type form: you can now edit the properties of a custom Test Type to determine if it is Active or Inactive, or a Static Scan or Dynamic Scan Test.
+- **(Beta UI)** Same Tool Deduplication Settings / Test Type field is now searchable.
+- **(Tools)** Qualys HackerGuardian now uses hashcode against "title", "severity", "description" for deduplication.
+- **(Tools)** Horusec scan now uses hashcode against "title", "description", "file_path", and "line" for deduplication.
 
 ## Dec 16, 2024: v2.41.2
 
