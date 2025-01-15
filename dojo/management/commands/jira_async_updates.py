@@ -22,7 +22,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         findings = Finding.objects.exclude(jira_issue__isnull=True)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_jira", True):
             findings = findings.filter(verified=True, active=True)
         else:
             findings = findings.filter(active=True)
