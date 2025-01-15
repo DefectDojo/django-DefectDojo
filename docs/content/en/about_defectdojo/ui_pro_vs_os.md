@@ -29,7 +29,7 @@ To access the Beta UI, open your User Options menu from the top-right hand corne
 
 1. The **Sidebar** has been reorganized: Pro Metrics and the Homepage can be found in the first section.
 
-2. Import methods can be found in the **Import** section: set up [API Connectors](en/connecting_your_tools/connectors/about_connectors/), use the Import Scan form to [Add Findings](en/connecting_your_tools/import_scan_files/import_scan_ui/), or use [Smart Upload](en/connecting_your_tools/import_scan_files/smart_upload/) to handle infrastructure scanning tools.
+2. Import methods can be found in the **Import** section: set up [API Connectors](/en/connecting_your_tools/connectors/about_connectors/), use the Import Scan form to [Add Findings](/en/connecting_your_tools/import_scan_files/import_scan_ui/), or use [Smart Upload](/en/connecting_your_tools/import_scan_files/smart_upload/) to handle infrastructure scanning tools.
 
 3. The **Manage** section allows you to view different objects in the [Product Hierarchy](en/working_with_findings/organizing_engagements_tests/product_hierarchy/), with views for Product Types, Products, Engagements, Tests, Findings, Risk Acceptances, Endpoints and Components.
 
