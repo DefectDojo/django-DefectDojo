@@ -137,3 +137,15 @@ class TestSemgrepParser(DojoTestCase):
             self.assertEqual("requirements3.txt", finding.file_path)
             self.assertEqual("222", finding.line)
             self.assertEqual(617, finding.cwe)
+
+    def test_fingerprint_requires_login_and_null(self):
+        with open("unittests/scans/semgrep/fingerprint_test.json", encoding="utf-8") as testfile:
+            parser = SemgrepParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            self.assertEqual(None, findings[0].unique_id_from_tool)
+            self.assertEqual("sample/brute.py", findings[0].file_path)
+            self.assertEqual(31, findings[0].line)
+            self.assertEqual(None, findings[1].unique_id_from_tool)
+            self.assertEqual("sample/function.go", findings[1].file_path)
+            self.assertEqual(37, findings[1].line)
