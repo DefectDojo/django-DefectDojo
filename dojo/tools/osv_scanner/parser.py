@@ -37,18 +37,23 @@ class OSVScannerParser:
                     vulnerabilitydetails = vulnerability.get("details", "")
                     vulnerabilitypackagepurl = ""
                     cwe = None
+                    mitigation = None
                     # Make sure we have an affected section to work with
                     if (affected := vulnerability.get("affected")) is not None:
                         if len(affected) > 0:
                             # Pull the package purl if present
                             if (vulnerabilitypackage := affected[0].get("package", "")) != "":
                                 vulnerabilitypackagepurl = vulnerabilitypackage.get("purl", "")
-                            # Extract the CWE
                             if (cwe := affected[0].get("database_specific", {}).get("cwes", None)) is not None:
                                 cwe = cwe[0]["cweId"]
-                    # Create some references
+                            ranges = affected[0].get("ranges", [])
+                            for range_item in ranges:
+                                for event in range_item.get("events", []):
+                                    if "fixed" in event:
+                                        mitigation = f"Upgrade to version: {event['fixed']}"
+
                     reference = ""
-                    for ref in vulnerability.get("references"):
+                    for ref in vulnerability.get("references", []):
                         reference += ref.get("url") + "\n"
                     # Define the description
                     description = vulnerabilitysummary + "\n"
@@ -56,6 +61,7 @@ class OSVScannerParser:
                     description += "**package_ecosystem**: " + package_ecosystem + "\n"
                     description += "**vulnerabilitydetails**: " + vulnerabilitydetails + "\n"
                     description += "**vulnerabilitypackagepurl**: " + vulnerabilitypackagepurl + "\n"
+
                     sev = vulnerability.get("database_specific", {}).get("severity", "")
                     finding = Finding(
                         title=vulnerabilityid + "_" + package_name,
@@ -70,8 +76,11 @@ class OSVScannerParser:
                         file_path=source_path,
                         references=reference,
                     )
+                    if mitigation:
+                        finding.mitigation = mitigation
                     if vulnerabilityid != "":
                         finding.unsaved_vulnerability_ids = []
                         finding.unsaved_vulnerability_ids.append(vulnerabilityid)
                     findings.append(finding)
         return findings
+
