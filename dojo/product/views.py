@@ -546,7 +546,7 @@ def view_product_metrics(request, pid):
     end_date = filters["end_date"]
 
     r = relativedelta(end_date, start_date)
-    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
+    weeks_between = ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7))
     if weeks_between <= 0:
         weeks_between += 2
 
