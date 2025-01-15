@@ -935,7 +935,7 @@ if SAML2_ENABLED:
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env("DD_SAML2_ATTRIBUTES_MAP"))
     SAML_FORCE_AUTH = env("DD_SAML2_FORCE_AUTH")
     SAML_ALLOW_UNKNOWN_ATTRIBUTES = env("DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE")
-    BASEDIR = Path(path.abspath(__file__)).parent
+    BASEDIR = Path(__file__).parent.absolute()
     if len(env("DD_SAML2_ENTITY_ID")) == 0:
         SAML2_ENTITY_ID = f"{SITE_URL}/saml2/metadata/"
     else:
