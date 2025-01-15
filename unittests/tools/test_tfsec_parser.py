@@ -96,7 +96,7 @@ class TestTFSecParser(DojoTestCase):
 
             severities = {}
             for finding in findings:
-                if severities.get(finding.severity, None):
+                if severities.get(finding.severity):
                     numSeverity = severities.get(finding.severity)
                     numSeverity += 1
                     severities[finding.severity] = numSeverity
