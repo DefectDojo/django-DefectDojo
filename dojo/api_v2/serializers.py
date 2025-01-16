@@ -1768,7 +1768,11 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.status()
 
     def process_risk_acceptance(self, data):
-        is_risk_accepted = data.get("risk_accepted", False)
+        is_risk_accepted = data.get("risk_accepted")
+        # Do not take any action if the `risk_accepted` was not passed
+        if not isinstance(is_risk_accepted, bool):
+            return
+        # Determine how to proceed based on the value of `risk_accepted`
         if is_risk_accepted and not self.instance.risk_accepted and self.instance.test.engagement.product.enable_simple_risk_acceptance and not data.get("active", False):
             ra_helper.simple_risk_accept(self.context["request"].user, self.instance)
         elif not is_risk_accepted and self.instance.risk_accepted:  # turning off risk_accepted
