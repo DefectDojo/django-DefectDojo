@@ -2126,7 +2126,7 @@ VULNERABILITY_URLS = {
     "ELSA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
     "ELBA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELBA-2024-7457.html
     "RXSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
-    "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
+    "C-": env("DD_CUSTOM_TAG_PARSER").get("url_controls_cloud", "https://hub.armosec.io/docs/"),  # e.g. https://hub.armosec.io/docs/c-0085
     "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html
