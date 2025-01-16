@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting Jira errors"
-description: "Set up a Jira Configuration in DefectDojo - step 1 of working with Jira"
+description: "Fixing issues with a Jira integration"
 ---
 
 Here are some common issues with the Jira integration, and ways to address them.
