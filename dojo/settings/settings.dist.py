@@ -1181,7 +1181,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    #"dojo.middleware.LoginRequiredMiddleware",
+    "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
     "watson.middleware.SearchContextMiddleware",
