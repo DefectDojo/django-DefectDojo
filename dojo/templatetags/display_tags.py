@@ -32,8 +32,7 @@ from dojo.models import (
     FileAccessToken,
     Finding,
     Product,
-    System_Settings,
-    ExclusivePermission)
+    System_Settings)
 
 from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
 
@@ -1097,23 +1096,6 @@ def import_history(finding):
     context = {
         "list_of_status_changes": list_of_status_changes
     }
-    template_object = template.Template(html_contect)
-    context_object = template.Context(context)
-
-    return template_object.render(context_object)
-
-
-@register.filter()
-def render_exclusive_permission_for_member(exclusive_permissions: list[ExclusivePermission]):
-    html_contect = ""
-    html_item = "<span class='pass_fail Pass'>{{permission}}</span><br/>"
-    for i in range(len(exclusive_permissions)):
-        html_contect += html_item.replace("permission", f"permission{str(i)}")
-    
-    context = {}
-    for i, exclusive_permission in enumerate(exclusive_permissions):
-        context[f"permission{str(i)}"] = exclusive_permission.name
-
     template_object = template.Template(html_contect)
     context_object = template.Context(context)
 
