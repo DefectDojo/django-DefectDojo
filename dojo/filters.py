@@ -1457,7 +1457,7 @@ class ApiFindingFilter(DojoFilter):
     jira_change = DateRangeFilter(field_name="jira_issue__jira_change")
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
-    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact")
+    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", method="filter_mitigated_on")
     mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt")
     mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After", method="filter_mitigated_after")
     # NumberInFilter
@@ -1550,7 +1550,14 @@ class ApiFindingFilter(DojoFilter):
             value = value.replace(hour=23, minute=59, second=59)
 
         return queryset.filter(mitigated__gt=value)
-
+    
+    def filter_mitigated_on(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            # we have a simple date without a time, lets get a range from this morning to tonight at 23:59:59:999
+            nextday = value + timedelta(days=1)
+            return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
+        
+        return queryset.filter(mitigated=value)
 
 class PercentageFilter(NumberFilter):
     def __init__(self, *args, **kwargs):
@@ -1594,7 +1601,7 @@ class FindingFilterHelper(FilterSet):
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
-    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On")
+    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On", method="filter_mitigated_on")
     mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
     mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After", method="filter_mitigated_after")
     planned_remediation_date = DateRangeOmniFilter()
@@ -1718,6 +1725,13 @@ class FindingFilterHelper(FilterSet):
 
         return queryset.filter(mitigated__gt=value)
 
+    def filter_mitigated_on(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            # we have a simple date without a time, lets get a range from this morning to tonight at 23:59:59:999
+            nextday = value + timedelta(days=1)
+            return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
+        
+        return queryset.filter(mitigated=value)
 
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
     test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
