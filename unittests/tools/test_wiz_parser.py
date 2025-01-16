@@ -39,11 +39,33 @@ class TestWizParser(DojoTestCase):
             finding = findings[1]
             self.assertEqual("Unusual activity by a principal from previously unseen country", finding.title)
             self.assertEqual("High", finding.severity)
+
+            finding = findings[7]
+            self.assertEqual("AKS user/service accounts with the privileges to create pods", finding.title)
+            self.assertEqual(True, finding.active)
+            self.assertEqual(False, finding.is_mitigated)
+            self.assertEqual(False, finding.out_of_scope)
+
+            finding = findings[9]
+            self.assertEqual("AKS cluster contains a pod running containers with added capabilities", finding.title)
+            self.assertEqual(False, finding.active)
+            self.assertEqual(True, finding.is_mitigated)
+            self.assertEqual(False, finding.out_of_scope)
+
+            finding = findings[11]
+            self.assertEqual("Container using an image with high/critical severity network vulnerabilities with a known exploit", finding.title)
+            self.assertEqual(False, finding.active)
+            self.assertEqual(False, finding.is_mitigated)
+            self.assertEqual(True, finding.out_of_scope)
+
             finding = findings[20]
             self.assertEqual(
                 "User/service account with get/list/watch permissions on secrets in an AKS cluster", finding.title,
             )
             self.assertEqual("Informational", finding.severity)
+
+            for index, value in enumerate(findings):
+                print(str(index) + ": " + str(value.active) + ':' + str(value.is_mitigated) + ':' + str(value.out_of_scope))
 
     def test_sca_format(self):
         with open("unittests/scans/wiz/sca_format.csv", encoding="utf-8") as testfile:
