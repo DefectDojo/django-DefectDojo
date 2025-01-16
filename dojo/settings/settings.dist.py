@@ -304,6 +304,10 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
+    # Add custom styles and/or scripts to UI. All files need to be stored in "static" dir and path need to relative to this dir
+    # Note: Linking of unknown JavaScript can pose a security risk for your application. Add only trusted sources.
+    DD_CUSTOM_CSS=(list, []),
+    DD_CUSTOM_JS=(list, []),
 )
 
 
@@ -819,6 +823,14 @@ TEMPLATES = [
         },
     },
 ]
+
+# ------------------------------------------------------------------------------
+# UI
+# ------------------------------------------------------------------------------
+
+# Add custom styles and/or scripts to UI
+CUSTOM_CSS = env("DD_CUSTOM_CSS")
+CUSTOM_JS = env("DD_CUSTOM_JS")
 
 # ------------------------------------------------------------------------------
 # APPS
