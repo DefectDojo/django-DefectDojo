@@ -57,7 +57,6 @@ class WizParserByTitle:
             mitigation = row.get("Remediation Recommendation")
             description = ""
             status_dict = WizcliParsers.convert_status(row.get("Status", None))
-            print(status_dict)
             # Iterate over the description fields to create the description
             for field in description_fields:
                 if (field_value := row.get(field)) is not None and len(field_value) > 0:
@@ -159,7 +158,7 @@ class WizParserByDetailedName:
 
     def _parse_tags(self, tags: str) -> list[str]:
         """
-        parse the Tag string dict, and convert to a list of strings.
+        Parse the Tag string dict, and convert to a list of strings.
 
         The format of the tags is is "{""key"":""value""}" format
         """
@@ -174,6 +173,7 @@ class WizParserByDetailedName:
             # Default to Info severity
             return "Info"
         return severity
+
 
 class WizParser(
     WizParserByTitle,

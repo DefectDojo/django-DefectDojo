@@ -64,9 +64,6 @@ class TestWizParser(DojoTestCase):
             )
             self.assertEqual("Informational", finding.severity)
 
-            for index, value in enumerate(findings):
-                print(str(index) + ": " + str(value.active) + ':' + str(value.is_mitigated) + ':' + str(value.out_of_scope))
-
     def test_sca_format(self):
         with open("unittests/scans/wiz/sca_format.csv", encoding="utf-8") as testfile:
             parser = WizParser()
