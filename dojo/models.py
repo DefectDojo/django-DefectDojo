@@ -2186,7 +2186,7 @@ class Test(models.Model):
                 deduplicationLogger.debug(f"using HASHCODE_FIELDS_PER_SCANNER for scan_type: {self.scan_type}")
                 hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.scan_type]
             else:
-                deduplicationLogger.debug(f"test_type name {self.test_type.name} and scan_type {self.scan_type} not found in HASHCODE_FIELDS_PER_SCANNER")
+                deduplicationLogger.warning(f"test_type name {self.test_type.name} and scan_type {self.scan_type} not found in HASHCODE_FIELDS_PER_SCANNER")
         else:
             deduplicationLogger.debug("Section HASHCODE_FIELDS_PER_SCANNER not found in settings.dist.py")
 
