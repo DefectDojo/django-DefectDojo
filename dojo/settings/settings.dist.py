@@ -463,7 +463,11 @@ env = environ.FileAwareEnv(
     AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
-    DD_REQUESTS_TIMEOUT=(int, 30)
+    DD_REQUESTS_TIMEOUT=(int, 30),
+    
+    # Cybersecurity emails
+    DD_PRISMA_CYBERSECURITY_EMAIL=(str, ""),
+    DD_TENABLE_CYBERSECURITY_EMAIL=(str, ""),
 )
 
 
@@ -1037,6 +1041,8 @@ MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
 # Approver and reviewer group names
 APPROVER_GROUP_NAME = env("DD_APPROVER_GROUP_NAMES")
 REVIEWER_GROUP_NAME = env("DD_REVIEWER_GROUP_NAMES")
+PRISMA_CYBERSECURITY_EMAIL = env("DD_PRISMA_CYBERSECURITY_EMAIL")
+TENABLE_CYBERSECURITY_EMAIL = env("DD_TENABLE_CYBERSECURITY_EMAIL")
 
 
 # ------------------------------------------------------------------------------
@@ -1175,7 +1181,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "dojo.middleware.LoginRequiredMiddleware",
+    #"dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
     "watson.middleware.SearchContextMiddleware",

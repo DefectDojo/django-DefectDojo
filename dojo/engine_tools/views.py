@@ -6,7 +6,12 @@ from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.filters import FindingExclusionFilter
 from dojo.engine_tools.forms import CreateFindingExclusionForm, FindingExclusionDiscussionForm, EditFindingExclusionForm
 from dojo.engine_tools.helpers import (
-    add_findings_to_whitelist, get_approvers_members, get_reviewers_members, Constants, expire_finding_exclusion_immediately
+    add_findings_to_whitelist, 
+    get_approvers_members, 
+    get_reviewers_members, 
+    Constants, 
+    expire_finding_exclusion_immediately,
+    send_mail_to_cybersecurity
 )
 
 # Utils
@@ -40,6 +45,12 @@ def finding_exclusions(request: HttpRequest):
 
 def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     default_unique_id = request.GET.get('unique_id', '')
+    default_practice = request.GET.get('practice', '')
+    
+    if "prisma" in default_practice:
+        default_practice = "prisma"
+    elif "tenable" in default_practice:
+        default_practice = "tenable"
     
     duplicate_finding_exclusions = FindingExclusion.objects.filter(
             unique_id_from_tool__in=[default_unique_id],
@@ -64,7 +75,10 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
         
         return HttpResponseRedirect(reverse("finding_exclusions"))
     
-    form = CreateFindingExclusionForm(initial={"unique_id_from_tool": default_unique_id})
+    form = CreateFindingExclusionForm(initial={
+            "unique_id_from_tool": default_unique_id,
+            "practice": default_practice
+        })
 
     finding_exclusion = None
 
@@ -77,6 +91,7 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
         
         if form.is_valid():
             exclusion = form.save(commit=False)
+            exclusion.practice = default_practice
             exclusion.created_by = request.user
             exclusion.save()
             
@@ -204,6 +219,8 @@ def review_finding_exclusion_request(
                         description=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}.",
                         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
                         recipients=approvers)
+    
+    send_mail_to_cybersecurity(finding_exclusion)
     
     messages.add_message(
             request,

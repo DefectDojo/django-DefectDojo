@@ -16,7 +16,13 @@ class CreateFindingExclusionForm(forms.ModelForm):
     
     class Meta:
         model = FindingExclusion
-        fields = ["type", "unique_id_from_tool", "reason"]
+        fields = ["type", "unique_id_from_tool", "reason", "practice"]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.initial.get("practice"):
+            self.fields["practice"].disabled = True
 
 
 class EditFindingExclusionForm(forms.ModelForm):
