@@ -1550,7 +1550,7 @@ class ApiFindingFilter(DojoFilter):
             value = value.replace(hour=23, minute=59, second=59)
 
         return queryset.filter(mitigated__gt=value)
-    
+
     def filter_mitigated_on(self, queryset, name, value):
         if value.hour == 0 and value.minute == 0 and value.second == 0:
             # we have a simple date without a time, lets get a range from this morning to tonight at 23:59:59:999
