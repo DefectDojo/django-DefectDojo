@@ -24,7 +24,16 @@ from django.utils.translation import gettext as _
 
 import dojo.jira_link.helper as jira_helper
 import dojo.utils
-from dojo.models import Benchmark_Product, Check_List, Dojo_User, FileAccessToken, Finding, Product, System_Settings
+
+from dojo.models import (
+    Benchmark_Product,
+    Check_List,
+    Dojo_User,
+    FileAccessToken,
+    Finding,
+    Product,
+    System_Settings)
+
 from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
 
 logger = logging.getLogger(__name__)
