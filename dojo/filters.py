@@ -1556,8 +1556,9 @@ class ApiFindingFilter(DojoFilter):
             # we have a simple date without a time, lets get a range from this morning to tonight at 23:59:59:999
             nextday = value + timedelta(days=1)
             return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
-        
+
         return queryset.filter(mitigated=value)
+
 
 class PercentageFilter(NumberFilter):
     def __init__(self, *args, **kwargs):
@@ -1730,8 +1731,9 @@ class FindingFilterHelper(FilterSet):
             # we have a simple date without a time, lets get a range from this morning to tonight at 23:59:59:999
             nextday = value + timedelta(days=1)
             return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
-        
+
         return queryset.filter(mitigated=value)
+
 
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
     test__engagement__product__prod_type = NumberFilter(widget=HiddenInput())
