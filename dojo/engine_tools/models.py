@@ -39,6 +39,7 @@ class FindingExclusion(models.Model):
                                    blank=True,
                                    on_delete=models.CASCADE,
                                    related_name="dojo_user_created")
+    practice = models.CharField(max_length=50, null=True, blank=True)
     
     class Meta:
         db_table = "dojo_finding_exlusion"

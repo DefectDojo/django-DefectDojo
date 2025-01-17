@@ -12,11 +12,22 @@ class CreateFindingExclusionForm(forms.ModelForm):
         help_text=Constants.VULNERABILITY_ID_HELP_TEXT.value)
     reason = forms.CharField(max_length=200, required=True,
                              widget=forms.Textarea,
-                             label="Reason")
+                             label="Reason",
+                             help_text="Please provide a reason for excluding this finding.")
+    
+    practice = forms.CharField(required=False,
+                                label="Practice Origin Exclusion",
+                                help_text="practice where exclusion originates",)
     
     class Meta:
         model = FindingExclusion
-        fields = ["type", "unique_id_from_tool", "reason"]
+        fields = ["type", "unique_id_from_tool", "reason", "practice"]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.initial.get("practice"):
+            self.fields.pop("practice")
 
 
 class EditFindingExclusionForm(forms.ModelForm):
