@@ -4,7 +4,17 @@ import unittest
 from crum import impersonate
 from django.conf import settings
 
-from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, System_Settings, Test, User, _copy_model_util
+from dojo.models import (
+    Endpoint,
+    Endpoint_Status,
+    Engagement,
+    Finding,
+    Product,
+    System_Settings,
+    Test,
+    User,
+    _copy_model_util,
+)
 
 from .dojo_test_case import DojoTestCase
 
