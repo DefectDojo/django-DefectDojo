@@ -47,11 +47,6 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     default_unique_id = request.GET.get('unique_id', '')
     default_practice = request.GET.get('practice', '')
     
-    if "prisma" in default_practice:
-        default_practice = "prisma"
-    elif "tenable" in default_practice:
-        default_practice = "tenable"
-    
     duplicate_finding_exclusions = FindingExclusion.objects.filter(
             unique_id_from_tool__in=[default_unique_id],
     ).exclude(status="Expired").first()
