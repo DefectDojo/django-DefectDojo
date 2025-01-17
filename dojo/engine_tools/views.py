@@ -45,7 +45,7 @@ def finding_exclusions(request: HttpRequest):
 
 def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     default_unique_id = request.GET.get('unique_id', '')
-    default_practice = request.GET.get('practice', '')
+    default_practice = request.GET.get('practice', '') or request.POST.get('practice', '')
     
     duplicate_finding_exclusions = FindingExclusion.objects.filter(
             unique_id_from_tool__in=[default_unique_id],
