@@ -1,4 +1,4 @@
-name: Run Binary and Create PR
+name: Update Sample Data
 
 env:
   GIT_USERNAME: "DefectDojo release bot"
