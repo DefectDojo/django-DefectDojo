@@ -112,7 +112,7 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
             create_notification(
                 event="finding_exclusion_expired",
                 title=f"The finding exclusion for {expired_fex.unique_id_from_tool} has expired.",
-                description="All findings whitelisted via this finding exclusion will be removed from the whitelist.",
+                description="All findings whitelisted via this finding exclusion {expired_fex.unique_id_from_tool} will be removed from the whitelist.",
                 url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
                 recipients=maintainers + approvers + [expired_fex.created_by.username]
             )
