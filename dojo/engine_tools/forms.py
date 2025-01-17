@@ -13,7 +13,7 @@ class CreateFindingExclusionForm(forms.ModelForm):
     reason = forms.CharField(max_length=200, required=True,
                              widget=forms.Textarea,
                              label="Reason",
-                             help_text="Please provide a reason for excluding this finding.")
+                             help_text="Please provide a reason for excluding this vulnerability id.")
     
     practice = forms.CharField(required=False,
                                 label="Practice Origin Exclusion",

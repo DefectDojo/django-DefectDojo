@@ -118,7 +118,8 @@ def is_in_approver_group(user):
 @register.filter
 def is_tags_authorized_for_whitelist(finding):
     tags = finding.tags.all()
-    
+    if not finding.active:
+        return False
     if tags:
         if 'white_list' in tags:
             return False
