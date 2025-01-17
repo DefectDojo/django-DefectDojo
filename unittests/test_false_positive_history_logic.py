@@ -3,7 +3,7 @@ from datetime import datetime
 
 from crum import impersonate
 
-from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, System_Settings, Test, User
+from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, System_Settings, Test, User, _copy_model_util
 
 from .dojo_test_case import DojoTestCase
 
@@ -1709,8 +1709,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def copy_and_reset_finding(self, id):
         org = Finding.objects.get(id=id)
-        new = org
-        new.pk = None
+        new = _copy_model_util(org)
         new.duplicate = False
         new.duplicate_finding = None
         new.false_p = False
@@ -1721,22 +1720,19 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def copy_and_reset_test(self, id):
         org = Test.objects.get(id=id)
-        new = org
-        new.pk = None
+        new = _copy_model_util(org)
         # return unsaved new test and reloaded existing test
         return new, Test.objects.get(id=id)
 
     def copy_and_reset_engagement(self, id):
         org = Engagement.objects.get(id=id)
-        new = org
-        new.pk = None
+        new = _copy_model_util(org)
         # return unsaved new engagement and reloaded existing engagement
         return new, Engagement.objects.get(id=id)
 
     def copy_and_reset_product(self, id):
         org = Product.objects.get(id=id)
-        new = org
-        new.pk = None
+        new = _copy_model_util(org)
         new.name = f"{org.name} (Copy {datetime.now()})"
         # return unsaved new product and reloaded existing product
         return new, Product.objects.get(id=id)
