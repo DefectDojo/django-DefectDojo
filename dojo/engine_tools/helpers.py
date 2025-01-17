@@ -54,15 +54,14 @@ def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion) -> None:
     recipient = None
     practice = finding_exclusion.practice
     
-    match practice:
-        case 'prisma':
-            recipient = settings.PRISMA_CYBERSECURITY_EMAIL
-
-        case 'tenable':
-            recipient = settings.TENABLE_CYBERSECURITY_EMAIL
-
-        case _:
-            return None
+    cyber_providers = settings.PROVIDERS_CYBERSECURITY_EMAIL
+    
+    for key, value in cyber_providers.items():
+        if key in practice:
+            recipient = value
+    
+    if not recipient:
+        return
         
     email_notification_manager.send_mail_notification(
         event="finding_exclusion_request",

@@ -466,8 +466,7 @@ env = environ.FileAwareEnv(
     DD_REQUESTS_TIMEOUT=(int, 30),
     
     # Cybersecurity emails
-    DD_PRISMA_CYBERSECURITY_EMAIL=(str, ""),
-    DD_TENABLE_CYBERSECURITY_EMAIL=(str, ""),
+    DD_PROVIDERS_CYBERSECURITY_EMAIL=(dict, {}),
 )
 
 
@@ -1041,9 +1040,7 @@ MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
 # Approver and reviewer group names
 APPROVER_GROUP_NAME = env("DD_APPROVER_GROUP_NAMES")
 REVIEWER_GROUP_NAME = env("DD_REVIEWER_GROUP_NAMES")
-PRISMA_CYBERSECURITY_EMAIL = env("DD_PRISMA_CYBERSECURITY_EMAIL")
-TENABLE_CYBERSECURITY_EMAIL = env("DD_TENABLE_CYBERSECURITY_EMAIL")
-
+PROVIDERS_CYBERSECURITY_EMAIL = env("DD_PROVIDERS_CYBERSECURITY_EMAIL")
 
 # ------------------------------------------------------------------------------
 # ADMIN

@@ -22,7 +22,7 @@ class CreateFindingExclusionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.initial.get("practice"):
-            self.fields["practice"].disabled = True
+            self.fields.pop("practice")
 
 
 class EditFindingExclusionForm(forms.ModelForm):
