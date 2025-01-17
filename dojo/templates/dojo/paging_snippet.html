@@ -18,7 +18,7 @@
                         {% if num.page_number %}
                             <a href="?{% url_replace request page_param num.page_number %}" aria-label="{% trans 'Page' %} {{ num.display }}"> {{ num.display }}</a>
                         {% else %}
-                            <a href="#" role="presentation" aria-disabled="true" tabindex="-1">{{ num.display }}</a>
+                            <a role="presentation" aria-disabled="true" tabindex="-1">{{ num.display }}</a>
                         {% endif %}
                     </li>
                 {% endfor %}
@@ -42,7 +42,7 @@
                             {% if page.paginator.count > 500 %}
                                 <li role="presentation"><a href="?{% url_replace request page_size_param 500 %}" aria-label="{% trans '500 items per page' %}" role="menuitem" >500</a></li>
                             {% endif %}
-                            <li role="presentation"><a href="?{% url_replace request page_size_param page.paginator.count %}" aria-label="{% trans 'All items per page' %}" role="menuitem">{% trans "All" %}</a></li>
+                            <li role="presentation"><a href="?{% url_replace request page_size_param page.paginator.count %}" aria-label="{% trans 'All items on one page' %}" role="menuitem">{% trans "All" %}</a></li>
                         </ul>
                     </div>
                 </li>
