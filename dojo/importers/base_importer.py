@@ -182,7 +182,7 @@ class BaseImporter(ImporterOptions):
         tests: list[Test],
     ) -> list[Finding]:
         """
-        currently we only support import one Test
+        Currently we only support import one Test
         so for parser that support multiple tests (like SARIF)
         we aggregate all the findings into one uniq test
         """
