@@ -1,7 +1,5 @@
 import json
-
 from dojo.models import Finding
-
 
 class AnchoreEngineParser:
     def get_scan_types(self):
@@ -16,100 +14,43 @@ class AnchoreEngineParser:
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
-        for item in data["vulnerabilities"]:
-            vulnerability_id = item.get("vuln")
+        for item in data.get("securityEvaluation", []):
+            vulnerability_id = item.get("vulnerabilityId")
 
             title = (
-                item["vuln"]
+                item["vulnerabilityId"]
                 + " - "
                 + item["package"]
-                + "("
-                + item["package_type"]
-                + ")"
+                + " (" + item["packageType"] + ")"
             )
 
             # Finding details information
-            # depending on version image_digest/imageDigest
             findingdetail = (
                 "**Image hash**: "
-                + item.get("image_digest", item.get("imageDigest", "None"))
+                + item.get("imageDigest", "None")
                 + "\n\n"
             )
             findingdetail += "**Package**: " + item["package"] + "\n\n"
-            findingdetail += (
-                "**Package path**: " + item["package_path"] + "\n\n"
-            )
-            findingdetail += (
-                "**Package type**: " + item["package_type"] + "\n\n"
-            )
-            findingdetail += (
-                "**Feed**: " + item["feed"] + "/" + item["feed_group"] + "\n\n"
-            )
-            findingdetail += "**CPE**: " + item["package_cpe"] + "\n\n"
-            findingdetail += (
-                "**Description**: "
-                + item.get("description", "<None>")
-                + "\n\n"
-            )
+            findingdetail += "**Package Type**: " + item["packageType"] + "\n\n"
+            findingdetail += "**CVEs**: " + item.get("cves", "None") + "\n\n"
+            findingdetail += "**Fix Available**: " + item.get("fixAvailable", "None") + "\n\n"
+            findingdetail += "**Fix Observed At**: " + item.get("fixObservedAt", "None") + "\n\n"
+            findingdetail += "**Link**: " + item.get("link", "None") + "\n\n"
+            findingdetail += "**CVSS Base Score**: " + str(item.get("nvdCvssBaseScore", "None")) + "\n\n"
 
             sev = item["severity"]
             if sev == "Negligible" or sev == "Unknown":
                 sev = "Info"
 
-            mitigation = (
-                "Upgrade to " + item["package_name"] + " " + item["fix"] + "\n"
-            )
-            mitigation += "URL: " + item["url"] + "\n"
-
-            cvssv3_base_score = None
-            if item["feed"] == "nvdv2" or item["feed"] == "vulnerabilities":
-                if "nvd_data" in item and len(item["nvd_data"]) > 0:
-                    cvssv3_base_score = item["nvd_data"][0]["cvss_v3"][
-                        "base_score"
-                    ]
-            else:
-                # there may be other keys, but taking a best guess here
-                if "vendor_data" in item and len(item["vendor_data"]) > 0:
-                    # sometimes cvssv3 in 1st element will have -1 for "not
-                    # set", but have data in the 2nd array item
-                    if (
-                        "cvss_v3" in item["vendor_data"][0]
-                        and item["vendor_data"][0]["cvss_v3"]["base_score"]
-                        != -1
-                    ):
-                        cvssv3_base_score = item["vendor_data"][0]["cvss_v3"][
-                            "base_score"
-                        ]
-                    elif len(item["vendor_data"]) > 1:
-                        if (
-                            "cvss_v3" in item["vendor_data"][1]
-                            and item["vendor_data"][1]["cvss_v3"]["base_score"]
-                            != -1
-                        ):
-                            cvssv3_base_score = item["vendor_data"][1][
-                                "cvss_v3"
-                            ]["base_score"]
-            # cvssv3 score spec states value should be between 0.0 and 10.0
-            # anchorage provides a -1.0 in some situations which breaks spec
-            if (cvssv3_base_score
-                and ((float(cvssv3_base_score) < 0)
-                     or (float(cvssv3_base_score) > 10))):
-                cvssv3_base_score = None
-
-            references = item["url"]
+            references = item.get("link", "None")
 
             dupe_key = "|".join(
                 [
-                    item.get(
-                        "image_digest", item.get("imageDigest", "None"),
-                    ),  # depending on version image_digest/imageDigest
-                    item["feed"],
-                    item["feed_group"],
-                    item["package_name"],
-                    item["package_version"],
-                    item["package_path"],
-                    item["vuln"],
-                ],
+                    item.get("imageDigest", "None"),
+                    item["vulnerabilityId"],
+                    item["package"],
+                    item["packageType"],
+                ]
             )
 
             if dupe_key in dupes:
@@ -120,18 +61,17 @@ class AnchoreEngineParser:
                 find = Finding(
                     title=title,
                     test=test,
-                    cvssv3_score=cvssv3_base_score,
+                    cvssv3_score=item.get("nvdCvssBaseScore"),
                     description=findingdetail,
                     severity=sev,
-                    mitigation=mitigation,
                     references=references,
-                    file_path=item["package_path"],
-                    component_name=item["package_name"],
-                    component_version=item["package_version"],
-                    url=item.get("url"),
+                    file_path="N/A",  # Package path is not available in the sample data
+                    component_name=item["package"],
+                    component_version=item.get("fixAvailable", "N/A"),
+                    url=item.get("link"),
                     static_finding=True,
                     dynamic_finding=False,
-                    vuln_id_from_tool=item.get("vuln"),
+                    vuln_id_from_tool=item.get("vulnerabilityId"),
                 )
                 if vulnerability_id:
                     find.unsaved_vulnerability_ids = [vulnerability_id]
