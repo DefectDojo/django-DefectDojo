@@ -463,7 +463,10 @@ env = environ.FileAwareEnv(
     AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
-    DD_REQUESTS_TIMEOUT=(int, 30)
+    DD_REQUESTS_TIMEOUT=(int, 30),
+    
+    # Cybersecurity emails
+    DD_PROVIDERS_CYBERSECURITY_EMAIL=(dict, {}),
 )
 
 
@@ -1037,7 +1040,7 @@ MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
 # Approver and reviewer group names
 APPROVER_GROUP_NAME = env("DD_APPROVER_GROUP_NAMES")
 REVIEWER_GROUP_NAME = env("DD_REVIEWER_GROUP_NAMES")
-
+PROVIDERS_CYBERSECURITY_EMAIL = env("DD_PROVIDERS_CYBERSECURITY_EMAIL")
 
 # ------------------------------------------------------------------------------
 # ADMIN

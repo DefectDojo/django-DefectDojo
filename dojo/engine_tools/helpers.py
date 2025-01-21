@@ -13,7 +13,7 @@ from dojo.engine_tools.models import FindingExclusion
 from dojo.engine_tools.queries import tag_filter
 from dojo.celery import app
 from dojo.user.queries import get_user
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import create_notification, EmailNotificationManger
 from dojo.utils import get_full_url
 
 
@@ -47,6 +47,30 @@ def get_note(author, message):
         entry=message
     )
     return note
+
+
+def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion) -> None:
+    email_notification_manager = EmailNotificationManger()
+    recipient = None
+    practice = finding_exclusion.practice
+    
+    cyber_providers = settings.PROVIDERS_CYBERSECURITY_EMAIL
+    
+    for key, value in cyber_providers.items():
+        if key in practice:
+            recipient = value
+    
+    if not recipient:
+        return
+        
+    email_notification_manager.send_mail_notification(
+        event="finding_exclusion_request",
+        user=None,
+        title=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}",
+        description=f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}.",
+        url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
+        recipient=recipient
+    )
 
 
 def remove_finding_from_whitelist(finding: Finding, note: Notes) -> Finding:
@@ -88,7 +112,7 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
             create_notification(
                 event="finding_exclusion_expired",
                 title=f"The finding exclusion for {expired_fex.unique_id_from_tool} has expired.",
-                description="All findings whitelisted via this finding exclusion will be removed from the whitelist.",
+                description=f"All findings whitelisted via this finding exclusion {expired_fex.unique_id_from_tool} will be removed from the whitelist.",
                 url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
                 recipients=maintainers + approvers + [expired_fex.created_by.username]
             )

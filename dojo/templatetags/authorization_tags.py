@@ -113,3 +113,18 @@ def is_in_reviewer_group(user):
 @register.filter
 def is_in_approver_group(user):
     return is_in_group(user, settings.APPROVER_GROUP_NAME)
+
+
+@register.filter
+def is_tags_authorized_for_whitelist(finding):
+    tags = finding.tags.all()
+    if not finding.active:
+        return False
+    if tags:
+        if 'white_list' in tags:
+            return False
+        for tag in tags:
+            if tag.name in settings.FINDING_EXCLUSION_FILTER_TAGS:
+                return True
+    
+    return False
