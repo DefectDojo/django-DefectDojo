@@ -23,6 +23,10 @@ curl -X 'GET' \
   'https://localhost/api/v2/findings/?response_fields=title,severity,description' \
   -H 'accept: application/json'
 ```
+- **(Findings)** Excel and CSV exports now include tags.
+- **(Reports)** Reports now exclude unenforced SLAs from Executive Summary to avoid confusion.
+- **(Risk Acceptance)** Simple Risk Acceptances now have a 'paper trail' created - when they are added or removed, a note will be added to the Finding to log the action.
+- **(Tools)** ImageTags are now included with AWS SecurityHub and AWS inspector parsers.
 
 ## Jan 6, 2025: v2.42.0
 
