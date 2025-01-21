@@ -55,13 +55,17 @@ def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion) -> None:
     practice = finding_exclusion.practice
     
     cyber_providers = settings.PROVIDERS_CYBERSECURITY_EMAIL
-    
+    recipients = []
     for key, value in cyber_providers.items():
         if key in practice:
-            recipient = value
+            recipients.append(value)
     
     if not recipient:
         return
+    
+    devsecops_email = cyber_providers.get("devsecops", "")
+    
+    recipients.append(devsecops_email)
     
     title = f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}"
     description = f"Eligibility Assessment Vulnerability Whitelist - {finding_exclusion.unique_id_from_tool}."
@@ -72,18 +76,7 @@ def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion) -> None:
         title=title,
         description=description,
         url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-        recipient=recipient
-    )
-
-    devsecops_email = cyber_providers.get("devsecops", "")
-    
-    email_notification_manager.send_mail_notification(
-        event="finding_exclusion_request",
-        user=None,
-        title=title,
-        description=description,
-        url=reverse("finding_exclusion", args=[str(finding_exclusion.pk)]),
-        recipient=devsecops_email
+        recipient=recipients
     )
     
 
