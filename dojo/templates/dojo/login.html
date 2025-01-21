@@ -34,10 +34,10 @@
                         <div class="col-sm-4">
                             <ul style="list-style-type: none">
                                 {% if FORGOT_PASSWORD %}
-                                    <li><a id="reset-password" style="color: rgb(51, 122, 183)" href="{% url 'password_reset' %}">{% trans "I forgot my password" %}</a></li>
+                                    <li><a id="reset-password" href="{% url 'password_reset' %}">{% trans "I forgot my password" %}</a></li>
                                 {% endif %}
                                 {% if FORGOT_USERNAME %}
-                                    <li><a id="forgot-username" style="color: rgb(51, 122, 183)" href="{% url 'forgot_username' %}">{% trans "I forgot my username" %}</a></li>
+                                    <li><a id="forgot-username" href="{% url 'forgot_username' %}">{% trans "I forgot my username" %}</a></li>
                                 {% endif %}
                             </ul>
                         </div>
