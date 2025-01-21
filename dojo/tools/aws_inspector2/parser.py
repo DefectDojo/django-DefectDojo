@@ -221,6 +221,7 @@ class AWSInspector2Parser:
                             f"Hash: {ecr_image_details.get('imageHash', 'N/A')}",
                             f"Author: {ecr_image_details.get('author', 'N/A')}",
                             f"Pushed at: {ecr_image_details.get('pushedAt', 'N/A')}",
+                            f"Image tags: {','.join(ecr_image_details.get('imageTags', []))}",
                             "---",
                         ),
                     )

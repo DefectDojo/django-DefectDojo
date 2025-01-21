@@ -12,6 +12,12 @@ metadata:
     {{- with .Values.extraLabels }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
+{{- if .Values.django.annotations }}
+  annotations:
+{{- with .Values.django.annotations }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
 spec:
   replicas: {{ .Values.django.replicas }}
   {{- if .Values.revisionHistoryLimit }}

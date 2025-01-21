@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import warnings
+from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -363,10 +364,32 @@ class System_Settings(models.Model):
 
     enforce_verified_status = models.BooleanField(
         default=True,
-        verbose_name=_("Enforce Verified Status"),
-        help_text=_("When enabled, features such as product grading, jira "
-                    "integration, metrics, and reports will only interact "
-                    "with verified findings.",
+        verbose_name=_("Enforce Verified Status - Globally"),
+        help_text=_(
+            "When enabled, features such as product grading, jira "
+            "integration, metrics, and reports will only interact "
+            "with verified findings. This setting will override "
+            "individually scoped verified toggles.",
+        ),
+    )
+    enforce_verified_status_jira = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status - Jira"),
+        help_text=_("When enabled, findings must have a verified status to be pushed to jira."),
+    )
+    enforce_verified_status_product_grading = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status - Product Grading"),
+        help_text=_(
+            "When enabled, findings must have a verified status to be considered as part of a product's grading.",
+        ),
+    )
+    enforce_verified_status_metrics = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status - Metrics"),
+        help_text=_(
+            "When enabled, findings must have a verified status to be counted in metric calculations, "
+            "be included in reports, and filters.",
         ),
     )
 
@@ -1236,7 +1259,7 @@ class Product(models.Model):
                                         date__range=[start_date,
                                                     end_date])
 
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
 
         critical = findings.filter(severity="Critical").count()
@@ -1553,7 +1576,7 @@ class Engagement(models.Model):
         from dojo.utils import get_system_setting
 
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
 
         return findings
@@ -1575,7 +1598,10 @@ class Engagement(models.Model):
         import dojo.finding.helper as helper
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
-        calculate_grade(self.product)
+        with suppress(Product.DoesNotExist):
+            # Suppressing a potential issue created from async delete removing
+            # related objects in a separate task
+            calculate_grade(self.product)
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -2123,7 +2149,7 @@ class Test(models.Model):
     def unaccepted_open_findings(self):
         from dojo.utils import get_system_setting
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
 
         return findings
@@ -2185,7 +2211,10 @@ class Test(models.Model):
     def delete(self, *args, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        calculate_grade(self.engagement.product)
+        with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
+            # Suppressing a potential issue created from async delete removing
+            # related objects in a separate task
+            calculate_grade(self.engagement.product)
 
     @property
     def statistics(self):
@@ -2745,14 +2774,17 @@ class Finding(models.Model):
         import dojo.finding.helper as helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        calculate_grade(self.test.engagement.product)
+        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+            # Suppressing a potential issue created from async delete removing
+            # related objects in a separate task
+            calculate_grade(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
         from dojo.utils import get_system_setting
         results = cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             results = results.filter(verified=True)
 
         return results
