@@ -737,7 +737,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         Determine how to to return the results based on whether the process was
         ran asynchronous or not
         """
-        if not kwargs.get("sync", False):
+        if not kwargs.get("sync"):
             serialized_new_items = [
                 serialize("json", [finding]) for finding in self.new_items
             ]

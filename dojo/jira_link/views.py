@@ -50,7 +50,7 @@ def webhook_responser_handler(
 @require_POST
 def webhook(request, secret=None):
     """
-    for examples of incoming json, see the unit tests for the webhook:
+    For examples of incoming json, see the unit tests for the webhook:
         https://github.com/DefectDojo/django-DefectDojo/blob/master/unittests/test_jira_webhook.py
     or the officials docs (which are not always clear):
         https://developer.atlassian.com/server/jira/platform/webhooks/
@@ -168,7 +168,7 @@ def webhook(request, secret=None):
 
 def check_for_and_create_comment(parsed_json):
     """
-    example incoming requests from JIRA Server 8.14.0
+    Example incoming requests from JIRA Server 8.14.0
     {
     "timestamp":1610269967824,
     "webhookEvent":"comment_created",
