@@ -814,6 +814,14 @@ class Product_Type(models.Model):
     def get_breadcrumbs(self):
         return [{"title": str(self),
                "url": reverse("edit_product_type", args=(self.id,))}]
+    
+    def get_contacts(self):
+        return {
+            "product_type_manager": self.product_type_manager,
+            "product_type_technical_contact": self.product_type_technical_contact,
+            "environment_manager": self.environment_manager,
+            "environment_technical_contact": self.environment_technical_contact
+        }
 
     @cached_property
     def critical_present(self):
@@ -1194,6 +1202,13 @@ class Product(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("view_product", args=[str(self.id)])
+    
+    def get_contacts(self):
+        return {
+            "product_manager": self.product_manager,
+            "technical_contact": self.technical_contact,
+            "team_manager": self.team_manager
+            }
 
     @cached_property
     def findings_count(self):

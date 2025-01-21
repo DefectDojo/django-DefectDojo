@@ -1,68 +1,16 @@
-from dojo.api_v2.api_error import ApiError
 from dojo.models import (
     Product_Type,
     Product_Type_Member,
     Role,
     Risk_Acceptance,
     Dojo_User,
-    Product,
 )
 from django.db.models import Q
 import ast
 
 
-def get_contacts(product_type: Product_Type = None, product: Product = None):
-    conctacts = {"product_type": {}, "product": {}}
-    if product_type is not None and isinstance(product_type, Product_Type):
-        conctacts["product_type"] = get_contacts_product_type(product_type)
-    if product is not None and isinstance(product, Product):
-        conctacts["product"] = get_contacts_product(product)
-    else:
-        raise ApiError.precondition_failed(
-            detail="Object is not object product_type o product have contacts"
-            )
-    return conctacts
-
-
-def get_contacts_product(product: Product):
-    contacts = {
-        "product_manager": None,
-        "technical_contact": None,
-        "team_manager": None,
-    }
-    contacts["product_manager"] = (
-        product.product_manager
-        )
-    contacts["technical_contact"] = (
-        product.technical_contact
-        )
-
-    contacts["team_manager"] = product.team_manager
-
-    return contacts
-
-
-def get_contacts_product_type(product_type: Product_Type):
-    contacts = {
-        "product_type_manager": None,
-        "product_type_technical_contact": None,
-        "environment_manager": None,
-        "environment_technical_contact": None,
-    }
-    contacts["product_type_manager"] = product_type.product_type_manager
-    contacts["product_type_technical_contact"] = (
-        product_type.product_type_technical_contact
-    )
-    contacts["environment_manager"] = product_type.environment_manager
-    contacts["environment_technical_contact"] = (
-        product_type.environment_technical_contact
-    )
-
-    return contacts
-
-
 def add_technical_contact_whit_member(product_type: Product_Type, pt_form):
-    technical_contacts = get_contacts_product_type(product_type)
+    technical_contacts = product_type.get_contacts()
     for name_contact in technical_contacts:
         technical_contact = technical_contacts.get(name_contact, None)
         if technical_contact:

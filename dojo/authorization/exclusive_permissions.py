@@ -1,8 +1,11 @@
 import logging
 import crum
+from django.conf import settings
+from typing import Union
 from django.core.exceptions import PermissionDenied
 from dojo.api_v2.api_error import ApiError
 from dojo.utils import get_product
+from dojo.utils import user_is_contacts
 from dojo.authorization.roles_permissions import Permissions 
 from dojo.authorization.authorization import (
     user_has_global_permission,
@@ -14,7 +17,9 @@ from dojo.models import (
     Product,
     ExclusivePermission,
     Product_Member,
-    Finding)
+    Finding,
+    Product_Type,
+    Vulnerability_Id)
 logger = logging.getLogger(__name__)
 
 
@@ -124,7 +129,7 @@ def get_members(user, obj):
 
 def user_has_exclusive_permission(
         user: Dojo_User,
-        obj: object,
+        obj: Union[Product_Type, Product],
         permission: Permissions) -> bool:
         
     if user is None:
@@ -140,6 +145,10 @@ def user_has_exclusive_permission(
     if user.is_superuser:
         return True
     if user_has_global_permission(user, permission):
+        return True
+    if user_is_contacts(user,
+                        obj,
+                        settings.CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS):
         return True
     if member is not None and role_has_permission(
         member.role.id,
@@ -176,23 +185,20 @@ def user_has_exclusive_permission_product_or_404(
         user=user,
         obj=obj,
         permission=permission)
+
+def exclude_tags(objs, tags):
+    return objs.exclude(tags__name__in=tags)
     
 
 def exclude_test_or_finding_with_tag(
-        tests_or_findings,
+        objs,
         product=None,
         user=None):
 
     exclusive_permission = None
 
-    if not tests_or_findings:
-        return tests_or_findings
-
-    if product is None and len(tests_or_findings) > 0:
-        product = get_product(tests_or_findings[0])
-
-    if user is None:
-        user = crum.get_current_user()
+    if not objs:
+        return objs
 
     try:
         exclusive_permission = ExclusivePermission.objects.get(
@@ -200,19 +206,28 @@ def exclude_test_or_finding_with_tag(
     except ExclusivePermission.DoesNotExist:
         logger.Error("Product_Tag_Red_Team does not exist")
         raise ApiError.not_found("Product_Tag_Red_Team does not exist")
-
+    
     if exclusive_permission.is_active() is False:
-        return tests_or_findings
+        return objs
+    
+    tags_name = exclusive_permission\
+        .get_validation_field("Product_Tag_Red_Team")\
+        .split(",")
+
+    if (product is None
+        and isinstance(objs.first(), Test)
+        or isinstance(objs.first(), Finding)):
+        product = get_product(objs.first())
+
+    elif isinstance(objs.first, Vulnerability_Id):
+        return exclude_tags(objs, tags_name)
+        
+    if user is None:
+        user = crum.get_current_user()
 
     if (
         user_has_exclusive_permission(
             user, product, Permissions["Product_Tag_Red_Team"])
     ):
-        pass
-    else:
-        tags_name = exclusive_permission\
-            .get_validation_field("Product_Tag_Red_Team")\
-            .split(",")
-        tests_or_findings = tests_or_findings.exclude(
-            tags__name__in=tags_name)
-    return tests_or_findings
+        return objs
+    return exclude_tags(objs, tags_name)

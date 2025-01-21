@@ -508,7 +508,6 @@ class Edit_Product_MemberForm(forms.ModelForm):
         
         if not user_is_contacts(
                 self.user,
-                self.product.prod_type,
                 self.product):
             self.add_error("user", "You do not have permission to add users to this product.")
             return False
@@ -565,7 +564,6 @@ class Add_Product_MemberForm(forms.ModelForm):
         
         if not user_is_contacts(
                 self.user,
-                self.product.prod_type,
                 self.product):
             self.add_error("users", "You do not have permission to add users to this product.")
             return False

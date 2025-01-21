@@ -1732,7 +1732,7 @@ def request_finding_review(request, fid):
                                                  active=True).order_by('title')
 
     finding_choices = exclude_test_or_finding_with_tag(
-        tests_or_findings=finding_choices,
+        objs=finding_choices,
         user=request.user)
 
     form.fields['findings_review'].queryset = finding_choices

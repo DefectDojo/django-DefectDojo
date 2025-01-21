@@ -47,7 +47,6 @@ from dojo.github import (
     reopen_external_issue_github,
     update_external_issue_github,
 )
-from dojo.product_type.utils import get_contacts
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
@@ -2796,11 +2795,16 @@ def validate_group_role(request, user, ptid, viewname, role):
     return None
 
 
-def user_is_contacts(user, product_type, product):
+def user_is_contacts(user, product, contacts_dict=None):
     contacts_all = {}
-    contacts = get_contacts(product_type, product)
-    contacts_all.update(contacts["product_type"])
-    contacts_all.update(contacts["product"])
+    contacts_all.update(product.get_contacts())
+    contacts_all.update(product.prod_type.get_contacts())
+    if contacts_dict:
+        contacts_all = {
+            key: value for key, value in contacts_all.items()
+            if key in contacts_dict
+            }
+
     return any(contact == user for contact in contacts_all.values())
 
 

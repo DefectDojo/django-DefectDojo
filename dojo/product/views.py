@@ -109,7 +109,6 @@ from dojo.product_type.queries import (
     get_authorized_members_for_product_type,
     get_authorized_product_types,
 )
-from dojo.utils import user_is_contacts
 from dojo.templatetags.display_tags import asvs_calc_level
 from dojo.tool_config.factory import create_API
 from dojo.tools.factory import get_api_scan_configuration_hints

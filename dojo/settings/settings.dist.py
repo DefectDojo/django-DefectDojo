@@ -453,6 +453,11 @@ env = environ.FileAwareEnv(
     
     # tags for filter to finding exclusion
     DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
+    # User Contacts with exclusive permissions
+    DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS=(list, [
+        "team_manager",
+        "product_type_technical_contact",
+        "environment_technical_contact"]),
     
     # Reviewer and approver groups
     DD_REVIEWER_GROUP_NAMES=(str, ""),
@@ -2167,6 +2172,8 @@ COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 # Engine Tools 
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
 FINDING_EXCLUSION_FILTER_TAGS = env("DD_FINDING_EXCLUSION_FILTER_TAGS")
+# exclusive permission
+CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS = env("DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS")
 # Acceptace for email
 ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
 LIFETIME_HOURS_PERMISSION_KEY = env("DD_LIFETIME_HOURS_PERMISSION_KEY")
