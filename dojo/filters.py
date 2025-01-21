@@ -21,6 +21,7 @@ from django_filters import (
     CharFilter,
     DateFilter,
     DateFromToRangeFilter,
+    DateTimeFilter,
     FilterSet,
     ModelChoiceFilter,
     ModelMultipleChoiceFilter,
@@ -1411,6 +1412,15 @@ class ApiProductFilter(DojoFilter):
     )
 
 
+class PercentageRangeFilter(RangeFilter):
+    def filter(self, qs, value):
+        if value is not None:
+            start = value.start / decimal.Decimal("100.0") if value.start else None
+            stop = value.stop / decimal.Decimal("100.0") if value.stop else None
+            value = slice(start, stop)
+        return super().filter(qs, value)
+
+
 class ApiFindingFilter(DojoFilter):
     # BooleanFilter
     active = BooleanFilter(field_name="active")
@@ -1456,13 +1466,30 @@ class ApiFindingFilter(DojoFilter):
     jira_change = DateRangeFilter(field_name="jira_issue__jira_change")
     last_reviewed = DateRangeFilter()
     mitigated = DateRangeFilter()
-    mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact")
-    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt")
-    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt")
+    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", method="filter_mitigated_on")
+    mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt")
+    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After", method="filter_mitigated_after")
     # NumberInFilter
     cwe = NumberInFilter(field_name="cwe", lookup_expr="in")
     defect_review_requested_by = NumberInFilter(field_name="defect_review_requested_by", lookup_expr="in")
     endpoints = NumberInFilter(field_name="endpoints", lookup_expr="in")
+    epss_score = PercentageRangeFilter(
+        field_name="epss_score",
+        label="EPSS score range",
+        help_text=(
+            "The range of EPSS score percentages to filter on; the min input is a lower bound, "
+            "the max is an upper bound. Leaving one empty will skip that bound (e.g., leaving "
+            "the min bound input empty will filter only on the max bound -- filtering on "
+            '"less than or equal"). Leading 0 required.'
+        ))
+    epss_percentile = PercentageRangeFilter(
+        field_name="epss_percentile",
+        label="EPSS percentile range",
+        help_text=(
+            "The range of EPSS percentiles to filter on; the min input is a lower bound, the max "
+            "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the min bound "
+            'input empty will filter only on the max bound -- filtering on "less than or equal"). Leading 0 required.'
+        ))
     found_by = NumberInFilter(field_name="found_by", lookup_expr="in")
     id = NumberInFilter(field_name="id", lookup_expr="in")
     last_reviewed_by = NumberInFilter(field_name="last_reviewed_by", lookup_expr="in")
@@ -1544,6 +1571,20 @@ class ApiFindingFilter(DojoFilter):
         exclude = ["url", "thread_id", "notes", "files",
                    "line", "cve"]
 
+    def filter_mitigated_after(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            value = value.replace(hour=23, minute=59, second=59)
+
+        return queryset.filter(mitigated__gt=value)
+
+    def filter_mitigated_on(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            # we have a simple date without a time, lets get a range from this morning to tonight at 23:59:59:999
+            nextday = value + timedelta(days=1)
+            return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
+
+        return queryset.filter(mitigated=value)
+
 
 class PercentageFilter(NumberFilter):
     def __init__(self, *args, **kwargs):
@@ -1564,15 +1605,6 @@ class PercentageFilter(NumberFilter):
         return queryset.filter(**lookup_kwargs)
 
 
-class PercentageRangeFilter(RangeFilter):
-    def filter(self, qs, value):
-        if value is not None:
-            start = value.start / decimal.Decimal("100.0") if value.start else None
-            stop = value.stop / decimal.Decimal("100.0") if value.stop else None
-            value = slice(start, stop)
-        return super().filter(qs, value)
-
-
 class FindingFilterHelper(FilterSet):
     title = CharFilter(lookup_expr="icontains")
     date = DateRangeFilter(field_name="date", label="Date Discovered")
@@ -1587,9 +1619,9 @@ class FindingFilterHelper(FilterSet):
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
-    mitigated_on = DateFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On")
-    mitigated_before = DateFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
-    mitigated_after = DateFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After")
+    mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On", method="filter_mitigated_on")
+    mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
+    mitigated_after = DateTimeFilter(field_name="mitigated", lookup_expr="gt", label="Mitigated After", method="filter_mitigated_after")
     planned_remediation_date = DateRangeOmniFilter()
     planned_remediation_version = CharFilter(lookup_expr="icontains", label=_("Planned remediation version"))
     file_path = CharFilter(lookup_expr="icontains")
@@ -1704,6 +1736,20 @@ class FindingFilterHelper(FilterSet):
         self.form.fields["mitigated_before"].widget = date_input_widget
         self.form.fields["mitigated_after"].widget = date_input_widget
         self.form.fields["cwe"].choices = cwe_options(self.queryset)
+
+    def filter_mitigated_after(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            value = value.replace(hour=23, minute=59, second=59)
+
+        return queryset.filter(mitigated__gt=value)
+
+    def filter_mitigated_on(self, queryset, name, value):
+        if value.hour == 0 and value.minute == 0 and value.second == 0:
+            # we have a simple date without a time, lets get a range from this morning to tonight at 23:59:59:999
+            nextday = value + timedelta(days=1)
+            return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
+
+        return queryset.filter(mitigated=value)
 
 
 class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFilter):
