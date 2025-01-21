@@ -11,7 +11,8 @@ from dojo.engine_tools.helpers import (
     get_reviewers_members, 
     Constants, 
     expire_finding_exclusion_immediately,
-    send_mail_to_cybersecurity
+    send_mail_to_cybersecurity,
+    check_priorization
 )
 
 # Utils
@@ -344,3 +345,17 @@ def edit_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRespo
     return redirect('edit_finding_exclusion', fxid=fxid)
         
         
+def execute_priorization_check(request: HttpRequest) -> HttpResponse:
+    """Execute the priorization check task inmediately"""
+    if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+        raise PermissionDenied
+    
+    check_priorization.apply_async()
+    
+    messages.add_message(
+        request,
+        messages.SUCCESS,
+        "Priorization of findings updated",
+        extra_tags="alert-success")
+    
+    return HttpResponseRedirect(reverse("finding_exclusions"))

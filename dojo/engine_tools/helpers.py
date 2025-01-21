@@ -5,6 +5,10 @@ from django.urls import reverse
 from django.conf import settings
 from celery.utils.log import get_task_logger
 from enum import Enum
+from datetime import timedelta
+from io import StringIO
+import csv
+import requests
 
 # Dojo
 from dojo.models import Finding, Dojo_Group, Notes
@@ -184,3 +188,153 @@ def check_new_findings_to_whitelist():
         
     Finding.objects.bulk_update(findings_to_whitelist, ["active", "risk_status"], 1000)
     logger.info(f"{findings_to_whitelist.count()} findings added to whitelist.")
+    
+    
+def get_resource_type(finding) -> str:
+    contains_host = any('hosts' in tag.name for tag in finding.tags.all())
+    contains_ecr = any('images' in tag.name for tag in finding.tags.all())
+    contains_lambda = any('lambdas' in tag.name for tag in finding.tags.all())
+    
+    if contains_host:
+        return "host"
+    if contains_ecr:
+        return "image"
+    if contains_lambda:
+        return "function"
+    
+    return ""
+    
+
+def get_risk_score(finding) -> int:
+    auth = (settings.TWISTLOCK_ACCESS_KEY, settings.TWISTLOCK_SECRET_KEY)
+    api_url = settings.TWISTLOCK_API_URL % f"?cve={finding.cve}"
+    try:
+        vulnerabilities_response = requests.get(api_url, auth=auth, stream=True)
+        vulnerabilities_response.raise_for_status()
+        
+        csv_file = StringIO(vulnerabilities_response.text)
+        reader = csv.DictReader(csv_file)
+        
+        resource_type = get_resource_type(finding)
+        
+        for row in reader:
+            if row.get("Impacted resource type") == resource_type:
+                try:
+                    risk_score = int(row.get("Highest risk score"))
+                    return risk_score if risk_score else 0
+                except Exception:
+                    return 0
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error on twistlock api request: {e}")
+
+
+def calculate_vulnerability_priority(finding) -> float:
+    """
+    Calculates the prioritization of a vulnerability with specific weights.
+    
+    Weights:
+    - Risk Score: 0.4
+    - EPSS: 0.4
+    - Severity: 0.1
+    - CVSS: 0.1
+    
+    Args:
+        finding (Finding): Vulnerability object from the Django model
+    
+    Returns:
+        float: Total prioritization score
+    """
+    # Initial validations
+    if not finding.cve:
+        return 0.0
+
+    # Severity (25-100)
+    severity_map = {
+        'Low': 25,
+        'Medium': 50,
+        'High': 75,
+        'Critical': 100
+    }
+    severity_score = severity_map.get(finding.severity, 0)
+
+    # Risk Score (0-100)
+    risk_score = get_risk_score(finding) or 1
+    
+    # CVSS Score (0-10 multiplied by 10)
+    cvss_score = (finding.cvssv3_score or 0) * 10
+
+    # EPSS Score (0-1 converted to 0-100)
+    epss_score = (finding.epss_score or 0) * 100
+
+    # Prioritization calculation with weights
+    priorization_field_weights = settings.PRIORIZATION_FIELD_WEIGHTS
+    
+    priority = (
+        (risk_score * priorization_field_weights.get("risk_score")) +     # Risk Score with weight 0.4
+        (epss_score * priorization_field_weights.get("epss_score")) +     # EPSS with weight 0.4
+        (severity_score * priorization_field_weights.get("severity_score")) + # Severity with weight 0.1
+        (cvss_score * priorization_field_weights.get("cvss_score"))       # CVSS with weight 0.1
+    )
+
+    return round(priority, 2)
+
+
+def identify_critical_vulnerabilities(findings) -> int:
+    """
+    Identifies vulnerabilities with a prioritization greater than 90 points.
+    
+    Args:
+        findings (QuerySet): Set of vulnerabilities from the Finding model
+    
+    Returns:
+        int: Number of critical vulnerabilities
+    """
+    finding_list = []
+    finding_exclusion_list = []
+    
+    for finding in findings:
+        priority = calculate_vulnerability_priority(finding)
+        
+        finding.priority = priority
+        
+        if priority > 90:
+            finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve)
+            finding.risk_status = "On Blacklist"
+            finding.tags.add("black_list")
+            
+            if not finding_exclusion.exists():
+                new_finding_exclusion = FindingExclusion(
+                    type="black_list",
+                    unique_id_from_tool=finding.cve,
+                    expiration_date=timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS)),
+                    status_updated_at=None,
+                    status_updated_by=None,
+                    reviewed_at=None,
+                    reason="Highly exploitable vulnerability.",
+                    status="Accepted",
+                    final_status="Accepted",
+                    created_by=None
+                )
+                finding_exclusion_list.append(new_finding_exclusion)
+        finding_list.append(finding)
+    
+    Finding.objects.bulk_update(finding_list, ["priority", "risk_status"])     
+    FindingExclusion.objects.bulk_create(finding_exclusion_list)
+            
+    return len(finding_exclusion_list)
+
+
+@app.task
+def check_priorization():
+    # Get all vulnerabilities
+    
+    all_vulnerabilities = Finding.objects.filter(
+        active=True,
+    ).filter(tag_filter).prefetch_related("tags")
+    
+    # Identify critical vulnerabilities
+    blacklist_new_items = identify_critical_vulnerabilities(all_vulnerabilities)
+    
+    return {
+        "message": f"{blacklist_new_items} added to blacklist"
+    }

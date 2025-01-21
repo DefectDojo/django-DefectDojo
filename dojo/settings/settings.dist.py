@@ -467,6 +467,7 @@ env = environ.FileAwareEnv(
     
     # Cybersecurity emails
     DD_PROVIDERS_CYBERSECURITY_EMAIL=(dict, {}),
+    DD_PRIORIZATION_FIELD_WEIGHTS=(dict, {}),
 )
 
 
@@ -567,8 +568,8 @@ SCHEMA_DB = env('DD_SCHEMA_DB')
 # ------------------------------------------------------------------------------
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
-if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
-    secret_database = get_secret(env("DD_SECRET_DATABASE"))
+if os.getenv("DD_USE_SECRETS_MANAGER") == "false":
+    secret_database = ""#get_secret(env("DD_SECRET_DATABASE"))
     DATABASES = {
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
@@ -626,9 +627,15 @@ else:
 if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     secret_engine_backend = get_secret(env("DD_PROVIDER_SECRET"))
     PROVIDER_TOKEN = secret_engine_backend["tokenRiskAcceptanceApi"]
+    # Twistlock API
+    TWISTLOCK_ACCESS_KEY = secret_engine_backend["prismaAccessKey"]
+    TWISTLOCK_SECRET_KEY = secret_engine_backend["prismaSecretKey"]
 else:
     PROVIDER_TOKEN = env("DD_PROVIDER_TOKEN")
-
+    TWISTLOCK_ACCESS_KEY = env('DD_TWISTLOCK_ACCESS_KEY')
+    TWISTLOCK_SECRET_KEY = env('DD_TWISTLOCK_SECRET_KEY')
+    
+TWISTLOCK_API_URL = env('DD_TWISTLOCK_API_URL')
 # Track migrations through source control rather than making migrations locally
 if env("DD_TRACK_MIGRATIONS"):
     MIGRATION_MODULES = {"dojo": "dojo.db_migrations"}
@@ -800,7 +807,7 @@ AZURE_DEVOPS_PERMISSION_AUTO_IMPORT = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSIO
 AZURE_DEVOPS_ORGANIZATION_URL = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL")
 AZURE_DEVOPS_TOKEN = (
     get_secret(env("DD_SECRET_AZURE_DEVOPS_TOKEN"))["token"]
-    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
+    if os.getenv("DD_USE_SECRETS_MANAGER") == None
     else env("DD_SOCIAL_AUTH_AZURE_DEVOPS_TOKEN")
 )
 AZURE_DEVOPS_MAIN_SECURITY_GROUP = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_MAIN_SECURITY_GROUP")
@@ -1041,6 +1048,7 @@ MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
 APPROVER_GROUP_NAME = env("DD_APPROVER_GROUP_NAMES")
 REVIEWER_GROUP_NAME = env("DD_REVIEWER_GROUP_NAMES")
 PROVIDERS_CYBERSECURITY_EMAIL = env("DD_PROVIDERS_CYBERSECURITY_EMAIL")
+PRIORIZATION_FIELD_WEIGHTS = env("DD_PRIORIZATION_FIELD_WEIGHTS")
 
 # ------------------------------------------------------------------------------
 # ADMIN
