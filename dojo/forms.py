@@ -1951,9 +1951,7 @@ class MetricsFilterForm(forms.Form):
 
     # add the ability to exclude the exclude_product_types field
     def __init__(self, *args, **kwargs):
-        exclude_product_types = kwargs.get("exclude_product_types", False)
-        if "exclude_product_types" in kwargs:
-            del kwargs["exclude_product_types"]
+        exclude_product_types = kwargs.pop("exclude_product_types", False)
         super().__init__(*args, **kwargs)
         if exclude_product_types:
             del self.fields["exclude_product_types"]
@@ -3208,10 +3206,7 @@ class QuestionForm(forms.Form):
         self.helper.form_method = "post"
 
         # If true crispy-forms will render a <form>..</form> tags
-        self.helper.form_tag = kwargs.get("form_tag", True)
-
-        if "form_tag" in kwargs:
-            del kwargs["form_tag"]
+        self.helper.form_tag = kwargs.pop("form_tag", True)
 
         self.engagement_survey = kwargs.get("engagement_survey")
 
@@ -3223,13 +3218,12 @@ class QuestionForm(forms.Form):
 
         self.helper.form_class = kwargs.get("form_class", "")
 
-        self.question = kwargs.get("question")
+        self.question = kwargs.pop("question", None)
 
         if not self.question:
             msg = "Need a question to render"
             raise ValueError(msg)
 
-        del kwargs["question"]
         super().__init__(*args, **kwargs)
 
 
