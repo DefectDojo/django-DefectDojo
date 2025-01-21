@@ -38,6 +38,7 @@ class OpenVASXMLParser:
 
             finding = Finding(
                 title=str(title),
+                test=test,
                 description="\n".join(description),
                 severity=severity,
                 dynamic_finding=True,
