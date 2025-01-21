@@ -37,19 +37,19 @@ Jira settings are located near the bottom of the Product Settings page.
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_2.png)
 
-#### **Jira Instance**
+### Jira Instance
 
 If you have multiple instances of Jira set up, for separate products or teams within your organization, you can indicate which Jira Project you want DefectDojo to create Issues in. Select a Project from the drop\-down menu.
 
 If this menu doesn't list any Jira instances, confirm that those Projects are connected in your global Jira Configuration for DefectDojo \- yourcompany.defectdojo.com/jira.
 
-#### **Project key**
+### Project key
 
 This is the key of the Project that you want to use with DefectDojo.  The Project Key for a given project can be found in the URL.
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_3.png)
 
-#### **Issue template**
+### Issue template
 
 Here you can determine how much DefectDojo metadata you want to send to Jira. Select one of two options:
 
@@ -65,7 +65,7 @@ Here is an example of a **jira\_full** Issue:
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_5.png)
 
-#### **Component**
+### Component
 
 If you manage your Jira project using Components, you can assign the appropriate Component for DefectDojo here.
 
@@ -87,19 +87,23 @@ Select the relevant labels that you want the Issue to be created with in Jira, e
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_6.png)
 
-#### **Default assignee**
+### Default assignee
 
 The name of the default assignee in Jira. If left blank, DefectDojo will follow the default behaviour in your Jira Project when creating Issues.
 
-#### Checkbox options
+## Additional Jira Options
 
-![image](images/Add_a_Connected_Jira_Project_to_a_Product_7.png)
+### Enable Connection With Jira Project
 
-#### **Add vulnerability Id as a Jira label**
+Jira integrations can be removed from your instance only if no related Issues have been created.  If Issues have been created, there is no way to completely remove a Jira Instance from DefectDojo.
+
+However, you can disable your Jira integration by disabling it at the Product level. This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
+
+### Add Vulnerability Id as a Jira label
 
 This allows you to add the Vulnerability ID data as a Jira Label automatically. Vulnerability IDs are added to Findings from individual security tools \- these may be Common Vulnerabilities and Exposures (CVE) IDs or a different format, specific to the tool reporting the Finding. 
 
-#### **Enable engagement epic mapping**
+### Enable Engagement Epic Mapping
 
 In DefectDojo, Engagements represent a collection of work. Each Engagement contains one or more tests, which contain one or more Findings which need to be mitigated. Epics in Jira work in a similar way, and this checkbox allows you to push Engagements to Jira as Epics.
 
@@ -110,21 +114,21 @@ In DefectDojo, Engagements represent a collection of work. Each Engagement conta
 
 ![image](images/Add_a_Connected_Jira_Project_to_a_Product_9.png)
 
-#### **Push All Issues**
+### Push All Issues
 
 If checked, DefectDojo will automatically push any Active and Verified Findings to Jira as Issues. If left unchecked, all Findings will need to be pushed to Jira manually.
 
-#### **Push notes**
+### Push Notes
 
 If enabled, Jira comments will populate on the associated Finding in DefectDojo, under Notes on the issue(screenshot), and vice versa; Notes on Findings will be added to the associated Jira Issue as Comments. 
 
-#### **Send SLA notifications as comment?**
+### Send SLA Notifications As Comments
 
 If enabled, any Issue which breaches DefectDojo’s Service Level Agreement rules will have comments added to the Jira issue indicating this. These comments will be posted daily until the Issue is resolved.
 
 Service Level Agreements can be configured under **Configuration \> SLA Configuration** in DefectDojo and assigned to each Product.
 
-#### **Send Risk Acceptance expiration notifications as comment?**
+### Send Risk Acceptance Expiration Notifications As Comment?
 
 If enabled, any Issue where the associated DefectDojo Risk Acceptance expires will have a comment added to the Jira issue indicating this. These comments will be posted daily until the Issue is resolved.
 
