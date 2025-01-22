@@ -965,7 +965,7 @@ class FindingViewSet(
         findings = exclude_test_or_finding_with_tag(findings)
         end_time = time.time()
         execution_time = end_time - start_time
-        logger.info(f"Tiempo de ejecución de exclude_test_or_finding_with_tag: {execution_time} segundos")
+        logger.info(f"Execution time of exclude_test_or_finding_with_tag: {execution_time} seconds")
         return findings.distinct()
 
     def get_serializer_class(self):
