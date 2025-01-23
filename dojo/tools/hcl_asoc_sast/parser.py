@@ -63,7 +63,7 @@ class HCLASoCSASTParser:
                         case "entity":
                             entity = self.xmltreehelper(item)
                             title += "_" + entity.strip()
-                            description = description + "***Entity:" + entity + "\n"
+                            description = description + "**Entity:** " + entity + "\n"
                         case "security-risks":
                             security_risks = self.xmltreehelper(item)
                             description = description + "***Security-Risks:" + security_risks + "\n"
