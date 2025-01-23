@@ -1,6 +1,6 @@
 ---
 title: "Event: product_added"
-weight: 2
+weight: 3
 chapter: true
 ---
 
