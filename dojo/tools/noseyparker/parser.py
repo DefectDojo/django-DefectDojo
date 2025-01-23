@@ -108,6 +108,7 @@ class NoseyParkerParser:
             num_elements = len(match["provenance"]) - 1
             json_path = match["provenance"][num_elements]
             line_num = match["location"]["source_span"]["start"]["line"]
+            # scanned with git history
             if json_path.get("first_commit"):
                 title = f"Secret(s) Found in Repository with Commit ID {json_path['first_commit']['commit_metadata']['commit_id']}"
                 filepath = json_path["first_commit"]["blob_path"]
@@ -118,6 +119,7 @@ class NoseyParkerParser:
                                 f"Commit ID: {json_path['first_commit']['commit_metadata']['commit_id']}  \n" \
                                 f"Location: {filepath} line #{line_num} \n" \
                                 f"Line #{line_num} \n"
+            # scanned wihout git history
             else:
                 title = "Secret(s) Found in Repository"
                 filepath = json_path["path"]
