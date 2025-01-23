@@ -54,10 +54,10 @@ class AnchoreCTLVulnsParser:
             if sev == "Negligible" or sev == "Unknown":
                 sev = "Info"
 
-            mitigation = (
-                "Upgrade to " + item["packageName"] + " " + item["fix"] + "\n"
-            )
-            mitigation += "URL: " + item["url"] + "\n"
+            if item["fix"] != "None":
+                mitigation = (
+                    "Upgrade to " + item["packageName"] + " " + item["fix"] + "\n"
+                )
 
             cvssv3_base_score = None
             if item["feed"] == "nvdv2" or item["feed"] == "vulnerabilities":
