@@ -79,7 +79,7 @@ class HCLASoCSASTParser:
                             description = description + "**ElementType:** " + elementtype + "\n"
                         case "variant-group":
                             variantgroup = item.iter()
-                            description = description + "***Call Trace:" + "\n"
+                            description = description + "**Call Trace:** " + "\n"
                             for vitem in variantgroup:
                                 if vitem.tag == "issue-information":
                                     issueinformation = vitem.iter()
