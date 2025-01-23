@@ -352,4 +352,3 @@ function clear_form(form){
         }
     });
 }
-   
