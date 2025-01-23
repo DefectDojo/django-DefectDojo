@@ -70,7 +70,7 @@ class HCLASoCSASTParser:
                         case "cause-id":
                             causeid = self.xmltreehelper(item)
                             title += "_" + causeid.strip()
-                            description = description + "***Cause-Id:" + causeid + "\n"
+                            description = description + "**Cause-Id:** " + causeid + "\n"
                         case "element":
                             element = self.xmltreehelper(item)
                             description = description + "***Element:" + element + "\n"
