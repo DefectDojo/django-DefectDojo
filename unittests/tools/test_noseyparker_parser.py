@@ -54,3 +54,12 @@ class TestNoseyParkerParser(TestCase):
             self.assertEqual(33, len(findings))
             finding = findings[10]
             self.assertEqual("High", finding.severity)
+
+    def test_noseyparker_version_0_22_0_without_githistory(self):
+        with open("unittests/scans/noseyparker/noseyparker_0_22_0_without_githistory.jsonl", encoding="utf-8") as testfile:
+            parser = NoseyParkerParser()
+            findings = parser.get_findings(testfile, Test())
+            finding = findings[0]
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(798, finding.cwe)
+            self.assertEqual(6, len(findings))

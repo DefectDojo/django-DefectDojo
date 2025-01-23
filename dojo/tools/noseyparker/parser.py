@@ -107,17 +107,24 @@ class NoseyParkerParser:
             # The following path is to account for the variability in the JSON lines output
             num_elements = len(match["provenance"]) - 1
             json_path = match["provenance"][num_elements]
-
-            title = f"Secret(s) Found in Repository with Commit ID {json_path['first_commit']['commit_metadata']['commit_id']}"
-            filepath = json_path["first_commit"]["blob_path"]
             line_num = match["location"]["source_span"]["start"]["line"]
-            description = f"Secret found of type:   {rule_name} \n" \
-                            f"SECRET starts with:  '{rule_text_id[:3]}' \n" \
-                            f"Committer Name: {json_path['first_commit']['commit_metadata']['committer_name']}  \n" \
-                            f"Committer Email: {json_path['first_commit']['commit_metadata']['committer_email']} \n" \
-                            f"Commit ID: {json_path['first_commit']['commit_metadata']['commit_id']}  \n" \
-                            f"Location: {filepath} line #{line_num} \n" \
-                            f"Line #{line_num} \n"
+            if json_path.get("first_commit"):
+                title = f"Secret(s) Found in Repository with Commit ID {json_path['first_commit']['commit_metadata']['commit_id']}"
+                filepath = json_path["first_commit"]["blob_path"]
+                description = f"Secret found of type:   {rule_name} \n" \
+                                f"SECRET starts with:  '{rule_text_id[:3]}' \n" \
+                                f"Committer Name: {json_path['first_commit']['commit_metadata']['committer_name']}  \n" \
+                                f"Committer Email: {json_path['first_commit']['commit_metadata']['committer_email']} \n" \
+                                f"Commit ID: {json_path['first_commit']['commit_metadata']['commit_id']}  \n" \
+                                f"Location: {filepath} line #{line_num} \n" \
+                                f"Line #{line_num} \n"
+            else:
+                title = "Secret(s) Found in Repository"
+                filepath = json_path["path"]
+                description = f"Secret found of type:   {rule_name} \n" \
+                                f"SECRET starts with:  '{rule_text_id[:3]}' \n" \
+                                f"Location: {filepath} line #{line_num} \n" \
+                                f"Line #{line_num} \n"
 
             # Internal de-duplication
             key = hashlib.md5((filepath + "|" + rule_text_id + "|" + str(line_num)).encode("utf-8")).hexdigest()
