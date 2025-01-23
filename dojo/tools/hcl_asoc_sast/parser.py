@@ -73,7 +73,7 @@ class HCLASoCSASTParser:
                             description = description + "**Cause-Id:** " + causeid + "\n"
                         case "element":
                             element = self.xmltreehelper(item)
-                            description = description + "***Element:" + element + "\n"
+                            description = description + "**Element:** " + element + "\n"
                         case "element-type":
                             elementtype = self.xmltreehelper(item)
                             description = description + "***ElementType:" + elementtype + "\n"
