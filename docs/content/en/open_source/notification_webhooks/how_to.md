@@ -10,7 +10,7 @@ Webhooks are HTTP requests coming from the DefectDojo instance towards a user-de
 
 It is not unusual that in some cases a webhook can not be delivered. It is usually connected to network issues, server misconfiguration, or running upgrades on the server. DefectDojo needs to react to these outages. It might temporarily or permanently disable related endpoints. The following graph shows how it might change the status of the webhook definition based on HTTP responses (or manual user interaction).
 
-```mermaid
+```kroki {type=mermaid}
 flowchart TD
 
     START{{Endpoint created}}
