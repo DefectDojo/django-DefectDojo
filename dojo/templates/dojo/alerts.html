@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load static %}
+{% load display_tags %}
 {% block content %}
     {{ block.super }}
     <div class="row">
@@ -28,7 +29,7 @@
                                 <td class="text-center"><i class="fa-solid fa-{{ alert.icon }} fa-fw"></i></td>
                                 <td class="text-center">{{ alert.source }}</td>
                                 <td>{%if alert.url %}<a href="{{ alert.url }}">{% endif %}{{ alert.title }}{% if alert.url %}</a>{% endif %}</td>
-                                <td>{{ alert.description|linebreaks }}</td>
+                                <td>{{ alert.description|markdown_render|linebreaks }}</td>
                                 <td>{{ alert.created }}</td>
                                 <td class="centered">
                                         <input type="checkbox" name="alert_select" value="{{ alert.id }}"
