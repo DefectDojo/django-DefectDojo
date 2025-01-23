@@ -76,7 +76,7 @@ class HCLASoCSASTParser:
                             description = description + "**Element:** " + element + "\n"
                         case "element-type":
                             elementtype = self.xmltreehelper(item)
-                            description = description + "***ElementType:" + elementtype + "\n"
+                            description = description + "**ElementType:** " + elementtype + "\n"
                         case "variant-group":
                             variantgroup = item.iter()
                             description = description + "***Call Trace:" + "\n"
