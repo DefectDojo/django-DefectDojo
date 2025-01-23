@@ -129,7 +129,7 @@ class SemgrepParser:
                         ],
                     )
 
-                dupe_key = finding.title + finding.file_path + str(finding.line)
+                dupe_key = unique_id_from_tool
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
@@ -178,7 +178,7 @@ class SemgrepParser:
                             .partition("-")[2],
                         )
 
-                dupe_key = finding.title + finding.file_path + str(finding.line)
+                dupe_key = unique_id_from_tool
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
