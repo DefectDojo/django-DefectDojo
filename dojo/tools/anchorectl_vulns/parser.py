@@ -58,6 +58,10 @@ class AnchoreCTLVulnsParser:
                 mitigation = (
                     "Upgrade to " + item["packageName"] + " " + item["fix"] + "\n"
                 )
+            else:
+                mitigation = (
+                    "No fix available" + "\n"
+                )
 
             cvssv3_base_score = None
             if item["feed"] == "nvdv2" or item["feed"] == "vulnerabilities":
