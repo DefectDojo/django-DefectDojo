@@ -109,7 +109,7 @@ class HCLASoCSASTParser:
                             articledetails = articles.iter()
                             for aitem in articledetails:
                                 if aitem.tag == "cause":
-                                    description = description + "***Cause:" + "\n"
+                                    description = description + "**Cause:**" + "\n"
                                     for causeitem in aitem:
                                         if causeitem.attrib["type"] == "string" and causeitem.text is not None:
                                             description = description + causeitem.text + "\n"
