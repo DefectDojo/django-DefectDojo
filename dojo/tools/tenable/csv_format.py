@@ -9,6 +9,7 @@ from cpe import CPE
 from cvss import CVSS3
 
 from dojo.models import Endpoint, Finding, Test
+from django.conf import settings
 
 LOGGER = logging.getLogger(__name__)
 
@@ -301,5 +302,6 @@ class TenableCSVParser:
             endpoint = Endpoint.from_uri(host) if "://" in host else Endpoint(protocol=protocol, host=host, port=port)
             # Add the list to be processed later
             find.unsaved_endpoints.append(endpoint)
+            find.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("tenable")]
 
         return list(dupes.values())

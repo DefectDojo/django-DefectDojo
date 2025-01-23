@@ -118,3 +118,19 @@ def is_in_approver_group(user):
 def is_contacts_permission(product):
     user = crum.get_current_user()
     return user_is_contacts(user, product)
+
+
+
+@register.filter
+def is_tags_authorized_for_whitelist(finding):
+    tags = finding.tags.all()
+    if not finding.active:
+        return False
+    if tags:
+        if 'white_list' in tags:
+            return False
+        for tag in tags:
+            if tag.name in settings.FINDING_EXCLUSION_FILTER_TAGS:
+                return True
+    
+    return False

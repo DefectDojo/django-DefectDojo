@@ -459,19 +459,13 @@
     {{ block.super }}
 
 {% if not edit_mode %}
-    <script type="text/javascript">
-        // keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.key == 'e') {
-                window.location.assign('{% url 'edit_risk_acceptance' eng.id risk_acceptance.id %}')
-            }
+    <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
+    <script type="text/javascript" nonce="{{request.csp_nonce}}">
+        $(function () {
+            $(document).on('keypress', null, 'e', function () {
+                window.location.assign('{% url 'edit_engagement' eng.id %}');
+            });
         });
-
-        <!-- what works on every other page with the 'e' keydown, conflicts here with the textare for notes, stoppropagation 'fixes' this -->
-        $('#id_entry').keydown( function(e) {
-            e.stopPropagation();
-        });
-
     </script>
 {% else %}
     <script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>

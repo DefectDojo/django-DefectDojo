@@ -103,6 +103,9 @@ class AsffParser:
                 impact=impact,
             )
             finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("asff")]
+
+            if vuln_id_tool:
+                finding.unsaved_vulnerability_ids = [vuln_id_tool.group(0).upper()]
             
             if "Resources" in item:
                 endpoints = []

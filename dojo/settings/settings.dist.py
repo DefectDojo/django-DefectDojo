@@ -468,7 +468,10 @@ env = environ.FileAwareEnv(
     AZURE_DEVOPS_CACHE_DIR=(str, "/run/defectdojo"),
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
-    DD_REQUESTS_TIMEOUT=(int, 30)
+    DD_REQUESTS_TIMEOUT=(int, 30),
+    
+    # Cybersecurity emails
+    DD_PROVIDERS_CYBERSECURITY_EMAIL=(dict, {}),
 )
 
 
@@ -1042,7 +1045,7 @@ MAX_TAG_LENGTH = env("DD_MAX_TAG_LENGTH")
 # Approver and reviewer group names
 APPROVER_GROUP_NAME = env("DD_APPROVER_GROUP_NAMES")
 REVIEWER_GROUP_NAME = env("DD_REVIEWER_GROUP_NAMES")
-
+PROVIDERS_CYBERSECURITY_EMAIL = env("DD_PROVIDERS_CYBERSECURITY_EMAIL")
 
 # ------------------------------------------------------------------------------
 # ADMIN
@@ -2131,7 +2134,7 @@ VULNERABILITY_URLS = {
     "ELSA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELSA-2024-12714.html
     "ELBA": "https://linux.oracle.com/errata/&&.html",  # e.g. https://linux.oracle.com/errata/ELBA-2024-7457.html
     "RXSA": "https://errata.rockylinux.org/",  # e.g. https://errata.rockylinux.org/RXSA-2024:4928
-    "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
+    "C-": env("DD_CUSTOM_TAG_PARSER").get("url_controls_cloud", "https://hub.armosec.io/docs/"),  # e.g. https://hub.armosec.io/docs/c-0085
     "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html

@@ -32,8 +32,7 @@ from dojo.models import (
     FileAccessToken,
     Finding,
     Product,
-    System_Settings,
-    ExclusivePermission)
+    System_Settings)
 
 from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
 
@@ -797,7 +796,7 @@ def finding_display_status(finding):
             display_status = display_status.replace("Risk Accepted", link)
 
     if finding.under_review:
-        url = reverse("defect_finding_review", args=(finding.id, ))
+        url = reverse("clear_finding_review", args=(finding.id, ))
         link = '<a href="' + url + '">Under Review</a>'
         display_status = display_status.replace("Under Review", link)
 

@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0232_merge_finding_exclusion_feature_migrations'),
+        ('dojo', '0233_findingexclusion_practice'),
     ]
 
     operations = [

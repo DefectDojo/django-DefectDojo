@@ -1598,7 +1598,7 @@ def view_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance_Edit, "eid")
 def edit_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
 

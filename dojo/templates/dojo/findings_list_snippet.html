@@ -466,9 +466,9 @@
                                                                     </a>
                                                                 </li>
                                                             {% endif %}
-                                                            {% if finding.cve and not 'white_list' in finding.tags.all %}
+                                                            {% if finding.cve and finding|is_tags_authorized_for_whitelist  %}
                                                                 <li role="presentation">
-                                                                    <a rel="noopener noreferrer" href="{% url 'create_finding_exclusion' %}?unique_id={{ finding.cve }}&product_id={{ finding.test.engagement.product.id }}">
+                                                                    <a rel="noopener noreferrer" href="{% url 'create_finding_exclusion' %}?unique_id={{ finding.cve }}&practice={{ finding.tags.all }}">
                                                                         <i class="fas fa-list"></i> Add to White List
                                                                     </a>
                                                                 </li>
