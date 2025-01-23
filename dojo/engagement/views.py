@@ -1811,10 +1811,6 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         unaccepted_findings = Finding.objects.filter(test__in=eng.test_set.all(), risk_accepted=False) \
             .exclude(id__in=accepted_findings).order_by("title")
 
-    # unaccepted_findings = exclude_test_or_finding_with_tag(
-    #     unaccepted_findings,
-    #     product=product,
-    #     user=request.user)
     add_fpage = get_page_items(request, unaccepted_findings, 25, "apage")
     
     # on this page we need to add unaccepted findings as possible findings to add as accepted

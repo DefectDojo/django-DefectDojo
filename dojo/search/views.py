@@ -144,9 +144,6 @@ def simple_search(request):
             app_analysis = authorized_app_analysis
             vulnerability_ids = authorized_vulnerability_ids
 
-            # vulnerability_ids = exclude_test_or_finding_with_tag(authorized_vulnerability_ids)
-
-
             findings_filter = None
             title_words = None
             component_words = None
