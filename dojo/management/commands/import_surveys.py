@@ -39,7 +39,6 @@ class Command(BaseCommand):
         new_line = matchedLine.replace(old_id, str(ctype_id))
         # Replace the all lines in the file
         with open(path, "w", encoding="utf-8") as fout:
-            for line in contents:
-                fout.write(line.replace(matchedLine, new_line))
+            fout.writelines(line.replace(matchedLine, new_line) for line in contents)
         # Delete the temp question
         created_question.delete()
