@@ -145,7 +145,6 @@ $(form).on("input change", updateClearFiltersState);
             if ($(this).attr("aria-disabled") === "true") {
                 return;
             }
-            console.log("tusom");
             const form = $(this).closest(".filter-set").find("form");
             if (form.length) {
                 clear_form(form);
