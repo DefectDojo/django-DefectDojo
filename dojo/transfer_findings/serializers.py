@@ -2,9 +2,21 @@ from rest_framework import serializers
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import TransferFinding, Finding, TransferFindingFinding
 from dojo.authorization.authorization import user_has_permission, user_has_global_permission
+from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
 
 
 class FindingTfSerlilizer(serializers.ModelSerializer):
+    
+    def to_representation(self, instance):
+        if not user_has_exclusive_permission(
+            user=None,
+            obj=instance,
+            permission=Permissions.Product_Tag_Red_Team
+            ):
+            return None
+        representation = super().to_representation(instance)
+        representation["tags"] = [tag.name for tag in instance.tags.all()]
+        return representation
     class Meta:
         model = Finding 
         fields = '__all__'

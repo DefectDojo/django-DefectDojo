@@ -9,27 +9,8 @@ from django.db.models import Q
 import ast
 
 
-def get_technical_contacts(product_type: Product_Type):
-    technical_contacts = {
-        "product_type_manager": None,
-        "product_type_technical_contact": None,
-        "environment_manager": None,
-        "environment_technical_contact": None,
-    }
-    technical_contacts["product_type_manager"] = product_type.product_type_manager
-    technical_contacts["product_type_technical_contact"] = (
-        product_type.product_type_technical_contact
-    )
-    technical_contacts["environment_manager"] = product_type.environment_manager
-    technical_contacts["environment_technical_contact"] = (
-        product_type.environment_technical_contact
-    )
-
-    return technical_contacts
-
-
 def add_technical_contact_whit_member(product_type: Product_Type, pt_form):
-    technical_contacts = get_technical_contacts(product_type)
+    technical_contacts = product_type.get_contacts()
     for name_contact in technical_contacts:
         technical_contact = technical_contacts.get(name_contact, None)
         if technical_contact:

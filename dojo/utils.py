@@ -2794,6 +2794,20 @@ def validate_group_role(request, user, ptid, viewname, role):
             return HttpResponseRedirect(reverse(viewname, args=(ptid, )))
     return None
 
+
+def user_is_contacts(user, product, contacts_dict=None):
+    contacts_all = {}
+    contacts_all.update(product.get_contacts())
+    contacts_all.update(product.prod_type.get_contacts())
+    if contacts_dict:
+        contacts_all = {
+            key: value for key, value in contacts_all.items()
+            if key in contacts_dict
+            }
+
+    return any(contact == user for contact in contacts_all.values())
+
+
 class Response:
 
     def __init__(self, status, message) -> None:

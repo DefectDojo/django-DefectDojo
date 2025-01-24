@@ -1,7 +1,9 @@
 import functools
-
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+from dojo.models import Product, Product_Member
+from dojo.utils import user_is_contacts
 
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
@@ -31,7 +33,20 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
         # object must exist
         obj = get_object_or_404(model.objects.filter(**{lookup: lookup_value}))
 
-        user_has_permission_or_403(request.user, obj, permission)
+        if isinstance(obj, Product) and user_is_contacts(
+            request.user,
+            obj,
+            settings.CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS
+        ):
+            return func(request, *args, **kwargs)
+        if isinstance(obj, Product_Member) and user_is_contacts(
+            request.user,
+            obj.product,
+            settings.CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS
+        ):
+            return func(request, *args, **kwargs)
+        else:
+            user_has_permission_or_403(request.user, obj, permission)
 
         return func(request, *args, **kwargs)
 

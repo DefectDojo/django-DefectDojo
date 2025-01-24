@@ -21,10 +21,12 @@ from dojo.models import (
     )
 from dojo.api_v2.api_error import ApiError
 from dojo.risk_acceptance.helper import post_jira_comments, handle_from_provider_risk
+from dojo.product_type.helper import get_contacts_product_type_and_product_by_serverity
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.product.queries import get_authorized_members_for_product
 from dojo.authorization.roles_permissions import Permissions
 from dojo.risk_acceptance.notification import Notification
+from dojo.user.queries import get_role_members
 from dojo.risk_acceptance.queries import (
     abuse_control_min_vulnerability_closed,
     abuse_control_max_vulnerability_accepted)
@@ -112,25 +114,7 @@ def risk_accepted_succesfully(
             finding=finding) 
 
 
-def get_role_members(user, product: Product, product_type: Product_Type):
-    user_members = None
-    user_members_product_type: Product_Type_Member = get_authorized_product_type_members_for_user(user, Permissions.Risk_Acceptance)
-    user_members = list(user_members_product_type)
-    user_members_product: Product_Member = get_authorized_members_for_product(product=product,
-                                                                              permission=Permissions.Risk_Acceptance,
-                                                                              user=user)
-    if user_members_product:
-        user_members += list(user_members_product)
-    if not user_members:
-        raise ValueError("The user does not have any product_type or product associated with it")
-    for user_member in user_members:
-        if hasattr(user_member, "product_type_id"):
-            if user_member.product_type_id == product_type.id or len(user.groups.filter(dojo_group__name="Compliance")) > 0:
-                return user_member.role.name
-        elif hasattr(user_member, "product_id"):
-            if user_member.product_id == product.id:
-                return user_member.role.name
-    raise ValueError(f"The user is not related to the object {product_type}")
+
 
 
 def role_has_exclusive_permissions(user):
@@ -257,33 +241,6 @@ def get_confirmed_acceptors(finding: Finding):
     return acceptors
 
 
-def get_contacts(engagement: Engagement, finding_serverity: str, user):
-    rule = settings.RULE_RISK_PENDING_ACCORDING_TO_CRITICALITY.get(finding_serverity)
-    product_type = engagement.product.get_product_type
-    contacts = rule.get("type_contacts").get(json.loads(settings.AZURE_DEVOPS_GROUP_TEAM_FILTERS.split("//")[3])[product_type.name.split(" - ")[0]]).get("users")
-
-    get_contacts_dict = {
-        "team_manager": engagement.product.team_manager,
-        "product_type_manager": product_type.product_type_manager,
-        "product_type_technical_contact": product_type.product_type_technical_contact,
-        "environment_manager": product_type.environment_manager,
-        "environment_technical_contact": product_type.environment_technical_contact,
-    }
-    contact_list = []
-    for contact in contacts:
-        if contact in get_contacts_dict.keys():
-            if not get_contacts_dict[contact]:
-                logger.warning("Risk_pending: contact not related to a product_type")
-            else:
-                contact_list.append(get_contacts_dict[contact])
-        else:
-            raise ValueError(f"Contact {contact} not found")
-    if contact_list == []:
-        contact_list.append(user)
-
-    return contact_list
-
-
 def is_permissions_risk_acceptance(
     engagement: Engagement, finding: Finding, user, product: Product, product_type: Product_Type
 ):
@@ -300,7 +257,7 @@ def is_permissions_risk_acceptance(
     ):
         result = True
 
-    contacts = get_contacts(engagement, finding.severity, user)
+    contacts = get_contacts_product_type_and_product_by_serverity(engagement, finding.severity, user)
     if contacts:
         contacts_ids = [contact.id for contact in contacts]
         if user.id in contacts_ids and finding.risk_accepted is False:
