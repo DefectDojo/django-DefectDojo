@@ -204,7 +204,7 @@ def exclude_test_or_finding_with_tag(
         exclusive_permission = ExclusivePermission.objects.get(
             name="Product_Tag_Red_Team")
     except ExclusivePermission.DoesNotExist:
-        logger.Error("Product_Tag_Red_Team does not exist")
+        logger.error("Product_Tag_Red_Team does not exist")
         raise ApiError.not_found("Product_Tag_Red_Team does not exist")
     
     if exclusive_permission.is_active() is False:

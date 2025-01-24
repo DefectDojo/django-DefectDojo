@@ -455,9 +455,14 @@ env = environ.FileAwareEnv(
     DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
     # User Contacts with exclusive permissions
     DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS=(list, [
-        "team_manager",
+        "product_type_manager",
         "product_type_technical_contact",
-        "environment_technical_contact"]),
+        "environment_manager",
+        "environment_technical_contact",
+        "product_manager",
+        "technical_contact",
+        "team_manager",
+        ]),
     DD_ENABLE_FILTER_FOR_TAG_RED_TEAM=(bool, True),
     # Reviewer and approver groups
     DD_REVIEWER_GROUP_NAMES=(str, ""),

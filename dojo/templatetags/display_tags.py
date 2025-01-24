@@ -32,7 +32,8 @@ from dojo.models import (
     FileAccessToken,
     Finding,
     Product,
-    System_Settings)
+    System_Settings,
+    ExclusivePermission)
 
 from dojo.utils import get_file_images, get_full_url, get_system_setting, prepare_for_view
 
