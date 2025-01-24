@@ -242,7 +242,7 @@
                                     {% if finding_exclusion.reviewed_at %}
                                         <pre>{{ finding_exclusion.reviewed_at|date:"d M Y H:i" }}</pre>
                                         <br>
-                                        <pre><strong>By:</strong> DevSecOps Team</pre>
+                                        <pre><strong>By:</strong> {{ finding_exclusion.reviewed_by.username }}</pre>
                                     {% else %}
                                         <pre>Pending review by DevSecOps team</pre>
                                     {% endif %}
@@ -261,6 +261,8 @@
                                         {% endif %}
                                         <br>
                                         <pre>{{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}</pre>
+                                        <br>
+                                        <pre><strong>By:</strong> {{ finding_exclusion.accepted_by.username }}</pre>
                                     {% else %}
                                         <pre>Awaiting Decision by Cibersecurity team</pre>
                                     {% endif %}
