@@ -961,11 +961,8 @@ class FindingViewSet(
             "test__engagement__product",
             "test__engagement__product__prod_type",
         )
-        start_time = time.time()
-        findings = exclude_test_or_finding_with_tag(findings)
-        end_time = time.time()
-        execution_time = end_time - start_time
-        logger.info(f"Execution time of exclude_test_or_finding_with_tag: {execution_time} seconds")
+        if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+            findings = findings.exclude(tags__name="redteam")
         return findings.distinct()
 
     def get_serializer_class(self):
