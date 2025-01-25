@@ -50,12 +50,15 @@ docker-compose features and flags. You can run Compose V2 by replacing the hyphe
 git clone https://github.com/DefectDojo/django-DefectDojo
 cd django-DefectDojo
 
+# Check if your installed toolkit is compatible
+./docker/docker-compose-check.sh
+
 # Building Docker images
-./dc-build.sh
+docker compose build
 
 # Run the application (for other profiles besides postgres-redis see  
 # https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md)
-./dc-up-d.sh postgres-redis
+docker compose up -d
 
 # Obtain admin credentials. The initializer can take up to 3 minutes to run.
 # Use docker compose logs -f initializer to track its progress.
@@ -64,17 +67,13 @@ docker compose logs initializer | grep "Admin password:"
 
 ## For Docker Compose V1
 
-You can run Compose V1 by editing the files below to add the hyphen (-) between `docker compose`. 
+You can run Compose V1 by calling `docker-compose` (by adding the hyphen (-) between `docker compose`). 
+
+Following commands are using original version so you might need to adjust them:
 ```sh
-     dc-build.sh
-     dc-down.sh
-     dc-stop.sh
-     dc-unittest.sh
-     dc-up-d.sh
-     dc-up.sh
-     docker/docker-compose-check.sh
-     docker/entrypoint-initializer.sh
-     docker/setEnv.sh
+docker/docker-compose-check.sh
+docker/entrypoint-initializer.sh
+docker/setEnv.sh
 ```
 
 Navigate to `http://localhost:8080` to see your new instance!
