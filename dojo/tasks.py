@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.celery import app
-from dojo.models import Alerts, Engagement, Finding, Product, System_Settings, User, Endpoint, Announcement
+from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
 from dojo.notifications.helper import create_notification
 from dojo.utils import calculate_grade, sla_compute_and_notify
 
@@ -215,5 +215,5 @@ def evaluate_pro_proposition(*args, **kwargs):
     if object_count < 100000:
         return
     # Update the announcement
-    announcement.message = f'Only professionals have {object_count} Findings/Endpoints in their systems... <a href="https://www.defectdojo.com/pricing" target="_blank">Get DefectDojo Pro</a> today!'
+    announcement.message = f'Only professionals have {object_count:,} Findings and Endpoints in their systems... <a href="https://www.defectdojo.com/pricing" target="_blank">Get DefectDojo Pro</a> today!'
     announcement.save()
