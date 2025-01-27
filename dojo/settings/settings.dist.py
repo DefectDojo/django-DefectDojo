@@ -453,7 +453,17 @@ env = environ.FileAwareEnv(
     
     # tags for filter to finding exclusion
     DD_FINDING_EXCLUSION_FILTER_TAGS=(str, ""),
-    
+    # User Contacts with exclusive permissions
+    DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS=(list, [
+        "product_type_manager",
+        "product_type_technical_contact",
+        "environment_manager",
+        "environment_technical_contact",
+        "product_manager",
+        "technical_contact",
+        "team_manager",
+        ]),
+    DD_ENABLE_FILTER_FOR_TAG_RED_TEAM=(bool, True),
     # Reviewer and approver groups
     DD_REVIEWER_GROUP_NAMES=(str, ""),
     DD_APPROVER_GROUP_NAMES=(str, ""),
@@ -2178,11 +2188,13 @@ COMPLIANCE_FILTER_RISK = env("DD_COMPLIANCE_FILTER_RISK")
 # Engine Tools 
 FINDING_EXCLUSION_EXPIRATION_DAYS = env("DD_FINDING_EXCLUSION_EXPIRATION_DAYS")
 FINDING_EXCLUSION_FILTER_TAGS = env("DD_FINDING_EXCLUSION_FILTER_TAGS")
+# exclusive permission
+CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS = env("DD_CONTACTS_ASSIGN_EXCLUSIVE_PERMISSIONS")
+ENABLE_FILTER_FOR_TAG_RED_TEAM = env("DD_ENABLE_FILTER_FOR_TAG_RED_TEAM")
 # Acceptace for email
 ENABLE_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_ENABLE_ACCEPTANCE_RISK_FOR_EMAIL")
 LIFETIME_HOURS_PERMISSION_KEY = env("DD_LIFETIME_HOURS_PERMISSION_KEY")
 HOST_ACCEPTANCE_RISK_FOR_EMAIL = env("DD_HOST_ACCEPTANCE_RISK_FOR_EMAIL")
-
 TENAN_ID = env("DD_TENAN_ID")
 CLIENT_ID = env("DD_CLIENT_ID")
 CALLBACK_URL = env("DD_CALLBACK_URL")

@@ -142,6 +142,7 @@ Array.prototype.remove = function(value) {
     }
 };
 
+
 function innerData(data, findings_related){
     let tableBody = document.getElementById("id_data_transfer_finding")
     tableBody.innerHTML = ""
@@ -206,12 +207,20 @@ function innerData(data, findings_related){
     });
 }
 
-
+function cleanData(data) {
+    data.results.forEach(function(transfer_finding_item) {
+        transfer_finding_item.transfer_findings = transfer_finding_item.transfer_findings.filter(function(transfer_findings_finding) {
+            return transfer_findings_finding.findings !== null;
+        });
+    });
+    return data;
+}
+    
 async function getTransferFindings(transferFindingId){
     try
     {
         let related_findings = ""
-        const transferFindingResponse = await getTransferFindingsAsync(transferFindingId);
+        let transferFindingResponse = await getTransferFindingsAsync(transferFindingId);
         related_findings += `<td> <select class="form-control form-control-chosen related-finding-chosen" data-placeholder="Please select..."><option value=""> New Finding </option>`
         if (transferFindingResponse.results.length == 1)
             {
@@ -229,10 +238,12 @@ async function getTransferFindings(transferFindingId){
                             }
                         }
                     related_findings += `</select></td>`;
+                    transferFindingResponse = cleanData(transferFindingResponse);
                     innerData(transferFindingResponse, related_findings);
                 }
                 else
                 {
+                    transferFindingResponse = cleanData(transferFindingResponse);
                     innerData(transferFindingResponse, "<td>None</td>");
                 }
             }

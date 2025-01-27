@@ -1,8 +1,20 @@
+import logging
 from crum import get_current_user
+from dojo.api_v2.api_error import ApiError
 from django.db.models import Exists, OuterRef, Q
-
+from dojo.authorization.roles_permissions import Permissions 
+from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
 from dojo.authorization.authorization import get_roles_for_permission, user_has_global_permission
-from dojo.models import Product_Group, Product_Member, Product_Type_Group, Product_Type_Member, Test, Test_Import
+from dojo.models import (
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+    Test,
+    Test_Import,
+    ExclusivePermission)
+
+logger = logging.getLogger(__name__)
 
 
 def get_authorized_tests(permission, product=None):

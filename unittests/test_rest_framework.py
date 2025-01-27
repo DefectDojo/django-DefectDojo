@@ -1709,7 +1709,7 @@ class UsersTest(BaseClass.BaseClassTest):
         }
         self.update_fields = {"first_name": "test changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 13
+        self.deleted_objects = 14
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create(self):
@@ -2620,7 +2620,7 @@ class ProductMemberTest(BaseClass.MemberEndpointTest):
         self.permission_create = Permissions.Product_Manage_Members
         self.permission_update = Permissions.Product_Manage_Members
         self.permission_delete = Permissions.Product_Member_Delete
-        self.deleted_objects = 1
+        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

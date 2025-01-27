@@ -279,7 +279,7 @@
                 &nbsp;
                 <a rel="noopener noreferrer" href="https://documentation.defectdojo.com/usage/permissions/" target="_blank">
                     <i class="fa-solid fa-circle-question"></i></a>
-                {% if prod|has_object_permission:"Product_Member_Add_Owner" %}
+                {% if prod|has_object_permission:"Product_Member_Add_Owner" or prod|is_contacts_permission%}
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductMember"
                             data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Member">
@@ -316,13 +316,13 @@
                                 <li class="dropdown" style="list-style:none;position:absolute">
                                     <a rel="noopener noreferrer" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
-                                        {% if prod|has_object_permission:"Product_Member_Edit" %}
+                                        {% if prod|has_object_permission:"Product_Member_Edit" or prod|is_contacts_permission %}
                                         <li>
                                             <a rel="noopener noreferrer" name="editProductMember" href="{% url 'edit_product_member' member.id %}">
                                             <i class="fa-solid fa-pen-to-square"></i>{% trans "Edit" %}</a>
                                         </li>
                                         {% endif %}
-                                        {% if member|has_object_permission:"Product_Member_Delete" %}
+                                        {% if member|has_object_permission:"Product_Member_Delete" or prod|is_contacts_permission %}
                                         <li>
                                             <a rel="noopener noreferrer" name="deleteProductMember" href="{% url 'delete_product_member' member.id %}">
                                             <i class="fa-solid fa-trash"></i>{% trans "Delete" %}</a>
@@ -335,6 +335,13 @@
                             <td name="member_user">{{ member.user.get_full_name }}</td>
                             <td>{% trans "Product member" %}</td>
                             <td name="member_role">{{ member.role }}</td>
+                            {% if member.exclusive_permission_product.all %} 
+                            <td>
+                              {{member.exclusive_permission_product.all | render_exclusive_permission_for_member}}
+                            </td>
+                            {% else %}
+                              <td></td>
+                            {%endif%}
                         </tr>
                     {% endfor %}
                     {% for member in product_type_members %}
@@ -348,6 +355,7 @@
                                 </a>
                             </td>
                             <td>{{ member.role }}</td>
+                            <td></td>
                         </tr>
                     {% endfor %}
                     {% for member in global_product_members %}
@@ -357,6 +365,7 @@
                             <td>{{ member.user.get_full_name }}</td>
                             <td>Global role</td>
                             <td>{{ member.role }}</td>
+                            <td></td>
                         </tr>
                     {% endfor %}
                     </tbody>

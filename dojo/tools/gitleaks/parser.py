@@ -93,6 +93,7 @@ class GitleaksParser:
             line=line,
             dynamic_finding=False,
             static_finding=True,
+            vuln_id_from_tool=issue.get("rule", "SECRET_SCANNING"),
         )
         # manage tags
         if self.custom_tag:
@@ -121,7 +122,7 @@ class GitleaksParser:
         date = issue.get("Date")
         message = issue.get("Message")
         tags = issue.get("Tags")
-        ruleId = issue.get("RuleID")
+        ruleId = issue.get("RuleID", "SECRET_SCANNING")
 
         title = f"Hard coded {reason} found in {file_path}"
 
@@ -178,6 +179,7 @@ class GitleaksParser:
                 dynamic_finding=False,
                 static_finding=True,
                 nb_occurences=1,
+                vuln_id_from_tool=ruleId,
             )
             if self.custom_tag:
                 finding.unsaved_tags = [settings.DD_CUSTOM_TAG_PARSER.get("gitleaks")]

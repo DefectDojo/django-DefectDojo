@@ -26,7 +26,10 @@ from github import Github
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
+from dojo.authorization.authorization import (
+    user_has_permission,
+    user_has_permission_or_403,
+    user_has_global_permission)
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import (
@@ -1170,7 +1173,7 @@ def delete_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
     form = DeleteAppAnalysisForm(instance=technology)
     if request.method == "POST":
-        form = Delete_Product_MemberForm(request.POST, instance=technology)
+        form = Delete_Product_MemberForm(request.POST, instance=technology, user=request.user)
         technology = form.instance
         technology.delete()
         messages.add_message(request,
@@ -1642,12 +1645,19 @@ def edit_notifications(request, pid):
 @user_is_authorized(Product, Permissions.Product_Manage_Members, "pid")
 def add_product_member(request, pid):
     product = get_object_or_404(Product, pk=pid)
-    memberform = Add_Product_MemberForm(initial={"product": product.id}, user=request.user)
+    memberform = Add_Product_MemberForm(initial={"product": product},
+                                        user=request.user)
     if request.method == "POST":
-        memberform = Add_Product_MemberForm(request.POST, initial={"product": product.id}, user=request.user)
+        memberform = Add_Product_MemberForm(request.POST,
+                                            initial={"product": product},
+                                            user=request.user)
         if memberform.is_valid():
-            if memberform.cleaned_data["role"].is_owner and not user_has_permission(request.user, product,
-                                                                                    Permissions.Product_Member_Add_Owner):
+            if (
+                memberform.cleaned_data["role"].is_owner
+                and not user_has_permission(
+                    request.user, product,
+                    Permissions.Product_Member_Add_Owner)
+            ):
                 messages.add_message(request,
                                      messages.WARNING,
                                      _("You are not permitted to add users as owners."),
@@ -1689,9 +1699,14 @@ def add_product_member(request, pid):
 @user_is_authorized(Product_Member, Permissions.Product_Manage_Members, "memberid")
 def edit_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
-    memberform = Edit_Product_MemberForm(instance=member, user=request.user)
+    memberform = Edit_Product_MemberForm(instance=member,
+                                         initial={"product": member.product},
+                                         user=request.user)
     if request.method == "POST":
-        memberform = Edit_Product_MemberForm(request.POST, instance=member, user=request.user)
+        memberform = Edit_Product_MemberForm(request.POST,
+                                             instance=member,
+                                             initial={"product": member.product},
+                                             user=request.user)
         if memberform.is_valid():
             if member.role.is_owner and not user_has_permission(request.user, member.product,
                                                                 Permissions.Product_Member_Add_Owner):
@@ -1725,9 +1740,9 @@ def edit_product_member(request, memberid):
 @user_is_authorized(Product_Member, Permissions.Product_Member_Delete, "memberid")
 def delete_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
-    memberform = Delete_Product_MemberForm(instance=member)
+    memberform = Delete_Product_MemberForm(instance=member, user=request.user)
     if request.method == "POST":
-        memberform = Delete_Product_MemberForm(request.POST, instance=member)
+        memberform = Delete_Product_MemberForm(request.POST, instance=member, user=request.user)
         member = memberform.instance
         user = member.user
         member.delete()

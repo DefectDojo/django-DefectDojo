@@ -814,6 +814,14 @@ class Product_Type(models.Model):
     def get_breadcrumbs(self):
         return [{"title": str(self),
                "url": reverse("edit_product_type", args=(self.id,))}]
+    
+    def get_contacts(self):
+        return {
+            "product_type_manager": self.product_type_manager,
+            "product_type_technical_contact": self.product_type_technical_contact,
+            "environment_manager": self.environment_manager,
+            "environment_technical_contact": self.environment_technical_contact
+        }
 
     @cached_property
     def critical_present(self):
@@ -1194,6 +1202,13 @@ class Product(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("view_product", args=[str(self.id)])
+    
+    def get_contacts(self):
+        return {
+            "product_manager": self.product_manager,
+            "technical_contact": self.technical_contact,
+            "team_manager": self.team_manager
+            }
 
     @cached_property
     def findings_count(self):
@@ -4909,10 +4924,21 @@ class ExclusivePermission(models.Model):
                            unique=True,
                            blank=True,
                            help_text=_("name permission")) 
+    short_name = models.CharField(max_length=50,
+                           blank=True,
+                           null=True,
+                           help_text=_("name permission")) 
     description = models.CharField(max_length=128,
                                   help_text=_("Short permit description"),
                                   null=True,
                                   blank=True) 
+    validation_field = models.CharField(max_length=250,
+                                  help_text=_("Validation Field"),
+                                  null=True,
+                                  blank=True) 
+    status = models.BooleanField(
+        default=True,
+        help_text=_("Status of the permission"))
     members = models.ManyToManyField(Product_Member,
                                     related_name="exclusive_permission_product",
                                     blank=True)
@@ -4923,7 +4949,18 @@ class ExclusivePermission(models.Model):
 
     def __str__(self):
         return self.description
-   
+    
+    @classmethod
+    def get_validation_field(cls, name: str) -> str:
+        try:
+            permission = cls.objects.get(name=name)
+        except ObjectDoesNotExist as e:
+            logger.error(f"Exclusive permission {name} not found")
+            raise e
+        return permission.validation_field
+    
+    def is_active(self):
+        return self.status
 
 if settings.ENABLE_AUDITLOG:
     # Register for automatic logging to database
