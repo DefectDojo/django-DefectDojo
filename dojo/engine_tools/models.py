@@ -39,6 +39,21 @@ class FindingExclusion(models.Model):
                                    blank=True,
                                    on_delete=models.CASCADE,
                                    related_name="dojo_user_created")
+    reviewed_by = models.ForeignKey("Dojo_User",
+                                   null=True,
+                                   blank=True,
+                                   on_delete=models.CASCADE,
+                                   related_name="dojo_user_reviewed")
+    accepted_by = models.ForeignKey("Dojo_User",
+                                   null=True,
+                                   blank=True,
+                                   on_delete=models.CASCADE,
+                                   related_name="dojo_user_accepted")
+    rejected_by = models.ForeignKey("Dojo_User",
+                                   null=True,
+                                   blank=True,
+                                   on_delete=models.CASCADE,
+                                   related_name="dojo_user_rejected")
     practice = models.CharField(max_length=50, null=True, blank=True)
     
     class Meta:
