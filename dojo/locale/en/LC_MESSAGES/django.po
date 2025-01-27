@@ -4966,21 +4966,21 @@ msgid "Home"
 msgstr ""
 
 #: dojo/templates/dojo/calendar.html
-msgid "previous month"
+msgid "Previous month"
 msgstr ""
 
 #: dojo/templates/dojo/calendar.html
-msgid "next month"
+msgid "Next month"
 msgstr ""
 
 #: dojo/templates/dojo/calendar.html
-msgid "month preview"
+msgid "Month preview"
 msgstr ""
 
 #: dojo/templates/dojo/calendar.html
-msgid "week preview"
+msgid "Week preview"
 msgstr ""
 
 #: dojo/templates/dojo/calendar.html
-msgid "day preview"
+msgid "Day preview"
 msgstr ""
