@@ -49,7 +49,9 @@ def get_note(author, message):
     return note
 
 
-def has_valid_comments(finding_exclusion, user) -> bool:    
+def has_valid_comments(finding_exclusion, user) -> bool:
+    if user.is_superuser:
+        return True    
     for comment in finding_exclusion.discussions.all():
         if comment.author == user:
             return True
