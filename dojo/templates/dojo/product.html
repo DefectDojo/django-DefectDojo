@@ -62,8 +62,8 @@
                             {% if system_settings.enable_github %}
                             <th class="text-center">GitHub</th>
                             {% endif %}
-                            <th class="text-right">{% dojo_sort request 'Active (Verified) Findings' 'findings_count' %}</th>
-                            <th class="text-right"> Vulnerable Hosts / Endpoints</th>
+                            <th>{% dojo_sort request 'Active (Verified) Findings' 'findings_count' %}</th>
+                            <th> Vulnerable Hosts / Endpoints</th>
                             <th> Contact</th>
                             {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
