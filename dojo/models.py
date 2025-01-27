@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import warnings
+from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -371,10 +372,32 @@ class System_Settings(models.Model):
 
     enforce_verified_status = models.BooleanField(
         default=True,
-        verbose_name=_("Enforce Verified Status"),
-        help_text=_("When enabled, features such as product grading, jira "
-                    "integration, metrics, and reports will only interact "
-                    "with verified findings.",
+        verbose_name=_("Enforce Verified Status - Globally"),
+        help_text=_(
+            "When enabled, features such as product grading, jira "
+            "integration, metrics, and reports will only interact "
+            "with verified findings. This setting will override "
+            "individually scoped verified toggles.",
+        ),
+    )
+    enforce_verified_status_jira = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status - Jira"),
+        help_text=_("When enabled, findings must have a verified status to be pushed to jira."),
+    )
+    enforce_verified_status_product_grading = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status - Product Grading"),
+        help_text=_(
+            "When enabled, findings must have a verified status to be considered as part of a product's grading.",
+        ),
+    )
+    enforce_verified_status_metrics = models.BooleanField(
+        default=True,
+        verbose_name=_("Enforce Verified Status - Metrics"),
+        help_text=_(
+            "When enabled, findings must have a verified status to be counted in metric calculations, "
+            "be included in reports, and filters.",
         ),
     )
 
@@ -498,9 +521,20 @@ class System_Settings(models.Model):
         help_text=_("Enable anyone with a link to the survey to answer a survey"),
     )
     credentials = models.TextField(max_length=3000, blank=True)
-    disclaimer = models.TextField(max_length=3000, default="", blank=True,
-                                  verbose_name=_("Custom Disclaimer"),
-                                  help_text=_("Include this custom disclaimer on all notifications and generated reports"))
+    disclaimer_notifications = models.TextField(max_length=3000, default="", blank=True,
+                                  verbose_name=_("Custom Disclaimer for Notifications"),
+                                  help_text=_("Include this custom disclaimer on all notifications"))
+    disclaimer_reports = models.TextField(max_length=5000, default="", blank=True,
+                                  verbose_name=_("Custom Disclaimer for Reports"),
+                                  help_text=_("Include this custom disclaimer on generated reports"))
+    disclaimer_reports_forced = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Force to add disclaimer reports"),
+        help_text=_("Disclaimer will be added to all reports even if user didn't selected 'Include disclaimer'."))
+    disclaimer_notes = models.TextField(max_length=3000, default="", blank=True,
+                                  verbose_name=_("Custom Disclaimer for Notes"),
+                                  help_text=_("Include this custom disclaimer next to input form for notes"))
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text=_("Default expiry period for risk acceptance form."))
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name=_("Risk acceptance expiration heads up days"), help_text=_("Notify X days before risk acceptance expires. Leave empty to disable."))
@@ -1236,7 +1270,7 @@ class Product(models.Model):
                                         date__range=[start_date,
                                                     end_date])
 
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
 
         critical = findings.filter(severity="Critical").count()
@@ -1550,7 +1584,7 @@ class Engagement(models.Model):
         from dojo.utils import get_system_setting
 
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement=self)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
 
         return findings
@@ -1572,7 +1606,10 @@ class Engagement(models.Model):
         import dojo.finding.helper as helper
         helper.prepare_duplicates_for_delete(engagement=self)
         super().delete(*args, **kwargs)
-        calculate_grade(self.product)
+        with suppress(Product.DoesNotExist):
+            # Suppressing a potential issue created from async delete removing
+            # related objects in a separate task
+            calculate_grade(self.product)
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited
@@ -1670,6 +1707,23 @@ class Endpoint(models.Model):
         indexes = [
             models.Index(fields=["product"]),
         ]
+
+    def __hash__(self):
+        return self.__str__().__hash__()
+
+    def __eq__(self, other):
+        if isinstance(other, Endpoint):
+            # Check if the contents of the endpoint match
+            contents_match = str(self) == str(other)
+            # Determine if products should be used in the equation
+            if self.product is not None and other.product is not None:
+                # Check if the products are the same
+                products_match = (self.product) == other.product
+                # Check if the contents match
+                return products_match and contents_match
+            return contents_match
+
+        return NotImplemented
 
     def __str__(self):
         try:
@@ -1801,23 +1855,6 @@ class Endpoint(models.Model):
 
         if errors:
             raise ValidationError(errors)
-
-    def __hash__(self):
-        return self.__str__().__hash__()
-
-    def __eq__(self, other):
-        if isinstance(other, Endpoint):
-            # Check if the contents of the endpoint match
-            contents_match = str(self) == str(other)
-            # Determine if products should be used in the equation
-            if self.product is not None and other.product is not None:
-                # Check if the products are the same
-                products_match = (self.product) == other.product
-                # Check if the contents match
-                return products_match and contents_match
-            return contents_match
-
-        return NotImplemented
 
     @property
     def is_broken(self):
@@ -2115,7 +2152,7 @@ class Test(models.Model):
     def unaccepted_open_findings(self):
         from dojo.utils import get_system_setting
         findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             findings = findings.filter(verified=True)
 
         return findings
@@ -2177,7 +2214,10 @@ class Test(models.Model):
     def delete(self, *args, **kwargs):
         logger.debug("%d test delete", self.id)
         super().delete(*args, **kwargs)
-        calculate_grade(self.engagement.product)
+        with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
+            # Suppressing a potential issue created from async delete removing
+            # related objects in a separate task
+            calculate_grade(self.engagement.product)
 
     @property
     def statistics(self):
@@ -2614,6 +2654,16 @@ class Finding(models.Model):
             models.Index(fields=["duplicate_finding", "id"]),
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.unsaved_endpoints = []
+        self.unsaved_request = None
+        self.unsaved_response = None
+        self.unsaved_tags = None
+        self.unsaved_files = None
+        self.unsaved_vulnerability_ids = None
+
     def __str__(self):
         return self.title
 
@@ -2688,16 +2738,6 @@ class Finding(models.Model):
         from django.urls import reverse
         return reverse("view_finding", args=[str(self.id)])
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.unsaved_endpoints = []
-        self.unsaved_request = None
-        self.unsaved_response = None
-        self.unsaved_tags = None
-        self.unsaved_files = None
-        self.unsaved_vulnerability_ids = None
-
     def copy(self, test=None):
         copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
@@ -2735,14 +2775,17 @@ class Finding(models.Model):
         import dojo.finding.helper as helper
         helper.finding_delete(self)
         super().delete(*args, **kwargs)
-        calculate_grade(self.test.engagement.product)
+        with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
+            # Suppressing a potential issue created from async delete removing
+            # related objects in a separate task
+            calculate_grade(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
     def unaccepted_open_findings(cls):
         from dojo.utils import get_system_setting
         results = cls.objects.filter(active=True, duplicate=False, risk_accepted=False)
-        if get_system_setting("enforce_verified_status", True):
+        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             results = results.filter(verified=True)
 
         return results
