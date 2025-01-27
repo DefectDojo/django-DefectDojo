@@ -13,7 +13,8 @@ from dojo.engine_tools.helpers import (
     expire_finding_exclusion_immediately,
     send_mail_to_cybersecurity,
     check_priorization,
-    has_valid_comments
+    has_valid_comments,
+    add_findings_to_blacklist
 )
 
 # Utils
@@ -82,12 +83,21 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = CreateFindingExclusionForm(request.POST)
         list_type = request.POST.get(key="type")
-        if list_type == "black_list":
-            if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
-                raise PermissionDenied
         
-        if form.is_valid():
-            exclusion = form.save(commit=False)
+        if form.is_valid():        
+            exclusion: FindingExclusion = form.save(commit=False)
+            if list_type == "black_list":
+                if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
+                    raise PermissionDenied
+                finding_exclusion.status = "Accepted"
+                finding_exclusion.final_status = "Accepted"
+                finding_exclusion.accepted_at = timezone.now()
+                finding_exclusion.accepted_by = request.user
+                finding_exclusion.status_updated_at = timezone.now()
+                finding_exclusion.status_updated_by = request.user
+                
+                relative_url = reverse("finding_exclusion", args=[str(exclusion.pk)])
+                add_findings_to_blacklist.apply_async(args=(exclusion.unique_id_from_tool, relative_url,))
             exclusion.practice = default_practice
             exclusion.created_by = request.user
             exclusion.save()
@@ -256,9 +266,9 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
             
             finding_exclusion.status = "Accepted"
             finding_exclusion.final_status = "Accepted"
-            finding_exclusion.accepted_at = datetime.now()
+            finding_exclusion.accepted_at = timezone.now()
             finding_exclusion.accepted_by = request.user
-            finding_exclusion.status_updated_at = datetime.now()
+            finding_exclusion.status_updated_at = timezone.now()
             finding_exclusion.status_updated_by = request.user
             finding_exclusion.expiration_date = timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS))
             finding_exclusion.save()
@@ -290,8 +300,6 @@ def accept_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpRes
         
     return redirect('finding_exclusion', fxid=fxid)
     
-
-
 
 def reject_finding_exclusion_request(request: HttpRequest, fxid: str) -> HttpResponse:
     if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value) and \

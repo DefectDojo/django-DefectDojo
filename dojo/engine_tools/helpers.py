@@ -14,7 +14,7 @@ import requests
 from dojo.models import Finding, Dojo_Group, Notes
 from dojo.group.queries import get_group_members_for_group
 from dojo.engine_tools.models import FindingExclusion
-from dojo.engine_tools.queries import tag_filter
+from dojo.engine_tools.queries import tag_filter, blacklist_tag_filter
 from dojo.celery import app
 from dojo.user.queries import get_user
 from dojo.notifications.helper import create_notification, EmailNotificationManger
@@ -313,7 +313,8 @@ def identify_critical_vulnerabilities(findings) -> int:
         if priority > 90:
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve)
             finding.risk_status = "On Blacklist"
-            finding.tags.add("black_list")
+            if 'black_list' not in finding.tags:
+                finding.tags.add("black_list")
             
             if not finding_exclusion.exists():
                 new_finding_exclusion = FindingExclusion(
@@ -343,7 +344,7 @@ def check_priorization():
     
     all_vulnerabilities = Finding.objects.filter(
         active=True,
-    ).filter(tag_filter).prefetch_related("tags")
+    ).filter(blacklist_tag_filter).prefetch_related("tags")
     
     # Identify critical vulnerabilities
     blacklist_new_items = identify_critical_vulnerabilities(all_vulnerabilities)
@@ -351,3 +352,25 @@ def check_priorization():
     return {
         "message": f"{blacklist_new_items} added to blacklist"
     }
+
+
+@app.task
+def add_findings_to_blacklist(unique_id_from_tool, relative_url):
+    findings_to_update = Finding.objects.filter(
+        cve=unique_id_from_tool,
+        active=True
+    ).filter(blacklist_tag_filter)
+    
+    finding_exclusion_url = get_full_url(relative_url)
+    system_user = get_user(settings.SYSTEM_USER)
+    message = f"Finding added to blacklist, for more details check the finding exclusion request: {finding_exclusion_url}"
+    note = get_note(system_user, message)
+    
+    for finding in findings_to_update:
+        if 'black_list' not in finding.tags:
+            finding.tags.add("black_list")
+        finding.notes.add(note)
+        finding.risk_status = "On Blacklist"
+        
+    Finding.objects.bulk_update(findings_to_update, ["risk_status"], 1000)
+    logger.info(f"{findings_to_update.count()} findings added to blacklist.")
