@@ -50,6 +50,7 @@ networkPolicy:
   #   ports:
   #   - protocol: TCP
   #     port: 443
+  annotations: {}
 
 # Configuration value to select database type
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
@@ -136,6 +137,7 @@ celery:
   # To use an external celery broker, set the hostname here
   brokerHost: ""
   logLevel: INFO
+  annotations: {}
   beat:
     annotations: {}
     affinity: {}
@@ -479,7 +481,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.37.3
+    tag: 1.37.4
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
