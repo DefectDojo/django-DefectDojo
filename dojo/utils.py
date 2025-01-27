@@ -41,6 +41,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.finding.queries import get_authorized_findings
+from dojo.api_v2.api_error import ApiError
 from dojo.github import (
     add_external_issue_github,
     close_external_issue_github,
@@ -2796,6 +2797,8 @@ def validate_group_role(request, user, ptid, viewname, role):
 
 
 def user_is_contacts(user, product, contacts_dict=None):
+    if isinstance(product, Finding):
+        product = get_product(product)
     contacts_all = {}
     contacts_all.update(product.get_contacts())
     contacts_all.update(product.prod_type.get_contacts())
