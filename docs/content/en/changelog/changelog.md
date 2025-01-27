@@ -7,6 +7,17 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
 
+## Jan 27, 2025: v2.42.3
+
+- **(Connectors)** Added 'minimum severity' filter for Semgrep and Tenable Connectors.  If you want to only upload Findings of a certain severity and up, you can set a filter for this under 'Minimum Severity' in your Connector options.
+
+![image](images/connectors_min_severity.png)
+
+Previously synced Findings that are no longer within the filter parameters will be set to Closed upon the following Sync operation.
+
+- **(API)** Prefetching multiple parameters now returns all prefetched objects in an array.
+
+
 ## Jan 21, 2025: v2.42.2
 
 - **(Classic UI)** Corrected link to Smart Upload form.
