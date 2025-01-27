@@ -1,36 +1,12 @@
 from django.db import models
+# from django.test.TransactionTestCase import assertQuerySetEqual
 
 from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
 
 from .dojo_test_case import DojoTestCase
 
 
-class EqualityHelpers:
-    def compare_querysets(self, queryset_1, queryset_2):
-        """
-        Compares two querysets and returns True if all fields (excluding primary key)
-        are equal for each model instance in both querysets. Otherwise, returns False.
-        """
-        # Make sure the querysets are the same length
-        if queryset_1.count() != queryset_2.count():
-            return False
-        # Get the model class from the queryset
-        model_class = queryset_1.model
-        # Create sets of field names excluding the primary key (ID)
-        field_names = [f.name for f in model_class._meta.get_fields() if not isinstance(f, models.AutoField)]
-        # Sort the querysets to compare them in order (if needed)
-        queryset_1 = queryset_1.order_by(*field_names)
-        queryset_2 = queryset_2.order_by(*field_names)
-        # Compare the fields of each model instance in the querysets
-        for obj1, obj2 in zip(queryset_1, queryset_2):
-            # Compare each field in the model, skipping the primary key
-            for field in field_names:
-                if getattr(obj1, field) != getattr(obj2, field):
-                    return False
-        return True
-
-
-class TestCopyFindingModel(DojoTestCase, EqualityHelpers):
+class TestCopyFindingModel(DojoTestCase):
 
     def test_duplicate_finding_same_test(self):
         # Set the scene
@@ -105,7 +81,7 @@ class TestCopyFindingModel(DojoTestCase, EqualityHelpers):
         # Make sure the copy was made without error
         self.assertEqual(current_finding_count + 1, Finding.objects.filter(test=test).count())
         # Do the notes match
-        self.assertTrue(self.compare_querysets(finding.notes.all(), finding_copy.notes.all()))
+        self.assertQuerySetEqual(finding.notes.all(), finding_copy.notes.all())
 
     def test_duplicate_finding_with_tags_and_notes(self):
         # Set the scene
@@ -127,7 +103,7 @@ class TestCopyFindingModel(DojoTestCase, EqualityHelpers):
         # Do the tags match
         self.assertEqual(finding.tags, finding_copy.tags)
         # Do the notes match
-        self.assertTrue(self.compare_querysets(finding.notes.all(), finding_copy.notes.all()))
+        self.assertQuerySetEqual(finding.notes.all(), finding_copy.notes.all())
 
     def test_duplicate_finding_with_endpoints(self):
         # Set the scene
@@ -159,7 +135,7 @@ class TestCopyFindingModel(DojoTestCase, EqualityHelpers):
         self.assertNotEqual(endpoint_status, finding_copy.status_finding.all().first())
 
 
-class TestCopyTestModel(DojoTestCase, EqualityHelpers):
+class TestCopyTestModel(DojoTestCase):
 
     def test_duplicate_test_same_enagagement(self):
         # Set the scene
@@ -242,7 +218,7 @@ class TestCopyTestModel(DojoTestCase, EqualityHelpers):
         # Make sure the copy was made without error
         self.assertEqual(current_test_count + 1, Test.objects.filter(engagement=engagement).count())
         # Do the notes match
-        self.assertTrue(self.compare_querysets(test.notes.all(), test_copy.notes.all()))
+        self.assertQuerySetEqual(test.notes.all(), test_copy.notes.all())
 
     def test_duplicate_test_with_tags_and_notes(self):
         # Set the scene
@@ -262,12 +238,12 @@ class TestCopyTestModel(DojoTestCase, EqualityHelpers):
         # Make sure the copy was made without error
         self.assertEqual(current_test_count + 1, Test.objects.filter(engagement=engagement).count())
         # Do the notes match
-        self.assertTrue(self.compare_querysets(test.notes.all(), test_copy.notes.all()))
+        self.assertQuerySetEqual(test.notes.all(), test_copy.notes.all())
         # Do the tags match
         self.assertEqual(test.tags, test_copy.tags)
 
 
-class TestCopyEngagementModel(DojoTestCase, EqualityHelpers):
+class TestCopyEngagementModel(DojoTestCase):
 
     def test_duplicate_engagement(self):
         # Set the scene
@@ -326,7 +302,7 @@ class TestCopyEngagementModel(DojoTestCase, EqualityHelpers):
         # Make sure the copy was made without error
         self.assertEqual(current_engagement_count + 1, Engagement.objects.filter(product=product).count())
         # Do the notes match
-        self.assertTrue(self.compare_querysets(engagement.notes.all(), engagement_copy.notes.all()))
+        self.assertQuerySetEqual(engagement.notes.all(), engagement_copy.notes.all())
 
     def test_duplicate_engagement_with_tags_and_notes(self):
         # Set the scene
@@ -346,6 +322,6 @@ class TestCopyEngagementModel(DojoTestCase, EqualityHelpers):
         # Make sure the copy was made without error
         self.assertEqual(current_engagement_count + 1, Engagement.objects.filter(product=product).count())
         # Do the notes match
-        self.assertTrue(self.compare_querysets(engagement.notes.all(), engagement_copy.notes.all()))
+        self.assertQuerySetEqual(engagement.notes.all(), engagement_copy.notes.all())
         # Do the tags match
         self.assertEqual(engagement.tags, engagement_copy.tags)
