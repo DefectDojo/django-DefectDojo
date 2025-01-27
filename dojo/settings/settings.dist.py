@@ -935,7 +935,7 @@ if SAML2_ENABLED:
     SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env("DD_SAML2_ATTRIBUTES_MAP"))
     SAML_FORCE_AUTH = env("DD_SAML2_FORCE_AUTH")
     SAML_ALLOW_UNKNOWN_ATTRIBUTES = env("DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE")
-    BASEDIR = Path(path.abspath(__file__)).parent
+    BASEDIR = Path(__file__).parent.absolute()
     if len(env("DD_SAML2_ENTITY_ID")) == 0:
         SAML2_ENTITY_ID = f"{SITE_URL}/saml2/metadata/"
     else:
@@ -1271,6 +1271,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Humble Json Importer": ["title"],
     "MSDefender Parser": ["title", "description"],
     "HCLAppScan XML": ["title", "description"],
+    "HCL AppScan on Cloud SAST XML": ["title", "file_path", "line", "severity"],
     "KICS Scan": ["file_path", "line", "severity", "description", "title"],
     "MobSF Scan": ["title", "description", "severity"],
     "MobSF Scorecard Scan": ["title", "description", "severity"],
@@ -1288,6 +1289,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Legitify Scan": ["title", "endpoints", "severity"],
     "ThreatComposer Scan": ["title", "description"],
     "Invicti Scan": ["title", "description", "severity"],
+    "Checkmarx CxFlow SAST": ["vuln_id_from_tool", "file_path", "line"],
     "HackerOne Cases": ["title", "severity"],
     "KrakenD Audit Scan": ["description", "mitigation", "severity"],
     "Red Hat Satellite": ["description", "severity"],
@@ -1360,6 +1362,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Wazuh": True,
     "Nuclei Scan": True,
     "Threagile risks report": True,
+    "HCL AppScan on Cloud SAST XML": True,
     "AWS Inspector2 Scan": True,
 }
 
@@ -1519,6 +1522,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Wazuh Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "MSDefender Parser": DEDUPE_ALGO_HASH_CODE,
     "HCLAppScan XML": DEDUPE_ALGO_HASH_CODE,
+    "HCL AppScan on Cloud SAST XML": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "KICS Scan": DEDUPE_ALGO_HASH_CODE,
     "MobSF Scan": DEDUPE_ALGO_HASH_CODE,
     "MobSF Scorecard Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1535,6 +1539,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Legitify Scan": DEDUPE_ALGO_HASH_CODE,
     "ThreatComposer Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Invicti Scan": DEDUPE_ALGO_HASH_CODE,
+    "Checkmarx CxFlow SAST": DEDUPE_ALGO_HASH_CODE,
     "KrakenD Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "PTART Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Red Hat Satellite": DEDUPE_ALGO_HASH_CODE,

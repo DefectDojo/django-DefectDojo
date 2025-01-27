@@ -380,7 +380,7 @@ class TestSonarQubeParser(DojoTestCase):
 
     def test_detailed_parse_file_table_has_whitespace(self):
         """
-        from version 3.1.1: sonarqube-report has new template with some change.
+        From version 3.1.1: sonarqube-report has new template with some change.
         see: https://github.com/soprasteria/sonar-report/commit/7dab559e7ecf9ed319345e9262a8b160bd3af94f
         Data table will have some whitespaces, parser should strip it before compare or use these properties.
         """
