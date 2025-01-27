@@ -1,6 +1,3 @@
-from django.db import models
-# from django.test.TransactionTestCase import assertQuerySetEqual
-
 from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
 
 from .dojo_test_case import DojoTestCase
