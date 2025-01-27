@@ -75,7 +75,15 @@
                             },
                         {%  endfor %}
                     {% endif %}
-                ]
+                ],
+                viewRender: function(view, element) {
+                // Updating aria-label attributes calendar switches after the view is rendered
+                $('.fc-prev-button').attr('aria-label', 'previous month');
+                $('.fc-next-button').attr('aria-label', 'next month');
+                $('.fc-month-button').attr('aria-label', 'month preview');
+                $('.fc-basicWeek-button').attr('aria-label', 'week preview');
+                $('.fc-basicDay-button').attr('aria-label', 'day preview');
+            }
             });
         });
     </script>
