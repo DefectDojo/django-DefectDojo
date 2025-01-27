@@ -8,10 +8,10 @@ weight: 2
 DefectDojo\'s API is created using [Django Rest
 Framework](http://www.django-rest-framework.org/). The documentation of
 each endpoint is available within each DefectDojo installation at
-[`/api/v2/oa3/swagger-ui`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/)) and can be accessed by choosing the API v2
+[`/api/v2/oa3/swagger-ui`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/) and can be accessed by choosing the API v2
 Docs link on the user drop down menu in the header. 
 
-![image](../../images/api_v2_1.png)
+![image](images/api_v2_1.png)
 
 The documentation is generated using [drf-spectacular](https://drf-spectacular.readthedocs.io/) at [`/api/v2/oa3/swagger-ui/`](https://demo.defectdojo.org/api/v2/oa3/swagger-ui/), and is
 interactive. On the top of API v2 docs is a link that generates an OpenAPI v3 spec.
@@ -20,12 +20,12 @@ To interact with the documentation, a valid Authorization header value
 is needed. Visit the `/api/key-v2` view to generate your
 API Key (`Token <api_key>`) and copy the header value provided.
 
-![image](../../images/api_v2_2.png)
+![image](images/api_v2_2.png)
 
 Each section allows you to make calls to the API and view the Request
 URL, Response Body, Response Code and Response Headers.
 
-![image](../../images/api_v2_3.png)
+![image](images/api_v2_3.png)
 
 If you're logged in to the Defect Dojo web UI, you do not need to provide the authorization token.
 
@@ -42,7 +42,7 @@ For example: :
 
 ### Alternative authentication method
 
-If you use [an alternative authentication method](../archived_docs/integrations/social-authentication/) for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
+If you use [an alternative authentication method](en/customize_dojo/user_management/configure_sso/ for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
 Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
