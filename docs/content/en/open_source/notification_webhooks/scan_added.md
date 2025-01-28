@@ -1,6 +1,6 @@
 ---
 title: "Event: scan_added and scan_added_empty"
-weight: 5
+weight: 6
 chapter: true
 ---
 
