@@ -53,7 +53,9 @@ def get_note(author, message):
     return note
 
 
-def has_valid_comments(finding_exclusion, user) -> bool:    
+def has_valid_comments(finding_exclusion, user) -> bool:
+    if user.is_superuser:
+        return True    
     for comment in finding_exclusion.discussions.all():
         if comment.author == user:
             return True
@@ -147,7 +149,6 @@ def expire_finding_exclusion_immediately(finding_exclusion_id: str) -> None:
 @app.task
 def check_expiring_findingexclusions():
     expired_finding_exclusions = FindingExclusion.objects.filter(
-        type="white_list",
         status="Accepted",
         expiration_date__lt=timezone.now()
     )
@@ -163,10 +164,11 @@ def add_findings_to_whitelist(unique_id_from_tool, relative_url):
         active=True
     ).filter(tag_filter)
     
-    finding_exclusion_url = get_full_url(relative_url)
-    system_user = get_user(settings.SYSTEM_USER)
-    message = f"Finding added to white list, for more details check the finding exclusion request: {finding_exclusion_url}"
-    note = get_note(system_user, message)
+    if findings_to_update.exists():
+        finding_exclusion_url = get_full_url(relative_url)
+        system_user = get_user(settings.SYSTEM_USER)
+        message = f"Finding added to white list, for more details check the finding exclusion request: {finding_exclusion_url}"
+        note = get_note(system_user, message)
     
     for finding in findings_to_update:
         if 'white_list' not in finding.tags:
@@ -202,7 +204,31 @@ def check_new_findings_to_whitelist():
     Finding.objects.bulk_update(findings_to_whitelist, ["active", "risk_status"], 1000)
     logger.info(f"{findings_to_whitelist.count()} findings added to whitelist.")
     
+
+@app.task
+def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
+    findings_to_update = Finding.objects.filter(
+        cve=unique_id_from_tool,
+        active=True
+    ).filter(blacklist_tag_filter)
     
+    if findings_to_update.exists():
+        finding_exclusion_url = get_full_url(relative_url)
+        system_user = get_user(settings.SYSTEM_USER)
+        message = f"Finding added to blacklist, for more details check the finding exclusion request: {finding_exclusion_url}"
+        note = get_note(system_user, message)
+    
+    for finding in findings_to_update:
+        if 'black_list' not in finding.tags:
+            finding.tags.add("black_list")
+        finding.notes.add(note)
+        finding.risk_status = "On Blacklist"
+        finding.priority = priority
+        
+    Finding.objects.bulk_update(findings_to_update, ["risk_status"], 1000)
+    logger.info(f"{findings_to_update.count()} findings added to blacklist.")
+
+
 def get_resource_type(finding) -> str:
     contains_host = any('hosts' in tag.name for tag in finding.tags.all())
     contains_ecr = any('images' in tag.name for tag in finding.tags.all())
@@ -308,13 +334,8 @@ def identify_critical_vulnerabilities(findings) -> int:
     for finding in findings:
         priority = calculate_vulnerability_priority(finding)
         
-        finding.priority = priority
-        
         if priority > 90:
-            finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve)
-            finding.risk_status = "On Blacklist"
-            if 'black_list' not in finding.tags:
-                finding.tags.add("black_list")
+            finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list")
             
             if not finding_exclusion.exists():
                 new_finding_exclusion = FindingExclusion(
@@ -330,6 +351,13 @@ def identify_critical_vulnerabilities(findings) -> int:
                     created_by=None
                 )
                 finding_exclusion_list.append(new_finding_exclusion)
+                relative_url = reverse("finding_exclusion", args=[str(new_finding_exclusion.pk)])
+                add_findings_to_blacklist(new_finding_exclusion.unique_id_from_tool, relative_url, priority)
+            else:
+                fx = finding_exclusion.first()
+                relative_url = reverse("finding_exclusion", args=[str(fx.pk)])
+                add_findings_to_blacklist(fx.unique_id_from_tool, relative_url, priority)
+                
         finding_list.append(finding)
     
     Finding.objects.bulk_update(finding_list, ["priority", "risk_status"])     
@@ -342,9 +370,12 @@ def identify_critical_vulnerabilities(findings) -> int:
 def check_priorization():
     # Get all vulnerabilities
     
-    all_vulnerabilities = Finding.objects.filter(
-        active=True,
-    ).filter(blacklist_tag_filter).prefetch_related("tags")
+    all_vulnerabilities = (
+        Finding.objects.filter(active=True)
+        .filter(blacklist_tag_filter)
+        .order_by("cve")
+        .distinct("cve")
+    )
     
     # Identify critical vulnerabilities
     blacklist_new_items = identify_critical_vulnerabilities(all_vulnerabilities)
@@ -352,25 +383,3 @@ def check_priorization():
     return {
         "message": f"{blacklist_new_items} added to blacklist"
     }
-
-
-@app.task
-def add_findings_to_blacklist(unique_id_from_tool, relative_url):
-    findings_to_update = Finding.objects.filter(
-        cve=unique_id_from_tool,
-        active=True
-    ).filter(blacklist_tag_filter)
-    
-    finding_exclusion_url = get_full_url(relative_url)
-    system_user = get_user(settings.SYSTEM_USER)
-    message = f"Finding added to blacklist, for more details check the finding exclusion request: {finding_exclusion_url}"
-    note = get_note(system_user, message)
-    
-    for finding in findings_to_update:
-        if 'black_list' not in finding.tags:
-            finding.tags.add("black_list")
-        finding.notes.add(note)
-        finding.risk_status = "On Blacklist"
-        
-    Finding.objects.bulk_update(findings_to_update, ["risk_status"], 1000)
-    logger.info(f"{findings_to_update.count()} findings added to blacklist.")

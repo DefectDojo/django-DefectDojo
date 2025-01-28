@@ -89,12 +89,12 @@ def create_finding_exclusion(request: HttpRequest) -> HttpResponse:
             if list_type == "black_list":
                 if not is_in_group(request.user, Constants.REVIEWERS_MAINTAINER_GROUP.value):
                     raise PermissionDenied
-                finding_exclusion.status = "Accepted"
-                finding_exclusion.final_status = "Accepted"
-                finding_exclusion.accepted_at = timezone.now()
-                finding_exclusion.accepted_by = request.user
-                finding_exclusion.status_updated_at = timezone.now()
-                finding_exclusion.status_updated_by = request.user
+                exclusion.status = "Accepted"
+                exclusion.final_status = "Accepted"
+                exclusion.accepted_at = timezone.now()
+                exclusion.accepted_by = request.user
+                exclusion.status_updated_at = timezone.now()
+                exclusion.status_updated_by = request.user
                 
                 relative_url = reverse("finding_exclusion", args=[str(exclusion.pk)])
                 add_findings_to_blacklist.apply_async(args=(exclusion.unique_id_from_tool, relative_url,))
