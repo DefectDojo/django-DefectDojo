@@ -579,8 +579,8 @@ SCHEMA_DB = env('DD_SCHEMA_DB')
 # ------------------------------------------------------------------------------
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db
-if os.getenv("DD_USE_SECRETS_MANAGER") == "false":
-    secret_database = ""#get_secret(env("DD_SECRET_DATABASE"))
+if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
+    secret_database = get_secret(env("DD_SECRET_DATABASE"))
     DATABASES = {
         "default": {
             "ENGINE": env("DD_DATABASE_ENGINE"),
@@ -818,7 +818,7 @@ AZURE_DEVOPS_PERMISSION_AUTO_IMPORT = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_PERMISSIO
 AZURE_DEVOPS_ORGANIZATION_URL = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_ORGANIZATION_URL")
 AZURE_DEVOPS_TOKEN = (
     get_secret(env("DD_SECRET_AZURE_DEVOPS_TOKEN"))["token"]
-    if os.getenv("DD_USE_SECRETS_MANAGER") == None
+    if os.getenv("DD_USE_SECRETS_MANAGER") == "true"
     else env("DD_SOCIAL_AUTH_AZURE_DEVOPS_TOKEN")
 )
 AZURE_DEVOPS_MAIN_SECURITY_GROUP = env("DD_SOCIAL_AUTH_AZURE_DEVOPS_MAIN_SECURITY_GROUP")
