@@ -41,8 +41,11 @@ class AnchoreCTLVulnsParser:
             if sev in ["Negligible", "Unknown"]:
                 sev = "Info"
 
+
             mitigation = f"Upgrade to {vuln.get('fix', vuln.get('fixAvailable', 'No fix available'))}\n"
             mitigation += f"URL: {vuln.get('url', vuln.get('link', 'N/A'))}\n"
+
+            
 
             cvss_base_score = None
             if vuln.get("feed") in ["nvdv2", "vulnerabilities"]:

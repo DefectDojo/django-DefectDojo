@@ -414,7 +414,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # this is left as is for simplicity.
             # Re-writing the legacy deduplication here would be complicated and counter-productive.
             # If you have use cases going through this section, you're advised to create a deduplication configuration for your parser
-            logger.debug("Legacy reimport. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
+            logger.warning("Legacy reimport. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
             return Finding.objects.filter(
                     title=unsaved_finding.title,
                     test=self.test,
@@ -737,7 +737,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         Determine how to to return the results based on whether the process was
         ran asynchronous or not
         """
-        if not kwargs.get("sync", False):
+        if not kwargs.get("sync"):
             serialized_new_items = [
                 serialize("json", [finding]) for finding in self.new_items
             ]

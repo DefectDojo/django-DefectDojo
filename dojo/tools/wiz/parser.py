@@ -7,6 +7,7 @@ import sys
 from dateutil import parser as date_parser
 
 from dojo.models import SEVERITIES, Finding, Test
+from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
 
 logger = logging.getLogger(__name__)
 
@@ -51,27 +52,28 @@ class WizParserByTitle:
         ]
         # Iterate over the objects to create findings
         for row in reader:
-            if row.get("Status").lower() == "open":
-                title = row.get("Title")
-                severity = row.get("Severity")
-                mitigation = row.get("Remediation Recommendation")
-                description = ""
-                # Iterate over the description fields to create the description
-                for field in description_fields:
-                    if (field_value := row.get(field)) is not None and len(field_value) > 0:
-                        description += f"**{field}**: {field_value}\n"
-                # Create the finding object
-                findings.append(
-                    Finding(
-                        title=title,
-                        description=description,
-                        severity=severity.lower().capitalize(),
-                        static_finding=False,
-                        dynamic_finding=True,
-                        mitigation=mitigation,
-                        test=test,
-                    ),
-                )
+            title = row.get("Title")
+            severity = row.get("Severity")
+            mitigation = row.get("Remediation Recommendation")
+            description = ""
+            status_dict = WizcliParsers.convert_status(row.get("Status", None))
+            # Iterate over the description fields to create the description
+            for field in description_fields:
+                if (field_value := row.get(field)) is not None and len(field_value) > 0:
+                    description += f"**{field}**: {field_value}\n"
+            # Create the finding object
+            findings.append(
+                Finding(
+                    title=title,
+                    description=description,
+                    severity=severity.lower().capitalize(),
+                    static_finding=False,
+                    dynamic_finding=True,
+                    mitigation=mitigation,
+                    test=test,
+                    **status_dict,
+                ),
+            )
         return findings
 
 
@@ -126,7 +128,7 @@ class WizParserByDetailedName:
 
             description = self._construct_string_field(description_fields, row)
             mitigation = self._construct_string_field(mitigation_fields, row)
-            status_dict = self._convert_status(row)
+            status_dict = WizcliParsers.convert_status(row.get("FindingStatus", None))
             # Create the finding object
             finding = Finding(
                 title=f"{package_name}: {vulnerability_id}",
@@ -156,7 +158,7 @@ class WizParserByDetailedName:
 
     def _parse_tags(self, tags: str) -> list[str]:
         """
-        parse the Tag string dict, and convert to a list of strings.
+        Parse the Tag string dict, and convert to a list of strings.
 
         The format of the tags is is "{""key"":""value""}" format
         """
@@ -171,19 +173,6 @@ class WizParserByDetailedName:
             # Default to Info severity
             return "Info"
         return severity
-
-    def _convert_status(self, row: dict) -> dict:
-        """
-        Convert the "FindingStatus" column to a dict of Finding statuses.
-
-        - Open-> Active = True
-        - Other statuses that may exist...
-        """
-        if (status := row.get("FindingStatus")) is not None:
-            if status == "Open":
-                return {"active": True}
-        # Return the default status of active
-        return {"active": True}
 
 
 class WizParser(

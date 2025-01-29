@@ -35,7 +35,9 @@
                             type="button"
                             id="dropdownMenu1"
                             data-toggle="dropdown"
-                            aria-expanded="true">
+                            aria-expanded="true"
+                            aria-label="Test options"        
+                            >
                         <span class="fa-solid fa-bars"></span>
                         <span class="caret"></span>
                     </button>
@@ -208,6 +210,7 @@
                         </i>
                         <div class="dropdown pull-right">
                             <button id="show-filters"
+                                    aria-label="Filters"
                                     data-toggle="collapse"
                                     data-target="#import-history-filters"
                                     class="btn btn-primary toggle-filters">
@@ -518,6 +521,7 @@
                     <div id="test-pulldown" class="dropdown pull-right">
                         &nbsp;
                         <button id="show-filters"
+                                aria-label="Filters"
                                 data-toggle="collapse"
                                 data-target="#the-filters"
                                 class="btn btn-primary toggle-filters">
@@ -528,7 +532,8 @@
                                     type="button"
                                     id="dropdownMenu_test_add"
                                     data-toggle="dropdown"
-                                    aria-expanded="true">
+                                    aria-expanded="true"
+                                    aria-label="Add finding">
                                 <span class="fa-solid fa-plus"></span>
                                 <span class="caret"></span>
                             </button>
@@ -554,7 +559,8 @@
                                 type="button"
                                 id="dropdownMenu1"
                                 data-toggle="dropdown"
-                                aria-expanded="true">
+                                aria-expanded="true"
+                                aria-label="Report options">
                             <span class="fa-solid fa-download"></span>
                             <span class="caret"></span>
                         </button>
@@ -848,6 +854,12 @@
                                 {{ bulk_edit_form.media.css }}
                                 {{ bulk_edit_form.media.js }}
                                 {{ bulk_edit_form.tags }}
+                                {% if bulk_edit_form.disclaimer %}
+                                    <div style="background-color:#DADCE2; border:1px #003333; padding:.3em; margin:.1em; ">
+                                        <div style="color:#ff0000;">Disclaimer</div>
+                                        <div>{{ bulk_edit_form.disclaimer }}</div>
+                                    </div>
+                                {% endif %}
                                 <input type="submit"
                                     class="btn btn-sm btn-secondary"
                                     value="Submit"

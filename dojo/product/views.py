@@ -546,7 +546,7 @@ def view_product_metrics(request, pid):
     end_date = filters["end_date"]
 
     r = relativedelta(end_date, start_date)
-    weeks_between = int(ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7)))
+    weeks_between = ceil((((r.years * 12) + r.months) * 4.33) + (r.days / 7))
     if weeks_between <= 0:
         weeks_between += 2
 
@@ -598,7 +598,7 @@ def view_product_metrics(request, pid):
         unix_timestamp = (tcalendar.timegm(date.timetuple()) * 1000)
 
         # Open findings
-        if open_findings_dict.get(finding.get("id", None), None):
+        if open_findings_dict.get(finding.get("id", None)):
             if unix_timestamp not in critical_weekly:
                 critical_weekly[unix_timestamp] = {"count": 0, "week": html_date}
             if unix_timestamp not in high_weekly:
@@ -651,7 +651,7 @@ def view_product_metrics(request, pid):
                 open_objs_by_severity[finding.get("severity")] += 1
 
         # Close findings
-        elif closed_findings_dict.get(finding.get("id", None), None):
+        elif closed_findings_dict.get(finding.get("id", None)):
             if unix_timestamp in open_close_weekly:
                 open_close_weekly[unix_timestamp]["closed"] += 1
             else:
@@ -662,7 +662,7 @@ def view_product_metrics(request, pid):
                 closed_objs_by_severity[finding.get("severity")] += 1
 
         # Risk Accepted findings
-        if accepted_findings_dict.get(finding.get("id", None), None):
+        if accepted_findings_dict.get(finding.get("id", None)):
             if unix_timestamp in open_close_weekly:
                 open_close_weekly[unix_timestamp]["accepted"] += 1
             else:
