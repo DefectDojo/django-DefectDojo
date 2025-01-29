@@ -541,9 +541,9 @@ Usage of Universal Importer is similar to DefectDojo-CLI, however Universal Impo
 
 ### Commands
 
-- [`import`](./#import)       Imports findings into DefectDojo.
-- [`reimport`](./#reimport)     Reimports findings into DefectDojo.
-- [`interactive`](./#interactive)   Starts an interactive mode to configure the import and reimport process, step by 
+- [`import`](./#import-1)       Imports findings into DefectDojo.
+- [`reimport`](./#reimport-1)     Reimports findings into DefectDojo.
+- [`interactive`](./#interactive-1)   Starts an interactive mode to configure the import and reimport process, step by 
 
 ### Global Options
 
