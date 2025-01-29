@@ -481,7 +481,10 @@ env = environ.FileAwareEnv(
     DD_PRIORIZATION_FIELD_WEIGHTS=(dict, {}),
     
     # Twistlock
-    DD_TWISTLOCK_API_URL=(str, "")
+    DD_TWISTLOCK_API_URL=(str, ""),
+    
+    # Priorization
+    DD_CELERY_CRON_CHECK_PRIORIZATION=(str, ""),
 )
 
 
@@ -1456,6 +1459,7 @@ CELERY_CRON_SCHEDULE = env("DD_CELERY_CRON_SCHEDULE")
 CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY = env("DD_CELERY_CRON_SCHEDULE_EXPIRE_PERMISSION_KEY")
 CELERY_EXPIRING_FINDINGEXCLUSION_DAYS = env("DD_CHECK_EXPIRING_FINDINGEXCLUSION_DAYS")
 CELERY_NEW_FINDINGS_TO_WHITELIST_DAYS = env("DD_CHECK_NEW_FINDINGS_TO_WHITELIST_DAYS")
+CELERY_CRON_CHECK_PRIORIZATION = env("DD_CELERY_CRON_CHECK_PRIORIZATION")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
@@ -1519,6 +1523,15 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
 
+    },
+    "check_finding_priorization": {
+        "task": "dojo.engine_tools.helpers.check_priorization",
+        "schedule": crontab(
+            minute=CELERY_CRON_CHECK_PRIORIZATION.split()[0],
+            hour=CELERY_CRON_CHECK_PRIORIZATION.split()[1],
+            day_of_month=CELERY_CRON_CHECK_PRIORIZATION.split()[2],
+            month_of_year=CELERY_CRON_CHECK_PRIORIZATION.split()[3],    
+        )
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
