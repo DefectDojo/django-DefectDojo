@@ -182,6 +182,9 @@ def user_has_exclusive_permission_product_or_404(
         user: Dojo_User,
         obj: object,
         permission: Permissions) -> bool:
+    
+    if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+        return True
 
     if user is None:
         user = crum.get_current_user()
