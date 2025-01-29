@@ -7,6 +7,14 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
 
+## Jan 21, 2025: v2.42.2
+
+- **(Classic UI)** Corrected link to Smart Upload form.
+- **(CLI Tools)** Fixed issue with .exe extensions not getting added to Windows binaries
+- **(Findings)** `Mitigated` filter now uses datetime instead of date for filtering.
+- **(OAuth)** Clarified Azure AD labels to better align with Azure's language.  Default value for Azure Resource is now set. <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
+- **(RBAC)** Request Review now applies RBAC properly with regard to User Groups.
+
 ## Jan 13, 2025: v2.42.1
 
 - **(API)** Pro users can now specify the fields they want to return in a given API payload.  For example, this request will only return the title, severity and description fields for each Finding.  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
@@ -15,6 +23,10 @@ curl -X 'GET' \
   'https://localhost/api/v2/findings/?response_fields=title,severity,description' \
   -H 'accept: application/json'
 ```
+- **(Findings)** Excel and CSV exports now include tags.
+- **(Reports)** Reports now exclude unenforced SLAs from Executive Summary to avoid confusion.
+- **(Risk Acceptance)** Simple Risk Acceptances now have a 'paper trail' created - when they are added or removed, a note will be added to the Finding to log the action.
+- **(Tools)** ImageTags are now included with AWS SecurityHub and AWS inspector parsers.
 
 ## Jan 6, 2025: v2.42.0
 
