@@ -1278,7 +1278,7 @@ div.custom-search-form {
 }
 
 .dojo-filter-set.form-inline .filter-form-control {
-    width: auto!important;
+    width: 100%!important;
     vertical-align: middle;
 }
 
