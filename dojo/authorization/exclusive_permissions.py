@@ -131,6 +131,16 @@ def user_has_exclusive_permission(
         user: Dojo_User,
         obj: Union[Product_Type, Product],
         permission: Permissions) -> bool:
+    
+    try:
+        exclusive_permission = ExclusivePermission.objects.get(
+            name="Product_Tag_Red_Team")
+    except ExclusivePermission.DoesNotExist:
+        logger.error("Product_Tag_Red_Team does not exist")
+        raise ApiError.not_found("Product_Tag_Red_Team does not exist")
+    
+    if exclusive_permission.is_active() is False:
+        return True
         
     if user is None:
         user = crum.get_current_user()
@@ -168,6 +178,16 @@ def user_has_exclusive_permission_product_or_404(
 
     if user is None:
         user = crum.get_current_user()
+    
+    try:
+        exclusive_permission = ExclusivePermission.objects.get(
+            name="Product_Tag_Red_Team")
+    except ExclusivePermission.DoesNotExist:
+        logger.error("Product_Tag_Red_Team does not exist")
+        raise ApiError.not_found("Product_Tag_Red_Team does not exist")
+    
+    if exclusive_permission.is_active() is False:
+        return True
 
     member = get_product_type_member(user, obj)
 
@@ -185,6 +205,7 @@ def user_has_exclusive_permission_product_or_404(
         user=user,
         obj=obj,
         permission=permission)
+
 
 def exclude_tags(objs, tags):
     return objs.exclude(tags__name__in=tags)

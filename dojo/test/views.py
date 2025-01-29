@@ -5,6 +5,7 @@ import operator
 from datetime import datetime
 from functools import reduce
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import ValidationError
@@ -149,7 +150,8 @@ class ViewTest(View):
 
     def get_findings(self, request: HttpRequest, test: Test):
         findings = Finding.objects.filter(test=test).order_by("numerical_severity")
-        findings = exclude_test_or_finding_with_tag(findings, product=None, user=request.user)
+        if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+            findings = exclude_test_or_finding_with_tag(findings, product=None, user=request.user)
         filter_string_matching = get_system_setting("filter_string_matching", False)
         finding_filter_class = FindingFilterWithoutObjectLookups if filter_string_matching else FindingFilter
         findings = finding_filter_class(request.GET, queryset=findings)
