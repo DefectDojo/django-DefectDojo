@@ -463,7 +463,7 @@ env = environ.FileAwareEnv(
         "technical_contact",
         "team_manager",
         ]),
-    DD_ENABLE_FILTER_FOR_TAG_RED_TEAM=(bool, True),
+    DD_ENABLE_FILTER_FOR_TAG_RED_TEAM=(bool, False),
     # Reviewer and approver groups
     DD_REVIEWER_GROUP_NAMES=(str, ""),
     DD_APPROVER_GROUP_NAMES=(str, ""),
