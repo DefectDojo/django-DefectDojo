@@ -1,5 +1,4 @@
 import json
-
 from dojo.models import Finding
 
 
@@ -16,91 +15,88 @@ class AnchoreCTLVulnsParser:
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
-        for item in data:
-            vulnerability_id = item.get("vuln")
+        
+        # Check if the JSON structure contains 'metadata' and 'securityEvaluation' (new structure)
+        if "metadata" in data and "securityEvaluation" in data:
+            # New JSON structure
+            metadata = data.get("metadata", {})
+            image_digest = metadata.get("imageDigest", "None")
+            vulnerabilities = data.get("securityEvaluation", [])
+        else:
+            # Original JSON structure (assumed)
+            image_digest = "None"  # Default value
+            vulnerabilities = data  # Assuming it's a list of vulnerabilities directly
 
-            title = (
-                item["vuln"]
-                + " - "
-                + item["package"]
-                + "("
-                + item["packageType"]
-                + ")"
-            )
+        for vuln in vulnerabilities:
+            # For the new structure, extract fields from 'securityEvaluation'
+            if "vulnerabilityId" in vuln:
+                vulnerability_id = vuln.get("vulnerabilityId")
+                title = f"{vuln['vulnerabilityId']} - {vuln['package']} ({vuln['packageType']})"
+                findingdetail = f"**Image hash**: {image_digest}\n\n"
+                findingdetail += f"**Package**: {vuln['package']}\n\n"
+                findingdetail += f"**Package path**: {vuln['path']}\n\n"
+                findingdetail += f"**Package type**: {vuln['packageType']}\n\n"
+                findingdetail += f"**Detected at**: {vuln['detectedAt']}\n\n"
+                findingdetail += f"**Feed**: N/A\n\n"  # Placeholder, adjust as needed
+                findingdetail += f"**CPE**: N/A\n\n"  # Placeholder, adjust as needed
+                findingdetail += f"**Description**: {vuln.get('description', '<None>')}\n\n"
 
-            # Finding details information
-            # depending on version image_digest/imageDigest
-            findingdetail = (
-                "**Image hash**: " + item.get("imageDigest", "None") + "\n\n"
-            )
-            findingdetail += "**Package**: " + item["package"] + "\n\n"
-            findingdetail += (
-                "**Package path**: " + item["packagePath"] + "\n\n"
-            )
-            findingdetail += (
-                "**Package type**: " + item["packageType"] + "\n\n"
-            )
-            findingdetail += (
-                "**Feed**: " + item["feed"] + "/" + item["feedGroup"] + "\n\n"
-            )
-            findingdetail += "**CPE**: " + item["packageCpe"] + "\n\n"
-            findingdetail += (
-                "**Description**: "
-                + item.get("description", "<None>")
-                + "\n\n"
-            )
+                sev = vuln["severity"]
+                if sev == "Negligible" or sev == "Unknown":
+                    sev = "Info"
 
-            sev = item["severity"]
-            if sev == "Negligible" or sev == "Unknown":
-                sev = "Info"
+                mitigation = f"Upgrade to {vuln['fixAvailable']}\n"
+                mitigation += f"URL: {vuln['link']}\n"
 
-            mitigation = (
-                "Upgrade to " + item["packageName"] + " " + item["fix"] + "\n"
-            )
-            mitigation += "URL: " + item["url"] + "\n"
+                cvss_base_score = vuln.get("nvdCvssBaseScore", None)
+                references = vuln["link"]
 
-            cvssv3_base_score = None
-            if item["feed"] == "nvdv2" or item["feed"] == "vulnerabilities":
-                if "nvdData" in item and len(item["nvdData"]) > 0:
-                    cvssv3_base_score = item["nvdData"][0]["cvssV3"][
-                        "baseScore"
-                    ]
             else:
-                # there may be other keys, but taking a best guess here
-                if "vendorData" in item and len(item["vendorData"]) > 0:
-                    # sometimes cvssv3 in 1st element will have -1 for "not
-                    # set", but have data in the 2nd array item
-                    if (
-                        "cvssV3" in item["vendorData"][0]
-                        and item["vendorData"][0]["cvssV3"]["baseScore"] != -1
-                    ):
-                        cvssv3_base_score = item["vendorData"][0]["cvssV3"][
-                            "baseScore"
-                        ]
-                    elif len(item["vendorData"]) > 1:
-                        if (
-                            "cvssV3" in item["vendorData"][1]
-                            and item["vendorData"][1]["cvssV3"]["baseScore"]
-                            != -1
-                        ):
-                            cvssv3_base_score = item["vendorData"][1][
-                                "cvssV3"
-                            ]["baseScore"]
+                # Handling the original JSON structure (with 'vuln', 'package', etc.)
+                vulnerability_id = vuln.get("vuln")
+                title = f"{vuln['vuln']} - {vuln['package']} ({vuln['packageType']})"
+                findingdetail = f"**Image hash**: {image_digest}\n\n"
+                findingdetail += f"**Package**: {vuln['package']}\n\n"
+                findingdetail += f"**Package path**: {vuln.get('packagePath', 'N/A')}\n\n"
+                findingdetail += f"**Package type**: {vuln['packageType']}\n\n"
+                findingdetail += f"**Feed**: {vuln.get('feed', 'N/A')}/{vuln.get('feedGroup', 'N/A')}\n\n"
+                findingdetail += f"**CPE**: {vuln.get('packageCpe', 'N/A')}\n\n"
+                findingdetail += f"**Description**: {vuln.get('description', '<None>')}\n\n"
 
-            references = item["url"]
+                sev = vuln["severity"]
+                if sev == "Negligible" or sev == "Unknown":
+                    sev = "Info"
+
+                mitigation = f"Upgrade to {vuln['fix']}\n"
+                mitigation += f"URL: {vuln['url']}\n"
+
+                cvss_base_score = None
+                if vuln["feed"] == "nvdv2" or vuln["feed"] == "vulnerabilities":
+                    if "nvdData" in vuln and len(vuln["nvdData"]) > 0:
+                        cvss_base_score = vuln["nvdData"][0]["cvssV3"]["baseScore"]
+                else:
+                    if "vendorData" in vuln and len(vuln["vendorData"]) > 0:
+                        if (
+                            "cvssV3" in vuln["vendorData"][0]
+                            and vuln["vendorData"][0]["cvssV3"]["baseScore"] != -1
+                        ):
+                            cvss_base_score = vuln["vendorData"][0]["cvssV3"]["baseScore"]
+                        elif len(vuln["vendorData"]) > 1:
+                            if (
+                                "cvssV3" in vuln["vendorData"][1]
+                                and vuln["vendorData"][1]["cvssV3"]["baseScore"] != -1
+                            ):
+                                cvss_base_score = vuln["vendorData"][1]["cvssV3"]["baseScore"]
+
+                references = vuln["url"]
 
             dupe_key = "|".join(
                 [
-                    item.get(
-                        "imageDigest", "None",
-                    ),  # depending on version image_digest/imageDigest
-                    item["feed"],
-                    item["feedGroup"],
-                    item["packageName"],
-                    item["packageVersion"],
-                    item["packagePath"],
-                    item["vuln"],
-                ],
+                    image_digest,
+                    vuln.get("vulnerabilityId", vuln.get("vuln")),
+                    vuln["package"],
+                    vuln.get("path", vuln.get("packagePath")),
+                ]
             )
 
             if dupe_key in dupes:
@@ -111,21 +107,22 @@ class AnchoreCTLVulnsParser:
                 find = Finding(
                     title=title,
                     test=test,
-                    cvssv3_score=cvssv3_base_score,
+                    cvssv3_score=cvss_base_score,
                     description=findingdetail,
                     severity=sev,
                     mitigation=mitigation,
                     references=references,
-                    file_path=item["packagePath"],
-                    component_name=item["packageName"],
-                    component_version=item["packageVersion"],
-                    url=item.get("url"),
+                    file_path=vuln.get("path", vuln.get("packagePath")),
+                    component_name=vuln["package"],
+                    component_version=vuln.get("packageVersion", "Unknown"),
+                    url=vuln.get("url"),
                     static_finding=True,
                     dynamic_finding=False,
-                    vuln_id_from_tool=item.get("vuln"),
+                    vuln_id_from_tool=vuln.get("vulnerabilityId", vuln.get("vuln")),
                 )
                 if vulnerability_id:
                     find.unsaved_vulnerability_ids = [vulnerability_id]
                 dupes[dupe_key] = find
 
         return list(dupes.values())
+
