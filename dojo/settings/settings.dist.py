@@ -643,8 +643,8 @@ if os.getenv("DD_USE_SECRETS_MANAGER") == "true":
     TWISTLOCK_SECRET_KEY = secret_engine_backend["prismaSecretKey"]
 else:
     PROVIDER_TOKEN = env("DD_PROVIDER_TOKEN")
-    TWISTLOCK_ACCESS_KEY = env('DD_TWISTLOCK_ACCESS_KEY')
-    TWISTLOCK_SECRET_KEY = env('DD_TWISTLOCK_SECRET_KEY')
+    TWISTLOCK_ACCESS_KEY = ""
+    TWISTLOCK_SECRET_KEY = ""
     
 TWISTLOCK_API_URL = env('DD_TWISTLOCK_API_URL')
 # Track migrations through source control rather than making migrations locally
