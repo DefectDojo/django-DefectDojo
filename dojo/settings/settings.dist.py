@@ -479,6 +479,9 @@ env = environ.FileAwareEnv(
     # Cybersecurity emails
     DD_PROVIDERS_CYBERSECURITY_EMAIL=(dict, {}),
     DD_PRIORIZATION_FIELD_WEIGHTS=(dict, {}),
+    
+    # Twistlock
+    DD_TWISTLOCK_API_URL=(str, "")
 )
 
 

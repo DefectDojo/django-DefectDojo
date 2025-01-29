@@ -246,7 +246,7 @@ def get_resource_type(finding) -> str:
 
 def get_risk_score(finding) -> int:
     auth = (settings.TWISTLOCK_ACCESS_KEY, settings.TWISTLOCK_SECRET_KEY)
-    api_url = settings.TWISTLOCK_API_URL % f"?cve={finding.cve}"
+    api_url = settings.TWISTLOCK_API_URL + f"?cve={finding.cve}"
     try:
         vulnerabilities_response = requests.get(api_url, auth=auth, stream=True)
         vulnerabilities_response.raise_for_status()
@@ -259,7 +259,7 @@ def get_risk_score(finding) -> int:
         for row in reader:
             if row.get("Impacted resource type") == resource_type:
                 try:
-                    risk_score = int(row.get("Highest risk score"))
+                    risk_score = float(row.get("Highest risk score"))
                     return risk_score if risk_score else 0
                 except Exception:
                     return 0
