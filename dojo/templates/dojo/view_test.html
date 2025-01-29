@@ -277,6 +277,8 @@
                                             {% for action in finding_action_list %}
                                                 {{ action.list|length }} {{ action.grouper }}
                                                 {% if not forloop.last %},{% endif %}
+                                            {% empty %}
+                                                There were no findings created, closed, or modified
                                             {% endfor %}
                                         </a>
                                     </td>
