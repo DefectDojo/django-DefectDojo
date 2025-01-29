@@ -134,9 +134,10 @@ def simple_search(request):
 
             # TODO: better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
 
-            authorized_findings = exclude_test_or_finding_with_tag(authorized_findings)
+            if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+                authorized_findings = exclude_test_or_finding_with_tag(authorized_findings)
+                authorized_tests = exclude_test_or_finding_with_tag(authorized_tests)
             findings = authorized_findings
-            authorized_tests = exclude_test_or_finding_with_tag(authorized_tests)
             tests = authorized_tests
             engagements = authorized_engagements
             products = authorized_products

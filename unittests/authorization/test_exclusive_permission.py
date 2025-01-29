@@ -125,7 +125,6 @@ class TestExclusivePermissions(DojoTestCase):
 
         tests_or_findings = MagicMock()
         tests_or_findings.exclude.return_value = tests_or_findings
-
         result = exclude_test_or_finding_with_tag(tests_or_findings, self.user)
 
         self.assertEqual(result, tests_or_findings)

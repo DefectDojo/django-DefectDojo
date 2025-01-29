@@ -1524,8 +1524,11 @@ class AddFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date")
+        exclude = ("reporter", "url", "numerical_severity",
+                   "under_review", "reviewers", "cve", "inherited_tags",
+                   "review_requested_by", "is_mitigated", "jira_creation",
+                   "jira_change", "endpoints", "sla_start_date",
+                   "component")
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -1601,9 +1604,11 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
-                   "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date",
-                   "sla_expiration_date")
+        exclude = ("reporter", "url", "numerical_severity", "under_review",
+                   "reviewers", "cve", "inherited_tags",
+                   "review_requested_by", "is_mitigated",
+                   "jira_creation", "jira_change", "endpoints",
+                   "sla_start_date", "sla_expiration_date", "component")
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -1658,8 +1663,12 @@ class PromoteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "active", "false_p", "verified", "endpoint_status", "cve", "inherited_tags",
-                   "duplicate", "out_of_scope", "under_review", "reviewers", "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "planned_remediation_date", "planned_remediation_version", "effort_for_fixing")
+        exclude = ("reporter", "url", "numerical_severity", "active",
+                   "false_p", "verified", "endpoint_status", "cve", "inherited_tags",
+                   "duplicate", "out_of_scope", "under_review", "reviewers",
+                   "review_requested_by", "is_mitigated", "jira_creation",
+                   "jira_change", "planned_remediation_date", "planned_remediation_version",
+                   "effort_for_fixing", "component")
 
 
 class FindingForm(forms.ModelForm):

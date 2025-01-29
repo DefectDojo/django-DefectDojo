@@ -447,10 +447,12 @@ class ViewEngagement(View):
         # Make sure the user is authorized
         user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
         tests = eng.test_set.all().order_by('-created')
-        tests = exclude_test_or_finding_with_tag(
-            tests,
-            product=eng.product,
-            user=request.user)
+        if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+            tests = exclude_test_or_finding_with_tag(
+                tests,
+                product=eng.product,
+                user=request.user)
+
         default_page_num = 10
         tests_filter = self.get_filtered_tests(request, tests, eng)
         paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
@@ -1402,11 +1404,11 @@ def add_risk_acceptance_pending(request, eid, fid):
             )
             .order_by("title")
         )
-
-        finding_choices = exclude_test_or_finding_with_tag(
-            finding_choices,
-            product=product,
-            user=request.user)
+        if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+            finding_choices = exclude_test_or_finding_with_tag(
+                finding_choices,
+                product=product,
+                user=request.user)
 
         if finding.impact and finding.impact in settings.COMPLIANCE_FILTER_RISK:
             finding_choices = finding_choices.filter(impact__in=[settings.COMPLIANCE_FILTER_RISK])
@@ -1489,10 +1491,11 @@ def add_risk_acceptance(request, eid, fid=None):
         form = RiskAcceptanceForm(initial={"owner": request.user, "name": risk_acceptance_title_suggestion})
 
     finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by("title")
-    finding_choices = exclude_test_or_finding_with_tag(
-            finding_choices,
-            product=eng.product,
-            user=request.user)
+    if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+        finding_choices = exclude_test_or_finding_with_tag(
+                finding_choices,
+                product=eng.product,
+                user=request.user)
 
     form.fields["accepted_findings"].queryset = finding_choices
     if fid:
@@ -1573,10 +1576,11 @@ def add_transfer_finding(request, eid, fid=None):
                                             "owner": request.user},
                                    product=product)
 
-        form.fields["findings"].queryset = exclude_test_or_finding_with_tag(
-            form.fields["findings"].queryset,
-            product=product,
-            user=request.user)
+        if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+            form.fields["findings"].queryset = exclude_test_or_finding_with_tag(
+                form.fields["findings"].queryset,
+                product=product,
+                user=request.user)
 
         form.fields["findings"].queryset = form.fields["findings"].queryset.filter(
             duplicate=False,
@@ -1789,10 +1793,11 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
     add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
 
-    accepted_findings = exclude_test_or_finding_with_tag(
-        risk_acceptance.accepted_findings,
-        product=product,
-        user=request.user)
+    if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+        accepted_findings = exclude_test_or_finding_with_tag(
+            risk_acceptance.accepted_findings,
+            product=product,
+            user=request.user)
 
     accepted_findings = accepted_findings.order_by("-risk_status")
     fpage = get_page_items(request, accepted_findings, 15)
