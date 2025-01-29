@@ -2796,6 +2796,8 @@ def validate_group_role(request, user, ptid, viewname, role):
 
 
 def user_is_contacts(user, product, contacts_dict=None):
+    if isinstance(product, Finding):
+        product = get_product(product)
     contacts_all = {}
     contacts_all.update(product.get_contacts())
     contacts_all.update(product.prod_type.get_contacts())
