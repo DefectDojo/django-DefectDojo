@@ -23,6 +23,17 @@ from dojo.models import (
 logger = logging.getLogger(__name__)
 
 
+def get_exclusive_permission_object(name):
+    try:
+        exclusive_permission = ExclusivePermission.objects.get(
+            name=name)
+    except ExclusivePermission.DoesNotExist:
+        logger.error(f"{name} does not exist")
+        raise ApiError.not_found(f"{name} does not exist")
+
+    return exclusive_permission
+
+
 def get_exclusive_permission(user: Dojo_User,
                              product: Product) -> list[Permissions]:
     products_members = Product_Member.objects.filter(
@@ -132,12 +143,8 @@ def user_has_exclusive_permission(
         obj: Union[Product_Type, Product],
         permission: Permissions) -> bool:
     
-    try:
-        exclusive_permission = ExclusivePermission.objects.get(
-            name="Product_Tag_Red_Team")
-    except ExclusivePermission.DoesNotExist:
-        logger.error("Product_Tag_Red_Team does not exist")
-        raise ApiError.not_found("Product_Tag_Red_Team does not exist")
+    exclusive_permission = get_exclusive_permission_object(
+        name="Product_Tag_Red_Team")
     
     if exclusive_permission.is_active() is False:
         return True
@@ -179,12 +186,8 @@ def user_has_exclusive_permission_product_or_404(
     if user is None:
         user = crum.get_current_user()
     
-    try:
-        exclusive_permission = ExclusivePermission.objects.get(
-            name="Product_Tag_Red_Team")
-    except ExclusivePermission.DoesNotExist:
-        logger.error("Product_Tag_Red_Team does not exist")
-        raise ApiError.not_found("Product_Tag_Red_Team does not exist")
+    exclusive_permission = get_exclusive_permission_object(
+        name="Product_Tag_Red_Team")
     
     if exclusive_permission.is_active() is False:
         return True
@@ -221,12 +224,8 @@ def exclude_test_or_finding_with_tag(
     if not objs:
         return objs
 
-    try:
-        exclusive_permission = ExclusivePermission.objects.get(
-            name="Product_Tag_Red_Team")
-    except ExclusivePermission.DoesNotExist:
-        logger.error("Product_Tag_Red_Team does not exist")
-        raise ApiError.not_found("Product_Tag_Red_Team does not exist")
+    exclusive_permission = get_exclusive_permission_object(
+        name="Product_Tag_Red_Team")
     
     if exclusive_permission.is_active() is False:
         return objs
