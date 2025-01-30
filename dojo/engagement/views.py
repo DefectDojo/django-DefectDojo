@@ -1793,9 +1793,11 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     replace_form = ReplaceRiskAcceptanceProofForm(instance=risk_acceptance)
     add_findings_form = AddFindingsRiskAcceptanceForm(instance=risk_acceptance)
 
+    accepted_findings = risk_acceptance.accepted_findings
+
     if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
         accepted_findings = exclude_test_or_finding_with_tag(
-            risk_acceptance.accepted_findings,
+            accepted_findings,
             product=product,
             user=request.user)
 
