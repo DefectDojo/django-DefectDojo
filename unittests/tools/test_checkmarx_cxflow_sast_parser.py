@@ -2,7 +2,7 @@ import dateutil.parser
 
 from dojo.models import Engagement, Product, Test
 from dojo.tools.checkmarx_cxflow_sast.parser import CheckmarxCXFlowSastParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
 class TestCheckmarxCxflowSast(DojoTestCase):
@@ -18,7 +18,7 @@ class TestCheckmarxCxflowSast(DojoTestCase):
 
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(self):
         my_file_handle, _, _, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/no_finding.json",
+            get_unit_tests_scans_path("checkmarx_cxflow_sast") / "no_finding.json",
         )
         parser = CheckmarxCXFlowSastParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -26,7 +26,7 @@ class TestCheckmarxCxflowSast(DojoTestCase):
 
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_1_finding(self):
         my_file_handle, _, _, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/1-finding.json",
+            get_unit_tests_scans_path("checkmarx_cxflow_sast") / "1-finding.json",
         )
         parser = CheckmarxCXFlowSastParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -55,7 +55,7 @@ class TestCheckmarxCxflowSast(DojoTestCase):
 
     def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_4_findings(self):
         my_file_handle, _, _, test = self.init(
-            get_unit_tests_path() + "/scans/checkmarx_cxflow_sast/4-findings.json",
+            get_unit_tests_scans_path("checkmarx_cxflow_sast") / "4-findings.json",
         )
         parser = CheckmarxCXFlowSastParser()
         findings = parser.get_findings(my_file_handle, test)
