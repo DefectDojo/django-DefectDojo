@@ -15,7 +15,7 @@ usage() {
   echo
   echo
   echo "Example command:"
-  echo './dc-unittest.sh --test-case "Finding integration tests"'
+  echo './run-unittest.sh --test-case "Finding integration tests"'
 }
 
 while [[ $# -gt 0 ]]; do
@@ -49,10 +49,10 @@ echo "Running docker compose unit tests with profile postgres-redis and test cas
 # a space, using docker compose, instead of docker-compose.
 echo "Building images..."
 ./docker/setEnv.sh integration_tests
-./dc-build.sh
+docker compose build
 echo "Setting up DefectDojo with Postgres and Redis..."
-DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
 echo "Initializing DefectDojo..."
-DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --no-deps --exit-code-from initializer initializer
+DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --exit-code-from initializer initializer
 echo "Running the integration tests..."
-DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --no-deps --exit-code-from integration-tests integration-tests
+DD_INTEGRATION_TEST_FILENAME="$TEST_CASE" docker compose --exit-code-from integration-tests integration-tests
