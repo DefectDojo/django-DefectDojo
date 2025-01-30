@@ -2,7 +2,6 @@ import base64
 import copy
 import hashlib
 import logging
-import os
 import re
 import warnings
 from contextlib import suppress
@@ -150,7 +149,7 @@ class UniqueUploadNameProvider:
             filename += ext
         if self.directory is None:
             return filename
-        return os.path.join(now().strftime(self.directory), filename)
+        return Path(now().strftime(self.directory)) / filename
 
 
 class Regulation(models.Model):
