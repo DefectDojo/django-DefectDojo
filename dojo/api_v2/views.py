@@ -962,7 +962,7 @@ class FindingViewSet(
             "test__engagement__product__prod_type",
         )
         if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
-            findings = findings.exclude(tags__name="redteam")
+            findings = exclude_test_or_finding_with_tag(findings)
         return findings.distinct()
 
     def get_serializer_class(self):
