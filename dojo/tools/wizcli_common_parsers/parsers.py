@@ -176,3 +176,23 @@ class WizcliParsers:
                     )
                     findings.append(finding)
         return findings
+
+    @staticmethod
+    def convert_status(wiz_status) -> dict:
+        """
+        Convert the Wiz Status to a dict of Finding status flags.
+
+        - Open-> Active = True
+        - Other statuses that may exist...
+        """
+        if (status := wiz_status) is not None:
+            if status.upper() == "OPEN":
+                return {"active": True}
+            if status.upper() == "RESOLVED":
+                return {"active": False, "is_mitigated": True}
+            if status.upper() == "IGNORED":
+                return {"active": False, "out_of_scope": True}
+            if status.upper() == "IN_PROGRESS":
+                return {"active": True}
+        # Return the default status of active
+        return {"active": True}
