@@ -85,3 +85,4 @@ class OSVScannerParser:
                         finding.unsaved_vulnerability_ids.append(vulnerabilityid)
                     findings.append(finding)
         return findings
+        
