@@ -15,20 +15,15 @@ class AnchoreCTLVulnsParser:
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
-        
-        # Check JSON structure
-        if "metadata" in data and "securityEvaluation" in data:
-            metadata = data.get("metadata", {})
-            image_digest = metadata.get("imageDigest", "None")
-            vulnerabilities = data.get("securityEvaluation", [])
-        else:
-            image_digest = "None"
-            vulnerabilities = data
+
+        metadata = data.get("metadata", {})
+        image_digest = metadata.get("imageDigest", "None")
+        vulnerabilities = data.get("securityEvaluation", data)
 
         for vuln in vulnerabilities:
             vulnerability_id = vuln.get("vulnerabilityId", vuln.get("vuln"))
             title = f"{vulnerability_id} - {vuln['package']} ({vuln['packageType']})"
-            
+
             findingdetail = f"**Image hash**: {image_digest}\n\n"
             findingdetail += f"**Package**: {vuln['package']}\n\n"
             findingdetail += f"**Package path**: {vuln.get('path', vuln.get('packagePath', 'N/A'))}\n\n"
@@ -41,22 +36,18 @@ class AnchoreCTLVulnsParser:
             if sev in ["Negligible", "Unknown"]:
                 sev = "Info"
 
-
             mitigation = f"Upgrade to {vuln.get('fix', vuln.get('fixAvailable', 'No fix available'))}\n"
             mitigation += f"URL: {vuln.get('url', vuln.get('link', 'N/A'))}\n"
 
-            
-
             cvss_base_score = None
             if vuln.get("feed") in ["nvdv2", "vulnerabilities"]:
-                if "nvdData" in vuln and vuln["nvdData"]:
+                if vuln.get("nvdData"):
                     cvss_base_score = vuln["nvdData"][0].get("cvssV3", {}).get("baseScore")
             else:
-                if "vendorData" in vuln and vuln["vendorData"]:
-                    for vendor in vuln["vendorData"]:
-                        if "cvssV3" in vendor and vendor["cvssV3"].get("baseScore") != -1:
-                            cvss_base_score = vendor["cvssV3"]["baseScore"]
-                            break
+                for vendor in vuln.get("vendorData", []):
+                    if vendor.get("cvssV3", {}).get("baseScore", -1) != -1:
+                        cvss_base_score = vendor["cvssV3"]["baseScore"]
+                        break
 
             references = vuln.get("url", vuln.get("link", "N/A"))
 
