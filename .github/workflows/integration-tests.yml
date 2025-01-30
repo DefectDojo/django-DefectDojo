@@ -63,21 +63,21 @@ jobs:
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
       - name: Start Dojo 
-        run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
+        run: docker compose up -d postgres nginx celerybeat celeryworker mailhog uwsgi redis
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           NGINX_VERSION: ${{ matrix.os }}
 
       - name: Initialize
         timeout-minutes: 10
-        run: docker compose up --no-deps --exit-code-from initializer initializer
+        run: docker compose up --exit-code-from initializer initializer
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           NGINX_VERSION: ${{ matrix.os }}
 
       - name: Integration tests
         timeout-minutes: 10
-        run: docker compose up --no-deps --exit-code-from integration-tests integration-tests
+        run: docker compose up --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
           INTEGRATION_TESTS_VERSION: debian

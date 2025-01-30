@@ -44,7 +44,7 @@ jobs:
       # no celery or initializer needed for unit tests
       - name: Unit tests
         timeout-minutes: 10
-        run: docker compose up --no-deps --exit-code-from uwsgi uwsgi
+        run: docker compose up --exit-code-from uwsgi uwsgi
         env:
           DJANGO_VERSION: ${{ matrix.os }}
 

@@ -295,7 +295,7 @@ $ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.<your
 or like this:
 
 {{< highlight bash >}}
-$ ./dc-unittest.sh --test-case unittests.tools.<your_unittest_py_file>.<main_class_name>
+$ ./run-unittest.sh --test-case unittests.tools.<your_unittest_py_file>.<main_class_name>
 {{< /highlight >}}
 
 Example for the blackduck hub parser:
@@ -307,7 +307,7 @@ $ docker compose exec uwsgi bash -c 'python manage.py test unittests.tools.test_
 or like this:
 
 {{< highlight bash >}}
-$ ./dc-unittest.sh --test-case unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser
+$ ./run-unittest.sh --test-case unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser
 {{< /highlight >}}
 
 If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test unittests -v2'`
