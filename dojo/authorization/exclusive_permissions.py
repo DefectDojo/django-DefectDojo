@@ -223,8 +223,7 @@ def exclude_test_or_finding_with_tag(
         user=None):
 
     exclusive_permission = None
-
-    if not objs:
+    if not objs.exists():
         return objs
 
     exclusive_permission = get_exclusive_permission_object(
