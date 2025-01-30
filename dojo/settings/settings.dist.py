@@ -1147,6 +1147,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "dojo.notifications.helper.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
     },
+    "trigger_evaluate_pro_proposition": {
+        "task": "dojo.tasks.evaluate_pro_proposition",
+        "schedule": timedelta(hours=8),
+    },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
     #     'schedule': timedelta(hours=12),

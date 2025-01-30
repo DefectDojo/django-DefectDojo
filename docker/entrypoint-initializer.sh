@@ -16,7 +16,7 @@ initialize_data()
     python3 manage.py initialize_permissions
 }
 
-create_announcement_banner() 
+create_announcement_banner()
 {
 # Load the announcement banner
 if [ -z "$DD_CREATE_CLOUD_BANNER" ]; then
@@ -103,8 +103,26 @@ then
   exit 47
 fi
 
-echo "Making migrations"
-python3 manage.py makemigrations dojo
+
+python3 manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
+    cat <<-EOF
+
+********************************************************************************
+
+You made changes to the models without creating a DB migration for them.
+
+**NEVER** change existing migrations, create a new one.
+
+If you're not familiar with migrations in Django, please read the
+great documentation thoroughly:
+https://docs.djangoproject.com/en/5.0/topics/migrations/
+
+********************************************************************************
+
+EOF
+    exit 1
+}
+
 echo "Migrating"
 python3 manage.py migrate
 
@@ -139,7 +157,7 @@ fi
 if [ -z "${ADMIN_EXISTS}" ]
 then
   . /entrypoint-first-boot.sh
-    
+
   create_announcement_banner
   initialize_data
 fi
