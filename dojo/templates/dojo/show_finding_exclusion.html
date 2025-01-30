@@ -170,6 +170,7 @@
                     {% block header_head %}
                         <th>ID</th>
                         <th>Vulnerability unique ID</th>
+                        <th>Type</th>
                         <th>Status</th>
                         <th>Created by</th>
                         <th>Created at</th>
@@ -180,6 +181,7 @@
                     {% block header_body %}
                         <td>{{ finding_exclusion.uuid }}</td>
                         <td>{{ finding_exclusion.unique_id_from_tool }}</td>
+                        <td>{{ finding_exclusion.type }}</td>
                         <td>
                             {% if finding_exclusion.status in "Pending,Accepted,Rejected,Reviewed,Expired" %}
                                 <span style="background-color: 
@@ -256,13 +258,17 @@
                                     {% if finding_exclusion.final_status %}
                                         {% if finding_exclusion.final_status == 'Accepted' %}
                                             <pre class="text-success"><strong>Approved</strong></pre>
+                                            <br>
+                                            <pre>{{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}</pre>
+                                            <br>
+                                            <pre><strong>By:</strong> {{ finding_exclusion.accepted_by.username }}</pre>
                                         {% else %}
                                             <pre class="text-danger"><strong>Rejected</strong></pre>
+                                            <br>
+                                            <pre>{{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}</pre>
+                                            <br>
+                                            <pre><strong>By:</strong> {{ finding_exclusion.rejected_by.username }}</pre>
                                         {% endif %}
-                                        <br>
-                                        <pre>{{ finding_exclusion.status_updated_at|date:"d M Y H:i" }}</pre>
-                                        <br>
-                                        <pre><strong>By:</strong> {{ finding_exclusion.accepted_by.username }}</pre>
                                     {% else %}
                                         <pre>Awaiting Decision by Cibersecurity team</pre>
                                     {% endif %}

@@ -27,6 +27,7 @@ class Constants(Enum):
     VULNERABILITY_ID_HELP_TEXT = "Vulnerability technical id from the source tool. " \
                                  "Allows to track unique vulnerabilities."
     ON_WHITELIST = "On Whitelist"
+    ON_BLACKLIST = "On Blacklist"
     REVIEWERS_MAINTAINER_GROUP = settings.REVIEWER_GROUP_NAME
     APPROVERS_CYBERSECURITY_GROUP = settings.APPROVER_GROUP_NAME
     
@@ -92,11 +93,15 @@ def send_mail_to_cybersecurity(finding_exclusion: FindingExclusion) -> None:
     )
     
 
-def remove_finding_from_whitelist(finding: Finding, note: Notes) -> Finding:
-    finding.active = True
+def remove_finding_from_list(finding: Finding, note: Notes, list_type: str) -> Finding:
     finding.risk_status = None
     finding.notes.add(note)
-    finding.tags.remove("white_list")
+    
+    if list_type == "white_list":
+        finding.active = True
+        finding.tags.remove("white_list")
+    elif list_type == "black_list":
+        finding.tags.remove("black_list")
     
     return finding
 
@@ -108,20 +113,20 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
             expired_fex.save()
             system_user = get_user(settings.SYSTEM_USER)
             logger.info(f"Expired finding exclusion: {expired_fex}")
-            note = get_note(system_user, "Finding has been removed from the whitelist as it has expired.")
+            note = get_note(system_user, f"Finding has been removed from the {expired_fex.type} as it has expired.")
             
             findings = Finding.objects.filter(
                 cve=expired_fex.unique_id_from_tool,
                 active=False,
-                tags__name__icontains="white_list"
+                tags__name__icontains=expired_fex.type
             ).prefetch_related("tags", "notes")
             
             findings_to_update = []
             
             for finding in findings:
-                finding = remove_finding_from_whitelist(finding, note)
+                finding = remove_finding_from_list(finding, note, expired_fex.type)
                 findings_to_update.append(finding)
-                logger.info(f"Removed finding {finding.id} from whitelist.")
+                logger.info(f"Removed finding {finding.id} from {expired_fex.type}.")
             
             Finding.objects.bulk_update(findings_to_update, ["active", "risk_status"], 1000)
             
@@ -131,7 +136,7 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
             create_notification(
                 event="finding_exclusion_expired",
                 title=f"The finding exclusion for {expired_fex.unique_id_from_tool} has expired.",
-                description=f"All findings whitelisted via this finding exclusion {expired_fex.unique_id_from_tool} will be removed from the whitelist.",
+                description=f"All findings added via this finding exclusion {expired_fex.unique_id_from_tool} will be removed from the {expired_fex.type}.",
                 url=reverse("finding_exclusion", args=[str(expired_fex.pk)]),
                 recipients=maintainers + approvers + [expired_fex.created_by.username]
             )
@@ -162,6 +167,8 @@ def add_findings_to_whitelist(unique_id_from_tool, relative_url):
     findings_to_update = Finding.objects.filter(
         cve=unique_id_from_tool,
         active=True
+    ).exclude(
+        risk_status=Constants.ON_WHITELIST.value
     ).filter(tag_filter)
     
     if findings_to_update.exists():
@@ -182,27 +189,17 @@ def add_findings_to_whitelist(unique_id_from_tool, relative_url):
     
 
 @app.task
-def check_new_findings_to_whitelist():
-    cves_on_whitelist = FindingExclusion.objects.filter(
-        type="white_list", 
+def check_new_findings_to_exclusion_list():
+    finding_exclusions = FindingExclusion.objects.filter(
         status="Accepted"
-    ).values_list("unique_id_from_tool", flat=True)
+    )
     
-    findings_to_whitelist = Finding.objects.filter(
-        cve__in=cves_on_whitelist,
-        active=True,
-    ).exclude(
-        risk_status=Constants.ON_WHITELIST.value
-    ).filter(tag_filter)
-    
-    for finding in findings_to_whitelist:
-        if 'white_list' not in finding.tags:
-            finding.tags.add("white_list")
-        finding.active = False
-        finding.risk_status = Constants.ON_WHITELIST.value
-        
-    Finding.objects.bulk_update(findings_to_whitelist, ["active", "risk_status"], 1000)
-    logger.info(f"{findings_to_whitelist.count()} findings added to whitelist.")
+    for finding_exclusion in finding_exclusions:
+        relative_url = reverse("finding_exclusion", args=[str(finding_exclusion.pk)])
+        if finding_exclusion.type == "white_list":
+            add_findings_to_whitelist.apply_async(args=(finding_exclusion.unique_id_from_tool, relative_url,))
+        else:
+            add_findings_to_blacklist.apply_async(args=(finding_exclusion.unique_id_from_tool, relative_url,))
     
 
 @app.task
@@ -210,6 +207,8 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
     findings_to_update = Finding.objects.filter(
         cve=unique_id_from_tool,
         active=True
+    ).exclude(
+        risk_status=Constants.ON_BLACKLIST.value
     ).filter(blacklist_tag_filter)
     
     if findings_to_update.exists():
@@ -222,7 +221,7 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
         if 'black_list' not in finding.tags:
             finding.tags.add("black_list")
         finding.notes.add(note)
-        finding.risk_status = "On Blacklist"
+        finding.risk_status = Constants.ON_BLACKLIST.value
         finding.priority = priority
         
     Finding.objects.bulk_update(findings_to_update, ["risk_status"], 1000)
@@ -334,7 +333,7 @@ def identify_critical_vulnerabilities(findings) -> int:
     for finding in findings:
         priority = calculate_vulnerability_priority(finding)
         
-        if priority > 90:
+        if priority > settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization"):
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list")
             
             if not finding_exclusion.exists():
@@ -352,15 +351,14 @@ def identify_critical_vulnerabilities(findings) -> int:
                 )
                 finding_exclusion_list.append(new_finding_exclusion)
                 relative_url = reverse("finding_exclusion", args=[str(new_finding_exclusion.pk)])
-                add_findings_to_blacklist(new_finding_exclusion.unique_id_from_tool, relative_url, priority)
+                add_findings_to_blacklist.apply_async(args=(new_finding_exclusion.unique_id_from_tool, relative_url, priority,))
             else:
                 fx = finding_exclusion.first()
                 relative_url = reverse("finding_exclusion", args=[str(fx.pk)])
-                add_findings_to_blacklist(fx.unique_id_from_tool, relative_url, priority)
+                add_findings_to_blacklist.apply_async(args=(fx.unique_id_from_tool, relative_url, priority,))
                 
         finding_list.append(finding)
-    
-    Finding.objects.bulk_update(finding_list, ["priority", "risk_status"])     
+        
     FindingExclusion.objects.bulk_create(finding_exclusion_list)
             
     return len(finding_exclusion_list)
