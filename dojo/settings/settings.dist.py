@@ -486,7 +486,7 @@ env = environ.FileAwareEnv(
     DD_TWISTLOCK_SECRET_KEY=(str, ""),
     
     # Priorization
-    DD_CELERY_CRON_CHECK_PRIORIZATION=(str, ""),
+    DD_CELERY_CRON_CHECK_PRIORIZATION=(str, "0 0 1 1,4,7,10 *"),
 )
 
 

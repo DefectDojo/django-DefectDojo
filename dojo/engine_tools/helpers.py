@@ -331,11 +331,12 @@ def identify_critical_vulnerabilities(findings) -> int:
     """
     finding_list = []
     finding_exclusion_list = []
+    system_user = get_user(settings.SYSTEM_USER)
     
     for finding in findings:
         priority = calculate_vulnerability_priority(finding)
         
-        Finding.objects.filter(cve=finding.cve, active=True).update(priority=priority)
+        Finding.objects.filter(cve=finding.cve, active=True).filter(blacklist_tag_filter).update(priority=priority)
         
         if priority > int(settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization")):
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list")
@@ -344,14 +345,16 @@ def identify_critical_vulnerabilities(findings) -> int:
                 new_finding_exclusion = FindingExclusion(
                     type="black_list",
                     unique_id_from_tool=finding.cve,
-                    expiration_date=timezone.now() + timedelta(days=int(settings.FINDING_EXCLUSION_EXPIRATION_DAYS)),
-                    status_updated_at=None,
-                    status_updated_by=None,
+                    expiration_date=None,
+                    status_updated_at=timezone.now(),
+                    status_updated_by=system_user,
                     reviewed_at=None,
                     reason="Highly exploitable vulnerability.",
                     status="Accepted",
                     final_status="Accepted",
-                    created_by=None
+                    created_by=system_user,
+                    accepted_by=system_user
+                    
                 )
                 finding_exclusion_list.append(new_finding_exclusion)
                 relative_url = reverse("finding_exclusion", args=[str(new_finding_exclusion.pk)])
