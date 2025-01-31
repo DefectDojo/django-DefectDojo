@@ -310,10 +310,10 @@ def calculate_vulnerability_priority(finding) -> float:
     priorization_field_weights = settings.PRIORIZATION_FIELD_WEIGHTS
     
     priority = (
-        (risk_score * priorization_field_weights.get("risk_score")) +     # Risk Score with weight 0.4
-        (epss_score * priorization_field_weights.get("epss_score")) +     # EPSS with weight 0.4
-        (severity_score * priorization_field_weights.get("severity_score")) + # Severity with weight 0.1
-        (cvss_score * priorization_field_weights.get("cvss_score"))       # CVSS with weight 0.1
+        (risk_score * float(priorization_field_weights.get("risk_score"))) +     # Risk Score with weight 0.4
+        (epss_score * float(priorization_field_weights.get("epss_score"))) +     # EPSS with weight 0.4
+        (severity_score * float(priorization_field_weights.get("severity_score"))) + # Severity with weight 0.1
+        (cvss_score * float(priorization_field_weights.get("cvss_score")))       # CVSS with weight 0.1
     )
 
     return round(priority, 2)
@@ -335,7 +335,7 @@ def identify_critical_vulnerabilities(findings) -> int:
     for finding in findings:
         priority = calculate_vulnerability_priority(finding)
         
-        if priority > settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization"):
+        if priority > int(settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization")):
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list")
             
             if not finding_exclusion.exists():
