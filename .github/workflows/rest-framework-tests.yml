@@ -39,12 +39,12 @@ jobs:
 
       # phased startup so we can use the exit code from unit test container
       - name: Start Postgres and webhook.endpoint
-        run: docker compose up -d postgres webhook.endpoint
+        run: docker compose up --no-deps -d postgres webhook.endpoint
 
       # no celery or initializer needed for unit tests
       - name: Unit tests
         timeout-minutes: 10
-        run: docker compose up --exit-code-from uwsgi uwsgi
+        run: docker compose up --no-deps --exit-code-from uwsgi uwsgi
         env:
           DJANGO_VERSION: ${{ matrix.os }}
 
