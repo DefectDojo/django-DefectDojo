@@ -226,7 +226,7 @@ def add_findings_to_blacklist(unique_id_from_tool, relative_url, priority=90.0):
         finding.risk_status = Constants.ON_BLACKLIST.value
         finding.priority = priority
         
-    Finding.objects.bulk_update(findings_to_update, ["risk_status"], 1000)
+    Finding.objects.bulk_update(findings_to_update, ["risk_status", "priority"], 1000)
     logger.info(f"{findings_to_update.count()} findings added to blacklist.")
 
 
@@ -334,6 +334,8 @@ def identify_critical_vulnerabilities(findings) -> int:
     
     for finding in findings:
         priority = calculate_vulnerability_priority(finding)
+        
+        Finding.objects.filter(cve=finding.cve, active=True).update(priority=priority)
         
         if priority > int(settings.PRIORIZATION_FIELD_WEIGHTS.get("minimum_prioritization")):
             finding_exclusion = FindingExclusion.objects.filter(unique_id_from_tool=finding.cve, type="black_list")
