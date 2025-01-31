@@ -115,9 +115,11 @@ def expire_finding_exclusion(expired_fex: FindingExclusion) -> None:
             logger.info(f"Expired finding exclusion: {expired_fex}")
             note = get_note(system_user, f"Finding has been removed from the {expired_fex.type} as it has expired.")
             
+            is_active = True if expired_fex.type == "black_list" else False
+            
             findings = Finding.objects.filter(
                 cve=expired_fex.unique_id_from_tool,
-                active=False,
+                active=is_active,
                 tags__name__icontains=expired_fex.type
             ).prefetch_related("tags", "notes")
             
