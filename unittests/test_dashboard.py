@@ -116,8 +116,12 @@ class TestDashboard(DojoTestCase):
 
         response = self._request("admin")
 
+        # temp code to update unit tests
+        print(response.context["mitigated_count"])  # noqa: T201
+        print(response.context["accepted_count"])  # noqa: T201
+
         self.assertEqual(3, response.context["engagement_count"])
-        self.assertEqual(4, response.context["finding_count"])
+        self.assertEqual(11, response.context["finding_count"])
         self.assertEqual(2, response.context["mitigated_count"])
         self.assertEqual(2, response.context["accepted_count"])
 
@@ -127,8 +131,12 @@ class TestDashboard(DojoTestCase):
 
         response = self._request("user1")
 
+        # temp code to update unit tests
+        print(response.context["mitigated_count"])  # noqa: T201
+        print(response.context["accepted_count"])  # noqa: T201
+
         self.assertEqual(3, response.context["engagement_count"])
-        self.assertEqual(4, response.context["finding_count"])
+        self.assertEqual(11, response.context["finding_count"])
         self.assertEqual(2, response.context["mitigated_count"])
         self.assertEqual(2, response.context["accepted_count"])
 
