@@ -39,4 +39,7 @@ urlpatterns = [
     re_path(r'^engine_tools/finding-exclusion/(?P<fxid>[\w-]+)/edit/$', 
             views.edit_finding_exclusion, 
             name='edit_finding_exclusion'),
+    re_path(r"^engine_tools/execute-priorization-check$",
+            views.execute_priorization_check,
+            name="execute_priorization_check"),
 ]
