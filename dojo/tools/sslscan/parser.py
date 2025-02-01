@@ -41,8 +41,8 @@ class SslscanParser:
                     title = "heartbleed" + " | " + target.attrib["sslversion"]
                     description = (
                         "**heartbleed** :"
-                        + "\n\n"
-                        + "**sslversion** : "
+                        "\n\n"
+                        "**sslversion** : "
                         + target.attrib["sslversion"]
                         + "\n"
                     )

@@ -328,8 +328,10 @@ class ProductForm(forms.ModelForm):
         # if this product has findings being asynchronously updated, disable the sla config field
         if self.instance.async_updating:
             self.fields["sla_configuration"].disabled = True
-            self.fields["sla_configuration"].widget.attrs["message"] = "Finding SLA expiration dates are currently being recalculated. " + \
-                                                                       "This field cannot be changed until the calculation is complete."
+            self.fields["sla_configuration"].widget.attrs["message"] = (
+                "Finding SLA expiration dates are currently being recalculated. "
+                "This field cannot be changed until the calculation is complete."
+            )
 
     class Meta:
         model = Product
@@ -954,8 +956,10 @@ class CheckForm(forms.ModelForm):
 class EngForm(forms.ModelForm):
     name = forms.CharField(
         max_length=300, required=False,
-        help_text="Add a descriptive name to identify this engagement. "
-                  + "Without a name the target start date will be set.")
+        help_text=(
+            "Add a descriptive name to identify this engagement. "
+            "Without a name the target start date will be set."
+        ))
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     product = forms.ModelChoiceField(label="Product",
@@ -2640,8 +2644,10 @@ class SLAConfigForm(forms.ModelForm):
 
         # if this sla config has findings being asynchronously updated, disable the days by severity fields
         if self.instance.async_updating:
-            msg = "Finding SLA expiration dates are currently being recalculated. " + \
-                  "This field cannot be changed until the calculation is complete."
+            msg = (
+                "Finding SLA expiration dates are currently being recalculated. "
+                "This field cannot be changed until the calculation is complete."
+            )
             self.fields["critical"].disabled = True
             self.fields["enforce_critical"].disabled = True
             self.fields["critical"].widget.attrs["message"] = msg

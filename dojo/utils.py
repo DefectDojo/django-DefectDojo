@@ -101,8 +101,10 @@ def do_false_positive_history(finding, *args, **kwargs):
 
     existing_fp_findings = existing_findings.filter(false_p=True)
     deduplicationLogger.debug(
-        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
-        + "that were previously marked as false positive",
+        (
+            "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
+            "that were previously marked as false positive"
+        ),
         len(existing_fp_findings),
     )
 
