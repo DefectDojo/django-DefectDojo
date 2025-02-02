@@ -200,10 +200,9 @@ class MonthYearWidget(Widget):
 
         return mark_safe("\n".join(output))
 
-    def id_for_label(self, id_):
+    @classmethod
+    def id_for_label(cls, id_):
         return f"{id_}_month"
-
-    id_for_label = classmethod(id_for_label)
 
     def value_from_datadict(self, data, files, name):
         y = data.get(self.year_field % name)
