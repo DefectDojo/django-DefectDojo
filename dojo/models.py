@@ -857,11 +857,11 @@ class Product_Type(models.Model):
         health = 100
         if c_findings.count() > 0:
             health = 40
-            health = health - ((c_findings.count() - 1) * 5)
+            health -= ((c_findings.count() - 1) * 5)
         if h_findings.count() > 0:
             if health == 100:
                 health = 60
-            health = health - ((h_findings.count() - 1) * 2)
+            health -= ((h_findings.count() - 1) * 2)
         if health < 5:
             return 5
         return health
@@ -2835,16 +2835,16 @@ class Finding(models.Model):
             if hashcodeField == "endpoints":
                 # For endpoints, need to compute the field
                 myEndpoints = self.get_endpoints()
-                fields_to_hash = fields_to_hash + myEndpoints
+                fields_to_hash += myEndpoints
                 deduplicationLogger.debug(hashcodeField + " : " + myEndpoints)
             elif hashcodeField == "vulnerability_ids":
                 # For vulnerability_ids, need to compute the field
                 my_vulnerability_ids = self.get_vulnerability_ids()
-                fields_to_hash = fields_to_hash + my_vulnerability_ids
+                fields_to_hash += my_vulnerability_ids
                 deduplicationLogger.debug(hashcodeField + " : " + my_vulnerability_ids)
             else:
                 # Generically use the finding attribute having the same name, converts to str in case it's integer
-                fields_to_hash = fields_to_hash + str(getattr(self, hashcodeField))
+                fields_to_hash += str(getattr(self, hashcodeField))
                 deduplicationLogger.debug(hashcodeField + " : " + str(getattr(self, hashcodeField)))
         deduplicationLogger.debug("compute_hash_code - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)

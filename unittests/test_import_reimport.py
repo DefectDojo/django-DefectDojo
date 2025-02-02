@@ -1191,12 +1191,12 @@ class ImportReimportMixin:
                 self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding["title"])
                 self.assertEqual("CVE-2020-29652", finding["vulnerability_ids"][0]["vulnerability_id"])
                 self.assertEqual("golang.org/x/crypto", finding["component_name"])
-                count = count + 1
+                count += 1
             elif finding["component_version"] == "v0.3.0" or finding["component_version"] == "v0.3.2":
                 self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding["title"])
                 self.assertEqual("CVE-2020-14040", finding["vulnerability_ids"][0]["vulnerability_id"])
                 self.assertEqual("golang.org/x/text", finding["component_name"])
-                count = count + 1
+                count += 1
 
         self.assertEqual(5, count)
 

@@ -1631,11 +1631,11 @@ def get_work_days(start: date, end: date):
     """
     # if the start date is on a weekend, forward the date to next Monday
     if start.weekday() > WEEKDAY_FRIDAY:
-        start = start + timedelta(days=7 - start.weekday())
+        start += timedelta(days=7 - start.weekday())
 
     # if the end date is on a weekend, rewind the date to the previous Friday
     if end.weekday() > WEEKDAY_FRIDAY:
-        end = end - timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
+        end -= timedelta(days=end.weekday() - WEEKDAY_FRIDAY)
 
     if start > end:
         return 0
@@ -1646,7 +1646,7 @@ def get_work_days(start: date, end: date):
     remainder = end.weekday() - start.weekday() + 1
 
     if remainder != 0 and end.weekday() < start.weekday():
-        remainder = 5 + remainder
+        remainder += 5
 
     return weeks * 5 + remainder
 
