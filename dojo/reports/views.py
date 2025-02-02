@@ -542,7 +542,7 @@ def generate_report(request, obj, *, host_view=False):
                    "title": report_title,
                    "host": report_url_resolver(request),
                    "user_id": request.user.id}
-    elif type(obj).__name__ in ["QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"]:
+    elif type(obj).__name__ in {"QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"}:
         findings = report_finding_filter_class(request.GET, queryset=prefetch_related_findings_for_report(obj).distinct())
         report_name = "Finding"
         template = "dojo/finding_pdf_report.html"

@@ -302,7 +302,7 @@ def get_glossary_item(glossary, finding, *, is_info=False, enable_weakness=False
     severity = glossary.findtext("SEVERITY")
     if severity is not None:
         group = glossary.findtext("GROUP")
-        if is_info and (not enable_weakness or group in ("DIAG", "IG")):
+        if is_info and (not enable_weakness or group in {"DIAG", "IG"}):
             # Scan Diagnostics are always Info.
             finding.severity = "Info"
         else:

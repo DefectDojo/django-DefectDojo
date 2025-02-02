@@ -48,7 +48,7 @@ class SslscanParser:
                     )
                 if target.tag == "cipher" and target.attrib[
                     "strength"
-                ] not in ["acceptable", "strong"]:
+                ] not in {"acceptable", "strong"}:
                     title = "cipher" + " | " + target.attrib["sslversion"]
                     description = (
                         "**Cipher** : "

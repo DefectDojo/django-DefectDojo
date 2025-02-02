@@ -114,11 +114,11 @@ class NexposeParser:
             for test in tests.findall("test"):
                 if test.get("id") in vulnsDefinitions and (
                     test.get("status")
-                    in [
+                    in {
                         "vulnerable-exploited",
                         "vulnerable-version",
                         "vulnerable-potential",
-                    ]
+                    }
                 ):
                     vuln = vulnsDefinitions[test.get("id").lower()]
                     for desc in list(test):
