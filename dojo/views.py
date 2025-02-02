@@ -84,9 +84,8 @@ def action_history(request, cid, oid):
             raise PermissionDenied
     elif ct.model == "user":
         user_has_configuration_permission_or_403(request.user, "auth.view_user")
-    else:
-        if not request.user.is_superuser:
-            raise PermissionDenied
+    elif not request.user.is_superuser:
+        raise PermissionDenied
 
     product_tab = None
     if product_id:

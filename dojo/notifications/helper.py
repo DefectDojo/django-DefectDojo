@@ -230,18 +230,17 @@ class SlackNotificationManger(NotificationManagerHelpers):
                         "The user %s does not have a email address informed for Slack in profile.",
                         user,
                     )
+            # System scope slack notifications, and not personal would still see this go through
+            elif self.system_settings.slack_channel is not None:
+                channel = self.system_settings.slack_channel
+                logger.info(
+                    f"Sending system notification to system channel {channel}.",
+                )
+                self._post_slack_message(event, user, channel, **kwargs)
             else:
-                # System scope slack notifications, and not personal would still see this go through
-                if self.system_settings.slack_channel is not None:
-                    channel = self.system_settings.slack_channel
-                    logger.info(
-                        f"Sending system notification to system channel {channel}.",
-                    )
-                    self._post_slack_message(event, user, channel, **kwargs)
-                else:
-                    logger.debug(
-                        "slack_channel not configured: skipping system notification",
-                    )
+                logger.debug(
+                    "slack_channel not configured: skipping system notification",
+                )
 
         except Exception as exception:
             logger.exception("Unable to send Slack notification")

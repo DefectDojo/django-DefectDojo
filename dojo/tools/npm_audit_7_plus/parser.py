@@ -210,10 +210,9 @@ def get_vuln_description(item_node, tree):
                 if tree[effect]["name"] != ev["name"]:
                     description += ("  Depends on vulnerable versions of "
                                     + ev["name"] + "\n")
-            else:
-                if tree[effect]["name"] != ev:
-                    description += ("  Depends on vulnerable versions of "
-                                    + ev + "\n")
+            elif tree[effect]["name"] != ev:
+                description += ("  Depends on vulnerable versions of "
+                                + ev + "\n")
         for en in tree[effect]["nodes"]:
             description += "  " + en + "\n"
 

@@ -65,10 +65,9 @@ def attach_unique_extras(
         finding.param = param
         finding.payload = payload
         finding.test = test
-    else:
-        # Finding already exists
-        if date is not None and finding.date > date:
-            finding.date = date
+    # Finding already exists
+    elif date is not None and finding.date > date:
+        finding.date = date
 
     for endpoint in endpoints:
         parsedUrl = urlparse(endpoint)
@@ -123,10 +122,9 @@ def attach_extras(endpoints, requests, responses, finding, date, qid, test):
         if date is not None:
             finding.date = date
         finding.vuln_id_from_tool = str(qid)
-    else:
-        # Finding already exists
-        if date is not None and finding.date > date:
-            finding.date = date
+    # Finding already exists
+    elif date is not None and finding.date > date:
+        finding.date = date
 
     for endpoint in endpoints:
         finding.unsaved_endpoints.append(Endpoint.from_uri(endpoint))

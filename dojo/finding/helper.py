@@ -237,10 +237,9 @@ def update_finding_group(finding, finding_group):
                 finding.finding_group.findings.remove(finding)
             logger.debug("adding finding %d to finding_group %s", finding.id, finding_group)
             finding_group.findings.add(finding)
-    else:
-        if finding.finding_group:
-            logger.debug("removing finding %d from finding_group %s", finding.id, finding.finding_group)
-            finding.finding_group.findings.remove(finding)
+    elif finding.finding_group:
+        logger.debug("removing finding %d from finding_group %s", finding.id, finding.finding_group)
+        finding.finding_group.findings.remove(finding)
 
 
 def get_group_by_group_name(finding, finding_group_by_option):
