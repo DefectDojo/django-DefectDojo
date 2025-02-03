@@ -2,7 +2,6 @@ import base64
 import copy
 import hashlib
 import logging
-import os
 import re
 import warnings
 from contextlib import suppress
@@ -124,6 +123,14 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
             obj.tags.set(cleaned_tag_list)
 
 
+def _copy_model_util(model_in_database, exclude_fields: list[str] = []):
+    new_model_instance = model_in_database.__class__()
+    for field in model_in_database._meta.fields:
+        if field.name not in ["id", *exclude_fields]:
+            setattr(new_model_instance, field.name, getattr(model_in_database, field.name))
+    return new_model_instance
+
+
 @deconstructible
 class UniqueUploadNameProvider:
 
@@ -150,7 +157,7 @@ class UniqueUploadNameProvider:
             filename += ext
         if self.directory is None:
             return filename
-        return os.path.join(now().strftime(self.directory), filename)
+        return Path(now().strftime(self.directory)) / filename
 
 
 class Regulation(models.Model):
@@ -704,9 +711,7 @@ class NoteHistory(models.Model):
     current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
 
     def copy(self):
-        copy = self
-        copy.pk = None
-        copy.id = None
+        copy = _copy_model_util(self)
         copy.save()
         return copy
 
@@ -732,12 +737,9 @@ class Notes(models.Model):
         return self.entry
 
     def copy(self):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_history = list(self.history.all())
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         # Save the object before setting any ManyToMany relationships
         copy.save()
         # Copy the history
@@ -752,10 +754,7 @@ class FileUpload(models.Model):
     file = models.FileField(upload_to=UniqueUploadNameProvider("uploaded_files"))
 
     def copy(self):
-        copy = self
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
+        copy = _copy_model_util(self)
         # Add unique modifier to file name
         copy.title = f"{self.title} - clone-{str(uuid4())[:8]}"
         # Create new unique file name
@@ -1539,16 +1538,13 @@ class Engagement(models.Model):
         return reverse("view_engagement", args=[str(self.id)])
 
     def copy(self):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
         old_tags = list(self.tags.all())
         old_risk_acceptances = list(self.risk_acceptance.all())
         old_tests = list(Test.objects.filter(engagement=self))
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         # Save the object before setting any ManyToMany relationships
         copy.save()
         # Copy the notes
@@ -1659,10 +1655,8 @@ class Endpoint_Status(models.Model):
         return f"'{self.finding}' on '{self.endpoint}'"
 
     def copy(self, finding=None):
-        copy = self
+        copy = _copy_model_util(self)
         current_endpoint = self.endpoint
-        copy.pk = None
-        copy.id = None
         if finding:
             copy.finding = finding
         copy.endpoint = current_endpoint
@@ -2128,15 +2122,12 @@ class Test(models.Model):
         return bc
 
     def copy(self, engagement=None):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
         old_tags = list(self.tags.all())
         old_findings = list(Finding.objects.filter(test=self))
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         if engagement:
             copy.engagement = engagement
         # Save the object before setting any ManyToMany relationships
@@ -2749,7 +2740,7 @@ class Finding(models.Model):
         return reverse("view_finding", args=[str(self.id)])
 
     def copy(self, test=None):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -2758,8 +2749,6 @@ class Finding(models.Model):
         old_found_by = list(self.found_by.all())
         old_tags = list(self.tags.all())
         # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         if test:
             copy.test = test
         # Save the object before setting any ManyToMany relationships
@@ -3745,13 +3734,10 @@ class Risk_Acceptance(models.Model):
         return None
 
     def copy(self, engagement=None):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         # Save the object before setting any ManyToMany relationships
         copy.save()
         # Copy the notes

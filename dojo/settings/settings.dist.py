@@ -442,7 +442,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(Path(DOJO_ROOT).parent, "components", "node_modules"),
+    Path(DOJO_ROOT).parent / "components" / "node_modules",
 )
 
 # List of finder classes that know how to find static files in
@@ -912,8 +912,6 @@ SAML2_ENABLED = env("DD_SAML2_ENABLED")
 SAML2_LOGIN_BUTTON_TEXT = env("DD_SAML2_LOGIN_BUTTON_TEXT")
 SAML2_LOGOUT_URL = env("DD_SAML2_LOGOUT_URL")
 if SAML2_ENABLED:
-    from os import path
-
     import saml2
     import saml2.saml
     # SSO_URL = env('DD_SSO_URL')
@@ -949,7 +947,7 @@ if SAML2_ENABLED:
         "entityid": str(SAML2_ENTITY_ID),
 
         # directory with attribute mapping
-        "attribute_map_dir": path.join(BASEDIR, "attribute-maps"),
+        "attribute_map_dir": Path(BASEDIR) / "attribute-maps",
         # do now discard attributes not specified in attribute-maps
         "allow_unknown_attributes": SAML_ALLOW_UNKNOWN_ATTRIBUTES,
         # this block states what services we provide
@@ -1800,6 +1798,9 @@ CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
 # ------------------------------------------------------------------------------
 AUDITLOG_FLUSH_RETENTION_PERIOD = env("DD_AUDITLOG_FLUSH_RETENTION_PERIOD")
 ENABLE_AUDITLOG = env("DD_ENABLE_AUDITLOG")
+AUDITLOG_TWO_STEP_MIGRATION = False
+AUDITLOG_USE_TEXT_CHANGES_IF_JSON_IS_NOT_PRESENT = False
+
 USE_FIRST_SEEN = env("DD_USE_FIRST_SEEN")
 USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
 
