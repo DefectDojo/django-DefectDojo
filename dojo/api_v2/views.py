@@ -72,6 +72,7 @@ from dojo.filters import (
     ApiTestFilter,
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
+    UserApiFilter
 )
 from dojo.finding.queries import (
     get_authorized_findings,
@@ -2497,6 +2498,7 @@ class UsersViewSet(
     serializer_class = serializers.UserSerializer
     queryset = User.objects.none()
     filter_backends = (DjangoFilterBackend,)
+    filterset_class = UserApiFilter
     filterset_fields = [
         "id",
         "username",
