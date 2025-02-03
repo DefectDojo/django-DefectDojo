@@ -16,7 +16,7 @@ initialize_data()
     python3 manage.py initialize_permissions
 }
 
-create_announcement_banner() 
+create_announcement_banner()
 {
 # Load the announcement banner
 if [ -z "$DD_CREATE_CLOUD_BANNER" ]; then
@@ -103,8 +103,26 @@ then
   exit 47
 fi
 
-echo "Making migrations"
-python3 manage.py makemigrations dojo
+
+python3 manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
+    cat <<-EOF
+
+********************************************************************************
+
+You made changes to the models without creating a DB migration for them.
+
+**NEVER** change existing migrations, create a new one.
+
+If you're not familiar with migrations in Django, please read the
+great documentation thoroughly:
+https://docs.djangoproject.com/en/5.0/topics/migrations/
+
+********************************************************************************
+
+EOF
+    exit 1
+}
+
 echo "Migrating"
 python3 manage.py migrate
 
@@ -138,39 +156,7 @@ fi
 
 if [ -z "${ADMIN_EXISTS}" ]
 then
-cat <<EOD | python manage.py shell
-import os
-from django.contrib.auth.models import User
-User.objects.create_superuser(
-  os.getenv('DD_ADMIN_USER'),
-  os.getenv('DD_ADMIN_MAIL'),
-  os.getenv('DD_ADMIN_PASSWORD'),
-  first_name=os.getenv('DD_ADMIN_FIRST_NAME'),
-  last_name=os.getenv('DD_ADMIN_LAST_NAME')
-)
-EOD
-
-  # load surveys all at once as that's much faster
-   echo "Importing fixtures all at once"
-   python3 manage.py loaddata system_settings initial_banner_conf product_type test_type \
-       development_environment benchmark_type benchmark_category benchmark_requirement \
-       language_type objects_review regulation initial_surveys role sla_configurations
-
-  echo "UPDATE dojo_system_settings SET jira_webhook_secret='$DD_JIRA_WEBHOOK_SECRET'" | python manage.py dbshell
-
-  echo "Importing extra fixtures"
-  # If there is extra fixtures, load them
-  for i in $(find dojo/fixtures/extra_*.json | sort -n 2>/dev/null) ; do
-    echo "Loading $i"
-    python3 manage.py loaddata "${i%.*}"
-  done
-
-  echo "Installing watson search index"
-  python3 manage.py installwatson
-
-  # surveys fixture needs to be modified as it contains an instance dependant polymorphic content id
-  echo "Migration of textquestions for surveys"
-  python3 manage.py migrate_textquestions
+  . /entrypoint-first-boot.sh
 
   create_announcement_banner
   initialize_data

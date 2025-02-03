@@ -3,6 +3,7 @@ title: "Authentication via OAuth2/SAML2"
 description: "OAuth2/SAML2 let users authenticate against enterprise directories."
 draft: false
 weight: 3
+exclude_search: true
 ---
 
 ## Auth0
