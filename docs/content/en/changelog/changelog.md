@@ -7,7 +7,18 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](../../open_source/upgrading/upgrading_guide).
 
-## Jan 21, 2025: v2.42.2
+## Jan 2025: v2.42
+
+### Jan 27, 2025: v2.42.3
+
+- **(Connectors)** Added 'minimum severity' filter for Semgrep and Tenable Connectors.  If you want to only upload Findings of a certain severity and up, you can set a filter for this under 'Minimum Severity' in your Connector options.
+
+![image](images/connectors_min_severity.png)
+
+Previously synced Findings that are no longer within the filter parameters will be set to Closed upon the following Sync operation.
+- **(API)** Prefetching multiple parameters now returns all prefetched objects in an array.
+
+### Jan 21, 2025: v2.42.2
 
 - **(Classic UI)** Corrected link to Smart Upload form.
 - **(CLI Tools)** Fixed issue with .exe extensions not getting added to Windows binaries
@@ -15,7 +26,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 - **(OAuth)** Clarified Azure AD labels to better align with Azure's language.  Default value for Azure Resource is now set. <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 - **(RBAC)** Request Review now applies RBAC properly with regard to User Groups.
 
-## Jan 13, 2025: v2.42.1
+### Jan 13, 2025: v2.42.1
 
 - **(API)** Pro users can now specify the fields they want to return in a given API payload.  For example, this request will only return the title, severity and description fields for each Finding.  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 ```
@@ -28,19 +39,21 @@ curl -X 'GET' \
 - **(Risk Acceptance)** Simple Risk Acceptances now have a 'paper trail' created - when they are added or removed, a note will be added to the Finding to log the action.
 - **(Tools)** ImageTags are now included with AWS SecurityHub and AWS inspector parsers.
 
-## Jan 6, 2025: v2.42.0
+### Jan 6, 2025: v2.42.0
 
 - **(API)** `/test_reimport` results can now be ordered via id, created, modified, version, branch_tag, build_id, and commit_hash.
 - **(Jira)** When a Risk Acceptance expires, linked Jira Group issues will now be updated to reflect the status change.
 
-## Dec 31, 2024: v2.41.4
+## Dec 2024: v2.41
+
+#### Dec 31, 2024: v2.41.4
 
 - **(API)** 'Force To Active / Verified' flag is no longer required when calling `/import-scan`, `/reimport-scan` endponts: a value of True now forces to Active, False now forces to Inactive, while setting a value of none (or not using the flag) will use the tool's status.
 - **(Beta UI)** Added ability to regenerate / copy your API token.
 - **(Beta UI)** Fixed bug preventing date / planned remediation dates from being added via Bulk Edit.
 - **(Import)** Added fields for EPSS score and percentile to Generic Findings Import parser.
 
-## Dec 24, 2024: v2.41.3
+#### Dec 24, 2024: v2.41.3
 
 - **(API)** Added `/request_response_pairs` endpoint.
 - **(Beta UI)** When sorting by Severity, Findings will now be ordered by **severity level** rather than alphabetically.
@@ -51,11 +64,11 @@ curl -X 'GET' \
 - **(Tools)** Qualys HackerGuardian now uses hashcode against "title", "severity", "description" for deduplication.
 - **(Tools)** Horusec scan now uses hashcode against "title", "description", "file_path", and "line" for deduplication.
 
-## Dec 16, 2024: v2.41.2
+#### Dec 16, 2024: v2.41.2
 
 - **(Connectors)** Remove the 'Beta' logo from Connectors
 
-## Dec 9, 2024: v2.41.1
+#### Dec 9, 2024: v2.41.1
 
 - **(API)** When using the jira_finding_mappings API endpoint, trying to update a finding's Jira mapping with a Jira issue that is already assigned to another finding will now raise a validation error.
 - **(Beta UI)** A Test's Import History is now paginated by default.
@@ -63,7 +76,7 @@ curl -X 'GET' \
 - **(Classic UI)** Filters have been added to the Product Type view.  This is useful for when a single Product Type contains many Products which need to be filtered down.
 - **(Classic UI)** Reported Finding Severity by Month graph now tracks the X axis by month correctly.
 
-## Dec 2, 2024: v2.41.0
+#### Dec 2, 2024: v2.41.0
 
 - **(API)** `engagements/{id}/update_jira_epic` endpoint path added so that users can now push an updated Engagement to Jira, without creating a new Jira Epic.
 - **(Beta UI)** Columns can now be reordered in tables, by clicking and dragging the column header.
@@ -74,7 +87,9 @@ curl -X 'GET' \
 - **(Classic UI)** Reviewers are now displayed on Finding pages.
 - **(Docs)** New integrated docs site: https://docs.defectdojo.com/
 
-## Nov 25, 2024: v2.40.4
+## Nov 2024: v2.40
+
+#### Nov 25, 2024: v2.40.4
 
 - **(Beta UI)**  Improved Metadata tables with Parent object relationships for Products, Engagements, Tests, Findings, Endpoints/Hosts
 - **(Beta UI)**  Deleting an object now returns you to a page which makes more sense.
@@ -85,7 +100,7 @@ curl -X 'GET' \
 - **(Tools)**  AnchorCTL Policies tool has been fortified to handle new severity values.
 
 
-## Nov 17, 2024: v2.40.2
+#### Nov 17, 2024: v2.40.2
 
 - **(API)** Added an API endpoint to get the DefectDojo version number: `/api/v2/version` <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 - **(API)**  Multiple Metadata objects can now be added to a single Endpoint, Finding or Product via POST or PATCH to `/api/v2/metadata/` .  Previously, only one Metadata key/value pair could be updated per call.
@@ -97,7 +112,7 @@ curl -X 'GET' \
 - **(Tools)**  Update to AWS Prowler parser - can now handle the ‘event_time’ parameter
 
 
-## Nov 14, 2024: v2.40.1
+#### Nov 14, 2024: v2.40.1
 
 - **(API)** Added a method to validate for file extensions, when 'artifact' files are added to a test (images, for example)
 - **(Cloud Portal)** Fixed an issue where QR codes were not being generated correctly for MFA setup.  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
@@ -108,7 +123,7 @@ curl -X 'GET' \
 
 
 
-## Nov 4, 2024: v2.40.0
+#### Nov 4, 2024: v2.40.0
 
 - **(API)** Engagement_End_Date is now honored when submitted via /import /reimport endpoint.
 - **(API)** Corrected an issue with the /import endpoint where old Findings were not being mitigated correctly.
@@ -136,14 +151,16 @@ configuration fields.
 * The "Location" field should be populated with the appropriate API endpoint for your region. For example, to retrieve results from the us-east-1 region, you would supply https://securityhub.us-east-1.amazonaws.com.
 * Note that we rely on Security Hub's cross-region aggregation to pull findings from more than one region. If cross-region aggregation is enabled, you should supply the API endpoint for your "Aggregation Region". Additional linked regions will have ProductRecords created for them in DefectDojo based on your AWS account IDs and the region names.
 
-## Oct 29, 2024: v2.39.4
+## Oct 2024: v2.39
+
+#### Oct 29, 2024: v2.39.4
 
 - **(API)**  Corrected 'multiple positional arguments' issue with `/import` endpoint
 - **(Metrics)**  Dashboards can now handle multiple Products or Product Types simultaneously: this includes the Executive, Program, Remediation and Tool insights dashboards.  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 - **(Tools)**  OSV, Tenable parsers have been made more robust
 
 
-## Oct 21, 2024: v2.39.1
+#### Oct 21, 2024: v2.39.1
 
 - **(Beta UI)**  Parent Object links have been added to the Metadata table to help contextualize the page you're on
 - **(Beta UI)**  Improved "Toggle Columns" menu on tables
@@ -153,7 +170,7 @@ configuration fields.
 - **(Metrics)**  All Metrics dashboards can now be exported as a PDF (Remediation Insights, Program Insights, Tool Insights)  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 
 
-## Oct 7, 2024: v2.39.0
+#### Oct 7, 2024: v2.39.0
 
 - **(Beta UI)**  Dropdown menus for Import Scan / Reimport Scan no longer block the active element of a form.
 - **(Beta UI)**  Finding counts by Severity now disregard Out Of Scope / False Positive Findings.
@@ -161,8 +178,9 @@ configuration fields.
 - **(Jira)**  Added help text for 'Push All Issues'.
 - **(Tools)**  AWS Security Hub EPSS score now parses correctly.
 
+## Sept 2024: v2.38
 
-## Sept 30, 2024: v2.38.4
+#### Sept 30, 2024: v2.38.4
 
 - **(API)**  Object History can now be accessed via the API.
 - **(API Docs)**  Generating the response schema for certain API endpoints no longer breaks the Swagger interface.
@@ -170,7 +188,7 @@ configuration fields.
 - **(Passwords)**  Password creation for new users can now be made optional upon request.  This feature is toggled via the back-end.
 
 
-## Sept 23, 2024: v2.38.3
+#### Sept 23, 2024: v2.38.3
 
 - **(API)**  `/global_role` endpoint now supports prefetching.
 - **(API)**  It is now possible to prefetch a Finding with attached files via API.
@@ -182,7 +200,7 @@ configuration fields.
 - **Tools**  fixed an issue where certain tools would not process asyncronously: Whitehat_Sentinel, SSLyze, SSLscan, Qualys_Webapp, Mend, Intsights, H1, and Blackduck.
 
 
-## Sept 16, 2024: v2.38.2
+#### Sept 16, 2024: v2.38.2
 
 - **(Beta UI)**  Jira integration in Beta UI now has parity with Legacy UI.  Ability to Push To Jira has been added, and the Jira ticket view has been added to Findings, Engagements, and all other related objects in DefectDojo.
 - **(Finding SLAs)**  Added “Mitigated Within SLA” Finding filter, so that users can now count how many Findings were mitigated on time, and how many were not.  Previously, we were only able to filter Findings that were currently violating SLA or not, rather than ones that had historically violated SLA or not.
@@ -195,7 +213,7 @@ configuration fields.
 
 
 
-## Sept 9, 2024: v2.38.1
+#### Sept 9, 2024: v2.38.1
 
 - **(Beta UI)**  Clearing a date filter and re-applying it no longer throws a 400 error.
 - **(Dashboard)**  Dashboard Tag Filters now work correctly in both legacy and beta UIs.  
@@ -207,7 +225,7 @@ configuration fields.
 - **(Tools)**  EPSS score / percentile will now be imported from Aquasec files
 
 
-## Sept 3, 2024: v2.38.0
+#### Sept 3, 2024: v2.38.0
 
 - **(API)**  Better naming conventions on Mitigated and Discovered date filters: these are now labeled Mitigated/Discovered On, Mitigated/Discovered Before, Mitigated/Discovered After.
 - **(Beta UI)**  Pre-filtered Finding Routes added to Sidebar: you can now quickly filter for Active Findings, Mitigated Findings, All Risk Acceptances, All Finding Groups.
@@ -222,8 +240,9 @@ configuration fields.
 - **(Reimport)**  Reimporting Findings that have been Risk-Accepted no longer changes their status to ‘Mitigated’.
 - **(Risk Acceptance)**  Updating the Simple Risk Acceptance or the Full Risk Acceptance flag on a Product now updates the Product as expected.
 
+## Aug 2024: v2.37
 
-## Aug 28, 2024: v2.37.3
+#### Aug 28, 2024: v2.37.3
 
 - **(API)**  New Endpoint: /finding_groups allows you to GET, add Findings to, delete, or otherwise interact with Finding Groups.  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 - **(Beta UI)**  Relative date ranges for Findings have been added to Finding Filters (last 30 days, last 90 days, etc)
@@ -238,8 +257,7 @@ configuration fields.
 - **(Tools)**  New Parser: AppCheck Web Application Scanning
 - **(Tools)**  Nmap Parser now handles script output
 
-
-## Aug 7, 2024: v2.37.0
+#### Aug 7, 2024: v2.37.0
 
 - **(API)**  Created a method to handle simultaneous async reimports to the same Test via API
 - **(API)**  Minimum Severity flag now works as expected on /import, /reimport endpoints (Clearsale)
@@ -258,7 +276,7 @@ configuration fields.
 - **(Tools)**  Kiuwan SCA Parser released
 - **(Tools)**  Test Types can now be set to Inactive so that they won’t appear in menus.  This ‘inactive’ setting can only be applied in the legacy UI, via Engagements > Test Types (or defectdojo.com/test_type)
 
-## Jul 8, 2024: v2.36.0
+## Jul 2024: v2.36.0
 
 - **(Notifications)**  Improved email notifications with collapsible Finding lists for greater readability
 - **(SLAs)**  SLAs can now be optionally enforced.  For each SLA associated with a Product you can set or unset the Enforce __ Finding Days box in the relevant SLA Configuration screen.  When this box is unchecked, SLAs for Findings that match that Severity level will not be tracked or displayed in the UI.
