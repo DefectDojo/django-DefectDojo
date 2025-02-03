@@ -697,6 +697,17 @@ class TestNotificationWebhooks(DojoTestCase):
 
     @patch("requests.request", **{"return_value.status_code": 200})
     def test_events_messages(self, mock):
+        with self.subTest("ping"):
+            manager = WebhookNotificationManger()
+            manager._test_webhooks_notification(self.sys_wh)
+            self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "ping")
+            self.maxDiff = None
+            self.assertEqual(mock.call_args.kwargs["json"], {
+                "description": "Test webhook notification",
+                "title": "",
+                "user": None,
+            })
+
         with self.subTest("product_type_added"):
             prod_type = Product_Type.objects.create(name="notif prod type")
             self.assertEqual(mock.call_args.kwargs["headers"]["X-DefectDojo-Event"], "product_type_added")

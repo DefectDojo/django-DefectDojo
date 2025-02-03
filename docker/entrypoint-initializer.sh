@@ -24,7 +24,7 @@ echo "Creating Announcement Banner"
 cat <<EOD | python3 manage.py shell
 from dojo.models import Announcement, UserAnnouncement, Dojo_User
 announcement, created = Announcement.objects.get_or_create(id=1)
-announcement.message = '<a href="https://www.defectdojo.com/pricing" target="_blank">Cloud and On-Premise Subscriptions Now Available! Click here for more details</a>'
+announcement.message = '<a href="https://defectdojo.com/contact" target="_blank">Cloud and On-Premise Subscriptions Now Available! Click here for more details</a>'
 announcement.dismissable = True
 announcement.save()
 for dojo_user in Dojo_User.objects.all():
