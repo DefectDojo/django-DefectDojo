@@ -3,6 +3,7 @@ import contextlib
 import datetime
 import logging
 import mimetypes
+from ast import literal_eval
 from itertools import chain
 
 import bleach
@@ -323,8 +324,7 @@ def display_index(data, index):
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
 def action_log_entry(value, autoescape=None):
-    import json
-    history = json.loads(value)
+    history = literal_eval(value)
     text = ""
     for k in history:
         if isinstance(history[k], dict):

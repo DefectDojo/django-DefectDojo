@@ -5,7 +5,7 @@ from django.utils import timezone
 from dojo.importers.default_importer import DefaultImporter
 from dojo.models import Development_Environment, Engagement, Product, Product_Type, User
 
-from .dojo_test_case import DojoTestCase, get_unit_tests_path
+from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 logger = logging.getLogger(__name__)
 
@@ -37,19 +37,19 @@ class TestDojoCloseOld(DojoTestCase):
             "scan_type": scan_type,
         }
         # Import first test
-        with open(f"{get_unit_tests_path()}/scans/acunetix/many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
+        with open(get_unit_tests_scans_path("acunetix") / "many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(close_old_findings=False, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(4, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # Import same test, should close no findings
-        with open(f"{get_unit_tests_path()}/scans/acunetix/many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
+        with open(get_unit_tests_scans_path("acunetix") / "many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(4, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
-        with open(f"{get_unit_tests_path()}/scans/acunetix/one_finding.xml", "r+", encoding="utf-8") as single_finding_scan:
+        with open(get_unit_tests_scans_path("acunetix") / "one_finding.xml", "r+", encoding="utf-8") as single_finding_scan:
             importer = DefaultImporter(close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(single_finding_scan)
             self.assertEqual(1, len_new_findings)
@@ -95,19 +95,19 @@ class TestDojoCloseOld(DojoTestCase):
             "scan_type": scan_type,
         }
         # Import first test
-        with open(f"{get_unit_tests_path()}/scans/acunetix/many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
+        with open(get_unit_tests_scans_path("acunetix") / "many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(engagement=engagement1, close_old_findings=False, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(4, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # Import same test, should close no findings
-        with open(f"{get_unit_tests_path()}/scans/acunetix/many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
+        with open(get_unit_tests_scans_path("acunetix") / "many_findings.xml", "r+", encoding="utf-8") as many_findings_scan:
             importer = DefaultImporter(engagement=engagement2, close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(many_findings_scan)
             self.assertEqual(4, len_new_findings)
             self.assertEqual(0, len_closed_findings)
         # Import test with only one finding. Remaining findings should close
-        with open(f"{get_unit_tests_path()}/scans/acunetix/one_finding.xml", "r+", encoding="utf-8") as single_finding_scan:
+        with open(get_unit_tests_scans_path("acunetix") / "one_finding.xml", "r+", encoding="utf-8") as single_finding_scan:
             importer = DefaultImporter(engagement=engagement3, close_old_findings=True, **import_options)
             _, _, len_new_findings, len_closed_findings, _, _, _ = importer.process_scan(single_finding_scan)
             self.assertEqual(1, len_new_findings)

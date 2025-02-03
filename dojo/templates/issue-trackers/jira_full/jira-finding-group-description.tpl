@@ -66,26 +66,26 @@ h3. [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 {% endif %}
 
 *Description*:
-{{ finding.description }}
+{{ finding.description|safe }}
 
 {% if finding.mitigation %}
 *Mitigation*:
-{{ finding.mitigation }}
+{{ finding.mitigation|safe }}
 {% endif %}
 
 {% if finding.impact %}
 *Impact*:
-{{ finding.impact }}
+{{ finding.impact|safe }}
 {% endif %}
 
 {% if finding.steps_to_reproduce %}
 *Steps to reproduce*:
-{{ finding.steps_to_reproduce }}
+{{ finding.steps_to_reproduce|safe }}
 {% endif %}
 
 {% if finding.references %}
 *References*:
-{{ finding.references }}
+{{ finding.references|safe }}
 {% endif %}
 
 *Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]

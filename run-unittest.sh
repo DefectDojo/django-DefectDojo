@@ -16,16 +16,11 @@ usage() {
   echo "You must specify a test case (arg)!"
   echo
   echo "Example command:"
-  echo "./dc-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser"
+  echo "./run-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser"
 }
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    -p|--profile)
-      # Leaving this here for backwards compatability
-      shift # past argument
-      shift # past value
-      ;;
     -t|--test-case)
       TEST_CASE="$2"
       shift # past argument

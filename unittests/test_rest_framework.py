@@ -4,7 +4,6 @@ import pathlib
 from collections import OrderedDict
 from enum import Enum
 from json import dumps
-from pathlib import Path
 
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import ANY, MagicMock, call, patch
@@ -134,7 +133,7 @@ from dojo.models import (
     UserContactInfo,
 )
 
-from .dojo_test_case import DojoAPITestCase
+from .dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path
 
 logger = logging.getLogger(__name__)
 
@@ -1120,7 +1119,7 @@ class FilesTest(DojoAPITestCase):
         # Test the creation
         for level in self.url_levels:
             length = FileUpload.objects.count()
-            with open(f"{self.path}/scans/acunetix/one_finding.xml", encoding="utf-8") as testfile:
+            with open(get_unit_tests_scans_path("acunetix") / "one_finding.xml", encoding="utf-8") as testfile:
                 payload = {
                     "title": level,
                     "file": testfile,
@@ -1132,7 +1131,7 @@ class FilesTest(DojoAPITestCase):
                 self.url_levels[level] = response.data.get("id")
 
         #  Test the download
-        file_data = Path(f"{self.path}/scans/acunetix/one_finding.xml").read_text(encoding="utf-8")
+        file_data = (get_unit_tests_scans_path("acunetix") / "one_finding.xml").read_text(encoding="utf-8")
         for level, file_id in self.url_levels.items():
             response = self.client.get(f"/api/v2/{level}/files/download/{file_id}/")
             self.assertEqual(200, response.status_code)
