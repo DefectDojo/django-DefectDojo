@@ -121,6 +121,7 @@ class TwistlockCSVParser:
             out_of_scope=False,
             mitigated=None,
             severity_justification=f"(CVSS v3 base score: {data_cvss})",
+            cvssv3_score=float(data_cvss) if data_cvss else None,
             impact=data_severity,
             vuln_id_from_tool=data_vulnerability_id,
             unique_id_from_tool=data_unique_id,
@@ -381,6 +382,7 @@ def get_item(vulnerability, test, packageTree):
         out_of_scope=False,
         mitigated=None,
         severity_justification=f"{vector} (CVSS v3 base score: {cvss})\n\n{riskFactors}",
+        cvssv3_score=float(cvss) if cvss != "No CVSS score yet." else None,
         impact=severity,
         vuln_id_from_tool=vulnerability["id"],
         publish_date=(

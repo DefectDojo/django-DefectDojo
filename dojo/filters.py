@@ -3,6 +3,7 @@ import decimal
 import logging
 import warnings
 from datetime import datetime, timedelta
+from django.contrib.auth.models import User
 
 import pytz
 import six
@@ -3226,6 +3227,25 @@ class UserFilter(DojoFilter):
 
     class Meta:
         model = Dojo_User
+        fields = ["is_superuser", "is_active", "first_name", "last_name", "username", "email"]
+
+class UserApiFilter(DojoFilter):
+    email = CharFilter(lookup_expr="icontains")
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ("last_name", "last_name"),
+            ("first_name", "first_name"),
+            ("is_active", "is_active"),
+            ("is_superuser", "is_superuser"),
+            ("date_joined", "date_joined"),
+            ("last_login", "last_login"),
+        ),
+    )
+
+    class Meta:
+        model = User
         fields = ["is_superuser", "is_active", "first_name", "last_name", "username", "email"]
 
 
