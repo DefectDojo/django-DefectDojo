@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 def get_npm_cwe(item_node):
     """
-    possible values:
+    Possible values:
         "cwe": null
         "cwe": ["CWE-173", "CWE-200","CWE-601"]  (or [])
         "cwe": "CWE-1234"

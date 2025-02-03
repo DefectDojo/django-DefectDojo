@@ -1,7 +1,6 @@
 import io
 import json
 import logging
-import os
 from pathlib import Path
 from typing import Any
 
@@ -333,8 +332,8 @@ def get_jira_issue_template(obj):
         template_dir = "issue-trackers/jira_full/"
 
     if isinstance(obj, Finding_Group):
-        return os.path.join(template_dir, "jira-finding-group-description.tpl")
-    return os.path.join(template_dir, "jira-description.tpl")
+        return Path(template_dir) / "jira-finding-group-description.tpl"
+    return Path(template_dir) / "jira-description.tpl"
 
 
 def get_jira_creation(obj):
@@ -677,10 +676,26 @@ def add_issues_to_epic(jira, obj, epic_id, issue_keys, ignore_epics=True):
     try:
         return jira.add_issues_to_epic(epic_id=epic_id, issue_keys=issue_keys, ignore_epics=ignore_epics)
     except JIRAError as e:
-        logger.error("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
-        logger.exception(e)
-        log_jira_alert(e.text, obj)
-        return False
+        """
+        We must try to accommodate the following:
+
+        The request contains a next-gen issue. This operation can't add next-gen issues to epics.
+        To add a next-gen issue to an epic, use the Edit issue operation and set the parent property
+        (i.e., '"parent":{"key":"PROJ-123"}' where "PROJ-123" has an issue type at level one of the issue type hierarchy).
+        See <a href="https://developer.atlassian.com/cloud/jira/platform/rest/v2/"> developer.atlassian.com </a> for more details.
+        """
+        try:
+            if "The request contains a next-gen issue." in str(e):
+                # Attempt to update the issue manually
+                for issue_key in issue_keys:
+                    issue = jira.issue(issue_key)
+                    epic = jira.issue(epic_id)
+                    issue.update(parent={"key": epic.key})
+        except JIRAError as e:
+            logger.error("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
+            logger.exception(e)
+            log_jira_alert(e.text, obj)
+            return False
 
 
 # we need two separate celery tasks due to the decorators we're using to map to/from ids
@@ -1284,13 +1299,12 @@ def update_epic(engagement, **kwargs):
             if not epic_name:
                 epic_name = engagement.name
 
-            epic_priority = kwargs.get("epic_priority")
-
             jira_issue_update_kwargs = {
                 "summary": epic_name,
                 "description": epic_name,
-                "priority": {"name": epic_priority},
             }
+            if (epic_priority := kwargs.get("epic_priority")) is not None:
+                jira_issue_update_kwargs["priority"] = {"name": epic_priority}
             issue.update(**jira_issue_update_kwargs)
             return True
         except JIRAError as e:
@@ -1319,6 +1333,7 @@ def add_epic(engagement, **kwargs):
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping:
         epic_name = kwargs.get("epic_name")
+        epic_issue_type_name = getattr(jira_project, "epic_issue_type_name", "Epic")
         if not epic_name:
             epic_name = engagement.name
         issue_dict = {
@@ -1328,14 +1343,16 @@ def add_epic(engagement, **kwargs):
             "summary": epic_name,
             "description": epic_name,
             "issuetype": {
-                "name": getattr(jira_project, "epic_issue_type_name", "Epic"),
+                "name": epic_issue_type_name,
             },
-            get_epic_name_field_name(jira_instance): epic_name,
         }
         if kwargs.get("epic_priority"):
             issue_dict["priority"] = {"name": kwargs.get("epic_priority")}
         try:
             jira = get_jira_connection(jira_instance)
+            # Determine if we should add the epic name or not
+            if (epic_name_field := get_epic_name_field_name(jira_instance)) in get_issuetype_fields(jira, jira_project.project_key, epic_issue_type_name):
+                issue_dict[epic_name_field] = epic_name
             logger.debug("add_epic: %s", issue_dict)
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(

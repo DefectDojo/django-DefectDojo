@@ -19,7 +19,7 @@ jobs:
           extended: true
 
       - name: Setup Node
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: '22.5.1'
 
@@ -39,8 +39,8 @@ jobs:
 
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0 - use this after https://github.com/DefectDojo/django-DefectDojo/pull/11329
-      
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+
       - name: Install dependencies
         run: cd docs && npm ci
       

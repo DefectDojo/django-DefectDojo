@@ -126,7 +126,7 @@ monitoring:
   # Add the nginx prometheus exporter sidecar
   prometheus:
     enabled: false
-    image: nginx/nginx-prometheus-exporter:1.4.0
+    image: nginx/nginx-prometheus-exporter:1.4.1
     imagePullPolicy: IfNotPresent
 
 annotations: {}
@@ -211,6 +211,7 @@ django:
   annotations: {}
   service:
     annotations: {}
+    type: ""
   affinity: {}
   ingress:
     enabled: true
@@ -480,7 +481,7 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.37.3
+    tag: 1.37.4
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
@@ -542,3 +543,15 @@ extraConfigs: {}
 #     configMapKeyRef:
 #       name: my-other-postgres-configmap
 #       key: cluster_endpoint
+
+# To add code snippet which would extend setting functionality, you might add it here
+# It will be stored as ConfigMap and mounted `dojo/settings/local_settings.py`.
+# For more see: https://documentation.defectdojo.com/getting_started/configuration/
+# For example:
+# localsettingspy: |
+#   INSTALLED_APPS += (
+#     'debug_toolbar',
+#   )
+#   MIDDLEWARE = [
+#       'debug_toolbar.middleware.DebugToolbarMiddleware',
+#   ] + MIDDLEWARE
