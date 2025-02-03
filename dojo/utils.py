@@ -1379,8 +1379,7 @@ def handle_uploaded_threat(f, eng):
         Path(settings.MEDIA_ROOT + "/threat/").mkdir()
     with open(settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}",
               "wb+") as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
+        destination.writelines(chunk for chunk in f.chunks())
     eng.tmodel_path = settings.MEDIA_ROOT + f"/threat/{eng.id}{extension}"
     eng.save()
 
@@ -1390,8 +1389,7 @@ def handle_uploaded_selenium(f, cred):
     extension = path.suffix
     with open(settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}",
               "wb+") as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
+        destination.writelines(chunk for chunk in f.chunks())
     cred.selenium_script = settings.MEDIA_ROOT + f"/selenium/{cred.id}{extension}"
     cred.save()
 

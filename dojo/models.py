@@ -2,7 +2,6 @@ import base64
 import copy
 import hashlib
 import logging
-import os
 import re
 import warnings
 from contextlib import suppress
@@ -124,6 +123,14 @@ def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_ta
             obj.tags.set(cleaned_tag_list)
 
 
+def _copy_model_util(model_in_database, exclude_fields: list[str] = []):
+    new_model_instance = model_in_database.__class__()
+    for field in model_in_database._meta.fields:
+        if field.name not in ["id", *exclude_fields]:
+            setattr(new_model_instance, field.name, getattr(model_in_database, field.name))
+    return new_model_instance
+
+
 @deconstructible
 class UniqueUploadNameProvider:
 
@@ -150,7 +157,7 @@ class UniqueUploadNameProvider:
             filename += ext
         if self.directory is None:
             return filename
-        return os.path.join(now().strftime(self.directory), filename)
+        return Path(now().strftime(self.directory)) / filename
 
 
 class Regulation(models.Model):
@@ -513,9 +520,20 @@ class System_Settings(models.Model):
         help_text=_("Enable anyone with a link to the survey to answer a survey"),
     )
     credentials = models.TextField(max_length=3000, blank=True)
-    disclaimer = models.TextField(max_length=3000, default="", blank=True,
-                                  verbose_name=_("Custom Disclaimer"),
-                                  help_text=_("Include this custom disclaimer on all notifications and generated reports"))
+    disclaimer_notifications = models.TextField(max_length=3000, default="", blank=True,
+                                  verbose_name=_("Custom Disclaimer for Notifications"),
+                                  help_text=_("Include this custom disclaimer on all notifications"))
+    disclaimer_reports = models.TextField(max_length=5000, default="", blank=True,
+                                  verbose_name=_("Custom Disclaimer for Reports"),
+                                  help_text=_("Include this custom disclaimer on generated reports"))
+    disclaimer_reports_forced = models.BooleanField(
+        default=False,
+        blank=False,
+        verbose_name=_("Force to add disclaimer reports"),
+        help_text=_("Disclaimer will be added to all reports even if user didn't selected 'Include disclaimer'."))
+    disclaimer_notes = models.TextField(max_length=3000, default="", blank=True,
+                                  verbose_name=_("Custom Disclaimer for Notes"),
+                                  help_text=_("Include this custom disclaimer next to input form for notes"))
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text=_("Default expiry period for risk acceptance form."))
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name=_("Risk acceptance expiration heads up days"), help_text=_("Notify X days before risk acceptance expires. Leave empty to disable."))
@@ -693,9 +711,7 @@ class NoteHistory(models.Model):
     current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
 
     def copy(self):
-        copy = self
-        copy.pk = None
-        copy.id = None
+        copy = _copy_model_util(self)
         copy.save()
         return copy
 
@@ -721,12 +737,9 @@ class Notes(models.Model):
         return self.entry
 
     def copy(self):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_history = list(self.history.all())
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         # Save the object before setting any ManyToMany relationships
         copy.save()
         # Copy the history
@@ -741,10 +754,7 @@ class FileUpload(models.Model):
     file = models.FileField(upload_to=UniqueUploadNameProvider("uploaded_files"))
 
     def copy(self):
-        copy = self
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
+        copy = _copy_model_util(self)
         # Add unique modifier to file name
         copy.title = f"{self.title} - clone-{str(uuid4())[:8]}"
         # Create new unique file name
@@ -1528,16 +1538,13 @@ class Engagement(models.Model):
         return reverse("view_engagement", args=[str(self.id)])
 
     def copy(self):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
         old_tags = list(self.tags.all())
         old_risk_acceptances = list(self.risk_acceptance.all())
         old_tests = list(Test.objects.filter(engagement=self))
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         # Save the object before setting any ManyToMany relationships
         copy.save()
         # Copy the notes
@@ -1648,10 +1655,8 @@ class Endpoint_Status(models.Model):
         return f"'{self.finding}' on '{self.endpoint}'"
 
     def copy(self, finding=None):
-        copy = self
+        copy = _copy_model_util(self)
         current_endpoint = self.endpoint
-        copy.pk = None
-        copy.id = None
         if finding:
             copy.finding = finding
         copy.endpoint = current_endpoint
@@ -1701,6 +1706,23 @@ class Endpoint(models.Model):
         indexes = [
             models.Index(fields=["product"]),
         ]
+
+    def __hash__(self):
+        return self.__str__().__hash__()
+
+    def __eq__(self, other):
+        if isinstance(other, Endpoint):
+            # Check if the contents of the endpoint match
+            contents_match = str(self) == str(other)
+            # Determine if products should be used in the equation
+            if self.product is not None and other.product is not None:
+                # Check if the products are the same
+                products_match = (self.product) == other.product
+                # Check if the contents match
+                return products_match and contents_match
+            return contents_match
+
+        return NotImplemented
 
     def __str__(self):
         try:
@@ -1832,23 +1854,6 @@ class Endpoint(models.Model):
 
         if errors:
             raise ValidationError(errors)
-
-    def __hash__(self):
-        return self.__str__().__hash__()
-
-    def __eq__(self, other):
-        if isinstance(other, Endpoint):
-            # Check if the contents of the endpoint match
-            contents_match = str(self) == str(other)
-            # Determine if products should be used in the equation
-            if self.product is not None and other.product is not None:
-                # Check if the products are the same
-                products_match = (self.product) == other.product
-                # Check if the contents match
-                return products_match and contents_match
-            return contents_match
-
-        return NotImplemented
 
     @property
     def is_broken(self):
@@ -2117,15 +2122,12 @@ class Test(models.Model):
         return bc
 
     def copy(self, engagement=None):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
         old_tags = list(self.tags.all())
         old_findings = list(Finding.objects.filter(test=self))
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         if engagement:
             copy.engagement = engagement
         # Save the object before setting any ManyToMany relationships
@@ -2653,6 +2655,16 @@ class Finding(models.Model):
             models.Index(fields=["duplicate_finding", "id"]),
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.unsaved_endpoints = []
+        self.unsaved_request = None
+        self.unsaved_response = None
+        self.unsaved_tags = None
+        self.unsaved_files = None
+        self.unsaved_vulnerability_ids = None
+
     def __str__(self):
         return self.title
 
@@ -2727,18 +2739,8 @@ class Finding(models.Model):
         from django.urls import reverse
         return reverse("view_finding", args=[str(self.id)])
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.unsaved_endpoints = []
-        self.unsaved_request = None
-        self.unsaved_response = None
-        self.unsaved_tags = None
-        self.unsaved_files = None
-        self.unsaved_vulnerability_ids = None
-
     def copy(self, test=None):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_files = list(self.files.all())
@@ -2747,8 +2749,6 @@ class Finding(models.Model):
         old_found_by = list(self.found_by.all())
         old_tags = list(self.tags.all())
         # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         if test:
             copy.test = test
         # Save the object before setting any ManyToMany relationships
@@ -3734,13 +3734,10 @@ class Risk_Acceptance(models.Model):
         return None
 
     def copy(self, engagement=None):
-        copy = self
+        copy = _copy_model_util(self)
         # Save the necessary ManyToMany relationships
         old_notes = list(self.notes.all())
         old_accepted_findings_hash_codes = [finding.hash_code for finding in self.accepted_findings.all()]
-        # Wipe the IDs of the new object
-        copy.pk = None
-        copy.id = None
         # Save the object before setting any ManyToMany relationships
         copy.save()
         # Copy the notes

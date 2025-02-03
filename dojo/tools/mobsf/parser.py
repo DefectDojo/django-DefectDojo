@@ -148,8 +148,6 @@ class MobSFParser:
                             "file_path": None,
                         }
                         mobsf_findings.append(mobsf_item)
-                    else:
-                        pass
 
         # Manifest Analysis
         if "manifest_analysis" in data:
