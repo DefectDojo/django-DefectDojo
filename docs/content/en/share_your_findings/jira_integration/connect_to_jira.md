@@ -6,20 +6,28 @@ weight: 1
 
 Connecting a Jira Instance is the first step to take when setting up DefectDojo’s Jira integration.
 
-Each Jira Instance connection needs to be set up with the following attributes:
-* a Jira Cloud URL
-* a Jira username and password, or personal access token which DefectDojo can use to connect to that Jira Cloud URL
+#### Required information from Jira
 
-When you set up your Jira Instance, you'll set up the following value mappings:
-* the Epic name that you want to use
+You will need:
+* a Jira URL
+* an account with permissions to create and update issues in your Jira instance.  This can be:
+    * A standard **username / password** combination
+    * A **username / API Key** combination **(Jira Cloud)**
+    * A **Personal Access Token (aka PAT, used in Jira Data Center and Jira Server only)**
+
+Optionally, you can map:
 * Jira Transitions to trigger Re-Opening and Closing Findings
 * Jira Resolutions which can apply Risk Acceptance and False Positive statuses to Findings (optional)
 
 Multiple Jira Projects can be handled by a single Jira Instance connection, as long as the Jira account / token used by DefectDojo has permission to create Issues in the associated Jira Project.
 
-Connecting a Jira instance does not cause any Findings to push right away \- this is simply the first step. Once the Jira Instance connection is created, it must be associated with a Product before any information will push to Jira. See **[this guide](../add_jira_to_product)** for help with adding this integration to a Product.
+#### How Findings are pushed
 
-## Add a Jira Instance (Beta UI)
+Connecting a Jira instance does not cause any Findings to push right away \- this is simply the first step. Once the Jira Instance connection is created, it must be associated with a Product or an Engagement before any information will push to Jira. 
+
+If you already have a Jira Instance connection set up, you can use **[this guide](../add_jira_to_product)** for help with adding this integration to a Product.
+
+## Add a Jira Instance (Pro UI)
 
 1. If you have not already done so, navigate to the System Settings page and check the box on **Enable Jira Integration**.
 
@@ -31,7 +39,12 @@ Connecting a Jira instance does not cause any Findings to push right away \- thi
 
 4. Select the URL for your company’s Jira instance \- likely similar to https://**yourcompany**.atlassian.net if you’re using a Jira Cloud installation.  
 
-5. Enter an appropriate Username and Password for Jira. Alternatively, if your Jira instance uses a Personal Access Token (**PAT**) for authentication, you should instead enter the **PAT** in the Password field. The Username will not be used for authentication with **PAT**, but you can use this field as a label to indicate the name of the **PAT** you're using.  Note that the user associated with this connection have permission to create Issues and access data in your Jira instance.
+5. Enter an appropriate authetication method in the Username / Password fields for Jira:
+    * For standard **username / password Jira authentication**, enter a Jira Username and corresponding Password in these fields.
+    * For authentication with a **user's API token (Jira Cloud)** enter the Username with the corresponding **API token** in the password field.
+    * For authentication with a Jira **Personal Access Token (aka PAT, used in Jira Data Center and Jira Server only)**, enter the PAT in the password field.  Username is not used for authentication with a Jira PAT, but the field is still required in this form, so you can use a placeholder value here to identify your PAT.
+
+Note that the user associated with this connection have permission to create Issues and access data in your Jira instance.
 
 6. You will need to provide values for an Epic Name ID, Re-open Transition ID and Close Transition ID.  These values can be changed later.  While logged into Jira, you can access these values from the following URLs:
 - **Epic Name ID**: visit `https://\<YOUR JIRA URL\>/rest/api/2/field` and search for Epic Name. Copy the number out of cf\[number] and paste it here.  
@@ -40,17 +53,19 @@ Connecting a Jira instance does not cause any Findings to push right away \- thi
 
 7. Select the Default issue type which you want to create Issues as in Jira. The options for this are **Bug, Task, Story** and **Epic** (which are standard Jira issue types) as well as **Spike** and **Security**, which are custom issue types. If you have a different Issue Type which you want to use, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for assistance.
 
-8. Select your Issue Template \- the two types are:  
+8. Select your Issue Template, which will determine the Issue Description when Issues are created in Jira.
+
+The two types are:  
 \- **Jira\_full**, which will include all Finding information in Jira Issues  
 \- **Jira\_limited**, which will include a smaller amount of Finding information and metadata.  
 ​  
-If you leave this field blank, it will default to **Jira\_full.**
+If you leave this field blank, it will default to **Jira\_full.**  If you need a different kind of template, Pro users can reach out to support@defectdojo.com
 
 9. If you wish, enter the name of a Jira Resolution which will change the status of a Finding to Accepted or to False Positive (when the Resolution is triggered on the Issue).
 
 The form can be submitted from here.  If you wish, you can further customize your Jira integration under Optional Fields.  Clicking this button will allow you to apply generic text to Jira Issues or change the mapping of Jira Severity Mappings.
 
-## Add a Jira Instance (Legacy UI)
+## Add a Jira Instance (Legacy UI / Open-Source)
 
 1. If you have not already done so, navigate to the System Settings page and check the box on **Enable Jira Integration**. You will need to do this before the ⚙️ **Configuration \> JIRA** option shows up on the sidebar.  
 ​
@@ -72,15 +87,20 @@ The Express method allows for a quicker method of linking a Project. Use the Exp
 ​
 2. Select the URL for your company’s Jira instance \- likely similar to https://**yourcompany**.atlassian.net if you’re using a Jira Cloud installation.  
 ​
-3. Enter your Username and Password for Jira. Alternatively, if your Jira instance uses a Personal Access Token (**PAT**) for authentication, you should instead enter the **PAT** in the Password field. The Username will not be used for authentication with **PAT**, but you can use this field as a label to indicate the name of the **PAT** you're using.  
+3. Enter an appropriate authetication method in the Username / Password fields for Jira:
+    * For standard **username / password Jira authentication**, enter a Jira Username and corresponding Password in these fields.
+    * For authentication with a **user's API token (Jira Cloud)** enter the Username with the corresponding **API token** in the password field.
+    * For authentication with a Jira **Personal Access Token (aka PAT, used in Jira Data Center and Jira Server only)**, enter the PAT in the password field.  Username is not used for authentication with a Jira PAT, but the field is still required in this form, so you can use a placeholder value here to identify your PAT.
 ​
 4. Select the Default issue type which you want to create Issues as in Jira. The options for this are **Bug, Task, Story** and **Epic** (which are standard Jira issue types) as well as **Spike** and **Security**, which are custom issue types. If you have a different Issue Type which you want to use, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for assistance.  
 ​
-5. Select your Issue Template \- the two types are:  
+5. Select your Issue Template, which will determine the Issue Description when Issues are created in Jira.
+
+The two types are:  
 \- **Jira\_full**, which will include all Finding information in Jira Issues  
-\- **Jira\_limited**, which will include a smaller amount of Finding information and metadata.  
+\- **Jira\_limited**, which will include a smaller amount of Finding information and metadata. 
 ​  
-If you leave this field blank, it will default to **Jira\_full.**  
+If you leave this field blank, it will default to **Jira\_full.** 
 ​
 6. Select one or more Jira Resolution types which will change the status of a Finding to Accepted (when the Resolution is triggered on the Issue). If you don’t wish to use this automation, you can leave the field blank.  
 ​
