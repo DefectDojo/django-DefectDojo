@@ -783,13 +783,14 @@ def finding_display_status(finding):
     }
 
     dict_rule_display_status = {
-        "Active, Verified, Risk Pending": ["Risk Pending", "Risk", "Orange"],
-        "Active, Verified, Risk Rejected": ["Risk Rejected","Risk", "Orange"],
-        "Active, Verified, Risk Expired": ["Risk Expired","Risk", "Orange"],
+        "Active, Verified, Risk Pending": ["Risk Pending", "Risk", "Red"],
+        "Active, Verified, Risk Rejected": ["Risk Rejected","Risk", "Red"],
+        "Active, Verified, Risk Expired": ["Risk Expired","Risk", "Red"],
         "Inactive, Verified, Risk Accepted": ["Risk Accepted","Risk", "Orange"],
         "Inactive, Verified, On Whitelist":["On Whitelist","Risk", "Orange"],
-        "Inactive, Verified, Mitigated, On Whitelist": ["On Whitelist","Risk", "Orange"],
+        "Inactive, Verified, Mitigated, On Whitelist": ["Closed","Risk", "Green"],
         "Active, Verified, On Blacklist": ["On Blacklist", "whitelist", "Red"],
+        "Inactive, Verified, On Blacklist": ["On Blacklist", "whitelist", "Orange"],
         "Active, Verified, Transfer Pending": ["Transfer Pending","Transfer", "Red"],
         "Active, Verified, Transfer Rejected": ["Transfer Rejected","Transfer", "Orange"],
         "Active, Verified, Transfer Expired": ["Activa", "Transfer", "Red"],
@@ -797,8 +798,8 @@ def finding_display_status(finding):
         "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "Closed", "Green"],
         "Active, Verified, Under Review": ["Under Review", "Under Review", "Red"],
         "Under Review, Active, Risk pending": ["Under Review", "Under Review", "Red"],
-        "Inactive, Mitigated, Out Of Scope": ["Out Of Scope", "Out Of Scope", "Green"],
-        "Inactive, Mitigated, False Positive": ["False Positive", "False Positive", "Green"],
+        "Inactive, Mitigated, Out Of Scope": ["Closed", "Closed", "Green"],
+        "Inactive, Mitigated, False Positive": ["Closed", "Closed", "Green"],
         "Inactive, Verified, Mitigated": ["Closed", "Closed", "Green"],
         "Active, Verified": ["Active", "Active", "Red"],
     }
