@@ -262,6 +262,13 @@ class BaseImporter(ImporterOptions):
             **kwargs,
         )
 
+    def determine_deduplication_algorithm(self) -> str:
+        """
+        Determines what dedupe algorithm to use for the Test being processed.
+        :return: A string representing the dedupe algorithm to use.
+        """
+        return self.test.deduplication_algorithm
+
     def update_test_meta(self):
         """
         Update the test with some values stored in the kwargs dict. The common
