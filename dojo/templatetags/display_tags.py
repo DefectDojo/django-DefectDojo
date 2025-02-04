@@ -783,23 +783,24 @@ def finding_display_status(finding):
     }
 
     dict_rule_display_status = {
-        "Active, Verified, Risk Pending": ["Risk Pending", "Risk", "Open", "Orange"],
-        "Active, Verified, Risk Rejected": ["Risk Rejected","Risk","Open", "Orange"],
-        "Active, Verified, Risk Expired": ["Risk Expired","Risk","Open", "Orange"],
-        "Inactive, Verified, Risk Accepted": ["Risk Accepted","Risk","Open", "Orange"],
-        "Inactive, Verified, On Whitelist":["On Whitelist","Risk","Open", "Orange"],
-        "Active, Verified, On Blacklist": ["On Blacklist", "whitelist", "Open", "Red"],
-        "Active, Verified, Transfer Pending": ["Transfer Pending","Transfer", "Open", "Orange"],
-        "Active, Verified, Transfer Rejected": ["Transfer Rejected","Transfer", "Open", "Orange"],
-        "Active, Verified, Transfer Expired": ["Activa", "Transfer", "Open", "Red"],
-        "Inactive, Verified, Transfer Accepted": ["Transfer Accepted", "Transfer", "Open", "Orange"],
-        "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "Closed", "Closed", "Green"],
-        "Active, Verified, Under Review": ["Under Review", "Under Review", "Open", "Red"],
-        "Under Review, Active, Risk pending": ["Under Review", "Under Review", "Open", "Red"],
-        "Inactive, Mitigated, Out Of Scope": ["Out Of Scope", "Out Of Scope", "Open", "Green"],
-        "Inactive, Mitigated, False Positive": ["False Positive", "False Positive", "Open", "Green"],
-        "Inactive, Verified, Mitigated": ["Closed", "Closed", "Closed", "Green"],
-        "Active, Verified": ["Active", "Active", "Open", "Red"],
+        "Active, Verified, Risk Pending": ["Risk Pending", "Risk", "Orange"],
+        "Active, Verified, Risk Rejected": ["Risk Rejected","Risk", "Orange"],
+        "Active, Verified, Risk Expired": ["Risk Expired","Risk", "Orange"],
+        "Inactive, Verified, Risk Accepted": ["Risk Accepted","Risk", "Orange"],
+        "Inactive, Verified, On Whitelist":["On Whitelist","Risk", "Orange"],
+        "Inactive, Verified, Mitigated, On Whitelist": ["On Whitelist","Risk", "Orange"],
+        "Active, Verified, On Blacklist": ["On Blacklist", "whitelist", "Red"],
+        "Active, Verified, Transfer Pending": ["Transfer Pending","Transfer", "Red"],
+        "Active, Verified, Transfer Rejected": ["Transfer Rejected","Transfer", "Orange"],
+        "Active, Verified, Transfer Expired": ["Activa", "Transfer", "Red"],
+        "Inactive, Verified, Transfer Accepted": ["Transfer Accepted", "Transfer", "Orange"],
+        "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "Closed", "Green"],
+        "Active, Verified, Under Review": ["Under Review", "Under Review", "Red"],
+        "Under Review, Active, Risk pending": ["Under Review", "Under Review", "Red"],
+        "Inactive, Mitigated, Out Of Scope": ["Out Of Scope", "Out Of Scope", "Green"],
+        "Inactive, Mitigated, False Positive": ["False Positive", "False Positive", "Green"],
+        "Inactive, Verified, Mitigated": ["Closed", "Closed", "Green"],
+        "Active, Verified": ["Active", "Active", "Red"],
     }
 
     display_status = finding.status()
@@ -808,8 +809,7 @@ def finding_display_status(finding):
     context = {
         "current_status": status[0],
         "reverse": dict_rule_reverse.get(status[1]),
-        "status": status[2],
-        "color_background": StatusColor.get_color(status[3]),
+        "color_background": StatusColor.get_color(status[2]),
         "display_status": display_status
     }
     context_object = template.Context(context)
