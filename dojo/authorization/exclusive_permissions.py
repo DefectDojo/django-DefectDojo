@@ -183,7 +183,7 @@ def user_has_exclusive_permission_product_or_404(
         obj: object,
         permission: Permissions) -> bool:
     
-    if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM:
+    if settings.ENABLE_FILTER_FOR_TAG_RED_TEAM is False:
         return True
 
     if user is None:
