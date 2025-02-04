@@ -808,7 +808,19 @@
                                                 <li>
                                                     <a rel="noopener noreferrer" href="{% url 'product_closed_findings' product_tab.product.id %}">
                                                         <i class="fa-solid fa-fire-extinguisher"></i>
-                                                        &nbsp;&nbsp;{% trans "View Closed Findings" %}
+                                                        {% trans "View Closed Findings" %}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'product_whitelisted_findings' product_tab.product.id %}">
+                                                        <i class="fa-solid fa-list"></i>
+                                                        {% trans "View Whitelisted Findings" %}
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a rel="noopener noreferrer" href="{% url 'product_blacklisted_findings' product_tab.product.id %}">
+                                                        <i class="fa-solid fa-circle"></i>
+                                                        {% trans "View Blacklisted Findings" %}
                                                     </a>
                                                 </li>
                                                 {% if product_tab.product|has_object_permission:"Finding_Add" %}

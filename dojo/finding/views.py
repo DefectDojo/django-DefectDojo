@@ -341,6 +341,10 @@ class BaseListFindings:
             return findings.filter(finding_helper.ACCEPTED_FINDINGS_QUERY)
         if filter_name == "Closed":
             return findings.filter(finding_helper.CLOSED_FINDINGS_QUERY)
+        if filter_name == "Whitelisted":
+            return findings.filter(finding_helper.WHITELISTED_FINDINGS_QUERY)
+        if filter_name == "Blacklisted":
+            return findings.filter(finding_helper.BLACKLISTED_FINDINGS_QUERY)
         return findings
 
     def filter_findings_by_form(self, request: HttpRequest, findings: QuerySet[Finding]):
@@ -509,6 +513,18 @@ class ListClosedFindings(ListFindings):
     def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
         self.filter_name = "Closed"
         self.order_by = "-mitigated"
+        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+
+
+class ListWhitelistedFindings(ListFindings):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
+        self.filter_name = "Whitelisted"
+        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+
+
+class ListBlacklistedFindings(ListFindings):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
+        self.filter_name = "Blacklisted"
         return super().get(request, product_id=product_id, engagement_id=engagement_id)
 
 

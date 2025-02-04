@@ -42,6 +42,8 @@ NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 UNDER_REVIEW_QUERY = Q(under_review=True)
+WHITELISTED_FINDINGS_QUERY = Q(risk_status="On Whitelist")
+BLACKLISTED_FINDINGS_QUERY = Q(risk_status="On Blacklist")
 
 
 # this signal is triggered just before a finding is getting saved
