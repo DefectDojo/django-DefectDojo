@@ -868,7 +868,6 @@ class NotificationManager(NotificationManagerHelpers):
                 )
 
 
-
 @app.task(ignore_result=True)
 def webhook_status_cleanup(*_args: list, **_kwargs: dict):
     # If some endpoint was affected by some outage (5xx, 429, Timeout) but it was clean during last 24 hours,
