@@ -7,8 +7,9 @@ from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.urls import reverse
 from django.utils.timezone import make_aware
-import dojo.jira_link.helper as jira_helper
+
 import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
 from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
@@ -762,10 +763,9 @@ class BaseImporter(ImporterOptions):
         self,
         findings,
     ):
-
-            for finding in findings:
-                # trigger dedupe, but don't push to jira
-                finding.save(dedupe_option=True)
+        for finding in findings:
+            # trigger dedupe, but don't push to jira
+            finding.save(dedupe_option=True)
 
     # Push findings to JIRA, or the group that the finding is part of
     def push_to_jira(
@@ -779,7 +779,7 @@ class BaseImporter(ImporterOptions):
                     for finding_group in {
                             finding.finding_group
                             for finding in findings
-                            if finding.finding_group is not None and not finding.is_mitigated and findind.finding_group.name not in pushed_groups_names
+                            if finding.finding_group is not None and not finding.is_mitigated and finding.finding_group.name not in pushed_groups_names
                     }:
                         jira_helper.push_to_jira(finding_group)
 
