@@ -10,6 +10,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
+    IMPORT_CREATED_FINDING,
     Engagement,
     Finding,
     Test,
@@ -103,6 +104,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         self.verify_tool_configuration_from_engagement()
         # Fetch the parser based upon the string version of the scan type
         parser = self.get_parser()
+        # Initialize the import history object, each finding will be added to this object
+        self.test_import_history = self.initialize_import_history()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         self.parsed_findings = self.parse_findings(scan, parser)
@@ -118,13 +121,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Save the test and engagement for changes to take affect
         self.test.save()
         self.test.engagement.save()
-        # Create a test import history object to record the flags sent to the importer
-        # This operation will return None if the user does not have the import history
-        # feature enabled
-        test_import_history = self.update_import_history(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-        )
+        # Finalize the import history object, which may just be logging the results for now
+        self.finalize_import_history(self.test_import_history, new_findings, None, None, None)
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
         create_notification(
@@ -147,7 +145,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("IMPORT_SCAN: Updating Test progress")
         self.update_test_progress()
         logger.debug("IMPORT_SCAN: Done")
-        return self.test, 0, len(new_findings), len(closed_findings), 0, 0, test_import_history
+        return self.test, 0, len(new_findings), len(closed_findings), 0, 0, self.test_import_history
 
     def process_findings(
         self,
@@ -195,6 +193,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             if self.service is not None:
                 unsaved_finding.service = self.service
             unsaved_finding.save(dedupe_option=False)
+            # we now create the history record inline before dedupe is done which might potentially delete the finding #6217
+            self.create_import_history_record(self.test_import_history, unsaved_finding, IMPORT_CREATED_FINDING)
             finding = unsaved_finding
             # Determine how the finding should be grouped
             self.process_finding_groups(
@@ -208,6 +208,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Process any tags
             if finding.unsaved_tags:
                 finding.tags = finding.unsaved_tags
+
+            if self.tags:
+                for tag in self.tags:
+                    finding.tags.add(tag)
+
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
@@ -219,6 +224,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 finding.save()
             else:
                 finding.save(push_to_jira=self.push_to_jira)
+
+            for endpoint in finding.endpoints.all():
+                for tag in self.tags:
+                    endpoint.tags.add(tag)
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(

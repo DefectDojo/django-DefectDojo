@@ -13,6 +13,7 @@ from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
     # Import History States
+    IMPORT_ACTIONS,
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
     IMPORT_REACTIVATED_FINDING,
@@ -317,25 +318,11 @@ class BaseImporter(ImporterOptions):
         if self.tags is not None and len(self.tags) > 0:
             self.test.tags.set(self.tags)
 
-    def update_import_history(
+    def initialize_import_history(
         self,
-        new_findings: list[Finding] = [],
-        closed_findings: list[Finding] = [],
-        reactivated_findings: list[Finding] = [],
-        untouched_findings: list[Finding] = [],
     ) -> Test_Import:
         """Creates a record of the import or reimport operation that has occurred."""
         # Quick fail check to determine if we even wanted this
-        if settings.TRACK_IMPORT_HISTORY is False:
-            return None
-        # Log the current state of what has occurred in case there could be
-        # deviation from what is displayed in the view
-        logger.debug(
-            f"new: {len(new_findings)} "
-            f"closed: {len(closed_findings)} "
-            f"reactivated: {len(reactivated_findings)} "
-            f"untouched: {len(untouched_findings)} ",
-        )
         # Create a dictionary to stuff into the test import object
         import_settings = {}
         import_settings["active"] = self.active
@@ -348,7 +335,7 @@ class BaseImporter(ImporterOptions):
         if len(self.endpoints_to_add) > 0:
             import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
         # Create the test import object
-        test_import = Test_Import.objects.create(
+        return Test_Import.objects.create(
             test=self.test,
             import_settings=import_settings,
             version=self.version,
@@ -357,38 +344,35 @@ class BaseImporter(ImporterOptions):
             commit_hash=self.commit_hash,
             type=self.import_type,
         )
-        # Define all of the respective import finding actions for the test import object
-        test_import_finding_action_list = []
-        for finding in closed_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for closed finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
+
+    def create_import_history_record(test_import, finding, action):
+        if settings.TRACK_IMPORT_HISTORY is False or test_import is None:
+            return
+
+        if action not in IMPORT_ACTIONS:
+            msg = f"Invalid Import History action: {action}"
+            raise ValueError(msg)
+
+        logger.debug(f"creating Test_Import_Finding_Action for finding: {finding.id} action: {action}")
+        # if ever needed we can try-catch exceptions here
+        Test_Import_Finding_Action.create(Test_Import_Finding_Action(
                 test_import=test_import,
                 finding=finding,
-                action=IMPORT_CLOSED_FINDING,
-            ))
-        for finding in new_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for created finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_CREATED_FINDING,
-            ))
-        for finding in reactivated_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for reactivated finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_REACTIVATED_FINDING,
-            ))
-        for finding in untouched_findings:
-            logger.debug(f"preparing Test_Import_Finding_Action for untouched finding: {finding.id}")
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
-                test_import=test_import,
-                finding=finding,
-                action=IMPORT_UNTOUCHED_FINDING,
-            ))
-        # Bulk create all the defined objects
-        Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
+                action=action,
+        ))
+
+    def finalize_import_history(self, test_import, new_findings, closed_findings, reactivated_findings, untouched_findings):
+        if settings.TRACK_IMPORT_HISTORY is False or test_import is None:
+            return None
+
+        # Log the current state of what has occurred in case there could be
+        # deviation from what is displayed in the view
+        logger.debug(
+            f"new: {len(new_findings)} "
+            f"closed: {len(closed_findings)} "
+            f"reactivated: {len(reactivated_findings)} "
+            f"untouched: {len(untouched_findings)} ",
+        )
 
         # Add any tags to the findings imported if necessary
         if self.apply_tags_to_findings and self.tags:
@@ -756,3 +740,5 @@ class BaseImporter(ImporterOptions):
             url=reverse("view_test", args=(test.id,)),
             url_api=reverse("test-detail", args=(test.id,)),
         )
+
+

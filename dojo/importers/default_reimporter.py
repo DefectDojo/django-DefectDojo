@@ -9,6 +9,10 @@ import dojo.jira_link.helper as jira_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.options import ImporterOptions
 from dojo.models import (
+    IMPORT_CLOSED_FINDING,
+    IMPORT_CREATED_FINDING,
+    IMPORT_REACTIVATED_FINDING,
+    IMPORT_UNTOUCHED_FINDING,
     Development_Environment,
     Finding,
     Notes,
@@ -88,6 +92,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.verify_tool_configuration_from_test()
         # Fetch the parser based upon the string version of the scan type
         parser = self.get_parser()
+        # Initialize the import history object, each finding will be added to this object.
+        self.test_import_history = self.initialize_import_history()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         self.parsed_findings = self.parse_findings(scan, parser)
@@ -108,20 +114,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Update the test meta
         self.update_test_meta()
         # Update the test tags
+        logger.debug("REIMPORT_SCAN: Updating test tags")
         self.update_test_tags()
         # Save the test and engagement for changes to take affect
         self.test.save()
         self.test.engagement.save()
-        logger.debug("REIMPORT_SCAN: Updating test tags")
-        # Create a test import history object to record the flags sent to the importer
-        # This operation will return None if the user does not have the import history
-        # feature enabled
-        test_import_history = self.update_import_history(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-            reactivated_findings=reactivated_findings,
-            untouched_findings=untouched_findings,
-        )
+        # Finalize the import history object, which may just be logging the results for now
+        self.finalize_import_history(self.test_import_history, new_findings, None, None, None)
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
         updated_count = (
@@ -144,7 +143,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             len(closed_findings),
             len(reactivated_findings),
             len(untouched_findings),
-            test_import_history,
+            self.test_import_history,
         )
 
     def determine_deduplication_algorithm(self) -> str:
@@ -276,6 +275,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding_groups_enabled=self.findings_groups_enabled,
                 )
                 mitigated_findings.append(finding)
+                self.create_import_history_record(self.test_import_history, finding, IMPORT_CLOSED_FINDING)
         # push finding groups to jira since we only only want to push whole groups
         if self.findings_groups_enabled and self.push_to_jira:
             for finding_group in {finding.finding_group for finding in findings if finding.finding_group is not None}:
@@ -470,6 +470,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             and existing_finding.risk_accepted == unsaved_finding.risk_accepted
         ):
             self.unchanged_items.append(existing_finding)
+            self.create_import_history_record(self.test_import_history, existing_finding, IMPORT_UNTOUCHED_FINDING)
             return existing_finding, True
         # If the finding is risk accepted and inactive in Defectdojo we do not sync the status from the scanner
         # We also need to add the finding to 'unchanged_items' as otherwise it will get mitigated by the reimporter
@@ -477,6 +478,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # We however do not exit the loop as we do want to update the endpoints (in case some endpoints were fixed)
         if existing_finding.risk_accepted and not existing_finding.active:
             self.unchanged_items.append(existing_finding)
+            self.create_import_history_record(self.test_import_history, existing_finding, IMPORT_UNTOUCHED_FINDING)
             return existing_finding, False
         # The finding was not an exact match, so we need to add more details about from the
         # new finding to the existing. Return False here to make process further
@@ -497,6 +499,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             # The new finding is already mitigated, so nothing to change on the
             # the existing finding
             self.unchanged_items.append(existing_finding)
+            self.create_import_history_record(self.test_import_history, existing_finding, IMPORT_UNTOUCHED_FINDING)
             # Look closer at the mitigation timestamp
             if unsaved_finding.mitigated:
                 logger.debug(f"item mitigated time: {unsaved_finding.mitigated.timestamp()}")
@@ -572,6 +575,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.endpoint_manager.chunk_endpoints_and_reactivate(endpoint_statuses)
         existing_finding.notes.add(note)
         self.reactivated_items.append(existing_finding)
+        self.create_import_history_record(self.test_import_history, existing_finding, IMPORT_REACTIVATED_FINDING)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
         # be updated in some way
         # Return False here to make sure further processing happens
@@ -624,6 +628,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                 self.unchanged_items.append(existing_finding)
+                self.create_import_history_record(self.test_import_history, existing_finding, IMPORT_UNTOUCHED_FINDING)
         # Set the component name and version on the existing finding if it is present
         # on the old finding, but not present on the existing finding (do not override)
         component_name = getattr(unsaved_finding, "component_name", None)
@@ -670,6 +675,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         )
         # Add the new finding to the list
         self.new_items.append(unsaved_finding)
+        self.create_import_history_record(self.test_import_history, unsaved_finding, IMPORT_CREATED_FINDING)
         # Process any request/response pairs
         self.process_request_response_pairs(unsaved_finding)
         return unsaved_finding
@@ -689,6 +695,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Update finding tags
         if finding_from_report.unsaved_tags:
             finding.tags = finding_from_report.unsaved_tags
+
+        if self.tags:
+            for tag in self.tags:
+                finding.tags.add(tag)
+
+        for endpoint in finding.endpoints.all():
+            for tag in self.tags:
+                endpoint.tags.add(tag)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files
