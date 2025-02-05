@@ -288,8 +288,7 @@
                                title="{{ finding.title }}">{{ finding.title|truncatechars_html:140 }}</a></td>
                         <td>{{ finding.date }}</td>
                         <td>{{ finding.active }}</td>
-                        <td><span>{{ finding.risk_status|status_style_color}}</span></td>
-                        {% comment %} <td><span style="color: {{ finding.risk_status|status_style_color.color }}">{{ finding.risk_status|status_style_color.text }}</span></td> {% endcomment %}
+                        <td>{{ finding|finding_display_status}}</td>
                         <td> <span style="color: green;">{{ finding.accepted_by}} </span></td>
                         <td>
                             {% if engagement|has_object_permission:"Risk_Acceptance" and engagement|has_risk_acceptance_permission:finding%}

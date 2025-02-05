@@ -1,3 +1,4 @@
+from enum import Enum
 import base64
 import contextlib
 import datetime
@@ -40,6 +41,21 @@ from dojo.utils import get_file_images, get_full_url, get_system_setting, prepar
 logger = logging.getLogger(__name__)
 
 register = template.Library()
+
+
+class StatusColor(Enum):
+    RED = "#b50500"
+    GREEN = "#006b00"
+    ORANGE = "#d77500"
+
+    @classmethod
+    def get_color(cls, status):
+        dict_color = {
+            "Red": cls.RED.value,
+            "Green": cls.GREEN.value,
+            "Orange": cls.ORANGE.value
+        }
+        return dict_color.get(status, cls.RED.value)
 
 # Tags suitable for rendering markdown
 markdown_tags = {
@@ -749,71 +765,61 @@ def system_setting_enabled(name):
 def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
+    html_url = '''
+        <a href="{{reverse}}" class="has-popover" data-trigger="hover"
+        data-placement="right" data-container="body" data-original-title="{{display_status}}">
+        <span style="background-color: {{color_background}};" class="pass_fail Pass">{{current_status}}</span></a>'''
+    ra = finding.risk_acceptance
+    reverse_risk_acceptance = None
+    if ra:
+        reverse_risk_acceptance = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id))
+    dict_rule_reverse = {
+        "view_transfer": reverse("view_transfer_finding", args=(finding.test.engagement.product.id, )),
+        "view_risk": reverse_risk_acceptance, 
+        "view_review": reverse("clear_finding_review", args=(finding.id, )),
+        "view_finding": reverse("view_finding", args=(finding.id, )),
+    }
+
+    dict_rule_display_status = {
+        "Under Review, Active, Risk pending": ["Under Review", "view_review", "Red"],
+        "Active, Verified, Risk pending": ["Risk Pending", "view_risk", "Red"],
+        "Inactive, Verified, Mitigated, Risk pending": ["Closed", "view_transfer", "Green"],
+        "Active, Verified, Risk Rejected": ["Open", "view_transfer", "Red"],
+        "Inactive, Mitigated, False Positive, Risk Rejected": ["Closed", "view_transfer", "Green"],
+        "Inactive, Verified, Mitigated, Risk Rejected": ["Closed", "view_transfer", "Green"],
+        "Active, Verified, Risk Expired": ["Open", "view_risk", "Red"],
+        "Inactive, Verified, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
+        "Inactive, Verified, On Whitelist": ["On Whitelist", "view_finding", "Orange"],
+        "Inactive, Verified, Mitigated, On Whitelist": ["Closed", "view_finding", "Green"],
+        "Active, Verified, On Blacklist": ["On Blacklist", "view_finding", "Red"],
+        "Inactive, Verified, On Blacklist": ["On Blacklist", "view_finding", "Red"],
+        "Inactive, Verified, Mitigated, On Blacklist": ["Closed", "view_finding", "Green"],
+        "Active, Verified, Transfer Pending": ["Transfer Pending", "view_transfer", "Red"],
+        "Active, Verified, Transfer Rejected": ["Open", "view_transfer", "Red"],
+        "Active, Verified, Transfer Expired": ["Open", "view_transfer", "Red"],
+        "Inactive, Mitigated, Out Of Scope, Transfer Expired": ["Closed", "view_transfer", "Green"],
+        "Inactive, Verified, Transfer Accepted": ["Transfer Accepted", "view_transfer", "Orange"],
+        "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "view_transfer", "Green"],
+        "Active, Verified, Under Review": ["Under Review", "view_review", "Red"],
+        "Under Review, Active, Verified, Risk pending": ["Under Review", "view_review", "Red"],
+        "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
+        "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
+        "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
+        "Active, Verified": ["Open", "view_finding", "Red"],
+    }
+
     display_status = finding.status()
-    if "Transfer Rejected" in display_status:
-        url = reverse("view_transfer_finding", args=(finding.test.engagement.product.id, ))
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Rejected"><span style="color: #b97a0c;">Transfer Rejected</span></a>'
-        display_status = display_status.replace('Transfer Rejected', link)
-    if "Transfer Pending" in display_status:
-        url = reverse("view_transfer_finding", args=(finding.test.engagement.product.id, ))
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Pending"><span style="color: #1B30DE;">Transfer Pending</span></a>'
-        display_status = display_status.replace("Transfer Pending", link)
-    if "Transfer Accepted" in display_status:
-        url = reverse("view_transfer_finding", args=(finding.test.engagement.product.id, ))
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Accepted"><span style="color: #096C11;">Transfer Accepted</span></a>'
-        display_status = display_status.replace("Transfer Accepted", link)
-    if "Transfer Expired" in display_status:
-        url = reverse("view_transfer_finding", args=(finding.test.engagement.product.id, ))
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-container="body" data-original-title="Transfer Expired"><span style="color: #D93E14;">Transfer Expired</span></a>'
-        display_status = display_status.replace("Transfer Expired", link)
-    if 'Risk Expired' in display_status:
-        ra = finding.risk_acceptance
-        if ra:
-            url = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id, ))
-            info = ra.name_and_expiration_info
-            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Expired"><span style="color: #D93E14;">Risk Expired</span></a>'
-            display_status = display_status.replace("Risk Expired", link)
-    if "Risk Rejected" in display_status:
-        ra = finding.risk_acceptance
-        if ra:
-            url = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id, ))
-            info = ra.name_and_expiration_info
-            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Rejected"><span style="color: #DA9917;">Risk Rejected</span></a>'
-            display_status = display_status.replace("Risk Rejected", link)
-
-    if "Risk pending" in display_status:
-        ra = finding.risk_acceptance
-        if ra:
-            url = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id, ))
-            info = ra.name_and_expiration_info
-            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Pending"><span style="color: blue;">Risk pending</span></a>'
-            display_status = display_status.replace("Risk pending", link)
-    elif "Risk Accepted" in display_status:
-        ra = finding.risk_acceptance
-        if ra:
-            url = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id))
-            info = ra.name_and_expiration_info
-            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
-            display_status = display_status.replace("Risk Accepted", link)
-
-    if finding.under_review:
-        url = reverse("clear_finding_review", args=(finding.id, ))
-        link = '<a href="' + url + '">Under Review</a>'
-        display_status = display_status.replace("Under Review", link)
-
-    if finding.duplicate:
-        url = "#"
-        name = "unknown"
-        if finding.duplicate_finding:
-            url = reverse("view_finding", args=(finding.duplicate_finding.id,))
-            name = finding.duplicate_finding.title + ", " + \
-                   finding.duplicate_finding.created.strftime("%b %d, %Y, %H:%M:%S")
-
-        link = '<a href="' + url + '" data-toggle="tooltip" data-placement="top" title="' + escape(
-            name) + '">Duplicate</a>'
-        display_status = display_status.replace("Duplicate", link)
-
-    return display_status
+    status = dict_rule_display_status.get(display_status, (display_status, "view_finding", "Red"))
+    template_object = template.Template(html_url)
+    context = {
+        "current_status": status[0],
+        "reverse": dict_rule_reverse.get(status[1]),
+        "color_background": StatusColor.get_color(status[2]),
+        "display_status": display_status
+    }
+    context_object = template.Context(context)
+    html_render = template_object.render(context_object)
+    return html_render
 
 
 @register.filter
