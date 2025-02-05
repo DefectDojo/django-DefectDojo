@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.db import IntegrityError
 from django.urls import reverse
 from django.utils.timezone import make_aware
 
@@ -32,7 +33,6 @@ from dojo.models import (
 from dojo.notifications.helper import create_notification
 from dojo.tools.factory import get_parser
 from dojo.utils import max_safe
-from django.db import IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -408,7 +408,7 @@ class BaseImporter(ImporterOptions):
             Test_Import_Finding_Action.create(test_import_finding_action)
         except IntegrityError as e:
             # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
-            logger.warn("Error creating Test_Import_Finding_Action: %s", e)
+            logger.warning("Error creating Test_Import_Finding_Action: %s", e)
             logger.debug("Error creating Test_Import_Finding_Action, finding marked as duplicate and deleted ?")
 
     def add_tags_safe(self, finding_or_endpoint, tag):
@@ -424,7 +424,7 @@ class BaseImporter(ImporterOptions):
             finding_or_endpoint.tags.add(tag)
         except IntegrityError as e:
             # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
-            logger.warn("Error adding tag: %s", e)
+            logger.warning("Error adding tag: %s", e)
             logger.debug("Error adding tag, finding marked as duplicate and deleted ?")
 
     def construct_imported_message(
