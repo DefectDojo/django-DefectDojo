@@ -200,7 +200,12 @@ def risk_acceptante_pending(eng: Engagement,
                                                     product,
                                                     risk_acceptance)
     message = ""
-    if finding.risk_status in ["Risk Pending", "Risk Rejected"] and finding.active is True:
+    if (
+        finding.risk_status in ["Risk Pending", "Risk Rejected"]
+        and finding.active is True
+        and finding.mitigated is None
+    ):
+
         confirmed_acceptances = get_confirmed_acceptors(finding)
         if is_permissions_risk_acceptance(eng, finding, user, product, product_type):
             if user.username in confirmed_acceptances:
