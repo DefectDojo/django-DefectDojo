@@ -7,7 +7,7 @@ from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.urls import reverse
 from django.utils.timezone import make_aware
-
+import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
@@ -756,3 +756,32 @@ class BaseImporter(ImporterOptions):
             url=reverse("view_test", args=(test.id,)),
             url_api=reverse("test-detail", args=(test.id,)),
         )
+
+    # Trigger deduplication for each finding in the findings parameter
+    def dedupe_findings(
+        self,
+        findings,
+    ):
+
+            for finding in findings:
+                # trigger dedupe, but don't push to jira
+                finding.save(dedupe_option=True)
+
+    # Push findings to JIRA, or the group that the finding is part of
+    def push_to_jira(
+        self,
+        findings,
+    ):
+        if self.push_to_jira:
+            for finding in findings:
+                if self.findings_groups_enabled and finding.finding_group is not None:
+                    pushed_groups_names = set()
+                    for finding_group in {
+                            finding.finding_group
+                            for finding in findings
+                            if finding.finding_group is not None and not finding.is_mitigated and findind.finding_group.name not in pushed_groups_names
+                    }:
+                        jira_helper.push_to_jira(finding_group)
+
+                else:
+                    jira_helper.push_to_jira(finding)

@@ -122,6 +122,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             reactivated_findings=reactivated_findings,
             untouched_findings=untouched_findings,
         )
+        # dedupe new findings
+        self.dedupe_findings(new_findings)
+        # push to JIRA
+        self.push_to_jira(new_findings)
+        self.push_to_jira(reactivated_findings)
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
         updated_count = (
@@ -232,12 +237,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding,
                     unsaved_finding,
                 )
-                # finding = new finding or existing finding still in the upload report
-                # to avoid pushing a finding group multiple times, we push those outside of the loop
-                if self.findings_groups_enabled and self.group_by:
-                    finding.save()
-                else:
-                    finding.save(push_to_jira=self.push_to_jira)
 
         self.to_mitigate = (set(self.original_items) - set(self.reactivated_items) - set(self.unchanged_items))
         # due to #3958 we can have duplicates inside the same report
@@ -715,19 +714,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
                 **kwargs,
             )
-            if self.push_to_jira:
-                if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
-                else:
-                    jira_helper.push_to_jira(findings[0])
-
-        if self.findings_groups_enabled and self.push_to_jira:
-            for finding_group in {
-                    finding.finding_group
-                    for finding in self.reactivated_items + self.unchanged_items
-                    if finding.finding_group is not None and not finding.is_mitigated
-            }:
-                jira_helper.push_to_jira(finding_group)
 
     def process_results(
         self,

@@ -125,6 +125,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings=new_findings,
             closed_findings=closed_findings,
         )
+        # dedupe findings
+        self.dedupe_findings(new_findings)
+        # push to JIRA
+        self.push_to_jira(new_findings)
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
         create_notification(
@@ -214,11 +218,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             finding = self.process_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
-            # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if self.findings_groups_enabled and self.group_by:
-                finding.save()
-            else:
-                finding.save(push_to_jira=self.push_to_jira)
 
         for (group_name, findings) in group_names_to_findings_dict.items():
             finding_helper.add_findings_to_auto_group(
@@ -228,11 +227,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 create_finding_groups_for_all_findings=self.create_finding_groups_for_all_findings,
                 **kwargs,
             )
-            if self.push_to_jira:
-                if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
-                else:
-                    jira_helper.push_to_jira(findings[0])
 
         sync = kwargs.get("sync", True)
         if not sync:
