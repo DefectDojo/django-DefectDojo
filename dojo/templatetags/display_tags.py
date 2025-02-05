@@ -805,7 +805,7 @@ def finding_display_status(finding):
         "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
         "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
         "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
-        "Active, Verified": ["Active", "view_finding", "Red"],
+        "Active, Verified": ["Open", "view_finding", "Red"],
     }
 
     display_status = finding.status()
