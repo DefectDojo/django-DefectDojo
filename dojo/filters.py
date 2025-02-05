@@ -12,7 +12,7 @@ from django import forms
 from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import JSONField, Q, Count
+from django.db.models import Count, JSONField, Q
 from django.forms import HiddenInput
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -137,12 +137,13 @@ class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
 
 class CharFieldFilterANDExpression(CharFieldInFilter):
     def filter(self, queryset, value):
-        objects = value.split(',')
+        objects = value.split(",")
         return (
             queryset.filter(**{f"{self.field_name}__in": objects})
             .annotate(object_count=Count(self.field_name))
             .filter(object_count=len(objects))
         )
+
 
 class FindingStatusFilter(ChoiceFilter):
     def any(self, qs, name):
