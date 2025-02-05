@@ -252,7 +252,7 @@ def is_permissions_risk_acceptance(
     if user.is_superuser is True or role_has_exclusive_permissions(user) is True:
         return True
 
-    if finding.mitigated is True or finding.active is False:
+    if finding.mitigated or finding.active is False:
         return False
 
     result = False
