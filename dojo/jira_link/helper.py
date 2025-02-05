@@ -547,6 +547,7 @@ def log_jira_cannot_be_pushed_reason(error, obj):
         obj=obj,
         alert_only=True)
 
+
 # Displays an alert for Jira notifications
 def log_jira_message(text, finding):
     create_notification(
