@@ -200,7 +200,7 @@ def risk_acceptante_pending(eng: Engagement,
                                                     product,
                                                     risk_acceptance)
     message = ""
-    if finding.risk_status in ["Risk Pending", "Risk Rejected"]:
+    if finding.risk_status in ["Risk Pending", "Risk Rejected"] and finding.active is True:
         confirmed_acceptances = get_confirmed_acceptors(finding)
         if is_permissions_risk_acceptance(eng, finding, user, product, product_type):
             if user.username in confirmed_acceptances:
@@ -244,10 +244,14 @@ def get_confirmed_acceptors(finding: Finding):
 def is_permissions_risk_acceptance(
     engagement: Engagement, finding: Finding, user, product: Product, product_type: Product_Type
 ):
+    if user.is_superuser is True or role_has_exclusive_permissions(user) is True:
+        return True
+
+    if finding.mitigated is True or finding.active is False:
+        return False
+
     result = False
-    if (user.is_superuser is True
-        or role_has_exclusive_permissions(user)
-        or get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS):
+    if get_role_members(user, product, product_type) in settings.ROLE_ALLOWED_TO_ACCEPT_RISKS:
         result = True
 
     if (

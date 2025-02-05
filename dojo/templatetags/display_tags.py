@@ -774,38 +774,42 @@ def finding_display_status(finding):
     if ra:
         reverse_risk_acceptance = reverse("view_risk_acceptance", args=(finding.test.engagement.id, ra.id))
     dict_rule_reverse = {
-        "Transfer": reverse("view_transfer_finding", args=(finding.test.engagement.product.id, )),
-        "Risk": reverse_risk_acceptance, 
-        "Under Review": reverse("clear_finding_review", args=(finding.id, )),
-        "Closed": reverse("view_finding", args=(finding.id, )),
-        "Active": reverse("view_finding", args=(finding.id, )),
-        "Undefine": reverse("view_finding", args=(finding.id, )),
+        "view_transfer": reverse("view_transfer_finding", args=(finding.test.engagement.product.id, )),
+        "view_risk": reverse_risk_acceptance, 
+        "view_review": reverse("clear_finding_review", args=(finding.id, )),
+        "view_finding": reverse("view_finding", args=(finding.id, )),
     }
 
     dict_rule_display_status = {
-        "Active, Verified, Risk Pending": ["Risk Pending", "Risk", "Red"],
-        "Active, Verified, Risk Rejected": ["Risk Rejected","Risk", "Red"],
-        "Active, Verified, Risk Expired": ["Risk Expired","Risk", "Red"],
-        "Inactive, Verified, Risk Accepted": ["Risk Accepted","Risk", "Orange"],
-        "Inactive, Verified, On Whitelist":["On Whitelist","Risk", "Orange"],
-        "Inactive, Verified, Mitigated, On Whitelist": ["Closed","Risk", "Green"],
-        "Active, Verified, On Blacklist": ["On Blacklist", "whitelist", "Red"],
-        "Inactive, Verified, On Blacklist": ["On Blacklist", "whitelist", "Orange"],
-        "Active, Verified, Transfer Pending": ["Transfer Pending","Transfer", "Red"],
-        "Active, Verified, Transfer Rejected": ["Transfer Rejected","Transfer", "Orange"],
-        "Active, Verified, Transfer Expired": ["Activa", "Transfer", "Red"],
-        "Inactive, Verified, Transfer Accepted": ["Transfer Accepted", "Transfer", "Orange"],
-        "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "Closed", "Green"],
-        "Active, Verified, Under Review": ["Under Review", "Under Review", "Red"],
-        "Under Review, Active, Risk pending": ["Under Review", "Under Review", "Red"],
-        "Inactive, Mitigated, Out Of Scope": ["Closed", "Closed", "Green"],
-        "Inactive, Mitigated, False Positive": ["Closed", "Closed", "Green"],
-        "Inactive, Verified, Mitigated": ["Closed", "Closed", "Green"],
-        "Active, Verified": ["Active", "Active", "Red"],
+        "Active, Verified, Risk Pending": ["Risk Pending", "view_risk", "Red"],
+        "Under Review, Active, Risk pending": ["Under Review", "view_review", "Red"],
+        "Active, Verified, Risk pending": ["Risk Pending", "view_review", "Red"],
+        "Inactive, Verified, Mitigated, Risk pending": ["Closed", "view_review", "Green"],
+        "Active, Verified, Risk Rejected": ["Open", "view_finding", "Red"],
+        "Inactive, Verified, Mitigated, Risk Rejected": ["Closed", "view_finding", "Green"],
+        "Active, Verified, Risk Expired": ["Open", "view_finding", "Red"],
+        "Inactive, Verified, Risk Accepted": ["Risk Accepted", "view_risk", "Orange"],
+        "Inactive, Verified, On Whitelist": ["On Whitelist", "view_risk", "Orange"],
+        "Inactive, Verified, Mitigated, On Whitelist": ["Closed", "view_finding", "Green"],
+        "Active, Verified, On Blacklist": ["On Blacklist", "view_finding", "Red"],
+        "Inactive, Verified, On Blacklist": ["On Blacklist", "view_finding", "Orange"],
+        "Inactive, Verified, Mitigated, On Blacklist": ["Closed", "view_finding", "Orange"],
+        "Active, Verified, Transfer Pending": ["Transfer Pending", "view_transfer", "Red"],
+        "Active, Verified, Transfer Rejected": ["Open", "view_transfer", "Red"],
+        "Active, Verified, Transfer Expired": ["Open", "view_transfer", "Red"],
+        "Inactive, Mitigated, Out Of Scope, Transfer Expired": ["Open", "view_transfer", "Red"],
+        "Inactive, Verified, Transfer Accepted": ["Transfer Accepted", "view_transfer", "Orange"],
+        "Inactive, Verified, Mitigated, Transfer Accepted": ["Closed", "view_finding", "Green"],
+        "Active, Verified, Under Review": ["Under Review", "view_review", "Red"],
+        "Under Review, Active, Verified, Risk pending": ["Under Review", "view_review", "Red"],
+        "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
+        "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
+        "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
+        "Active, Verified": ["Active", "view_finding", "Red"],
     }
 
     display_status = finding.status()
-    status = dict_rule_display_status.get(display_status, (display_status, "Undefine", "Open", "Red"))
+    status = dict_rule_display_status.get(display_status, (display_status, "view_finding", "Red"))
     template_object = template.Template(html_url)
     context = {
         "current_status": status[0],
@@ -816,6 +820,7 @@ def finding_display_status(finding):
     context_object = template.Context(context)
     html_render = template_object.render(context_object)
     return html_render
+
 
 @register.filter
 def cwe_url(cwe):
