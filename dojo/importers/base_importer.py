@@ -14,11 +14,6 @@ from dojo.importers.options import ImporterOptions
 from dojo.models import (
     # Import History States
     IMPORT_ACTIONS,
-    IMPORT_CLOSED_FINDING,
-    IMPORT_CREATED_FINDING,
-    IMPORT_REACTIVATED_FINDING,
-    IMPORT_UNTOUCHED_FINDING,
-    # Finding Severities
     SEVERITIES,
     BurpRawRequestResponse,
     Endpoint,
@@ -740,5 +735,3 @@ class BaseImporter(ImporterOptions):
             url=reverse("view_test", args=(test.id,)),
             url_api=reverse("test-detail", args=(test.id,)),
         )
-
-
