@@ -275,7 +275,7 @@
                                         {% regroup test_import.test_import_finding_action_set.all by get_action_display as finding_action_list %}
                                         <a href="{% url 'engagement_all_findings' test.engagement.id %}?test={{ test.id }}&test_import_finding_action__test_import={{ test_import.id }}">
                                             {% for action in finding_action_list %}
-                                                {{ action.list|length }} {{ action.grouper }}
+                                                {{ action.list|length }} {{ action.grouper|replace_underscore_with_space }}
                                                 {% if not forloop.last %},{% endif %}
                                             {% empty %}
                                                 There were no findings created, closed, or modified
