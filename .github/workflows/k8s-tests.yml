@@ -125,10 +125,15 @@ jobs:
              RETRY=0
              while :
                do
+               DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
                OUT=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
                   --overrides='{ "apiVersion": "v1" }' \
-                  --restart=Never -i --rm -- -s -m 20 -I --header "Host: $DD_HOSTNAME" http://`kubectl get service defectdojo-django -o json \
-                 |  jq -r '.spec.clusterIP'`/login?next=/)
+                  --restart=Never -i --rm -- \
+                    --silent \
+                    --max-time 20 \
+                    --head \
+                    --header "Host: $DD_HOSTNAME" \
+                    http://$DJANGO_IP/login?next=/)
                echo $OUT
                CR=`echo $OUT | egrep "^HTTP" | cut -d' ' -f2`
                echo $CR
@@ -149,6 +154,26 @@ jobs:
                 break
                fi
              done
+             ADMIN_PASS=$(kubectl get secret/defectdojo -o jsonpath='{.data.DD_ADMIN_PASSWORD}' | base64 -d)
+             echo "Simple API check"
+             DJANGO_IP=$(kubectl get svc defectdojo-django -o jsonpath='{.spec.clusterIP}')
+             CR=$(kubectl run  curl --quiet=true --image=curlimages/curl:7.73.0 \
+               --overrides='{ "apiVersion": "v1" }' \
+               --restart=Never -i --rm -- \
+                 --silent \
+                 --max-time 20 \
+                 --header "Host: $DD_HOSTNAME" \
+                 --data-raw "username=admin&password=$ADMIN_PASS" \
+                 --output /dev/null \
+                 --write-out "%{http_code}\n" \
+                 http://$DJANGO_IP/api/v2/api-token-auth/)
+             echo $CR
+             if [[ $CR -ne 200 ]]; then
+              echo "ERROR: login is not possible; got HTTP code $CR"
+              exit 1
+             else
+              echo "Result received"
+             fi
              echo "Final Check of components"
              errors=`kubectl get pods | grep Error | awk '{print  $1}'`
              if [[ ! -z  $errors ]]; then
