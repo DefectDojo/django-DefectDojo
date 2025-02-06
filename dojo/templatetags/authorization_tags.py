@@ -3,7 +3,7 @@ from django import template
 from django.conf import settings
 from dojo.utils import user_is_contacts
 from dojo.authorization.authorization import user_has_configuration_permission as configuration_permission
-from dojo.authorization.authorization import user_has_global_permission, user_has_permission
+from dojo.authorization.authorization import user_has_global_permission, user_has_permission, user_has_role_permission
 from dojo.authorization.exclusive_permissions import user_has_exclusive_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.risk_acceptance.risk_pending import is_permissions_risk_acceptance 
@@ -41,6 +41,10 @@ def has_object_permission(obj, permission):
 @register.filter
 def has_global_permission(permission):
     return user_has_global_permission(crum.get_current_user(), Permissions[permission])
+
+@register.filter
+def has_role_permission(permission):
+    return user_has_role_permission(crum.get_current_user(), Permissions[permission])
 
 
 @register.filter

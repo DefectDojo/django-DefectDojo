@@ -145,7 +145,6 @@ class Permissions(IntEnum):
     Credential_Edit = 2706
     Credential_Delete = 2707
     
-    Metrics_Panel = 2708
     Metrics_DevSecOps = 2709
     Metrics_Panel_Admin = 2710
 
@@ -352,6 +351,7 @@ def get_roles_with_permissions():
             Permissions.Product_API_Scan_Configuration_View,
             Permissions.Product_Tracking_Files_View,
             Permissions.Credential_View,
+            Permissions.Metrics_Panel_Admin
         },
         Roles.API_Importer: {
             Permissions.Product_Type_Add,
@@ -434,6 +434,7 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Manage_Members,
             Permissions.Product_Type_Member_Add_Owner,
             Permissions.Product_Type_Edit,
+            Permissions.Product_Type_Delete,
             Permissions.Product_View,
             Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
@@ -512,7 +513,6 @@ def get_roles_with_permissions():
             Permissions.Credential_Add,
             Permissions.Credential_Edit,
             Permissions.Credential_Delete,
-            Permissions.Metrics_Panel,
             Permissions.Metrics_DevSecOps,
             Permissions.Metrics_Panel_Admin,
             Permissions.Transfer_Finding_View,
