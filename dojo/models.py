@@ -941,8 +941,8 @@ class DojoMeta(models.Model):
                self.finding_id]
         ids_count = 0
 
-        for id in ids:
-            if id is not None:
+        for obj_id in ids:
+            if obj_id is not None:
                 ids_count += 1
 
         if ids_count == 0:
@@ -1033,7 +1033,7 @@ class SLA_Configuration(models.Model):
             if (initial_sla_config.low != self.low) or (initial_sla_config.enforce_low != self.enforce_low):
                 severities.append("Low")
             # if severities have changed, update finding sla expiration dates with those severities
-            if len(severities):
+            if severities:
                 # set the async updating flag to true for this sla config
                 self.async_updating = True
                 super().save(*args, **kwargs)

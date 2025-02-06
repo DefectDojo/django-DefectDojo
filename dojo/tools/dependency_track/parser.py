@@ -172,9 +172,11 @@ class DependencyTrackParser:
             component_description = f"Version {component_version} of the {component_name} component"
         else:
             component_description = f"The {component_name} component"
-        vulnerability_description = "You are using a component with a known vulnerability. " \
-                f"{component_description} is affected by the vulnerability with an id of {vuln_id} as " \
-                f"identified by {source}."
+        vulnerability_description = (
+            "You are using a component with a known vulnerability. "
+            f"{component_description} is affected by the vulnerability with an id of {vuln_id} as "
+            f"identified by {source}."
+        )
         # Append purl info if it is present
         if "purl" in dependency_track_finding["component"] and dependency_track_finding["component"]["purl"] is not None:
             component_purl = dependency_track_finding["component"]["purl"]
