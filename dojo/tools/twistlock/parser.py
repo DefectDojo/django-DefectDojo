@@ -272,7 +272,7 @@ class TwistlockCSVParser:
             content = content.decode("utf-8")
         reader = csv.DictReader(
             io.StringIO(content),
-            delimiter=",",
+            delimiter=";",
             quotechar='"',
         )
         with ThreadPoolExecutor(max_workers=25) as executor:
