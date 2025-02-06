@@ -1033,7 +1033,7 @@ class SLA_Configuration(models.Model):
             if (initial_sla_config.low != self.low) or (initial_sla_config.enforce_low != self.enforce_low):
                 severities.append("Low")
             # if severities have changed, update finding sla expiration dates with those severities
-            if len(severities):
+            if severities:
                 # set the async updating flag to true for this sla config
                 self.async_updating = True
                 super().save(*args, **kwargs)
