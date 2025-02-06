@@ -8,7 +8,9 @@ from dojo.utils import user_is_contacts
 from dojo.authorization.authorization import (
     user_has_configuration_permission,
     user_has_global_permission_or_403,
+    user_has_role_permission_or_403,
     user_has_permission_or_403,
+    user_has_role_permission
 )
 
 
@@ -65,6 +67,17 @@ def user_has_global_permission(permission, func=None):
 
     return _wrapped
 
+def user_has_role_permission(permission, func=None):
+    """Decorator for functions that ensures the user has a role-based permission"""
+    if func is None:
+        return functools.partial(user_has_role_permission, permission)
+
+    @functools.wraps(func)
+    def _wrapped(request, *args, **kwargs):
+        user_has_role_permission_or_403(request.user, permission)
+        return func(request, *args, **kwargs)
+
+    return _wrapped
 
 def user_is_configuration_authorized(permission, func=None):
     """Decorator for views that checks whether a user has a particular permission enabled."""
