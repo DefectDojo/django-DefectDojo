@@ -807,6 +807,7 @@ def finding_display_status(finding):
         "Active, Verified, Under Review": ["Under Review", "view_review", "Red"],
         "Under Review, Active, Verified, Risk pending": ["Under Review", "view_review", "Red"],
         "Under Review, Active": ["Under Review", "view_review", "Red"],
+        "Under Review, Inactive, Mitigated, Risk pending": ["Closed", "view_review", "Green"],
         "Inactive, Mitigated, Out Of Scope": ["Closed", "view_finding", "Green"],
         "Inactive, Mitigated, False Positive": ["Closed", "view_finding", "Green"],
         "Inactive, Verified, Mitigated": ["Closed", "view_finding", "Green"],
