@@ -177,7 +177,7 @@ def can_be_pushed_to_jira(obj, form=None):
 
 
 # use_inheritance=True means get jira_project config from product if engagement itself has none
-def get_jira_project(obj, use_inheritance=True):
+def get_jira_project(obj, *, use_inheritance=True):
     if not is_jira_enabled():
         return None
 
@@ -408,7 +408,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
 
         return jira
     except JIRAError as e:
-        logger.exception(e)
+        logger.exception("logged in to JIRA %s unsuccessful", jira_server)
 
         error_message = e.text if hasattr(e, "text") else e.message if hasattr(e, "message") else e.args[0]
 
@@ -421,7 +421,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         raise
 
     except requests.exceptions.RequestException as re:
-        logger.exception(re)
+        logger.exception("Unknown JIRA Connection Error")
         error_message = re.text if hasattr(re, "text") else re.message if hasattr(re, "message") else re.args[0]
         log_jira_generic_alert("Unknown JIRA Connection Error", re)
 
@@ -461,7 +461,7 @@ def jira_transition(jira, issue, transition_id):
             return True
     except JIRAError as jira_error:
         logger.debug("error transitioning jira issue " + issue.key + " " + str(jira_error))
-        logger.exception(jira_error)
+        logger.exception("Error with Jira transation issue")
         alert_text = f"JiraError HTTP {jira_error.status_code}"
         if jira_error.url:
             alert_text += f" url: {jira_error.url}"
@@ -572,12 +572,12 @@ def get_labels(obj):
 
     if system_settings.add_vulnerability_id_to_jira_label or (jira_project and jira_project.add_vulnerability_id_to_jira_label):
         if isinstance(obj, Finding) and obj.vulnerability_ids:
-            for id in obj.vulnerability_ids:
-                labels.append(id)
+            for vul_id in obj.vulnerability_ids:
+                labels.append(vul_id)
         elif isinstance(obj, Finding_Group):
             for finding in obj.findings.all():
-                for id in finding.vulnerability_ids:
-                    labels.append(id)
+                for vul_id in finding.vulnerability_ids:
+                    labels.append(vul_id)
 
     return labels
 
@@ -672,14 +672,29 @@ def push_to_jira(obj, *args, **kwargs):
     return None
 
 
-def add_issues_to_epic(jira, obj, epic_id, issue_keys, ignore_epics=True):
+def add_issues_to_epic(jira, obj, epic_id, issue_keys, *, ignore_epics=True):
     try:
         return jira.add_issues_to_epic(epic_id=epic_id, issue_keys=issue_keys, ignore_epics=ignore_epics)
     except JIRAError as e:
-        logger.error("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
-        logger.exception(e)
-        log_jira_alert(e.text, obj)
-        return False
+        """
+        We must try to accommodate the following:
+
+        The request contains a next-gen issue. This operation can't add next-gen issues to epics.
+        To add a next-gen issue to an epic, use the Edit issue operation and set the parent property
+        (i.e., '"parent":{"key":"PROJ-123"}' where "PROJ-123" has an issue type at level one of the issue type hierarchy).
+        See <a href="https://developer.atlassian.com/cloud/jira/platform/rest/v2/"> developer.atlassian.com </a> for more details.
+        """
+        try:
+            if "The request contains a next-gen issue." in str(e):
+                # Attempt to update the issue manually
+                for issue_key in issue_keys:
+                    issue = jira.issue(issue_key)
+                    epic = jira.issue(epic_id)
+                    issue.update(parent={"key": epic.key})
+        except JIRAError as e:
+            logger.exception("error adding issues %s to epic %s for %s", issue_keys, epic_id, obj.id)
+            log_jira_alert(e.text, obj)
+            return False
 
 
 # we need two separate celery tasks due to the decorators we're using to map to/from ids
@@ -1039,8 +1054,7 @@ def get_jira_issue_from_jira(find):
         return jira.issue(j_issue.jira_id)
 
     except JIRAError as e:
-        logger.exception(e)
-        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+        logger.exception("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
         log_jira_alert(e.text, find)
         return None
 
@@ -1070,7 +1084,7 @@ def issue_from_jira_is_active(issue_from_jira):
     return issue_from_jira.fields.resolution == "None"
 
 
-def push_status_to_jira(obj, jira_instance, jira, issue, save=False):
+def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
     status_list = obj.status()
     issue_closed = False
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
@@ -1197,7 +1211,7 @@ def jira_attachment(finding, jira, issue, file, jira_filename=None):
                     jira.add_attachment(issue=issue, attachment=f)
             return True
         except JIRAError as e:
-            logger.exception(e)
+            logger.exception("Unable to add attachment")
             log_jira_alert("Attachment: " + e.text, finding)
             return False
     return None
@@ -1251,7 +1265,7 @@ def close_epic(eng, push_to_jira, **kwargs):
                     return False
                 return True
             except JIRAError as e:
-                logger.exception(e)
+                logger.exception("Jira Engagement/Epic Close Error")
                 log_jira_generic_alert("Jira Engagement/Epic Close Error", str(e))
                 return False
         return None
@@ -1283,17 +1297,16 @@ def update_epic(engagement, **kwargs):
             if not epic_name:
                 epic_name = engagement.name
 
-            epic_priority = kwargs.get("epic_priority")
-
             jira_issue_update_kwargs = {
                 "summary": epic_name,
                 "description": epic_name,
-                "priority": {"name": epic_priority},
             }
+            if (epic_priority := kwargs.get("epic_priority")) is not None:
+                jira_issue_update_kwargs["priority"] = {"name": epic_priority}
             issue.update(**jira_issue_update_kwargs)
             return True
         except JIRAError as e:
-            logger.exception(e)
+            logger.exception("Jira Engagement/Epic Update Error")
             log_jira_generic_alert("Jira Engagement/Epic Update Error", str(e))
             return False
     else:
@@ -1318,6 +1331,7 @@ def add_epic(engagement, **kwargs):
     jira_instance = get_jira_instance(engagement)
     if jira_project.enable_engagement_epic_mapping:
         epic_name = kwargs.get("epic_name")
+        epic_issue_type_name = getattr(jira_project, "epic_issue_type_name", "Epic")
         if not epic_name:
             epic_name = engagement.name
         issue_dict = {
@@ -1327,14 +1341,16 @@ def add_epic(engagement, **kwargs):
             "summary": epic_name,
             "description": epic_name,
             "issuetype": {
-                "name": getattr(jira_project, "epic_issue_type_name", "Epic"),
+                "name": epic_issue_type_name,
             },
-            get_epic_name_field_name(jira_instance): epic_name,
         }
         if kwargs.get("epic_priority"):
             issue_dict["priority"] = {"name": kwargs.get("epic_priority")}
         try:
             jira = get_jira_connection(jira_instance)
+            # Determine if we should add the epic name or not
+            if (epic_name_field := get_epic_name_field_name(jira_instance)) in get_issuetype_fields(jira, jira_project.project_key, epic_issue_type_name):
+                issue_dict[epic_name_field] = epic_name
             logger.debug("add_epic: %s", issue_dict)
             new_issue = jira.create_issue(fields=issue_dict)
             j_issue = JIRA_Issue(
@@ -1350,12 +1366,12 @@ def add_epic(engagement, **kwargs):
             # but it's just a non-existent project (or maybe a project for which the account has no create permission?)
             #
             # {"errorMessages":[],"errors":{"project":"project is required"}}
-            logger.exception(e)
             error = str(e)
             message = ""
             if "customfield" in error:
                 message = "The 'Epic name id' in your DefectDojo Jira Configuration does not appear to be correct. Please visit, " + jira_instance.url + \
                     "/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and place in your DefectDojo settings for Jira and try again. For example, if your results are cf[100001] then copy 100001 and place it in 'Epic name id'. (Your Epic Id will be different.) \n\n"
+            logger.exception(message)
 
             log_jira_generic_alert("Jira Engagement/Epic Creation Error",
                                    message + error)
@@ -1372,8 +1388,7 @@ def jira_get_issue(jira_project, issue_key):
         return jira.issue(issue_key)
 
     except JIRAError as jira_error:
-        logger.debug("error retrieving jira issue " + issue_key + " " + str(jira_error))
-        logger.exception(jira_error)
+        logger.exception("error retrieving jira issue %s", issue_key)
         log_jira_generic_alert("error retrieving jira issue " + issue_key, str(jira_error))
         return None
 
@@ -1384,7 +1399,7 @@ def jira_get_issue(jira_project, issue_key):
 @app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
-def add_comment(obj, note, force_push=False, **kwargs):
+def add_comment(obj, note, *, force_push=False, **kwargs):
     if not is_jira_configured_and_enabled(obj):
         return False
 
@@ -1579,9 +1594,9 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
                                                 extra_tags="alert-success")
                         error = False
                         logger.debug("stored JIRA_Project successfully")
-            except Exception as e:
+            except Exception:
                 error = True
-                logger.exception(e)
+                logger.exception("Unable to store Jira project")
         else:
             logger.debug(jform.errors)
             error = True
