@@ -105,8 +105,10 @@ def clean_hosts_run(apps, change):
 
                         if parts.protocol:
                             if endpoint.protocol and (endpoint.protocol != parts.protocol):
-                                message = f"has defined protocol ({endpoint.protocol}) and it is not the same as protocol in host " \
-                                          f"({parts.protocol})"
+                                message = (
+                                    f"has defined protocol ({endpoint.protocol}) and it is not the same as protocol in host "
+                                    f"({parts.protocol})"
+                                )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
                             else:
                                 if change:
@@ -126,8 +128,10 @@ def clean_hosts_run(apps, change):
                         if parts.port:
                             try:
                                 if (endpoint.port is not None) and (int(endpoint.port) != parts.port):
-                                    message = f"has defined port number ({endpoint.port}) and it is not the same as port number in " \
-                                              f"host ({parts.port})"
+                                    message = (
+                                        f"has defined port number ({endpoint.port}) and it is not the same as port number in "
+                                        f"host ({parts.port})"
+                                    )
                                     err_log(message, html_log, endpoint_html_log, endpoint)
                                 else:
                                     if change:
@@ -138,8 +142,10 @@ def clean_hosts_run(apps, change):
 
                         if parts.path:
                             if endpoint.path and (endpoint.path != parts.path):
-                                message = f"has defined path ({endpoint.path}) and it is not the same as path in host " \
-                                          f"({parts.path})"
+                                message = (
+                                    f"has defined path ({endpoint.path}) and it is not the same as path in host "
+                                    f"({parts.path})"
+                                )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
                             else:
                                 if change:
@@ -147,8 +153,10 @@ def clean_hosts_run(apps, change):
 
                         if parts.query:
                             if endpoint.query and (endpoint.query != parts.query):
-                                message = f"has defined query ({endpoint.query}) and it is not the same as query in host " \
-                                          f"({parts.query})"
+                                message = (
+                                    f"has defined query ({endpoint.query}) and it is not the same as query in host "
+                                    f"({parts.query})"
+                                )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
                             else:
                                 if change:
@@ -156,8 +164,10 @@ def clean_hosts_run(apps, change):
 
                         if parts.fragment:
                             if endpoint.fragment and (endpoint.fragment != parts.fragment):
-                                message = f"has defined fragment ({endpoint.fragment}) and it is not the same as fragment in host " \
-                                          f"({parts.fragment})"
+                                message = (
+                                    f"has defined fragment ({endpoint.fragment}) and it is not the same as fragment in host "
+                                    f"({parts.fragment})"
+                                )
                                 err_log(message, html_log, endpoint_html_log, endpoint)
                             else:
                                 if change:
