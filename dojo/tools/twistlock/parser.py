@@ -270,9 +270,11 @@ class TwistlockCSVParser:
         dupes = {}
         if isinstance(content, bytes):
             content = content.decode("utf-8")
+        first_line = content.splitlines()[0]
+        delimiter = ';' if ';' in first_line else ','
         reader = csv.DictReader(
             io.StringIO(content),
-            delimiter=";",
+            delimiter=delimiter,
             quotechar='"',
         )
         with ThreadPoolExecutor(max_workers=25) as executor:
