@@ -66,6 +66,18 @@ class TestTwistlockParser(DojoTestCase):
         self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
         self.assertEqual("CVE-2020-24977", findings[0].unsaved_vulnerability_ids[0])
 
+    def test_parse_file_prisma_twistlock_images_four_vulns_semicolon(self):
+        testfile = open(
+            path.join(Path(__file__).parent, "../scans/twistlock/scan_report_prisma_twistlock_images_four_vulns_semicolon.csv"), encoding="utf-8",
+        )
+        parser = TwistlockParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(4, len(findings))
+        self.assertEqual(1, len(findings[0].unsaved_vulnerability_ids))
+        self.assertEqual("CVE-2020-24977", findings[0].unsaved_vulnerability_ids[0])
+        self.assertEqual("libxml2,boto3", findings[0].component_name)
+
     def test_parse_file_prisma_twistlock_images_long_package_name(self):
         testfile = open(
             path.join(
