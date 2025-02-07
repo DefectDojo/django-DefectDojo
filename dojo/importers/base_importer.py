@@ -317,32 +317,38 @@ class BaseImporter(ImporterOptions):
         self,
     ) -> Test_Import:
         """Creates a record of the import or reimport operation that has occurred."""
-        if settings.TRACK_IMPORT_HISTORY:
-            # Quick fail check to determine if we even wanted this
-            # Create a dictionary to stuff into the test import object
-            import_settings = {}
-            import_settings["active"] = self.active
-            import_settings["verified"] = self.verified
-            import_settings["minimum_severity"] = self.minimum_severity
-            import_settings["close_old_findings"] = self.close_old_findings_toggle
-            import_settings["push_to_jira"] = self.push_to_jira
-            import_settings["tags"] = self.tags
-            # Add the list of endpoints that were added exclusively at import time
-            if len(self.endpoints_to_add) > 0:
-                import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
-            # Create the test import object
-            return Test_Import.objects.create(
-                test=self.test,
-                import_settings=import_settings,
-                version=self.version,
-                branch_tag=self.branch_tag,
-                build_id=self.build_id,
-                commit_hash=self.commit_hash,
-                type=self.import_type,
-            )
-        return None
+        if settings.TRACK_IMPORT_HISTORY is False:
+            return None
 
-    def create_import_history_record(self, test_import, finding, action):
+        # Quick fail check to determine if we even wanted this
+        # Create a dictionary to stuff into the test import object
+        import_settings = {}
+        import_settings["active"] = self.active
+        import_settings["verified"] = self.verified
+        import_settings["minimum_severity"] = self.minimum_severity
+        import_settings["close_old_findings"] = self.close_old_findings_toggle
+        import_settings["push_to_jira"] = self.push_to_jira
+        import_settings["tags"] = self.tags
+        # Add the list of endpoints that were added exclusively at import time
+        if len(self.endpoints_to_add) > 0:
+            import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
+        # Create the test import object
+        return Test_Import.objects.create(
+            test=self.test,
+            import_settings=import_settings,
+            version=self.version,
+            branch_tag=self.branch_tag,
+            build_id=self.build_id,
+            commit_hash=self.commit_hash,
+            type=self.import_type,
+        )
+
+    def create_import_history_record(
+        self,
+        test_import,
+        finding,
+        action,
+    ) -> None:
         if settings.TRACK_IMPORT_HISTORY is False or test_import is None:
             return
 
@@ -358,7 +364,14 @@ class BaseImporter(ImporterOptions):
                 action=action,
         )
 
-    def finalize_import_history(self, test_import, new_findings, closed_findings, reactivated_findings, untouched_findings):
+    def finalize_import_history(
+        self,
+        test_import,
+        new_findings,
+        closed_findings,
+        reactivated_findings,
+        untouched_findings,
+    ) -> Test_Import:
         if settings.TRACK_IMPORT_HISTORY is False or test_import is None:
             return None
 
