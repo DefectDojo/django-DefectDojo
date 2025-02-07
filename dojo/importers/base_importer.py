@@ -367,7 +367,6 @@ class BaseImporter(ImporterOptions):
                 finding=finding,
                 action=IMPORT_CLOSED_FINDING,
             ))
-
         for finding in new_findings:
             test_import_finding_action_list.append(Test_Import_Finding_Action(
                 test_import=test_import,
@@ -401,7 +400,10 @@ class BaseImporter(ImporterOptions):
 
         return test_import
 
-    def create_import_history_record_safe(self, test_import_finding_action):
+    def create_import_history_record_safe(
+        self,
+        test_import_finding_action,
+    ):
         """Creates an import history record, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
         logger.debug(f"creating Test_Import_Finding_Action for finding: {test_import_finding_action.finding.id} action: {test_import_finding_action.action}")
         try:
@@ -411,7 +413,11 @@ class BaseImporter(ImporterOptions):
             logger.warning("Error creating Test_Import_Finding_Action: %s", e)
             logger.debug("Error creating Test_Import_Finding_Action, finding marked as duplicate and deleted ?")
 
-    def add_tags_safe(self, finding_or_endpoint, tag):
+    def add_tags_safe(
+        self,
+        finding_or_endpoint,
+        tag,
+    ):
         """Adds tags to a finding or endpoint, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
         if not isinstance(finding_or_endpoint, Finding) and not isinstance(finding_or_endpoint, Endpoint):
             msg = "finding_or_endpoint must be a Finding or Endpoint object"
