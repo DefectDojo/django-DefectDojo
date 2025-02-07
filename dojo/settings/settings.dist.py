@@ -947,7 +947,7 @@ if SAML2_ENABLED:
         "entityid": str(SAML2_ENTITY_ID),
 
         # directory with attribute mapping
-        "attribute_map_dir": Path(BASEDIR) / "attribute-maps",
+        "attribute_map_dir": str(Path(BASEDIR) / "attribute-maps"),
         # do now discard attributes not specified in attribute-maps
         "allow_unknown_attributes": SAML_ALLOW_UNKNOWN_ATTRIBUTES,
         # this block states what services we provide
