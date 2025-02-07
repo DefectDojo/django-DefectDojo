@@ -80,6 +80,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             api_scan_configuration=self.api_scan_configuration,
             tags=self.tags,
         )
+
+        # Initialize the import history object, each finding will be added to this object
+        self.test_import_history = self.initialize_import_history()
         return self.test
 
     def process_scan(
@@ -104,8 +107,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         self.verify_tool_configuration_from_engagement()
         # Fetch the parser based upon the string version of the scan type
         parser = self.get_parser()
-        # Initialize the import history object, each finding will be added to this object
-        self.test_import_history = self.initialize_import_history()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         self.parsed_findings = self.parse_findings(scan, parser)

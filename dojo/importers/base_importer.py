@@ -317,44 +317,46 @@ class BaseImporter(ImporterOptions):
         self,
     ) -> Test_Import:
         """Creates a record of the import or reimport operation that has occurred."""
-        # Quick fail check to determine if we even wanted this
-        # Create a dictionary to stuff into the test import object
-        import_settings = {}
-        import_settings["active"] = self.active
-        import_settings["verified"] = self.verified
-        import_settings["minimum_severity"] = self.minimum_severity
-        import_settings["close_old_findings"] = self.close_old_findings_toggle
-        import_settings["push_to_jira"] = self.push_to_jira
-        import_settings["tags"] = self.tags
-        # Add the list of endpoints that were added exclusively at import time
-        if len(self.endpoints_to_add) > 0:
-            import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
-        # Create the test import object
-        return Test_Import.objects.create(
-            test=self.test,
-            import_settings=import_settings,
-            version=self.version,
-            branch_tag=self.branch_tag,
-            build_id=self.build_id,
-            commit_hash=self.commit_hash,
-            type=self.import_type,
-        )
+        if settings.TRACK_IMPORT_HISTORY:
+            # Quick fail check to determine if we even wanted this
+            # Create a dictionary to stuff into the test import object
+            import_settings = {}
+            import_settings["active"] = self.active
+            import_settings["verified"] = self.verified
+            import_settings["minimum_severity"] = self.minimum_severity
+            import_settings["close_old_findings"] = self.close_old_findings_toggle
+            import_settings["push_to_jira"] = self.push_to_jira
+            import_settings["tags"] = self.tags
+            # Add the list of endpoints that were added exclusively at import time
+            if len(self.endpoints_to_add) > 0:
+                import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
+            # Create the test import object
+            return Test_Import.objects.create(
+                test=self.test,
+                import_settings=import_settings,
+                version=self.version,
+                branch_tag=self.branch_tag,
+                build_id=self.build_id,
+                commit_hash=self.commit_hash,
+                type=self.import_type,
+            )
+        return None
 
-    def create_import_history_record(test_import, finding, action):
+    def create_import_history_record(self, test_import, finding, action):
         if settings.TRACK_IMPORT_HISTORY is False or test_import is None:
             return
 
-        if action not in IMPORT_ACTIONS:
+        if action not in [action[0] for action in IMPORT_ACTIONS]:
             msg = f"Invalid Import History action: {action}"
             raise ValueError(msg)
 
         logger.debug(f"creating Test_Import_Finding_Action for finding: {finding.id} action: {action}")
         # if ever needed we can try-catch exceptions here
-        Test_Import_Finding_Action.create(Test_Import_Finding_Action(
+        Test_Import_Finding_Action.objects.create(
                 test_import=test_import,
                 finding=finding,
                 action=action,
-        ))
+        )
 
     def finalize_import_history(self, test_import, new_findings, closed_findings, reactivated_findings, untouched_findings):
         if settings.TRACK_IMPORT_HISTORY is False or test_import is None:
@@ -363,10 +365,10 @@ class BaseImporter(ImporterOptions):
         # Log the current state of what has occurred in case there could be
         # deviation from what is displayed in the view
         logger.debug(
-            f"new: {len(new_findings)} "
-            f"closed: {len(closed_findings)} "
-            f"reactivated: {len(reactivated_findings)} "
-            f"untouched: {len(untouched_findings)} ",
+            f"new: {len(new_findings) if new_findings else 0} "
+            f"closed: {len(closed_findings) if closed_findings else 0} "
+            f"reactivated: {len(reactivated_findings) if reactivated_findings else 0} "
+            f"untouched: {len(untouched_findings) if untouched_findings else 0} ",
         )
 
         # Add any tags to the findings imported if necessary
