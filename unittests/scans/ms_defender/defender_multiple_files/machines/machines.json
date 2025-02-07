@@ -1,0 +1,93 @@
+{
+    "@odata.context": "https://fweffsfe.com/api/$metadata#Machines",
+    "value": [
+      {
+        "id": "wjeriowerjoiewrjoweirjeowij",
+        "mergedIntoMachineId": null,
+        "isPotentialDuplication": false,
+        "isExcluded": false,
+        "exclusionReason": null,
+        "computerDnsName": null,
+        "firstSeen": "1990-1sdfsdfsdfZ",
+        "lastSeen": "1999-10-sdffew",
+        "osPlatform": "Other",
+        "osVersion": null,
+        "osProcessor": null,
+        "version": "Other",
+        "lastIpAddress": "1.1.1.1",
+        "lastExternalIpAddress": null,
+        "agentVersion": "1234",
+        "osBuild": null,
+        "healthStatus": "Active",
+        "deviceValue": "Normal",
+        "rbacGroupId": 5678,
+        "rbacGroupName": "UnassignedGroup",
+        "riskScore": "None",
+        "exposureLevel": "None",
+        "isAadJoined": false,
+        "aadDeviceId": null,
+        "machineTags": [],
+        "defenderAvStatus": "Unknown",
+        "onboardingStatus": "Unsupported",
+        "osArchitecture": null,
+        "managedBy": "Unknown",
+        "managedByStatus": "Unknown",
+        "ipAddresses": [
+          {
+            "ipAddress": "1.1.1.1",
+            "macAddress": "00-B0-D0-63-C2-26",
+            "type": null,
+            "operationalStatus": "Unknown"
+          }
+        ],
+        "vmMetadata": null
+      },
+      {
+        "id": "fjweoifjewiofjweoifjeowifjowei",
+        "mergedIntoMachineId": null,
+        "isPotentialDuplication": false,
+        "isExcluded": false,
+        "exclusionReason": null,
+        "computerDnsName": "afjweiofwejfio.com",
+        "firstSeen": "jfowefjweoifjoie",
+        "lastSeen": "fwjeofwjeiof",
+        "osPlatform": "plat",
+        "osVersion": null,
+        "osProcessor": "123",
+        "version": "123123",
+        "lastIpAddress": "1.1.1.1",
+        "lastExternalIpAddress": "1.1.1.1",
+        "agentVersion": "12312370",
+        "osBuild": 123,
+        "healthStatus": "Active",
+        "deviceValue": "Normal",
+        "rbacGroupId": 123123,
+        "rbacGroupName": "NOOOOOOO",
+        "riskScore": "None",
+        "exposureLevel": "Medium",
+        "isAadJoined": true,
+        "aadDeviceId": "asdfasdfasdfasdf",
+        "machineTags": [],
+        "defenderAvStatus": "Updated",
+        "onboardingStatus": "Onboarded",
+        "osArchitecture": "64-bit",
+        "managedBy": "asdf",
+        "managedByStatus": "Unknown",
+        "ipAddresses": [
+          {
+            "ipAddress": "1.2.3.4",
+            "macAddress": "00-B0-D0-63-C2-26",
+            "type": "Ethernet",
+            "operationalStatus": "Up"
+          },
+          {
+            "ipAddress": "1.2.3.5",
+            "macAddress": "00-B0-D0-63-C2-26",
+            "type": "Ethernet",
+            "operationalStatus": "Up"
+          }
+        ],
+        "vmMetadata": null
+      }
+    ]
+  }
