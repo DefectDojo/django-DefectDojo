@@ -405,7 +405,7 @@ class BaseImporter(ImporterOptions):
         """Creates an import history record, while catching any IntegrityErrors that might happen because of the background job having deleted a finding"""
         logger.debug(f"creating Test_Import_Finding_Action for finding: {test_import_finding_action.finding.id} action: {test_import_finding_action.action}")
         try:
-            Test_Import_Finding_Action.create(test_import_finding_action)
+            Test_Import_Finding_Action.objects.create(test_import_finding_action)
         except IntegrityError as e:
             # This try catch makes us look we don't know what we're doing, but in https://github.com/DefectDojo/django-DefectDojo/issues/6217 we decided that for now this is the best solution
             logger.warning("Error creating Test_Import_Finding_Action: %s", e)
