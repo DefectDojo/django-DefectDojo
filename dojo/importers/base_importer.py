@@ -360,7 +360,6 @@ class BaseImporter(ImporterOptions):
         )
 
         # Create a history record for each finding
-        test_import_finding_action_list = []
         for finding in closed_findings:
             self.create_import_history_record_safe(Test_Import_Finding_Action(
                 test_import=test_import,
@@ -368,13 +367,13 @@ class BaseImporter(ImporterOptions):
                 action=IMPORT_CLOSED_FINDING,
             ))
         for finding in new_findings:
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
                 test_import=test_import,
                 finding=finding,
                 action=IMPORT_CREATED_FINDING,
             ))
         for finding in reactivated_findings:
-            test_import_finding_action_list.append(Test_Import_Finding_Action(
+            self.create_import_history_record_safe(Test_Import_Finding_Action(
                 test_import=test_import,
                 finding=finding,
                 action=IMPORT_REACTIVATED_FINDING,
