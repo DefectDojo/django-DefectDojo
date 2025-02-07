@@ -306,11 +306,11 @@ Run a single test. Example:
 python manage.py test unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
 ```
 
-For docker compose stack, there is a convenience script (`dc-unittest.sh`) capable of running a single test class. 
+For docker compose stack, there is a convenience script (`run-unittest.sh`) capable of running a single test class. 
 You will need to provide a test case (`--test-case`). Example:
 
 ```
-./dc-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
+./run-unittest.sh --test-case unittests.tools.test_stackhawk_parser.TestStackHawkParser
 ```
 
 ## Running the integration tests
